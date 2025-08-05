@@ -1,0 +1,131 @@
+prontera,166,200,6	duplicate(Aluguel Universal)	Aluguel Universal#prontera	726
+
+prontera,145,198,3	duplicate(Removedora de Cartas)	Removedora de Cartas#prontera	78
+
+prontera,151,189,5	duplicate(Servico Kafra)	Serviço Kafra#prontera	113
+
+prontera,162,193,5	duplicate(Healer)	Curandeira#prt	640
+
+prontera,148,175,5	duplicate(Eden)	Eden#prontera	729
+
+prontera,166,204,5	duplicate(Perchik)	Perchik#prontera	47
+
+prontera,153,193,6	duplicate(Mestre de Classes)	Mestre de Classes#prontera	123
+
+prontera,145,207,4	duplicate(Habilidade Platinum)	Habilidade Platinum#prontera	84
+
+prontera,150,193,4	duplicate(Resetadora)	Resetadora#prontera	124
+
+prontera,164,196,5	duplicate(Estilista)	Estilista#prontera	122
+
+prontera,157,193,5	duplicate(Warper)	Teleportadora#prt	815
+
+prontera,147,195,4	duplicate(Loja)	Loja#prontera	478
+prontera,145,202,4	shop	Loja de Utilidades	850,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,578:200,12414:500,645:1000,656:1500,657:2000,610:5000
+
+prontera,163,175,4	script	AgenteVIP	724,{
+	
+	mes "[Agente VIP]";
+
+	if (#vip_inicial_recebido) {
+		mes "Você já recebeu seu VIP gratuito de 3 dias.";
+		close;
+	}
+
+	mes "Bem-vindo! Posso ativar 3 dias de VIP gratuito para você.";
+	next;
+	if(select("Sim, quero ativar meus 3 dias VIP gratis.:Não, obrigado.") == 1) {
+		atcommand("@vip +3d " + strcharinfo(0));
+		#vip_inicial_recebido = 1; 
+		mes "Pronto! Você agora é VIP por 3 dias. Aproveite!";
+		close;
+	} else {
+		mes "Tudo bem. Volte quando quiser.";
+		close;
+	}
+}
+
+prontera,160,133,2	script	YuPi#pront	102,{
+	mes "[YuPi]";
+	mes "Embora muitos monstros possam parecer iguais, tenha cuidado! Existem variações entre monstros que têm a mesma forma básica.";
+	next;
+	mes "[YuPi]";
+	mes "Um monstro que parece ser calmo e fraco pode, na verdade, ser selvagem e feroz!";
+	next;
+	mes "[YuPi]";
+	mes "Você pode diferenciar esses tipos de monstros pela cor do corpo. Monstros mais selvagens e poderosos geralmente têm cores mais perigosas.";
+	close;
+}
+
+prontera,159,190,4	script	Treinador	811,{
+	mes "[Treinador]";
+	mes "Bem-vindo à cidade de ^0000FFProntera^000000, o coração do nosso servidor!";
+	mes "Aqui você encontrará muitos jogadores e NPCs que irão te auxiliar durante sua jornada.";
+	next;
+
+	while (true) {
+		mes "[Treinador]";
+		mes "Gostaria de conhecer melhor o que há nesta cidade e no começo da sua aventura?";
+		switch(select("Sim, quero saber mais.:Não, obrigado.")) {
+			case 1:
+				mes "Aqui em Prontera, você pode conversar com diversos NPCs que oferecem missões, serviços e recompensas.";
+				next;
+
+				mes "[Treinador]";
+				mes "Esta cidade é onde tudo começa. É aqui que você irá escolher sua classe e começar a se especializar.";
+				next;
+
+				mes "[Treinador]";
+				mes "Cada classe possui habilidades únicas. Escolha com sabedoria e torne-se um verdadeiro mestre!";
+				next;
+
+				mes "[Treinador]";
+				mes "Ao sul da cidade, há um portal que leva a uma área com monstros iniciantes.";
+				next;
+
+				mes "[Treinador]";
+				mes "Derrotar monstros é essencial para ganhar ^00FF00experiência^000000 e ^FFAA00itens^000000.";
+				next;
+
+				mes "[Treinador]";
+				mes "Alguns itens você pode usar para se fortalecer, outros você pode vender para conseguir ^0000FFZeny^000000.";
+				next;
+
+				mes "[Treinador]";
+				mes "Com Zeny, você pode comprar ^FF0000poções^000000 de cura e buffs, ^FF0000equipamentos^000000 poderosos e até ^FF0000cartas^000000.";
+				next;
+
+				mes "[Treinador]";
+				mes "Tudo isso será essencial para enfrentar desafios maiores e conquistar recompensas melhores.";
+				next;
+
+				mes "[Treinador]";
+				mes "Aproveite cada etapa e não tenha medo de explorar. O servidor foi feito para guiar você e proporcionar diversão.";
+				next;
+
+				mes "[Treinador]";
+				mes "Se tiver dúvidas, busque ajuda com outros jogadores, nos NPCs de suporte, ou em nosso Discord.";
+				next;
+
+				mes "[Treinador]";
+				mes "Deseja rever todas essas informações ou encerrar por aqui?";
+				if (select("Rever tudo.:Encerrar.") == 1) {
+					continue;
+				} else {
+					mes "Boa sorte na sua jornada! Estamos torcendo por você!";
+					close;
+				}
+				end;
+
+			case 2:
+				mes "Tudo bem! Estarei aqui caso mude de ideia.";
+				close;
+		}
+	}
+}
+
+
+
+
+
+

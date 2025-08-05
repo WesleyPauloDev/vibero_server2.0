@@ -1,0 +1,37 @@
+-	script	BuffVIP	-1,{
+
+OnInit:
+	bindatcmd "buff", strnpcinfo(3)+"::OnAtcommand";
+	end;
+
+OnAtcommand:
+	// Verifica se o jogador é VIP
+	if (getgroupid() == 5) {
+        // Aumentar Agilidade
+		specialeffect2 EF_INCAGILITY;
+		sc_start SC_INCREASEAGI,600000,10;
+
+		// Benção
+		specialeffect2 EF_BLESSING;
+		sc_start SC_BLESSING,600000,10;
+
+		// Impositio Manus
+		sc_start SC_IMPOSITIO,600000,5;
+
+		// Kyrie Eleison
+		sc_start SC_KYRIE,600000,10;
+
+		// Glória
+		sc_start SC_GLORIA,600000,5;
+
+		// Magnificat
+		sc_start SC_MAGNIFICAT,600000,5;
+        message strcharinfo(0), "Buffs VIP aplicados!";
+		end;
+	}
+
+	// Aplica buffs
+    message strcharinfo(0), "Este comando é exclusivo para jogadores VIP.";
+
+	end;
+}

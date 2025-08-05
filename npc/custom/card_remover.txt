@@ -1,0 +1,147 @@
+//===== rAthena Script =======================================
+//= Card Removal NPC
+//===== By: ==================================================
+//= TyrNemesis^
+//===== Current Version: =====================================
+//= 1.2a
+//===== Compatible With: =====================================
+//= rAthena Project
+//===== Description: =========================================
+//= Removes cards from equipped items.
+//===== Additional Comments: =================================
+//= 1.0 First version. [TyrNemesis^]
+//= 1.2 Optimized and fixed getequipname menu. [Kisuka]
+//= 1.2a Added 'disable_items' command. [Euphy]
+//============================================================
+
+-	script	Removedora de Cartas	78,{
+
+	set .zenycost,200000;    // base cost of the card remover services (in Zeny)
+	set .percardcost,25000;  // cost per card of the card remover services (in Zeny)
+	set .faildestroy,0;      // should the card remover have a chance of failure that destroys items? (1=yes, 0=no)
+
+	disable_items;
+	mes "[Velha Sábia]";
+	mes "Ola, jovem! Posso remover cartas dos seus equipamentos com total segurança.";
+	next;
+	switch(select("Sim, quero remover cartas.:Quanto custa?:Não, obrigado.")) {
+	case 1:
+		mes "[Velha Sábia]";
+		mes "Escolha o equipamento que deseja tratar:";
+		next;
+
+		setarray .@indices[1], EQI_HEAD_TOP, EQI_ARMOR, EQI_HAND_L, EQI_HAND_R, EQI_GARMENT, EQI_SHOES, EQI_ACC_L, EQI_ACC_R, EQI_HEAD_MID, EQI_HEAD_LOW;
+		for( set .@i,1; .@i <= 10; set .@i,.@i+1 ) {
+			if( getequipisequiped(.@indices[.@i]) )
+				set .@menu$, .@menu$ + F_getpositionname(.@indices[.@i]) + "-[" + getequipname(.@indices[.@i]) + "]";
+			set .@menu$, .@menu$ + ":";
+		}
+		set .@part, .@indices[ select(.@menu$) ];
+		if(!getequipisequiped(.@part)) {
+			mes "[Velha Sábia]";
+			mes "Jovem... Voce não esta usando nada que eu possa remover as cartas.";
+			close;
+		}
+		if(getequipcardcnt(.@part) == 0) {
+			mes "[Velha Sábia]";
+			mes "Jovem... Não ha cartas compostas neste item. Receio que não possa fazer nada com ele.";
+			close;
+		}
+		set .@cardcount,getequipcardcnt(.@part);
+		
+		if (!checkweight(1202,(.@cardcount+1))) { 
+			mes "^3355FFSomente um momento!";
+			mes "Não posso oferecer nada dos meus";
+			mes "serviços para voce porque";
+			mes "voce esta carregando muita coisa";
+			mes "Coloque seus itens extras no";
+			mes "Armazem e retorne aqui";
+			close;
+		}
+		mes "[Velha Sábia]";
+		mes "Este item tem " + .@cardcount + " cartas compostas. Para realizar minha magica, preciso de " + (.zenycost+(.@cardcount * .percardcost)) + " zeny.";
+		next;
+		if(select("Muito bem. Faça isso.:Deixa pra la..") == 2) {
+			mes "[Velha Sábia]";
+			mes "Muito bem. Volte se precisar dos meus serviços..";
+			close;
+		}
+		if((zeny < (.zenycost+(.@cardcount * .percardcost)))) {
+			mes "[Velha Sábia]";
+			mes "Voce não tem todos os itens que preciso para fazer minha magica, criança. Volte quando tiver.";
+			close;
+		}
+		// mes "[Velha Sábia]";
+		// mes "Antes de começar, preciso avisa-lo: posso falhar. Se falhar, posso destruir as cartas, o item ou ambos. Não faço devoluções. Dito isso, o que ç mais importante para voce: as cartas ou o item?";
+		// next;
+		// switch(select("Mudei de ideia sobre isso.:O item:carta")) {
+		// case 1:
+		// 	mes "[Velha Sábia]";
+		// 	mes "Muito bem. Volte se precisar dos meus serviços.";
+		// 	close;
+		// case 2:
+		// 	set .@failtype,1;
+		// 	break;
+		// case 3:
+		// 	set .@failtype,2;
+		// }
+		mes "[Velha Sábia]";
+		mes "Muito bem. Vou começar.";
+		set Zeny, Zeny - (.zenycost+(.@cardcount * .percardcost)); 
+		
+		// Replace the constants in the next 3 lines with failure chance values defined in refine_db.txt
+		// First value = Total failure chance (item and cards destroyed)
+		// Second value = Partial failure chance (one or the other is destroyed, player decides which one is safe)
+		// Third value = Harmless failure chance (all that's lost is your investment)
+
+		set .@failchance,rand(100);
+		if (.faildestroy==1) {
+			if(.@failchance < 2) {
+				next;
+				failedremovecards .@part,0;
+				mes "[Velha Sábia]";
+				mes "O processo foi um fracasso total. Receio que o item e os cartas tenham sido destruidos.";
+				close;
+			}
+
+			if(.@failchance < 8) {
+				if (.@failtype == 1) {
+					next;
+					failedremovecards .@part,1;
+					mes "[Velha Sábia]";
+					mes "Embora eu tenha conseguido remover a carta do item, elas foram destruidas no processo. O item, no entanto, esta em boas condições.";
+					close;
+				}
+
+				if (.@failtype == 2) {
+					next;
+					failedremovecards .@part,2;
+					mes "[Velha Sábia]";
+					mes "Que pena. Consegui remover as cartas, mas o item em si foi destruido no processo.";
+					close;
+				}
+			}
+		}
+
+		if(.@failchance < 10) {
+			next;
+			failedremovecards .@part,3;
+			mes "[Velha Sábia]";
+			mes "Não consegui remover os cards. Felizmente, tanto o item quanto os cards ainda estao em boas condições.";
+			close;
+		}
+		next;
+		successremovecards .@part;
+		mes "[Velha Sábia]";
+		mes "O processo foi um sucesso. Aqui estao seus itens e seu item.";
+		close;
+	case 2:
+		mes "[Velha Sábia]";
+		mes "Cobro uma taxa fixa de "+callfunc("F_InsertComma",.zenycost)+" zeny, mais "+callfunc("F_InsertComma",.percardcost)+" zeny para cada carta que removo do item.";
+		close;
+	case 3:
+		mes "[Velha Sábia]";
+		mes "Muito bem. Volte se precisar dos meus serviços.";
+		close;
+	}
+}
