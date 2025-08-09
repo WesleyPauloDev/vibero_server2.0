@@ -11,45 +11,45 @@
 //============================================================
 -	script	Aluguel Universal	726,{
 
-	// Se o jogador j√° est√° montado em algo
+	// Se o jogador j· est· montado em algo
 	if (ismounting()) {
-		message strcharinfo(0), "Voc√™ precisa desmontar primeiro.";
+		message strcharinfo(0), "VocÍ precisa desmontar primeiro.";
 		end;
 
-	// Se for um Ranger e n√£o tem a flauta de invocar o lobo
+	// Se for um Ranger e n„o tem a flauta de invocar o lobo
 	} else if (((eaclass() & EAJ_THIRDMASK) == EAJ_RANGER) && !countitem(6124)) {
-		// Se n√£o tem falc√£o, tem a skill de falc√£o, e n√£o tem Wug
+		// Se n„o tem falc„o, tem a skill de falc„o, e n„o tem Warg
 		if (!checkfalcon() && getskilllv("HT_FALCON") && !checkwug()) {
-			// Pergunta se quer falc√£o ou warg (lobo)
-			if (select(" ~ Falc√£o: ~ Warg") == 1) setfalcon;
+			// Pergunta se quer falc„o ou warg (lobo)
+			if (select(" ~ Falc„o: ~ Warg") == 1) setfalcon;
 			else getitem 6124, 1; // D√° a Flauta do Lobo (Wolf's Flute)
 		} else getitem 6124, 1;
 
-	// Se for um Mec√¢nico e tem a skill carrinho mas ainda n√£o tem um
+	// Se for um Mec‚nico e tem a skill carrinho mas ainda n„o tem um
 	} else if (((eaclass() & EAJ_THIRDMASK) == EAJ_MECHANIC) && !checkcart() && getskilllv("MC_PUSHCART")) {
-		// Se n√£o est√° com Madogear e tem a skill para usar Madogear
+		// Se n„o est· com Madogear e tem a skill para usar Madogear
 		if (!checkmadogear() && getskilllv("NC_MADOLICENCE")) {
 			if (select(" ~ Carrinho: ~ Madogear") == 1) setcart;
 			else setmadogear;
 		} else setcart;
 
-	// Se tem a skill de carrinho e n√£o tem carrinho
+	// Se tem a skill de carrinho e n„o tem carrinho
 	} else if (!checkcart() && getskilllv("MC_PUSHCART")) setcart;
 
-	// Se tem a skill de falc√£o e n√£o tem falc√£o ou wug
+	// Se tem a skill de falc„o e n„o tem falc„o ou warg
 	else if (!checkfalcon() && getskilllv("HT_FALCON") && !checkwug()) setfalcon;
 
-	// Se tem a skill de montar e n√£o est√° montado nem com drag√£o
+	// Se tem a skill de montar e n„o est· montado nem com drag„o
 	else if (!checkriding() && !checkdragon() && getskilllv("KN_RIDING")) {
 		if ((eaclass() & EAJ_THIRDMASK) == EAJ_RUNE_KNIGHT) setdragon;
 		else setriding;
 
-	// Se tem a skill de usar Madogear e n√£o est√° com um
+	// Se tem a skill de usar Madogear e n„o est· com um
 	} else if (!checkmadogear() && getskilllv("NC_MADOLICENCE")) setmadogear;
 
-	// Se n√£o atende nenhum crit√©rio
+	// Se n„o atende nenhum critÈrio
 	else {
-		message strcharinfo(0), "Voc√™ n√£o atende aos requisitos para alugar.";
+		message strcharinfo(0), "VocÍ n„o atende aos requisitos para alugar.";
 		end;
 	}
 

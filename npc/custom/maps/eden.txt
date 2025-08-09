@@ -1,0 +1,244 @@
+moc_para01,30,10,0	warp	edenwarp01	1,1,prontera,155,188
+
+moc_para01,24,22,5	duplicate(Servico Kafra)	Serviço Kafra#eden	113
+
+moc_para01,37,22,4	shop	Loja de Utilidades#eden	850,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,578:200,12414:500,645:1000,656:1500,657:2000,610:5000
+
+moc_para01,24,13,5	duplicate(Healer)	Curandeira#eden	640
+
+
+
+
+// ----------------------- Quests do Éden -----------------------
+// ----------------------- Contador de kill está em npc/custom/quests/quest_eden.txt -----------------------
+moc_para01,27,35,5	script	Secretário do Éden	810,{
+
+	if (BaseLevel < 20) {
+		mes "[Secretário do Éden]";
+		mes "Volte quando estiver no nível 20 ou superior para participar das missões do Éden.";
+		close;
+	}
+
+	// Se o jogador já tem missão ativa, oferece menu de progresso, recompensa ou cancelar
+	if (@eden_missao_ativa) {
+		mes "[Secretário do Éden]";
+		mes "Você já está em uma missão.";
+		next;
+		.@choice = select("Ver Progresso", "Receber Recompensa", "Cancelar Missão", "Fechar");
+
+		if (.@choice == 1) {
+			mes "[Missão Ativa]";
+			mes "Progresso:";
+			mes "Missão Lvl " +@eden_nivel + " Mapa " + @eden_mapa  ;
+			mes "- Monstro: ^00bb00" + @mob1_name$ + " " + @eden_mob1_kill + " / " + @eden_mob_quant + "^000000";
+			mes "- Monstro: ^00bb00" + @mob2_name$ + " " + @eden_mob2_kill + " / " + @eden_mob_quant + "^000000";
+			mes "Deseja ser teleportado agora para o mapa da missão?";
+			if (select("Sim:Não") == 1) {
+				warp $@eden_mapa_quest$, 0,0;
+			}
+			close;
+		}
+
+		if (.@choice == 2) {
+			if (@eden_missao_concluida) {
+				mes "[Secretário do Éden]";
+				mes "Parabéns por completar a missão!";
+				mes "Aqui está sua recompensa.";
+				getexp @eden_quest_exp,0;
+				Zeny += @eden_quest_zeny;
+				getitem 675, @eden_quest_medals;
+				dispbottom "Você Recebeu: "+@eden_quest_exp+" EXP / "+@eden_quest_zeny+" Zeny / "+@eden_quest_medals+" Medalhas";
+				
+				// Limpa dados da missão
+				@eden_missao_ativa = 0;
+				@eden_quest_count = 0;
+				@quant = 0;
+				@eden_quest_mob_id = 0;
+				@eden_quest_mob_name$ = "";
+				@eden_quest_map$ = "";
+				@eden_quest_medals = 0;
+				@eden_quest_zeny = 0;
+				@eden_quest_exp = 0;
+
+				close;
+			} else {
+				mes "[Secretário do Éden]";
+				mes "Você ainda não derrotou todos os monstros necessários.";
+				mes "Progresso:";
+				mes "Missão Lvl " +@eden_nivel + " Mapa " + @eden_mapa  ;
+				mes "- Monstro: ^00bb00" + @mob1_name$ + " " + @eden_mob1_kill + " / " + @eden_mob_quant + "^000000";
+				mes "- Monstro: ^00bb00" + @mob2_name$ + " " + @eden_mob2_kill + " / " + @eden_mob_quant + "^000000";
+				mes "Deseja ser teleportado agora para o mapa da missão para completa-la?";
+				if (select("Sim:Não") == 1) {
+					warp $@eden_mapa_quest$, 0,0;
+				}
+				close;
+			}
+		}
+
+		if (.@choice == 3) {
+			mes "[Secretário do Éden]";
+			mes "Tem certeza que deseja cancelar a missão atual?";
+			if (select("Sim, cancelar missão", "Não, continuar") == 1) {
+				@eden_missao_ativa = 0;
+				@eden_quest_count = 0;
+				@quant = 0;
+				@eden_quest_mob_id = 0;
+				@eden_quest_mob_name$ = "";
+				@eden_quest_map$ = "";
+				@eden_quest_medals = 0;
+				@eden_quest_zeny = 0;
+				@eden_quest_exp = 0;
+				mes "Missão cancelada com sucesso.";
+				close;
+			} else {
+				mes "Missão mantida. Boa sorte!";
+				close;
+			}
+		}
+
+		if (.@choice == 4) {
+			close;
+		}
+	}
+	mes "[Secretário do Éden]";
+	mes "Bem-vindo ao Programa de Missões do Éden!";
+	mes "Você pode realizar missões repetíveis que dão EXP, Zeny e Medalhas do Éden!";
+	next;
+
+	MainMenu:
+		mes "Escolha a faixa de nível da missão:";
+		.@choice = select("Lv. 20~39","Lv. 40~59","Lv. 60~79","Lv. 80+","Cancelar");
+		if (.@choice == 5) {
+			mes "Tudo bem, volte quando quiser realizar uma missão.";
+			close;
+		}	
+
+		.@nivel = ((.@choice - 1) * 20) + 20;
+
+		if (BaseLevel < .@nivel) {
+			mes "[Secretário do Éden]";
+			mes "Você ainda não é forte o bastante para esta missão.";
+			next;
+			goto MainMenu;
+		}
+
+		callsub L_MissaoMenu, .@nivel;
+		end;
+
+L_MissaoMenu:
+	.@nivel = getarg(0);
+
+	mes "[Missões Nível " + .@nivel + "+]";
+	mes "Escolha a missão que deseja:";
+	next;
+
+	.@op = select("Mapa 1:Mapa 2:Voltar");
+	if (.@op == 3) goto MainMenu;
+
+	callsub L_IniciarMissao, .@nivel, .@op;
+	end;
+
+L_IniciarMissao:
+	.@nivel = getarg(0);
+	.@mapa  = getarg(1);	
+
+	// Quantidade e recompensas escalam com o nível
+	.@quant = .@nivel
+	.@nivel = 20;
+	.@medalhas = .@nivel / 20;
+	.@zeny = (.@nivel / 20) * 5000;
+	.@exp = (.@nivel / 20) * 20000;
+
+	// Armazena recompensas nas variáveis do jogador
+	@eden_quest_medals = .@medalhas;
+	@eden_quest_zeny   = .@zeny;
+	@eden_quest_exp    = .@exp;
+
+	// Define missões
+	if (.@nivel == 20 && .@mapa == 1) {
+		.@mapname$ = "anthell01";
+		.@mob1$ = "Piere"; .@mob1_id = 1160;
+		.@mob2$ = "Deniro"; .@mob2_id = 1105;
+	}
+	else if (.@nivel == 20 && .@mapa == 2) {
+		.@mapname$ = "pay_fild08";
+		.@mob1$ = "Spore"; .@mob1_id = 1014;
+		.@mob2$ = "Wormtail"; .@mob2_id = 1024;
+	}
+	else if (.@nivel == 40 && .@mapa == 1) {
+		.@mapname$ = "gef_fild10";
+		.@mob1$ = "Orc Warrior"; .@mob1_id = 1023;
+		.@mob2$ = "Orc Lady"; .@mob2_id = 1273;
+	}
+	else if (.@nivel == 40 && .@mapa == 2) {
+		.@mapname$ = "orcsdun02";
+		.@mob1$ = "Orc Skeleton"; .@mob1_id = 1152;
+		.@mob2$ = "Zenorc"; .@mob2_id = 1177;
+	}
+	else if (.@nivel == 60 && .@mapa == 1) {
+		.@mapname$ = "moc_fild17";
+		.@mob1$ = "Sandman"; .@mob1_id = 1165;
+		.@mob2$ = "Hode"; .@mob2_id = 1127;
+	}
+	else if (.@nivel == 60 && .@mapa == 2) {
+		.@mapname$ = "gef_fild06";
+		.@mob1$ = "Petite"; .@mob1_id = 1155;
+		.@mob2$ = "Mantis"; .@mob2_id = 1139;
+	}
+	else if (.@nivel == 80 && .@mapa == 1) {
+		.@mapname$ = "gl_church";
+		.@mob1$ = "Evil Druid"; .@mob1_id = 1117;
+		.@mob2$ = "Wraith"; .@mob2_id = 1192;
+	}
+	else if (.@nivel == 80 && .@mapa == 2) {
+		.@mapname$ = "yuno_fild04";
+		.@mob1$ = "Harpy"; .@mob1_id = 1376;
+		.@mob2$ = "Goat"; .@mob2_id = 1372;
+	}
+	else {
+		mes "Missão não encontrada.";
+		close;
+	}
+
+	// Armazenar variáveis da missão para o sistema de contagem	
+	@eden_missao_concluida = 0;
+	@eden_nivel = .@nivel;
+	@eden_nivel = .@nivel;
+	@eden_mapa  = .@mapa;
+	@eden_mapa  = .@mapa;
+	$@eden_mapa_quest$ = .@mapname$;
+	@mob1_name$ = .@mob1$;
+	@mob2_name$ = .@mob2$;
+	@eden_mob1_id = .@mob1_id;
+	@eden_mob2_id = .@mob2_id;
+	@eden_mob_quant = .@quant;
+	@eden_mob1_kill = 0;
+	@eden_mob2_kill = 0;
+
+
+	mes "[Missão do Éden]";
+	mes "Você escolheu caçar:";
+	mes "- " + .@quant + " " + .@mob1$;
+	mes "- " + .@quant + " " + .@mob2$;	
+	mes "[Recompensas]";
+	mes "- " + .@medalhas + " Medalha(s) do Éden";
+	mes "- " + .@zeny + " Zeny";
+	mes "- " + .@exp + " de EXP";
+	mes "";
+	mes "Você confirma esta missão?";
+	if (select("Sim:Não") == 2) {
+		goto L_MissaoMenu;
+	}
+	@eden_missao_ativa = 1;
+	next;
+	mes "Deseja ser teleportado agora para o mapa da missão?";
+	if (select("Sim:Não") == 1) {
+		warp .@mapname$, 0,0;
+	}
+	close;
+
+OnInit:
+	end;
+}
+

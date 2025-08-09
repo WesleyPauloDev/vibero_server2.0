@@ -2127,12 +2127,13 @@ ACMD_FUNC(go)
 		{ MAP_MALAYA,      242, 211 }, // 34=Malaya Port
 		{ MAP_ECLAGE,      110,  39 }, // 35=Eclage
 		{ MAP_LASAGNA,     193, 182 }, // 36=Lasagna
+		{ "moc_para01", 30, 14 }, // 37 = Eden Group
 	};
 
 	nullpo_retr(-1, sd);
 
 	if( strcmp(mapindex_id2name(sd->mapindex), "new_1-1") == 0 ) {
-		clif_displaymessage(fd, "Vocï¿½ nï¿½o pode usar o comando @go neste mapa.");
+		clif_displaymessage(fd, "Você não pode usar o comando @go neste mapa.");
 		return -1;
 	}
 
@@ -2253,6 +2254,8 @@ ACMD_FUNC(go)
 		town = 35;
 	} else if (strncmp(map_name, "lasagna", 2) == 0) {
 		town = 36;
+	} 	else if (strncmp(map_name, "eden", 3) == 0) {
+		town = 37;
 	}
 
 	if (town >= 0 && town < ARRAYLENGTH(data))

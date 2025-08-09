@@ -5,6 +5,19 @@ OnInit:
 	end;
 
 OnAtcommand:
+	// Tempo de delay em segundos
+	.@delay = 5;
+
+	// Verifica tempo restante
+	if (@last_buff_time + .@delay > gettimetick(2)) {
+		.@remaining = (@last_buff_time + .@delay) - gettimetick(2);
+		message strcharinfo(0), "Você poderá usar o comando novamente em " + .@remaining + " segundo(s).";
+		end;
+	}
+
+	// Atualiza o tempo do último uso
+	@last_buff_time = gettimetick(2);
+	
 	// Verifica se o jogador é VIP
 	if (getgroupid() == 5) {
         // Aumentar Agilidade
@@ -26,6 +39,15 @@ OnAtcommand:
 
 		// Magnificat
 		sc_start SC_MAGNIFICAT,600000,5;
+
+		// +10 em todos os atributos (efeito de comidas +10)
+		sc_start SC_FOOD_STR_CASH,600000,10;
+		sc_start SC_FOOD_AGI_CASH,600000,10;
+		sc_start SC_FOOD_VIT_CASH,600000,10;
+		sc_start SC_FOOD_INT_CASH,600000,10;
+		sc_start SC_FOOD_DEX_CASH,600000,10;
+		sc_start SC_FOOD_LUK_CASH,600000,10;
+
         message strcharinfo(0), "Buffs VIP aplicados!";
 		end;
 	}

@@ -1,0 +1,37 @@
+-	script	ContadorEden	FAKE_NPC,{
+	OnNPCKillEvent:
+		if (!@eden_missao_ativa) {
+			end;
+		}
+		// Incrementa kill de mob1
+		if (killedrid == @eden_mob1_id && @eden_mob1_kill < @eden_mob_quant) {
+            @eden_mob1_kill++;
+            if (@eden_mob1_kill >= @eden_mob_quant) {
+				dispbottom "[Missão Éden] Você completou: "+@mob1_name$+"!";
+				showscript @mob1_name$+" completo!", getcharid(3);
+			} else {
+                dispbottom "[Missão Éden] Progresso: "+@eden_mob1_kill+"/"+@eden_mob_quant+" "+@mob1_name$;
+                showscript @mob1_name$+" "+@eden_mob1_kill+"/"+@eden_mob_quant, getcharid(3);
+            }
+        }
+        // Incrementa kill de mob2 (se existir)
+        else if (@eden_mob2_id > 0 && killedrid == @eden_mob2_id && @eden_mob2_kill < @eden_mob_quant) {
+            @eden_mob2_kill++;
+            if (@eden_mob2_kill >= @eden_mob_quant) {
+				dispbottom "[Missão Éden] Você completou: "+@mob2_name$+"!";
+				showscript @mob2_name$+" completo!", getcharid(3);
+			} else {
+                dispbottom "[Missão Éden] Progresso: "+@eden_mob2_kill+"/"+@eden_mob_quant+" "+@mob2_name$;
+                showscript @mob2_name$+" "+@eden_mob2_kill+"/"+@eden_mob_quant, getcharid(3);
+            }
+        }
+
+		// Verifica se concluiu a missão
+		if (@eden_mob1_kill >= @eden_mob_quant && (@eden_mob2_id == 0 || @eden_mob2_kill >= @eden_mob_quant)) {
+			if (!@eden_missao_concluida) {
+				@eden_missao_concluida = 1;
+				dispbottom "[Missão Éden] Você concluiu todos os objetivos! Volte ao NPC para receber sua recompensa.";
+			}
+		}
+		end;
+}

@@ -8,190 +8,190 @@
 //= 1.0.1 Fix Cutin Aigu. [mazvi]
 //============================================================
 
-moc_para01,26,95,5	script	Roel#sara	4_M_ROEL,{
-	cutin "roel01",0;
-	if (BaseLevel < 120) {
-		mes "[Roel]";
-		mes "We're looking for adventurers that can join us for a brand new adventure. If you're at the Level to accept IGU's quests, then you're qualified.";
-		close3;
-	}
-	switch( isbegin_quest(13183) ) {// Nightmarish Jitterbug: Completed
-	case 0:
-		switch( isbegin_quest(13181) ) {// Nightmarish Jitterbug
-		case 0:
-			mes "[Roel]";
-			mes "I'm Roel, new member of the White Wings Guild. Roter had me search everywhere for Newoz, and I've found some clues as to his whereabouts.";
-			next;
-			mes "[Roel]";
-			mes "Recruiting guild prospects! Join us in our search for our former master Newoz! Are you interested?";
-			next;
-			if (select( "Yes.", "No." ) == 1) {
-				cutin "roel02",0;
-				mes "[Roel]";
-				mes "What a difficult task. I searched from this end to that end of the world, and could find neither hide nor hair of him.";
-				next;
-				cutin "roel01",0;
-				mes "[Roel]";
-				mes "I tried to some trace of him, but to no avail.";
-				next;
-				mes "[Roel]";
-				mes "Newoz is an avid adventurer who never stays in one place long enough; a lot of people claimed they saw him, yet none of them remembered where he went.";
-				next;
-				mes "[Roel]";
-				mes "After a while, I had to give up on tracing him. I was just wasting time.";
-				next;
-				mes "[Roel]";
-				mes "I turned my eyes to the Other World, and there I met some eyewitnesses. They led me to the last place Newoz had been seen.";
-				next;
-				mes "[Roel]";
-				mes "The whole process was painful. If it weren't for Runane, we couldn't have Memorized his last location or gotten out of it.";
-				next;
-				mes "[Roel]";
-				mes "If you're interested in joining us, please talk to Runane. We have an exciting adventure ahead of us.";
-				setquest 13181;// Nightmarish Jitterbug
-			}
-			close3;
-		case 1:
-			mes "[Roel]";
-			mes "If you're interested in joining us, please talk to Runane.";
-			close3;
-		case 2:
-			cutin "roel03",0;
-			mes "[Roel]";
-			mes "It was my first adventure as a member of White Wings. I can't wait for the next one!";
-			erasequest 13181;
-			setquest 13183;// Nightmarish Jitterbug: Completed
-			completequest 13183;
-			getexp 1500000,500000;
-			close3;
-		}
-		end;
-	case 1:
-	case 2:
-		switch( isbegin_quest(13181) ) {
-		case 0:
-			mes "[Roel]";
-			mes "Where do you think Shaloshi is by now? The space where we met Shaloshi is caught in a time loop, repeating the same events again and again.";
-			next;
-			mes "[Roel]";
-			mes "Mingmin thinks the phenomenon has something to do with the Dimensional Crack and Shaloshi's ability.";
-			next;
-			mes "[Roel]";
-			mes "I didn't quite understand her, but Runane said the portal to the place she Memorized is based on time instead of space.";
-			next;
-			mes "[Roel]";
-			mes "If you want, you can go back in time and experience the same events. Do you want to embark on an adventure again?";
-			next;
-			if (select( "Yes.", "No." ) == 1) {
-				mes "[Roel]";
-				mes "You might have a different experience this time in this place full of unfathomable mysteries. Please ask Runane to open the portal for you.";
-				next;
-				mes "[Roel]";
-				mes "This time, maybe you don't have to leave Shaloshi.";
-				setquest 13181;// Nightmarish Jitterbug
-			}
-			close3;
-		case 1:
-			mes "[Roel]";
-			mes "Are you ready yet? You can give up if you're not confident.";
-			next;
-			if (select( "No.", "Give up." ) == 1) {
-				mes "[Roel]";
-				mes "That's the spirit!";
-				close3;
-			}
-			erasequest 13181;
-			close3;
-		case 2:
-			cutin "roel03",0;
-			mes "[Roel]";
-			mes "Adventuring is always fun. Be a great adventurer, okay?";
-			erasequest 13181;
-			getexp 1500000,500000;
-			close3;
-		}
-	}
-}
+// moc_para01,26,95,5	script	Roel#sara	4_M_ROEL,{
+// 	cutin "roel01",0;
+// 	if (BaseLevel < 120) {
+// 		mes "[Roel]";
+// 		mes "We're looking for adventurers that can join us for a brand new adventure. If you're at the Level to accept IGU's quests, then you're qualified.";
+// 		close3;
+// 	}
+// 	switch( isbegin_quest(13183) ) {// Nightmarish Jitterbug: Completed
+// 	case 0:
+// 		switch( isbegin_quest(13181) ) {// Nightmarish Jitterbug
+// 		case 0:
+// 			mes "[Roel]";
+// 			mes "I'm Roel, new member of the White Wings Guild. Roter had me search everywhere for Newoz, and I've found some clues as to his whereabouts.";
+// 			next;
+// 			mes "[Roel]";
+// 			mes "Recruiting guild prospects! Join us in our search for our former master Newoz! Are you interested?";
+// 			next;
+// 			if (select( "Yes.", "No." ) == 1) {
+// 				cutin "roel02",0;
+// 				mes "[Roel]";
+// 				mes "What a difficult task. I searched from this end to that end of the world, and could find neither hide nor hair of him.";
+// 				next;
+// 				cutin "roel01",0;
+// 				mes "[Roel]";
+// 				mes "I tried to some trace of him, but to no avail.";
+// 				next;
+// 				mes "[Roel]";
+// 				mes "Newoz is an avid adventurer who never stays in one place long enough; a lot of people claimed they saw him, yet none of them remembered where he went.";
+// 				next;
+// 				mes "[Roel]";
+// 				mes "After a while, I had to give up on tracing him. I was just wasting time.";
+// 				next;
+// 				mes "[Roel]";
+// 				mes "I turned my eyes to the Other World, and there I met some eyewitnesses. They led me to the last place Newoz had been seen.";
+// 				next;
+// 				mes "[Roel]";
+// 				mes "The whole process was painful. If it weren't for Runane, we couldn't have Memorized his last location or gotten out of it.";
+// 				next;
+// 				mes "[Roel]";
+// 				mes "If you're interested in joining us, please talk to Runane. We have an exciting adventure ahead of us.";
+// 				setquest 13181;// Nightmarish Jitterbug
+// 			}
+// 			close3;
+// 		case 1:
+// 			mes "[Roel]";
+// 			mes "If you're interested in joining us, please talk to Runane.";
+// 			close3;
+// 		case 2:
+// 			cutin "roel03",0;
+// 			mes "[Roel]";
+// 			mes "It was my first adventure as a member of White Wings. I can't wait for the next one!";
+// 			erasequest 13181;
+// 			setquest 13183;// Nightmarish Jitterbug: Completed
+// 			completequest 13183;
+// 			getexp 1500000,500000;
+// 			close3;
+// 		}
+// 		end;
+// 	case 1:
+// 	case 2:
+// 		switch( isbegin_quest(13181) ) {
+// 		case 0:
+// 			mes "[Roel]";
+// 			mes "Where do you think Shaloshi is by now? The space where we met Shaloshi is caught in a time loop, repeating the same events again and again.";
+// 			next;
+// 			mes "[Roel]";
+// 			mes "Mingmin thinks the phenomenon has something to do with the Dimensional Crack and Shaloshi's ability.";
+// 			next;
+// 			mes "[Roel]";
+// 			mes "I didn't quite understand her, but Runane said the portal to the place she Memorized is based on time instead of space.";
+// 			next;
+// 			mes "[Roel]";
+// 			mes "If you want, you can go back in time and experience the same events. Do you want to embark on an adventure again?";
+// 			next;
+// 			if (select( "Yes.", "No." ) == 1) {
+// 				mes "[Roel]";
+// 				mes "You might have a different experience this time in this place full of unfathomable mysteries. Please ask Runane to open the portal for you.";
+// 				next;
+// 				mes "[Roel]";
+// 				mes "This time, maybe you don't have to leave Shaloshi.";
+// 				setquest 13181;// Nightmarish Jitterbug
+// 			}
+// 			close3;
+// 		case 1:
+// 			mes "[Roel]";
+// 			mes "Are you ready yet? You can give up if you're not confident.";
+// 			next;
+// 			if (select( "No.", "Give up." ) == 1) {
+// 				mes "[Roel]";
+// 				mes "That's the spirit!";
+// 				close3;
+// 			}
+// 			erasequest 13181;
+// 			close3;
+// 		case 2:
+// 			cutin "roel03",0;
+// 			mes "[Roel]";
+// 			mes "Adventuring is always fun. Be a great adventurer, okay?";
+// 			erasequest 13181;
+// 			getexp 1500000,500000;
+// 			close3;
+// 		}
+// 	}
+// }
 
-moc_para01,29,95,5	script	Runane#sara	4_F_RUNAIN,{
-	cutin "lunain01",0;
-	if (BaseLevel < 120) {
-		mes "[Runane]";
-		mes "^ff0000You must be Level 120.^000000";
-		close3;
-	}
-	if (isbegin_quest(13181) != 1) {
-		mes "[Runane]";
-		mes "^ff0000If you want to use my dimensional portal, then you first have to talk to Roel. The portal is not open for everyone.^000000";
-		close3;
-	}
-	.@party_id = getcharid(1);
-	.@md_name$ = "Nightmarish Jitterbug";
-	if (.@party_id < 1) {
-		mes "[Runane]";
-		mes "^ff0000You first must form/join a party of at least 1 person to enter this dungeon.^000000";
-		close3;
-	}
-	switch( checkquest(13182,PLAYTIME) ) {
-	case -1:
-		break;
-	case 0:
-	case 1:
-		mes "[Runane]";
-		mes "^ff0000This dimensional portal cannot be accessed for 20 hours after your last access.^000000";
-		close3;
-	case 2:
-		mes "[Runane]";
-		mes "The portal is now available for use.";
-		erasequest 13182;// Nightmarish Jitterbug: Waiting
-		close3;
-	}
-	if (is_party_leader() == true)
-		.@menu$ = "Open the dimensional portal.";
-	switch( select( .@menu$, "Enter " + .@md_name$ + ".", "Cancel." ) ) {
-	case 1:
-		if (instance_create(.@md_name$) < 0) {
-			mes "Party Name: " + getpartyname( getcharid(1) );
-			mes "Party Leader: " + strcharinfo(0);
-			mes "^0000ff" + .@md_name$ + " ^000000- Reservation Failed!";
-			close3;
-		}
-		mes "[Runane]";
-		mes "^ff0000Preparing the dimensional portal...^000000";
-		mes "^ff0000Please wait.^000000";
-		close3;
-	case 2:
-		switch( instance_enter(.@md_name$) ) {
-		case IE_NOMEMBER:
-			close3;
-		case IE_NOINSTANCE:
-			if (is_party_leader() == false) {
-				mes "[Runane]";
-				mes "Teleporting...";
-				next;
-				mes "[Runane]";
-				mes "^ff0000Please note that this portal cannot be accessed for 23 hours after your last access.^000000";
-				next;
-			}
-			mes "[Runane]";
-			mes "^ff0000Your party leader has not yet created a Time Crack.^000000";
-			close3;
-		case IE_OTHER:
-			mes "An unknown error has occurred.";
-			close3;
-		case IE_OK:
-			setquest 13182;// Nightmarish Jitterbug: Waiting
-			mapannounce "moc_para01", "" + strcharinfo(0) + " of the party, " + getpartyname( getcharid(1) ) + ", is entering the " + .@md_name$ + ".", bc_map, 0xFF99;
-			specialeffect2 EF_READYPORTAL2;
-			specialeffect2 EF_PORTAL2;
-			// warp "1@jtb",16,17;
-			end;
-		}
-	case 3:
-		cutin "",255;
-		end;
-	}
-}
+// moc_para01,29,95,5	script	Runane#sara	4_F_RUNAIN,{
+// 	cutin "lunain01",0;
+// 	if (BaseLevel < 120) {
+// 		mes "[Runane]";
+// 		mes "^ff0000You must be Level 120.^000000";
+// 		close3;
+// 	}
+// 	if (isbegin_quest(13181) != 1) {
+// 		mes "[Runane]";
+// 		mes "^ff0000If you want to use my dimensional portal, then you first have to talk to Roel. The portal is not open for everyone.^000000";
+// 		close3;
+// 	}
+// 	.@party_id = getcharid(1);
+// 	.@md_name$ = "Nightmarish Jitterbug";
+// 	if (.@party_id < 1) {
+// 		mes "[Runane]";
+// 		mes "^ff0000You first must form/join a party of at least 1 person to enter this dungeon.^000000";
+// 		close3;
+// 	}
+// 	switch( checkquest(13182,PLAYTIME) ) {
+// 	case -1:
+// 		break;
+// 	case 0:
+// 	case 1:
+// 		mes "[Runane]";
+// 		mes "^ff0000This dimensional portal cannot be accessed for 20 hours after your last access.^000000";
+// 		close3;
+// 	case 2:
+// 		mes "[Runane]";
+// 		mes "The portal is now available for use.";
+// 		erasequest 13182;// Nightmarish Jitterbug: Waiting
+// 		close3;
+// 	}
+// 	if (is_party_leader() == true)
+// 		.@menu$ = "Open the dimensional portal.";
+// 	switch( select( .@menu$, "Enter " + .@md_name$ + ".", "Cancel." ) ) {
+// 	case 1:
+// 		if (instance_create(.@md_name$) < 0) {
+// 			mes "Party Name: " + getpartyname( getcharid(1) );
+// 			mes "Party Leader: " + strcharinfo(0);
+// 			mes "^0000ff" + .@md_name$ + " ^000000- Reservation Failed!";
+// 			close3;
+// 		}
+// 		mes "[Runane]";
+// 		mes "^ff0000Preparing the dimensional portal...^000000";
+// 		mes "^ff0000Please wait.^000000";
+// 		close3;
+// 	case 2:
+// 		switch( instance_enter(.@md_name$) ) {
+// 		case IE_NOMEMBER:
+// 			close3;
+// 		case IE_NOINSTANCE:
+// 			if (is_party_leader() == false) {
+// 				mes "[Runane]";
+// 				mes "Teleporting...";
+// 				next;
+// 				mes "[Runane]";
+// 				mes "^ff0000Please note that this portal cannot be accessed for 23 hours after your last access.^000000";
+// 				next;
+// 			}
+// 			mes "[Runane]";
+// 			mes "^ff0000Your party leader has not yet created a Time Crack.^000000";
+// 			close3;
+// 		case IE_OTHER:
+// 			mes "An unknown error has occurred.";
+// 			close3;
+// 		case IE_OK:
+// 			setquest 13182;// Nightmarish Jitterbug: Waiting
+// 			mapannounce "moc_para01", "" + strcharinfo(0) + " of the party, " + getpartyname( getcharid(1) ) + ", is entering the " + .@md_name$ + ".", bc_map, 0xFF99;
+// 			specialeffect2 EF_READYPORTAL2;
+// 			specialeffect2 EF_PORTAL2;
+// 			// warp "1@jtb",16,17;
+// 			end;
+// 		}
+// 	case 3:
+// 		cutin "",255;
+// 		end;
+// 	}
+// }
 
 // Warps
 1@jtb,45,47,0	warp	1 Door 1	3,3,1@jtb,100,14

@@ -4,7 +4,7 @@ prontera,145,198,3	duplicate(Removedora de Cartas)	Removedora de Cartas#prontera
 
 prontera,151,189,5	duplicate(Servico Kafra)	Serviço Kafra#prontera	113
 
-prontera,162,193,5	duplicate(Healer)	Curandeira#prt	640
+prontera,162,193,5	duplicate(Healer)	Curandeira#prontera	640
 
 prontera,148,175,5	duplicate(Eden)	Eden#prontera	729
 
@@ -18,34 +18,66 @@ prontera,150,193,4	duplicate(Resetadora)	Resetadora#prontera	124
 
 prontera,164,196,5	duplicate(Estilista)	Estilista#prontera	122
 
-prontera,157,193,5	duplicate(Warper)	Teleportadora#prt	815
+prontera,157,193,5	duplicate(Warper)	Teleportadora#prontera	815
 
+// ----------------------- Script está em npc/custom/custom_shop.txt -----------------------
 prontera,147,195,4	duplicate(Loja)	Loja#prontera	478
-prontera,145,202,4	shop	Loja de Utilidades	850,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,578:200,12414:500,645:1000,656:1500,657:2000,610:5000
+prontera,145,202,4	shop	Loja de Utilidades#prontera	850,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,578:200,12414:500,645:1000,656:1500,657:2000,610:5000
 
-prontera,163,175,4	script	AgenteVIP	724,{
-	
+prontera,163,175,4	script	AgenteVIP#prontera	724,{
 	mes "[Agente VIP]";
-
-	if (#vip_inicial_recebido) {
-		mes "Você já recebeu seu VIP gratuito de 3 dias.";
-		close;
-	}
-
-	mes "Bem-vindo! Posso ativar 3 dias de VIP gratuito para você.";
+	mes "Olá, aventureiro!";
+	mes "Como posso te ajudar hoje?";
 	next;
-	if(select("Sim, quero ativar meus 3 dias VIP gratis.:Não, obrigado.") == 1) {
-		atcommand("@vip +3d " + strcharinfo(0));
-		#vip_inicial_recebido = 1; 
-		mes "Pronto! Você agora é VIP por 3 dias. Aproveite!";
-		close;
-	} else {
-		mes "Tudo bem. Volte quando quiser.";
-		close;
+
+	while (true) {
+		switch(select(
+			"Ativar VIP gratuito de 3 dias",
+			"O que é ser VIP?",
+			"Sair"
+		)) {
+			case 1:
+				if (#vip_inicial_recebido) {
+					mes "[Agente VIP]";
+					mes "Você já recebeu seu VIP gratuito de 3 dias anteriormente.";
+					next;
+					break;
+				}
+				mes "[Agente VIP]";
+				mes "Ativando seu VIP gratuito de 3 dias...";
+				mes "Você só pode usar este beneficio uma vez por conta";
+				atcommand("@vip +3d " + strcharinfo(0));
+				#vip_inicial_recebido = 1;
+				mes "Pronto! Você agora é VIP por 3 dias.";
+				mes "Aproveite os benefícios!";
+				close;
+
+			case 2:
+				mes "[Agente VIP]";
+				mes "Jogadores VIP possuem várias vantagens exclusivas:";
+				next;
+				
+				mes "[Agente VIP]";
+				mes "- Acesso ao comando ^0000FF@buff^000000 para buffs especiais.";
+				mes "- Acesso ao comando ^0000FF@storage^000000 em qualquer lugar.";
+				mes "- Maior ganho de experiência e drop em monstros.";
+				mes "- Eventos especiais para VIPs.";
+				next;
+
+				mes "[Agente VIP]";
+				mes "Você pode adquirir VIP com ROPs ou em eventos.";
+				next;
+				break;
+
+			case 3:
+				mes "[Agente VIP]";
+				mes "Tudo bem. Estou aqui se mudar de ideia!";
+				close;
+		}
 	}
 }
 
-prontera,160,133,2	script	YuPi#pront	102,{
+prontera,160,133,2	script	YuPi#prontera	102,{
 	mes "[YuPi]";
 	mes "Embora muitos monstros possam parecer iguais, tenha cuidado! Existem variações entre monstros que têm a mesma forma básica.";
 	next;
@@ -57,7 +89,7 @@ prontera,160,133,2	script	YuPi#pront	102,{
 	close;
 }
 
-prontera,159,190,4	script	Treinador	811,{
+prontera,159,190,4	script	Treinador#prontera	811,{
 	mes "[Treinador]";
 	mes "Bem-vindo à cidade de ^0000FFProntera^000000, o coração do nosso servidor!";
 	mes "Aqui você encontrará muitos jogadores e NPCs que irão te auxiliar durante sua jornada.";
@@ -124,6 +156,11 @@ prontera,159,190,4	script	Treinador	811,{
 	}
 }
 
+// ----------------------- warps -----------------------
+prontera,156,22,0	warp	prt001	3,2,prt_fild08,170,375
+prontera,22,203,0	warp	prt002	2,3,prt_fild05,367,205
+prontera,289,203,0	warp	prt003	2,3,prt_fild06,27,193
+prontera,156,358,0	warp	prt004	2,3,prt_fild01,199,29
 
 
 
