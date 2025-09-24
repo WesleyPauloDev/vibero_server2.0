@@ -27161,6 +27161,49 @@ BUILDIN_FUNC(getjobexp_ratio){
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/*========================================================
+ * Retorna o bônus de drop para um item específico de um mob,
+ * considerando os bônus do jogador que está executando o script.
+ * Uso em script: get_drop_bonus(<mob_id>, <item_id>);
+ *-------------------------------------------------------*/
+BUILDIN_FUNC(get_drop_bonus)
+{
+    map_session_data* sd;
+    // Obtém o jogador atual (charid tipo 4 = script executor)
+    if ( !script_charid2sd(4, sd) ) {
+        script_pushint(st, 100); // sem jogador, retorna 100%
+        return SCRIPT_CMD_SUCCESS;
+    }
+
+    int mob_id  = script_getnum(st, 2);
+    int item_id = script_getnum(st, 3);
+
+    std::shared_ptr<s_mob_db> mob = mob_db.find(mob_id);
+    if (!mob) {
+        script_pushint(st, 100);
+        return SCRIPT_CMD_SUCCESS;
+    }
+
+    // Procura o drop específico
+    for (const auto& drop : mob->dropitem) {
+        if (drop->nameid == item_id) {
+            int32 drop_modifier = 100;
+    #ifdef RENEWAL_DROP
+            drop_modifier = pc_level_penalty_mod(sd, PENALTY_DROP, mob);
+    #endif
+            int32 final_rate = mob_getdroprate(sd, mob, drop->rate, drop_modifier);
+            script_pushint(st, final_rate); // em centésimos de %
+            return SCRIPT_CMD_SUCCESS;
+        }
+    }
+
+    // Se não encontrar, retorna 0
+    script_pushint(st, 0);
+    return SCRIPT_CMD_SUCCESS;
+}
+
+
+
 BUILDIN_FUNC( enchantgradeui ){
 #if PACKETVER_MAIN_NUM >= 20200916 || PACKETVER_RE_NUM >= 20200724
 	map_session_data* sd;
@@ -28508,6 +28551,8 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getbaseexp_ratio, "i??"),
 	BUILDIN_DEF(getjobexp_ratio, "i??"),
 	BUILDIN_DEF(enchantgradeui, "?" ),
+
+	BUILDIN_DEF(get_drop_bonus, "ii?"),
 
 	BUILDIN_DEF(set_reputation_points, "ii?"),
 	BUILDIN_DEF(get_reputation_points, "i?"),

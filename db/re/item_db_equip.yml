@@ -24454,7 +24454,7 @@ Body:
     AegisName: Immuned_Shield
     Name: Immune Shield
     Type: Armor
-    Buy: 20
+    Buy: 2000
     Weight: 700
     Defense: 55
     Slots: 1
@@ -24464,20 +24464,12 @@ Body:
     EquipLevelMin: 1
     Refineable: true
     View: 4
-    Trade:
-      NoDrop: true
     Script: |
       .@r = getrefine();
-      if (.@r>=5)
-         bonus2 bSubEle,Ele_Neutral,min(.@r,12)-4;
-      if (.@r>6)
-         bonus2 bSubEle,Ele_Neutral,5;
-      if (.@r>8) {
-         bonus2 bSubEle,Ele_Fire,5;
-         bonus2 bSubEle,Ele_Water,5;
-         bonus2 bSubEle,Ele_Wind,5;
-         bonus2 bSubEle,Ele_Earth,5;
+      if (.@r >= 5) {
+          bonus2 bSubEle, Ele_Neutral, 5 + (.@r - 5);
       }
+
   - Id: 2169
     AegisName: Kalasak
     Name: Kalasag
@@ -32819,8 +32811,9 @@ Body:
     ArmorLevel: 1
     Refineable: true
     View: 1
-    Trade:
-      NoDrop: true
+    Script: |
+      bonus bMaxHPrate,5;
+      bonus bMaxSPrate,5;
   - Id: 2574
     AegisName: Ur_Manteau
     Name: Ur's Manteau
@@ -33132,8 +33125,6 @@ Body:
     ArmorLevel: 1
     Refineable: true
     View: 3
-    Trade:
-      NoDrop: true
     Script: |
       bonus bAllStats,1;
       bonus bBaseAtk,readparam(bStr)/20;
@@ -35354,30 +35345,30 @@ Body:
       NoAuction: true
     Script: |
       bonus3 bAutoSpell,"MG_FIREBOLT",5,50;
-  - Id: 2709
-    AegisName: 5_Anniversary_Coin
-    Name: 5th Anniversary Coin
-    Type: Armor
-    Buy: 2
-    Locations:
-      Both_Accessory: true
-    ArmorLevel: 1
-    Trade:
-      NoDrop: true
-      NoTrade: true
-      NoSell: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
-    Script: |
-      bonus bBaseAtk,10;
-      bonus bMatk,10;
-      bonus bCritical,10;
-      autobonus "{ bonus bAspd,3; }",1,5000,BF_WEAPON;
-      autobonus "{ bonus bVariableCastrate,-50; }",1,5000,BF_MAGIC;
-      autobonus3 "{ bonus bHealPower,20; }",100,3000,"AL_HEAL","{ specialeffect2 EF_HEAL3; }";
+  # - Id: 2709
+  #   AegisName: 5_Anniversary_Coin
+  #   Name: 5th Anniversary Coin
+  #   Type: Armor
+  #   Buy: 2
+  #   Locations:
+  #     Both_Accessory: true
+  #   ArmorLevel: 1
+  #   Trade:
+  #     NoDrop: true
+  #     NoTrade: true
+  #     NoSell: true
+  #     NoCart: true
+  #     NoStorage: true
+  #     NoGuildStorage: true
+  #     NoMail: true
+  #     NoAuction: true
+  #   Script: |
+  #     bonus bBaseAtk,10;
+  #     bonus bMatk,10;
+  #     bonus bCritical,10;
+  #     autobonus "{ bonus bAspd,3; }",1,5000,BF_WEAPON;
+  #     autobonus "{ bonus bVariableCastrate,-50; }",1,5000,BF_MAGIC;
+  #     autobonus3 "{ bonus bHealPower,20; }",100,3000,"AL_HEAL","{ specialeffect2 EF_HEAL3; }";
   - Id: 2710
     AegisName: Bloody_Iron_Ball_C
     Name: Bloody Iron Ball
@@ -49929,12 +49920,11 @@ Body:
       Head_Mid: true
       Head_Top: true
     ArmorLevel: 1
-    EquipLevelMin: 50
+    EquipLevelMin: 30
     Refineable: true
     View: 492
     Script: |
-      skill "DC_DONTFORGETME",1;
-      bonus bDex,2;
+      bonus bCritical,5;
       bonus bLuk,2;
   - Id: 5506
     AegisName: Blue_Pajamas_Hat
@@ -57898,12 +57888,6 @@ Body:
       .@r = getrefine();
       bonus bInt,3;
       bonus bMatkRate,.@r;
-      if (.@r>=7) {
-         bonus2 bSkillAtk,"WM_REVERBERATION",30;
-         bonus2 bSkillUseSP,"WM_REVERBERATION",18;
-      }
-      if (.@r>=10)
-         bonus2 bSkillCooldown,"WM_METALICSOUND",-2000;
   - Id: 5965
     AegisName: Riot_Chip_J
     Name: Riot Chip
@@ -58111,7 +58095,7 @@ Body:
     Locations:
       Head_Low: true
     ArmorLevel: 1
-    EquipLevelMin: 70
+    EquipLevelMin: 30
     View: 842
     Script: |
       bonus bMdef,3;
@@ -58908,6 +58892,29 @@ Body:
     AegisName: aegis_9193
     Name: Mistress Egg
     Type: PetEgg
+
+# ===================================Ovos de Pet Custom====================================================
+
+  - Id: 9200
+    AegisName: S_Nydhog_Egg
+    Name: Ovo de Nydhog
+    Type: PetEgg
+    Buy: 20
+
+  - Id: 9201
+    AegisName: VALKYRIE_N_Egg
+    Name: Ovo de VALKYRIE
+    Type: PetEgg
+    Buy: 20
+
+  - Id: 9202
+    AegisName: EDDGA_Egg
+    Name: Ovo de EDDGA
+    Type: PetEgg
+    Buy: 20
+
+# =========================================================================================================
+
   - Id: 10001
     AegisName: Skull_Helm
     Name: Skull Helm
@@ -71900,7 +71907,7 @@ Body:
     Locations:
       Head_Low: true
     ArmorLevel: 1
-    EquipLevelMin: 60
+    EquipLevelMin: 30
     View: 1471
     Script: |
       bonus bFlee2,2;
@@ -94180,7 +94187,7 @@ Body:
     Locations:
       Head_Mid: true
     ArmorLevel: 1
-    EquipLevelMin: 70
+    EquipLevelMin: 30
     View: 1423
     Script: |
       bonus bMaxSP,50;
@@ -97442,10 +97449,10 @@ Body:
     Locations:
       Head_Low: true
     ArmorLevel: 1
-    EquipLevelMin: 80
+    EquipLevelMin: 30
     View: 1704
     Script: |
-      bonus bHealPower,5;
+      bonus bDex,2;
   - Id: 19328
     AegisName: Spider_Temp_TW
     Name: Spider's Winks
@@ -117759,16 +117766,16 @@ Body:
       Costume_Head_Top: true
       Costume_Head_Mid: true
     ArmorLevel: 1
-  - Id: 21400
-    AegisName: aegis_21400
-    Name: Costume Blue Dragon Statue
-    Type: Armor
-    Locations:
-      Costume_Head_Top: true
-      Costume_Head_Mid: true
-      Costume_Head_Low: true
-    ArmorLevel: 1
-    View: 2494
+  # - Id: 21400
+  #   AegisName: aegis_21400
+  #   Name: Costume Blue Dragon Statue
+  #   Type: Armor
+  #   Locations:
+  #     Costume_Head_Top: true
+  #     Costume_Head_Mid: true
+  #     Costume_Head_Low: true
+  #   ArmorLevel: 1
+  #   View: 2494
   - Id: 22000
     AegisName: Temporal_Str_Boots
     Name: Temporal Str Boots
@@ -147049,13 +147056,13 @@ Body:
     AegisName: Glove_Of_Wizard_BR
     Name: Magician's Gloves
     Type: Armor
-    Buy: 20
+    Buy: 2000
     Weight: 500
     Slots: 1
     Locations:
       Both_Accessory: true
     ArmorLevel: 1
-    EquipLevelMin: 80
+    EquipLevelMin: 30
     Script: |
       bonus bVariableCastrate,-5;
       bonus2 bMagicAtkEle,Ele_Fire,5;
@@ -191968,15 +191975,9 @@ Body:
     Locations:
       Armor: true
     ArmorLevel: 1
-    EquipLevelMin: 100
-    Trade:
-      NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+    EquipLevelMin: 30
+    Slots: 1
+    Refineable: true
     Script: |
       .@l = BaseLevel;
       bonus bMaxHP,1500;
@@ -191999,15 +192000,9 @@ Body:
     Locations:
       Armor: true
     ArmorLevel: 1
-    EquipLevelMin: 100
-    Trade:
-      NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+    EquipLevelMin: 30
+    Slots: 1
+    Refineable: true
     Script: |
       bonus bMaxHP,1000;
       bonus bMaxSP,250;
@@ -200123,15 +200118,9 @@ Body:
     Locations:
       Shoes: true
     ArmorLevel: 1
-    EquipLevelMin: 100
-    Trade:
-      NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+    EquipLevelMin: 30
+    Slots: 1
+    Refineable: true
     Script: |
       bonus bShortAtkRate,10;
       bonus bLongAtkRate,10;
@@ -200751,15 +200740,9 @@ Body:
     Locations:
       Shoes: true
     ArmorLevel: 1
-    EquipLevelMin: 100
-    Trade:
-      NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+    EquipLevelMin: 30
+    Slots: 1
+    Refineable: true
     Script: |
       bonus2 bMagicAddEle,Ele_All,10;
       bonus bFixedCast,-300;
@@ -208344,15 +208327,9 @@ Body:
     Locations:
       Garment: true
     ArmorLevel: 1
-    EquipLevelMin: 100
-    Trade:
-      NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+    EquipLevelMin: 30
+    Slots: 1
+    Refineable: true
     Script: |
       .@l = BaseLevel;
       bonus2 bSubEle,Ele_Neutral,20;
@@ -208375,18 +208352,15 @@ Body:
     Locations:
       Garment: true
     ArmorLevel: 1
-    EquipLevelMin: 100
+    EquipLevelMin: 30
     Trade:
       NoDrop: true
       NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+    Slots: 1
+    Refineable: true
     Script: |
       bonus2 bSubEle,Ele_Neutral,20;
-      bonus bFlee,40;
+      bonus bFlee,10;
       bonus bVariableCastrate,-15;
       bonus bAspdRate,(min(BaseLevel,150)/10);
       if (BaseLevel>=105)
@@ -217171,17 +217145,11 @@ Body:
     Name: Advanced Paradise Ring
     Type: Armor
     Locations:
-      Left_Accessory: true
+      Both_Accessory: true
     ArmorLevel: 1
-    EquipLevelMin: 100
-    Trade:
-      NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+    EquipLevelMin: 30
+    Slots: 1
+    Refineable: false
     Script: |
       bonus bAtkRate,3;
       bonus bNoCastCancel;
@@ -217210,17 +217178,11 @@ Body:
     Name: Advanced Paradise Magic Ring
     Type: Armor
     Locations:
-      Left_Accessory: true
+      Both_Accessory: true
     ArmorLevel: 1
-    EquipLevelMin: 100
-    Trade:
-      NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+    EquipLevelMin: 30
+    Slots: 1
+    Refineable: true
     Script: |
       bonus bMatkRate,3;
       bonus bNoCastCancel;
@@ -217229,17 +217191,11 @@ Body:
     Name: Advanced Paradise Necklace
     Type: Armor
     Locations:
-      Right_Accessory: true
+      Both_Accessory: true
     ArmorLevel: 1
-    EquipLevelMin: 100
-    Trade:
-      NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+    EquipLevelMin: 30
+    Slots: 1
+    Refineable: true
     Script: |
       skill "AL_HEAL",1;
       bonus bVariableCastrate,-10;
@@ -263840,3 +263796,5 @@ Body:
       bonus bMaxHP,.@r*10;
       bonus2 bSkillAtk,"SOA_EXORCISM_OF_MALICIOUS_SOUL",5+(.@r/3);
       bonus bMatk,10*(.@r/2);
+
+      

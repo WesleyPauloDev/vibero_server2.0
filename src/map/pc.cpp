@@ -16031,8 +16031,9 @@ void do_final_pc(void) {
 
 	attendance_db.clear();
 	reputation_db.clear();
-#ifdef MAP_GENERATOR
 	reputationgroup_db.clear();
+#ifdef MAP_GENERATOR
+
 #endif
 	penalty_db.clear();
 	captcha_db.clear();
@@ -16046,8 +16047,8 @@ void do_init_pc(void) {
 	pc_read_motd(); // Read MOTD [Valaris]
 	attendance_db.load();
 	reputation_db.load();
-#ifdef MAP_GENERATOR
 	reputationgroup_db.load();
+#ifdef MAP_GENERATOR
 #endif
 	captcha_db.load();
 

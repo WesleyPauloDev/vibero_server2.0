@@ -1,0 +1,25 @@
+function	script	MapExpBonus	{
+    // argumentos
+    .@map$    = getarg(0);   // nome do mapa
+    .@basepct = getarg(1);   // bônus BaseExp em %
+    .@jobpct  = getarg(2);   // bônus JobExp  em %
+
+    // só aplica se o player estiver no mapa indicado
+    if (strcharinfo(3) == .@map$ || strcharinfo(3) == instance_mapname(.@map$)) {
+        // experiência base do monstro morto
+        .@base = getmonsterinfo(killedrid, MOB_BASEEXP);
+        .@job  = getmonsterinfo(killedrid, MOB_JOBEXP);
+
+        // calcula o bônus: ex. 50 = +50% de exp
+        if (.@base > 0)
+            getexp (.@base * .@basepct / 100), 0;
+        if (.@job > 0)
+            getexp 0, (.@job * .@jobpct / 100);
+    }
+    return;
+}
+
+// -------------------------------------------------------------------
+// NPC que dispara no evento de morte e chama a função
+// -------------------------------------------------------------------
+

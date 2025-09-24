@@ -1,0 +1,73 @@
+// ======================================================
+// Função: get_daily_reset()
+// Retorna o tempo restante (em segundos) até meia-noite.
+// ======================================================
+function	script	get_daily_reset	{
+	.@hour = gettime(DT_HOUR);
+	.@min  = gettime(DT_MINUTE);
+	.@sec  = gettime(DT_SECOND);
+
+	// Segundos que já se passaram hoje
+	.@elapsed = (.@hour * 3600) + (.@min * 60) + .@sec;
+
+	// Segundos totais de um dia
+	.@day_seconds = 86400;
+
+	// Falta até meia-noite
+	return .@day_seconds - .@elapsed;
+}
+
+// ======================================================
+// Função: get_weekly_reset()
+// Retorna o tempo restante (em segundos) até domingo 00:00.
+// ======================================================
+function	script	get_weekly_reset	{
+	.@dow  = gettime(DT_DAYOFWEEK); // 0 = domingo, 1 = segunda, ..., 6 = sábado
+	.@hour = gettime(DT_HOUR);
+	.@min  = gettime(DT_MINUTE);
+	.@sec  = gettime(DT_SECOND);
+
+	// Segundos já se passaram hoje
+	.@elapsed = (.@hour * 3600) + (.@min * 60) + .@sec;
+	.@day_seconds = 86400;
+
+	// Dias restantes até domingo
+	if (.@dow == 0) {
+		// Hoje é domingo ? reset só à meia-noite do próximo domingo
+		.@days_left = 7;
+	} else {
+		.@days_left = 7 - .@dow;
+	}
+
+	// Segundos totais até domingo 00:00
+	return (.@days_left * .@day_seconds) - .@elapsed;
+}
+
+function	script	get_weekly_dayAndHour	{
+	.@dow  = gettime(DT_DAYOFWEEK); // 0 = domingo, 1 = segunda, ..., 6 = sábado
+	.@hour = gettime(DT_HOUR);
+	.@min  = gettime(DT_MINUTE);
+	.@sec  = gettime(DT_SECOND);
+
+	.@check_event = 0;
+
+	.@day = getarg(0);
+	.@hour_day = getarg(1);
+	.@minute = getarg(2);
+
+	// Segundos já se passaram hoje
+	.@elapsed = (.@hour * 3600) + (.@min * 60) + .@sec;
+	.@day_seconds = 86400;
+
+	// Dias restantes até domingo
+	if (.@dow == .@day) {		
+		if (.@hour == .@hour_day) {
+			if (.@minute == .@min) {
+				.@check_event = 1;
+			}
+		}
+	}
+
+	// Segundos totais até domingo 00:00
+	return .@check_event;
+}

@@ -1,0 +1,677 @@
+-	script	JobMaster	-1,{
+
+OnInit:
+
+	$NPCName$ = "[Mestre de Classes]";
+	$FourthClass = 1;
+	$FourthExpanded = 1;
+	$ThirdClass = 1;
+	$RebirthClass = 1;
+	$SecondExpanded = 1;
+	$BabyNovice = 1;
+	$BabyClass = 1;
+	$BabyThird = 1;
+	$BabyExpanded = 1;
+	$BabySummoner = 1;
+	$LastJob = 1;
+	$SkillPointCheck = 1;
+	$Platinum = 1;
+	$GetJobEquip = 0;	
+
+	setarray $Req_First[0],1,10;
+	setarray $Req_Second[0],1,40;
+	setarray $Req_Rebirth[0],99,50;
+	setarray $Req_Third[0],99,50;
+	setarray $Req_Fourth[0],200,70;
+	setarray $Req_Exp_NJ_GS[0],99,70;
+	setarray $Req_Exp_SNOVI[0],99,99;
+	setarray $Req_SHandler[0],200,60;
+	$SNovice = 45;
+
+	if( PACKETVER < 20161207 ) {
+		$BabyExpanded = false;
+		$BabySummoner = false;
+	}
+
+	bindatcmd "jobmaster", strnpcinfo(3)+"::OnAtcommand";	
+
+	end;
+
+OnAtcommand:
+
+	callfunc ("Job_Master_Custom");
+
+	end;
+}
+
+function	script	Can_Change_Fourth_Custom	{
+	// To change to fourth class you need to be:
+	// * Transcendent Third Class
+	if( !$FourthClass )
+		return false; // Fourth job change disabled
+	if( (eaclass()&(EAJL_THIRD|EAJL_UPPER)) != (EAJL_THIRD|EAJL_UPPER) )
+		return false; // Not Transcendent Third Class
+	if( eaclass()&EAJL_FOURTH )
+		return false; // Already Fourth Class
+	if( roclass(eaclass()|EAJL_FOURTH) < 0 )
+		return false; // Job has no Fourth Class
+	return true;
+}
+
+// Checks if the player can change to third class.
+// Note: This does not include the level checks.
+function	script	Can_Change_Third_Custom	{
+	// To change to third class you either need to be:
+	// * Second Class
+	// * Transcendent Second Class
+	// * Baby Second Class
+	if( !$ThirdClass ) {
+		debugmes "ThirdClass disabled";
+		return false;
+	} 
+	if( !(eaclass()&EAJL_2) )
+		return false; // Not second Class
+	if( eaclass()&EAJL_THIRD )
+		return false; // Already Third Class
+	if( roclass(eaclass()|EAJL_THIRD) < 0 )
+		return false; // Job has no third Class
+
+	// .@eac = eaclass();
+	// if (!(.@eac & EAJL_2)) {
+	// 	debugmes "Not second Class";
+	// 	return false; // Not second Class
+	// } 
+	// if (Class >= Job_Third_First && Class <= Job_Third_Last) {
+	// 	debugmes "Already Third Class (by ID range)";
+	// 	return false;
+	// }
+
+	// if (roclass((.@eac & ~EAJL_UPPER) | EAJL_THIRD) < 0) {
+	// 	debugmes "Job has no third Class";
+	// 	return false; // Job has no third Class
+	// } 
+	if( (eaclass()&EAJ_UPPERMASK) == EAJ_SUPER_NOVICE ) {
+		debugmes "eaclass()&EAJ_UPPERMASK) == EAJ_SUPER_NOVICE";
+		return false;
+	}
+	if( callfunc ("Is_Baby_Custom") && (!$BabyClass || !$BabyThird) ) {		
+		debugmes "Is_Baby_Custom && (!$BabyClass || !$BabyThird";
+		return false;
+	}	
+	return true;
+}
+
+function	script	Can_Rebirth_Custom	{
+	// To rebirth, you need to be:
+	// * Second Class
+	if( !$RebirthClass )
+		return false; // Rebirth disabled
+	if( !(eaclass()&EAJL_2) )
+		return false; // Not second Class
+	if( eaclass()&(EAJL_UPPER|EAJL_THIRD) )
+		return false; // Already Rebirthed/ Third Class
+	if( roclass(eaclass()|EAJL_UPPER) < 0 )
+		return false; // Job has no transcended class
+	if( callfunc ("Is_Baby_Custom") && !$BabyClass )
+		return false; // No Baby changes allowed
+	return true;
+}
+
+// Function which gives a job related item to the play_Customer
+// the items are the rewards from the original job change quests
+function	script	Get_Job_Equip_Custom	{
+	debugmes "Get_Job_Equip_Custom";
+	// Note: The item is dropping, when the player can't hold it.
+	// But that's better than not giving the item at all.
+	.@eac = eaclass();
+	if( .@eac&EAJL_FOURTH ) {
+		// Fourth Class Items
+		getitem 490087,1; // Hourglass Necklace
+	} else if( .@eac&EAJL_THIRD ) {
+		// Third Class Items
+		getitem 2795,1;	//	Green Apple Ring for every 3rd Class
+		switch(BaseJob) {
+			// BaseJob of Third Cls
+			// For Normal Third, Baby Third and Transcended Third Cls
+			case Job_Knight:
+				getitem 5746,1;	break;	//	Rune Circlet [1]
+			case Job_Wizard:
+				getitem 5753,1;	break;	//	Magic Stone Hat [1]
+			case Job_Hunter:
+				getitem 5748,1;	break;	//	Sniper Goggle [1]
+			case Job_Priest:
+				getitem 5747,1;	break;	//	Mitra [1]
+			case Job_Blacksmith:
+				getitem 5749,1;	break;	//	Driver Band [1]
+			case Job_Assassin:
+				getitem 5755,1;	break;	//	Silent Executor [1]
+			case Job_Crusader:
+				getitem 5757,1;	break;	//	Dip Schmidt Helm [1]
+			case Job_Sage:
+				getitem 5756,1;	break;	//	Wind Whisper [1]
+			case Job_Bard:
+				getitem 5751,1;	break;	//	Maestro Song's Hat [1]
+			case Job_Dancer:
+				getitem 5758,1;	break;	//	Dying Swan [1]
+			case Job_Monk:
+				getitem 5754,1;	break;	//	Blazing Soul [1]
+			case Job_Alchemist:
+				getitem 5752,1;	break;	//	Midas Whisper[1]
+			case Job_Rogue:
+				getitem 5750,1; 		//	Shadow Handicraft [1]
+				getitem 6121,1;			//	Makeover Brush
+				getitem 6122,1;	break;	//	Paint Brush
+		}
+	} else if (.@eac&EAJL_2) {
+		// Second Class (And not Third Class)
+		switch(BaseJob) {
+			// Second Class
+			case Job_Knight:
+				getitem 1163,1;	break;	//	Claymore [0]
+			case Job_Priest:
+				getitem 1522,1;	break;	//	Stunner [0]
+			case Job_Wizard:
+				getitem 1617,1;	break;	//	Survivor's Rod [0]
+			case Job_Blacksmith:
+				getitem 1360,1;	break;	//	Two-Handed-Axe [1]
+			case Job_Hunter:
+				getitem 1718,1;	break;	//	Hunter Bow [0]
+			case Job_Assassin:
+				getitem 1254,1;	break;	//	Jamadhar [0]
+			case Job_Crusader:
+				getitem 1410,1;	break;	//	Lance [0]
+			case Job_Monk:
+				getitem 1807,1;	break;	//	Fist [0]
+			case Job_Sage:
+				getitem 1550,1;	break;	//	Book [3]
+			case Job_Rogue:
+				getitem 1222,1;	break;	//	Damascus [1]
+			case Job_Alchemist:
+				getitem 1126,1;	break;	//	Saber [2]
+			case Job_Bard:
+				getitem 1907,1;	break;	//	Guitar [0]
+			case Job_Dancer:
+				getitem 1960,1;	break;	//	Whip [1]
+			case Job_Super_Novice:
+				getitem 1208,1;	break;	//	Main Gauche [4]
+			case Job_Star_Gladiator:
+				getitem 1550,1;	break;	//	Book [3]
+			case Job_Soul_Linker:
+				getitem 1617,1;	break;	//	Survivor's Rod [0]
+		}
+	} else {
+		// Neither Second or Third Cls
+		// => First Cls or not covered by the switch
+		switch(BaseClass) {
+			// First Class
+			case Job_Swordman:
+				getitem 1101,1;
+				getitem 1155,1;
+				break;
+			case Job_Mage:
+				getitem 1601,1;	break;	//	Rod [4]
+			case Job_Archer:
+				getitem 1701,1;
+				getitem 1750,1000;
+				getitem 1751,1000;
+				getitem 1752,1000;
+				break;	//	Composite Bow [4]
+			case Job_Acolyte:
+				getitem 1501,1;
+				getitem 1601,1;
+				break;
+			case Job_Merchant:
+				getitem 1301,1;	break;	//	Axe [4]
+			case Job_Thief:
+				getitem 1208,1;	break;	//	Main Gauche [4]
+			case Job_Gunslinger:
+				getitem 13116,1;
+				getitem 13180,1;
+				getitem 13182,1;
+				getitem 13222,1000;
+				break;	//	Six Shooter [2]
+			case Job_Ninja:
+				getitem 13010,1;
+				getitem 13250,100;
+				getitem 13258,100;
+				break;
+		}
+	}
+	return;
+}
+
+// Executes the actual jobchange and closes.
+function	script	Job_Change_Custom	{
+	debugmes "Job_Change_Custom";
+	.@previous_class = Class;
+	.@to_cls = getarg(0);
+	next;
+	mes $NPCName$;
+	mes "Você agora é " + callfunc("F_InsertArticle", jobname(.@to_cls)) + "!";
+	if (.@to_cls == Job_Novice_High && $LastJob)
+		lastJob = Class; // Saves the lastJob for rebirth
+	jobchange .@to_cls;
+	if (.@to_cls == Job_Novice_High)
+		resetlvl(1);
+	else if (.@to_cls == Job_Baby) {
+		resetstatus;
+		resetskill;
+		set SkillPoint,0;
+	}
+	specialeffect2 EF_ANGEL2;
+	specialeffect2 EF_ELECTRIC;
+	if (.@previous_class != Class) {
+		if ($Platinum)
+			callfunc "F_GetPlatinumSkills";
+		callfunc ("Get_Job_Equip_Custom");
+	}
+	close; // Always closes after the change
+}
+
+
+function	script	Confirm_Change_Custom	{
+	debugmes "Confirm_Change_Custom";
+	// Player confirms he want to change into .@class
+	.@class = getarg(0, -1);
+	.@back = getarg(1, false);
+	if( .@class < 0 || eaclass(.@class) == -1 ) {
+		mes "Erro de classe desconhecido.";
+		close;
+	}
+	mes "Você quer mudar para a classe ^0055FF"+jobname(.@class)+"^000000?";
+	.@job_option$ = " ~ Mudar para a classe ^0055FF"+jobname(.@class)+"^000000";
+
+	if( .@class == Job_Novice_High)
+		.@job_option$ = " ~ ^0055FFRenascer^000000";
+
+	if (select(.@job_option$+": ~ ^777777" + 
+			((.@back) ?"Voltar" : "Cancelar") + "^000000") == 1) {
+		callfunc ("Job_Change_Custom", .@class);
+	}
+
+	if (!.@back)
+		close; // "Cancel" pressed
+	return;
+}
+
+function	script	Job_Menu_Custom	{
+	debugmes "Job_Menu_Custom";
+
+	// getarg(0) is the .@job_opt array holding all available job changes.
+	while(true) {
+		.@opt_cnt =  getarraysize(getarg(0));
+		if( .@opt_cnt <= 0 ) {
+			mes "Não ha mais classes disponiveis.";
+			close;
+		}		
+
+		.@selected = 0; // Just a single job class given, no select needed
+		if (.@opt_cnt > 1) {
+			// Multiple job classes given. Select one and save it to .@class
+			// After that confirm .@class
+			mes "Selecione uma classe.";
+			.@menu$ = "";
+			for (.@i = 0; .@i < .@opt_cnt; .@i++) {
+				if( getelementofarray(getarg(0), .@i) == Job_Novice_High)
+					.@jobname$ = "^0055FFRenascer^000000";
+				else
+					.@class_id = getelementofarray(getarg(0), .@i);
+
+					switch (.@class_id) {
+						// Primeiras classes
+						case Job_Novice:         .@jobname$ = "Aprendiz"; break;
+						case Job_Swordman:       .@jobname$ = "Espadachim"; break;
+						case Job_Mage:           .@jobname$ = "Mago"; break;
+						case Job_Archer:         .@jobname$ = "Arqueiro"; break;
+						case Job_Acolyte:        .@jobname$ = "Acolito"; break;
+						case Job_Merchant:       .@jobname$ = "Mercador"; break;
+						case Job_Thief:          .@jobname$ = "Gatuno"; break;
+
+						// Segundas classes
+						case Job_Knight:         .@jobname$ = "Cavaleiro"; break;
+						case Job_Priest:         .@jobname$ = "Sacerdote"; break;
+						case Job_Wizard:         .@jobname$ = "Feiticeiro"; break;
+						case Job_Blacksmith:     .@jobname$ = "Ferreiro"; break;
+						case Job_Hunter:         .@jobname$ = "Caçador"; break;
+						case Job_Assassin:       .@jobname$ = "Algoz"; break;
+						case Job_Crusader:       .@jobname$ = "Templario"; break;
+						case Job_Monk:           .@jobname$ = "Monge"; break;
+						case Job_Sage:           .@jobname$ = "Sabio"; break;
+						case Job_Rogue:          .@jobname$ = "Mercenario"; break;
+						case Job_Alchemist:      .@jobname$ = "Alquimista"; break;
+						case Job_Bard:           .@jobname$ = "Bardo"; break;
+						case Job_Dancer:         .@jobname$ = "Odalisca"; break;
+
+						// Transclasses
+						case Job_Lord_Knight:    .@jobname$ = "Lorde Cavaleiro"; break;
+						case Job_High_Priest:    .@jobname$ = "Sumo Sacerdote"; break;
+						case Job_High_Wizard:    .@jobname$ = "Arcano"; break;
+						case Job_Whitesmith:     .@jobname$ = "Mestre Ferreiro"; break;
+						case Job_Sniper:         .@jobname$ = "Atirador de Elite"; break;
+						case Job_Assassin_Cross: .@jobname$ = "Algoz Transcendente"; break;
+						case Job_Paladin:        .@jobname$ = "Paladino"; break;
+						case Job_Champion:       .@jobname$ = "Champion"; break;
+						case Job_Professor:      .@jobname$ = "Professor"; break;
+						case Job_Stalker:        .@jobname$ = "Sicario"; break;
+						case Job_Creator:        .@jobname$ = "Bioquimico"; break;
+						case Job_Clown:          .@jobname$ = "Menestrel"; break;
+						case Job_Gypsy:          .@jobname$ = "Cigana"; break;
+
+						// Classes 3rd Job
+						case Job_Rune_Knight:       .@jobname$ = "Cavaleiro Runico"; break;
+						case Job_Warlock:           .@jobname$ = "Feiticeiro Arcano"; break;
+						case Job_Ranger:            .@jobname$ = "Guarda"; break;
+						case Job_Arch_Bishop:       .@jobname$ = "Arcebispo"; break;
+						case Job_Mechanic:          .@jobname$ = "Mecanico"; break;
+						case Job_Guillotine_Cross:  .@jobname$ = "Carrasco"; break;
+
+						// Rebellion, Doram e outros
+						case Job_Rebellion:      .@jobname$ = "Rebelde"; break;
+						case Job_Summoner:       .@jobname$ = "Doram"; break;
+
+						// Classe de renascimento
+						case Job_Novice_High:    .@jobname$ = "Renascimento"; break;
+					
+						default:                 .@jobname$ = jobname(.@class_id); break;
+					}
+
+				.@menu$ = .@menu$ + " ~ " + .@jobname$ + ":";
+			}
+			.@menu$ = .@menu$+" ~ ^777777Cancelar^000000";
+			.@selected = select(.@menu$) - 1;
+			if( .@selected < 0 || .@selected >= .@opt_cnt )
+				close;
+			next;
+			mes $NPCName$;
+		}
+		
+		.@class = getelementofarray(getarg(0), .@selected);
+		if ((.@class == Job_Super_Novice || .@class == Job_Super_Baby) &&
+				BaseLevel < $SNovice) {
+			// Special Level Requirement because Super Novice and
+			// Super Baby can both be selected in one of the first class
+			// changes. That's why the Level Requirement is after and not before
+			// the selection.
+			mes "é necessario ter nivel base " + $SNovice +
+    		" para se tornar um " + jobname(.@class) + ".";
+
+			return;
+		}
+		// Confirm the Class
+		callfunc ("Confirm_Change_Custom", .@class, .@opt_cnt > 1);
+		next;
+		mes $NPCName$;
+		break;
+	}
+	return;
+}
+
+// addJobOptions is essentially the same like
+// setarray .@array[getarraysize(.@array)],opt1,opt2,...;
+// It's just easier to read, since we're using it very often
+function	script	Job_Options_Custom	{
+	debugmes "Job_Options_Custom";
+	.@argcount = getargcount();
+	.@arr_size = getarraysize(getarg(0));
+	for( .@i = 1; .@i < .@argcount; .@i++) {
+		setarray getelementofarray(getarg(0), .@arr_size++),getarg(.@i);
+	}
+	return getelementofarray(getarg(0), .@arr_size - 1);
+}
+
+function	script	Job_Master_Custom	{
+	debugmes "job_master";	
+	
+	callfunc("Check_Ridings_Custom");
+	callfunc("Check_SkillPoints_Custom");
+	
+	// initialisation
+	mes $NPCName$;
+	.@eac = eaclass();
+	.@fourth_possible = callfunc ("Can_Change_Fourth_Custom");
+	.@third_possible = callfunc ("Can_Change_Third_Custom");
+	.@rebirth_possible = callfunc ("Can_Rebirth_Custom");
+	.@first_eac = .@eac&EAJ_BASEMASK;
+	.@second_eac = .@eac&EAJ_UPPERMASK;
+	
+	// Note: These are already set in pc.cpp
+	// BaseClass = roclass(.@eac&EAJ_BASEMASK) which is the players First Class
+	// BaseJob = roclass(.@eac&EAJ_UPPERMASK) which is the players Second Class
+	//dispbottom "Debug: eac ("+.@eac+"), third ("+.@third_possible+"), rebirth("+.@rebirth_possible+"), BaseClass ("+BaseClass+"), BaseJob ("+BaseJob+")";
+	
+	// From here on the jobmaster checks the current class
+	// and fills the array `.@job_opt` with possible
+	// job options for the player.
+	
+	if( .@rebirth_possible ) {
+		debugmes "rebirth_possible";
+		// Rebirth option (displayed on the top of the menu)
+		callfunc("Require_Level_Custom", $Req_Rebirth[0], $Req_Rebirth[1]);		
+		callfunc("Job_Options_Custom", .@job_opt, Job_Novice_High);
+	}
+	if( .@third_possible ) {
+		debugmes "third_possible";
+		// Third Job change (displayed below rebirth)
+		callfunc("Require_Level_Custom", $Req_Third[0], $Req_Third[1]);
+		callfunc("Job_Options_Custom", .@job_opt, roclass(.@eac|EAJL_THIRD));
+	}
+	if( .@fourth_possible ) {
+		debugmes "fourth_possible";
+		// Fourth Job change (displayed below rebirth)
+		// Require_Level($Req_Fourth[0], $Req_Fourth[1]);
+		callfunc("Require_Level_Custom", $Req_Fourth[0], $Req_Fourth[1]);
+		// Job_Options(.@job_opt, roclass(.@eac|EAJL_FOURTH));
+		callfunc("Job_Options_Custom", .@job_opt, roclass(.@eac|EAJL_FOURTH));
+	}
+	
+	if ($SecondExpanded && 
+		(.@eac&EAJ_UPPERMASK) == EAJ_SUPER_NOVICE && // is Super Novice
+		!(eaclass()&EAJL_THIRD) ) {	
+			debugmes "SecondExpanded";			 	// not already Expanded SN
+			// 	// (Baby) Super Novice to Expanded (Baby) Super Novice
+			if( ! callfunc ("Is_Baby_Custom", .@eac) || ($BabyClass && $BabyExpanded) ) {
+						// $BabyClass & $BabyExpanded must be enabled if the is a baby
+						// Require_Level(.Req_Exp_SNOVI[0], .Req_Exp_SNOVI[1]);
+				callfunc("Require_Level_Custom", $Req_Exp_SNOVI[0], $Req_Exp_SNOVI[1]);
+						// Job_Options(.@job_opt,roclass(.@eac|EAJL_THIRD)); // Expanded SN is "third" cls
+				callfunc("Job_Options_Custom", .@job_opt,roclass(.@eac|EAJL_THIRD));
+			}
+		}
+		
+	// // babies don't get to become 4th jobs
+	if ($FourthExpanded && .@eac == EAJ_REBELLION) {
+		debugmes "EAJ_REBELLION";	
+		// Require_Level($Req_Fourth[0], $Req_Fourth[1]);
+		callfunc("Require_Level_Custom", $Req_Fourth[0], $Req_Fourth[1]);
+		// Job_Options(.@job_opt, roclass(EAJ_NIGHT_WATCH));
+		callfunc("Job_Options_Custom", .@job_opt, roclass(EAJ_NIGHT_WATCH));
+	}
+	
+	
+	if ($FourthExpanded && .@eac == EAJ_KAGEROUOBORO) {
+		debugmes "EAJ_KAGEROUOBORO";
+		// Require_Level($Req_Fourth[0], $Req_Fourth[1]);
+		callfunc("Require_Level_Custom", $Req_Fourth[0], $Req_Fourth[1]);
+		// Job_Options(.@job_opt, roclass(EAJ_SHINKIRO_SHIRANUI));
+		callfunc("Job_Options_Custom", .@job_opt, roclass(EAJ_SHINKIRO_SHIRANUI));
+	}
+	
+	if ($FourthExpanded && .@eac == EAJ_SUPER_NOVICE_E) {
+		debugmes "EAJ_SUPER_NOVICE_E";
+		callfunc("Require_Level_Custom",$Req_Fourth[0], $Req_Fourth[1]);
+		callfunc("Job_Options_Custom", .@job_opt, roclass(EAJ_HYPER_NOVICE));
+	}
+	
+	if ($FourthExpanded && .@eac == EAJ_SUMMONER) {
+		debugmes "EAJ_SUMMONER";
+		callfunc("Require_Level_Custom",$Req_SHandler[0], $Req_SHandler[1]);
+		callfunc("Job_Options_Custom", .@job_opt, roclass(EAJ_SPIRIT_HANDLER));
+	}		
+	
+	if ($SecondExpanded && 
+		((.@eac&(~EAJL_BABY)) == EAJ_NINJA || 		// is (Baby) Ninja
+		(.@eac&(~EAJL_BABY)) == EAJ_GUNSLINGER)) {	// is (Baby) Gunslinger
+			debugmes "SecondExpanded BABY Ninja/Gunslinger";
+		// (Baby) Ninja to (Baby) Kagerou / Oboro
+		// (Baby) Gunslinger to (Baby) Rebellion
+		if( !callfunc("Is_Baby_Custom", .@eac) || ($BabyClass && $BabyExpanded) ) {
+			debugmes "BabyClass && BabyExpanded";
+			// $BabyClass & $BabyExpanded must be enabled if the is a baby
+			callfunc("Require_Level_Custom", $Req_Exp_NJ_GS[0], $Req_Exp_NJ_GS[1]);
+			// Kagerou, Oboro, Rebellion are considered as a 2-1 class
+			callfunc("Job_Options_Custom", .@job_opt, roclass(.@eac|EAJL_2_1));
+		}
+	}	
+	// Player is Job_Novice, Job_Novice_High or Job_Baby
+	
+	if (.@first_eac == EAJ_NOVICE && .@second_eac != EAJ_SUPER_NOVICE) {
+		debugmes "first_eac";
+		// MAPID_NOVICE, MAPID_SUPER_NOVICE, MAPID_NOVICE_HIGH, MAPID_BABY
+		callfunc("Require_Level_Custom",$Req_First[0], $Req_First[1]);
+		switch(Class) {
+			case Job_Novice:
+				debugmes "Job_Novice";
+				// First job change				
+				callfunc("Job_Options_Custom", .@job_opt,Job_Swordman,
+					Job_Mage, Job_Archer, Job_Acolyte, Job_Merchant, Job_Thief,
+					Job_Super_Novice, Job_Taekwon, Job_Gunslinger, Job_Ninja);
+				mes "[Mestre de Classes]";
+				if( $BabyNovice ) {
+					debugmes "BabyNovice";
+					callfunc("Job_Options_Custom", .@job_opt, Job_Baby);
+				}
+				break;
+			case Job_Novice_High:						
+				// Job change after rebirth
+				if( $LastJob && lastJob ) {
+					debugmes "Job_Novice_High with lastJob";
+					callfunc("Job_Options_Custom", .@job_opt,
+						roclass((eaclass(lastJob)&EAJ_BASEMASK)|EAJL_UPPER));
+					
+				} else {
+					debugmes "Job_Novice_High without lastJob";
+					callfunc("Job_Options_Custom", .@job_opt, 
+						Job_Swordman_High, Job_Mage_High, Job_Archer_High,
+						Job_Acolyte_High, Job_Merchant_High, Job_Thief_High);
+				}
+				break;
+			case Job_Baby:
+				if( !$BabyClass ) {
+					debugmes "!$BabyClass";
+					break;
+				}
+				debugmes "Job_Baby";
+				// First job change as a baby
+				callfunc("Job_Options_Custom", .@job_opt, Job_Baby_Swordman, Job_Baby_Mage,
+					Job_Baby_Archer,Job_Baby_Acolyte, Job_Baby_Merchant,
+					Job_Baby_Thief);
+				if( $BabyExpanded ) {
+					debugmes "BabyExpanded";
+					callfunc("Job_Options_Custom", .@job_opt, Job_Super_Baby, Job_Baby_Taekwon,
+						Job_Baby_Gunslinger, Job_Baby_Ninja);
+				}
+				if( $BabySummoner ) {
+					debugmes "BabySummoner";
+					callfunc("Job_Options_Custom", .@job_opt, Job_Baby_Summoner);
+				}
+				break;
+			default:
+				mes "Ocorreu um erro.";
+				close;
+		}
+	} else if( callfunc("Is_First_Cls_Custom", .@eac) || 				// First Class
+			callfunc("Is_First_Cls_Custom", .@eac&(~EAJL_UPPER)) ||	// Trans. First Cls
+			($BabyClass && callfunc("Is_First_Cls_Custom", .@eac&(~EAJL_BABY))) ) {	// Baby First Cls
+		debugmes "Is_First_Cls_Custom";
+		// Player is First Class (not Novice)
+		// most jobs should have two options here  (2-1 and 2-2)
+		.@class1 = roclass(.@eac|EAJL_2_1); // 2-1
+		.@class2 = roclass(.@eac|EAJL_2_2); // 2-2
+		// dispbottom "Debug: Classes: class1 ("+.@class1+"), class2 ("+.@class2+")";
+		if($LastJob && lastJob && (.@eac&EAJL_UPPER)) {
+			debugmes "Is_First_Cls_Custom with lastJob";
+			// Player is rebirth Cls and linear class changes are enforced
+			callfunc("Require_Level_Custom", $Req_Second[0], $Req_Second[1]);
+			callfunc("Job_Options_Custom", .@job_opt, lastJob + Job_Novice_High);
+		} else {
+			debugmes "Is_First_Cls_Custom without lastJob";
+			// Class is not enforced, player can decide.
+			if( .@class1 > 0 ) { // 2-1
+				debugmes "class1 > 0";
+				callfunc("Require_Level_Custom", $Req_Second[0], $Req_Second[1]);
+				callfunc("Job_Options_Custom", .@job_opt, .@class1);
+			}
+			if( .@class2 > 0 ) { // 2-2
+				debugmes "class2 > 0";
+				callfunc("Require_Level_Custom", $Req_Second[0], $Req_Second[1]);
+				callfunc("Job_Options_Custom", .@job_opt, .@class2);
+			}
+		}
+	}	
+	
+	// Displaying the Job Menu defined by .@job_opt.
+	// .@job_opt should not be changed below this line.
+	callfunc("Job_Menu_Custom", .@job_opt);	
+	return;
+}
+
+function	script	Require_Level_Custom	{
+	debugmes "Require_Level_Custom";	
+	if (BaseLevel < getarg(0) || JobLevel < getarg(1)) {
+		.@blvl = getarg(0) - BaseLevel;
+		.@jlvl = getarg(1) - JobLevel;
+		mes "Requisitos de nivel:";
+		mes ((getarg(0)>1)? 
+			"^bb0000"+getarg(0)+"^000000 (^bb0000Base^000000) / ":"")+"^00bb00"+
+			getarg(1)+"^000000 (^00bb00Classe^000000)";
+		mes "Você precisa de " +
+			((.@blvl > 0) ? "^bb0000"+.@blvl+"^000000 niveis de base a mais" + 
+				((.@jlvl > 0) ? " e " : "") : "") +
+			((.@jlvl > 0) ? "^00bb00"+.@jlvl+"^000000 niveis de classe a mais" : "") +
+			" para continuar.";
+		close;
+	}
+	return;
+}
+
+// Checks if the given eac is a baby class
+function	script	Is_Baby_Custom	{
+	return ((getarg(0, eaclass())&EAJL_BABY)>0);
+}
+
+// Checks if the player can change to fourth class.
+// Note: This does not include the level checks.
+
+// Checks if the given eac is a first class
+function	script	Is_First_Cls_Custom	{
+	return (getarg(0) <= EAJ_TAEKWON);
+}
+
+function	script	Check_Ridings_Custom	{
+	// Nota: Por que sempre devemos verificar se esta montado:
+	// Montarias são consideradas como outra classe,
+	// o que tornaria esse NPC mais complexo para lidar
+	// com esses casos especiais.
+	if (checkfalcon() || checkcart() || checkriding() || ismounting()) {
+		mes "Por favor, remova o seu " +
+			((checkfalcon()) ? "falcão" : "") +
+			((checkcart()) ? "carrinho" : "") +
+			((checkriding()) ? "Peco Peco" : "") +
+			((ismounting()) ? "montaria" : "") +
+			" antes de continuar.";
+		close;
+	}
+	return;
+}
+
+function	script	Check_SkillPoints_Custom	{
+	if ($SkillPointCheck && SkillPoint) {
+		mes "Por favor, use todos os seus pontos de habilidade antes de continuar.";
+		close;
+	}
+	return;
+}
+
+
+
+

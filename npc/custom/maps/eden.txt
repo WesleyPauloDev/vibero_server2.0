@@ -2,14 +2,32 @@ moc_para01,30,10,0	warp	edenwarp01	1,1,prontera,155,188
 
 moc_para01,24,22,5	duplicate(Servico Kafra)	Serviço Kafra#eden	113
 
-moc_para01,37,22,4	shop	Loja de Utilidades#eden	850,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,578:200,12414:500,645:1000,656:1500,657:2000,610:5000
+moc_para01,37,22,4	shop	Loja de Utilidades#eden	850,643:100,512:100,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,578:200,12414:500,645:1000,656:1500,657:2000,610:5000
 
 moc_para01,24,13,5	duplicate(Healer)	Curandeira#eden	640
 
+// ----------------------- Está em npc/custom/barter.yml -----------------------
+moc_para01,24,35,5	script	Loja do Éden	640,{
+	mes "[Loja do Éden]";
+    mes "Escolha a categoria de itens que deseja ver:";
+    next;
 
+	switch(select("Armas:Equipamentos:Sair")) {
+        case 1:
+            callshop "weapons_eden"; // Loja de armas
+            end;
 
+		case 2:
+			callshop "equipments_eden"; // Loja de equipamentos
+			end;
 
-// ----------------------- Quests do Éden -----------------------
+		default:
+			mes "Volte sempre!";
+			close;
+    }
+}
+
+// ----------------------- Quests do Éden ---------------------------------------------------------
 // ----------------------- Contador de kill está em npc/custom/quests/quest_eden.txt -----------------------
 moc_para01,27,35,5	script	Secretário do Éden	810,{
 
@@ -46,7 +64,7 @@ moc_para01,27,35,5	script	Secretário do Éden	810,{
 				mes "Aqui está sua recompensa.";
 				getexp @eden_quest_exp,0;
 				Zeny += @eden_quest_zeny;
-				getitem 675, @eden_quest_medals;
+				getitem 674, @eden_quest_medals;
 				dispbottom "Você Recebeu: "+@eden_quest_exp+" EXP / "+@eden_quest_zeny+" Zeny / "+@eden_quest_medals+" Medalhas";
 				
 				// Limpa dados da missão
@@ -241,4 +259,7 @@ L_IniciarMissao:
 OnInit:
 	end;
 }
+
+
+
 

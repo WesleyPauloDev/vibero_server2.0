@@ -1,0 +1,90 @@
+//=============================================================
+// NPC: Reborn Master
+// Função: Resetar Stats/Skills, reduzir EXP e aumentar Drop
+//=============================================================
+prontera,172,226,4	script	Reborn Master	4_M_GUNSLINGER,{
+	// ===== Configurações =====
+	.@req_base = 1;        // Nível base mínimo
+	.@req_job  = 1;        // Nível de classe mínimo
+	.@exp_penalty = 10;  // -20% EXP
+    .@drop_bonus = 10;   // +20% DROP
+    lastJob = Class;
+
+	// #reborn_exp  = 0;
+    // #reborn_drop = 0;
+	// add_reputation_points(7, -1000);
+
+	mes "[Reborn Master]";
+
+	if(get_reputation_points(7) < 4000) {
+		mes "Eu posso guiá-lo pelo renascimento.";
+		mes "Você perderá seus status e habilidades, voltara ao nível 1, mas ganhará ^00FF00"
+			+.@drop_bonus * 2 +"%^000000 de taxa de drop e reduzira ^FF0000"
+			+.@exp_penalty * 2 +"%^000000 da ganho de experiência.";
+		next;
+
+		if (BaseLevel < .@req_base || JobLevel < .@req_job) {
+			mes "Você precisa ter pelo menos Nível Base "+.@req_base+
+				" e Nível de Classe "+.@req_job+" para renascer.";
+			close;
+		}
+
+		if (select("Quero renascer","Cancelar") == 2) close;
+
+		// Confirmação
+		mes "[Reborn Master]";
+		mes "Tem certeza? Isso não pode ser desfeito.";
+		if (select("Sim, estou pronto","Não, cancelar") == 2) close;
+
+		// ===== Aplicar renascimento =====
+		resetstatus;      // Reseta atributos
+		resetskill;       // Reseta habilidades
+		resetlvl 1;  
+		jobchange Job_Novice_High;  // Vira Noviço T.
+
+		setpcblock(0,1); // evita movimentos durante ajustes
+
+		// Guarda em variáveis de personagem
+		#reborn_flag = 1;
+		#reborn_exp  = #reborn_exp + .@exp_penalty;
+		#reborn_drop = #reborn_drop + .@drop_bonus;
+		add_reputation_points(7, -1000);	
+
+		bonus2 bExpAddRace,RC_All,-.@exp_penalty;
+		bonus2 bExpAddClass,Class_All,-.@exp_penalty;
+		bonus2 bDropAddRace,RC_All,.@drop_bonus;
+		bonus2 bDropAddClass,Class_All,.@drop_bonus;
+
+		specialeffect2 EF_ANGEL2;
+		specialeffect2 EF_ELECTRIC;
+
+		setpcblock(0,0);
+
+		mes "[Reborn Master]";
+		mes "Parabéns, você renasceu!";
+		close;
+	} else {
+		mes "Você já atingiu máximo de Reborn!";
+		close;
+	}
+}
+
+// ==============================================
+// Reaplicar os bônus em login, caso o char já tenha renascido
+-	script	RebornLogin	-1,{
+    OnPCLoginEvent:
+		
+		if(#reborn_drop > 0) {
+			mes "[RebornMaster]";
+			mes "Você tem bonus de drop de "+#reborn_drop+"% de Reborn.";
+
+			close2;
+
+			bonus2 bExpAddRace,RC_All,-#reborn_exp;
+			bonus2 bExpAddClass,Class_All,-#reborn_exp;
+			bonus2 bDropAddRace,RC_All,#reborn_drop;
+			bonus2 bDropAddClass,Class_All,#reborn_drop;
+		}
+		
+    end;
+}

@@ -8142,6 +8142,44 @@ ACMD_FUNC(mobinfo)
 	return 0;
 }
 
+/*==========================================
+ * Custom Drop Rate
+ * originally by [Wesley]
+ *------------------------------------------*/
+ACMD_FUNC(droprate)
+{
+    int mob_id, item_id;
+    if (sscanf(message, "%d %d", &mob_id, &item_id) < 2) {
+        clif_displaymessage(fd, "Uso: @droprate <mobid> <itemid>");
+        return -1;
+    }
+
+    std::shared_ptr<s_mob_db> mob = mob_db.find(mob_id);
+    if (!mob) {
+        clif_displaymessage(fd, "Monstro inválido.");
+        return -1;
+    }
+
+    for (const auto& drop : mob->dropitem) {
+        if (drop->nameid == item_id) {
+            int32 drop_modifier = 100;
+#ifdef RENEWAL_DROP
+            drop_modifier = pc_level_penalty_mod(sd, PENALTY_DROP, mob);
+#endif
+            int32 final_rate = mob_getdroprate(sd, mob, drop->rate, drop_modifier);
+            char buf[CHAT_SIZE_MAX];
+            snprintf(buf, sizeof(buf), "Drop final de %d para %s: %.2f%%",
+                     item_id, mob->jname.c_str(), (float)final_rate / 100);
+            clif_displaymessage(fd, buf);
+            return 0;
+        }
+    }
+
+    clif_displaymessage(fd, "Este monstro não dropa esse item.");
+    return 0;
+}
+
+
 /*=========================================
 * @showmobs by KarLaeda
 * => For 15 sec displays the mobs on minimap
@@ -11614,7 +11652,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(autoloot),
 		ACMD_DEF(autolootitem),
 		ACMD_DEF(autoloottype),
-		ACMD_DEF(mobinfo),
+		ACMD_DEF(mobinfo),		
 		ACMD_DEF(exp),
 		ACMD_DEF(version),
 		ACMD_DEF(mutearea),
@@ -11656,6 +11694,9 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(hominfo),
 		ACMD_DEF(homstats),
 		ACMD_DEF(homshuffle),
+
+		ACMD_DEF(droprate),
+
 		ACMD_DEF(showmobs),
 		ACMD_DEF(feelreset),
 		ACMD_DEF(hatereset),

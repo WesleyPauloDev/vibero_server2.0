@@ -18,6 +18,11 @@
 	.@Price = 0;	// Zeny required for heal
 	.@Buffs = 1;	// Also buff players? (1: yes / 0: no)
 	.@Delay = 3;	// Heal delay, in seconds
+	.@time = 300000;	// Heal delay, in seconds
+
+	if (getgroupid() != 0) {
+		.@time = 600000;
+	}	
 
 	if (@HD > gettimetick(2))
 		end;
@@ -35,23 +40,29 @@
 	if (.@Buffs) {
 		// Aumentar Agilidade
 		specialeffect2 EF_INCAGILITY;
-		sc_start SC_INCREASEAGI,600000,10;
+		sc_start SC_INCREASEAGI,.@time,10;
 
 		// Benção
 		specialeffect2 EF_BLESSING;
-		sc_start SC_BLESSING,600000,10;
+		sc_start SC_BLESSING,.@time,10;
 
-		// Impositio Manus
-		sc_start SC_IMPOSITIO,600000,5;
+		if (getgroupid() != 0) {
 
-		// Kyrie Eleison
-		sc_start SC_KYRIE,600000,10;
+			// Impositio Manus
+			sc_start SC_IMPOSITIO,.@time,5;
 
-		// Glória
-		sc_start SC_GLORIA,600000,5;
+			// Kyrie Eleison
+			sc_start SC_KYRIE,.@time,10;
 
-		// Magnificat
-		sc_start SC_MAGNIFICAT,600000,5;
+			// Glória
+			sc_start SC_GLORIA,.@time,5;
+
+			// Magnificat
+			sc_start SC_MAGNIFICAT,.@time,5;
+
+			// Consertar todos os itens equipados um por um
+			atcommand("@repairall");
+		}
 	}
 	if (.@Delay)
 		@HD = gettimetick(2) + .@Delay;

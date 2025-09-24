@@ -1,0 +1,90 @@
+function	script	refinar_equipamentos	{
+
+    set .@menu$, "";
+    set .@menuCount, 0;
+
+    set .@equipId[0], EQI_HEAD_TOP;
+    set .@equipId[1], EQI_HEAD_MID;
+    set .@equipId[2], EQI_HEAD_LOW;
+    set .@equipId[3], EQI_ARMOR;
+    set .@equipId[4], EQI_HAND_R;
+    set .@equipId[5], EQI_HAND_L;
+    set .@equipId[6], EQI_GARMENT;
+    set .@equipId[7], EQI_SHOES;
+    set .@equipId[8], EQI_ACC_L;
+    set .@equipId[9], EQI_ACC_R;
+
+    for (.@i = 0; .@i < 10; .@i++) {
+        if (.@i == 1 || .@i == 2 || .@i == 8 || .@i == 9) continue;
+        if (getequipid(.@equipId[.@i]) > 0) {
+
+            if (getequiprefinerycnt(.@equipId[.@i]) >= 7) continue;
+            
+            if (.@equipId[.@i] == 6) set .@slotName$, "Topo";
+            else if (.@equipId[.@i] == 7) set .@slotName$, "Armadura";
+            else if (.@equipId[.@i] == 9) set .@slotName$, "Mão Direita";
+            else if (.@equipId[.@i] == 8) set .@slotName$, "Mão Esquerda";
+            else if (.@equipId[.@i] == 3) set .@slotName$, "Manto";
+            else if (.@equipId[.@i] == 2) set .@slotName$, "Botas";
+            else set .@slotName$, "Outro";
+
+            set .@menu$, .@menu$ + getitemname(getequipid(.@equipId[.@i])) +" [" + .@slotName$ + "]" + ":";
+            set .@menuIndex[.@menuCount], .@i;
+            set .@menuCount, .@menuCount + 1;
+        } else {
+            continue;
+        }
+    }
+    
+    if (.@menu$ == "") {
+        mes "[Refinador Especial]";
+        mes "Você não tem nenhum item refinável!";
+        close;
+    }
+
+    mes "[Refinador Especial]";
+    mes "Escolha um equipamento para refinar:";
+
+    set .@choice, select(.@menu$) - 1;
+    
+    if (.@choice < 0 || .@choice >= .@menuCount) close;
+
+    set .@realSlot, .@menuIndex[.@choice];
+    set .@itemid, getequipid(.@equipId[.@realSlot]);
+
+    mes "Deseja refinar o item ^0055FF" + getitemname(.@itemid) + "^000000?";
+    .@refineLvl = getequiprefinerycnt(.@equipId[.@realSlot]);
+
+    // Chance base = 100 - (nível de refino * 10)
+    .@chance = 10 - .@refineLvl;
+
+    if (.@chance < 0) .@chance = 0; // nunca abaixo de 0%
+
+    // Sorteio aleatório de 1 a 100
+    .@roll = rand(1,10);
+
+    mes "Chance de Sucesso: " + .@chance + "0%";
+
+    if (select("Sim:Não") == 1) {        
+
+        if (.@roll <= .@chance) {
+            successrefitem(.@equipId[.@realSlot]);
+            specialeffect2 EF_REFINEOK;
+            mes "O item foi refinado com sucesso!";
+        } else {
+            specialeffect2 EF_REFINEFAIL;
+            mes "O refino falhou!";
+        }
+        close;
+    } else {
+        mes "Operação cancelada.";
+        close;
+    }
+    return;
+}
+
+
+
+
+
+

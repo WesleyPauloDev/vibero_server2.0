@@ -1,0 +1,102 @@
+//===========================================================
+//  Evento Boss Global – Quarta e Sexta às 20:00
+//  Comando: @evento (teleporta se ativo)
+//===========================================================
+
+-	script	GlobalBossCtrl	-1,{
+
+OnInit:
+    .npc_name$ = strnpcinfo(3);           // guarda o nome do NPC
+    .map$      = "boss_global";
+    .rewardID  = 501;
+    .rewardQty = 5;
+    .active    = 0;
+
+    // Checa a cada minuto se precisa iniciar
+	initnpctimer;
+    end;
+
+OnTimer10000:
+    // verifica quarta (3) ou sexta (5) às 20h
+    .@w1 = callfunc("get_weekly_dayAndHour", 3, 20, 00);
+    .@w2 = callfunc("get_weekly_dayAndHour", 5, 20, 00);
+	
+    if ((.@w1 || .@w2) && .active == 0) {   
+        disablenpc "Recompensa do Boss";     
+		.active = 1;
+		stopnpctimer;
+        announce "[Evento Boss Global] Começa em 5 minutos! Use @evento para participar.", bc_all, 0xFF0000;
+        initnpctimer;
+	} else {
+		if (.active != 1) {
+			// continua checando a cada minuto
+			initnpctimer;
+		}
+    }
+
+    end;
+
+OnTimer180000:
+    announce "[Evento Boss Global] Começa em 2 minutos! Use @evento para participar.", bc_all, 0xFF0000;
+    end;
+
+OnTimer240000:
+    announce "[Evento Boss Global] Começa em 1 minuto! Use @evento para participar.", bc_all, 0xFF0000;
+    end;
+
+OnTimer300000:
+	announce "[Evento Boss Global Começou]", bc_all, 0xFF0000;
+    .active = 2;
+    stopnpctimer;
+    donpcevent .npc_name$ + "::OnStartEvent";
+    end;
+
+OnStartEvent:
+	initnpctimer;
+    mapannounce .map$, "[Evento] O Boss Global apareceu!", bc_all;
+    monster .map$, 50, 50, "Boss Global", 21401, 1, .npc_name$ + "::OnBossDead";    
+    end;
+
+OnBossDead:   
+    enablenpc "Recompensa do Boss"; 
+    announce "[Evento] O Boss Global foi derrotado!", bc_all, 0xFF0000;
+
+    .active = 0;	
+    end;
+}
+
+//-----------------------------------------------------------
+//  Comando @evento – Teleporta para o mapa se o evento ativo
+//-----------------------------------------------------------
+-	script	cmd_evento	-1,{
+OnInit:
+    bindatcmd "evento", strnpcinfo(3)+"::OnEnterEvent";
+    end;
+
+OnEnterEvent:
+    if (getvariableofnpc(.active, "GlobalBossCtrl") == 1) {
+        warp getvariableofnpc(.map$, "GlobalBossCtrl"), 36, 38;
+    } else {
+        dispbottom "Nenhum convite de evento ativo no momento.";
+    }
+    end;
+}
+
+boss_global,50,50,4	script	Recompensa do Boss	10403,{
+    // Mensagem de parabenização
+    mes "[Parabéns!]";
+    mes "Você venceu o Evento Boss Global!";
+    
+    // Dá a recompensa
+    getitem 501, 5;  // ID 501, quantidade 5
+
+    set #evento,  2;
+    set #boss,  2;
+    
+    // Teleporta o jogador para Prontera
+    close2;
+    warp "prontera", 154, 186;
+    
+    end;
+}
+

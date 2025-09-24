@@ -1,30 +1,31 @@
-prontera,166,200,6	duplicate(Aluguel Universal)	Aluguel Universal#prontera	726
+prontera,130,217,5	duplicate(Aluguel Universal)	Aluguel Universal#prontera	726
 
-prontera,145,198,3	duplicate(Removedora de Cartas)	Removedora de Cartas#prontera	78
+prontera,178,220,4	duplicate(Removedora de Cartas)	Removedora de Cartas#prontera	78
 
-prontera,151,189,5	duplicate(Servico Kafra)	Serviço Kafra#prontera	113
+prontera,152,193,5	duplicate(Servico Kafra)	Serviço Kafra#prontera	113
 
-prontera,162,193,5	duplicate(Healer)	Curandeira#prontera	640
+prontera,162,195,5	duplicate(Healer)	Curandeira#prontera	640
 
-prontera,148,175,5	duplicate(Eden)	Eden#prontera	729
+prontera,148,175,5	duplicate(Eden)	Agente do Eden#prontera	729
 
-prontera,166,204,5	duplicate(Perchik)	Perchik#prontera	47
+prontera,182,216,4	duplicate(Perchik)	Perchik#prontera	47
 
-prontera,153,193,6	duplicate(Mestre de Classes)	Mestre de Classes#prontera	123
+prontera,124,210,5	duplicate(Mestre de Classes)	Mestre de Classes#prontera	123
 
-prontera,145,207,4	duplicate(Habilidade Platinum)	Habilidade Platinum#prontera	84
+prontera,126,213,5	duplicate(Habilidade Platinum)	Habilidade de Platina#prontera	84
 
-prontera,150,193,4	duplicate(Resetadora)	Resetadora#prontera	124
+prontera,128,215,5	duplicate(Resetadora)	Resetadora#prontera	124
 
-prontera,164,196,5	duplicate(Estilista)	Estilista#prontera	122
+prontera,185,214,4	duplicate(Estilista)	Estilista#prontera	122
 
 prontera,157,193,5	duplicate(Warper)	Teleportadora#prontera	815
 
 // ----------------------- Script está em npc/custom/custom_shop.txt -----------------------
-prontera,147,195,4	duplicate(Loja)	Loja#prontera	478
-prontera,145,202,4	shop	Loja de Utilidades#prontera	850,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,578:200,12414:500,645:1000,656:1500,657:2000,610:5000
+prontera,136,185,5	duplicate(Loja)	Loja do Iniciante#prontera	478
+prontera,134,221,5	shop	Loja de Utilidades#prontera	850,643:100,512:100,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,578:200,12414:500,645:1000,656:1500,657:2000,610:5000
+prontera,133,188,5	shop	Loja de Assistentes#prontera	850,12276:10000,12184:100,12185:100,12241:1000,12242:1500,12243:2000
 
-prontera,163,175,4	script	AgenteVIP#prontera	724,{
+prontera,163,175,4	script	Agente VIP#prontera	724,{
 	mes "[Agente VIP]";
 	mes "Olá, aventureiro!";
 	mes "Como posso te ajudar hoje?";
@@ -89,7 +90,7 @@ prontera,160,133,2	script	YuPi#prontera	102,{
 	close;
 }
 
-prontera,159,190,4	script	Treinador#prontera	811,{
+prontera,165,182,4	script	Treinador#prontera	811,{
 	mes "[Treinador]";
 	mes "Bem-vindo à cidade de ^0000FFProntera^000000, o coração do nosso servidor!";
 	mes "Aqui você encontrará muitos jogadores e NPCs que irão te auxiliar durante sua jornada.";
@@ -154,6 +155,101 @@ prontera,159,190,4	script	Treinador#prontera	811,{
 				close;
 		}
 	}
+}
+
+prontera,187,211,4	script	Criador de Homunculos#prontera	740,{
+	debugmes "Classe: " + Class;
+	
+	mes "[Criador de Homunculos]";
+	mes "Hey, sou um poderoso criador";
+	mes "de Homunculos!";
+	next;
+	
+	// Menus
+	if (Class != 18 && Class != 4019 && Class != 4071 && Class != 4078 && Class != 4259 && Class != 4041 && Class != 4107) {
+		set @MENU$,select("","","","Sobre Homunculos.","Cancelar.");
+	} else if(!gethominfo(1)) {
+		set @MENU$,select("Criar Homunculo.","","","Sobre Homunculos.","Cancelar.");
+	} else {
+		set @MENU$,select("","Evoluir.","Informações do seu Homunculo.","Sobre Homunculus","Cancelar.");
+	}
+	
+	switch(@MENU$){
+	// Criar
+	case 1:
+		mes "[Criador de Homunculos]";
+		mes "Qual homunculo você deseja criar?";
+		next;
+		switch(select("- Lif:- Amistr:- Filir:- Vanilmirth")){
+			case 1: setarray .@type$[0],"Lif",6001,6005; break;
+			case 2: setarray .@type$[0],"Amistr",6002,6006; break;
+			case 3: setarray .@type$[0],"Filir",6003,6007; break;
+			case 4: setarray .@type$[0],"Vanilmirth",6004,6008; break;
+		}
+		mes "[Criador de Homunculos]";
+		debugmes "+strcharinfo(0): " +.@type$[1];
+		mes "Existe dois tipos de "+.@type$[0]+", qual você deseja criar?";
+		next;
+		set .@choice, select("- "+.@type$[0]+"[1]","- "+.@type$[0]+"[2]");
+		mes "[Criador de Homunculos]";
+		mes "Cuide bem de seu novo amiguinho!";
+		atcommand "@makehomun "+.@type$[.@choice]; // pega [1] ou [2] conforme escolha
+		break;
+
+	// Ressucitar
+	// case 2:
+	// 	mes "[Criador de Homunculos]";
+	// 	set .@GID,getcharid(2);
+	// 	getmapxy(.@map$,.@x,.@y,0);
+	// 	unitskillusepos .@GID,247,10,.@x,.@y;
+	// 	mes "Muito bem, seu amiguinho foi ressucitado!";
+	// 	break;
+
+	// Evoluir
+	case 2:
+		mes "[Criador de Homunculos]";		
+		homevolution;
+		mes "Muito bem, agora seu amiguinho está mais forte e com uma nova aparência!";
+		break;
+
+	// Informações
+	case 3:
+		mes "[Criador de Homunculos]";
+		mes "Informações do seu Homunculo:";
+		mes "Nome: "+gethominfo(2)+".";
+		mes "Amizade: "+gethominfo(3)+".";
+		mes "Fome: "+gethominfo(4)+".";
+		mes "Level: "+gethominfo(6)+".";
+		break;
+
+	// Sobre
+	case 4:
+		mes "[Criador de Homunculos]";
+		mes "Homunculos são criaturas especiais criadas";
+		mes "para ajudar em batalhas e aventuras!";
+		mes "Você pode evoluir seu Homunculo a qualquer momento";
+		mes "Somente os Alquimistas e suas evoluções";
+		mes "podem ter Homunculos!";
+		mes "Se você for um posso te dar um homunculo a sua escolha.";
+		mes "Se você já tem cuide bem, evolua e treine seu Homunculo.";
+		break;
+
+	// Cancelar
+	case 5:
+		mes "[Criador de Homunculos]";
+		mes "Tudo bem, volte qualquer dia!";
+		break;
+	}
+	close;
+}
+
+prontera,149,196,4	script	Loja de Tickets	642,{
+	mes "[Loja do Éden]";
+    mes "Bem Vindo a nossa loja!";
+    next;
+
+	callshop "luck_egg_barter_shop";
+	end;
 }
 
 // ----------------------- warps -----------------------

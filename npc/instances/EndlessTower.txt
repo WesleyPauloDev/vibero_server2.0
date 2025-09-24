@@ -11,195 +11,218 @@
 //= Endless Tower Memorial Dungeon.
 //= Consists of 101 floors.
 //===== Additional Comments: ================================= 
-//= 1.0 First version.
-//= 1.1 Removed a disablenpc from #102FShadowDust1. (bugreport:4415)
-//= 1.2 Added ends to several NPCs which would allow you to restart timers.
-//=     Added some missing stopnpctimers to npcs. (bugreport:4418)
-//= 1.3 Fixed a couple copy/paste errors :D I fail. [L0ne_W0lf]
-//      Timer no longer resets when re-entering.
-//= 1.4 Added quest log entries based on iRO. [L0ne_W0lf]
-//=     You may need to update your questid2display.
-//=     Changed White lady spawn to MVP White Lady. (bugreport:4601)
-//= 1.5 Corrected some grammar and typos.
-//= 1.6 Corrected the tower re-entry blocked condition. (bugreport:4677) [L0ne_W0lf]
-//=     Corrected floor 75 warp disabling the wrong NPC. (bugreport:4711)
-//= 1.7 Added missing end's to prevent accidental disabling of
-//=     warps between floors. (bugreport:4623)
-//=     Added missing end's to prevent infinite mobspawn (bugreport:4540)
-//=     Commented out remaining GM-only NPCs. [Gepard]
-//= 1.8 Adjusted Instance Attach Map to Validate ALL Maps, instead of 
-//=     only 1@tower -> 5@tower (bugreport:4983)
-//= 1.9 Added 'instance_check_party' command to the script for proper checking if
-//=     the invoking party meets the requirements to join the Memorial Dungeon.
-//= 2.0 Fixed broken else/if chaining. [Joseph]
-//= 2.1 Updated to match latest official script. [Euphy]
-//= 2.2 Instance system rewrite. [Euphy]
-//= 2.3 Added some missing announcements. [Euphy]
-//= 2.4 Added GM management function. [Euphy]
-//============================================================ 
+//= 1.0 Primeira versão.
+//= 1.1 Removido um disablenpc de #102FShadowDust1. (relatório de bug: 4415)
+//= 1.2 Adicionados "end" a vários NPCs, permitindo reiniciar timers.
+//=     Adicionados alguns stopnpctimers que estavam faltando nos NPCs. (relatório de bug: 4418)
+//= 1.3 Corrigidos alguns erros de copiar/colar :D Falha minha. [L0ne_W0lf]
+//      O timer não reinicia mais ao reentrar.
+//= 1.4 Adicionadas entradas no log de quests baseadas no iRO. [L0ne_W0lf]
+//=     Você pode precisar atualizar seu questid2display.
+//=     Alterado o spawn da White Lady para MVP White Lady. (relatório de bug: 4601)
+//= 1.5 Corrigida gramática e erros de digitação.
+//= 1.6 Corrigida a condição de bloqueio de reentrada na torre. (relatório de bug: 4677) [L0ne_W0lf]
+//=     Corrigido warp do andar 75 que desabilitava o NPC errado. (relatório de bug: 4711)
+//= 1.7 Adicionados "end" faltantes para evitar desabilitação acidental de
+//=     warps entre andares. (relatório de bug: 4623)
+//=     Adicionados "end" faltantes para evitar spawn infinito de monstros (relatório de bug: 4540)
+//=     Comentados NPCs restantes de uso exclusivo de GM. [Gepard]
+//= 1.8 Ajustado Instance Attach Map para validar TODOS os mapas, em vez de
+//=     apenas 1@tower -> 5@tower (relatório de bug: 4983)
+//= 1.9 Adicionado comando instance_check_party ao script para verificar corretamente se
+//=     o grupo invocador atende aos requisitos para entrar na Memorial Dungeon.
+//= 2.0 Corrigido encadeamento de else/if quebrado. [Joseph]
+//= 2.1 Atualizado para coincidir com o script oficial mais recente. [Euphy]
+//= 2.2 Reescrita do sistema de instâncias. [Euphy]
+//= 2.3 Adicionadas algumas mensagens de anúncio que estavam faltando. [Euphy]
+//= 2.4 Adicionada função de gerenciamento para GM. [Euphy]
+//============================================================
 
-alberta,214,77,6	script	Captain Janssen	709,{
-	if (checkweight(1201,1) == 0) {
-		mes "^008800Wait here!!";
-		mes "You're carrying too much stuff. Why don't you put some of it away, and then come back.^000000";
-		close;
-	}
-	if (BaseLevel < 50) {
-		mes "[Captain Janssen]";
-		mes "Sigh... I don't know if I can ever go back to sailing the sea...";
-		close;
-	}
-	set .@name$,strcharinfo(0);
-	if (in_102tower == 1) {
-		mes "^0000ffLooking incredibly excited, the old man ran into the marine shop hurriedly ordering goods. You don't have anything better to do, so you decide to ask him why he is in such a rush.^000000";
+// alberta,214,77,6	script	Captain Janssen	709,{
+// 	if (checkweight(1201,1) == 0) {
+// 		mes "^008800Wait here!!";
+// 		mes "Youre carrying too much stuff. Why dont you put some of it away, and then come back.^000000";
+// 		close;
+// 	}
+// 	if (BaseLevel < 50) {
+// 		mes "[Captain Janssen]";
+// 		mes "Sigh... I dont know if I can ever go back to sailing the sea...";
+// 		close;
+// 	}
+// 	set .@name$,strcharinfo(0);
+// 	if (in_102tower == 1) {
+// 		mes "^0000ffLooking incredibly excited, the old man ran into the marine shop hurriedly ordering goods. You dont have anything better to do, so you decide to ask him why he is in such a rush.^000000";
+// 		next;
+// 		mes "^0000ffThe old man, after finishing his orders, walks towards you.^000000";
+// 		next;
+// 		mes "[Captain Janssen]";
+// 		mes "I was touched when you accepted a request from me, a stranger, so easily. You must truly be one of those good, heroic adventurers. Are you interested in setting out on an ocean voyage?";
+// 		next;
+// 		mes "["+.@name$+"]";
+// 		mes "Ive sailed a few times... But now that I think about it, Ive never gone across the continent.";
+// 		next;
+// 		mes "[Captain Janssen]";
+// 		mes "No, thats good enough. I may just have one small fishing vessel, but I used to be a captain that commanded a fleet.";
+// 		next;
+// 		mes "[Captain Janssen]";
+// 		mes "As you may know after a few sea voyages, not many people have gone across the ocean beyond the continent. I too have failed to conquer the ocean.";
+// 		next;
+// 		mes "^0000ffMr. Janssen talked about his perilous ocean journeys for quite a while. You have enough time on your hands, so you sit down, quietly listening to his story.^000000";
+// 		next;
+// 		mes "^0000ffAt least half of his story sounded grossly exaggerated, but something caught your ear: he insists that a humongous tower exists on the ocean, and that its so tall, it scrapes across the sky.^000000";
+// 		set in_102tower,2;
+// 		close;
+// 	} else if (in_102tower == 2) {
+// 		mes "[Captain Janssen]";
+// 		mes "So all I could do was cast anchor at that humongous tower after my fleet was wrecked. At first, we were only going to stay there until the rainstorm was over, but it didnt end as soon as we had hoped.";
+// 		next;
+// 		mes "[Captain Janssen]";
+// 		mes "My crew was starving, and a few of them walked into the tower in order to find food... They never came back.";
+// 		next;
+// 		mes "["+.@name$+"]";
+// 		mes "Why didnt you go in there with them?";
+// 		next;
+// 		mes "[Captain Janssen]";
+// 		mes "My instincts told me that tower was dangerous. I was curious, but I wasnt going to risk my life. We waited for them to come back for 7 days until the rainstorm was finally over, but no one returned.";
+// 		next;
+// 		mes "[Captain Janssen]";
+// 		mes "In our desperation to survive, we abandoned all our goods, and left the tower only with a little bit of the water and edible plants wed found around the tower. When we finally reached land, I was the only one alive...";
+// 		next;
+// 		mes "^0000ffYou could imagine the heartwretching scene of the dying fleet on their last voyage, even if he didnt explain it any further. A look of somber regret swept over his face as he remained silent a while, and then he said:^000000";
+// 		next;
+// 		mes "[Captain Janssen]";
+// 		mes "I have something I must do before I die. I must retrieve the remains of my crew that died in the tower, and give them a proper burial.";
+// 		next;
+// 		mes "[Captain Janssen]";
+// 		mes "I feel so lucky to meet a warm-hearted adventurer like you. With the money youve given me, I can finally go sailing to the tower again.";
+// 		next;
+// 		mes "["+.@name$+"]";
+// 		mes "How about hiring me as your first mate?";
+// 		next;
+// 		mes "[Captain Janssen]";
+// 		mes "Thank you, but it is an extremely dangerous place. I have my duty to fulfill, but you dont have any obligation to me or them. I dont wish to sacrifice someone as young as you to such a dangerous place.";
+// 		next;
+// 		mes "["+.@name$+"]";
+// 		mes "No...";
+// 		mes ".";
+// 		mes ".";
+// 		mes "As an adventurer, theres my obligation to those in need. Im also very curious about that place...";
+// 		next;
+// 		mes "[Captain Janssen]";
+// 		mes "I was going to leave right away, but since youve joined me, I should give you time to prepare. Ill be waiting here until youre ready to go.";
+// 		next;
+// 		mes "[Captain Janssen]";
+// 		mes "...Okay then...";
+// 		mes "Welcome aboard, first mate.";
+// 		set in_102tower,3;
+// 		close;
+// 	} else if (in_102tower == 3) {
+// 		mes "[Captain Janssen]";
+// 		mes "Shall we leave now?";
+// 		next;
+// 		switch(select("Yes, lets go!:No, Im not quite ready...")) {
+// 		case 1:
+// 			mes "[Captain Janssen]";
+// 			mes "Then pull up the anchor, first mate!";
+// 			close2;
+// 			set in_102tower,4;
+// 			warp "e_tower",70,114;
+// 			end;
+// 		case 2:
+// 			mes "[Captain Janssen]";
+// 			mes "Sure, no problem. Come back when youre ready.";
+// 			close;
+// 		}
+// 	} else if (in_102tower > 3) {
+// 		mes "[Captain Janssen]";
+// 		mes "Well, to travel the ocean again, we need to restock on goods. If you give me 10,000 Zeny, Ill take care of the rest.";
+// 		next;
+// 		switch(select("Ill come back later.:Lets go, now!")) {
+// 		case 1:
+// 			mes "["+.@name$+"]";
+// 			mes "Im sorry, but I dont have that much money. Ill come back when I save enough.";
+// 			next;
+// 			mes "[Captain Janssen]";
+// 			mes "Sure, no problem. Ill be waiting for your return.";
+// 			close;
+// 		case 2:
+// 			if (Zeny < 10000) {
+// 				mes "[Captain Janssen]";
+// 				mes "Im sorry, but you dont have enough money. I need at least 10,000 Zeny to restock our supplies...";
+// 				close;
+// 			}
+// 			else {
+// 				mes "[Captain Janssen]";
+// 				mes "Excellent! Now were good to go. Lets pull up the anchor again!";
+// 				set Zeny, Zeny-10000;
+// 				close2;
+// 				warp "e_tower",70,114;
+// 				end;
+// 			}
+// 		}
+// 	} else {
+// 		mes "[Captain Janssen]";
+// 		mes "Excuse me, are you an adventurer?";
+// 		next;
+// 		mes "[Captain Janssen]";
+// 		mes "Im sorry to ask you this, especially when this is the first time weve ever met, but can you do me a favor? Ill make it short.";
+// 		next;
+// 		mes "[Captain Janssen]";
+// 		mes "Can you donate ^0000ff10,000 Zeny^000000 to me? Its for a cause thats important to me...";
+// 		next;
+// 		switch(select("No!:Sure thing.")) {
+// 		case 1:
+// 			mes "["+.@name$+"]";
+// 			mes "Im sorry, but youve got the wrong person to ask that.";
+// 			next;
+// 			mes "[Captain Janssen]";
+// 			mes "I see... Sorry to bother you. I understand it was too rude to ask something like that to begin with.";
+// 			close;
+// 		case 2:
+// 			mes "[Captain Janssen]";
+// 			mes "Huh? Are you sure that you dont mind giving me that much money? Wow, thank you so much!";
+// 			next;
+// 			if (Zeny < 10000) {
+// 				mes "[Captain Janssen]";
+// 				mes "...Im sorry, but I dont think you have 10,000 Zeny. Thank you for your kindness, but I need more than that.";
+// 				close;
+// 			} else {
+// 				mes "["+.@name$+"]";
+// 				mes "I dont know why youd need so much money, but here. You can take it.";
+// 				next;
+// 				mes "^0000ffYou have donated 10,000 Zeny to Captain Janssen^000000.";
+// 				next;
+// 				mes "[Captain Janssen]";
+// 				mes "Thank you so much! Now I can stock up on food and materials for my ship. Youre kind, very kind!";
+// 				set Zeny, Zeny-10000;
+// 				set in_102tower,1;
+// 				close;
+// 			}
+// 		}
+// 	}
+// }
+
+1@tower,50,350,2	script	Lucid Crystal#102Custom	844,{
+	// Verifica se o jogador é GM
+	if (getgroupid() == 99) {		
+		mes "[Voz Misteriosa]";
+		mes "Você deseja ir diretamente ao último andar da torre?";
 		next;
-		mes "^0000ffThe old man, after finishing his orders, walks towards you.^000000";
-		next;
-		mes "[Captain Janssen]";
-		mes "I was touched when you accepted a request from me, a stranger, so easily. You must truly be one of those good, heroic adventurers. Are you interested in setting out on an ocean voyage?";
-		next;
-		mes "["+.@name$+"]";
-		mes "I've sailed a few times... But now that I think about it, I've never gone across the continent.";
-		next;
-		mes "[Captain Janssen]";
-		mes "No, that's good enough. I may just have one small fishing vessel, but I used to be a captain that commanded a fleet.";
-		next;
-		mes "[Captain Janssen]";
-		mes "As you may know after a few sea voyages, not many people have gone across the ocean beyond the continent. I too have failed to conquer the ocean.";
-		next;
-		mes "^0000ffMr. Janssen talked about his perilous ocean journeys for quite a while. You have enough time on your hands, so you sit down, quietly listening to his story.^000000";
-		next;
-		mes "^0000ffAt least half of his story sounded grossly exaggerated, but something caught your ear: he insists that a humongous tower exists on the ocean, and that it's so tall, it scrapes across the sky.^000000";
-		set in_102tower,2;
-		close;
-	} else if (in_102tower == 2) {
-		mes "[Captain Janssen]";
-		mes "So all I could do was cast anchor at that humongous tower after my fleet was wrecked. At first, we were only going to stay there until the rainstorm was over, but it didn't end as soon as we had hoped.";
-		next;
-		mes "[Captain Janssen]";
-		mes "My crew was starving, and a few of them walked into the tower in order to find food... They never came back.";
-		next;
-		mes "["+.@name$+"]";
-		mes "Why didn't you go in there with them?";
-		next;
-		mes "[Captain Janssen]";
-		mes "My instincts told me that tower was dangerous. I was curious, but I wasn't going to risk my life. We waited for them to come back for 7 days until the rainstorm was finally over, but no one returned.";
-		next;
-		mes "[Captain Janssen]";
-		mes "In our desperation to survive, we abandoned all our goods, and left the tower only with a little bit of the water and edible plants we'd found around the tower. When we finally reached land, I was the only one alive...";
-		next;
-		mes "^0000ffYou could imagine the heartwretching scene of the dying fleet on their last voyage, even if he didn't explain it any further. A look of somber regret swept over his face as he remained silent a while, and then he said:^000000";
-		next;
-		mes "[Captain Janssen]";
-		mes "I have something I must do before I die. I must retrieve the remains of my crew that died in the tower, and give them a proper burial.";
-		next;
-		mes "[Captain Janssen]";
-		mes "I feel so lucky to meet a warm-hearted adventurer like you. With the money you've given me, I can finally go sailing to the tower again.";
-		next;
-		mes "["+.@name$+"]";
-		mes "How about hiring me as your first mate?";
-		next;
-		mes "[Captain Janssen]";
-		mes "Thank you, but it is an extremely dangerous place. I have my duty to fulfill, but you don't have any obligation to me or them. I don't wish to sacrifice someone as young as you to such a dangerous place.";
-		next;
-		mes "["+.@name$+"]";
-		mes "No...";
-		mes ".";
-		mes ".";
-		mes "As an adventurer, there's my obligation to those in need. I'm also very curious about that place...";
-		next;
-		mes "[Captain Janssen]";
-		mes "I was going to leave right away, but since you've joined me, I should give you time to prepare. I'll be waiting here until you're ready to go.";
-		next;
-		mes "[Captain Janssen]";
-		mes "...Okay then...";
-		mes "Welcome aboard, first mate.";
-		set in_102tower,3;
-		close;
-	} else if (in_102tower == 3) {
-		mes "[Captain Janssen]";
-		mes "Shall we leave now?";
-		next;
-		switch(select("Yes, let's go!:No, I'm not quite ready...")) {
+		switch(select("Sim.:Não")) {
 		case 1:
-			mes "[Captain Janssen]";
-			mes "Then pull up the anchor, first mate!";
-			close2;
-			set in_102tower,4;
-			warp "e_tower",70,114;
-			end;
+			mes "Muito bem, prepare-se para enfrentar o desafio final!";
+			warp instance_mapname("6@tower"),32,12;
+			break;
 		case 2:
-			mes "[Captain Janssen]";
-			mes "Sure, no problem. Come back when you're ready.";
+			mes "Como desejar, fique à vontade para continuar pelos andares anteriores.";
 			close;
-		}
-	} else if (in_102tower > 3) {
-		mes "[Captain Janssen]";
-		mes "Well, to travel the ocean again, we need to restock on goods. If you give me 10,000 Zeny, I'll take care of the rest.";
-		next;
-		switch(select("I'll come back later.:Let's go, now!")) {
-		case 1:
-			mes "["+.@name$+"]";
-			mes "I'm sorry, but I don't have that much money. I'll come back when I save enough.";
-			next;
-			mes "[Captain Janssen]";
-			mes "Sure, no problem. I'll be waiting for your return.";
-			close;
-		case 2:
-			if (Zeny < 10000) {
-				mes "[Captain Janssen]";
-				mes "I'm sorry, but you don't have enough money. I need at least 10,000 Zeny to restock our supplies...";
-				close;
-			}
-			else {
-				mes "[Captain Janssen]";
-				mes "Excellent! Now we're good to go. Let's pull up the anchor again!";
-				set Zeny, Zeny-10000;
-				close2;
-				warp "e_tower",70,114;
-				end;
-			}
+			break;
 		}
 	} else {
-		mes "[Captain Janssen]";
-		mes "Excuse me, are you an adventurer?";
-		next;
-		mes "[Captain Janssen]";
-		mes "I'm sorry to ask you this, especially when this is the first time we've ever met, but can you do me a favor? I'll make it short.";
-		next;
-		mes "[Captain Janssen]";
-		mes "Can you donate ^0000ff10,000 Zeny^000000 to me? It's for a cause that's important to me...";
-		next;
-		switch(select("No!:Sure thing.")) {
-		case 1:
-			mes "["+.@name$+"]";
-			mes "I'm sorry, but you've got the wrong person to ask that.";
-			next;
-			mes "[Captain Janssen]";
-			mes "I see... Sorry to bother you. I understand it was too rude to ask something like that to begin with.";
-			close;
-		case 2:
-			mes "[Captain Janssen]";
-			mes "Huh? Are you sure that you don't mind giving me that much money? Wow, thank you so much!";
-			next;
-			if (Zeny < 10000) {
-				mes "[Captain Janssen]";
-				mes "...I'm sorry, but I don't think you have 10,000 Zeny. Thank you for your kindness, but I need more than that.";
-				close;
-			} else {
-				mes "["+.@name$+"]";
-				mes "I don't know why you'd need so much money, but here. You can take it.";
-				next;
-				mes "^0000ffYou have donated 10,000 Zeny to Captain Janssen^000000.";
-				next;
-				mes "[Captain Janssen]";
-				mes "Thank you so much! Now I can stock up on food and materials for my ship. You're kind, very kind!";
-				set Zeny, Zeny-10000;
-				set in_102tower,1;
-				close;
-			}
-		}
+		mes "Apenas GMs podem usar este cristal para acessar o último andar.";
+		close;
 	}
+	end;
 }
 
 e_tower,81,105,0	script	Tower Protection Stone	406,{
@@ -228,7 +251,7 @@ e_tower,81,105,0	script	Tower Protection Stone	406,{
 					close;
 				}
 				mes "^0000ff"+.@md_name$+"^000000 - Try to reserve";
-				mes "After making a reservation, you have to talk to NPC behind and select the menu 'Enter the Dungeon' to enter the dungeon.";
+				mes "After making a reservation, you have to talk to NPC behind and select the menu Enter the Dungeon to enter the dungeon.";
 				close;
 			case 2:
 				callsub L_Enter,0,1;
@@ -277,7 +300,7 @@ e_tower,81,105,0	script	Tower Protection Stone	406,{
 			set .@dun_m,(.@dun_ent_t - (.@dun_h * 3600)) / 60;
 			set .@dun_s,.@dun_ent_t - ((.@dun_h * 3600) + (.@dun_m * 60));
 
-			mes "Due to the tower's aftereffects, you cannot enter the dungeon right now, " + .@dun_h + "hours " + .@dun_m + "minutes " + .@dun_s + "seconds left to enter the next dungeon.";
+			mes "Due to the towers aftereffects, you cannot enter the dungeon right now, " + .@dun_h + "hours " + .@dun_m + "minutes " + .@dun_s + "seconds left to enter the next dungeon.";
 			next;
 			mes "It is dangerous here. Let me move you to Alberta.";
 			close2;
@@ -548,7 +571,7 @@ function	script	F_Tower_Monster	{
 		areamonster .@map$,267,9,277,45,"Jakk",1130,10,.@label$;
 		break;
 	case 25:
-		areamonster .@map$,352,9,362,45,"Cat o' Nine Tails",1307,15,.@label$;
+		areamonster .@map$,352,9,362,45,"Cat o Nine Tails",1307,15,.@label$;
 		areamonster .@map$,352,9,362,45,"Moonlight",1150,1,.@label$;
 		areamonster .@map$,352,9,362,45,"Nine Tail",1180,15,.@label$;
 		break;
@@ -765,6 +788,7 @@ function	script	F_Tower_Monster	{
 		areamonster .@map$,267,267,277,303,"Mystcase",1249,10,.@label$;
 		break;
 	case 60:
+		// Egnigem Cenia Crashou
 		areamonster .@map$,352,267,362,303,"Egnigem Cenia",1658,1,.@label$;
 		areamonster .@map$,352,267,362,303,"Doppelganger",1046,1,.@label$;
 		areamonster .@map$,352,267,362,303,"Armeyer Dinze",1654,10,.@label$;
@@ -1075,7 +1099,7 @@ function	script	F_Tower_Monster	{
 		}
 		break;
 	}
-	return;
+	return .@level;
 }
 
 function	script	F_Tower_Warp	{
@@ -1189,21 +1213,24 @@ function	script	F_Tower_Warp	{
 // Levels 1-25
 //============================================================
 1@tower,50,360,0	script	Immortal Brazier#	844,{
-	mes "- A Message is Engraved on the Brazier -";
-	mes "The one who scatters the ashes of the darkness in this place shall become one step closer to Naght Sieger, the Hegemon King of the Darkness...";
+	mes "- Uma Mensagem Está Gravada na Pira -";
+	mes "Aquele que espalhar as cinzas da escuridão neste lugar estará um passo mais próximo de Naght Sieger, o Hegemon-Rei das Trevas...";
+	mes "Você precisará das Cinzas das Trevas para avançar:";
+	mes "26º Andar -> 1 Cinzas da Escuridão", "51º Andar -> 2 Cinzas da Escuridão","76º Andar -> 3 Cinzas da Escuridão";
 	next;
 
-	setarray .@level$[1],"26th","51st","76th";
+	setarray .@level$[1],"26º","51º","76º";
 	setarray .@map$[1],"2@tower","3@tower","4@tower";
-	set .@i, select("26th Level:51st Level:76th Level");
+	set .@i, select("26º Andar:51º Andar:76º Andar");
 
 	if (countitem(6000) < .@i) {
-		mes "-Warning-";
-		mes "To warp to the "+.@level$[.@i]+" Level, you need "+.@i+" Ashes of the Darkness.";
+		mes "-Aviso-";
+		mes "Para se teleportar para o "+.@level$[.@i]+" Andar, você precisa de "+.@i+" Cinzas das Trevas.";
 		close;
 	}
-	delitem 6000,.@i; //Dark_Ashes
-	mapannounce instance_mapname("1@tower"), strcharinfo(0)+". You will be warped to the "+.@level$[.@i]+" Level.",bc_map,"0x00ff99";
+	delitem 6000,.@i; // Dark_Ashes
+	mapannounce instance_mapname("1@tower"), strcharinfo(0)+". Você será teletransportado para o "+.@level$[.@i]+" Andar.",bc_map,"0x00ff99";
+	
 	warp instance_mapname(.@map$[.@i]),52,354;
 	close;
 
@@ -1212,9 +1239,72 @@ OnInstanceInit:
 	end;
 
 OnTimer10000:
-	mapannounce instance_mapname("1@tower"), "Notice : Taming a monster does not count towards defeating them.",bc_map,"0xff0000";
+	mapannounce instance_mapname("1@tower"), "Aviso: Domar um monstro não conta como derrotá-lo.",bc_map,"0xff0000";
 	stopnpctimer;
 	end;
+}
+
+1@tower,42,360,5	script	Atalho#	406,{
+
+	set .@pid, getcharid(1);
+	set .@saved, 1;
+	if (.@pid > 0) {
+		set .@key$, "$party_current_floor_"+.@pid;
+		setd("$party_current_map_"+.@pid, instance_mapname("1@tower"));
+
+		// Pega o andar salvo para o grupo
+		set .@saved, getd(.@key$);
+
+		// se ainda não houver valor salvo, começa do nível deste portal
+		if (.@saved <= 1) {
+			mes "[Atalho]";
+			mes "Você está no maior piso alcançado hoje.";
+			close;
+		}		
+
+		setd(.@key$, .@saved);
+	}
+	// set .@saved, 98;
+
+	// pega o mapa correto da instância
+	if (.@saved <= 25) {
+		.@map$ = instance_mapname("1@tower");
+		.npc$ = instance_npcname("#1F Controller");
+	} else if (.@saved <= 50) {
+		.@map$ = instance_mapname("2@tower");
+		.npc$ = instance_npcname("Immortal Furnace#1");
+	} else if (.@saved <= 75) {
+		.@map$ = instance_mapname("3@tower");
+		.npc$ = instance_npcname("Immortal Furnace#2");
+	} else if (.@saved <= 99) {
+		.@map$ = instance_mapname("4@tower");
+		.npc$ = instance_npcname("Immortal Furnace#3");
+	} 	
+
+	mes "[Atalho]";
+	mes "Gostaria de ir direto ao : ^0055FF"+.@saved+"º^000000 andar?";
+	switch(select("Sim.:Não")) {
+		case 1:			
+			mes "Você será teletransportado para o "+.@saved+"º andar.";
+			close2;
+
+			if(.@saved == 100) {
+				warp instance_mapname("5@tower"),101,72;
+			}
+
+			set strnpc$, .@saved-1;
+			donpcevent instance_npcname(strnpc$ + "FGate102tower")+"::OnMyMobDead";
+
+			// Warpa o jogador diretamente para o andar salvo
+			callfunc "F_Tower_Warp",
+				.@saved,
+				.@map$;
+
+			end;	
+		case 2:
+			mes "Como desejar, fique à vontade para escalar os andares.";			
+			end;			
+	}
 }
 
 1@tower,29,365,1	script	#1F Controller	844,{
@@ -1228,17 +1318,25 @@ OnInstanceInit:
 	end;
 
 OnMyMobDead:
+
+	// Drops
+	callfunc("CustomMapDrop", "1@tower", 607, 10);
+	// XP
+	callfunc("MapExpBonus", "1@tower", 50, 20);
+
 	set .@map$, instance_mapname("1@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#1F Controller")+"::OnMyMobDead");
-	if (.@mob_dead_num < 1) {
+	if (.@mob_dead_num < 1) {	
+
 		initnpctimer;
 		//SetItemPartyInMap in_102floor 1
 	} else
-		mapannounce .@map$, "Remaining Monsters on the 1st Level - "+.@mob_dead_num,bc_map,"0x00ff99";
+		// callfunc("CustomMapDrop", "1@tower", 607, 100);
+		mapannounce .@map$, "Monstros restantes no 1º nível - "+.@mob_dead_num,bc_map,"0x00ff99";
 	end;
 
 OnTimer5000:
-	mapannounce instance_mapname("1@tower"), "All Monsters on the 1st Level have been defeated.",bc_map,"0xffff00";
+	mapannounce instance_mapname("1@tower"), "Todos os monstros do 1º nível foram derrotados.",bc_map,"0xffff00";
 	donpcevent instance_npcname("1FGate102tower")+"::OnEnable";
 	stopnpctimer;
 	end;
@@ -1260,8 +1358,35 @@ OnEnable:
 	end;
 
 OnTouch_:
+
+	set .@this_level, atoi(replacestr(strnpcinfo(0),"FGate102tower","")) + 1;
+
+	set .@pid, getcharid(1);
+	if (.@pid > 0) {
+		set .@key$, "$party_current_floor_"+.@pid;
+		setd("$party_current_map_"+.@pid, instance_mapname("1@tower"));
+
+		// Pega o andar salvo para o grupo
+		set .@saved, getd(.@key$);
+
+		// se ainda não houver valor salvo, começa do nível deste portal
+		if (.@saved <= 0) {
+			debugmes ".@saved <= 0";
+			set .@saved, .@this_level;
+			setd(.@key$, .@saved);
+		}
+
+		// só grava se o jogador estiver indo para um andar MAIS ALTO
+		if (.@this_level > .@saved) {
+			setd(.@key$, .@this_level);
+			.@saved = .@this_level;
+		} 
+
+		setd(.@key$, .@saved);
+	}
+
 	callfunc "F_Tower_Warp",
-		atoi(replacestr(strnpcinfo(0),"FGate102tower","")) + 1,
+		.@this_level,
 		strnpcinfo(4);
 	end;
 
@@ -1271,18 +1396,20 @@ OnMyMobDead:
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
 		initnpctimer;
-		//SetItemPartyInMap in_102floor .@level
+
 	} else
-		mapannounce .@map$, "Remaining Monsters on the "+callfunc("F_GetNumSuffix",.@level)+" Level - "+.@mob_dead_num,bc_map,"0x00ff99";
+		mapannounce .@map$, "Monstros restantes no "+callfunc("F_GetNumSuffix",.@level)+" nível - "+.@mob_dead_num,bc_map,"0x00ff99";
 	end;
 
 OnTimer5000:
-	set .@level, atoi(replacestr(strnpcinfo(0),"FGate102tower","")) + 1;
-	mapannounce strnpcinfo(4), "All Monsters on the "+callfunc("F_GetNumSuffix",.@level)+" Level have been defeated.",bc_map,"0xffff00";
+	set .@level, atoi(replacestr(strnpcinfo(0),"FGate102tower","")) + 1;	
+
+	mapannounce strnpcinfo(4), "Todos os monstros no "+callfunc("F_GetNumSuffix",.@level)+" nível foram derrotados.",bc_map,"0xffff00";
 	donpcevent instance_npcname(.@level+"FGate102tower")+"::OnEnable";
 	stopnpctimer;
 	end;
 }
+
 1@tower,96,393,0	duplicate(1FGate102tower)	2FGate102tower	45,2,2
 1@tower,184,393,0	duplicate(1FGate102tower)	3FGate102tower	45,2,2
 1@tower,270,393,0	duplicate(1FGate102tower)	4FGate102tower	45,2,2
@@ -1355,31 +1482,35 @@ OnInstanceInit:
 	end;
 
 OnTimer15000:
-OnTimer60000:
-	mapannounce instance_mapname("1@tower"), "Notice : In any abnormal situation where you defeat a monster, you can't advance to the next level!",bc_map,"0xff0000";
+	mapannounce instance_mapname("1@tower"), "Continue firme! Cada monstro derrotado te aproxima do topo da Torre!", bc_map, "0x00ffcc";
 	end;
-OnTimer120000:
-	mapannounce instance_mapname("1@tower"), "Notice : In any abnormal situation where you defeat a monster, you can't advance to the next level!",bc_map,"0xff0000";
+
+OnTimer30000:
+	mapannounce instance_mapname("1@tower"), "Drops valiosos te esperam! Mostre sua coragem e siga para o próximo andar!", bc_map, "0x00ffcc";
+	end;
+
+OnTimer45000:
+	mapannounce instance_mapname("1@tower"), "A jornada é difícil, mas a vitória espera no topo! Continue avançando!", bc_map, "0x00ffcc";
 	stopnpctimer;
 	end;
 }
 
 1@tower,71,1,0	script	#Manager Mode1	844,{
 	callfunc "F_GM_NPC";
-	mes "Please enter the password.";
+	mes "Por favor, digite a senha.";
 	set .@i, callfunc("F_GM_NPC","dmc2008",1);
 	next;
 	if (.@i == 1) {
-		mes "This NPC manages the tower from the 1st to the 25th Level.";
-		mes "Please enter the Level number to open.";
+		mes "Este NPC gerencia a torre do 1º ao 25º nível.";
+		mes "Por favor, insira o número do nível a ser aberto.";
 		mes "(i.g.: 1F->1, 25F->25)";
 		input .@input,1,25;
 		next;
 		if (.@input < 1 || .@input > 25)
-			mes "You can only enter a number from 1 to 25.";
+			mes "Você só pode inserir um número de 1 a 25.";
 		else {
 			donpcevent instance_npcname(.@input+"FGate102tower")+"::OnEnable";
-			mes "*** Level "+ .@input + " is now being opened. ***";
+			mes "*** Nível "+ .@input + " está sendo aberto agora. ***";
 		}
 	}
 	close;
@@ -1405,11 +1536,11 @@ OnMyMobDead:
 		//SetItemPartyInMap in_102floor 26
 	}
 	else
-		mapannounce .@map$, "Remaining Monsters on the 26th Level - " + .@mob_dead_num,bc_map,"0x00ff99";
+		mapannounce .@map$, "Monstros restantes no 26º nível - " + .@mob_dead_num,bc_map,"0x00ff99";
 	end;
 
 OnTimer5000:
-	mapannounce instance_mapname("2@tower"), "All Monsters on the 26th Level have been defeated.",bc_map,"0xffff00";
+	mapannounce instance_mapname("2@tower"), "Todos os monstros do 26º nível foram derrotados.",bc_map,"0xffff00";
 	donpcevent instance_npcname("26FGate102tower")+"::OnEnable";
 	stopnpctimer;
 	end;
@@ -1482,20 +1613,20 @@ OnTouch_:
 
 2@tower,71,1,0	script	#Manager Mode2	844,{
 	callfunc "F_GM_NPC";
-	mes "Please enter the password.";
+	mes "Por favor, digite a senha.";
 	set .@i, callfunc("F_GM_NPC","dmc2008",1);
 	next;
 	if (.@i == 1) {
-		mes "This NPC manages the tower from the 26st to the 50th Level.";
-		mes "Please enter the Level number to open.";
+		mes "Este NPC gerencia a torre do 26º ao 50º nível.";
+		mes "Por favor, insira o número do nível a ser aberto.";
 		mes "(i.g.: 26F->26, 50F->50)";
 		input .@input,26,50;
 		next;
 		if (.@onput < 26 || .@input > 50)
-			mes "You can only enter a number from 26 to 50.";
+			mes "Você só pode inserir um número de 26 a 50.";
 		else {
 			donpcevent instance_npcname(.@input+"FGate102tower")+"::OnEnable";
-			mes "*** Level "+ .@input + " is now being opened. ***";
+			mes "*** Nível "+ .@input + " está sendo aberto agora. ***";
 		}
 	}
 	close;
@@ -1521,11 +1652,11 @@ OnMyMobDead:
 		//SetItemPartyInMap in_102floor 51
 	}
 	else
-		mapannounce .@map$, "Remaining Monsters on the 51st Level - " + .@mob_dead_num,bc_map,"0x00ff99";
+		mapannounce .@map$, "Monstros restantes no 51º nível - " + .@mob_dead_num,bc_map,"0x00ff99";
 	end;
 
 OnTimer5000:
-	mapannounce instance_mapname("3@tower"), "All Monsters on the 51st Level have been defeated.",bc_map,"0xffff00";
+	mapannounce instance_mapname("3@tower"), "Todos os monstros do 51º nível foram derrotados.",bc_map,"0xffff00";
 	donpcevent instance_npcname("51FGate102tower")+"::OnEnable";
 	stopnpctimer;
 	end;
@@ -1598,20 +1729,20 @@ OnTouch_:
 
 3@tower,71,1,0	script	#Manager Mode3	844,{
 	callfunc "F_GM_NPC";
-	mes "Please enter the password.";
+	mes "Por favor, digite a senha.";
 	set .@i, callfunc("F_GM_NPC","dmc2008",1);
 	next;
 	if (.@i == 1) {
-		mes "This NPC manages the tower from the 51st to the 75th Level.";
-		mes "Please enter the Level number to open.";
+		mes "Este NPC gerencia a torre do 51º ao 75º nível.";
+		mes "Por favor, insira o número do nível a ser aberto.";
 		mes "(i.g.: 51F->51, 75F->75)";
 		input .@input,51,75;
 		next;
 		if (.@input < 51 || .@input > 75)
-			mes "You can only enter a number from 51 to 75.";
+			mes "Você só pode inserir um número de 51 a 75.";
 		else {
 			donpcevent instance_npcname(.@input+"FGate102tower")+"::OnEnable";
-			mes "*** Level "+ .@input + " is now being opened. ***";
+			mes "*** Nível "+ .@input + " está sendo aberto agora. ***";
 		}
 	}
 	close;
@@ -1637,11 +1768,11 @@ OnMyMobDead:
 		//SetItemPartyInMap in_102floor 76
 	}
 	else
-		mapannounce .@map$,"Remaining Monsters on the 76th Level - " + .@mob_dead_num,bc_map,"0x00ff99";
+		mapannounce .@map$,"Monstros restantes no 76º nível - " + .@mob_dead_num,bc_map,"0x00ff99";
 	end;
 
 OnTimer5000:
-	mapannounce instance_mapname("4@tower"),"All Monsters on the 76th Level have been defeated.",bc_map,"0xffff00";
+	mapannounce instance_mapname("4@tower"),"Todos os monstros do 76º nível foram derrotados.",bc_map,"0xffff00";
 	donpcevent instance_npcname("76FGate102tower")+"::OnEnable";
 	stopnpctimer;
 	end;
@@ -1684,6 +1815,32 @@ OnEnable:
 	end;
 
 OnTouch_:
+	set .@this_level, atoi(replacestr(strnpcinfo(0),"FGate102tower","")) + 1;
+
+	set .@pid, getcharid(1);
+	if (.@pid > 0) {
+		set .@key$, "$party_current_floor_"+.@pid;
+		setd("$party_current_map_"+.@pid, instance_mapname("1@tower"));
+
+		// Pega o andar salvo para o grupo
+		set .@saved, getd(.@key$);
+
+		// se ainda não houver valor salvo, começa do nível deste portal
+		if (.@saved <= 0) {
+			debugmes ".@saved <= 0";
+			set .@saved, .@this_level;
+			setd(.@key$, .@saved);
+		}
+
+		// só grava se o jogador estiver indo para um andar MAIS ALTO
+		if (.@this_level > .@saved) {
+			setd(.@key$, .@this_level);
+			.@saved = .@this_level;
+		} 
+
+		setd(.@key$, .@saved);
+	}
+
 	getitem 6000,1; //Dark_Ashes
 	warp instance_mapname("5@tower"),101,72;
 	end;
@@ -1713,20 +1870,20 @@ OnTouch_:
 
 4@tower,71,1,0	script	#Manager Mode4	844,{
 	callfunc "F_GM_NPC";
-	mes "Please enter the password.";
+	mes "Por favor, digite a senha.";
 	set .@i, callfunc("F_GM_NPC","dmc2008",1);
 	next;
 	if (.@i == 1) {
-		mes "This NPC manages the tower from the 76th to the 99th Level.";
-		mes "Please enter the Level number to open.";
+		mes "Este NPC gerencia a torre do 76º ao 100º nível.";
+		mes "Por favor, insira o número do nível a ser aberto.";
 		mes "(i.g.: 76F->76, 99F->99)";
 		input .@input,76,99;
 		next;
 		if (.@input < 76 || .@input > 99)
-			mes "You can only enter a number from 76 to 99.";
+			mes "Você só pode inserir um número de 76 a 99.";
 		else {
 			donpcevent instance_npcname(.@input+"FGate102tower")+"::OnEnable";
-			mes "*** Level "+ .@input + " is now being opened. ***";
+			mes "*** Nível "+ .@input + " está sendo aberto agora. ***";
 		}
 	}
 	close;
@@ -1735,42 +1892,72 @@ OnTouch_:
 // Level 100
 //============================================================
 5@tower,106,109,2	script	Lucid Crystal#102	844,{
+
 	if (in_102tower < 10) {
-		mes "^0000ffA mysterious voice echoes through the room as you touch the lucid crystal radiating a strong light.^000000";
+		mes "^0000ffUma voz misteriosa ecoa pela sala enquanto você toca o cristal lúcido que irradia uma luz intensa.^000000";
 		next;
-		mes "[Mysterious Voice]";
-		mes "Welcome to my place, intruders. I've had fun watching you endure all the difficulties I've set before you.";
+		mes "[Voz Misteriosa]";
+		mes "Bem-vindos ao meu domínio, intrusos. Foi divertido observar vocês enfrentarem todas as dificuldades que preparei.";
 		next;
-		mes "[Mysterious Voice]";
-		mes "Unfortunately, the time has come to end the show.";
+		mes "[Voz Misteriosa]";
+		mes "Infelizmente, chegou a hora de encerrar o espetáculo.";
 		next;
-		mes "[Mysterious Voice]";
-		mes "It's still too early to celebrate your victory against my right-hand man Knothen because he isn't completely destroyed!";
+		mes "[Voz Misteriosa]";
+		mes "Ainda é cedo para comemorar sua vitória contra meu braço direito Knothen, pois ele não foi completamente destruído!";
 		next;
-		mes "[Mysterious Voice]";
-		mes "I shall resurrect him for your next show. Defeat him again, and then I'll gladly accept your challenge.";
+		mes "[Voz Misteriosa]";
+		mes "Eu o ressuscitarei para o próximo espetáculo. Derrote-o novamente, e então aceitarei seu desafio com prazer.";
 		next;
-		mes "[Mysterious Voice]";
-		mes "Good-bye for now.";
-		mes "Once again, I had such a great time, humans. I look forward to seeing you again.";
+		mes "[Voz Misteriosa]";
+		mes "Adeus por enquanto.";
+		mes "Mais uma vez, foi muito divertido, humanos. Espero encontrá-los novamente em breve.";
 		next;
-		mes "^0000ffAs soon as the voice stopped talking, an irresistible force lifted and moved you somewhere else.";
+		mes "^0000ffAssim que a voz parou de falar, uma força irresistível o levantou e transportou para outro lugar.";
 		close2;
+
 		set in_102tower,10;
-		warp "alberta",223,36;
+
+		.@iid = instance_id(IM_PARTY);
+		if (.@iid > 0) {
+			// pega o party_id salvo para essa instância
+			.@pid = getd("$etower_pid_by_iid_"+.@iid);
+			// .@partyName$ = party_name(.@iid);
+
+			if (.@pid > 0) {
+				// limpa o progresso do grupo
+				setd("$party_current_floor_"+.@pid, 0);
+				setd("$party_current_map_"+.@pid, "");
+				setd("$etower_pid_by_iid_"+.@iid, 0);
+			}
+
+			set #ETOWER_STATUS, 4;
+
+			set .@party_id, getcharid(1);
+			set .@partyName$, getpartyname(.@party_id);
+
+			set #instancia, 2;
+			set #torre, 2;
+
+			// // anuncia globalmente
+			announce "O jogador "+strcharinfo(0)+" finalmente conquistou o andar 99 da Torre Sem Fim ! Parabéns!", bc_all, 0xFF0000;
+			
+		}
+		
+		warp "prontera",155,184;
 	}
 	else {
-		mes "^0000ffThe radiating crystal piece seems to beckon you, just like last time.^000000";
+		mes "^0000ffO pedaço de cristal que irradia luz parece chamá-lo, assim como da última vez.^000000";
 		next;
-		mes "[Mysterious Voice]";
-		mes "I must have underestimated you... I didn't expect to see you again.";
+		mes "[Voz Misteriosa]";
+		mes "Devo ter subestimado vocês... Não esperava vê-los novamente.";
 		next;
-		mes "[Mysterious Voice]";
-		mes "I can smell your sweat, hear the gasps of your exhaustion in combat. Ah~ The human desire for victory always excites me.";
+		mes "[Voz Misteriosa]";
+		mes "Posso sentir o cheiro do seu suor, ouvir os suspiros de exaustão em combate. Ah~ O desejo humano por vitória sempre me excita.";
 		next;
-		mes "[Mysterious Voice]";
-		mes "I now allow you to come receive an audience from me. Come to me, to Naght Sieger the Hegemon-King of the Darkness!";
+		mes "[Voz Misteriosa]";
+		mes "Agora permito que venham receber uma audiência comigo. Venham até mim, a Naght Sieger, o Hegemon-Rei das Trevas!";
 		close2;
+
 		warp instance_mapname("6@tower"),32,12;
 	}
 	end;
@@ -1844,7 +2031,7 @@ OnMyMobDead:
 	set .@map$, instance_mapname("5@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#102FShadowDust1")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
-		mapannounce .@map$, "Mysterious Voice: Who are you to dare intrude upon my sanctuary?!",bc_map,"0xffff00";
+		mapannounce .@map$, "Voz Misteriosa: Quem é você para ousar invadir meu santuário?!",bc_map,"0xffff00";
 		donpcevent instance_npcname("#102FShadowDust")+"::OnDisable";
 		donpcevent instance_npcname("Lucid Crystal#102")+"::OnEnable";
 		//SetItemPartyInMap in_102floor 100
@@ -1905,21 +2092,21 @@ OnEnable:
 
 5@tower,71,1,0	script	#Manager Mode5	844,{
 	callfunc "F_GM_NPC";
-	mes "This NPC manages the crystal on the 100th Level. Please enter the password.";
+	mes "Este NPC gerencia o cristal no 100º nível. Por favor, digite a senha.";
 	set .@i, callfunc("F_GM_NPC","dmc2008",1);
 	next;
 	if (.@i == 1) {
 		donpcevent instance_npcname("Lucid Crystal#102")+"::OnEnable";
-		mes "The 100th Level's crystal has been activated.";
+		mes "O cristal do 100º nível foi ativado.";
 	} else
-		mes "Please enter the correct password.";
+		mes "Por favor, digite a senha correta.";
 	close;
 }
 
 // Level 101
 //============================================================
 6@tower,45,89,2	script	Life Spring#1	844,{
-	mes "^0066ffYou took a sip of the spring's clear water, and you feel invigorated.^000000";
+	mes "^0066ffVocê tomou um gole da água cristalina da fonte e se sente revigorado.^000000";
 	heal (MaxHp-Hp),(MaxSp-Sp);
 	close;
 
@@ -1958,18 +2145,18 @@ OnTimer2000:
 
 6@tower,32,100,0	warp	102FGate102tower	2,2,6@tower,155,64
 
-6@tower,156,151,2	script	Tyrant's Throne#	844,{
+6@tower,156,151,2	script	Tyrants Throne#	844,{
 	end;
 
 OnInstanceInit:
-	areamonster instance_mapname("6@tower"),154,73,156,75,"Watcher's Son",1627,10,instance_npcname("Tyrant's Throne#")+"::OnMyMobDead";
+	areamonster instance_mapname("6@tower"),154,73,156,75,"Watchers Son",1627,10,instance_npcname("Tyrants Throne#")+"::OnMyMobDead";
 	end;
 
 OnMyMobDead:
-	set .@mob_dead_num,mobcount(instance_mapname("6@tower"),instance_npcname("Tyrant's Throne#")+"::OnMyMobDead");
+	set .@mob_dead_num,mobcount(instance_mapname("6@tower"),instance_npcname("Tyrants Throne#")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
 		donpcevent instance_npcname("#1st Beeper")+"::OnEnable";
-		disablenpc instance_npcname("Tyrant's Throne#");
+		disablenpc instance_npcname("Tyrants Throne#");
 	}
 	end;
 }
@@ -1982,24 +2169,24 @@ OnEnable:
 	end;
 
 OnTimer500:
-	mapannounce instance_mapname("6@tower"),"Guests, huh? I hope you've come here knowing that you'll be buried in this place. If you didn't know, well... it's too late!",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Convidados, hein? Espero que tenham vindo aqui sabendo que serão enterrados neste lugar. Se não sabiam, bem... é tarde demais!",bc_map,"0x00ffcc";
 	end;
 
 OnTimer5500:
-	mapannounce instance_mapname("6@tower"),"This is why you adventurers always end up dead.",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"É por isso que vocês, aventureiros, sempre acabam mortos.",bc_map,"0x00ffcc";
 	end;
 
 OnTimer10500:
-	mapannounce instance_mapname("6@tower"),"I may applaud you for your courage... Of course, I intend to play with you a little bit first.",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Posso aplaudir sua coragem... Claro, pretendo brincar um pouco com você primeiro.",bc_map,"0x00ffcc";
 	end;
 
 OnTimer15500:
-	mapannounce instance_mapname("6@tower"),"You know, I like watching humans running around in fear.",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Sabe, eu gosto de ver humanos correndo por aí com medo.",bc_map,"0x00ffcc";
 	end;
 
 OnTimer20500:
 	set .@map$, instance_mapname("6@tower");
-	mapannounce .@map$,"Let's see who runs fastest. Are you ready?",bc_map,"0x00ffcc";
+	mapannounce .@map$,"Lets see who runs fastest. Are you ready?",bc_map,"0x00ffcc";
 	stopnpctimer;
 	areamonster .@map$,151,66,153,106,"Bone Guardian",1152,50,instance_npcname("#1st Beeper")+"::OnMyMobDead";
 	areamonster .@map$,158,66,160,106,"Bone Guardian",1152,50,instance_npcname("#1st Beeper")+"::OnMyMobDead";
@@ -2013,7 +2200,7 @@ OnMyMobDead:
 		//SetItemPartyInMap in_102floor 101
 	}
 	else
-		mapannounce .@map$,"Remaining Targets " + .@mob_dead_num + "ea",bc_map,"0x00ff99";
+		mapannounce .@map$,"Alvos Restantes " + .@mob_dead_num + "",bc_map,"0x00ff99";
 	end;
 }
 
@@ -2025,16 +2212,16 @@ OnEnable:
 	end;
 
 OnTimer500:
-	mapannounce instance_mapname("6@tower"),"Well, I guess they aren't too challenging for you.",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Bem, acho que elas não são muito desafiadoras para você.",bc_map,"0x00ffcc";
 	end;
 
 OnTimer5500:
-	mapannounce instance_mapname("6@tower"),"Let's speed up a little bit, shall we?",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Vamos acelerar um pouco, certo?",bc_map,"0x00ffcc";
 	end;
 
 OnTimer10500:
 	set .@map$, instance_mapname("6@tower");
-	mapannounce .@map$,"I demand an encore!",bc_map,"0x00ffcc";
+	mapannounce .@map$,"Exijo um bis!",bc_map,"0x00ffcc";
 	stopnpctimer;
 	areamonster .@map$,151,66,153,106,"Wind Guardian",1263,30,instance_npcname("#2nd Beeper")+"::OnMyMobDead";
 	areamonster .@map$,158,66,160,106,"Wind Guardian",1263,30,instance_npcname("#2nd Beeper")+"::OnMyMobDead";
@@ -2048,7 +2235,7 @@ OnMyMobDead:
 		//SetItemPartyInMap in_102floor 102
 	}
 	else
-		mapannounce .@map$,"Remaining Targets " + .@mob_dead_num + "ea",bc_map,"0x00ff99";
+		mapannounce .@map$,"Alvos Restantes " + .@mob_dead_num + "",bc_map,"0x00ff99";
 	end;
 }
 
@@ -2060,16 +2247,16 @@ OnEnable:
 	end;
 
 OnTimer500:
-	mapannounce instance_mapname("6@tower"),"Yes, this is getting exciting!",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Sim, isso está ficando emocionante!",bc_map,"0x00ffcc";
 	end;
 
 OnTimer5500:
-	mapannounce instance_mapname("6@tower"),"I'll remember you as one of a few that have managed to entertain me.",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Vou lembrar de você como um dos poucos que conseguiram me entreter.",bc_map,"0x00ffcc";
 	end;
 
 OnTimer10500:
 	set .@map$, instance_mapname("6@tower");
-	mapannounce .@map$,"How would you like to play one more round?",bc_map,"0x00ffcc";
+	mapannounce .@map$,"Você gostaria de jogar mais uma rodada?",bc_map,"0x00ffcc";
 	stopnpctimer;
 	areamonster .@map$,151,66,153,106,"Sword Edge Guardian",1132,20,instance_npcname("#3rd Beeper")+"::OnMyMobDead";
 	areamonster .@map$,158,66,160,106,"Sword Edge Guardian",1132,20,instance_npcname("#3rd Beeper")+"::OnMyMobDead";
@@ -2083,7 +2270,7 @@ OnMyMobDead:
 		//SetItemPartyInMap in_102floor 103
 	}
 	else
-		mapannounce .@map$,"Remaining Targets " + .@mob_dead_num + "ea",bc_map,"0x00ff99";
+		mapannounce .@map$,"Alvos Restantes " + .@mob_dead_num + "",bc_map,"0x00ff99";
 	end;
 }
 
@@ -2095,16 +2282,16 @@ OnEnable:
 	end;
 
 OnTimer500:
-	mapannounce instance_mapname("6@tower"),"Okay, the time has come to make my appearance!",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Ok, chegou a hora de aparecer!",bc_map,"0x00ffcc";
 	end;
 
 OnTimer5500:
-	mapannounce instance_mapname("6@tower"),"Do you want to know who I am?",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Você quer saber quem eu sou?",bc_map,"0x00ffcc";
 	end;
 
 OnTimer10500:
 	set .@map$, instance_mapname("6@tower");
-	mapannounce .@map$,"You'll soon know. Mine is the face of death!",bc_map,"0x00ffcc";
+	mapannounce .@map$,"Você logo saberá. O meu é o rosto da morte!",bc_map,"0x00ffcc";
 	stopnpctimer;
 	monster .@map$,156,147,"Naght Sieger",1956,1,instance_npcname("#4th Beeper")+"::OnMyMobDead";
 	end;
@@ -2116,57 +2303,80 @@ OnMyMobDead:
 
 6@tower,169,127,2	script	Lost Soul#102	796,{
 	if (checkweight(1201,1) == 0) {
-		mes "You're carrying too much stuff. Why don't you put some of it away, and then come back?";
+		mes "Você está carregando itens demais. Por que não guarda um pouco e volta depois?";
 		close;
 	}
-	mes "[Lost Souls]";
-	mes "It's you that have liberated us from the evil Naght Sieger.";
+	mes "[Almas Perdidas]";
+	mes "Foi você que nos libertou do malvado Naght Sieger.";
 	next;
-	mes "[Lost Souls]";
-	mes "Thank you so much. Now we can escape from this cold and dark place... to heaven.";
+	mes "[Almas Perdidas]";
+	mes "Muito obrigado. Agora podemos escapar deste lugar frio e escuro... para o céu.";
 	next;
 	if ((countitem(13412) > 0) && (countitem(13413) > 0)) {
-		mes "[Lost Souls]";
-		mes "Hey, you have the remnants of Naght Sieger with you.";
+		mes "[Almas Perdidas]";
+		mes "Ei, você tem os restos de Naght Sieger com você.";
 		next;
-		mes "[Lost Souls]";
-		mes "They may appear to be one-handed swords, but I can put them together to make a two-handed one if you want. That's the only way I can repay you for freeing me.";
+		mes "[Almas Perdidas]";
+		mes "Eles podem parecer espadas de uma mão, mas posso juntá-las para criar uma de duas mãos, se você quiser. É a única forma de retribuir por nos libertar.";
 		next;
-		switch(select("Make a Two-Handed Sword.:No, thanks.")) {
+		switch(select("Criar Espada de Duas Mãos.:Não, obrigado.")) {
 		case 1:
-			mes "[Lost Souls]";
-			mes "If it is already upgraded or has a card inside, those effects will be disappear. Is this ok with you?";
+			mes "[Almas Perdidas]";
+			mes "Se ela já estiver aprimorada ou tiver uma carta, esses efeitos desaparecerão. Está bem para você?";
 			next;
-			switch(select("It's fine with me. Please make one.:No way!")) {
+			switch(select("Tudo bem, por favor crie.:De jeito nenhum!")) {
 			case 1:
-				mes "[Lost Souls]";
-				mes "Good, then I'll combine these to create a two-handed sword.";
+				mes "[Almas Perdidas]";
+				mes "Ótimo, então vou combinar estas para criar a espada de duas mãos.";
 				next;
 				delitem 13412,1; //Twin_Edge_B
 				delitem 13413,1; //Twin_Edge_R
 				getitem 1185,1; //Violet_Fear
 				break;
 			case 2:
-				mes "[Lost Souls]";
-				mes "I see. I guess you aren't as greedy or ambitious as those other adventurers.";
+				mes "[Almas Perdidas]";
+				mes "Entendo. Acho que você não é tão ganancioso ou ambicioso quanto outros aventureiros.";
 				next;
 				break;
 			}
 			break;
 		case 2:
-			mes "[Lost Souls]";
-			mes "I see. I guess you aren't as greedy or ambitious as those other adventurers.";
+			mes "[Almas Perdidas]";
+			mes "Entendo. Acho que você não é tão ganancioso ou ambicioso quanto outros aventureiros.";
 			next;
 			break;
 		}
 	}
-	mes "[Lost Souls]";
-	mes "I'd like to talk to you more, but I've... I've got to go now.";
+	mes "[Almas Perdidas]";
+	mes "Eu gostaria de conversar mais, mas... preciso ir agora.";
 	next;
-	mes "[Lost Souls]";
-	mes "Farewell, young adventurer. I wish you good luck.";
+	mes "[Almas Perdidas]";
+	mes "Adeus, jovem aventureiro. Desejo-lhe boa sorte.";
 	close2;
-	warp "alberta",223,36;
+
+	.@iid = instance_id(IM_PARTY);
+	if (.@iid > 0) {
+		// pega o party_id salvo para essa instância
+		.@pid = getd("$etower_pid_by_iid_"+.@iid);
+		// .@partyName$ = party_name(.@iid);
+
+		if (.@pid > 0) {
+			// limpa o progresso do grupo
+			setd("$party_current_floor_"+.@pid, 0);
+			setd("$party_current_map_"+.@pid, "");
+			setd("$etower_pid_by_iid_"+.@iid, 0);
+		}
+
+		erasequest 60201;
+		set #ETOWER_STATUS, 3;
+		set #instancia, 2;
+		set #torre, 2;
+
+		// // anuncia globalmente
+		announce "O jogador "+strcharinfo(0)+" conquistou todos os andares da Torre Sem Fim! Parabéns!", bc_all, 0xFF0000;
+	}	
+
+	warp "prontera",155,184;
 	end;
 
 OnInstanceInit:
@@ -2181,15 +2391,15 @@ OnEnable:
 	end;
 
 OnTimer500:
-	mapannounce instance_mapname("6@tower"),"This... This can't be happening! I can't be defeated!",bc_map,"0xffff00";
+	mapannounce instance_mapname("6@tower"),"Isto... Isto não pode estar acontecendo! Não posso ser derrotado!",bc_map,"0xffff00";
 	end;
 
 OnTimer5500:
-	mapannounce instance_mapname("6@tower"),"Nooo! My soul... My shell...! Nooo~!",bc_map,"0xffff00";
+	mapannounce instance_mapname("6@tower"),"Nããão! Minha alma... Minha casca...! Nããão~!",bc_map,"0xffff00";
 	end;
 
 OnTimer10500:
-	mapannounce instance_mapname("6@tower"),"Naght Sieger's body has turned into dark ashes that scattered in the wind.",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"O corpo de Naght Sieger se transformou em cinzas negras que se espalharam pelo vento.",bc_map,"0x00ffcc";
 	stopnpctimer;
 	end;
 }

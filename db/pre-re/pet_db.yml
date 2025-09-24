@@ -66,9 +66,9 @@ Body:
     Script: >
       .@i = getpetinfo(PETINFO_INTIMATE);
 
+      bonus bLuk,2;
+      bonus bCritical,1;
       if( .@i >= PET_INTIMATE_LOYAL ){
-        bonus bLuk,2;
-        bonus bCritical,1;
       }
   - Mob: DROPS
     TameItem: Orange_Juice
@@ -895,3 +895,22 @@ Body:
     IntimacyOwnerDie: 0
     CaptureRate: 50
     SpecialPerformance: false
+
+  - Mob: E_HYDRA
+    TameItem: Unripe_Apple
+    EggItem: Test_Egg
+    EquipItem: Backpack
+    FoodItem: Apple_Juice
+    Fullness: 3
+    IntimacyFed: 50
+    CaptureRate: 2000
+    Script: >
+      .@i = getpetinfo(PETINFO_INTIMATE);
+
+      if( .@i >= PET_INTIMATE_LOYAL ){
+        bonus bLuk,2;
+        bonus bCritical,1;
+      }
+
+  
+
