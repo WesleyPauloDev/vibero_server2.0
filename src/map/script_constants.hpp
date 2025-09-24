@@ -4386,6 +4386,10 @@
 	export_constant(VIP_STATUS_EXPIRE);
 	export_constant(VIP_STATUS_REMAINING);
 
+
+	/* item groups Custom */
+	export_constant(IG_LUCK_EGG);
+
 	/* item groups */
 	export_constant(IG_BLUEBOX);
 	export_constant(IG_VIOLETBOX);

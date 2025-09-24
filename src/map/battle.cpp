@@ -2049,6 +2049,19 @@ int64 battle_calc_damage(struct block_list *src,struct block_list *bl,struct Dam
 			return 0;
 	}
 
+
+
+	if (bl->type == BL_MOB) {
+		mob_data* md = BL_CAST(BL_MOB, bl);
+		if (md && md->damage_cap > 0) {
+			if (damage > md->damage_cap)
+				damage = md->damage_cap;
+		}
+	}
+
+
+
+
 	return damage;
 }
 

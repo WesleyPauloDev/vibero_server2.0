@@ -1133,14 +1133,24 @@ int32 mob_spawn(struct mob_data* md)
 	md->next_thinktime = tick;
 	if (md->prev != nullptr)
 		unit_remove_map(md, CLR_RESPAWN);
-	else
-		if (md->spawn && md->mob_id != md->spawn->id)
-		{
+	else {
+
+		if (md->spawn) {
+			md->db = mob_db.find(md->mob_id); // busca no DB
+			if (md->db) {
+				md->damage_cap = md->db->damage_cap; // sempre copia do DB
+			} else {
+				md->damage_cap = 0;
+			}
+		}
+
+		if (md->spawn && md->mob_id != md->spawn->id) {
 			md->mob_id = md->spawn->id;
 			status_set_viewdata(md, md->mob_id);
-			md->db = mob_db.find(md->mob_id);
+			md->db = mob_db.find(md->mob_id); // pode até manter, mas damage_cap não precisa mais aqui
 			memcpy(md->name, md->spawn->name, NAME_LENGTH);
 		}
+	}
 
 	if (md->spawn) { //Respawn data
 		md->m = md->spawn->m;
@@ -2598,6 +2608,8 @@ static TIMER_FUNC(mob_delay_item_drop) {
  *------------------------------------------*/
 static void mob_item_drop(struct mob_data* md, std::shared_ptr<s_item_drop_list>& dlist, std::shared_ptr<s_item_drop>& ditem, int32 loot, int32 drop_rate, bool flag)
 {
+
+
 	TBL_PC* sd;
 	bool test_autoloot;
 	//Logs items, dropped by mobs [Lupus]
@@ -4115,6 +4127,7 @@ int32 mob_getfriendhprate_sub(struct block_list* bl, va_list ap)
 		(*fr) = bl;
 	return 1;
 }
+
 static struct block_list* mob_getfriendhprate(struct mob_data* md, int64 min_rate, int64 max_rate)
 {
 	struct block_list* fr = nullptr;
@@ -4991,6 +5004,8 @@ s_mob_db::s_mob_db()
 	this->damagetaken = 100;
 	this->group_id = {};
 	this->title = {};
+
+	this->damage_cap = 0; // ?? inicialização segura
 }
 
 /**
@@ -5083,6 +5098,18 @@ uint64 MobDatabase::parseBodyNode(const ryml::NodeRef& node) {
 
 		mob->status.max_hp = hp;
 	}
+	
+
+	if (this->nodeExists(node, "DamageCap")) {
+		int cap;
+		if (!this->asInt32(node, "DamageCap", cap))
+			cap = 0;
+		mob->damage_cap = cap;
+	} else {
+		mob->damage_cap = 0; // default = sem limite
+	}
+
+
 
 	if (this->nodeExists(node, "Sp")) {
 		uint32 sp;

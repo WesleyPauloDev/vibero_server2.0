@@ -280,6 +280,8 @@ struct s_mob_db {
 	int32 group_id;
 	std::string title;
 
+	int damage_cap;
+
 	e_mob_bosstype get_bosstype();
 	s_mob_db();
 };
@@ -397,6 +399,8 @@ struct mob_data : public block_list {
 	 **/
 	int32 tomb_nid;
 	uint16 damagetaken;
+
+	int damage_cap;
 
 	e_mob_bosstype get_bosstype();
 	map_session_data* get_mvp_player();

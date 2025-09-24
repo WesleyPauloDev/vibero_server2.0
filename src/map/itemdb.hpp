@@ -3119,6 +3119,11 @@ enum e_random_item_group {
 	IG_CHEST_OF_DEATH,
 	IG_SHADOW_CUBE_SAK,
 
+/// Item Group Custom
+	IG_LUCK_EGG,
+
+// ====================================================
+
 	IG_MAX
 };
 

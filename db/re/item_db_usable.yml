@@ -1081,8 +1081,12 @@ Body:
     Weight: 10
     Flags:
       BuyingStore: true
+      NoConsume: true
     Script: |
       itemskill "AL_TELEPORT",1;
+      if (getgroupid() != 5) {
+        delitem 601, 1;
+      }
   - Id: 602
     AegisName: Wing_Of_Butterfly
     Name: Butterfly Wing
@@ -1178,7 +1182,7 @@ Body:
     Name: Yggdrasil Leaf
     Type: DelayConsume
     Buy: 4000
-    Weight: 100
+    Weight: 10
     Flags:
       BuyingStore: true
     Script: |
@@ -1557,12 +1561,16 @@ Body:
     AegisName: Pet_Incubator
     Name: Pet Incubator
     Type: Usable
-    Buy: 10000
-    Weight: 30
+    Buy: 100
+    Weight: 10
     Flags:
       BuyingStore: true
+      NoConsume: true
     Script: |
       bpet;
+      if (getgroupid() != 5) {
+        delitem 643, 1;
+      }
   - Id: 644
     AegisName: Gift_Box
     Name: Gift Box
@@ -1579,17 +1587,25 @@ Body:
     Name: Concentration Potion
     Type: Usable
     Buy: 1200
-    Weight: 100
+    Weight: 10
     Flags:
       BuyingStore: true
+      NoConsume: true 
     Script: |
-      sc_start SC_ASPDPOTION0,1800000,4;
+      // 1. Aplica o efeito do item para todos
+      sc_start SC_ASPDPOTION0, 1800000, 4;
+
+      // 2. Verifica se o jogador NÃO é VIP (grupo_id = 0)
+      if (getgroupid() != 5) {
+        // 3. Se não for VIP, consome o item manualmente.
+        delitem 645, 1;
+      }
   - Id: 656
     AegisName: Awakening_Potion
     Name: Awakening Potion
     Type: Usable
     Buy: 1000
-    Weight: 150
+    Weight: 10
     Jobs:
       Alchemist: true
       Archer: true
@@ -1619,14 +1635,18 @@ Body:
     EquipLevelMin: 40
     Flags:
       BuyingStore: true
+      NoConsume: true
     Script: |
       sc_start SC_ASPDPOTION1,1800000,6;
+      if (getgroupid() != 5) {
+        delitem 656, 1;
+      }
   - Id: 657
     AegisName: Berserk_Potion
     Name: Berserk Potion
     Type: Usable
     Buy: 2000
-    Weight: 200
+    Weight: 10
     Jobs:
       Alchemist: true
       Blacksmith: true
@@ -1645,8 +1665,12 @@ Body:
     EquipLevelMin: 85
     Flags:
       BuyingStore: true
+      NoConsume: true
     Script: |
       sc_start SC_ASPDPOTION2,1800000,9;
+      if (getgroupid() != 5) {
+        delitem 657, 1;
+      }
   - Id: 658
     AegisName: Union_Of_Tribe
     Name: Union of Tribe
@@ -5679,7 +5703,7 @@ Body:
     Name: Bloody Branch
     Type: Usable
     Buy: 10000
-    Weight: 200
+    Weight: 10
     Flags:
       BuyingStore: true
       DeadBranch: true
@@ -5811,28 +5835,40 @@ Body:
     Weight: 10
     Flags:
       BuyingStore: true
+      NoConsume: true
     Script: |
       itemskill "ITEM_ENCHANTARMS",4;
+      if (getgroupid() != 5) {
+        delitem 12114, 1;
+      }
   - Id: 12115
     AegisName: Elemental_Water
     Name: Elemental Converter
-    Type: DelayConsume
+    Type: Usable
     Buy: 2
     Weight: 10
     Flags:
-      BuyingStore: true
+      ByingStore: true
+      NoConsume: true
     Script: |
       itemskill "ITEM_ENCHANTARMS",2;
+      if (getgroupid() != 5) {
+        delitem 12115, 1;
+      }
   - Id: 12116
     AegisName: Elemental_Earth
     Name: Elemental Converter
-    Type: DelayConsume
+    Type: Usable
     Buy: 2
     Weight: 10
     Flags:
-      BuyingStore: true
+      ByingStore: true
+      NoConsume: true
     Script: |
       itemskill "ITEM_ENCHANTARMS",3;
+      if (getgroupid() != 5) {
+        delitem 12116, 1;
+      }
   - Id: 12117
     AegisName: Elemental_Wind
     Name: Elemental Converter
@@ -5840,9 +5876,13 @@ Body:
     Buy: 2
     Weight: 10
     Flags:
-      BuyingStore: true
+      ByingStore: true
+      NoConsume: true
     Script: |
       itemskill "ITEM_ENCHANTARMS",5;
+      if (getgroupid() != 5) {
+        delitem 12117, 1;
+      }
   - Id: 12118
     AegisName: Resist_Fire
     Name: Fireproof Potion
@@ -7832,7 +7872,7 @@ Body:
       NoMail: true
       NoAuction: true
     Script: |
-      mercenary_create 2058,1800000;
+      mercenary_create 1191,3600000;
   - Id: 12277
     AegisName: Disguise_Scroll
     Name: Disguise Scroll
@@ -9544,7 +9584,7 @@ Body:
     Buy: 2
     Weight: 10
     Script: |
-      sc_start SC_EXPBOOST,900000,200;
+      sc_start SC_EXPBOOST,1800000,200;
   - Id: 12412
     AegisName: HE_Bubble_Gum
     Name: HE Bubble Gum
@@ -9691,7 +9731,7 @@ Body:
     Name: HP Increase Potion (Large)
     Type: Usable
     Buy: 100
-    Weight: 80
+    Weight: 10
     Flags:
       BuyingStore: true
     Script: |
@@ -9724,7 +9764,7 @@ Body:
     Name: SP Increase Potion (Large)
     Type: Usable
     Buy: 100
-    Weight: 80
+    Weight: 10
     Flags:
       BuyingStore: true
     Script: |
@@ -12963,9 +13003,9 @@ Body:
     AegisName: Guyak_Pudding
     Name: Guyak Pudding
     Type: Usable
-    Weight: 200
+    Weight: 10
     Script: |
-      sc_start SC_SPEEDUP1,300000,50;
+      sc_start SC_SPEEDUP1,1800000,50;
   - Id: 12711
     AegisName: Pretzel
     Name: Pretzel
@@ -34789,7 +34829,7 @@ Body:
       NoMail: true
       NoAuction: true
     Script: |
-      sc_start SC_EXPBOOST,3600000,100;
+      sc_start SC_EXPBOOST,1800000,100;
   - Id: 14534
     AegisName: Small_Life_Potion
     Name: Small Life Potion

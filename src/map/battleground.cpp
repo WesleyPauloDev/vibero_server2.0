@@ -999,9 +999,19 @@ void bg_queue_join_solo(const char *name, map_session_data *sd)
 
 	std::shared_ptr<s_battleground_type> bg = bg_search_name(name);
 
-	if (!bg) {
-		ShowWarning("bq_queue_join_solo: Could not find battleground \"%s\" requested by %s (AID: %d / CID: %d)\n", name, sd->status.name, sd->status.account_id, sd->status.char_id);
+	map_session_data* pl_sd = map_charid2sd(sd->status.char_id);
+	if (pl_sd) {		
+		char event[128];
+
+		// monta o nome do evento dinâmico
+		safesnprintf(event, sizeof(event), "%s_Instance#Custom::OnStartInstance", name);
+
+		// dispara o evento já com attach correto
+		npc_event_do_id(event, pl_sd->status.account_id);
 		return;
+	
+		// ShowWarning("bq_queue_join_solo: Could not find battleground \"%s\" requested by %s (AID: %d / CID: %d)\n", name, sd->status.name, sd->status.account_id, sd->status.char_id);
+		// return;
 	}
 
 	if (!bg->solo) {
@@ -1074,8 +1084,8 @@ void bg_queue_join_party(const char *name, map_session_data *sd)
 
 		bg_queue_join_multi(name, sd, list); // Join as party, all on the same side of the BG
 	} else {
-		ShowWarning("clif_parse_bg_queue_apply_request: Could not find Battleground: \"%s\" requested by player: %s (AID:%d CID:%d)\n", name, sd->status.name, sd->status.account_id, sd->status.char_id);
-		clif_bg_queue_apply_result(BG_APPLY_INVALID_NAME, name, sd);
+		// ShowWarning("clif_parse_bg_queue_apply_request: Could not find Battleground: \"%s\" requested by player: %s (AID:%d CID:%d)\n", name, sd->status.name, sd->status.account_id, sd->status.char_id);
+		// clif_bg_queue_apply_result(BG_APPLY_INVALID_NAME, name, sd);
 		return; // Invalid BG name
 	}
 }
@@ -1093,28 +1103,28 @@ void bg_queue_join_guild(const char *name, map_session_data *sd)
 	}
 
 	if (!sd->guild) {
-		clif_bg_queue_apply_result(BG_APPLY_INVALID_APP, name, sd);
-		return; // Someone has bypassed the client check for being in a guild
+		// clif_bg_queue_apply_result(BG_APPLY_INVALID_APP, name, sd);
+		return; /// O jogador não está em um clã
 	}
 	
 	if (strcmp(sd->status.name, sd->guild->guild.master) != 0) {
-		clif_bg_queue_apply_result(BG_APPLY_PARTYGUILD_LEADER, name, sd);
-		return; // Not the guild leader
+		// clif_bg_queue_apply_result(BG_APPLY_PARTYGUILD_LEADER, name, sd);
+		return; // Não é o líder do clã
 	}
 
 	std::shared_ptr<s_battleground_type> bg = bg_search_name(name);
 
 	if (bg) {
 		if (!bg->guild) {
-			clif_bg_queue_apply_result(BG_APPLY_INVALID_APP, name, sd);
-			return;
+			// clif_bg_queue_apply_result(BG_APPLY_INVALID_APP, name, sd);
+			return; // O tipo de Battleground não aceita clãs
 		}
 
 		auto &g = sd->guild;
 
 		if (g->guild.connect_member > bg->max_players) {
-			clif_bg_queue_apply_result(BG_APPLY_PLAYER_COUNT, name, sd);
-			return; // Too many guild members online
+			// clif_bg_queue_apply_result(BG_APPLY_PLAYER_COUNT, name, sd);
+			return; // Muitos membros do clã online
 		}
 
 		std::vector<map_session_data *> list;
@@ -1133,9 +1143,9 @@ void bg_queue_join_guild(const char *name, map_session_data *sd)
 
 		bg_queue_join_multi(name, sd, list); // Join as guild, all on the same side of the BG
 	} else {
-		ShowWarning("clif_parse_bg_queue_apply_request: Could not find Battleground: \"%s\" requested by player: %s (AID:%d CID:%d)\n", name, sd->status.name, sd->status.account_id, sd->status.char_id);
-		clif_bg_queue_apply_result(BG_APPLY_INVALID_NAME, name, sd);
-		return; // Invalid BG name
+		// ShowWarning("clif_parse_bg_queue_apply_request: Could not find Battleground: \"%s\" requested by player: %s (AID:%d CID:%d)\n", name, sd->status.name, sd->status.account_id, sd->status.char_id);
+		// clif_bg_queue_apply_result(BG_APPLY_INVALID_NAME, name, sd);
+		return; // Nome de Battleground inválido
 	}
 }
 
