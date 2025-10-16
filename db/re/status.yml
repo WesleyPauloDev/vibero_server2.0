@@ -750,9 +750,10 @@ Body:
   - Status: Speedup1
     Icon: EFST_MOVHASTE_POTION
     Flags:
-      NoSave: true
-      NoClearance: true
       RemoveOnHermode: true
+      NoDispell: true
+      NoClearance: true
+      NoRemoveOnDead: true
     Script: |
       bonus bSpeedRate, getstatus(SC_SPEEDUP1, 1);
   - Status: Atkpotion
@@ -870,6 +871,7 @@ Body:
     DurationLookup: AM_CP_WEAPON
     Flags:
       NoClearbuff: true
+      NoRemoveOnDead: true
       NoDispell: true
       NoBanishingBuster: true
       NoClearance: true
@@ -880,6 +882,7 @@ Body:
     DurationLookup: AM_CP_SHIELD
     Flags:
       NoClearbuff: true
+      NoRemoveOnDead: true
       NoDispell: true
       NoBanishingBuster: true
       NoClearance: true
@@ -890,6 +893,7 @@ Body:
     DurationLookup: AM_CP_ARMOR
     Flags:
       NoClearbuff: true
+      NoRemoveOnDead: true
       NoDispell: true
       NoBanishingBuster: true
       NoClearance: true
@@ -900,6 +904,7 @@ Body:
     DurationLookup: AM_CP_HELM
     Flags:
       NoClearbuff: true
+      NoRemoveOnDead: true
       NoDispell: true
       NoBanishingBuster: true
       NoClearance: true
@@ -2667,6 +2672,9 @@ Body:
     CalcFlags:
       Atk_Ele: true
     Flags:
+      NoDispell: true
+      NoClearance: true
+      NoRemoveOnDead: true
       SendVal1: true
       OverlapIgnoreLevel: true
       RemoveOnUnequipWeapon: true
@@ -6484,10 +6492,18 @@ Body:
       Reuse_Limit_Recall: true
   - Status: Promote_Health_Reserch
     Icon: EFST_PROMOTE_HEALTH_RESERCH
+    Flags:
+      NoRemoveOnDead: true
+      NoDispell: true
+      NoClearance: true
     CalcFlags:
       MaxHp: true
   - Status: Energy_Drink_Reserch
     Icon: EFST_ENERGY_DRINK_RESERCH
+    Flags:
+      NoRemoveOnDead: true
+      NoDispell: true
+      NoClearance: true
     CalcFlags:
       MaxSp: true
   - Status: Norecover_State
@@ -7432,11 +7448,35 @@ Body:
       bonus bMaxSPrate, getstatus(SC_INCREASE_MAXSP, 1);
       bonus bSPrecovRate, getstatus(SC_INCREASE_MAXSP, 2);
   - Status: Ref_T_Potion
-    Icon: EFST_REF_T_POTION
+    Icon: EFST_REF_T_POTION  
+    Flags:
+      NoDispell: true
+      NoClearance: true
+      NoRemoveOnDead: true
+  - Status: Add_Atk_Damage_Macaroon
+    Icon: EFST_ADD_ATK_DAMAGE_MACAROON
+    Flags:
+      NoDispell: true
+      NoClearance: true
+      NoRemoveOnDead: true
   - Status: Add_Atk_Damage
     Icon: EFST_ADD_ATK_DAMAGE
+    Flags:
+      NoDispell: true
+      NoClearance: true
+      NoRemoveOnDead: true
+  - Status: Add_Matk_Damage_Happiness
+    Icon: EFST_ADD_MATK_DAMAGE_HAPPINESS
+    Flags:
+      NoDispell: true
+      NoClearance: true
+      NoRemoveOnDead: true
   - Status: Add_Matk_Damage
     Icon: EFST_ADD_MATK_DAMAGE
+    Flags:
+      NoDispell: true
+      NoClearance: true
+      NoRemoveOnDead: true
   - Status: Helpangel
     Icon: EFST_HELPANGEL
     DurationLookup: NV_HELPANGEL
@@ -7841,6 +7881,10 @@ Body:
     Flags:
       BlEffect: true
       DisplayPc: true
+  - Status: Add_Atk_Damage_Macaroon
+    Icon: EFST_ADD_ATK_DAMAGE_MACAROON
+  - Status: Add_Matk_Damage_Happiness
+    Icon: EFST_ADD_MATK_DAMAGE_HAPPINESS
   - Status: Deadly_Defeasance
     Icon: EFST_DEADLY_DEFEASANCE
     DurationLookup: AG_DEADLY_PROJECTION

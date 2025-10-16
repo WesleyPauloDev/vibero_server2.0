@@ -1997,7 +1997,11 @@ int64 battle_calc_damage(struct block_list *src,struct block_list *bl,struct Dam
 
 		if (flag & BF_WEAPON && (sce = sc->getSCE(SC_ADD_ATK_DAMAGE)))
 			damage += damage * sce->val1 / 100;
+		if (flag & BF_WEAPON && (sce = sc->getSCE(SC_ADD_ATK_DAMAGE_MACAROON)))
+			damage += damage * sce->val1 / 100;
 		if (flag & BF_MAGIC && (sce = sc->getSCE(SC_ADD_MATK_DAMAGE)))
+			damage += damage * sce->val1 / 100;
+		if (flag & BF_MAGIC && (sce = sc->getSCE(SC_ADD_MATK_DAMAGE_HAPPINESS)))
 			damage += damage * sce->val1 / 100;
 		if (sc->getSCE(SC_DANCEWITHWUG) && (flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON))
 			damage += damage * sc->getSCE(SC_DANCEWITHWUG)->val1 / 100;

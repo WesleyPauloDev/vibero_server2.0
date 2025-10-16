@@ -4,6 +4,7 @@ function	script	Warper_Card	{
     mes "[Teleporte]";
 
     menu	"Ultimo Teleporte ^777777["+lastwarp$+"]^000000",-,
+    	" ~ Guia de UP",Guia_UP,
     	" ~ Cidades",Towns,
 		" ~ Campos",Fields,
 		" ~ Masmorras",Dungeons,
@@ -13,7 +14,7 @@ function	script	Warper_Card	{
 		" ~ Areas Especiais",Special;
 
         if (lastwarp$ == "")
-            message strcharinfo(0),"You haven't warped anywhere yet.";
+            message strcharinfo(0),"Você ainda não se teletransportou para lugar nenhum.";
         else
             warp lastwarp$,lastwarpx,lastwarpy;
         end;
@@ -58,7 +59,7 @@ function	script	Warper_Card	{
             set .@map$, getarg(0)+((.@i<10)?"0":"")+.@i;
         }
         if (.@warp_block & (1<<.@select)) {
-            message strcharinfo(0),"This map is not enabled in "+((checkre(0))?"":"Pre-")+"Renewal.";
+            message strcharinfo(0),"Este mapa não está habilitado em "+((checkre(0))?"":"Pre-")+"Renewal.";
             end;
         }
         set .@x, @c[.@i*2];
@@ -86,13 +87,38 @@ function	script	Warper_Card	{
                 for (set .@i,1; .@i<getargcount(); set .@i,.@i+1)
                     set @warp_block, @warp_block | (1<<getarg(.@i));
             } else {
-                message strcharinfo(0),"This map is not enabled in "+((checkre(0))?"":"Pre-")+"Renewal.";
+                message strcharinfo(0),"Este mapa não está habilitado em "+((checkre(0))?"":"Pre-")+"Renewal.";
                 end;
             }
         }
         return;
     }
 
+    // --------------------------------------------------
+	Guia_UP:
+    // --------------------------------------------------
+    menu	"[99+]Roween",GUIA1, "[100+]Magdun 02",GUIA2, "[105+]Vento da Colina",GUIA3, "[110+]Kobold",GUIA4,
+            "[115+]Lobo do Deserto",GUIA5, "[120+]Large Meditatio Bath",GUIA6, "[130+]Siroma",GUIA7, "[125+]Magmaring",GUIA8, "[135+]Juperos",GUIA9, "[140+]Abyss 01",GUIA10,
+            "[145+]Torre de Thanatos 08",GUIA11, "[150+]El Dicastes 01",GUIA12, "[155+]Scaraba",GUIA13, "[160+]Monastério 03",GUIA14, "[165+]Templo de Odin",GUIA15,
+            "[170+]Caverna de Nifflheim",GUIA16;
+    
+    GUIA1: Go("ra_fild12",47,226);
+    GUIA2: Go("mag_dun02",48,35);
+    GUIA3: Go("ra_fild04",263,61);
+    GUIA4: Go("ra_fild05",39,353);
+    GUIA5: Go("ra_fild01",307,43);
+    GUIA6: Go("ba_bath",159,26);
+    GUIA7: Go("ice_dun01",157,15);
+    GUIA8: Go("ve_fild03",351,221);
+    GUIA9: Go("juperos_01",53,248);
+    GUIA10: Go("abyss_01",261,273);
+    GUIA11: Go("tha_t08",110,120);
+    GUIA12: Go("dic_fild01",28,79);
+    GUIA13: Go("dic_dun02",102,144);
+    GUIA14: Go("abbey03",119,9);
+    GUIA15: Go("odin_tem03",247,40);
+    GUIA16: Go("nif_dun01",145,86);
+    
     // --------------------------------------------------
 	Towns:
     // --------------------------------------------------

@@ -5001,6 +5001,7 @@ int32 status_calc_pc_( map_session_data* sd, uint8 opt ){
 	// Store the return value of the original function
 	int32 ret = status_calc_pc_sub( sd, opt );
 
+
 	// If an old script is present
 	if( previous_st ){
 		// Reattach the player to it, so that the limitations of that script kick back in

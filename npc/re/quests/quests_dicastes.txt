@@ -7448,140 +7448,140 @@ dic_fild01,228,159,4	script	Jahbong#pa0829	496,{
 
 // Cat Paw Agent
 //============================================================
-moc_para01,44,19,3	script	Cat Paw Agent#gekk	496,{
-	if (BaseLevel < 70)	{
-		mes "[Cat Paw Agent]";
-		mes "Hey, human! Did you come to make a request, too? When will it be my turn?";
-		next;
-		mes "[Cat Paw Agent]";
-		mes "Our Cat Paw Merchant group really needs any help it can get. But by the looks of all those requests that Ebenor is holding in his hand, Cat Paw Merchant will be closed by the time my request is put up on the board!";
-		next;
-		mes "[Cat Paw Agent]";
-		mes "It breaks my heart to think my colleagues will be shivering in the blizzard. I hope I don't get into trouble since I can't do anything about it, right?";
-		close;
-	}
-	if (ep13_start != 100) {
-		mes "[Cat Paw Agent]";
-		mes "Hey, human! Did you come to make a request, too? When will it be my turn?";
-		next;
-		mes "[Cat Paw Agent]";
-		mes "Our Cat Paw Merchant group really needs any help it can get. But by the looks of all those requests that Ebenor is holding in his hand, Cat Paw Merchant will be closed by the time my request is put up on the board!";
-		next;
-		mes "[Cat Paw Agent]";
-		mes "It breaks my heart to think my colleagues will be shivering in the blizzard. I hope I don't get into trouble since I can't do anything about it, right?";
-		next;
-		if (select ("Why don't you collect it yourself?:I'm sorry to hear that.") == 1) {
-				emotion ET_HUK;
-				mes "[Cat Paw Agent]";
-				mes "Human!! You're a genius!!";
-				mes "How did you come up with that?";
-				next;
-				mes "[Agent Geck]";
-				mes "I'm Agent Geck from the Cat Paw Merchant.";
-				mes "Car Paw Merchant has been wandering for a long time in this Midgard world ever since we lost our homeland.";
-				next;
-				mes "[Agent Geck]";
-				mes "But now we realize there is no place for our group here in Midgard.";
-				mes "Geck, Gyareuk and Gorureung did a lot of thinking about it.";
-				next;
-				mes "[Agent Geck]";
-				mes "But we finally found a place to settle!";
-				mes "It may be a bit cold but there are no Kafra or Jonda there!";
-				mes "We will gain ground in our new land!";
-				next;
-				mes "[Agent Geck]";
-				mes "But of course, we don't have any influence over there to start with.";
-				mes "However, we plan to spare no efforts on it.";
-				next;
-				mes "[Agent Geck]";
-				mes "Human!! Did you know there is a huge hole near the Morocc village and nearby area?";
-				mes "They say you can travel to a new area through the hole!";
-				next;
-				mes "[Agent Geck]";
-				mes "But you will have to go through tests and research to get to a place before trying it out.";
-				mes "To me, I think its all nonsense to go through the trouble!";
-				next;
-				mes "[Agent Geck]";
-				mes "We must send someone as soon as possible to start exploring the area.";
-				mes "While the humans are frittering away, our Cat Paw Merchant should settle first and continue with our research.";
-				next;
-				if (select ("I also want to go and help the merchants.:I'm not interested.") == 1) {
-						mes "[Agent Geck]";
-						mes "You are better than other humans!";
-						mes "If you really mean it, then sign here.";
-						mes "I'm collecting signs to get on Gyareuk's good side... never mind. I will let them know you are my sponsor!";
-						next;
-						input .@inputstr$;
-						mes "[Agent Geck]";
-						mes "" + strcharinfo(0) + "? Human names are strange to me.";
-						next;
-						mes "[Agent Geck]";
-						mes "Now you are Geck's personal slav... sponsor.";
-						mes "Don't ask why you aren't Merchant sponsor.";
-						mes "A good human does not poke around where they are not supposed to.";
-						next;
-						mes "[Agent Geck]";
-						mes "Now since you've signed, all we need to do is leave for the other world.";
-						mes "I heard humans call it Ash-Vacuum.";
-						mes "Nobody explained to Geck why it was called that.";
-						next;
-						mes "[Agent Geck]";
-						mes "But human.";
-						mes "You will need to pay to get to the Ash-Vacuum.";
-						mes "There wouldn't be any expense for Geck to send you there myself but we must ask for help from other agents.";
-						next;
-						mes "[Agent Geck]";
-						mes "So you will need some money to buy fish for agents who help you.";
-						mes "I will introduce you to an agent who will send you to the other world with no questions asked for only 50,000 zeny.";
-						next;
-						if (select ("Pay 50,000 zeny.:No way!") == 1) {
-								if (Zeny < 50000) {
-									mes "[Agent Geck]";
-									mes "Geck learned not to deal with people who can't pay.";
-									close;
-								}
-								mes "[Agent Geck]";
-								mes "With this, our contract is now complete.";
-								mes "Geck will help you to get to Ash-Vacuum in one piece.";
-								set Zeny, Zeny - 50000;
-								set ep13_start, 100;
-								next;
-								mes "[Agent Geck]";
-								mes "Don't forget, human. The reason why Geck is helping you is to help the Cat Paw Merchant working hard in the other world.";
-								next;
-								mes "[Agent Geck]";
-								mes "Now, I will transport you. Go meet our agent in the right corner.";
-								close2;
-								warp "moc_fild20", 342, 198;
-								end;
-						}
-						mes "[Agent Geck]";
-						mes "Geck doesn't force humans.";
-						mes "But I think you will change your mind.";
-						close;
-				}
-				mes "[Agent Geck]";
-				mes "Did you meet the Cat Paw Merchant in Ash-Vacuum, human?";
-				close;
-		}
-		mes "[Cat Paw Agent]";
-		mes "But our Cat Paw Merchant will overcome any obstacle!";
-		close;
-	}
-	mes "[Agent Geck]";
-	mes "Did you meet the Cat Paw Merchant in Ash-Vacuum, human?";
-	next;
-	if (select ("Send me back:I'm busy") == 1) {
-		mes "[Agent Geck]";
-		mes "There is no time to waste, human!";
-		mes "I'll send you back right away!";
-		warp "moc_fild20", 342, 198;
-		close;
-	}
-	mes "[Agent Geck]";
-	mes "Hey, human! Didn't you say you will help the Cat Paw Merchant!";
-	close;
-}
+// moc_para01,44,19,3	script	Cat Paw Agent#gekk	496,{
+// 	if (BaseLevel < 70)	{
+// 		mes "[Cat Paw Agent]";
+// 		mes "Hey, human! Did you come to make a request, too? When will it be my turn?";
+// 		next;
+// 		mes "[Cat Paw Agent]";
+// 		mes "Our Cat Paw Merchant group really needs any help it can get. But by the looks of all those requests that Ebenor is holding in his hand, Cat Paw Merchant will be closed by the time my request is put up on the board!";
+// 		next;
+// 		mes "[Cat Paw Agent]";
+// 		mes "It breaks my heart to think my colleagues will be shivering in the blizzard. I hope I don't get into trouble since I can't do anything about it, right?";
+// 		close;
+// 	}
+// 	if (ep13_start != 100) {
+// 		mes "[Cat Paw Agent]";
+// 		mes "Hey, human! Did you come to make a request, too? When will it be my turn?";
+// 		next;
+// 		mes "[Cat Paw Agent]";
+// 		mes "Our Cat Paw Merchant group really needs any help it can get. But by the looks of all those requests that Ebenor is holding in his hand, Cat Paw Merchant will be closed by the time my request is put up on the board!";
+// 		next;
+// 		mes "[Cat Paw Agent]";
+// 		mes "It breaks my heart to think my colleagues will be shivering in the blizzard. I hope I don't get into trouble since I can't do anything about it, right?";
+// 		next;
+// 		if (select ("Why don't you collect it yourself?:I'm sorry to hear that.") == 1) {
+// 				emotion ET_HUK;
+// 				mes "[Cat Paw Agent]";
+// 				mes "Human!! You're a genius!!";
+// 				mes "How did you come up with that?";
+// 				next;
+// 				mes "[Agent Geck]";
+// 				mes "I'm Agent Geck from the Cat Paw Merchant.";
+// 				mes "Car Paw Merchant has been wandering for a long time in this Midgard world ever since we lost our homeland.";
+// 				next;
+// 				mes "[Agent Geck]";
+// 				mes "But now we realize there is no place for our group here in Midgard.";
+// 				mes "Geck, Gyareuk and Gorureung did a lot of thinking about it.";
+// 				next;
+// 				mes "[Agent Geck]";
+// 				mes "But we finally found a place to settle!";
+// 				mes "It may be a bit cold but there are no Kafra or Jonda there!";
+// 				mes "We will gain ground in our new land!";
+// 				next;
+// 				mes "[Agent Geck]";
+// 				mes "But of course, we don't have any influence over there to start with.";
+// 				mes "However, we plan to spare no efforts on it.";
+// 				next;
+// 				mes "[Agent Geck]";
+// 				mes "Human!! Did you know there is a huge hole near the Morocc village and nearby area?";
+// 				mes "They say you can travel to a new area through the hole!";
+// 				next;
+// 				mes "[Agent Geck]";
+// 				mes "But you will have to go through tests and research to get to a place before trying it out.";
+// 				mes "To me, I think its all nonsense to go through the trouble!";
+// 				next;
+// 				mes "[Agent Geck]";
+// 				mes "We must send someone as soon as possible to start exploring the area.";
+// 				mes "While the humans are frittering away, our Cat Paw Merchant should settle first and continue with our research.";
+// 				next;
+// 				if (select ("I also want to go and help the merchants.:I'm not interested.") == 1) {
+// 						mes "[Agent Geck]";
+// 						mes "You are better than other humans!";
+// 						mes "If you really mean it, then sign here.";
+// 						mes "I'm collecting signs to get on Gyareuk's good side... never mind. I will let them know you are my sponsor!";
+// 						next;
+// 						input .@inputstr$;
+// 						mes "[Agent Geck]";
+// 						mes "" + strcharinfo(0) + "? Human names are strange to me.";
+// 						next;
+// 						mes "[Agent Geck]";
+// 						mes "Now you are Geck's personal slav... sponsor.";
+// 						mes "Don't ask why you aren't Merchant sponsor.";
+// 						mes "A good human does not poke around where they are not supposed to.";
+// 						next;
+// 						mes "[Agent Geck]";
+// 						mes "Now since you've signed, all we need to do is leave for the other world.";
+// 						mes "I heard humans call it Ash-Vacuum.";
+// 						mes "Nobody explained to Geck why it was called that.";
+// 						next;
+// 						mes "[Agent Geck]";
+// 						mes "But human.";
+// 						mes "You will need to pay to get to the Ash-Vacuum.";
+// 						mes "There wouldn't be any expense for Geck to send you there myself but we must ask for help from other agents.";
+// 						next;
+// 						mes "[Agent Geck]";
+// 						mes "So you will need some money to buy fish for agents who help you.";
+// 						mes "I will introduce you to an agent who will send you to the other world with no questions asked for only 50,000 zeny.";
+// 						next;
+// 						if (select ("Pay 50,000 zeny.:No way!") == 1) {
+// 								if (Zeny < 50000) {
+// 									mes "[Agent Geck]";
+// 									mes "Geck learned not to deal with people who can't pay.";
+// 									close;
+// 								}
+// 								mes "[Agent Geck]";
+// 								mes "With this, our contract is now complete.";
+// 								mes "Geck will help you to get to Ash-Vacuum in one piece.";
+// 								set Zeny, Zeny - 50000;
+// 								set ep13_start, 100;
+// 								next;
+// 								mes "[Agent Geck]";
+// 								mes "Don't forget, human. The reason why Geck is helping you is to help the Cat Paw Merchant working hard in the other world.";
+// 								next;
+// 								mes "[Agent Geck]";
+// 								mes "Now, I will transport you. Go meet our agent in the right corner.";
+// 								close2;
+// 								warp "moc_fild20", 342, 198;
+// 								end;
+// 						}
+// 						mes "[Agent Geck]";
+// 						mes "Geck doesn't force humans.";
+// 						mes "But I think you will change your mind.";
+// 						close;
+// 				}
+// 				mes "[Agent Geck]";
+// 				mes "Did you meet the Cat Paw Merchant in Ash-Vacuum, human?";
+// 				close;
+// 		}
+// 		mes "[Cat Paw Agent]";
+// 		mes "But our Cat Paw Merchant will overcome any obstacle!";
+// 		close;
+// 	}
+// 	mes "[Agent Geck]";
+// 	mes "Did you meet the Cat Paw Merchant in Ash-Vacuum, human?";
+// 	next;
+// 	if (select ("Send me back:I'm busy") == 1) {
+// 		mes "[Agent Geck]";
+// 		mes "There is no time to waste, human!";
+// 		mes "I'll send you back right away!";
+// 		warp "moc_fild20", 342, 198;
+// 		close;
+// 	}
+// 	mes "[Agent Geck]";
+// 	mes "Hey, human! Didn't you say you will help the Cat Paw Merchant!";
+// 	close;
+// }
 
 moc_fild20,368,197,3	script	Cat#to22	876,{
 	if (ep13_start != 100) {

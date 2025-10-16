@@ -1,0 +1,463 @@
+//===== rAthena Script =======================================
+//= Poring Village
+//===== Description: =========================================
+//= [Walkthrough Conversion]
+//= Poring Village instance
+//===== Changelogs: ==========================================
+//= 1.0 First version. [Capuche]
+//============================================================
+
+// Instance
+-	script	PoringVillage_Instance#Custom	999,{
+	
+	OnStartInstance:
+		callfunc("F_InstanceEntry",
+			"Poring Village",        // Nome da instância
+			"Emily",                 // Nome do NPC
+			"poringvillage", // Variável de cooldown da conta
+			"PORING",        // Variável de status da conta
+			30                       // Level mínimo
+		);
+	end;
+}
+
+
+1@begi,106,30,0	script	#start_wp1_0	HIDDEN_WARP_NPC,4,4,{
+	end;
+
+OnTouch:
+	disablenpc();
+	donpcevent instance_npcname("#start_wp1_1") + "::OnStart";
+	end;
+
+OnInstanceInit:
+	set .@map$, instance_mapname("1@begi");
+	// Bloqueia certas áreas até os diálogos da Emily liberarem
+	setcell .@map$,146,35,146,41,cell_walkable,0;
+	setcell .@map$,154,100,154,107,cell_walkable,0;
+	setcell .@map$,59,187,59,197,cell_walkable,0;
+
+	disablenpc instance_npcname("#start_wp1_2");
+	disablenpc instance_npcname("#gift");
+	end;
+}
+
+1@begi,106,30,5	script	#start_wp1_1	4_GEFFEN_03,{
+	mes "[Emily]";
+	mes "Vamos em frente!";
+	close;
+
+OnStart:
+	set .@map$, instance_mapname("1@begi");
+	npctalk "Emily: Então... essa é a Vila dos Porings?";
+	sleep 2000;
+	npctalk "Emily: Certo! Vamos lá!";
+	sleep 2000;
+	disablenpc();
+	donpcevent instance_npcname("#start_wp1_2") + "::OnStart";
+	donpcevent instance_npcname("poring_village_1") + "::OnStart";
+	end;
+}
+
+1@begi,140,37,5	script	#start_wp1_2	4_GEFFEN_03,{
+	mes "[Emily]";
+	mes "Vou começar devagar agora...";
+	close;
+
+OnStart:
+	set .@map$, instance_mapname("1@begi");
+	enablenpc();
+	sleep 1000;
+	npctalk "Emily: Hmm... parece que colocaram barreiras pra impedir nossa passagem.";
+	sleep 3000;
+	npctalk "Emily: Tenho quase certeza de que os Porings esconderam muitos tesouros por aqui...";
+	sleep 4000;
+	mapannounce .@map$, "???: Ouço uma voz humana... Recebam-nos, pessoal!", bc_map, "0xFFFF00";
+	sleep 4000;
+	npctalk "Emily: O que foi que ele disse?";
+	sleep 3000;
+	npctalk "Emily: Parece que algo está vindo correndo pra cá...";
+	sleep 2500;
+	mapannounce .@map$, "???: Não deixem eles fugirem! Peguem tudo que tiver valor!", bc_map, 0xFFFF00;
+	sleep 2500;
+	npctalk "Emily: É... acho que eles não são amigáveis. Rápido, esconda-se!";
+	sleep 4000;
+
+	// Em vez de sumir completamente, o NPC fica invisível (padrão oficial)
+	hideonnpc();
+	sleep 1000;
+	npctalk "Emily: Aaaah! Você não conseguiu se esconder? Bem... força aí!";
+
+	// Efeitos de surgimento dos Porings
+	hideonnpc instance_npcname("#poring_wl18");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl18");
+	sleep 500;
+
+	hideonnpc instance_npcname("#poring_wl19");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl19");
+	sleep 500;
+
+	// Remove bloqueios para permitir combate e movimentação
+	disablenpc instance_npcname("#poring_wl15");
+	sleep 500;
+	disablenpc instance_npcname("#poring_wl16");
+	disablenpc instance_npcname("#poring_wl17");
+	disablenpc instance_npcname("#poring_wl20");
+	disablenpc instance_npcname("#poring_wl21");
+
+	// Libera passagem (remove barreira)
+	setcell .@map$,146,35,146,41,cell_walkable,1;
+	end;
+}
+
+// First wall
+1@begi,146,35,6	duplicate(dummy_npc)	#poring_wl15	4_ROPEPILE,1,0
+1@begi,146,36,6	duplicate(dummy_npc)	#poring_wl16	4_ROPEPILE,1,0
+1@begi,146,37,6	duplicate(dummy_npc)	#poring_wl17	4_ROPEPILE,1,0
+1@begi,146,38,6	duplicate(dummy_npc)	#poring_wl18	4_ROPEPILE,1,0
+1@begi,146,39,6	duplicate(dummy_npc)	#poring_wl19	4_ROPEPILE,1,0
+1@begi,146,40,6	duplicate(dummy_npc)	#poring_wl20	4_ROPEPILE,1,0
+1@begi,146,41,6	duplicate(dummy_npc)	#poring_wl21	4_ROPEPILE,1,0
+
+// Second wall
+1@begi,59,187,6	duplicate(dummy_npc)	#poring_wl9	4_ROPEPILE,1,0
+1@begi,59,188,6	duplicate(dummy_npc)	#poring_wl10	4_ROPEPILE,1,0
+1@begi,59,189,6	duplicate(dummy_npc)	#poring_wl11	4_ROPEPILE,1,0
+1@begi,59,190,6	duplicate(dummy_npc)	#poring_wl12	4_ROPEPILE,1,0
+1@begi,59,191,6	duplicate(dummy_npc)	#poring_wl13	4_ROPEPILE,1,0
+1@begi,59,192,6	duplicate(dummy_npc)	#poring_wl14	4_ROPEPILE,1,0
+
+// Others
+1@begi,154,100,6	duplicate(dummy_npc)	#poring_wl1	4_ROPEPILE,1,0
+1@begi,154,101,6	duplicate(dummy_npc)	#poring_wl2	4_ROPEPILE,1,0
+1@begi,154,102,6	duplicate(dummy_npc)	#poring_wl3	4_ROPEPILE,1,0
+1@begi,154,103,6	duplicate(dummy_npc)	#poring_wl4	4_ROPEPILE,1,0
+1@begi,154,104,6	duplicate(dummy_npc)	#poring_wl5	4_ROPEPILE,1,0
+1@begi,154,105,6	duplicate(dummy_npc)	#poring_wl6	4_ROPEPILE,1,0
+1@begi,154,106,6	duplicate(dummy_npc)	#poring_wl7	4_ROPEPILE,1,0
+1@begi,154,107,6	duplicate(dummy_npc)	#poring_wl8	4_ROPEPILE,1,0
+
+
+1@begi,1,1,5	script	poring_village_1	-1,{
+	end;
+OnStart:
+	set .@map$, instance_mapname("1@begi");
+	.@event$ = instance_npcname("poring_village_1") + "::OnMobDead";
+
+	areamonster .@map$, 153,32, 171,32, "--en--", "MD_DROPS",7, .@event$;
+	areamonster .@map$, 48,54, 71,57, "--en--", "MD_DROPS",8, .@event$;
+	areamonster .@map$, 170,38, 189,38, "--en--", "MD_POPORING",8, .@event$;
+	areamonster .@map$, 24,72, 28,92, "--en--", "MD_POPORING",8, .@event$;
+	areamonster .@map$, 188,42, 191,58, "--en--", "MD_MARIN",8, .@event$;
+	areamonster .@map$, 158,67, 174,68, "--en--", "MD_MARIN",3, .@event$;
+	areamonster .@map$, 117,68, 131,68, "--en--", "MD_MARIN",4, .@event$;
+	areamonster .@map$, 79,113, 92,113, "--en--", "MD_MARIN",6, .@event$;
+
+	monster .@map$,101,66, "--en--","MD_MARIN",1, .@event$;
+	monster .@map$,57,113, "--en--","MD_MARIN",1, .@event$;
+	monster .@map$,68,113, "--en--","MD_MARIN",1, .@event$;
+	monster .@map$,176,66, "--en--","MD_PORING",1, .@event$;
+	monster .@map$,158,68, "--en--","MD_PORING",1, .@event$;
+	monster .@map$,157,67, "--en--","MD_PORING",1, .@event$;
+	monster .@map$,149,66, "--en--","MD_PORING",1, .@event$;
+	monster .@map$,125,67, "--en--","MD_PORING",1, .@event$;
+	monster .@map$,121,67, "--en--","MD_PORING",1, .@event$;
+	monster .@map$,102,67, "--en--","MD_PORING",1, .@event$;
+	monster .@map$,101,68, "--en--","MD_PORING",1, .@event$;
+	end;
+OnMobDead:
+	set .@map$, instance_mapname("1@begi");
+	if (mobcount( .@map$, instance_npcname("poring_village_1") + "::OnMobDead" ) > 3)
+		end;
+	killmonster .@map$, instance_npcname("poring_village_1") + "::OnMobDead";
+	mapannounce .@map$, "Emily: Uau~ Você é muito forte! Você derrotou todos esses Porings!", bc_map, 0xFFFF00;
+	sleep 2000;
+	mapannounce .@map$, "Emily: Mas o Poring parece único de alguma forma. Tome cuidado!", bc_map, 0xFFFF00;
+	sleep 2000;
+	mapannounce .@map$, "Emily: Ah, há uma força única se você chegar perto da coluna de luz azul.", bc_map, 0xFFFF00;
+	sleep 2000;
+	monster .@map$,132,103,"--en--","MD_GOLDRING",1, instance_npcname("poring_village_1") + "::OnBossDead";
+	end;
+OnBossDead:
+	set .@map$, instance_mapname("1@begi");
+	if (mobcount( .@map$, instance_npcname("poring_village_1") + "::OnBossDead" ) > 0)
+		end;
+	killmonster .@map$, instance_npcname("poring_village_1") + "::OnBossDead";
+	donpcevent instance_npcname("poring_village_2") + "::OnStart";
+	sleep 6000;
+	// disablenpc instance_npcname("#poring_wl4");
+	hideonnpc instance_npcname("#poring_wl4");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl4");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl4");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl4");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl4");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl4");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl4");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl4");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl4");
+	// disablenpc instance_npcname("#poring_wl5");
+	hideonnpc instance_npcname("#poring_wl5");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl5");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl5");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl5");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl5");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl5");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl5");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl5");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl5");
+	disablenpc instance_npcname("#poring_wl1");
+	disablenpc instance_npcname("#poring_wl2");
+	disablenpc instance_npcname("#poring_wl3");
+	disablenpc instance_npcname("#poring_wl6");
+	disablenpc instance_npcname("#poring_wl7");
+	disablenpc instance_npcname("#poring_wl8");
+	setcell .@map$,154,100,154,107,cell_walkable,1;
+	end;
+}
+
+1@begi,1,1,5	script	poring_village_2	-1,{
+	end;
+OnStart:
+	set .@map$, instance_mapname("1@begi");
+	.@event$ = instance_npcname("poring_village_2") + "::OnMobDead";
+
+	monster .@map$,191,97,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,191,97,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,191,97,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,192,97,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,194,97,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,194,97,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,195,97,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,195,97,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,199,108,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,201,107,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,203,108,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,206,107,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,213,108,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,214,109,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,214,109,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,214,109,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,214,115,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,214,112,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,214,113,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,214,117,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,214,111,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,215,108,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,215,107,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,216,107,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,197,143,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,197,143,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,192,143,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,190,143,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,188,143,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,188,143,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,184,143,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,182,143,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,157,144,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,154,143,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,154,144,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,152,143,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,142,144,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,130,144,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,129,144,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,127,144,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,120,144,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,117,144,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,116,144,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,114,143,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,103,144,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,102,144,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,102,144,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,93,143,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,88,144,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,88,144,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,84,144,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,84,144,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,83,143,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,76,143,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,75,144,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,73,144,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,73,143,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,72,144,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,69,143,"--en--","MD_POPORING",1, .@event$;
+	monster .@map$,64,144,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,59,143,"--en--","MD_PORING",1, .@event$;
+	monster .@map$,59,144,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,52,144,"--en--","MD_DROPS",1, .@event$;
+	monster .@map$,51,143,"--en--","MD_PORING",1, .@event$;
+	end;
+OnMobDead:
+	set .@map$, instance_mapname("1@begi");
+	if (mobcount( .@map$, instance_npcname("poring_village_2") + "::OnMobDead" ) > 4)
+		end;
+	killmonster .@map$, instance_npcname("poring_village_2") + "::OnMobDead";
+	mapannounce .@map$, "Emily: Hmm... aqui está outro chefe... Parece forte...", bc_map, 0xFFFF00;
+	sleep 2000;
+	mapannounce .@map$, "Emily: Não sou boa em batalhas. Deixe-me procurar o tesouro primeiro. Até breve~", bc_map, 0xFFFF00;
+	sleep 2000;
+	monster .@map$,42,173,"--en--","MD_AMERING",1, instance_npcname("poring_village_2") + "::OnBossDead";
+	end;
+OnBossDead:
+	set .@map$, instance_mapname("1@begi");
+	if (mobcount( .@map$, instance_npcname("poring_village_2") + "::OnBossDead" ) > 0)
+		end;
+	killmonster .@map$, instance_npcname("poring_village_2") + "::OnBossDead";
+	donpcevent instance_npcname("poring_village_3") + "::OnStart";
+	sleep 6000;
+	// disablenpc instance_npcname("#poring_wl10");
+	hideonnpc instance_npcname("#poring_wl10");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl10");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl10");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl10");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl10");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl10");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl10");
+	// disablenpc instance_npcname("#poring_wl13");
+	hideonnpc instance_npcname("#poring_wl13");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl13");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl13");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl13");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl13");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl13");
+	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl13");
+	disablenpc instance_npcname("#poring_wl9");
+	disablenpc instance_npcname("#poring_wl11");
+	disablenpc instance_npcname("#poring_wl12");
+	disablenpc instance_npcname("#poring_wl14");
+	setcell .@map$,59,187,59,197,cell_walkable,1;
+	end;
+}
+
+1@begi,1,1,5	script	poring_village_3	-1,{
+	end;
+OnStart:
+	set .@map$, instance_mapname("1@begi");
+	.@event$ = instance_npcname("poring_village_3") + "::OnMobDead";
+
+	monster .@map$,81,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,84,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,85,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,86,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,87,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,88,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,90,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,93,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,94,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,94,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,95,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,98,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,99,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,103,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,103,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,104,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,108,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,111,197,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,128,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,128,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,130,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,132,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,132,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,132,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,133,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,134,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,135,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,136,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,137,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,141,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,143,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,144,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,144,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,146,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,150,185,"--en--","MD_MARIN",1, .@event$;
+	monster .@map$,150,185,"--en--","MD_MARIN",1, .@event$;
+	end;
+OnMobDead:
+	set .@map$, instance_mapname("1@begi");
+	if (mobcount( .@map$, instance_npcname("poring_village_3") + "::OnMobDead" ) > 4)
+		end;
+	killmonster .@map$, instance_npcname("poring_village_3") + "::OnMobDead";
+	mapannounce .@map$, "Rei Poring: Com licença... Mas... Você poderia voltar agora?...", bc_map, 0xFFFF;
+	sleep 2000;
+	mapannounce .@map$, "Emily: O quê? Quem é você?", bc_map, 0xFFFF00;
+	sleep 2000;
+	mapannounce .@map$, "Rei Poring: Eu sou o líder desta Vila Poring. Desculpem a apresentação tardia.", bc_map, 0xFFFF;
+	sleep 2000;
+	mapannounce .@map$, "Rei Poring: Talvez haja algum mal-entendido em nossos panfletos. Esta vila é muito pobre e não tem nada de valor.", bc_map, 0xFFFF;
+	sleep 2000;
+	mapannounce .@map$, "Emily: Cabe a mim julgar depois de olhar mais ao redor...", bc_map, 0xFFFF00;
+	sleep 2000;
+	mapannounce .@map$, "Rei Poring: Ugh... Não gosto de lutar, mas não há escolha.", bc_map, 0xFFFF;
+	sleep 2000;
+	monster .@map$,182,194,"--en--","PORING",10;
+	for ( .@i = 0; .@i < 10; ++.@i ) {
+		setunitdata $@mobid[.@i], UMOB_MODE, (MD_CANMOVE | MD_LOOTER | MD_AGGRESSIVE | MD_CANATTACK);
+		setunitdata $@mobid[.@i], UMOB_SPEED, 200;
+	}
+	monster .@map$,182,194,"--en--","MD_KING_PORING",1, instance_npcname("poring_village_3") + "::OnBossDead";
+	end;
+OnBossDead:
+	set .@map$, instance_mapname("1@begi");
+	if (mobcount( .@map$, instance_npcname("poring_village_3") + "::OnBossDead" ) > 0)
+		end;
+	killmonster .@map$, instance_npcname("poring_village_3") + "::OnBossDead";
+	enablenpc instance_npcname("#gift");
+	end;
+}
+
+1@begi,117,108,5	script	Blue Light Column#1	4_ENERGY_BLUE,4,4,{
+	end;
+OnTouch:
+	switch( rand(3) ) {
+		case 0:
+			unittalk getcharid(3), "" + strcharinfo(0) + " : Ohhhhh!!! Solte o papagaio que está lá dentro!!!!";
+			break;
+		case 1:
+			unittalk getcharid(3), "" + strcharinfo(0) + " : Acho que não tem problema dar um biquinho em alguém agora!!";
+			break;
+		case 2:
+			unittalk getcharid(3), "" + strcharinfo(0) + " : Você foi mordido por um papagaio louco?";
+			break;
+	}
+	transform 1629,60000;
+	specialeffect2 EF_ENHANCE;
+	sc_start SC_GLASTHEIM_STATE,30000,20;
+	end;
+}
+
+1@begi,37,165,5	duplicate(Blue Light Column#1)	Blue Light Column#2	4_ENERGY_BLUE,4,4
+1@begi,175,199,5	duplicate(Blue Light Column#1)	Blue Light Column#3	4_ENERGY_BLUE,4,4
+
+
+1@begi,199,186,5	script	#gift	4_GEFFEN_03,{
+	mes "[Emily]";
+	mes "Você pode ficar com todos os itens que encontrar nesta masmorra. Eu já tenho alguns.";
+	next;
+	
+	mes "[Emily]";
+	mes "Ah, encontrei alguns itens. Deixa eu te dar um deles. Só para comemorar sua primeira visita!";
+	next;
+	if (rand(100) < 50) {
+		getitem 14586,10;	// Doce HiperAçucarado
+	} else {
+		getitem 12210,1;	// Goma de Mascar
+	}
+	
+	mes "[Emily]";
+	mes "Encontrei algumas Moedas também, pode ficar com algumas. Agora, vamos lá fora!";
+	close2;
+	
+	// Premiações do Servidor
+	if (#PORING_STATUS == 2) {
+		add_reputation_points(1, 10);
+		set #instancia, 2;
+		if (#inst60_name$ == "[30+] Vila dos Porings") {			
+			set #inst60_status,2;
+		}
+		set #PORING_STATUS, 3;
+		getitem 9608,10;	// Moeda de Instância
+	}
+	
+	warp "prontera",155,185;
+	end;
+}
+

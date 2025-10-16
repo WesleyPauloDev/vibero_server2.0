@@ -1,0 +1,452 @@
+-	script	Loja de GLastHeim	-1,{
+OnTalk:
+	mes "[Artesão de Hugin]";
+	mes "Escolha o que deseja fazer:";
+	next;
+	switch(select("Abrir Loja GlastHeim:Encantar Botas Temporais:Slotar Botas Temporais:Sair")) {
+
+		case 1:
+			close2;
+			// Chama a loja configurada (substitua o nome abaixo pela sua loja real)
+			callshop "boots_temporal_barter",1;
+			end;
+
+		case 2:
+			close2;
+			// Executa o script do encantador (como se falasse com ele)
+			doevent "Mago de Hugin#pa0829::OnTalk";
+			end;
+
+		case 3:
+			close2;
+			// Executa o script do NPC que faz slot (Hugins Craftsman)
+			doevent "Hugins Craftsman#pa0829::OnTalk";
+			end;
+
+		case 4:
+			mes "[Artesão de Hugin]";
+			mes "Volte sempre!";
+			close;
+	}
+	end;
+}
+
+// Slotador de Botas Temporais
+-	script	Hugins Craftsman#pa0829	4_F_JOB_BLACKSMITH,{
+
+    OnTalk:
+        disable_items;
+        if (MaxWeight - Weight < 1000) {
+            mes "Sua bolsa está muito pesada. Reduza um pouco o peso e volte depois.";
+            close;
+        }
+        mes "[Artesão de Hugin]";
+        mes "Traga-me ^0000FF20 Cristais Temporais e 50 Manas Coaguladas^000000, e eu tentarei colocar um slot nas suas Botas Temporais.";
+        mes "Mas saiba que existe 20% de chance de ^FF0000falhar e quebrar o item^000000. Deseja tentar mesmo assim?";
+        next;
+        if (select("Aceitar o risco e tentar colocar o slot", "Cancelar") == 0) {
+            mes "[Artesão de Hugin]";
+            mes "Tudo bem, volte quando quiser.";
+            close;
+        }
+        if (!getequipisequiped(EQI_SHOES)) {
+            mes "[Artesão de Hugin]";
+            mes "Tem certeza de que está usando o item?";
+            close;
+        }
+
+        .@equip_id = getequipid(EQI_SHOES);
+        switch(.@equip_id) {
+        case 22000:	callsub(S_Slot,22006);	break; // Temporal_STR_Boots
+        case 22001:	callsub(S_Slot,22009);	break; // Temporal_INT_Boots
+        case 22002:	callsub(S_Slot,22010);	break; // Temporal_AGI_Boots
+        case 22003:	callsub(S_Slot,22007);	break; // Temporal_VIT_Boots
+        case 22004:	callsub(S_Slot,22008);	break; // Temporal_DEX_Boots
+        case 22005:	callsub(S_Slot,22011);	break; // Temporal_LUK_Boots
+
+        case 22107:	callsub(S_Slot,22113);	break; // Modified_STR_Boots
+        case 22108:	callsub(S_Slot,22114);	break; // Modified_INT_Boots
+        case 22109:	callsub(S_Slot,22115);	break; // Modified_AGI_Boots
+        case 22110:	callsub(S_Slot,22116);	break; // Modified_VIT_Boots
+        case 22111:	callsub(S_Slot,22117);	break; // Modified_DEX_Boots
+        case 22112:	callsub(S_Slot,22118);	break; // Modified_LUK_Boots
+
+        default:
+            mes "[Artesão de Hugin]";
+            mes "Isso não serve! Eu preciso de ^0000FFBotas Temporais^000000!";
+            mes "O item precisa ser ^0000FFsem slot^000000!";
+            close;
+        }
+
+    S_Slot:
+        .@equip_id = getequipid(EQI_SHOES);
+        mes "[Artesão de Hugin]";
+        mes "E saiba que ^FF0000todas as refinações e encantamentos serão perdidos.^000000";
+        mes "Ainda quer arriscar?";
+        next;
+        if (select("Tudo bem, quero tentar!", "Cancelar") == 0) {
+            mes "[Artesão de Hugin]";
+            mes "Tudo bem, volte quando quiser.";
+            close;
+        }
+        if ((countitem(6607) < 20) || (countitem(6608) < 50)) {
+            mes "[Artesão de Hugin]";
+            mes "Você precisa trazer ^0000FF20 Cristais Temporais e 50 Manas Coaguladas^000000. Nada é de graça, sabe...";
+            close;
+        }
+        delitem 6607,20; // Temporal_Crystal
+
+        if (getequipid(EQI_SHOES) == .@equip_id) {
+            delequip EQI_SHOES;
+            if (rand(1,100) < 20) {
+                mes "[Artesão de Hugin]";
+                mes "Arrggh... falhamos. Melhor sorte da próxima vez.";
+                specialeffect2 EF_PHARMACY_FAIL;
+                close;
+            }
+            mes "[Artesão de Hugin]";
+            mes "Sucesso! Aqui está seu novo item.";
+            specialeffect2 EF_MAXPOWER;
+            getitem getarg(0),1;
+        }
+        close;
+    end;
+}
+
+// Encantador de Botas Temporais
+-	script	Mago de Hugin#pa0829	1_F_01,{
+
+    OnTalk:
+        disable_items;
+        if (MaxWeight - Weight < 1000) {
+            mes "Sua bolsa está muito pesada. Diminua o peso e volte.";
+            close;
+        }
+        mes "[Artesão de Hugin]";
+        mes "Então você veio encantar as Botas Temporais, e o encantamento só é possível no par de botas que você está usando.";
+        next;
+        if (select("Encantar minhas Botas Temporais", "Como funciona o encantamento?") == 0) {
+            mes "[Artesão de Hugin]";
+            mes "Você pode obter ^0000FFMana Coagulada^000000 durante suas jornadas no tempo.";
+            next;
+            mes "[Artesão de Hugin]";
+            mes "Eu posso encantar suas Botas Temporais dependendo da quantidade desse item. ^0000FFNão é possível em botas comuns^000000, apenas nas 6 versões especiais.";
+            next;
+            mes "[Artesão de Hugin]";
+            mes "Você pode escolher qual efeito deseja no item.";
+            next;
+            mes "[Artesão de Hugin]";
+            mes "Claro que isso vale apenas para o 4º slot. Você começará com um efeito pequeno e ele ficará mais forte a cada aprimoramento.";
+            next;
+            mes "[Artesão de Hugin]";
+            mes "Para alcançar o efeito final, será necessário muito mais Mana Coaguladas. Não se esqueça disso.";
+            next;
+            mes "[Artesão de Hugin]";
+            mes "Quando o 4º slot atinge a opção máxima, você pode receber um efeito bônus aleatório no 3º slot — mediante um pequeno pagamento~";
+            next;
+            mes "[Artesão de Hugin]";
+            mes "Ah, e não se preocupe! Mesmo que o encantamento falhe, você não perderá o item, nem os aprimoramentos ou cartas. Apenas não podemos redefinir o encantamento.";
+            next;
+            mes "[Artesão de Hugin]";
+            mes "Ufa...";
+            mes "Enfim, isso é tudo sobre o encantamento. Agora veja você mesmo como funciona.";
+            close;
+        }
+        if (!getequipisequiped(EQI_SHOES)) {
+            mes "[Artesão de Hugin]";
+            mes "Você está realmente usando o item?";
+            close;
+        }
+        .@equip_id = getequipid(EQI_SHOES);
+
+        setarray .@enchant_1[0],4808,4832,4814,4741,4869,4752; // Espírito de Luta 4 / Arqueiro Perito 1 / Feitiço 2 / Vitalidade 2 / Pós-Conjuração 1 / Sorte 3
+        setarray .@enchant_2[0],4820,4833,4813,4742,4872,4753; // Espírito de Luta 5 / Arqueiro Perito 2 / Feitiço 3 / Vitalidade 3 / Pós-Conjuração 2 / Sorte 4
+        setarray .@enchant_3[0],4821,4834,4812,4861,4873,4754; // Espírito de Luta 6 / Arqueiro Perito 3 / Feitiço 4 / HP Máx. 1 / Pós-Conjuração 3 / Sorte 5
+        setarray .@enchant_4[0],4822,4835,4826,4862,4881,4755; // Espírito de Luta 7 / Arqueiro Perito 4 / Feitiço 5 / HP Máx. 2 / Pós-Conjuração 4 / Sorte 6
+        setarray .@enchant_cost[0],1,4,15,30,50;
+
+        switch(.@equip_id) {
+        case 22000:	// Botas Temporais FOR
+        case 22001:	// Botas Temporais INT
+        case 22002:	// Botas Temporais AGI
+        case 22003:	// Botas Temporais VIT
+        case 22004:	// Botas Temporais DES
+        case 22005:	// Botas Temporais SOR
+
+        case 22006:	// Temporal_Str_Boots_ Slotada
+        case 22007:	// Temporal_Vit_Boots_ Slotada
+        case 22008:	// Temporal_Dex_Boots_ Slotada
+        case 22009:	// Temporal_Int_Boots_ Slotada
+        case 22010:	// Temporal_Agi_Boots_ Slotada
+        case 22011:	// Temporal_Luk_Boots_ Slotada
+
+            .@equip_name$ = getequipname(EQI_SHOES);
+            setarray .@card[0],
+                getequipcardid(EQI_SHOES,0),
+                getequipcardid(EQI_SHOES,1),
+                getequipcardid(EQI_SHOES,2),
+                getequipcardid(EQI_SHOES,3);
+            copyarray .@equip_card[0], .@card[0], 4; // Para checagem final
+            .@equip_refine = getequiprefinerycnt(EQI_SHOES);
+
+            if (.@card[2] > 0) {
+                mes "[Artesão de Hugin]";
+                mes "Essas botas já atingiram o limite de encantamento. Não posso encantá-las mais.";
+                close;
+            }
+            if (.@card[3] == 0) { // Primeiro encantamento no 4º slot
+                .@cost = .@enchant_cost[0];
+                mes "[Artesão de Hugin]";
+                mes "Quer encantar ^0000FF" + .@equip_name$ + "^000000?";
+                mes "Para o primeiro encantamento, você precisa de ^0000FF" + .@cost + "^000000 Mana Coagulada.";
+                next;
+                .@s = select("Cancelar", "Espírito de Luta", "Perícia em Arco", "Feitiço", "Vitalidade", "Velocidade de Ataque", "Sorte") - 2;
+                if (.@s == -1) {
+                    mes "[Artesão de Hugin]";
+                    mes "Tudo bem, volte quando estiver pronto.";
+                    close;
+                }
+                .@card[3] = .@enchant_1[.@s];
+                .@string$ = "encantamento nível ^6300001^000000.";
+            }
+            else {
+                for (.@enchant_num = 1; .@enchant_num < 5; .@enchant_num++) {
+                    for (.@enchant_type = 0; .@enchant_type < 6 && .@card[3] != getd(".@enchant_" + .@enchant_num + "[" + .@enchant_type + "]"); .@enchant_type++)
+                        continue;
+                    if (.@enchant_type < 6)
+                        break;
+                }
+                if (.@enchant_num == 5) {
+                    mes "[Artesão de Hugin]";
+                    mes "Algo de errado aconteceu.";
+                    close;
+                }
+                .@cost = .@enchant_cost[.@enchant_num];
+
+                mes "[Artesão de Hugin]";
+                if (.@enchant_num == 4) {
+                    .@card[2] = callfunc("F_Rand",4875,4876,4877,4878,4879,4880); // Poder do Urso, Magia Incontrolável, Velocidade da Luz, Tolo Musculoso, Olho de Águia, Dia de Sorte
+                    .@string$ = "^990000bônus aleatório^000000 no slot 3.";
+                    mes "O 4º slot já foi aprimorado ao máximo. Deseja adicionar um efeito bônus aleatório ao 3º slot? Você precisará de ^0000ff" + .@cost + "^000000 Mana Coagulada.";
+                }
+                else {
+                    .@number = .@enchant_num + 1;
+                    .@card[3] = getd(".@enchant_" + (.@enchant_num+1) + "[" + .@enchant_type + "]");
+                    .@string$ = "encantamento nível ^630000" + .@number + "^000000.";
+                    mes "Encantando o 4º slot de ^0000FF" + .@equip_name$ + "^000000 para o nível ^0000FF" + .@number + "^000000. Requer ^0000FF" + .@cost + "^000000 Mana Coagulada.";
+                }
+                next;
+                if (select("Aprimorar Encantamento!", "Cancelar") == 0) {
+                    mes "[Artesão de Hugin]";
+                    mes "Tudo bem, volte quando estiver pronto.";
+                    close;
+                }
+            }
+            if (countitem(6608) < .@cost) {
+                mes "[Artesão de Hugin]";
+                mes "Hmm... você está faltando " + (.@cost - countitem(6608)) + " Mana Coagulada. Traga mais e poderemos continuar.";
+                close;
+            }
+            specialeffect2 EF_REPAIRWEAPON;
+            delitem 6608,.@cost; // Feitiço Coagulado
+
+            // Anti-hack
+            if (callfunc("F_IsEquipIDHack", EQI_SHOES, .@equip_id) || callfunc("F_IsEquipCardHack", EQI_SHOES, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]) || callfunc("F_IsEquipRefineHack", EQI_SHOES, .@equip_refine))
+                close;
+
+            delequip EQI_SHOES;
+            mes "[Artesão de Hugin]";
+            mes "Tentando " + .@string$;
+            getitem2 .@equip_id,1,1,.@equip_refine,0,0,0,.@card[2],.@card[3];
+            close;
+        default:
+            mes "[Artesão de Hugin]";
+            mes "Este não é o item correto para encantamento.";
+            mes "Lembre-se, apenas as 6 Botas Temporais podem ser encantadas.";
+            close;
+        }
+    end;
+}
+
+// Temporal shoes slotted - npc enchant
+-	script	Mestre da magia negra#pa082	1_F_01,{
+
+    OnTalk:
+        disable_items;
+        if ((MaxWeight - Weight) < 1000) {
+            mes "Sua mala está muito pesada. Reduza um pouco o peso e volte.";
+            close;
+        }
+        if (checkweight(1201,1) == 0) {
+            mes "Parece que você está carregando itens demais. Guarde alguns itens e volte aqui.";
+            close;
+        }
+        // requirements
+        .@coagulated_id = 6608;// Coagulated_Spell
+        .@polluted_id = 6755;// Polluted_Spell
+        .@cost_zeny = 100000;
+
+        mes "[Mestre da magia negra]";
+        mes "Eu trabalho apenas com Botas Temporais com slot.";
+        next;
+        if (select( "Como funciona o encantamento?", "Dê efeito às minhas Botas Temporais" ) == 1) {
+            mes "[Mestre da magia negra]";
+            mes "Você deveria perguntar ao mestre mágico Hugins todas as coisas básicas. Quero uma conversa mais aprofundada sobre o trabalho de encantamento.";
+            next;
+            mes "[Mestre da magia negra]";
+            mes "Preciso de 4 itens. ^0000ff" + callfunc("F_InsertComma",.@cost_zeny) + ", " + getitemname(.@polluted_id) + ", " + getitemname(.@coagulated_id) + ", Temporal Boots(Socket) Series^000000. Se você não tiver nenhum desses, não posso ajudar.";
+            next;
+            mes "[Mestre da magia negra]";
+            mes "É meu pequeno hobby... Encantar Botas Temporais Slotadas usando Mana Sombria e Coagulada.";
+            next;
+            mes "[Mestre da magia negra]";
+            mes "É claro que você deve lidar com um risco maior de destruição sempre que quiser encantar repetidamente.";
+            next;
+            mes "[Mestre da magia negra]";
+            mes "A ordem dos encantamentos é a mesma do mestre mágico de Hugins. Consulte a explicação dele.";
+            close;
+        }
+        .@equip_id = getequipid(EQI_SHOES);
+
+        switch(.@equip_id) {
+        case 22006:	// Temporal_Str_Boots_
+        case 22007:	// Temporal_Vit_Boots_
+        case 22008:	// Temporal_Dex_Boots_
+        case 22009:	// Temporal_Int_Boots_
+        case 22010:	// Temporal_Agi_Boots_
+        case 22011:	// Temporal_Luk_Boots_
+        case 22113:	// Modified_Str_Boots_
+        case 22114:	// Modified_Int_Boots_
+        case 22115:	// Modified_Agi_Boots_
+        case 22116:	// Modified_Vit_Boots_
+        case 22117:	// Modified_Dex_Boots_
+        case 22118:	// Modified_Luk_Boots_
+            break;
+        case -1:
+            mes "[Mestre da magia negra]";
+            mes "Você está usando o item?";
+            close;
+        default:
+            mes "[Mestre da magia negra]";
+            mes "Este não é o item certo para este encantamento. Lembre-se, apenas os 6 tipos de Botas Temporais com slot estão disponíveis para encantamentos ocultos.";
+            close;
+        }
+        // enchants ID
+        setarray .@enchant_1[0],4808,4832,4814,4741,4869,4752;// Fighting_Spirit4	Expert_Archer1	Spell2	Vitality2	DelayafterAttack1Lv	Luck3
+        setarray .@enchant_2[0],4820,4833,4813,4742,4872,4753;// Fighting_Spirit5	Expert_Archer2	Spell3	Vitality3	DelayafterAttack2Lv	Luck4
+        setarray .@enchant_3[0],4821,4834,4812,4861,4873,4754;// Fighting_Spirit6	Expert_Archer3	Spell4	MHP1		DelayafterAttack3Lv	Luck5
+        setarray .@enchant_4[0],4822,4835,4826,4862,4881,4755;// Fighting_Spirit7	Expert_Archer4	Spell5	MHP2		DelayafterAttack4Lv	Luck6
+
+        // requirements amount
+        setarray .@en_amount_coag[0],3,10,20,40,50;
+        setarray .@en_amount_polluted[0],1,2,4,7,10;
+
+        // (custom) chances of success (official value unknown)
+        setarray .@chances[0],100,70,70,70,70;
+
+        // data of item equipped
+        .@equip_name$ = getequipname(EQI_SHOES);
+        setarray .@card[0],
+            getequipcardid(EQI_SHOES,0),
+            getequipcardid(EQI_SHOES,1),
+            getequipcardid(EQI_SHOES,2),
+            getequipcardid(EQI_SHOES,3);
+        copyarray .@equip_card[0], .@card[0], 4;
+        .@equip_refine = getequiprefinerycnt(EQI_SHOES);
+
+        if (.@card[2] > 0) {
+            mes "[Mestre da magia negra]";
+            mes "Essas botas já ultrapassaram o limite de encantamento. Não podemos mais encantá-las.";
+            close;
+        }
+        if (.@card[3] == 0) {// 4th slot 1st try enchanting
+            .@amount_coag = .@en_amount_coag[0];
+            .@amount_poll = .@en_amount_polluted[0];
+
+            mes "[Mestre da magia negra]";
+            mes "Quer encantar ^0000ff" + .@equip_name$ + " (Socket)^000000? Para o primeiro encantamento, você precisa de ^0000ff" + .@amount_poll + " " + getitemname(.@polluted_id) + ", " + .@amount_coag + " " + getitemname(.@coagulated_id) + ", e " + callfunc("F_InsertComma",.@cost_zeny) + " zeny^000000.";
+            mes "Tem algum risco de falhar.";
+            next;
+            .@s = select( "Desistir", "Espírito de Luta", "Arquearia", "Feitiço", "Vitalidade", "Velocidade de Ataque", "Sorte" ) - 2;
+            if (.@s == -1) {
+                mes "[Mestre da magia negra]";
+                mes "Ok, volte quando estiver pronto.";
+                close;
+            }
+            .@card[3] = .@enchant_1[.@s];
+            .@string$ = "número encantado ^6300001^000000.";
+            .@num = 0;
+        }
+        else {
+            for ( .@num = 1; .@num < 5; .@num++ ) {
+                for ( .@type = 0; .@type < 6 && .@card[3] != getd( ".@enchant_" + .@num + "[" + .@type + "]" ); .@type++ )
+                    continue;
+                if (.@type < 6)
+                    break;
+            }
+            if (.@num == 5) {
+                mes "[Mestre da magia negra]";
+                mes "Algo errado aconteceu.";
+                close;
+            }
+            .@amount_coag = .@en_amount_coag[.@num];
+            .@amount_poll = .@en_amount_polluted[.@num];
+
+            mes "[Mestre da magia negra]";
+            if (.@num == 4) {
+                .@card[2] = callfunc("F_Rand",4875,4876,4877,4878,4879,4880);// Bears_Power, Runaway_Magic, Speed_Of_Light, Muscle_Fool, Hawkeye, Lucky_Day
+                .@string$ = "^990000 Efeito bônus ^000000 atualização.";
+                mes "Gostaria de um efeito bônus aleatório para o 3º slot? Você precisa de ^0000ff" + .@amount_poll + " " + getitemname(.@polluted_id) + ", " + .@amount_coag + " " + getitemname(.@coagulated_id) + " e " + callfunc("F_InsertComma",.@cost_zeny) + " zeny^000000. Mas há alto risco de falha.";
+            }
+            else {
+                .@level = .@num + 1;
+                .@card[3] = getd( ".@enchant_" + (.@num+1) + "[" + .@type + "]" );
+                .@string$ = "enchant number ^990000" + .@level + "^000000.";
+                mes "Encantando ^0000ff" + .@equip_name$ + " (Socket)^000000s 4º slot como ^0000ff" + .@level + "^000000 efeito de nível. Requer ^0000ff" + .@amount_poll + " " + getitemname(.@polluted_id) + ", " + .@amount_coag + " " + getitemname(.@coagulated_id) + ", e " + callfunc("F_InsertComma",.@cost_zeny) + " z^000000. Tem algum risco de falhar.";
+            }
+            next;
+            if (select( "Sair", "Atualização de efeito!" ) == 1) {
+                mes "[Mestre da magia negra]";
+                mes "Ok, volte quando estiver pronto.";
+                close;
+            }
+        }
+        if (countitem(.@coagulated_id) < .@amount_coag) {
+            mes "[Mestre da magia negra]";
+            mes "Hmm, estão faltando " + (.@amount_coag - countitem(.@coagulated_id)) + " " + getitemname(.@coagulated_id) + " itens. Vá buscar mais e depois podemos conversar sobre mais encantamentos.";
+            close;
+        }
+        if (countitem(.@polluted_id) < .@amount_poll) {
+            mes "[Mestre da magia negra]";
+            mes "Hmm, estão faltando " + (.@amount_poll - countitem(.@polluted_id)) + " " + getitemname(.@polluted_id) + " itens. Vá buscar mais e depois podemos conversar sobre mais encantamentos.";
+            close;
+        }
+        if (Zeny < .@cost_zeny) {
+            mes "[Mestre da magia negra]";
+            mes "Você deve trazer ^0000ff" + callfunc("F_InsertComma",.@cost_zeny) + " zeny^000000. Nada é de graça, você sabe...";
+            close;
+        }
+        delitem .@coagulated_id, .@amount_coag;
+        delitem .@polluted_id, .@amount_poll;
+        Zeny -= .@cost_zeny;
+
+        // anti-hack
+        if (callfunc("F_IsEquipIDHack", EQI_SHOES, .@equip_id) || callfunc("F_IsEquipCardHack", EQI_SHOES, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]) || callfunc("F_IsEquipRefineHack", EQI_SHOES, .@equip_refine))
+            close;
+
+        delequip EQI_SHOES;
+        if (.@chances[.@num] < rand(1,100)) {
+            specialeffect2 EF_LORD;
+            mes "[Mestre da magia negra]";
+            mes "Arrggg, Nós falhamos. Mais sorte na próxima vez.";
+            close;
+        }
+        specialeffect2 EF_REPAIRWEAPON;
+        mes "[Hugins Mágico]";
+        mes "Tentando por " + .@string$;
+        getitem2 .@equip_id,1,1,.@equip_refine,0,0,0,.@card[2],.@card[3];
+        close;
+
+    end;
+}
+

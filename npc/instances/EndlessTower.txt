@@ -1930,13 +1930,21 @@ OnTouch_:
 				setd("$etower_pid_by_iid_"+.@iid, 0);
 			}
 
-			set #ETOWER_STATUS, 4;
-
+			
 			set .@party_id, getcharid(1);
 			set .@partyName$, getpartyname(.@party_id);
-
-			set #instancia, 2;
-			set #torre, 2;
+			
+			// Premiações do Servidor
+			if (#ETOWER_STATUS == 2) {
+				set #instancia, 2;
+				set #torre, 2;
+				if (#inst60_name$ == "[50+] Torre Sem Fim") {
+					set #inst60_status,2;
+				}
+				add_reputation_points(1, 50);
+				getitem 9608,30; //Moeda de Instância
+				set #ETOWER_STATUS, 4;
+			}
 
 			// // anuncia globalmente
 			announce "O jogador "+strcharinfo(0)+" finalmente conquistou o andar 99 da Torre Sem Fim ! Parabéns!", bc_all, 0xFF0000;
@@ -2367,10 +2375,18 @@ OnMyMobDead:
 			setd("$etower_pid_by_iid_"+.@iid, 0);
 		}
 
-		erasequest 60201;
-		set #ETOWER_STATUS, 3;
-		set #instancia, 2;
-		set #torre, 2;
+		// Premiações do Servidor
+		if (#ETOWER_STATUS == 2) {
+			set #instancia, 2;
+			set #torre, 2;
+			if (#inst60_name$ == "[50+] Torre Sem Fim") {
+				set #inst60_status,2;
+			}
+			add_reputation_points(1, 50);
+			getitem 9608,30; //Moeda de Instância
+			set #ETOWER_STATUS, 4;
+			erasequest 60201;
+		}
 
 		// // anuncia globalmente
 		announce "O jogador "+strcharinfo(0)+" conquistou todos os andares da Torre Sem Fim! Parabéns!", bc_all, 0xFF0000;

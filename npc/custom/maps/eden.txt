@@ -28,7 +28,7 @@ moc_para01,24,35,5	script	Loja do Éden	640,{
 }
 
 // ----------------------- Quests do Éden ---------------------------------------------------------
-// ----------------------- Contador de kill está em npc/custom/quests/quest_eden.txt -----------------------
+// ----------------------- Contador de kill está em npc/custom/quest_eden.txt -----------------------
 moc_para01,27,35,5	script	Secretário do Éden	810,{
 
 	if (BaseLevel < 20) {
@@ -64,8 +64,7 @@ moc_para01,27,35,5	script	Secretário do Éden	810,{
 				mes "Aqui está sua recompensa.";
 				getexp @eden_quest_exp,0;
 				Zeny += @eden_quest_zeny;
-				getitem 674, @eden_quest_medals;
-				dispbottom "Você Recebeu: "+@eden_quest_exp+" EXP / "+@eden_quest_zeny+" Zeny / "+@eden_quest_medals+" Medalhas";
+				getitem 9607, @eden_quest_medals;
 				
 				// Limpa dados da missão
 				@eden_missao_ativa = 0;
@@ -125,6 +124,7 @@ moc_para01,27,35,5	script	Secretário do Éden	810,{
 	next;
 
 	MainMenu:
+		mes "[Secretário do Éden]";
 		mes "Escolha a faixa de nível da missão:";
 		.@choice = select("Lv. 20~39","Lv. 40~59","Lv. 60~79","Lv. 80+","Cancelar");
 		if (.@choice == 5) {
@@ -135,7 +135,6 @@ moc_para01,27,35,5	script	Secretário do Éden	810,{
 		.@nivel = ((.@choice - 1) * 20) + 20;
 
 		if (BaseLevel < .@nivel) {
-			mes "[Secretário do Éden]";
 			mes "Você ainda não é forte o bastante para esta missão.";
 			next;
 			goto MainMenu;
@@ -163,10 +162,11 @@ L_IniciarMissao:
 
 	// Quantidade e recompensas escalam com o nível
 	.@quant = .@nivel
+	// .@quant = 1
 	.@nivel = 20;
 	.@medalhas = .@nivel / 20;
 	.@zeny = (.@nivel / 20) * 5000;
-	.@exp = (.@nivel / 20) * 20000;
+	.@exp = (.@nivel / 20) * 60000;
 
 	// Armazena recompensas nas variáveis do jogador
 	@eden_quest_medals = .@medalhas;

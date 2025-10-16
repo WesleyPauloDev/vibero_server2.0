@@ -16,89 +16,89 @@
 //= 1.4 Added use of F_HasEdenGroupMark function. [Ragno]
 //============================================================
 
-moc_para01,38,38,3	script	Mission [26 - 40]	857,{
-	if (!callfunc("F_HasEdenGroupMark")) {
-		mes "You are not a qualified member. You can not use the bulletin board.";
-		close;
-	}
-	mes "[26 ~ 40 Lv. Mission Board]";
-	mes "- Many missions are -";
-	mes "- on the bulletin board. -";
-	next;
-	if ((BaseLevel < 26) || (BaseLevel > 40)) {
-		mes "Your level is not qualified. You can not use the bulletin board.";
-		close;
-	}
-	switch(select("Hunting Mission:Delivery Mission:Gathering Mission:Escort Mission")) {
-	case 1:
-		mes "[Hunting Mission Board]";
-		mes "- Hunting Mission details -";
-		mes "- are on the board. -";
-		next;
-		switch(select("Hunting Poison Spore:Hunting Smokie:Hunting Elder Willow(Above Lv.30):Hunting Coco(Above Lv.35):Hunting Thara Frog(Above Lv.38)")) {
-			case 1: callsub L_Quest,8266,0,"Hunting Poison Spore","Sponiac","Geffen","Hunt 10 Poison Spores";
-			case 2: callsub L_Quest,8267,0,"Hunting Smokie","Sponiac","Geffen","Hunt 10 Smokies";
-			case 3: callsub L_Quest,8268,30,"Hunting Elder Willow","Sponiac","Geffen","Hunt 10 Elder Willows";
-			case 4: callsub L_Quest,8269,35,"Hunting Coco","Sponiac","Geffen","Hunt 10 Cocos";
-			case 5: callsub L_Quest,8270,38,"Hunting Thara Frog","Sponiac","Geffen","Hunt 10 Thara Frogs";
-		}
-	case 2:
-		mes "[Delivery Mission Board]";
-		mes "- Delivery Mission details -";
-		mes "- are on the board. -";
-		next;
-		switch(select("Deliver an Insecticide:Deliver Honey:Deliver Blanket(Above Lv.35)")) {
-			case 1: callsub L_Quest,8271,0,"Deliver an Insecticide","Dieshin Man","Morocc Ruins","Get an 'Insecticide' from Dieshin Man and deliver it south east of Payon";
-			case 2: callsub L_Quest,8272,0,"Deliver Honey","Dieshin Man","Morocc Ruins","Get 'Honey' from Dieshin Man and deliver it west of St. Capitolina Abbey";
-			case 3: callsub L_Quest,8273,35,"Deliver Blanket","Dieshin Man","Morocc Ruins","Get Blankets from Dieshin Man and deliver to the field south of Lutie";
-		}
-	case 3:
-		mes "[Gathering Mission Board]";
-		mes "- Gathering Mission details -";
-		mes "- are on the board. -";
-		next;
-		switch(select("Gather Bones:Gather Animal Skins:Gather Peelings(Above Lv.30):Gather Tails(Above Lv.32):Gather Cookies(Above Lv.35):Gather Mustaches(Above Lv.35)")) {
-			case 1: callsub L_Quest,8274,0,"Gather Bones","Dashia","Payon","Gather '10 Skel-Bones' and give them to Dashia";
-			case 2: callsub L_Quest,8275,0,"Gather Animal Skins","Dashia","Payon","Gather '10 Bear's Footskins' and '5 Animal Skins' and give them to Dashia";
-			case 3: callsub L_Quest,8276,30,"Gather Peelings","Dashia","Payon","Gather '20 Worm Peelings' and '20 Garlets' and give them to Dashia";
-			case 4: callsub L_Quest,8277,32,"Gather Tails","Dashia","Payon","Gather '10 Yoyo Tails', '10 Acorns' and '10 Raccon Leafs' and give them to Dashia";
-			case 5: callsub L_Quest,8278,35,"Gather Cookies","Dashia","Payon","Gather '5 Well-baked Cookies' and '1 Piece of Cake' and give them to Dashia";
-			case 6: callsub L_Quest,8279,35,"Gather Mustaches","Dashia","Payon","Gather '5 Mole Whiskers' and '3 Mole Claws' and give them to Dashia";
-		}
-	case 4:
-		mes "[Escort Mission Board]";
-		mes "There are currently no Escort Missions registered on the board.";
-		close;
-	}
-	end;
-L_Quest:
-	//QuestID,ReqLvl,Quest,Client,Loc,Desc
-	.@string$ = getarg(2);
-	if (BaseLevel < getarg(1,26)) {
-		mes "Your level doesn't meet the requirements. You can't take the '"+ .@string$ +"' mission.";
-		close;
-	}
-	mes "["+ .@string$ +" !!]";
-	mes "Client : "+getarg(3);
-	mes "Client Location : "+getarg(4);
-	mes "Requested Mission : "+getarg(5);
-	mes " ";
-	mes "Will you accept this mission?";
-	next;
-	if(select("No, I won't accept it.:Yes, I will accept it.") == 1) {
-		mes "You have declined the "+ .@string$ +" mission.";
-		close;
-	}
-	if (checkquest(getarg(0)) > -1) mes "You are already doing this mission.";
-	else {
-		setquest getarg(0);
-		mes "You have accepted the "+ .@string$ +" mission.";
-	}
-	mes "You can get a reward from the client after you finish the mission.";
-	next;
-	mes "For more details, please press 'Alt + U', to get more information from the Quest Window.";
-	close;
-}
+// moc_para01,38,38,3	script	Mission [26 - 40]	857,{
+// 	if (!callfunc("F_HasEdenGroupMark")) {
+// 		mes "You are not a qualified member. You can not use the bulletin board.";
+// 		close;
+// 	}
+// 	mes "[26 ~ 40 Lv. Mission Board]";
+// 	mes "- Many missions are -";
+// 	mes "- on the bulletin board. -";
+// 	next;
+// 	if ((BaseLevel < 26) || (BaseLevel > 40)) {
+// 		mes "Your level is not qualified. You can not use the bulletin board.";
+// 		close;
+// 	}
+// 	switch(select("Hunting Mission:Delivery Mission:Gathering Mission:Escort Mission")) {
+// 	case 1:
+// 		mes "[Hunting Mission Board]";
+// 		mes "- Hunting Mission details -";
+// 		mes "- are on the board. -";
+// 		next;
+// 		switch(select("Hunting Poison Spore:Hunting Smokie:Hunting Elder Willow(Above Lv.30):Hunting Coco(Above Lv.35):Hunting Thara Frog(Above Lv.38)")) {
+// 			case 1: callsub L_Quest,8266,0,"Hunting Poison Spore","Sponiac","Geffen","Hunt 10 Poison Spores";
+// 			case 2: callsub L_Quest,8267,0,"Hunting Smokie","Sponiac","Geffen","Hunt 10 Smokies";
+// 			case 3: callsub L_Quest,8268,30,"Hunting Elder Willow","Sponiac","Geffen","Hunt 10 Elder Willows";
+// 			case 4: callsub L_Quest,8269,35,"Hunting Coco","Sponiac","Geffen","Hunt 10 Cocos";
+// 			case 5: callsub L_Quest,8270,38,"Hunting Thara Frog","Sponiac","Geffen","Hunt 10 Thara Frogs";
+// 		}
+// 	case 2:
+// 		mes "[Delivery Mission Board]";
+// 		mes "- Delivery Mission details -";
+// 		mes "- are on the board. -";
+// 		next;
+// 		switch(select("Deliver an Insecticide:Deliver Honey:Deliver Blanket(Above Lv.35)")) {
+// 			case 1: callsub L_Quest,8271,0,"Deliver an Insecticide","Dieshin Man","Morocc Ruins","Get an 'Insecticide' from Dieshin Man and deliver it south east of Payon";
+// 			case 2: callsub L_Quest,8272,0,"Deliver Honey","Dieshin Man","Morocc Ruins","Get 'Honey' from Dieshin Man and deliver it west of St. Capitolina Abbey";
+// 			case 3: callsub L_Quest,8273,35,"Deliver Blanket","Dieshin Man","Morocc Ruins","Get Blankets from Dieshin Man and deliver to the field south of Lutie";
+// 		}
+// 	case 3:
+// 		mes "[Gathering Mission Board]";
+// 		mes "- Gathering Mission details -";
+// 		mes "- are on the board. -";
+// 		next;
+// 		switch(select("Gather Bones:Gather Animal Skins:Gather Peelings(Above Lv.30):Gather Tails(Above Lv.32):Gather Cookies(Above Lv.35):Gather Mustaches(Above Lv.35)")) {
+// 			case 1: callsub L_Quest,8274,0,"Gather Bones","Dashia","Payon","Gather '10 Skel-Bones' and give them to Dashia";
+// 			case 2: callsub L_Quest,8275,0,"Gather Animal Skins","Dashia","Payon","Gather '10 Bear's Footskins' and '5 Animal Skins' and give them to Dashia";
+// 			case 3: callsub L_Quest,8276,30,"Gather Peelings","Dashia","Payon","Gather '20 Worm Peelings' and '20 Garlets' and give them to Dashia";
+// 			case 4: callsub L_Quest,8277,32,"Gather Tails","Dashia","Payon","Gather '10 Yoyo Tails', '10 Acorns' and '10 Raccon Leafs' and give them to Dashia";
+// 			case 5: callsub L_Quest,8278,35,"Gather Cookies","Dashia","Payon","Gather '5 Well-baked Cookies' and '1 Piece of Cake' and give them to Dashia";
+// 			case 6: callsub L_Quest,8279,35,"Gather Mustaches","Dashia","Payon","Gather '5 Mole Whiskers' and '3 Mole Claws' and give them to Dashia";
+// 		}
+// 	case 4:
+// 		mes "[Escort Mission Board]";
+// 		mes "There are currently no Escort Missions registered on the board.";
+// 		close;
+// 	}
+// 	end;
+// L_Quest:
+// 	//QuestID,ReqLvl,Quest,Client,Loc,Desc
+// 	.@string$ = getarg(2);
+// 	if (BaseLevel < getarg(1,26)) {
+// 		mes "Your level doesn't meet the requirements. You can't take the '"+ .@string$ +"' mission.";
+// 		close;
+// 	}
+// 	mes "["+ .@string$ +" !!]";
+// 	mes "Client : "+getarg(3);
+// 	mes "Client Location : "+getarg(4);
+// 	mes "Requested Mission : "+getarg(5);
+// 	mes " ";
+// 	mes "Will you accept this mission?";
+// 	next;
+// 	if(select("No, I won't accept it.:Yes, I will accept it.") == 1) {
+// 		mes "You have declined the "+ .@string$ +" mission.";
+// 		close;
+// 	}
+// 	if (checkquest(getarg(0)) > -1) mes "You are already doing this mission.";
+// 	else {
+// 		setquest getarg(0);
+// 		mes "You have accepted the "+ .@string$ +" mission.";
+// 	}
+// 	mes "You can get a reward from the client after you finish the mission.";
+// 	next;
+// 	mes "For more details, please press 'Alt + U', to get more information from the Quest Window.";
+// 	close;
+// }
 
 geffen,103,42,5	script	Sponiac	99,{
 	if (checkweight(1201,1) == 0 || (MaxWeight - Weight) < 3500) {

@@ -524,17 +524,49 @@ Body:
     Script: |
       bonus bStr,2;
       bonus bDex,1;
-
+  
+# ========================Consumíveis============================  
+  - Id: 9609
+    AegisName: Chemical_Protection
+    Name: Proteção Quimica Total
+    Type: Usable
+    Buy: 2000
+    Weight: 10
+    Script: |
+      sc_start SC_CP_WEAPON,1800000,5;
+      sc_start SC_CP_ARMOR,1800000,5;
+      sc_start SC_CP_SHIELD,1800000,5;
+      sc_start SC_CP_HELM,1800000,5;
+      
 # ========================Refine============================  
-
   - Id: 9611
     AegisName: Refine_Menu_Item
     Name: Item de Refino Especial
     Type: Usable
     Buy: 2000
     Weight: 10
+    Flags:
+      NoConsume: true
     Script: |    
       callfunc ("refinar_equipamentos");
+
+  - Id: 7776
+    AegisName: Max_Weight_Up_Scroll
+    Name: Gym Pass
+    Type: Usable
+    Weight: 10
+    Trade:
+      NoDrop: true
+      NoTrade: true
+      NoSell: true
+      NoCart: true
+      NoGuildStorage: true
+      NoMail: true
+      NoAuction: true
+    Flags:
+      NoConsume: true
+    Script: |    
+      callfunc ("Gympass");
 
 # ========================Caixas de Montaria============================  
 
@@ -801,11 +833,11 @@ Body:
       getitem 12710,1;
 
   - Id: 9629
-    AegisName: Level_Box[200]
-    Name: Caixa de Level 200
+    AegisName: Level_Box[175]
+    Name: Caixa de Level 175
     Type: Usable
     Weight: 10
-    EquipLevelMin: 200
+    EquipLevelMin: 175
     Flags:
       Container: true
     Script: |
@@ -820,17 +852,17 @@ Body:
       getitem 12103,1;
       getitem 12214,1;
 
-  - Id: 9630
-    AegisName: Level_Box[250]
-    Name: Caixa de Level 250
-    Type: Usable
-    Weight: 10
-    Flags:
-      Container: true
-    Script: |
-      getitem 601,20;
-      getitem 645,5;
-      getitem 12414,10;
+  # - Id: 9630
+  #   AegisName: Level_Box[250]
+  #   Name: Caixa de Level 250
+  #   Type: Usable
+  #   Weight: 10
+  #   Flags:
+  #     Container: true
+  #   Script: |
+  #     getitem 601,20;
+  #     getitem 645,5;
+  #     getitem 12414,10;
 
 # ==============================Itens Aleatórios=====================================  
 
@@ -857,15 +889,19 @@ Body:
       NoMail: true
       NoAuction: true
     Script: |
-      getgroupitem(IG_LUCK_EGG);
       getitem 9643,1;
+      getgroupitem(IG_LUCK_EGG);
 
   - Id: 9643
     AegisName: Special_Ticket
     Name: Ticket Especial
-    Type: Etc
+    Type: Usable
     Buy: 100000
     Weight: 400
+    Flags:
+      NoConsume: true
+    Script: |
+      callshop "luck_egg_barter_shop";
 
 # ===================================Cartões================================  
   - Id: 9644
@@ -910,7 +946,7 @@ Body:
       NoMail: true
       NoAuction: true
     Script: |
-      if (getgroupid() != 5) {
+      if (getgroupid() < 5) {
         delitem 9645, 1;
       }
       
@@ -923,7 +959,29 @@ Body:
     Name: Moeda de Anubis
     Type: Etc
     Buy: 100
-    Weight: 0
+    Weight: 1
+
+  - Id: 9607
+    AegisName: Mithril_Coin
+    Name: Moeda Do Edén
+    Type: Etc
+    Buy: 5000
+    Weight: 10
+
+  - Id: 9608
+    AegisName: Evt_20th_Invasion
+    Name: Moeda de Instância
+    Type: Etc
+    Weight: 10
+      
+  - Id: 40108
+    AegisName: Moeda_Rops[1000]
+    Name: Moeda Rops[1000]
+    Type: Usable
+    Buy: 10
+    Weight: 0    
+    Script: |
+      set #CASHPOINTS, #CASHPOINTS + 1000;
   
   
 

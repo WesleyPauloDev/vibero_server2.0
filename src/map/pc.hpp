@@ -682,6 +682,9 @@ public:
 	} bonus;
 	// zeroed vars end here.
 
+	int reborn_drop; // ? bônus de drop permanente, não será zerado
+	int reborn_exp;   // bônus de experiência (%), pode ser negativo
+
 	int32 castrate,hprate,sprate,aprate,dsprate;
 	int32 hprecov_rate,sprecov_rate;
 	int32 matk_rate;
@@ -1479,6 +1482,10 @@ bool pc_addautobonus(std::vector<std::shared_ptr<s_autobonus>> &bonus, const cha
 void pc_exeautobonus(map_session_data &sd, std::vector<std::shared_ptr<s_autobonus>> *bonus, std::shared_ptr<s_autobonus> autobonus);
 TIMER_FUNC(pc_endautobonus);
 void pc_delautobonus(map_session_data &sd, std::vector<std::shared_ptr<s_autobonus>> &bonus, bool restore);
+
+void pc_set_reborn_drop(map_session_data* sd, int val);
+void pc_set_reborn_exp(map_session_data* sd, int val);
+
 
 void pc_bonus(map_session_data *sd, int32 type, int32 val);
 void pc_bonus2(map_session_data *sd, int32 type, int32 type2, int32 val);

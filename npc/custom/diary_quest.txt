@@ -1,5 +1,5 @@
 // Salve este arquivo como "npc/custom/mission_board.txt"
-prontera,163,179,4	script	Mural de Missões	888,{
+prontera,146,173,5	script	Mural de Missões	888,{
 	
 	// IDs fictícios para cada missão
 	// (coloque IDs únicos acima de 60000)
@@ -62,24 +62,24 @@ L_Diarias:
 	else if (#d_monstros == 2)	set .@st_monstros$, "^0000FF[Resgatar]^000000";	
 	else                       set .@st_monstros$, "^00FF00[OK]^000000";
 	if (#instancia == 1) set .@st_instancia$, "^FF0000[Pendente]^000000";
-	else if (#instancia == 2)	set .@instancia$, "^0000FF[Resgatar]^000000";
+	else if (#instancia == 2)	set .@st_instancia$, "^0000FF[Resgatar]^000000";
 	else                  set .@st_instancia$, "^00FF00[OK]^000000";
 	if (#voto == 1) set .@st_voto$, "^FF0000[Pendente]^000000";
-	else if (#voto == 2)	set .@voto$, "^0000FF[Resgatar]^000000";
+	else if (#voto == 2)	set .@st_voto$, "^0000FF[Resgatar]^000000";
 	else                  set .@st_voto$, "^00FF00[OK]^000000";
 	if (#evento == 1) set .@st_evento$, "^FF0000[Pendente]^000000";
 	else if (#evento == 2)	set .@st_evento$, "^0000FF[Resgatar]^000000";
 	else                  set .@st_evento$, "^00FF00[OK]^000000";
 	if (#todas == 1) set .@st_todas$, "^FF0000[Pendente]^000000";
-	else if (#todas == 2)	set .@todas$, "^0000FF[Resgatar]^000000";
+	else if (#todas == 2)	set .@st_todas$, "^0000FF[Resgatar]^000000";
 	else                  set .@st_todas$, "^00FF00[OK]^000000";
 
 	.@opt = select(
 		"1) Derrote " + #d_monstros_count + "/100 Anubis " + .@st_monstros$,
-		"2) Complete 1 instância " + .@st_instancia$,
-		"3) Vote no servidor " + .@st_voto$,
-		"4) Participe de um evento " + .@st_evento$,
-		"5) Todas as diárias " + #todas_count + "/4" + .@st_todas$,
+		"2) Complete 1 Instância " + .@st_instancia$,
+		"3) Vote no Servidor " + .@st_voto$,
+		"4) Participe de um Evento " + .@st_evento$,
+		"5) Todas as Diárias " + #todas_count + "/4" + .@st_todas$,
 		"Sair"
 	);
 

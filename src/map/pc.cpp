@@ -1434,6 +1434,9 @@ void pc_makesavestatus(map_session_data *sd) {
 void pc_setnewpc(map_session_data *sd, uint32 account_id, uint32 char_id, int32 login_id1, t_tick client_tick, int32 sex, int32 fd) {
 	nullpo_retv(sd);
 
+	sd->reborn_drop = 0;
+	sd->reborn_exp = 0;
+
 	sd->id = account_id;
 	sd->status.account_id = account_id;
 	sd->status.char_id = char_id;
@@ -3701,6 +3704,34 @@ static void pc_bonus_addvanish(std::vector<s_vanish_bonus> &bonus, int16 rate, i
 	entry.flag = flag;
 
 	bonus.push_back(entry);
+}
+
+
+void pc_set_reborn_drop(map_session_data* sd, int val)
+{
+    if (!sd)
+        return;
+
+    sd->reborn_drop = val;
+	printf("[DEBUG] pc_set_reborn_drop: CharID=%d, bonus=%d\n", sd->status.char_id, val);
+
+	// Força recalcular status
+    status_calc_pc(sd, SCO_NONE);
+
+    printf("[DEBUG] depois do status_calc_pc: bonus_reborn_drop=%d\n", sd->reborn_drop);
+}
+
+
+void pc_set_reborn_exp(map_session_data* sd, int val)
+{
+    if (!sd)
+        return;
+
+    sd->reborn_exp = val;
+    printf("[DEBUG] pc_set_reborn_exp: CharID=%d, exp=%d\n", sd->status.char_id, val);
+
+    // força recalcular status (opcional, caso queira que já reflita em cálculos dependentes)
+    status_calc_pc(sd, SCO_NONE);
 }
 
 /*==========================================
@@ -8446,8 +8477,28 @@ void pc_gainexp(map_session_data *sd, struct block_list *src, t_exp base_exp, t_
 		((pc_is_maxbaselv(sd)) ? 4 : 0) |
 		((pc_is_maxjoblv(sd)) ? 8 : 0);
 
-	if (!(exp_flag&2))
+	if (!(exp_flag&2)) {
 		pc_calcexp(sd, &base_exp, &job_exp, src);
+
+		// --- Bônus Reborn de EXP (pode ser negativo) ---
+		if (sd->reborn_exp != 0) {
+			// converte para int64 temporariamente
+			int64_t base_mod = (int64_t)base_exp * sd->reborn_exp / 100;
+			int64_t job_mod  = (int64_t)job_exp  * sd->reborn_exp / 100;
+
+			// aplica modificador, usando safe_addition_cap ou check para evitar underflow
+			if (base_mod < 0 && (uint64_t)(-base_mod) > base_exp)
+				base_exp = 0;
+			else
+				base_exp += base_mod;
+
+			if (job_mod < 0 && (uint64_t)(-job_mod) > job_exp)
+				job_exp = 0;
+			else
+				job_exp += job_mod;
+		}
+
+	}
 
 	nextb = pc_nextbaseexp(sd);
 	nextj = pc_nextjobexp(sd);

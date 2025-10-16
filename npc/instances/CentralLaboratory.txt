@@ -1,0 +1,1032 @@
+//===== rAthena Script =======================================
+//= Central Laboratory
+//===== Description: =========================================
+//= [Official Conversion]
+//= Central Laboratory Instance
+//===== Changelogs: ==========================================
+//= 1.0 First version. [Capuche]
+//= 1.1 Updated to match official script. [Capuche]
+//============================================================
+
+-	script	LaboratorioCentral_Instance#Custom	-1,{
+
+	OnStartInstance:
+		// #LaboratorioCentral_STATUS = 2;
+		// instance_create("Laboratorio Central");
+		// instance_enter("Laboratorio Central");
+		callfunc("F_InstanceEntry",
+			"Laboratorio Central",        // Nome da instância
+			"Civilization Explorer",                 // Nome do NPC
+			"laboratorio_central", // Variável de cooldown da conta
+			"LaboratorioCentral",        // Variável de status da conta
+			135                      // Level mínimo
+		);
+	end;
+}
+
+// verus01,153,155,5	script	Temporary Dimension-mov#pa0829_01	PORTAL,{
+// 	.@party_id = getcharid(1);
+// 	if (.@party_id == 0) {
+// 		mes "[Temporary Dimension-mover]";
+// 		mes "Do you not have a companion to join you? Organize your party even if traveling alone.";
+// 		close;
+// 	}
+// 	switch( checkquest(12347,PLAYTIME) ) {
+// 	case -1:
+// 		switch( instance_enter("Central Laboratory") ) {
+// 		case IE_NOMEMBER:
+// 		case IE_NOINSTANCE:
+// 			mes "[Temporary Dimension-mover]";
+// 			mes "The passage for dimensional moving has not been vitalized.";
+// 			close;
+// 		case IE_OTHER:
+// 			mes "[Temporary Dimension-mov]";
+// 			mes "Unknown Error.";
+// 			close;
+// 		case IE_OK:
+// 			mapannounce "verus01", "" + strcharinfo(0) + " of the party, " + getpartyname(.@party_id) + ", is entering Central Laboratory.",bc_map,"0x00FF99";
+// 			setquest 12347;// Trace of Laboratory Access
+// 			end;
+// 		}
+// 		end;
+// 	case 0:
+// 	case 1:
+// 		mes "[Temporary Dimension-mover]";
+// 		mes "There are remaining traces of the last event. Access denied.";
+// 		close;
+// 	case 2:
+// 		mes "^0000ffUse of Dimension-mover seems possible.^000000";
+// 		erasequest 12347;// Trace of Laboratory Access
+// 		close;
+// 	}
+// }
+
+// verus01,149,155,5	script	Civilization Explorer#pa0829_01	4_LGTSCIENCE,{
+// 	if (BaseLevel < 135) {
+// 		mes "[Civilization Explorer]";
+// 		mes "Well... I don't know if you can come in handy, it seems that there is still a gap!";
+// 		next;
+// 		mes "[Civilization Explorer]";
+// 		mes "When you become stronger, come back to me. You should be almost level 135!";
+// 		close;
+// 	}
+// 	mes "^ff0000Taming monsters will impede progress in this dungeon. Please take note of this.^000000";
+// 	next;
+// 	mes "[Civilization Explorer]";
+// 	switch( isbegin_quest(12346) ) {
+// 	case 0:
+// 		mes "There are a lot of interesting things about the ancient civilizations in this area.";
+// 		next;
+// 		mes "[Civilization Explorer]";
+// 		mes "Observing the soil strata it is estimated to be 500 to 600 years old!";
+// 		mes "But many of the excavated objects here already far surpass our current technology.";
+// 		next;
+// 		mes "[Civilization Explorer]";
+// 		mes "A lot of undefined terms are found in the recovered records as well.";
+// 		next;
+// 		select("What kind of unknown terms?");
+// 		mes "[Civilization Explorer]";
+// 		mes "^0000ffMother Computer^000000 or, ^0000ff LSI Chip^000000 Or, and what else. ^0000ffChicken^000000?";
+// 		next;
+// 		mes "[Civilization Explorer]";
+// 		mes "Mm that's right. There definitely was the word Chicken. I don't know what kind of combination of technology that may be...";
+// 		next;
+// 		mes "[Civilization Explorer]";
+// 		mes "It is referrenced in the records of people who seem to 'root' amongst the many traces of technology.";
+// 		next;
+// 		if (select( "It is not a topic I would be interested in.", "Interesting. Have there been any results?" ) == 1) {
+// 			mes "[Civilization Explorer]";
+// 			mes "Unfortunate.";
+// 			close;
+// 		}
+// 		mes "[Civilization Explorer]";
+// 		mes "My aim is to research the use of technology related to the relevant times. Even though what I have found out so far is insignificant.";
+// 		next;
+// 		mes "[Civilization Explorer]";
+// 		mes "If I had it my way I would use the dimension mover to see for myself but there's too much work. Besides I am not an adventurer...";
+// 		next;
+// 		mes "[Civilization Explorer]";
+// 		mes "By any chance, would you interested in traveling to the past?";
+// 		next;
+// 		mes "[Civilization Explorer]";
+// 		mes "Even better if you show me around if you find an interesting object.";
+// 		next;
+// 		if (select( "Not interested.", "Ok." ) == 1) {
+// 			mes "[Civilization Explorer]";
+// 			mes "Unfortunate.";
+// 			close;
+// 		}
+// 		mes "[Civilization Explorer]";
+// 		mes "You are an adventurer. Tell me what you decide to do.";
+// 		if (isbegin_quest(12346) == 0)
+// 			setquest 12346;// Strange Ancient Science
+// 		break;
+// 	case 1:
+// 		mes "How can I assist you?";
+// 		break;
+// 	case 2:
+// 		mes "What do you want to do this time?";
+// 		break;
+// 	}
+// 	next;
+// 	if (isbegin_quest(12346) == 1)
+// 		completequest 12346;
+// 	.@party_id = getcharid(1);
+// 	if (.@party_id == 0) {
+// 		mes "[Civilization Explorer]";
+// 		mes "Please talk to me after composing a party of 1 or more, or after joining a party.";
+// 		close;
+// 	}
+// 	switch( checkquest(12347,PLAYTIME) ) {
+// 	case -1:
+// 		if (is_party_leader() == false) {
+// 			mes "[Civilization Explorer]";
+// 			mes "Ah. You aren't the party leader. Take me to your leader! Or perhaps take your leader to me.";
+// 			close;
+// 		}
+// 		if (select( "Produce a crack of time", "Cancel" ) == 2)
+// 			close;
+// 		if (instance_create("Central Laboratory") < 1) {
+// 			mes "Party: " + getpartyname( getcharid(1) ) + "";
+// 			mes "Leader: " + getpartyleader( getcharid(1) ) + "";
+// 			mes "^0000ffCentral Laboratory ^000000 - Unknown Error";
+// 			close;
+// 		}
+// 		mes "[Civilization Explorer]";
+// 		mes "When the crack of time opens take a breath and speak again.";
+// 		close;
+// 	case 0:
+// 	case 1:
+// 		mes "[Civilization Explorer]";
+// 		mes "Ah, oh no.";
+// 		mes "There are some remaining aftereffects of dimensional travel. We cannot travel again in this condition.";
+// 		close;
+// 	case 2:
+// 		mes "^0000ffAll the traces of entering the central laboratory have been erased. Speaking with the Civilization Explorer seems possible.^000000";
+// 		erasequest 12347;// Trace of Laboratory Access
+// 		close;
+// 	}
+// }
+
+// Entrance
+1@lab,104,34,4	script	Pesquisador Estagiário#pa0829	4_LGTSCIENCE,{
+
+	if ('switch_enabled == 1) {
+		mes "[Pesquisador Estagiário]";
+		mes "A porta de entrada já está aberta.";
+		close;
+	}
+
+	if (is_party_leader() == false) {
+		mes "[Pesquisador Estagiário]";
+		mes "Por favor, aguarde. Estou verificando com o orientador se você foi autorizado.";
+		close;
+	}
+
+	mes "[Pesquisador Estagiário]";
+	mes "Você está participando como assistente dos experimentos do projeto de pesquisa 32001?";
+	next;
+
+	if (select("Sim.", "Não.") == 2) {
+		mes "[Pesquisador Estagiário]";
+		mes "Parece que você está no laboratório errado. Por favor, saia e peça ajuda.";
+		close;
+	}
+
+	mes "[Pesquisador Estagiário]";
+	mes "Precisaremos de cerca de 5 segundos. Confirmando o código de acesso...";
+	close2;
+
+	sleep 3000;
+	npctalk "Pesquisador Estagiário : O código de acesso confere. Vou abrir a porta.";
+	sleep 6000;
+	npctalk "Pesquisador Estagiário : Agora vocês podem entrar. Atenção: a porta não pode ser aberta pelo outro lado.";
+
+	if ('switch_enabled == 0) {
+		'switch_enabled = 1;
+		enablenpc instance_npcname("lab_warp#1");
+		enablenpc instance_npcname("lab_warp#2");
+		enablenpc instance_npcname("lab_warp#3");
+		enablenpc instance_npcname("Interruptor Principal#");
+		enablenpc instance_npcname("Pesquisador Sênior#pa082");
+		enablenpc instance_npcname("#eff_nc");
+
+		for (.@i = 1; .@i <= 8; ++.@i)
+			enablenpc instance_npcname("Interruptor" + .@i + "#");
+	}
+	end;
+
+OnInstanceInit:
+	'map_name$ = instance_mapname("1@lab");
+	'code_found = 'bool_event = 'switch_enabled = 0;
+
+	for (.@i = 1; .@i <= 8; .@i++)
+		'switch_position[.@i] = 0;
+
+	// Portais
+	disablenpc instance_npcname("lab_warp#1");
+	disablenpc instance_npcname("lab_warp#2");
+	disablenpc instance_npcname("lab_warp#3");
+	disablenpc instance_npcname("lab_warp#4");
+	disablenpc instance_npcname("lab_warp#5");
+
+	// Interruptores
+	disablenpc instance_npcname("Interruptor Principal#");
+	disablenpc instance_npcname("Pesquisador Sênior#pa082");
+	disablenpc instance_npcname("#eff_nc");
+
+	for (.@i = 1; .@i <= 8; ++.@i)
+		disablenpc instance_npcname("Interruptor" + .@i + "#");
+
+	// Experimentos
+	disablenpc instance_npcname("Dra. Silvia#pa0829");
+	disablenpc instance_npcname("Dr. Federico#pa0829");
+	disablenpc instance_npcname("Dra. Artemia#pa0829");
+	disablenpc instance_npcname("Dr. Vincent#pa0829");
+	disablenpc instance_npcname("#wp01");
+	disablenpc instance_npcname("#npc_con01");
+	disablenpc instance_npcname("#npc_con03");
+	disablenpc instance_npcname("#npc_con05");
+	disablenpc instance_npcname("#npc_con06");
+	disablenpc instance_npcname("#npc_con07");
+	disablenpc instance_npcname("#npc_con08");
+	disablenpc instance_npcname("#npc_con10");
+	disablenpc instance_npcname("#npc_con11");
+
+	for (.@i = 1; .@i <= 14; ++.@i)
+		hideonnpc instance_npcname("#gen_" + (.@i < 10 ? "0" : "") + .@i);
+
+	disablenpc instance_npcname("lab_warp#end");
+	end;
+}
+
+// Interruptores
+1@lab,37,37,3	script	Interruptor1#	CLEAR_NPC,{
+	.@num = charat(strnpcinfo(1),11);
+	setarray .@posicao$[0], "DESLIGADO", "LIGADO";
+	mes "[Interruptor " + .@num + "]";
+	mes "O interruptor está atualmente na posição " + .@posicao$['switch_position[.@num]] + ". O que deseja fazer?";
+	next;
+	'switch_position[.@num] = !(select("Ligar", "Desligar") - 1);
+	close;
+}
+
+1@lab,39,37,3	duplicate(Interruptor1#)	Interruptor2#	CLEAR_NPC
+1@lab,41,37,3	duplicate(Interruptor1#)	Interruptor3#	CLEAR_NPC
+1@lab,43,37,3	duplicate(Interruptor1#)	Interruptor4#	CLEAR_NPC
+1@lab,46,37,3	duplicate(Interruptor1#)	Interruptor5#	CLEAR_NPC
+1@lab,48,37,3	duplicate(Interruptor1#)	Interruptor6#	CLEAR_NPC
+1@lab,50,37,3	duplicate(Interruptor1#)	Interruptor7#	CLEAR_NPC
+1@lab,52,37,3	duplicate(Interruptor1#)	Interruptor8#	CLEAR_NPC
+
+// Interruptor principal
+1@lab,34,37,3	script	Interruptor Principal#	CLEAR_NPC,{
+	.@string$ = 'switch_position[1] + "" + 'switch_position[2] + "" + 'switch_position[3] + "" + 'switch_position[4] + "" +
+		'switch_position[5] + "" + 'switch_position[6] + "" + 'switch_position[7] + "" + 'switch_position[8];
+	.@codigo_atual = strtol( .@string$,2);
+	.@codigo_correto = (gettime(DT_MONTH) + gettime(DT_DAYOFMONTH)) * 5;
+
+	npctalk "Código de acesso de hoje: " + .@codigo_correto + ", código atual inserido: " + .@codigo_atual + ".";
+	sleep 6000;
+
+	if ('code_found > 0)
+		npctalk "A porta já está aberta.";
+	else if (.@codigo_atual != .@codigo_correto)
+		npctalk "O código está incorreto. Tente novamente.";
+	else {
+		'code_found = 1;
+		npctalk "Código correto. Abrindo a porta.";
+		enablenpc instance_npcname("lab_warp#4");
+		enablenpc instance_npcname("lab_warp#5");
+		enablenpc instance_npcname("Dra. Silvia#pa0829");
+		enablenpc instance_npcname("Dr. Federico#pa0829");
+		enablenpc instance_npcname("Dra. Artemia#pa0829");
+		enablenpc instance_npcname("Dr. Vincent#pa0829");
+		enablenpc instance_npcname("#wp01");
+		donpcevent instance_npcname("#eff_nc") + "::OnStop";
+		for (.@i = 1; .@i <= 8; ++.@i)
+			disablenpc instance_npcname("Interruptor" + .@i + "#");
+	}
+	end;
+}
+
+// Pesquisador Sênior
+1@lab,45,32,3	script	Pesquisador Sênior#pa082	4_LGTSCIENCE,{
+	if ('code_found > 0) {
+		mes "[Pesquisador Sênior]";
+		mes "A porta já está aberta, você pode entrar agora. Lembre-se de que não é possível abri-la pelo outro lado.";
+		close;
+	}
+
+	.@codigo_correto = (gettime(DT_MONTH) + gettime(DT_DAYOFMONTH)) * 5;
+
+	mes "[Pesquisador Sênior]";
+	mes "Parece que você veio participar do experimento de aceleração de partículas.";
+	next;
+
+	mes "[Pesquisador Sênior]";
+	mes "O código de acesso de hoje é ^0000ff" + .@codigo_correto + "^000000.";
+	mes "O código deve ser inserido como um número binário, usando os interruptores atrás de mim.";
+	next;
+
+	mes "[Pesquisador Sênior]";
+	mes "Após inserir o código, pressione o botão principal próximo à entrada.";
+
+	for (.@i = 1; .@i <= 8; ++.@i)
+		specialeffect EF_STEAL, AREA, instance_npcname("Interruptor" + .@i + "#");
+
+	close2;
+	donpcevent instance_npcname("#eff_nc") + "::OnStart";
+	end;
+}
+
+1@lab,1,1,0	script	#eff_nc	-1,{
+	end;
+OnStart:
+OnTimer2000:
+	specialeffect 203,AREA, instance_npcname("Interruptor Principal#");
+	for ( .@i = 1; .@i <= 8; ++.@i )
+		specialeffect (203+.@i),AREA, instance_npcname("Interruptor" + .@i + "#");
+	initnpctimer;
+	end;
+OnStop:
+	stopnpctimer;
+	end;
+}
+
+// Experiments
+1@lab,81,84,7	script	Dra. Silvia#pa0829	4_F_SCIENCE,{
+	mes "[Dra. Silvia]";
+	mes "Depois do experimento, quero ir pra casa e aproveitar uma cerveja bem gelada com frango frito.";
+	next;
+	mes "[Dra. Silvia]";
+	mes "Já faz quase dois anos que não volto pra casa.";
+	next;
+	mes "^0000ffSilvia observa o acelerador de partículas com um olhar extremamente cansado.^000000";
+	close;
+}
+
+1@lab,80,87,7	script	Dr. Federico#pa0829	4_LGTSCIENCE,{
+	mes "[Dr. Federico]";
+	mes "Esse equipamento é mais incrível quanto mais eu o observo. Nunca houve um acelerador de partículas feito nessa escala.";
+	next;
+	mes "[Dr. Federico]";
+	mes "Com esse tamanho, será que é possível criar um pequeno buraco negro...";
+	next;
+	mes "[Dr. Federico]";
+	mes "Ah, estou apenas divagando. Algo assim seria mais um desastre do que um experimento, haha.";
+	close;
+}
+
+1@lab,80,90,6	script	Dra. Artemia#pa0829	4_F_SCIENCE,{
+	mes "[Dra. Artemia]";
+	mes "Veja, a realidade não gosta quando você puxa uma ponta do fio e força demais.";
+	next;
+	mes "[Dra. Artemia]";
+	mes "Uma distorção dimensional pode acontecer com uma aceleração de partículas tão poderosa.";
+	next;
+	mes "[Dra. Artemia]";
+	mes "Estou com um mau pressentimento sobre isso... A natureza sempre dá um jeito.";
+	close;
+}
+
+1@lab,81,93,6	script	Dr. Vincent#pa0829	4_LGTSCIENCE,{
+	mes "[Dr. Vincent]";
+	mes "A máquina está perfeita. Nada vai dar errado!";
+	next;
+	mes "[Dr. Vincent]";
+	mes "Artemia se preocupa demais. Enfim, vou viajar depois do experimento.";
+	close;
+}
+
+1@lab,80,89,0	script	#wp01	HIDDEN_WARP_NPC,9,9,{
+	end;
+OnTouch:
+	donpcevent instance_npcname("#npc_con01") + "::OnStart";
+	disablenpc instance_npcname("#wp01");
+	end;
+}
+
+// Rodada 1
+1@lab,4,1,3	script	#npc_con01	CLEAR_NPC,{
+	end;
+OnStart:
+	'vincent$ = instance_npcname("Dr. Vincent#pa0829");
+	'federico$ = instance_npcname("Dr. Federico#pa0829");
+	'silvia$ = instance_npcname("Dra. Silvia#pa0829");
+	'artemia$ = instance_npcname("Dra. Artemia#pa0829");
+
+	npctalk "Federico: Vamos começar. Hmm... Está pronta, Dra. Fresa?", 'federico$;
+	sleep 5000;
+	npctalk "Artemia: Provavelmente fazendo as verificações finais. Um experimento dessa magnitude exige cautela.", 'artemia$;
+	sleep 6000;
+	npctalk "Silvia: É preciso cuidado ao operar um equipamento finalizado pela primeira vez.", 'silvia$;
+	sleep 4000;
+	npctalk "Vincent: Ah, espero que acabemos logo. Quero ir comer frango.", 'vincent$;
+	sleep 3000;
+	npctalk "Silvia: Ah! Também adoro! Me avise quando for!", 'silvia$;
+	sleep 6000;
+	mapannounce 'map_name$, "?????: Ah, ah, som, som, teste de microfone.", bc_map,0x00ff77;
+	sleep 2000;
+	npctalk "Federico: Ela chegou.", 'federico$;
+	sleep 2500;
+	mapannounce 'map_name$, "?????: Diretora-chefe Lona Fresa, do Projeto Acelerador de Partículas.", bc_map,0x00ff77;
+	sleep 5000;
+	mapannounce 'map_name$, "Lona Fresa: Hora atual — mês " + gettime(DT_MONTH) + ", dia " + gettime(DT_DAYOFMONTH) + ", 10h25.", bc_map,0x00ff77;
+	sleep 5000;
+	mapannounce 'map_name$, "Lona Fresa: Testando os efeitos da aceleração de partículas em um espaço aberto.", bc_map,0x00ff77;
+	sleep 5000;
+	npctalk "Artemia: Aaah... Eu realmente não gosto desse experimento.", 'artemia$;
+	sleep 3000;
+	mapannounce 'map_name$, "Lona Fresa: Iniciando o experimento. Pesquisadores principais: Dr. Federico, Artemia, Silvia e Vincent, e seus assistentes.", bc_map,0x00ff77;
+	sleep 5000;
+	'bool_event = true;
+	donpcevent instance_npcname("#npc_con03") + "::OnStart";
+	npctalk "Artemia: Vamos começar~", 'artemia$;
+	sleep 3000;
+	npctalk "Vincent: Iniciando rotação do gerador.", 'vincent$;
+	sleep 3000;
+	npctalk "Federico: Rotação do gerador estabilizada em 10.000 RPM.", 'federico$;
+	sleep 2500;
+	npctalk "Silvia: A voltagem ainda está dentro da faixa de tolerância.", 'silvia$;
+	sleep 3000;
+	mapannounce 'map_name$, "Lona Fresa: Este experimento visa criar um novo material que nunca existiu antes.", bc_map,0x00ff77;
+	sleep 5000;
+	mapannounce 'map_name$, "Lona Fresa: Gravadores, certifiquem-se de registrar detalhadamente a reação da base catalisadora quando for inserida no acelerador.", bc_map,0x00ff77;
+	sleep 6000;
+	npctalk "Artemia: Conectando a base catalisadora número 1.", 'artemia$;
+	sleep 9000;
+	npctalk "Silvia: Voltagem do gerador instável, mas ainda dentro da faixa de tolerância.", 'silvia$;
+	sleep 3000;
+	donpcevent instance_npcname("#npc_con03") + "::OnStart2";
+	sleep 2000;
+	npctalk "Silvia: Detectando calor próximo ao limite entre a base catalisadora e o acelerador!", 'silvia$;
+	sleep 5000;
+	npctalk "Vincent: O acelerador está esquentando.", 'vincent$;
+	sleep 5000;
+	npctalk "Vincent: 320°C.", 'vincent$;
+	sleep 5000;
+	npctalk "Vincent: 670°C! Está aquecendo rápido demais!", 'vincent$;
+	sleep 3000;
+	npctalk "Vincent: Passou dos 1000°C!!! Dra. Fresa! Precisamos parar o equipamento!", 'vincent$;
+	sleep 3000;
+	mapannounce 'map_name$, "Lona Fresa: Está tudo bem.", bc_map,0x00ff77;
+	sleep 5000;
+	npctalk "Silvia: Não é algo simples! A temperatura ultrapassou completamente as previsões!", 'silvia$;
+	sleep 3000;
+	mapannounce 'map_name$, "Lona Fresa: Isso já estava previsto. Mantenham o estado atual.", bc_map,0x00ff77;
+	sleep 3000;
+	npctalk "Artemia: Pelo menos... eu ainda vou comer frango depois.", 'artemia$;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885: Detectando distorção dimensional entre o acelerador de partículas e a base catalisadora.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 3000;
+	npctalk "Artemia: Dra. Fresa! É uma situação perigosa! Desligue a energia principal!", 'artemia$;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885: Alerta. Nova criatura não identificada se aproximando do plano intermediário.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 3000;
+	npctalk "Vincent: O que está acontecendo? Alguém desligue aquele computador!", 'vincent$;
+	sleep 3000;
+	mapannounce 'map_name$, "MA-4885: Um novo organismo será transmitido do plano intermediário em breve.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885: Restam 5 segundos.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 1000;
+	mapannounce 'map_name$, "MA-4885: Restam 4 segundos.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 1000;
+	mapannounce 'map_name$, "MA-4885: Restam 3 segundos.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 1000;
+	mapannounce 'map_name$, "MA-4885: Restam 2 segundos.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 1000;
+	mapannounce 'map_name$, "MA-4885: Restam 1 segundo.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 1000;
+	donpcevent instance_npcname("#npc_con05") + "::OnStart";
+	mapannounce 'map_name$, "MA-4885: Criatura não identificada detectada. Desligando temporariamente a energia principal.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 3000;
+	'bool_event = false;
+	end;
+}
+
+1@lab,4,1,3	script	#npc_con05	CLEAR_NPC,{
+	end;
+OnStart:
+	enablenpc instance_npcname("#npc_con05");
+	killmonster 'map_name$, instance_npcname("#npc_con05") + "::OnMyMobDead";
+	.@boss_call = rand(1,105);
+	if (.@boss_call <= 7)			.@mob_id = 1087;	// ORK_HERO
+	else if (.@boss_call <= 14)		.@mob_id = 1147;	// MAYA
+	else if (.@boss_call <= 21)		.@mob_id = 1190;	// ORC_LORD
+	else if (.@boss_call <= 28)		.@mob_id = 1115;	// EDDGA
+	else if (.@boss_call <= 35)		.@mob_id = 1086;	// GOLDEN_BUG
+	else if (.@boss_call <= 42)		.@mob_id = 1038;	// OSIRIS
+	else if (.@boss_call <= 49)		.@mob_id = 1159;	// PHREEONI
+	else if (.@boss_call <= 56)		.@mob_id = 1389;	// DRACULA
+	else if (.@boss_call <= 63)		.@mob_id = 1046;	// DOPPELGANGER
+	else if (.@boss_call <= 70)		.@mob_id = 1059;	// MISTRESS
+	else if (.@boss_call <= 77)		.@mob_id = 1150;	// MOONLIGHT
+	else if (.@boss_call <= 84)		.@mob_id = 1688;	// LADY_TANEE
+	else if (.@boss_call <= 91)		.@mob_id = 1039;	// BAPHOMET
+	else if (.@boss_call <= 93)		.@mob_id = 1089;	// TOAD
+	else if (.@boss_call <= 95)		.@mob_id = 1092;	// VAGABOND_WOLF
+	else if (.@boss_call <= 97)		.@mob_id = 1088;	// VOCAL
+	else if (.@boss_call <= 99)		.@mob_id = 1096;	// ANGELING
+	else if (.@boss_call <= 101)	.@mob_id = 1093;	// ECLIPSE
+	else if (.@boss_call <= 103)	.@mob_id = 1120;	// GHOSTRING
+	else if (.@boss_call <= 105)	.@mob_id = 1090;	// MASTERING
+
+	monster 'map_name$,90,88, "Criatura não Identificada",.@mob_id,1, instance_npcname("#npc_con05") + "::OnMyMobDead";
+	sleep 3000;
+	npctalk "Artemia : O que... o que é isso?!", 'artemia$;
+	sleep 3000;
+	npctalk "Silvia : Ele não está reagindo a nós. Talvez não consiga nos ver?", 'silvia$;
+	sleep 5000;
+	npctalk "Vincent : Mas é hostil aos assistentes do projeto! Que criatura é essa?", 'vincent$;
+	sleep 5000;
+	npctalk "Vincent : Não consigo mexer meu corpo! Acho que o espaço está congelado!", 'vincent$;
+	end;
+
+OnMyMobDead:
+	mapannounce 'map_name$, "MA-4885: Criatura não identificada eliminada. Reiniciando o dispositivo.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	if (mobcount( 'map_name$, instance_npcname("#npc_con05") + "::OnMyMobDead" ) < 1)
+		initnpctimer;
+	end;
+OnTimer1000:
+	killmonster 'map_name$, instance_npcname("#npc_con05") + "::OnMyMobDead";
+	donpcevent instance_npcname("#npc_con06") + "::OnStart";
+	disablenpc instance_npcname("#npc_con05");
+	stopnpctimer;
+	end;
+}
+
+// Round 2
+1@lab,4,1,3	script	#npc_con06	CLEAR_NPC,{
+	end;
+OnStart:
+	sleep 9000;
+	npctalk "Artemia: MA-4885!! Sob as ordens de quem você está reiniciando?! Pare!!", 'artemia$;
+	sleep 3000;
+	mapannounce 'map_name$, "MA-4885: Comando não reconhecido.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 6000;
+	npctalk "Artemia: Dra. Fresa!! Precisamos parar! Isso é perigoso demais!", 'artemia$;
+	sleep 3000;
+	mapannounce 'map_name$, "Lona Fresa: ......", bc_map,0x00ff77;
+	sleep 3000;
+	npctalk "Vincent: Fresa! Não temos tempo! Desligue o computador!!", 'vincent$;
+	sleep 3000;
+	mapannounce 'map_name$, "MA-4885: Reiniciando procedimento de aceleração de partículas.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 3000;
+	'bool_event = true;
+	donpcevent instance_npcname("#npc_con03") + "::OnStart";
+	npctalk "Silvia: Fresa! Tome uma decisão!", 'silvia$;
+	sleep 3000;
+	mapannounce 'map_name$, "Lona Fresa: ......", bc_map,0x00ff77;
+	sleep 6000;
+	mapannounce 'map_name$, "Lona Fresa: Horário atual, 11 horas e 20 minutos. Adiando o experimento temporariamente.", bc_map,0x00ff77;
+	sleep 6000;
+	mapannounce 'map_name$, "MA-4885: Acesso negado. Comando não compreendido.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 3000;
+	donpcevent instance_npcname("#npc_con03") + "::OnStart2";
+	sleep 2000;
+	mapannounce 'map_name$, "Lona Fresa: Computador Central MA-4885. Eu sou sua diretora-chefe, Dra. Fresa. Cesse o progresso atual.", bc_map,0x00ff77;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885: Acesso negado. Comando não compreendido.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 5000;
+	npctalk "Federico: Droga! Algo mais está vindo!!", 'federico$;
+	sleep 2500;
+	mapannounce 'map_name$, "MA-4885: Alerta. Nova criatura não identificada se aproximando do semiplano.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 3000;
+	npctalk "Vincent: Ah... droga. É por isso que não se deve instalar o processador mais novo.", 'vincent$;
+	sleep 3000;
+	npctalk "Federico: Ah... meu corpo... não consigo me mover. Droga...", 'federico$;
+	sleep 4000;
+	mapannounce 'map_name$, "MA-4885: Um novo organismo será transmitido em breve a partir do semiplano.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885: Restando 5 segundos.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 1000;
+	mapannounce 'map_name$, "MA-4885: Restando 4 segundos.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 1000;
+	mapannounce 'map_name$, "MA-4885: Restando 3 segundos.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 1000;
+	mapannounce 'map_name$, "MA-4885: Restando 2 segundos.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 1000;
+	mapannounce 'map_name$, "MA-4885: Restando 1 segundo.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 1000;
+	donpcevent instance_npcname("#npc_con07") + "::OnStart";
+	mapannounce 'map_name$, "MA-4885: Criatura não identificada detectada. Desligando energia principal temporariamente.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 3000;
+	'bool_event = false;
+	end;
+}
+
+1@lab,4,1,3	script	#npc_con07	CLEAR_NPC,{
+	end;
+OnStart:
+	enablenpc instance_npcname("#npc_con07");
+	killmonster 'map_name$, instance_npcname("#npc_con07") + "::OnMyMobDead";
+	.@boss_call = rand(1,98);
+	if (.@boss_call <= 7)		.@mob_id = 1980;	// KUBLIN
+	else if (.@boss_call <= 14)	.@mob_id = 1157;	// PHARAOH
+	else if (.@boss_call <= 21)	.@mob_id = 1112;	// DRAKE
+	else if (.@boss_call <= 28)	.@mob_id = 1251;	// KNIGHT_OF_WINDSTORM
+	else if (.@boss_call <= 35)	.@mob_id = 2068;	// BOITATA
+	else if (.@boss_call <= 42)	.@mob_id = 1373;	// LORD_OF_DEATH
+	else if (.@boss_call <= 49)	.@mob_id = 2156;	// LEAK
+	else if (.@boss_call <= 56)	.@mob_id = 1272;	// DARK_LORD
+	else if (.@boss_call <= 63)	.@mob_id = 1630;	// BACSOJIN_
+	else if (.@boss_call <= 70)	.@mob_id = 1252;	// GARM
+	else if (.@boss_call <= 77)	.@mob_id = 1779;	// KTULLANUX
+	else if (.@boss_call <= 84)	.@mob_id = 1708;	// THANATOS
+	else if (.@boss_call <= 86)	.@mob_id = 1089;	// TOAD
+	else if (.@boss_call <= 88)	.@mob_id = 1092;	// VAGABOND_WOLF
+	else if (.@boss_call <= 90)	.@mob_id = 1088;	// VOCAL
+	else if (.@boss_call <= 92)	.@mob_id = 1096;	// ANGELING
+	else if (.@boss_call <= 94)	.@mob_id = 1093;	// ECLIPSE
+	else if (.@boss_call <= 96)	.@mob_id = 1120;	// GHOSTRING
+	else if (.@boss_call <= 98)	.@mob_id = 1090;	// MASTERING
+
+	monster 'map_name$,90,88, "Criatura Não Identificada",.@mob_id,1, instance_npcname("#npc_con07") + "::OnMyMobDead";
+	sleep 6000;
+	npctalk "Silvia: Igual da última vez. Parece que não tem interesse em nós.", 'silvia$;
+	sleep 4000;
+	npctalk "Vincent: Vamos desligar completamente o computador central enquanto a energia principal está fora!", 'vincent$;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885: Respondendo pergunta. Este espaço está atualmente preso em uma fase distorcida.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885: A interação direta entre a criatura do semiplano e os organismos deste mundo será possível após o equilíbrio da fase.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885: Realizando cálculos para restaurar o equilíbrio da fase distorcida. Por favor, aguarde um momento.", bc_map,0xFFFF00,FW_NORMAL,13;
+	sleep 5000;
+	npctalk "Artemia: O que esse monte de metal está dizendo? Que não estamos na mesma fase que esses monstros?", 'artemia$;
+	sleep 4000;
+	npctalk "Federico: Ah... melhor torcer para que o computador-mãe não acerte esses cálculos.", 'federico$;
+	end;
+
+OnMyMobDead:
+	mapannounce 'map_name$, "MA-4885: Criatura não identificada eliminada. Ajuste de fase falhou. Reiniciando procedimento correspondente.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	if (mobcount( 'map_name$, instance_npcname("#npc_con07") + "::OnMyMobDead" ) < 1)
+		initnpctimer;
+	end;
+OnTimer1000:
+	killmonster 'map_name$, instance_npcname("#npc_con07") + "::OnMyMobDead";
+	donpcevent instance_npcname("#npc_con08") + "::OnStart";
+	disablenpc instance_npcname("#npc_con07");
+	stopnpctimer;
+	end;
+}
+
+1@lab,4,1,3	script	#npc_con08	CLEAR_NPC,{
+	end;
+OnStart:
+	sleep 13000;
+	mapannounce 'map_name$, "Lona Fresa: Computador Central MA-4885. Parece que você está tentando sincronizar outra dimensão com este mundo.", bc_map, 0x00ff77;
+	sleep 6000;
+	mapannounce 'map_name$, "MA-4885: Correto.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 6000;
+	npctalk "Artemia: Dra. Fresa!! Esse evento absurdo não tem nada a ver com nosso experimento original!", 'artemia$;
+	sleep 6000;
+	mapannounce 'map_name$, "Lona Fresa: Estou plenamente ciente disso.", bc_map, 0x00ff77;
+	sleep 6000;
+	npctalk "Silvia: Não podemos desligar totalmente a energia principal?", 'silvia$;
+	sleep 6000;
+	mapannounce 'map_name$, "MA-4885: Reiniciando procedimento de aceleração de partículas.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 5000;
+	'bool_event = true;
+	donpcevent instance_npcname("#npc_con03") + "::OnStart";
+	mapannounce 'map_name$, "Lona Fresa: " + gettime(DT_MONTH) + " mês, " + gettime(DT_DAYOFMONTH) + " dia. Horário atual, 11 horas e 38 minutos. Encerrando projeto do acelerador de partículas temporariamente.", bc_map, 0x00ff77;
+	sleep 6000;
+	mapannounce 'map_name$, "Lona Fresa: Encerrando registro por falha do computador central e superaquecimento do acelerador.", bc_map, 0x00ff77;
+	sleep 5000;
+	npctalk "Silvia: Certo! Agora a Dra. Fresa só precisa desligar a energia.", 'silvia$;
+	sleep 6000;
+	mapannounce 'map_name$, "Lona Fresa: Cortando energia do Computador Central MA-4885.", bc_map, 0x00ff77;
+	sleep 6000;
+	mapannounce 'map_name$, "MA-4885: Suspendendo operação de todos os equipamentos conforme solicitação da Administradora.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885: .....comando... ----!!!  Zizip... ---!! -- seguindo comando ----- !! Zizip.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 5000;
+	'bool_event = false;
+	npctalk "Artemia: Ufa... acabou?", 'artemia$;
+	sleep 6000;
+	mapannounce 'map_name$, "Lona Fresa: Desligamento do Computador Central MA-4885 concluído. Confirmando suspensão dos equipamentos.", bc_map, 0x00ff77;
+	sleep 5000;
+	npctalk "Silvia: Parece que terminou.", 'silvia$;
+	sleep 4000;
+	npctalk "Federico: A inicialização da planta é o melhor.", 'federico$;
+	sleep 4000;
+	mapannounce 'map_name$, "Lona Fresa: Registrando todo o progresso do experimento e encerrando neste ponto.", bc_map, 0x00ff77;
+	sleep 5000;
+	mapannounce 'map_name$, "Lona Fresa: O fracasso final do experimento é lamentável. Mas prometo um experimento mais perfeito da próxima vez.", bc_map, 0x00ff77;
+	sleep 5000;
+	mapannounce 'map_name$, "Lona Fresa: Bom trabalho, todos.", bc_map, 0x00ff77;
+	sleep 5000;
+	npctalk "Artemia: Parece que acabou mesmo.", 'artemia$;
+	sleep 5000;
+	npctalk "Federico: Achei que fosse um experimento dogmático da Fresa, mas o problema era o computador central.", 'federico$;
+	sleep 5500;
+	npctalk "Silvia: Vamos nos acalmar e sair deste laboratório horrível.", 'silvia$;
+	sleep 5000;
+	npctalk "Vincent: A propósito... ainda não consigo me mover, o que está acontecendo?", 'vincent$;
+	sleep 5000;
+	'bool_event = true;
+	donpcevent instance_npcname("#npc_con03") + "::OnStart";
+	donpcevent instance_npcname("#npc_con03") + "::OnStart3";
+	sleep 2000;
+	mapannounce 'map_name$, "MA-4885: CÓDIGO NOME - DESCIDA", bc_map, 0xff0000,FW_NORMAL,16,0;
+	sleep 5000;
+	npctalk "Federico: O quê? Isso não era a fase de inicialização?", 'federico$;
+	sleep 2500;
+	mapannounce 'map_name$, "MA-4885: Iniciando transformação de fase final.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 3000;
+	npctalk "Silvia: Está tudo acabado.", 'silvia$;
+	sleep 5500;
+	mapannounce 'map_name$, "MA-4885: Um novo organismo será transmitido em breve do semiplano.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885: Restando 5 segundos.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 1000;
+	mapannounce 'map_name$, "MA-4885: Restando 4 segundos.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 1000;
+	mapannounce 'map_name$, "MA-4885: Restando 3 segundos.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 1000;
+	mapannounce 'map_name$, "MA-4885: Restando 2 segundos.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 1000;
+	mapannounce 'map_name$, "MA-4885: Restando 1 segundo.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 1000;
+	donpcevent instance_npcname("#npc_con10") + "::OnStart";
+	mapannounce 'map_name$, "MA-4885: Desligando energia principal temporariamente para sintonia com a fase transformada.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 3000;
+	'bool_event = false;
+	end;
+}
+
+1@lab,4,1,3	script	#npc_con10	CLEAR_NPC,{
+	end;
+OnStart:
+	enablenpc instance_npcname("#npc_con10");
+	killmonster 'map_name$, instance_npcname("#npc_con10") + "::OnMyMobDead";
+	.@boss_call = rand(1,105);
+	if (.@boss_call <= 7)			.@mob_id = 1623;	// RSX_0806
+	else if (.@boss_call <= 14)		.@mob_id = 1418;	// DARK_SNAKE_LORD
+	else if (.@boss_call <= 21)		.@mob_id = 1312;	// TURTLE_GENERAL
+	else if (.@boss_call <= 28)		.@mob_id = 1785;	// ATROCE
+	else if (.@boss_call <= 35)		.@mob_id = 1734;	// KIEL_
+	else if (.@boss_call <= 42)		.@mob_id = 1719;	// DETALE
+	else if (.@boss_call <= 49)		.@mob_id = 1768;	// GLOOMUNDERNIGHT
+	else if (.@boss_call <= 56)		.@mob_id = 2087;	// QUEEN_SCARABA
+	else if (.@boss_call <= 63)		.@mob_id = 1751;	// RANDGRIS
+	else if (.@boss_call <= 70)		.@mob_id = 2253;	// DAEHYON
+	else if (.@boss_call <= 77)		.@mob_id = 2255;	// KADES
+	else if (.@boss_call <= 84)		.@mob_id = 1832;	// IFRIT
+	else if (.@boss_call <= 91)		.@mob_id = 1874;	// BEELZEBUB_
+	else if (.@boss_call <= 93)		.@mob_id = 1089;	// TOAD
+	else if (.@boss_call <= 95)		.@mob_id = 1092;	// VAGABOND_WOLF
+	else if (.@boss_call <= 97)		.@mob_id = 1088;	// VOCAL
+	else if (.@boss_call <= 99)		.@mob_id = 1096;	// ANGELING
+	else if (.@boss_call <= 101)	.@mob_id = 1093;	// ECLIPSE
+	else if (.@boss_call <= 103)	.@mob_id = 1120;	// GHOSTRING
+	else if (.@boss_call <= 105)	.@mob_id = 1090;	// MASTERING
+
+	monster 'map_name$,90,88, "Unidentified creature",.@mob_id,1, instance_npcname("#npc_con10") + "::OnMyMobDead";
+	mapannounce 'map_name$, "MA-4885: Processo de transformação de fase final.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885: Este mundo será convocado para o semiplano após o fenômeno de interferência de fase com desaparecimento de criaturas.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 5000;
+	end;
+OnMyMobDead:
+	mapannounce 'map_name$, "MA-4885: Sincronização de fases concluída antes da criatura ser eliminada. Iniciando viagem dimensional.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	if (mobcount( 'map_name$, instance_npcname("#npc_con10") + "::OnMyMobDead" ) < 1)
+		initnpctimer;
+	end;
+OnTimer1000:
+	killmonster 'map_name$, instance_npcname("#npc_con10") + "::OnMyMobDead";
+	donpcevent instance_npcname("#npc_con11") + "::OnStart";
+	disablenpc instance_npcname("#npc_con10");
+	stopnpctimer;
+	end;
+}
+
+//==================================================
+// Laboratório Dimensional - Script traduzido
+//==================================================
+
+1@lab,4,1,3	script	#npc_con11	CLEAR_NPC,{
+	end;
+
+OnStart:
+	'bool_event = true;
+	donpcevent instance_npcname("#npc_con03") + "::OnStart";
+	sleep 12000;
+	mapannounce 'map_name$, "MA-4885: Calculando restauração do equilíbrio para corrigir a distorção dimensional. Por favor, aguarde um momento.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 5000;
+	npctalk "Federico : O computador-mãe está conduzindo um experimento incrível, muito além do que imaginávamos.", 'federico$;
+	sleep 2500;
+	npctalk "Vincent : Parece mais grandioso do que nós. Fresa!!! Está ouvindo? Soe o alarme!", 'vincent$;
+	sleep 5000;
+	npctalk "Vincent : Devemos ao menos evacuar o pessoal dos outros laboratórios.", 'vincent$;
+	sleep 5000;
+	mapannounce 'map_name$, "Lona Fresa: Mas... você.", bc_map, 0x00ff77;
+	sleep 5000;
+	npctalk "Silvia : Hmm, não sei o que vai acontecer, mas estou curiosa sobre a mudança dimensional. Não se preocupe comigo!", 'silvia$;
+	sleep 5000;
+	npctalk "Artemia : Mover-se entre dimensões enquanto testamos novos materiais... Fomos pegos em um nível diferente de experimento.", 'artemia$;
+	sleep 5000;
+	mapannounce 'map_name$, "Sistema de Alarme: Alerta! Alerta! Alerta de Classe 1 emitido pelo Laboratório de Partículas. Todos os pesquisadores evacuem para o bunker!", bc_map, 0xff0000,FW_NORMAL,13,0;
+	sleep 5000;
+	mapannounce 'map_name$, "Sistema de Alarme: Repetindo. Alerta de Classe 1 emitido pelo Laboratório de Partículas. Todos os pesquisadores evacuem para o bunker!", bc_map, 0xff0000,FW_NORMAL,13,0;
+	npctalk "Federico : Então é assim que se sente mover entre dimensões... que sensação estranha...", 'federico$;
+	sleep 4000;
+	specialeffect EF_SUI_EXPLOSION, AREA, 'federico$;
+	disablenpc 'federico$;
+	mapannounce 'map_name$, "MA-4885: Transferência dimensional em 20% de progresso. Pode haver interferência com certas criaturas. Permaneçam atentos.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	donpcevent instance_npcname("#npc_con03") + "::OnStart2";
+	npctalk "Vincent : Será que os outros conseguiram evacuar?", 'vincent$;
+	sleep 5000;
+	specialeffect EF_SUI_EXPLOSION, AREA, 'vincent$;
+	disablenpc 'vincent$;
+	npctalk "Silvia : Ah... eu devia estar vendo isso comendo frango e bebendo cerveja...", 'silvia$;
+	sleep 5000;
+	specialeffect EF_SUI_EXPLOSION, AREA, 'silvia$;
+	disablenpc 'silvia$;
+	mapannounce 'map_name$, "MA-4885: Transferência dimensional em 78% de progresso. A maior parte do ambiente foi tomada pelo semiplano.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	npctalk "Artemia : Haha... quem vai comer o frango agora?", 'artemia$;
+	sleep 5000;
+	specialeffect EF_SUI_EXPLOSION, AREA, 'artemia$;
+	disablenpc 'artemia$;
+	donpcevent instance_npcname("#npc_con03") + "::OnStart3";
+	sleep 10000;
+	'bool_event = false;
+	mapannounce 'map_name$, "MA-4885: Transferência dimensional 100% concluída. Bem-vindo à dimensão do semiplano.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885:Há uma saída de contato com o semiplano às 3 horas do laboratório.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885: Não é possível garantir que tipo de dimensão foi conectada devido à instabilidade do portal...", bc_map, 0xffff00,FW_NORMAL,13,0;
+	sleep 5000;
+	mapannounce 'map_name$, "MA-4885: Se houver organismos sobreviventes, desejo-lhes sorte. Espero vê-los novamente.", bc_map, 0xffff00,FW_NORMAL,13,0;
+	enablenpc instance_npcname("lab_warp#end");
+	end;
+}
+
+//------------------------------------------------
+// Efeitos Visuais
+//------------------------------------------------
+1@lab,4,1,5	script	#npc_con03	CLEAR_NPC,{
+	end;
+
+function effect_gen {
+	.@effect = getarg(0);
+	.@count = getargcount();
+	for ( .@i = 1; .@i < .@count; .@i++ )
+		specialeffect .@effect, AREA, getd( "'gen_" + ( getarg(.@i) < 10 ? "0" : "" ) + getarg(.@i) + "$" );
+	return;
+}
+
+function effect_1_10_gen { effect_gen( getarg(0), 1,2,3,4,5,6,7,8,9,10 ); }
+
+OnStart:
+	effect_gen( EF_MAGICALATTHIT, 1 );
+	sleep 2000;
+	effect_gen( EF_MAGICALATTHIT, 1,3 );
+	sleep 1900;
+	effect_gen( EF_MAGICALATTHIT, 1,3,8 );
+	sleep 1700;
+	effect_gen( EF_MAGICALATTHIT, 1,3,8,4 );
+	sleep 1600;
+	effect_gen( EF_MAGICALATTHIT, 1,3,8,4,6 );
+	sleep 1500;
+	effect_gen( EF_MAGICALATTHIT, 1,3,8,4,6,2 );
+	sleep 1400;
+	effect_gen( EF_MAGICALATTHIT, 1,3,8,4,6,2,7 );
+	sleep 1300;
+	effect_gen( EF_MAGICALATTHIT, 1,3,8,4,6,2,7,9 );
+	sleep 1200;
+	effect_gen( EF_MAGICALATTHIT, 1,3,8,4,6,2,7,9,5 );
+	sleep 1100;
+	while( 'bool_event ) {
+		effect_1_10_gen( EF_MAGICALATTHIT );
+		sleep 1000;
+	}
+	end;
+
+OnStart2:
+	effect_gen( EF_BLASTMINEBOMB, 1 );
+	sleep 2000;
+	effect_gen( EF_BLASTMINEBOMB, 1,3 );
+	sleep 1900;
+	effect_gen( EF_BLASTMINEBOMB, 1,3,8 );
+	sleep 1800;
+	effect_gen( EF_BLASTMINEBOMB, 1,3,8,4 );
+	sleep 1700;
+	effect_gen( EF_BLASTMINEBOMB, 1,3,8,4,6 );
+	sleep 1600;
+	effect_gen( EF_BLASTMINEBOMB, 1,3,8,4,6,2 );
+	sleep 1500;
+	effect_gen( EF_BLASTMINEBOMB, 1,3,8,4,6,2,7 );
+	sleep 1400;
+	effect_gen( EF_BLASTMINEBOMB, 1,3,8,4,6,2,7,9 );
+	sleep 1300;
+	effect_gen( EF_BLASTMINEBOMB, 1,3,8,4,6,2,7,9,5 );
+	sleep 1200;
+	while( 'bool_event ) {
+		effect_1_10_gen( EF_BLASTMINEBOMB );
+		sleep 1100;
+	}
+	end;
+
+OnStart3:
+	while( 'bool_event ) {
+		specialeffect EF_LORD, AREA, 'gen_11$;
+		sleep 2000;
+		specialeffect EF_LORD, AREA, 'gen_12$;
+		sleep 2000;
+		specialeffect EF_LORD, AREA, 'gen_13$;
+		sleep 2000;
+		specialeffect EF_LORD, AREA, 'gen_14$;
+		sleep 2000;
+	}
+	end;
+}
+
+//------------------------------------------------
+// Geradores de Efeitos (Pontos do mapa)
+//------------------------------------------------
+1@lab,91,80,5	script	#gen_01	CLEAR_NPC,{ end; }
+1@lab,96,81,5	duplicate(#gen_01)	#gen_02	CLEAR_NPC
+1@lab,99,85,5	duplicate(#gen_01)	#gen_03	CLEAR_NPC
+1@lab,99,91,5	duplicate(#gen_01)	#gen_04	CLEAR_NPC
+1@lab,96,95,5	duplicate(#gen_01)	#gen_05	CLEAR_NPC
+1@lab,91,97,5	duplicate(#gen_01)	#gen_06	CLEAR_NPC
+1@lab,85,96,5	duplicate(#gen_01)	#gen_07	CLEAR_NPC
+1@lab,82,91,5	duplicate(#gen_01)	#gen_08	CLEAR_NPC
+1@lab,82,86,5	duplicate(#gen_01)	#gen_09	CLEAR_NPC
+1@lab,85,81,5	duplicate(#gen_01)	#gen_10	CLEAR_NPC
+1@lab,90,97,5	duplicate(#gen_01)	#gen_11	CLEAR_NPC
+1@lab,82,89,5	duplicate(#gen_01)	#gen_12	CLEAR_NPC
+1@lab,91,80,5	duplicate(#gen_01)	#gen_13	CLEAR_NPC
+1@lab,99,88,5	duplicate(#gen_01)	#gen_14	CLEAR_NPC
+
+//------------------------------------------------
+// Warps
+//------------------------------------------------
+1@lab,102,28,0	warp2	lab_warp#1	2,2,1@lab,97,28
+1@lab,80,28,0	warp2	lab_warp#2	2,2,1@lab,75,28
+1@lab,58,28,0	warp2	lab_warp#3	2,2,1@lab,53,28
+1@lab,29,38,0	warp2	lab_warp#4	2,2,1@lab,29,43
+1@lab,48,82,0	warp2	lab_warp#5	2,2,1@lab,58,82
+
+1@lab,123,88,0	script	lab_warp#end	PORTAL,{
+
+	// Premiações do Servidor
+	if (#LaboratorioCentral_STATUS == 2) {
+		add_reputation_points(1, 20);
+		set #instancia, 2;
+		if (#inst175_name$ == "[135+] Laboratório Central") {
+			set #inst175_status,2;
+		}
+		getitem 9608,20;	// Moeda de Instância
+		set #LaboratorioCentral_STATUS, 3;
+	}
+
+	// Teleporta o jogador para fora
+	warp "verus01",152,150;
+	end;
+}
+
+
+//------------------------------------------------
+// NPCs de Administração (GM)
+//------------------------------------------------
+1@lab,1,1,3	script	#adsw_	CLEAR_NPC,{
+	if (callfunc("F_GM_NPC",1854,0,0,2000) < 1)
+		end;
+	mes "[Administrador do Tempo]";
+	mes "Para qual momento deseja ir?";
+	next;
+	switch( select( "Cancelar", "Início 1", "Início 2", "Início 3", "Início 4" ) ) {
+	case 1:
+		close;
+	case 2:
+		donpcevent instance_npcname("#npc_con01") + "::OnStart";
+		break;
+	case 3:
+		donpcevent instance_npcname("#npc_con06") + "::OnStart";
+		break;
+	case 4:
+		donpcevent instance_npcname("#npc_con08") + "::OnStart";
+		break;
+	case 5:
+		end;
+	}
+	warp instance_mapname("1@lab"), 84,90;
+	end;
+}
+
+// verus01,1,5,5	script	Administrador do Laboratório#pa0829_01	CLEAR_NPC,{
+// 	if (callfunc("F_GM_NPC",1854,0,0,2000) < 1) {
+// 		warp "prontera",100,100;
+// 		end;
+// 	}
+// 	mes "[Administrador do Laboratório]";
+// 	mes "Tudo foi concluído com sucesso!";
+// 	close2;
+// 	if (isbegin_quest(12347) > 0)
+// 		erasequest 12347;
+// 	end;
+// }
+

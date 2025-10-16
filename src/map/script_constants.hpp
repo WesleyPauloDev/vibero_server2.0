@@ -1687,7 +1687,11 @@
 	export_constant(SC_HELPANGEL);
 	export_constant(SC_REF_T_POTION);
 	export_constant(SC_ADD_ATK_DAMAGE);
+
+	export_constant(SC_ADD_ATK_DAMAGE_MACAROON);
+	
 	export_constant(SC_ADD_MATK_DAMAGE);
+	export_constant(SC_ADD_MATK_DAMAGE_HAPPINESS);
 	export_constant(SC_SOUNDOFDESTRUCTION);
 	export_constant(SC_LUXANIMA);
 	export_constant(SC_REUSE_LIMIT_LUXANIMA);
@@ -3147,6 +3151,8 @@
 	export_constant(EFST_DRAGONIC_AURA);
 	export_constant(EFST_BIG_SCAR);
 	export_constant(EFST_VIGOR);
+	export_constant(EFST_ADD_ATK_DAMAGE_MACAROON);
+	export_constant(EFST_ADD_MATK_DAMAGE_HAPPINESS);
 	export_constant(EFST_WILL_OF_FAITH);
 	export_constant(EFST_PRESSURE);
 	export_constant(EFST_SA_DRAGONOLOGY);

@@ -21,6 +21,12 @@ function Get_Job_Equip;
 // Checks if the Player has the required level.
 // closes if not, returns if yes
 function	Require_Level	{
+
+	if ( eaclass()&EAJL_THIRD ) {
+		mes "Não há mais classes disponiveis.";
+		close;
+	}
+
 	if (BaseLevel < getarg(0) || JobLevel < getarg(1)) {
 		.@blvl = getarg(0) - BaseLevel;
 		.@jlvl = getarg(1) - JobLevel;
@@ -539,7 +545,7 @@ function	Get_Job_Equip	{
 	} else {
 		// Neither Second or Third Cls
 		// => First Cls or not covered by the switch
-		switch(BaseClass) {
+		switch(Class) {
 			// First Class
 			case Job_Swordman:
 				getitem 1101,1;
@@ -572,6 +578,9 @@ function	Get_Job_Equip	{
 				getitem 13250,100;
 				getitem 13258,100;
 				break;
+			case Job_Novice_High:
+				getitem 1201,1;
+				break;
 		}
 	}
 	return;
@@ -602,10 +611,10 @@ OnInit:
 	setarray .Req_Second[0],1,40; 		// Minimum base level, job level to turn into 2nd class
 	setarray .Req_Rebirth[0],99,50;		// Minimum base level, job level to rebirth
 	setarray .Req_Third[0],99,50;		// Minimum base level, job level to change to third class
-	setarray .Req_Fourth[0],200,70;		// Minimum base level, job level to change to fourth class
+	setarray .Req_Fourth[0],175,70;		// Minimum base level, job level to change to fourth class
 	setarray .Req_Exp_NJ_GS[0],99,70; 	// Minimum base level, job level to turn into Expanded Ninja and Gunslinger
 	setarray .Req_Exp_SNOVI[0],99,99; 	// Minimum base level, job level to turn into Expanded Super Novice
-	setarray .Req_SHandler[0],200,60;	// Minimum base level, job level to turn into Spirit Handler
+	setarray .Req_SHandler[0],175,60;	// Minimum base level, job level to turn into Spirit Handler
 	.SNovice = 45;						// Minimum base level to turn into Super Novice
 	
 	// Setting adjustments by PACKETVER

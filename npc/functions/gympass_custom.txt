@@ -1,0 +1,132 @@
+function	script	Gympass	{
+ 
+    mes "[Ripped]";
+    mes "E aí. As pessoas não estão";
+    mes "tão ativas fisicamente como";
+    mes "costumavam. Mesmo que você lute";
+    mes "para viver, seu corpo pode estar";
+    mes "fraco e flácido em algumas";
+    mes "áreas. Sabe do que estou falando?";
+    next;
+    mes "[Ripped]";
+    mes "Ei, treine comigo, e eu garanto";
+    mes "que você será capaz de levantar";
+    mes "e carregar mais das suas";
+    mes "coisas. É só me dar seu";
+    mes "^FF0000Passe Antigravitacional^000000 a cada vez,";
+    mes "e estaremos prontos para ir.";
+    next;
+    mes "[Ripped]";
+    mes "Mas não se empolgue demais:";
+    mes "não importa quanto treino";
+    mes "eu te dê, você pode";
+    mes "exagerar. Você já ouviu falar";
+    mes "de alguém que ficou bombado demais?";
+    mes "É porque eles morreram. Entendeu?";
+    next;
+    mes "[Ripped]";
+    mes "Eu diria que seria seguro";
+    mes "para você treinar seriamente";
+    mes "comigo e aumentar sua";
+    mes "capacidade de carga ^FF000010 vezes^000000.";
+    mes "Então... Está pronto para suar?";
+    next;
+    switch(select("Sim:Nao:Meus treinos perderam o efeito.")) {
+        case 1:
+        if (gympassmemory < 10) {
+            set .@add_carry,gympassmemory + 1;
+            set .@remain_carry,10 - .@add_carry;
+            if (countitem(7776) > 0) {
+            mes "[Ripped]";
+            mes "Oh, que ótimo, vejo que";
+            mes "trouxe seu Passe Antigravitacional.";
+            mes "Certo, é só fazer o que eu faço,";
+            mes "e tentar sentir a queimação.";
+            mes "Pronto? Vamos nessa.";
+            next;
+            specialeffect2 EF_EARTHSPIKE;
+            next;
+            specialeffect2 EF_DEVIL;
+            next;
+            specialeffect2 EF_COIN;
+            next;
+            specialeffect2 EF_SIGHTRASHER;
+            next;
+            mes "[Ripped]";
+            mes "Pronto, você deve ser capaz";
+            mes "de carregar mais coisas com você.";
+            mes "Vamos ver, podemos aumentar";
+            mes "sua capacidade de carga";
+            mes "^FF00000" + .@remain_carry + "^000000 mais vezes se continuarmos";
+            mes "treinando juntos assim.";
+            delitem 7776,1; //Passagem_Aumento_Peso
+            set gympassmemory,.@add_carry;
+            skill "ALL_INCCARRY",.@add_carry,SKILL_PERM_GRANT;
+            close;
+            }
+            else {
+            mes "[Ripped]";
+            mes "Cara, o que eu te disse?";
+            mes "Você tem que me trazer seu";
+            mes "^FF0000Passe Antigravitacional^000000 se quiser";
+            mes "malhar e construir seus";
+            mes "músculos de carregamento.";
+            close;
+            }
+        }
+        else {
+            mes "[Ripped]";
+            mes "Cara, não acho que podemos";
+            mes "desenvolver mais seus músculos";
+            mes "de carregamento do que isso.";
+            mes "É muito perigoso para o seu";
+            mes "corpo se tentarmos! Qual é,";
+            mes "eu te falei sobre os limites.";
+            close;
+        }
+        case 2:
+        mes "[Ripped]";
+        mes "Ah, que pena.";
+        mes "Bem, volte se você";
+        mes "mudar de ideia. Fale";
+        mes "sobre mim para seus amigos:";
+        mes "se eles estiverem flácidos, eu ajudo";
+        mes "a colocá-los em forma.";
+        close;
+        case 3:
+        if (gympassmemory > 0) {
+            mes "[Ripped]";
+            mes "O que aconteceu?";
+            mes "Você deixou seus músculos";
+            mes "de carregamento atrofiarem? Sorte sua, existe algo chamado";
+            mes "memória muscular. Não vai levar";
+            mes "tanto tempo para reconstruí-los...";
+            next;
+            specialeffect2 EF_EARTHSPIKE;
+            next;
+            specialeffect2 EF_DEVIL;
+            next;
+            specialeffect2 EF_COIN;
+            next;
+            specialeffect2 EF_SIGHTRASHER;
+            next;
+            mes "[Ripped]";
+            mes "Que tal isso?";
+            mes "Seus músculos de carregamento";
+            mes "cresceram de novo,";
+            mes "assim, rapidinho! Tente não";
+            mes "dar para trás de novo, ok?";
+            skill "ALL_INCCARRY",gympassmemory,SKILL_PERM_GRANT;
+            close;
+        }
+        else {
+            mes "[Ripped]";
+            mes "Uh...";
+            mes "Nós não malhamos";
+            mes "juntos antes.";
+            mes "Tenho certeza disso.";
+            close;
+        }
+    }
+    return;
+}

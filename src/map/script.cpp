@@ -27221,6 +27221,34 @@ BUILDIN_FUNC( enchantgradeui ){
 #endif
 }
 
+// Função para script: define bônus de drop permanente
+BUILDIN_FUNC(set_reborn_drop)
+{
+    map_session_data* sd;
+
+    if (!script_charid2sd(4, sd))
+        return SCRIPT_CMD_FAILURE;
+
+    int val = script_getnum(st, 2);
+    sd->reborn_drop = val;    
+
+    return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(set_reborn_exp)
+{
+    map_session_data* sd;
+    if (!script_charid2sd(4, sd))
+        return SCRIPT_CMD_FAILURE;
+
+    int val = script_getnum(st, 2);
+    sd->reborn_exp = val;
+	
+    return SCRIPT_CMD_SUCCESS;
+}
+
+
+
 BUILDIN_FUNC(set_reputation_points){
 	map_session_data* sd;
 
@@ -28553,6 +28581,8 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(enchantgradeui, "?" ),
 
 	BUILDIN_DEF(get_drop_bonus, "ii?"),
+	BUILDIN_DEF(set_reborn_drop, "i"),
+	BUILDIN_DEF(set_reborn_exp, "i"),
 
 	BUILDIN_DEF(set_reputation_points, "ii?"),
 	BUILDIN_DEF(get_reputation_points, "i?"),

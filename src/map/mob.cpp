@@ -2888,6 +2888,10 @@ int32 mob_getdroprate(struct block_list* src, std::shared_ptr<s_mob_db> mob, int
 			else
 				cap = battle_config.drop_rate_cap;
 
+			if (sd->reborn_drop > 0) {
+				drop_rate_bonus += sd->reborn_drop;				
+			}
+
 			drop_rate = (int32)(0.5 + drop_rate * drop_rate_bonus / 100.);
 
 			// Now limit the drop rate to never be exceed the cap (default: 90%), unless it is originally above it already.
