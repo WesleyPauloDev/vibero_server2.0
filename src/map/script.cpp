@@ -27247,6 +27247,65 @@ BUILDIN_FUNC(set_reborn_exp)
     return SCRIPT_CMD_SUCCESS;
 }
 
+BUILDIN_FUNC(set_bonus_hpsp)
+{
+    map_session_data* sd;
+    int charid = script_getnum(st, 2); // char_id
+    int val_hp = script_getnum(st, 3); // bônus de HP
+    int val_sp = script_hasdata(st, 4) ? script_getnum(st, 4) : val_hp; // bônus de SP (opcional)
+
+    if (!script_charid2sd(charid, sd))
+        return SCRIPT_CMD_FAILURE;
+
+    // Atribui os valores separadamente
+    sd->bonus_hp = val_hp;
+    sd->bonus_sp = val_sp;
+
+    // Força recalcular status completo
+    status_calc_pc(sd, SCO_NONE);
+
+    // Atualiza no cliente
+    clif_updatestatus(*sd, SP_MAXHP);
+    clif_updatestatus(*sd, SP_MAXSP);
+
+    // Corrige HP/SP atuais se passarem do limite
+    if (sd->status.hp > sd->battle_status.max_hp)
+        sd->status.hp = sd->battle_status.max_hp;
+    if (sd->status.sp > sd->battle_status.max_sp)
+        sd->status.sp = sd->battle_status.max_sp;
+
+    clif_updatestatus(*sd, SP_HP);
+    clif_updatestatus(*sd, SP_SP);
+
+    return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(set_bonus_allstats)
+{
+	map_session_data* sd;
+	int charid = script_getnum(st, 2);
+	int val = script_getnum(st, 3);
+
+	if (!script_charid2sd(charid, sd))
+		return SCRIPT_CMD_FAILURE;
+
+	sd->bonus_allstats = val;
+
+	status_calc_pc(sd, SCO_NONE);
+
+	// Atualiza atributos no cliente
+	clif_updatestatus(*sd, SP_STR);
+	clif_updatestatus(*sd, SP_AGI);
+	clif_updatestatus(*sd, SP_VIT);
+	clif_updatestatus(*sd, SP_INT);
+	clif_updatestatus(*sd, SP_DEX);
+	clif_updatestatus(*sd, SP_LUK);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+
+
 
 
 BUILDIN_FUNC(set_reputation_points){
@@ -28581,8 +28640,11 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(enchantgradeui, "?" ),
 
 	BUILDIN_DEF(get_drop_bonus, "ii?"),
+
 	BUILDIN_DEF(set_reborn_drop, "i"),
 	BUILDIN_DEF(set_reborn_exp, "i"),
+	BUILDIN_DEF(set_bonus_hpsp, "iii"),
+	BUILDIN_DEF(set_bonus_allstats, "ii"),
 
 	BUILDIN_DEF(set_reputation_points, "ii?"),
 	BUILDIN_DEF(get_reputation_points, "i?"),

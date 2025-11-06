@@ -1,0 +1,88 @@
+-	script	Lojas	-1,{
+
+OnInit:
+
+	bindatcmd "lojas", strnpcinfo(3)+"::OnAtcommand";	
+
+	end;
+
+OnAtcommand:
+
+	callfunc ("Menu_Lojas");
+
+	end;
+}
+
+function	script	Menu_Lojas	{	
+	mes "[Menu de Lojas]";
+
+    switch(select("Instância", "Cheffenia", "Bio5", "Anubis", "Éden", "Votos", "Pontos MVP", "Loja de Presença")) {
+        case 1:
+            callshop "instancia_barter",1;
+            end;
+        case 2:
+            switch(select("Cheffenia Normal", "Cheffenia Hard")) {
+                case 1:
+                    callshop "cheffenia_normal_barter",1;
+                    end;
+                case 2:
+                    callshop "cheffenia_hard_barter",1;
+                    end;
+            }
+        case 3:
+            switch(select("Bio5 Normal", "Bio5 Hard")) {
+                case 1:
+                    callshop "bio5_normal_barter",1;
+                    end;
+                case 2:
+                    callshop "bio5_hard_barter",1;
+                    end;
+            }
+        case 4:
+            switch(select("Encantamentos", "Armas", "Equipamentos")) {
+                case 1:
+                    callshop "enchant_anubis",1;
+                    end;
+                case 2:
+                    callshop "weapons_anubis",1;
+                    end;
+                case 3:
+                    callshop "equipments_anubis",1;
+                    end;
+            }
+        case 5:
+            next;
+            mes "[Loja do Éden]";
+            switch(select("Consumíveis:Armas:Equipamentos:Sair")) {
+                case 1:
+                    callshop "consumable_eden"; // Loja de Consumíveis
+                    end;
+
+                case 2:
+                    callshop "weapons_eden"; // Loja de armas
+                    end;
+
+                case 3:
+                    callshop "equipments_eden"; // Loja de equipamentos
+                    end;
+                default:
+                    mes "Volte sempre!";
+                    close;
+            }
+        case 6:
+            next;
+            doEvent "Loja de Votos::OnTalk";
+            end;
+        case 7:
+            next;
+            doEvent "Loja de Pontos MVP::OnTalk";
+            end;        
+        case 8:
+            next;            
+            doEvent "Loja de Presença::OnTalk";
+            end;        
+    }
+    close;
+	
+	return;
+}

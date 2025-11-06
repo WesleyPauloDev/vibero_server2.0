@@ -4038,9 +4038,11 @@ void clif_changelook(struct block_list *bl, int32 type, int32 val) {
 #if PACKETVER < 20150513
 				return;
 #else
+#if PACKETVER < 20231220
 				if( val != 0 && sc != nullptr && sc->option&OPTION_COSTUME ){
  					val = 0;
 				}
+#endif
 
  				vd->look[LOOK_BODY2] = val;
 #endif
@@ -11464,6 +11466,9 @@ void clif_parse_GlobalMessage(int32 fd, map_session_data* sd)
 void clif_parse_MapMove( int32 fd, map_session_data* sd){
 	const PACKET_CZ_MOVETO_MAP* p = reinterpret_cast<PACKET_CZ_MOVETO_MAP*>( RFIFOP( fd, 0 ) );
 
+	ShowDebug("[MOVE CLICK] Player '%s' wants to move to map '%s' (%hu,%hu)\n",
+		sd->status.name, p->map, p->x, p->y);
+		
 	char map_name[MAP_NAME_LENGTH_EXT];
 
 	safestrncpy( map_name, p->map, sizeof( map_name ) );

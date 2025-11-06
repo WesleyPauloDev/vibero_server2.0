@@ -14,58 +14,76 @@
 //============================================================
 
 -	script	Healer	-1,{
+OnTalk:
 
-	.@Price = 0;	// Zeny required for heal
 	.@Buffs = 1;	// Also buff players? (1: yes / 0: no)
-	.@Delay = 3;	// Heal delay, in seconds
+	.@Delay = 5;	// Heal delay, in seconds
 	.@time = 300000;	// Heal delay, in seconds
 
 	if (getgroupid() != 0) {
 		.@time = 600000;
-	}	
-
-	if (@HD > gettimetick(2))
-		end;
-	if (.@Price) {
-		message strcharinfo(0), "Healing costs " + callfunc("F_InsertComma",.@Price) + " Zeny.";
-		if (Zeny < .@Price)
-			end;
-		if (select("^0055FFHeal^000000:^777777Cancel^000000") == 2)
-			end;
-		Zeny -= .@Price;
 	}
+
+	// Verifica tempo restante
+	if (@last_buff_time + .@delay > gettimetick(2)) {
+		.@remaining = (@last_buff_time + .@delay) - gettimetick(2);
+		message strcharinfo(0), "Você poderá usar novamente em " + .@remaining + " segundo(s).";
+		end;
+	}
+
+	// Atualiza o tempo do último uso
+	@last_buff_time = gettimetick(2);
+
 	specialeffect2 EF_HEAL2;
 	percentheal 100,100;
+
+OnBuffOnly:
 	// Buffs
-	if (.@Buffs) {
-		// Aumentar Agilidade
-		specialeffect2 EF_INCAGILITY;
-		sc_start SC_INCREASEAGI,.@time,10;
+	
+	// Aumentar Agilidade
+	specialeffect2 EF_INCAGILITY;
+	sc_start SC_INCREASEAGI,.@time,10;
 
-		// Benção
-		specialeffect2 EF_BLESSING;
-		sc_start SC_BLESSING,.@time,10;
+	// Benção
+	specialeffect2 EF_BLESSING;
+	sc_start SC_BLESSING,.@time,10;
 
-		if (getgroupid() != 0) {
+	if (getgroupid() != 0) {
 
-			// Impositio Manus
-			sc_start SC_IMPOSITIO,.@time,5;
+		// Impositio Manus
+		sc_start SC_IMPOSITIO,.@time,5;
 
-			// Kyrie Eleison
-			sc_start SC_KYRIE,.@time,10;
+		// Kyrie Eleison
+		// sc_start SC_KYRIE,.@time,10;
 
-			// Glória
-			sc_start SC_GLORIA,.@time,5;
+		// Glória
+		sc_start SC_GLORIA,.@time,5;
 
-			// Magnificat
-			sc_start SC_MAGNIFICAT,.@time,5;
+		// Magnificat
+		sc_start SC_MAGNIFICAT,.@time,5;
 
-			// Consertar todos os itens equipados um por um
-			atcommand("@repairall");
+		sc_start SC_FOOD_STR_CASH,600000,10;
+		sc_start SC_FOOD_AGI_CASH,600000,10;
+		sc_start SC_FOOD_VIT_CASH,600000,10;
+		sc_start SC_FOOD_INT_CASH,600000,10;
+		sc_start SC_FOOD_DEX_CASH,600000,10;
+		sc_start SC_FOOD_LUK_CASH,600000,10;		
+
+		getinventorylist;
+		.@needsRepair = 0;
+		for (.@i = 0; .@i < @inventorylist_count; .@i++) {
+			// attribute == 1 => quebrado (mesmo critério usado no repairall em C)
+			if (@inventorylist_attribute[.@i] == 1) {
+				.@needsRepair = 1;
+				break;
+			}
 		}
+
+		if (.@needsRepair) {
+			atcommand("@repairall");
+			message strcharinfo(0), "Itens quebrados foram reparados.";
+		}		
 	}
-	if (.@Delay)
-		@HD = gettimetick(2) + .@Delay;
 	end;
 }
 

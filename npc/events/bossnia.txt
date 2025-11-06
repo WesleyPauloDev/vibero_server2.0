@@ -20,6 +20,7 @@
 //============================================================
 
 prontera,145,230,6	script	Porteiro de Cheffenia	908,{
+OnTalk:
 	mes "[Cheffenia]";
 	mes "Olá aventureiro!";
 	mes "Deseja participar da Cheffenia?";	
@@ -166,16 +167,15 @@ prontera,145,230,6	script	Porteiro de Cheffenia	908,{
     	end;
 
 	OnBossDead:
-		#mvp_hardkills++;
-		debugmes "Hard kills: " + #mvp_hardkills;
+		#cheffenia_hardkills++;		
 
-		if ( #mvp_hardkills >= 5 ) {
-			#mvp_hardkills = 0; // zera contador
+		if ( #cheffenia_hardkills >= 5 ) {
+			#cheffenia_hardkills = 0; // zera contador
 			add_reputation_points(4, 1); // dá 1 ponto no grupo 7
 			dispbottom "[Reputação] Você recebeu +1 ponto de reputação Cheffenia Hard!";
 			
 		}
-		callfunc("CustomMapDrop", "bossnia_03", 674, 20);
+		callfunc("CustomMapDrop", "bossnia_03", 9647, 20);
 
         // GID do mob morto
 		.@gid = killedrid;
@@ -289,15 +289,15 @@ prontera,145,230,6	script	Porteiro de Cheffenia	908,{
 
 	OnBossDead:
 		
-		#mvp_hardkills++;
+		#cheffenia_hardkills++;		
 
-		if ( #mvp_hardkills >= 5 ) {
-			#mvp_hardkills = 0; // zera contador
+		if ( #cheffenia_hardkills >= 5 ) {
+			#cheffenia_hardkills = 0; // zera contador
 			add_reputation_points(4, 1); // dá 1 ponto no grupo 7
 			dispbottom "[Reputação] Você recebeu +1 ponto de reputação Cheffenia Hard!";
 			
 		}
-		callfunc("CustomMapDrop", "bossnia_04", 674, 20);
+		callfunc("CustomMapDrop", "bossnia_04", 9647, 20);
 
         // GID do mob morto
 		.@gid = killedrid;
@@ -328,6 +328,61 @@ prontera,145,230,6	script	Porteiro de Cheffenia	908,{
 
 		end;
 }
+
+-	script	NpcCheffenia	-1,{
+
+	OnInit:
+
+		// Lista de mobs e quantidade de spawn
+		setarray .@mob_list[0], 21402,21403,21404,21405,21406,21407,21408,21409,21410,
+							21411,21413,21414,21415,21416,21417,21418,21419,21420,21421,
+							21422,21423,21424,21425,21426,21427,21428,21429,21430,21431,
+							21432,21433,21434,21435,21438,21440,21441;
+
+		 set .@spawn_count, 5; // quantidade de cada mob
+
+		for (.@i = 0; .@i < getarraysize(.@mob_list); .@i++) {
+			for (.@q = 0; .@q < .@spawn_count; .@q++) {
+				monster "bossnia_01",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffenia::OnBossDead";
+				monster "bossnia_02",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffenia::OnBossDead2";
+			}
+			sleep 5;
+		}
+
+    	end;
+
+	OnBossDead:
+		#cheffenia_kills++;		
+
+		if ( #cheffenia_kills >= 5 ) {
+			#cheffenia_kills = 0; // zera contador
+			add_reputation_points(3, 1); // dá 1 ponto no grupo 7
+			dispbottom "[Reputação] Você recebeu +1 ponto de reputação Cheffenia Normal!";
+			
+		}
+		callfunc("CustomMapDrop", "bossnia_01", 9646, 20);
+
+		.@gid = killedrid;
+		monster "bossnia_01",0,0,"--ja--",.@gid,1,"NpcCheffenia::OnBossDead";
+
+		end;	
+	OnBossDead2:
+		#cheffenia_kills++;		
+
+		if ( #cheffenia_kills >= 5 ) {
+			#cheffenia_kills = 0; // zera contador
+			add_reputation_points(3, 1); // dá 1 ponto no grupo 7
+			dispbottom "[Reputação] Você recebeu +1 ponto de reputação Cheffenia Normal!";
+			
+		}
+		callfunc("CustomMapDrop", "bossnia_02", 9646, 20);
+		
+		.@gid = killedrid;
+		monster "bossnia_02",0,0,"--ja--",.@gid,1,"NpcCheffenia::OnBossDead2";
+
+		end;	
+}
+
 
 
 //============================================================

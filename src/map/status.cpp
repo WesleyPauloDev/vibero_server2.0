@@ -3194,6 +3194,15 @@ static int32 status_get_hpbonus(struct block_list *bl, enum e_status_bonus type)
 	} else if (type == STATUS_BONUS_RATE) {
 		status_change *sc = status_get_sc(bl);
 
+
+		if (bl->type == BL_PC) {
+			map_session_data *sd = map_id2sd(bl->id);
+			if (sd && sd->bonus_hp > 0) {
+				bonus += sd->bonus_hp; // Exemplo: 30 ? +30% 
+			}
+		}
+
+
 		//Bonus by SC
 		// !CHECKME: status_get_hpbonus shouldn't be used for SC from usable items
 		if (sc) {
@@ -3355,6 +3364,14 @@ static int32 status_get_spbonus(struct block_list *bl, enum e_status_bonus type)
 				bonus += i;
 			if((i = pc_checkskill(sd,HW_SOULDRAIN)) > 0)
 				bonus += 2 * i;
+
+
+			// --- ADIÇÃO PERSONALIZADA: bônus de SP do sistema de conquistas ---		
+			if (sd && sd->bonus_sp > 0) {
+				bonus += sd->bonus_sp; // aplica o mesmo % de bônus no SP
+			}		
+
+
 #ifdef RENEWAL
 			if ((i = pc_checkskill(sd, (sd->status.sex ? BA_MUSICALLESSON : DC_DANCINGLESSON))) > 0)
 				bonus += i;
@@ -4403,7 +4420,7 @@ int32 status_calc_pc_sub(map_session_data* sd, uint8 opt)
 
 // ----- MISC CALCULATION -----
 	status_calc_misc(sd, base_status, sd->status.base_level);
-
+	
 	// Equipment modifiers for misc settings
 	if(sd->matk_rate < 0)
 		sd->matk_rate = 0;
@@ -4963,6 +4980,7 @@ int32 status_calc_pc_sub(map_session_data* sd, uint8 opt)
 			sd->bonus.long_attack_atk_rate += i;
 		}
 	}
+
 	status_cpy(&sd->battle_status, base_status);
 
 // ----- CLIENT-SIDE REFRESH -----
@@ -4988,7 +5006,7 @@ int32 status_calc_pc_sub(map_session_data* sd, uint8 opt)
 	if (pc_checkskill(sd, SU_SOULATTACK) > 0 && !sd->sc.getSCE(SC_SOULATTACK))
 		sc_start(sd, sd, SC_SOULATTACK, 100, 1, INFINITE_TICK);
 
-	calculating = 0;
+	calculating = 0;	
 
 	return 0;
 }
@@ -5036,6 +5054,7 @@ int32 status_calc_mercenary_(s_mercenary_data *md, uint8 opt)
 	}
 
 	status_calc_misc(md, status, md->db->lv);
+	
 	status_cpy(&md->battle_status, status);
 
 	return 0;
@@ -6811,6 +6830,16 @@ static uint16 status_calc_str(struct block_list *bl, status_change *sc, int32 st
 		str += str * sc->getSCE(SC_FULL_THROTTLE)->val3 / 100;
 	if(sc->getSCE(SC_CHEERUP))
 		str += 3;
+
+
+	if (bl->type == BL_PC) {
+		map_session_data *sd = map_id2sd(bl->id);
+		if (sd && sd->bonus_allstats > 0) {
+			str += sd->bonus_allstats;
+		}
+	}
+
+
 #ifdef RENEWAL
 	if (sc->getSCE(SC_NIBELUNGEN) && sc->getSCE(SC_NIBELUNGEN)->val2 == RINGNBL_ALLSTAT)
 		str += 15;
@@ -6884,6 +6913,16 @@ static uint16 status_calc_agi(struct block_list *bl, status_change *sc, int32 ag
 		agi += sc->getSCE(SC_ARCLOUSEDASH)->val2;
 	if(sc->getSCE(SC_CHEERUP))
 		agi += 3;
+
+
+	if (bl->type == BL_PC) {
+		map_session_data *sd = map_id2sd(bl->id);
+		if (sd && sd->bonus_allstats > 0) {
+			agi += sd->bonus_allstats;
+		}
+	}
+
+
 #ifdef RENEWAL
 	if (sc->getSCE(SC_NIBELUNGEN) && sc->getSCE(SC_NIBELUNGEN)->val2 == RINGNBL_ALLSTAT)
 		agi += 15;
@@ -6945,6 +6984,16 @@ static uint16 status_calc_vit(struct block_list *bl, status_change *sc, int32 vi
 		vit += sc->getSCE(SC_DEFENCE)->val2;
 	if(sc->getSCE(SC_CHEERUP))
 		vit += 3;
+
+
+	if (bl->type == BL_PC) {
+		map_session_data *sd = map_id2sd(bl->id);
+		if (sd && sd->bonus_allstats > 0) {
+			vit += sd->bonus_allstats;
+		}
+	}
+
+
 #ifdef RENEWAL
 	if (sc->getSCE(SC_NIBELUNGEN) && sc->getSCE(SC_NIBELUNGEN)->val2 == RINGNBL_ALLSTAT)
 		vit += 15;
@@ -7025,6 +7074,16 @@ static uint16 status_calc_int(struct block_list *bl, status_change *sc, int32 in
 		if(sc->getSCE(SC__STRIPACCESSORY))
 			int_ -= int_ * sc->getSCE(SC__STRIPACCESSORY)->val2 / 100;
 	}
+
+
+	if (bl->type == BL_PC) {
+		map_session_data *sd = map_id2sd(bl->id);
+		if (sd && sd->bonus_allstats > 0) {
+			int_ += sd->bonus_allstats;
+		}
+	}
+
+
 #ifdef RENEWAL
 	if (sc->getSCE(SC_NIBELUNGEN) && sc->getSCE(SC_NIBELUNGEN)->val2 == RINGNBL_ALLSTAT)
 		int_ += 15;
@@ -7098,6 +7157,16 @@ static uint16 status_calc_dex(struct block_list *bl, status_change *sc, int32 de
 		dex += dex * sc->getSCE(SC_FULL_THROTTLE)->val3 / 100;
 	if(sc->getSCE(SC_CHEERUP))
 		dex += 3;
+
+
+	if (bl->type == BL_PC) {
+		map_session_data *sd = map_id2sd(bl->id);
+		if (sd && sd->bonus_allstats > 0) {
+			dex += sd->bonus_allstats;
+		}
+	}
+
+
 #ifdef RENEWAL
 	if (sc->getSCE(SC_NIBELUNGEN) && sc->getSCE(SC_NIBELUNGEN)->val2 == RINGNBL_ALLSTAT)
 		dex += 15;
@@ -7159,6 +7228,16 @@ static uint16 status_calc_luk(struct block_list *bl, status_change *sc, int32 lu
 		luk += luk * sc->getSCE(SC_FULL_THROTTLE)->val3 / 100;
 	if(sc->getSCE(SC_CHEERUP))
 		luk += 3;
+		
+
+	if (bl->type == BL_PC) {
+		map_session_data *sd = map_id2sd(bl->id);
+		if (sd && sd->bonus_allstats > 0) {
+			luk += sd->bonus_allstats;
+		}
+	}
+
+
 #ifdef RENEWAL
 	if (sc->getSCE(SC_NIBELUNGEN) && sc->getSCE(SC_NIBELUNGEN)->val2 == RINGNBL_ALLSTAT)
 		luk += 15;
@@ -13028,7 +13107,9 @@ static bool status_change_start_post_delay(block_list* src, block_list* bl, sc_t
 				clif_changelook(bl,LOOK_WEAPON,0);
 				clif_changelook(bl,LOOK_SHIELD,0);
 				clif_changelook(bl,LOOK_CLOTHES_COLOR,vd->look[LOOK_CLOTHES_COLOR]);
+#if PACKETVER < 20231220
 				clif_changelook(bl,LOOK_BODY2,0);
+#endif
 				break;
 			case SC_STONE:
 			case SC_STONEWAIT:
@@ -14084,7 +14165,7 @@ int32 status_change_end( struct block_list* bl, enum sc_type type, int32 tid ){
 			clif_changelook(bl,LOOK_WEAPON,sd->vd.look[LOOK_WEAPON]);
 			clif_changelook(bl,LOOK_SHIELD,sd->vd.look[LOOK_SHIELD]);
 			clif_changelook(bl,LOOK_CLOTHES_COLOR,cap_value(sd->status.clothes_color,0,battle_config.max_cloth_color));
-			clif_changelook(bl,LOOK_BODY2,cap_value(sd->status.body,0,battle_config.max_body_style));
+			clif_changelook(bl,LOOK_BODY2,cap_value(sd->status.body,0,MAX_BODY_STYLE));
 		}
 	}
 	if (calc_flag.any()) {

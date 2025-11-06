@@ -11,10 +11,7 @@ OnPCLoginEvent:
 
     // #rate_escolhido = 0;
 	// Se já escolheu a taxa, apenas aplica os bônus
-	if (#rate_escolhido > 0) {
-		callsub S_AplicarRate;
-		end;
-	}
+	if (#rate_escolhido > 0) end;
 
 	mes "^00AAFFBem-vindo, " + strcharinfo(0) + "!^000000";
 	mes "Antes de começar sua jornada, escolha sua taxa de experiência:";
@@ -35,22 +32,26 @@ OnPCLoginEvent:
 			case 1:
 				#rate_escolhido = 1;
 				#bonus_drop = 100; // máximo bônus de drop
+				.@drop_display$ = "2";
 				break;
 			case 2:
 				#rate_escolhido = 2;
 				#bonus_drop = 50;
+				.@drop_display$ = "1.5";
 				break;
 			case 3:
 				#rate_escolhido = 5;
 				#bonus_drop = 20;
+				.@drop_display$ = "1.2";
 				break;
 			case 4:
 				#rate_escolhido = 10;
 				#bonus_drop = 0; // sem bônus
+				.@drop_display$ = "1";
 				break;
 		}
-        mes "Você escolheu a taxa de ^FFAA00" + #rate_escolhido + "x^000000 de XP.";
-        mes "Bônus de Drop: ^00AAFF" + #bonus_drop / 50 + "x^000000.";
+        mes "Você escolheu a taxa de ^FFAA00" + #rate_escolhido + "X^000000 de XP.";
+        mes "Bônus de Drop: ^00AAFF" + .@drop_display$ + "X^000000.";
         mes " ";
         mes "Sua escolha é permanente!";
         mes "Tem certeza que deseja continuar com esta Rate?";
@@ -58,14 +59,7 @@ OnPCLoginEvent:
 	}	
     mes "Rate escolhida foi ^FFAA00" + #rate_escolhido + "x^000000 de XP.";
 	close2;
-	callsub S_AplicarRate;
-	end;
 
-
-//-----------------------------------------------------
-// Subrotina: aplica as taxas escolhidas
-//-----------------------------------------------------
-S_AplicarRate:
     // #rate_bonus = 0;
     if (!#rate_bonus) {
         if (!#exp_final) #exp_final = 1;
@@ -81,13 +75,11 @@ S_AplicarRate:
         #rate_bonus = 1;
     }
 
-	// Aplicar taxa de XP
-    debugmes "#exp_final: " + #exp_final;
-    debugmes "#drop_final: " + #drop_final;
 	set_reborn_exp(#exp_final);
-    
-	// Aplicar taxa de Drop (considera outros bônus, ex: instâncias)
 	set_reborn_drop(#drop_final);
+
+	set #exp_base, #exp_final;
+	set #drop_base, #drop_final;
 
 	end;
 }

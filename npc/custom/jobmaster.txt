@@ -17,14 +17,16 @@
 //============================================================
 
 -	script	Mestre de Classes	123,{
+OnTalk:
 function Get_Job_Equip;
 // Checks if the Player has the required level.
 // closes if not, returns if yes
 function	Require_Level	{
 
-	if ( eaclass()&EAJL_THIRD ) {
-		mes "Não há mais classes disponiveis.";
+	if ( eaclass() & EAJL_THIRD || Class == 4215 ||	Class == 4211 || Class == 4212) {
+		mes "Não há mais classes disponíveis para este tipo.";
 		close;
+		end;
 	}
 
 	if (BaseLevel < getarg(0) || JobLevel < getarg(1)) {
@@ -585,6 +587,7 @@ function	Get_Job_Equip	{
 	}
 	return;
 }
+	end;
 
 OnInit:
 	// Initialisation, do not edit these

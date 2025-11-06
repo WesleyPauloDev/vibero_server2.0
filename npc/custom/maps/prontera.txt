@@ -4,9 +4,9 @@ prontera,178,220,4	duplicate(Removedora de Cartas)	Removedora de Cartas#prontera
 
 prontera,154,193,5	duplicate(Servico Kafra)	Serviço Kafra#prontera	113
 
-prontera,162,195,5	duplicate(Healer)	Curandeira#prontera	640
+prontera,162,194,5	duplicate(Healer)	Curandeira#prontera	640
 
-prontera,148,175,5	duplicate(Eden)	Agente do Eden#prontera	729
+prontera,148,174,5	duplicate(Eden)	Agente do Eden#prontera	729
 
 prontera,181,215,4	duplicate(Perchik)	Perchik#prontera	47
 
@@ -18,12 +18,14 @@ prontera,129,214,5	duplicate(Resetadora)	Resetadora#prontera	124
 
 prontera,183,213,4	duplicate(Estilista)	Estilista#prontera	122
 
-prontera,157,193,5	duplicate(Warper)	Teleportadora#prontera	405
+prontera,157,193,5	duplicate(Warper)	Teleportador#prontera	405
+prontera,146,89,5	duplicate(Warper)	Teleportador#prontera2	405
 
 // ----------------------- Script está em npc/custom/custom_shop.txt -----------------------
 prontera,138,184,7	duplicate(Loja)	Loja do Iniciante#prontera	478
 prontera,135,220,5	shop	Loja de Utilidades#prontera	850,643:100,512:100,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,578:200,12414:500,645:1000,656:1500,657:2000,610:5000
 prontera,133,188,7	shop	Loja de Assistentes#prontera	850,12276:10000,12184:100,12185:100,12241:1000,12242:1500,12243:2000
+prontera,148,194,4	shop	Loja de Grimórios#prontera	620,100065:50000,100066:50000,100067:50000,100068:50000,100069:50000,100070:50000,100071:50000,100072:50000,100073:50000,100074:50000
 
 prontera,163,175,4	script	Agente VIP#prontera	724,{
 	mes "[Agente VIP]";
@@ -243,14 +245,200 @@ prontera,186,210,4	script	Criador de Homunculos#prontera	740,{
 	close;
 }
 
-// prontera,148,195,4	script	Loja de Tickets	408,{
-// 	mes "[Loja do Éden]";
-//     mes "Bem Vindo a nossa loja!";
-//     next;
+prontera,146,197,4	script	Loja de Tickets	408,{
+	mes "[Loja do Éden]";
+    mes "Bem Vindo a nossa loja!";
+    next;
 
-// 	callshop "luck_egg_barter_shop";
-// 	end;
-// }
+	callshop "luck_egg_barter_shop";
+	end;
+}
+
+prontera,166,198,5	script	Dominio de Classes	588,{
+OnTalk:
+	// #class_mastered_4096 = 0;
+	// changesex;
+	// sleep 1000;
+	// end;
+	// #classes_mastered = 4;
+
+	mes "[Domínio das Classes]";
+	mes "Saudações, guerreiro.";
+	mes "Eu sou o guardião do ^FFCC00Domínio das Classes^000000.";
+	mes "Aqui, cada vez que você atingir o nível máximo com uma classe diferente,";
+	mes "sua reputação perante os deuses aumentará!";
+	next;
+
+	mes "[Domínio das Classes]";
+	mes "Cada classe nova que atingir o nível máximo (175/70) lhe dará ^00FF00pontos de reputação^000000.";
+	mes "Ao alcançar certos níveis de reputação, você ganhará bônus especiais permanentes!";
+	next;
+
+	// Tabela de classes (3rd e transclasses)
+	setarray .@classes_id[0],
+		4060, // Rune Knight T
+		4073, // Royal Guard T
+		4065, // Guillotine Cross T
+		4079, // Shadow Chaser T
+		4063, // Arch Bishop T
+		4077, // Sura T
+		4061, // Warlock T
+		4074, // Sorcerer T
+		4062, // Ranger T
+		4075, // Minstrel
+		// 4076, // Wanderer
+		4064, // Mechanic
+		4078, // Genetic
+		4211, // Kagerou
+		// 4212, // Oboro
+		4215, // Rebellion
+		4239, // Star Emperor
+		4240, // Soul Reaper
+		4190; // Super Novice Expandido
+
+	switch(select("Registrar minha classe:Ver progresso das classes:Sair")) {
+		case 1:
+			if (BaseLevel < 175 || JobLevel < 70) {
+				mes "[Domínio das Classes]";
+				mes "Você ainda não alcançou o nível necessário (175/70).";
+				close;
+			}			
+
+			.@class_id = Class;
+
+			if (getd("#class_mastered_" + .@class_id)) {
+				mes "[Domínio das Classes]";
+				mes "Você já alcançou o domínio desta classe.";
+				close;
+			}
+
+			// Tabela de equivalência entre classes masculino/feminino
+			switch (.@class_id) {
+				// ?? Minstrel <-> Wanderer
+				case 4075: // Minstrel
+					setd("#class_mastered_4076", 1);
+					break;
+				case 4076: // Wanderer
+					setd("#class_mastered_4075", 1);
+					break;
+
+				// ?? Ninja <-> Kunoichi (Kagerou / Oboro)
+				case 4211: // Kagerou
+					setd("#class_mastered_4212", 1);
+					break;
+				case 4212: // Oboro
+					setd("#class_mastered_4211", 1);
+					break;
+			}
+			
+			switch (.@class_id) {
+				// Minstrel/Wanderer -> 4075
+				case 4076: .@class_id = 4075; break;
+
+				// Kagerou/Oboro -> 4211
+				case 4212: .@class_id = 4211; break;
+			}
+
+			// --- Verifica se a classe atual é elegível (pertence à lista) ---
+			.@eligible = 0;
+			for (.@i = 0; .@i < getarraysize(.@classes_id); .@i++) {
+				if (.@class_id == .@classes_id[.@i]) { .@eligible = 1; break; }
+			}
+			if (!.@eligible) {
+				mes "[Domínio das Classes]";
+				mes "Você não pode receber esta conquista com a classe atual.";
+				close;
+				end;
+			}
+
+			setd("#class_mastered_" + .@class_id, 1);
+			#classes_mastered++;
+			specialeffect2 EF_JOBLVUP50;			
+
+			mes "[Domínio das Classes]";
+			mes "Parabéns! Você atingiu o nível máximo com uma nova classe!";
+			mes "Total de classes dominadas: ^00FF00" + #classes_mastered + "/17^000000.";
+
+			// Recompensa
+			add_reputation_points(8, 300);
+
+			close;
+
+		case 2:
+			mes "Classes conquistadas: ^00FF00" + #classes_mastered + "^000000";
+			mes "Classes restantes: ^FF0000" + (17 - #classes_mastered) + "^000000";
+			next;
+
+			setarray .@classes_name$[0],
+				"Rune Knight Transcendente",
+				"Royal Guard Transcendente",
+				"Guillotine Cross Transcendente",
+				"Shadow Chaser Transcendente",
+				"Arch Bishop Transcendente",
+				"Sura Transcendente",
+				"Warlock Transcendente",
+				"Sorcerer Transcendente",
+				"Ranger Transcendente",
+				"Minstrel/Wanderer",
+				// "Minstrel/Wanderer",
+				"Mechanic",
+				"Genetic",
+				"Kagerou/Oboro",
+				// "Kagerou/Oboro",
+				"Rebellion",
+				"Star Emperor",
+				"Soul Reaper",
+				"Super Aprendiz Expandido";
+
+			// Listar progresso
+			mes "==== ^00FF00Classes Conquistadas^000000 ====";
+			for (.@i = 0; .@i < getarraysize(.@classes_id); .@i++) {
+				// setd("#class_mastered_" + .@classes_id[.@i], 0);
+				switch (.@classes_id[.@i]) {
+					case 4211: // Kagerou/Oboro
+						// setd("#class_mastered_4212", 0);
+						if (getd("#class_mastered_4211") || getd("#class_mastered_4212"))
+							mes "^00FF00- " + .@classes_name$[.@i] + "^000000";
+						break;
+					case 4075: // Minstrel/Wanderer
+						// setd("#class_mastered_4076", 0);
+						if (getd("#class_mastered_4075") || getd("#class_mastered_4076"))
+							mes "^00FF00- " + .@classes_name$[.@i] + "^000000";
+						break;
+					default:
+						if (getd("#class_mastered_" + .@classes_id[.@i]))
+							mes "^00FF00- " + .@classes_name$[.@i] + "^000000";
+						break;
+				}
+			}
+
+			mes "===== ^FF0000Classes Restantes^000000 =====";
+			for (.@i = 0; .@i < getarraysize(.@classes_id); .@i++) {
+				switch (.@classes_id[.@i]) {
+					case 4211: // Kagerou/Oboro
+						if (!getd("#class_mastered_4211") && !getd("#class_mastered_4212"))
+							mes "^FF0000- " + .@classes_name$[.@i] + "^000000";
+						break;
+					case 4075: // Minstrel/Wanderer
+						if (!getd("#class_mastered_4075") && !getd("#class_mastered_4076"))
+							mes "^FF0000- " + .@classes_name$[.@i] + "^000000";
+						break;
+					default:
+						if (!getd("#class_mastered_" + .@classes_id[.@i]))
+							mes "^FF0000- " + .@classes_name$[.@i] + "^000000";
+						break;
+				}
+			}
+			close;
+
+		case 3:
+			mes "[Domínio das Classes]";
+			mes "Retorne quando estiver pronto para provar seu domínio.";
+			close;
+	}
+	end;
+}
+
 
 // ----------------------- warps -----------------------
 prontera,156,22,0	warp	prt001	3,2,prt_fild08,170,375

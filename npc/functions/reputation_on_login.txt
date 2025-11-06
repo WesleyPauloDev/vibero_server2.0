@@ -1,0 +1,96 @@
+-	script	Reputation_Login	-1,{
+
+OnPCLoginEvent:
+	// Inicia o contador quando o jogador entra
+	#exp_final = (#exp_base + #reborn_exp);
+	set #drop_final, #reborn_drop;
+	set #hp_final, 0;
+	set #sp_final, 0;
+	set #allstats_final, 0;
+
+	// set #exp_final, 900;
+	// set #drop_final, 0;
+
+	// add_reputation_points(8, 1000);
+	// add_reputation_points(7, -4000);
+
+	// set #reborn_exp, 0;
+	// set #reborn_drop, 0;
+	// set #reput_instance, 0;
+	
+	// Instância + 20% EXP por Nível
+	.@reput_instance = (get_reputation_points(1) / 1000) * 20;
+	set #reput_instance, .@reput_instance;
+
+	set #exp_final, #exp_final + (#exp_base * .@reput_instance / 100);
+
+	// Votos + 5 em todos os status
+	.@reput_votos = (get_reputation_points(2) / 1000) * 5;
+	set #reput_votos, .@reput_votos;
+
+	#allstats_final += .@reput_votos;
+
+	// Cheffenia Normal + 10 HP/SP por Nível
+	.@reput_cheffenia = (get_reputation_points(3) / 1000) * 10;
+	set #reput_cheffenia, .@reput_cheffenia;
+	
+	set #hp_final, #hp_final + .@reput_cheffenia;
+	set #sp_final, #sp_final + .@reput_cheffenia;
+	
+	// Cheffenia Hard + 5 em todos os status
+	.@reput_cheffenia_hard = (get_reputation_points(4) / 1000) * 5;
+	set #reput_cheffenia_hard, .@reput_cheffenia_hard;
+
+	#allstats_final += .@reput_cheffenia_hard;
+
+	// Bio5 Normal + 10 HP/SP por Nível
+	.@reput_bio5 = (get_reputation_points(5) / 1000) * 10;
+	set #reput_bio5, .@reput_bio5;
+
+	set #hp_final, #hp_final + .@reput_bio5;
+	set #sp_final, #sp_final + .@reput_bio5;
+
+	// Bio5 Hard + 5 em todos os status
+	.@reput_bio5_hard = (get_reputation_points(6) / 1000) * 5;
+	set #reput_bio5_hard, .@reput_bio5_hard;
+
+	#allstats_final += .@reput_bio5_hard;
+
+	// Dominador de Classes - 20% Drop/-10% XP por Nível
+	.@reput_class_dominator = (get_reputation_points(8) / 1000) * 20;
+	set #reput_class_dominator, .@reput_class_dominator;
+
+	set #drop_final, #drop_final + .@reput_class_dominator;
+	set #exp_final, #exp_final + (#exp_base * .@reput_class_dominator / 100);
+
+	// Aplicação dos Bonus
+	set_reborn_exp(#exp_final);
+	set_reborn_drop(#drop_final);
+
+	set_bonus_hpsp(getcharid(0), #hp_final, #sp_final);
+
+	set_bonus_allstats(getcharid(0),  #allstats_final);
+	end;
+}
+
+// prontera,168,221,5	script	Reputation_Login_Continued	888,{
+// 	#exp_final = (#exp_base + #reborn_exp);
+// 	set #drop_final, #reborn_drop;
+// 	set #hp_final, 0;
+// 	set #sp_final, 0;
+// 	set #allstats_final, 0;
+
+// 	.@reput_instance = (get_reputation_points(1) / 1000) * 20;
+// 	set #reput_instance, .@reput_instance;
+
+// 	set #exp_final, #exp_final + (#exp_base * .@reput_instance / 100);
+
+// 	.@reput_class_dominator = (get_reputation_points(8) / 1000) * 20;
+// 	set #reput_class_dominator, .@reput_class_dominator;
+
+// 	set #drop_final, #drop_final + .@reput_class_dominator;
+// 	set #exp_final, #exp_final + (#exp_base * .@reput_class_dominator / 100);
+
+// 	set_reborn_exp(#exp_final);
+// 	set_reborn_drop(#drop_final);
+// }

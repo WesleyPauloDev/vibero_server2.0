@@ -234,7 +234,7 @@ int32 e_mail_check(char* email)
 
 //--------------------------------------------------
 // Return numerical value of a switch configuration
-// on/off, english, franï¿½ais, deutsch, espaï¿½ol, portuguese
+// on/off, english, francês, deutsch, espanhol, portuguese
 //--------------------------------------------------
 int32 config_switch(const char* str)
 {

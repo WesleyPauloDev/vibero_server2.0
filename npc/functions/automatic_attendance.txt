@@ -1,0 +1,27 @@
+-	script	Automatic_Attendance	-1,{
+
+OnInit:
+	.ponto_intervalo = 600000;	// 10 minutos = 600.000 ms
+	end;
+
+OnPCLoginEvent:
+	// Inicia o contador quando o jogador entra
+	addtimer .ponto_intervalo, strnpcinfo(3) + "::OnGivePoints";
+	end;
+
+OnGivePoints:
+	set .@aid, getcharid(3);
+
+	// Se o jogador não estiver online, encerra
+	if (!isloggedin(.@aid)) end;	
+
+	// Dá o ponto de presença
+	set .@pontos, #presence_points + 1;
+	set #presence_points, .@pontos;
+
+	dispbottom "[Presença] Você ganhou 1 ponto de presença! Total: " + .@pontos + " ponto(s).";
+
+	// Reagendar o timer
+	addtimer .ponto_intervalo, strnpcinfo(3) + "::OnGivePoints";
+	end;
+}

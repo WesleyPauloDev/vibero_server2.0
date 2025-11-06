@@ -1492,6 +1492,12 @@ int32 char_make_new_char( struct char_session_data* sd, char* name_, int32 str, 
 	}
 #endif
 
+#if PACKETVER >= 20231220
+	int32 body = start_job;
+#else
+	int32 body = 0;
+#endif
+
 	//Insert the new char entry to the database
 	if( SQL_ERROR == Sql_Query(sql_handle, "INSERT INTO `%s` (`account_id`, `char_num`, `name`, `class`, `zeny`, `status_point`, `str`, `agi`, `vit`, `int`, `dex`, `luk`, `max_hp`, `hp`,"
 		"`max_sp`, `sp`, `hair`, `hair_color`, `last_map`, `last_x`, `last_y`, `save_map`, `save_x`, `save_y`, `sex`, `last_instanceid`) VALUES ("

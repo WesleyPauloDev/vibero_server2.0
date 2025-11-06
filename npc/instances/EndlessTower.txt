@@ -38,170 +38,6 @@
 //= 2.4 Adicionada função de gerenciamento para GM. [Euphy]
 //============================================================
 
-// alberta,214,77,6	script	Captain Janssen	709,{
-// 	if (checkweight(1201,1) == 0) {
-// 		mes "^008800Wait here!!";
-// 		mes "Youre carrying too much stuff. Why dont you put some of it away, and then come back.^000000";
-// 		close;
-// 	}
-// 	if (BaseLevel < 50) {
-// 		mes "[Captain Janssen]";
-// 		mes "Sigh... I dont know if I can ever go back to sailing the sea...";
-// 		close;
-// 	}
-// 	set .@name$,strcharinfo(0);
-// 	if (in_102tower == 1) {
-// 		mes "^0000ffLooking incredibly excited, the old man ran into the marine shop hurriedly ordering goods. You dont have anything better to do, so you decide to ask him why he is in such a rush.^000000";
-// 		next;
-// 		mes "^0000ffThe old man, after finishing his orders, walks towards you.^000000";
-// 		next;
-// 		mes "[Captain Janssen]";
-// 		mes "I was touched when you accepted a request from me, a stranger, so easily. You must truly be one of those good, heroic adventurers. Are you interested in setting out on an ocean voyage?";
-// 		next;
-// 		mes "["+.@name$+"]";
-// 		mes "Ive sailed a few times... But now that I think about it, Ive never gone across the continent.";
-// 		next;
-// 		mes "[Captain Janssen]";
-// 		mes "No, thats good enough. I may just have one small fishing vessel, but I used to be a captain that commanded a fleet.";
-// 		next;
-// 		mes "[Captain Janssen]";
-// 		mes "As you may know after a few sea voyages, not many people have gone across the ocean beyond the continent. I too have failed to conquer the ocean.";
-// 		next;
-// 		mes "^0000ffMr. Janssen talked about his perilous ocean journeys for quite a while. You have enough time on your hands, so you sit down, quietly listening to his story.^000000";
-// 		next;
-// 		mes "^0000ffAt least half of his story sounded grossly exaggerated, but something caught your ear: he insists that a humongous tower exists on the ocean, and that its so tall, it scrapes across the sky.^000000";
-// 		set in_102tower,2;
-// 		close;
-// 	} else if (in_102tower == 2) {
-// 		mes "[Captain Janssen]";
-// 		mes "So all I could do was cast anchor at that humongous tower after my fleet was wrecked. At first, we were only going to stay there until the rainstorm was over, but it didnt end as soon as we had hoped.";
-// 		next;
-// 		mes "[Captain Janssen]";
-// 		mes "My crew was starving, and a few of them walked into the tower in order to find food... They never came back.";
-// 		next;
-// 		mes "["+.@name$+"]";
-// 		mes "Why didnt you go in there with them?";
-// 		next;
-// 		mes "[Captain Janssen]";
-// 		mes "My instincts told me that tower was dangerous. I was curious, but I wasnt going to risk my life. We waited for them to come back for 7 days until the rainstorm was finally over, but no one returned.";
-// 		next;
-// 		mes "[Captain Janssen]";
-// 		mes "In our desperation to survive, we abandoned all our goods, and left the tower only with a little bit of the water and edible plants wed found around the tower. When we finally reached land, I was the only one alive...";
-// 		next;
-// 		mes "^0000ffYou could imagine the heartwretching scene of the dying fleet on their last voyage, even if he didnt explain it any further. A look of somber regret swept over his face as he remained silent a while, and then he said:^000000";
-// 		next;
-// 		mes "[Captain Janssen]";
-// 		mes "I have something I must do before I die. I must retrieve the remains of my crew that died in the tower, and give them a proper burial.";
-// 		next;
-// 		mes "[Captain Janssen]";
-// 		mes "I feel so lucky to meet a warm-hearted adventurer like you. With the money youve given me, I can finally go sailing to the tower again.";
-// 		next;
-// 		mes "["+.@name$+"]";
-// 		mes "How about hiring me as your first mate?";
-// 		next;
-// 		mes "[Captain Janssen]";
-// 		mes "Thank you, but it is an extremely dangerous place. I have my duty to fulfill, but you dont have any obligation to me or them. I dont wish to sacrifice someone as young as you to such a dangerous place.";
-// 		next;
-// 		mes "["+.@name$+"]";
-// 		mes "No...";
-// 		mes ".";
-// 		mes ".";
-// 		mes "As an adventurer, theres my obligation to those in need. Im also very curious about that place...";
-// 		next;
-// 		mes "[Captain Janssen]";
-// 		mes "I was going to leave right away, but since youve joined me, I should give you time to prepare. Ill be waiting here until youre ready to go.";
-// 		next;
-// 		mes "[Captain Janssen]";
-// 		mes "...Okay then...";
-// 		mes "Welcome aboard, first mate.";
-// 		set in_102tower,3;
-// 		close;
-// 	} else if (in_102tower == 3) {
-// 		mes "[Captain Janssen]";
-// 		mes "Shall we leave now?";
-// 		next;
-// 		switch(select("Yes, lets go!:No, Im not quite ready...")) {
-// 		case 1:
-// 			mes "[Captain Janssen]";
-// 			mes "Then pull up the anchor, first mate!";
-// 			close2;
-// 			set in_102tower,4;
-// 			warp "e_tower",70,114;
-// 			end;
-// 		case 2:
-// 			mes "[Captain Janssen]";
-// 			mes "Sure, no problem. Come back when youre ready.";
-// 			close;
-// 		}
-// 	} else if (in_102tower > 3) {
-// 		mes "[Captain Janssen]";
-// 		mes "Well, to travel the ocean again, we need to restock on goods. If you give me 10,000 Zeny, Ill take care of the rest.";
-// 		next;
-// 		switch(select("Ill come back later.:Lets go, now!")) {
-// 		case 1:
-// 			mes "["+.@name$+"]";
-// 			mes "Im sorry, but I dont have that much money. Ill come back when I save enough.";
-// 			next;
-// 			mes "[Captain Janssen]";
-// 			mes "Sure, no problem. Ill be waiting for your return.";
-// 			close;
-// 		case 2:
-// 			if (Zeny < 10000) {
-// 				mes "[Captain Janssen]";
-// 				mes "Im sorry, but you dont have enough money. I need at least 10,000 Zeny to restock our supplies...";
-// 				close;
-// 			}
-// 			else {
-// 				mes "[Captain Janssen]";
-// 				mes "Excellent! Now were good to go. Lets pull up the anchor again!";
-// 				set Zeny, Zeny-10000;
-// 				close2;
-// 				warp "e_tower",70,114;
-// 				end;
-// 			}
-// 		}
-// 	} else {
-// 		mes "[Captain Janssen]";
-// 		mes "Excuse me, are you an adventurer?";
-// 		next;
-// 		mes "[Captain Janssen]";
-// 		mes "Im sorry to ask you this, especially when this is the first time weve ever met, but can you do me a favor? Ill make it short.";
-// 		next;
-// 		mes "[Captain Janssen]";
-// 		mes "Can you donate ^0000ff10,000 Zeny^000000 to me? Its for a cause thats important to me...";
-// 		next;
-// 		switch(select("No!:Sure thing.")) {
-// 		case 1:
-// 			mes "["+.@name$+"]";
-// 			mes "Im sorry, but youve got the wrong person to ask that.";
-// 			next;
-// 			mes "[Captain Janssen]";
-// 			mes "I see... Sorry to bother you. I understand it was too rude to ask something like that to begin with.";
-// 			close;
-// 		case 2:
-// 			mes "[Captain Janssen]";
-// 			mes "Huh? Are you sure that you dont mind giving me that much money? Wow, thank you so much!";
-// 			next;
-// 			if (Zeny < 10000) {
-// 				mes "[Captain Janssen]";
-// 				mes "...Im sorry, but I dont think you have 10,000 Zeny. Thank you for your kindness, but I need more than that.";
-// 				close;
-// 			} else {
-// 				mes "["+.@name$+"]";
-// 				mes "I dont know why youd need so much money, but here. You can take it.";
-// 				next;
-// 				mes "^0000ffYou have donated 10,000 Zeny to Captain Janssen^000000.";
-// 				next;
-// 				mes "[Captain Janssen]";
-// 				mes "Thank you so much! Now I can stock up on food and materials for my ship. Youre kind, very kind!";
-// 				set Zeny, Zeny-10000;
-// 				set in_102tower,1;
-// 				close;
-// 			}
-// 		}
-// 	}
-// }
-
 1@tower,50,350,2	script	Lucid Crystal#102Custom	844,{
 	// Verifica se o jogador é GM
 	if (getgroupid() == 99) {		
@@ -1327,7 +1163,7 @@ OnMyMobDead:
 	set .@map$, instance_mapname("1@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#1F Controller")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {	
-
+		mapannounce instance_mapname("1@tower"), "Todos os monstros do 1º nível foram derrotados.",bc_map,"0xffff00";
 		initnpctimer;
 		//SetItemPartyInMap in_102floor 1
 	} else
@@ -1335,8 +1171,7 @@ OnMyMobDead:
 		mapannounce .@map$, "Monstros restantes no 1º nível - "+.@mob_dead_num,bc_map,"0x00ff99";
 	end;
 
-OnTimer5000:
-	mapannounce instance_mapname("1@tower"), "Todos os monstros do 1º nível foram derrotados.",bc_map,"0xffff00";
+OnTimer5000:	
 	donpcevent instance_npcname("1FGate102tower")+"::OnEnable";
 	stopnpctimer;
 	end;
@@ -1371,7 +1206,6 @@ OnTouch_:
 
 		// se ainda não houver valor salvo, começa do nível deste portal
 		if (.@saved <= 0) {
-			debugmes ".@saved <= 0";
 			set .@saved, .@this_level;
 			setd(.@key$, .@saved);
 		}
@@ -1395,6 +1229,7 @@ OnMyMobDead:
 	set .@level, atoi(replacestr(strnpcinfo(0),"FGate102tower","")) + 1;
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
+		mapannounce strnpcinfo(4), "Todos os monstros no "+callfunc("F_GetNumSuffix",.@level)+" nível foram derrotados.",bc_map,"0xffff00";
 		initnpctimer;
 
 	} else
@@ -1404,7 +1239,6 @@ OnMyMobDead:
 OnTimer5000:
 	set .@level, atoi(replacestr(strnpcinfo(0),"FGate102tower","")) + 1;	
 
-	mapannounce strnpcinfo(4), "Todos os monstros no "+callfunc("F_GetNumSuffix",.@level)+" nível foram derrotados.",bc_map,"0xffff00";
 	donpcevent instance_npcname(.@level+"FGate102tower")+"::OnEnable";
 	stopnpctimer;
 	end;
@@ -1532,6 +1366,7 @@ OnMyMobDead:
 	set .@map$, instance_mapname("2@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("Immortal Furnace#1")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
+		mapannounce instance_mapname("2@tower"), "Todos os monstros do 26º nível foram derrotados.",bc_map,"0xffff00";		
 		initnpctimer;
 		//SetItemPartyInMap in_102floor 26
 	}
@@ -1540,7 +1375,6 @@ OnMyMobDead:
 	end;
 
 OnTimer5000:
-	mapannounce instance_mapname("2@tower"), "Todos os monstros do 26º nível foram derrotados.",bc_map,"0xffff00";
 	donpcevent instance_npcname("26FGate102tower")+"::OnEnable";
 	stopnpctimer;
 	end;
@@ -1648,6 +1482,7 @@ OnMyMobDead:
 	set .@map$, instance_mapname("3@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("Immortal Furnace#2")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
+		mapannounce instance_mapname("3@tower"), "Todos os monstros do 51º nível foram derrotados.",bc_map,"0xffff00";
 		initnpctimer;
 		//SetItemPartyInMap in_102floor 51
 	}
@@ -1656,7 +1491,6 @@ OnMyMobDead:
 	end;
 
 OnTimer5000:
-	mapannounce instance_mapname("3@tower"), "Todos os monstros do 51º nível foram derrotados.",bc_map,"0xffff00";
 	donpcevent instance_npcname("51FGate102tower")+"::OnEnable";
 	stopnpctimer;
 	end;
@@ -1764,6 +1598,7 @@ OnMyMobDead:
 	set .@map$, instance_mapname("4@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("Immortal Furnace#3")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
+		mapannounce instance_mapname("4@tower"),"Todos os monstros do 76º nível foram derrotados.",bc_map,"0xffff00";
 		initnpctimer;
 		//SetItemPartyInMap in_102floor 76
 	}
@@ -1772,7 +1607,6 @@ OnMyMobDead:
 	end;
 
 OnTimer5000:
-	mapannounce instance_mapname("4@tower"),"Todos os monstros do 76º nível foram derrotados.",bc_map,"0xffff00";
 	donpcevent instance_npcname("76FGate102tower")+"::OnEnable";
 	stopnpctimer;
 	end;
@@ -1827,7 +1661,6 @@ OnTouch_:
 
 		// se ainda não houver valor salvo, começa do nível deste portal
 		if (.@saved <= 0) {
-			debugmes ".@saved <= 0";
 			set .@saved, .@this_level;
 			setd(.@key$, .@saved);
 		}

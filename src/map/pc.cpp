@@ -1349,8 +1349,13 @@ void pc_makesavestatus(map_session_data *sd) {
 		sd->status.clothes_color = 0;
 
 	if(!battle_config.save_body_style)
+	{
+#if PACKETVER >= 20231220
+ 		sd->status.body = sd->status.class_;
+#else
 		sd->status.body = 0;
-
+#endif
+ 	}
 	//Only copy the Cart/Peco/Falcon options, the rest are handled via
 	//status change load/saving. [Skotlex]
 #ifdef NEW_CARTS
@@ -1436,6 +1441,7 @@ void pc_setnewpc(map_session_data *sd, uint32 account_id, uint32 char_id, int32 
 
 	sd->reborn_drop = 0;
 	sd->reborn_exp = 0;
+	// sd->bonus_hpsp = 0;
 
 	sd->id = account_id;
 	sd->status.account_id = account_id;
@@ -3713,12 +3719,9 @@ void pc_set_reborn_drop(map_session_data* sd, int val)
         return;
 
     sd->reborn_drop = val;
-	printf("[DEBUG] pc_set_reborn_drop: CharID=%d, bonus=%d\n", sd->status.char_id, val);
 
 	// Força recalcular status
     status_calc_pc(sd, SCO_NONE);
-
-    printf("[DEBUG] depois do status_calc_pc: bonus_reborn_drop=%d\n", sd->reborn_drop);
 }
 
 
@@ -3728,11 +3731,11 @@ void pc_set_reborn_exp(map_session_data* sd, int val)
         return;
 
     sd->reborn_exp = val;
-    printf("[DEBUG] pc_set_reborn_exp: CharID=%d, exp=%d\n", sd->status.char_id, val);
 
     // força recalcular status (opcional, caso queira que já reflita em cálculos dependentes)
     status_calc_pc(sd, SCO_NONE);
 }
+
 
 /*==========================================
  * Add a bonus(type) to player sd
@@ -10929,9 +10932,14 @@ bool pc_jobchange(map_session_data *sd,int32 job, char upper)
 	}
 
 	// Reset body style to 0 before changing job to avoid
-	// errors since not every job has a alternate outfit.
+	// errors since not every job has a alternate outfit.	
+#if PACKETVER >= 20231220
+	sd->status.body = job;
+#else
 	sd->status.body = 0;
-	clif_changelook(sd,LOOK_BODY2,0);
+#endif
+	clif_changelook(sd, LOOK_BODY2, sd->status.body);
+
 
 	sd->status.class_ = job;
 	fame_flag = pc_famerank(sd->status.char_id,sd->class_&MAPID_UPPERMASK);

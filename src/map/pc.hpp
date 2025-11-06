@@ -681,9 +681,14 @@ public:
 		int32 skill_ratio;
 	} bonus;
 	// zeroed vars end here.
+	
 
 	int reborn_drop; // ? bônus de drop permanente, não será zerado
 	int reborn_exp;   // bônus de experiência (%), pode ser negativo
+	int bonus_hp;
+	int bonus_sp;
+	int bonus_allstats;
+
 
 	int32 castrate,hprate,sprate,aprate,dsprate;
 	int32 hprecov_rate,sprecov_rate;
@@ -1485,6 +1490,7 @@ void pc_delautobonus(map_session_data &sd, std::vector<std::shared_ptr<s_autobon
 
 void pc_set_reborn_drop(map_session_data* sd, int val);
 void pc_set_reborn_exp(map_session_data* sd, int val);
+void pc_set_bonus_hpsp(map_session_data* sd, int val);
 
 
 void pc_bonus(map_session_data *sd, int32 type, int32 val);
