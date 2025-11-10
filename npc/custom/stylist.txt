@@ -1,4 +1,31 @@
+//==================================================
+// Estilista com menu de opções
+// Autor: Wesley + ChatGPT
+//==================================================
 -	script	Estilista	122,{
+	mes "[Estilista]";
+	mes "Olá! Deseja mudar seu visual?";
+	next;
+	switch(select(" ~ Opções Gratuitas: ~ Opções Pagas")) {
+	case 1:
+		mes "[Estilista]";
+		mes "Vamos escolher seu estilo manualmente!";
+		close2;
+		callsub S_FreeStylist;
+		end;
+	case 2:
+		mes "[Estilista]";
+		mes "Abrindo interface premium...";
+		close2;
+		openstylist();
+		end;
+	}
+	end;
+
+//----------------------------------------------
+// Sub-NPC Stylist (versão gratuita)
+//----------------------------------------------
+S_FreeStylist:
 	set .@max_cloth_color, getbattleflag("max_cloth_color");
 	if (.@max_cloth_color > 4)
 		set .@max_cloth_color, 4;
@@ -22,7 +49,7 @@
 		setlook .@Look[.@s], .@Style;
 		message strcharinfo(0),"Este estilo é #"+.@Style+".";
 
-		set .@menu$, " ~ Próximo (^0055FF"+((.@Style!=.@Styles[.@s])?.@Style+1:1)+"^000000): ~ Anterior (^0055FF"+((.@Style!=1)?.@Style-1:.@Styles[.@s])+"^000000): ~ Pular para...: ~ Voltar para a Original (^0055FF"+.@Revert+"^000000)";
+		set .@menu$, " ~ Próximo (^0055FF"+((.@Style!=.@Styles[.@s])?.@Style+1:1)+"^000000): ~ Anterior (^0055FF"+((.@Style!=1)?.@Style-1:.@Styles[.@s])+"^000000): ~ Pular para...: ~ Voltar para a Original (^0055FF"+.@Revert+"^000000): ~ Sair";
 		
 		switch(select(.@menu$)) {
 		case 1:
@@ -36,8 +63,7 @@
 				set .@Style, .@Styles[.@s];
 			break;
 		case 3:
-			message strcharinfo(0),"Escolha um estilo entre 1 - "+.@Styles[.@s]+".";
-			input .@Style,1,.@Styles[.@s];
+			message strcharinfo(0),"Escolha um estilo entre 1 - "+.@Styles[.@s]+"."; input .@Style,1,.@Styles[.@s];
 			if (!.@Style)
 				set .@Style, rand(1,.@Styles[.@s]);
 			break;
@@ -45,6 +71,9 @@
 			set .@Style, .@Revert;
 			setlook .@Look[.@s], .@Revert;
 			break;
+		case 5:
+			close;
 		}
 	}
+	end;
 }

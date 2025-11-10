@@ -58913,6 +58913,26 @@ Body:
     Type: PetEgg
     Buy: 20
 
+  - Id: 9203
+    AegisName: OSIRIS_N_Egg
+    Name: Ovo de OSIRIS
+    Type: PetEgg
+    Buy: 20
+
+  - Id: 9204
+    AegisName: PHREEONI_N_Egg
+    Name: Ovo de PHREEONI
+    Type: PetEgg
+    Buy: 20
+
+  - Id: 9205
+    AegisName: DARK_LORD_N_Egg
+    Name: Ovo de VALKYRIE
+    Type: PetEgg
+    Buy: 20
+
+  
+
 # =========================================================================================================
 
   - Id: 10001
@@ -168352,14 +168372,11 @@ Body:
       bonus bLongAtkRate,7*(.@r/4);
   - Id: 400237
     AegisName: Viva_Adul_Hat_RL1
-    Name: Helm of Faith (Rebellion)
+    Name: Helm of Faith (All)
     Type: Armor
     Weight: 100
     Defense: 10
     Slots: 1
-    Jobs:
-      Gunslinger: true
-      Rebellion: true
     Locations:
       Head_Top: true
     ArmorLevel: 2
@@ -168368,29 +168385,26 @@ Body:
     View: 2218
     Script: |
       .@r = getrefine();
-      if (BaseLevel>=210) {
-         bonus bPAtk,1;
-         bonus bPow,2;
-      }
-      if (BaseLevel>=230) {
-         bonus bPAtk,2;
-         bonus bPow,3;
-      }
-      if (.@r>=7) {
-         bonus2 bAddSize,Size_All,5;
-         if (.@r>=9) {
-            bonus bFixedCast,-200;
-            if (.@r>=11) {
-               bonus bFixedCast,-300;
-               bonus bAtkRate,5;
+
+      bonus bAllStats, 8;
+      bonus bAtkRate, 15;
+      bonus bMatkRate, 15;
+
+      if (.@r >= 7) {
+        bonus2 bAddSize, Size_All, 5;
+        if (.@r >= 9) {
+            bonus bFixedCast, -200;
+            if (.@r >= 11) {
+              bonus bFixedCast, -300;
+              bonus bAtkRate, 5;
+              bonus bMatkRate, 5;
             }
-         }
+        }
       }
-      bonus bBaseAtk,10*(.@r/2);
-      bonus2 bSkillAtk,"RL_FIREDANCE",15*(.@r/3);
-      bonus2 bSkillAtk,"RL_HAMMER_OF_GOD",15*(.@r/3);
-      bonus2 bSkillAtk,"RL_D_TAIL",15*(.@r/3);
-      bonus bLongAtkRate,7*(.@r/4);
+
+      bonus bAtkRate, 3 * (.@r / 3);
+      bonus bMatkRate, 3 * (.@r / 3);
+
   - Id: 400238
     AegisName: Viva_Adul_Hat_RL2
     Name: Helm of Faith II (Rebellion)

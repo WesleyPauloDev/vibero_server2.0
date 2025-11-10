@@ -8,9 +8,7 @@
 OnInit:
     .npc_name$ = strnpcinfo(3);           // guarda o nome do NPC
     .map$      = "boss_global";
-    .rewardID  = 501;
-    .rewardQty = 5;
-    .active    = 0;
+    .active    = 0;    
 
     // Checa a cada minuto se precisa iniciar
 	initnpctimer;
@@ -18,8 +16,8 @@ OnInit:
 
 OnTimer10000:
     // verifica quarta (3) ou sexta (5) às 20h
-    .@w1 = callfunc("get_weekly_dayAndHour", 1, 10, 05);
-    .@w2 = callfunc("get_weekly_dayAndHour", 5, 10, 05);
+    .@w1 = callfunc("get_weekly_dayAndHour", 3, 20, 00);
+    .@w2 = callfunc("get_weekly_dayAndHour", 5, 20, 00);
 	
     if ((.@w1 || .@w2) && .active == 0) {   
         disablenpc "Recompensa do Boss";     
@@ -88,7 +86,21 @@ boss_global,50,50,4	script	Recompensa do Boss	10403,{
     mes "Você venceu o Evento Boss Global!";
     
     // Dá a recompensa
-    getitem 501, 5;  // ID 501, quantidade 5
+    setarray .@rewards[0], 12259,12210,22818,12224,12223,7621,7776,9617,9642,9199;
+    setarray .@chance[0],   30,   20,   10,   10,   10,  10,   5,   5,   5,  10;
+
+    .@rand = rand(100);
+    .@sum = 0;
+
+    for (.@i = 0; .@i < getarraysize(.@rewards); .@i++) {
+        .@sum += .@chance[.@i];
+        if (.@rand < .@sum) {
+            .rewardID = .@rewards[.@i];
+            break;
+        }
+    }
+    getitem 9608, 20;
+    getitem .rewardID, 1;
 
     set #evento,  2;
     set #boss,  2;

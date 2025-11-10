@@ -18,12 +18,18 @@ function	script	Menu_Lojas	{
 
     switch(select("Instância", "Cheffenia", "Bio5", "Anubis", "Éden", "Votos", "Pontos MVP", "Loja de Presença")) {
         case 1:
-            callshop "instancia_barter",1;
-            end;
+            switch(select("Equipamentos", "Itens")) {
+                case 1:
+                    callshop "instancia_barter",1;
+                    end;
+                case 2:
+                    callshop "instancia_items_barter",1;
+                    end;
+            }
         case 2:
             switch(select("Cheffenia Normal", "Cheffenia Hard")) {
                 case 1:
-                    callshop "cheffenia_normal_barter",1;
+                    callshop "cheffenia_barter",1;
                     end;
                 case 2:
                     callshop "cheffenia_hard_barter",1;
@@ -32,7 +38,7 @@ function	script	Menu_Lojas	{
         case 3:
             switch(select("Bio5 Normal", "Bio5 Hard")) {
                 case 1:
-                    callshop "bio5_normal_barter",1;
+                    callshop "bio5_barter",1;
                     end;
                 case 2:
                     callshop "bio5_hard_barter",1;
