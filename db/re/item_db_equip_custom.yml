@@ -361,15 +361,31 @@ Body:
       Priest: true
     Locations:
       Right_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 5
     EquipLevelMin: 30
     Refineable: true
+    Gradable: true
     Script: |
       bonus bStr,2;
       bonus bDex,1;
       bonus2 bSkillCooldown,"SR_TIGERCANNON",-4000;
       bonus bVariableCastrate,-100;
       bonus bDelayRate,-100;
+
+      .@g = getenchantgrade();
+
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
 
   - Id: 26244
     AegisName: Evolved_Instrument
@@ -553,7 +569,7 @@ Body:
       Thief: true
     Locations:
       Right_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -590,7 +606,7 @@ Body:
       Thief: true
     Locations:
       Both_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -608,13 +624,13 @@ Body:
     SubType: Dagger
     Buy: 4000
     Weight: 1000
-    Attack: 96         # +20% de 80
+    Attack: 100         # +20% de 80
     MagicAttack: 120   # +20% de 100
     Range: 1
-    Slots: 1
+    Slots: 2
     Locations:
       Right_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -625,6 +641,7 @@ Body:
       }
       bonus bAspdRate,10;
       bonus bAtkRate,50;
+      bonus bMAtkRate,50;
       bonus bCritical,15;
       bonus bCritAtkRate,10;
   
@@ -642,7 +659,7 @@ Body:
       Assassin: true
     Locations:
       Both_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -672,7 +689,7 @@ Body:
       Rogue: true
     Locations:
       Both_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -705,7 +722,7 @@ Body:
       SuperNovice: true
     Locations:
       Right_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -738,7 +755,7 @@ Body:
       SuperNovice: true
     Locations:
       Both_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -765,7 +782,7 @@ Body:
       Swordman: true
     Locations:
       Right_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -795,7 +812,7 @@ Body:
       Swordman: true
     Locations:
       Both_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -833,7 +850,7 @@ Body:
       Priest: true
     Locations:
       Right_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -868,7 +885,7 @@ Body:
       StarGladiator: true
     Locations:
       Right_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -905,7 +922,7 @@ Body:
       SoulLinker: true
     Locations:
       Right_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -938,7 +955,7 @@ Body:
       SuperNovice: true
     Locations:
       Both_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -950,7 +967,7 @@ Body:
       bonus bVariableCastrate,-15;
       bonus bDelayRate,-20;
       bonus bMAtkRate,50;
-      bonus bHealPower,1;
+      bonus bHealPower,100;
 
   - Id: 26264
     AegisName: Anubis_Fist
@@ -967,7 +984,7 @@ Body:
       Priest: true
     Locations:
       Right_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -996,13 +1013,13 @@ Body:
     Gender: Male
     Locations:
       Right_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
       .@r = getrefine();
       if (.@r>0) {
-        bonus bAtkRate,5 * .@r;
+        bonus bLongAtkRate,5 * .@r;
         bonus bMAtkRate,5 * .@r;
       }
       bonus bVariableCastrate,-10;
@@ -1026,13 +1043,13 @@ Body:
     Gender: Female
     Locations:
       Right_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
       .@r = getrefine();
       if (.@r>0) {
-        bonus bAtkRate,5 * .@r;
+        bonus bLongAtkRate,5 * .@r;
         bonus bMAtkRate,5 * .@r;
       }
       bonus bVariableCastrate,-10;
@@ -1055,7 +1072,7 @@ Body:
       Rebellion: true
     Locations:
       Both_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -1084,7 +1101,7 @@ Body:
       Rebellion: true
     Locations:
       Both_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -1113,7 +1130,7 @@ Body:
       Rebellion: true
     Locations:
       Both_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -1142,7 +1159,7 @@ Body:
       Rebellion: true
     Locations:
       Both_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -1172,7 +1189,7 @@ Body:
       Ninja: true
     Locations:
       Right_Hand: true
-    WeaponLevel: 1
+    WeaponLevel: 2
     EquipLevelMin: 99
     Refineable: true
     Script: |
@@ -1354,6 +1371,9 @@ Body:
     Buy: 20
     Weight: 800
     Defense: 10
+    Trade:
+      NoDrop: true
+      NoSell: true
     Locations:
       Head_Top: true
     ArmorLevel: 1

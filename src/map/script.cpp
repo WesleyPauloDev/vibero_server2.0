@@ -26786,6 +26786,101 @@ BUILDIN_FUNC(getenchantgrade){
 	return SCRIPT_CMD_SUCCESS;
 }
 
+
+BUILDIN_FUNC(setenchantgrade)
+{
+	map_session_data *sd = nullptr;
+
+	// O correto é: st, &sd, nullptr
+	if (!script_rid2sd(sd)) {
+		ShowError("setenchantgrade: no player attached!\n");
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	int position = script_getnum(st, 2);
+	int grade    = script_getnum(st, 3);
+
+	int index;
+
+	if (position == EQI_COMPOUND_ON)
+		index = current_equip_item_index;
+	else if (equip_index_check(position))
+		index = pc_checkequip(sd, equip_bitmask[position]);
+	else {
+		ShowError("setenchantgrade: invalid equip position %d\n", position);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	if (index < 0 || index >= MAX_INVENTORY || sd->inventory.u.items_inventory[index].nameid == 0) {
+		ShowError("setenchantgrade: invalid inventory index %d\n", index);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	// SETA O GRADE DIRETO
+	sd->inventory.u.items_inventory[index].enchantgrade = grade;
+
+	// RECALCULA STATUS
+	status_calc_pc(sd, SCO_NONE);
+
+	// envia atualização visual
+	clif_inventorylist(sd);
+	clif_equiplist(sd);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+
+BUILDIN_FUNC(setitemcard)
+{
+	map_session_data* sd = nullptr;
+
+	// A SUA VERSÃO funciona assim:
+	if (!script_rid2sd(sd)) {
+		ShowError("setitemcard: no player attached!\n");
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	int position = script_getnum(st, 2); // EQI_*
+	int slot     = script_getnum(st, 3); // 0..3
+	int card     = script_getnum(st, 4); // item ID ou 0
+
+	if (slot < 0 || slot > 3) {
+		ShowError("setitemcard: invalid card slot %d\n", slot);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	int index;
+
+	if (position == EQI_COMPOUND_ON)
+		index = current_equip_item_index;
+	else if (equip_index_check(position))
+		index = pc_checkequip(sd, equip_bitmask[position]);
+	else {
+		ShowError("setitemcard: invalid equipment position %d\n", position);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	if (index < 0 || index >= MAX_INVENTORY ||
+		sd->inventory.u.items_inventory[index].nameid == 0)
+	{
+		ShowError("setitemcard: invalid inventory index %d\n", index);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	// APLICA A CARTA/ENCANTO DIRETO
+	sd->inventory.u.items_inventory[index].card[slot] = card;
+
+	// Recalcula status
+	status_calc_pc(sd, SCO_NONE);
+
+	// envia atualização visual
+	clif_inventorylist(sd);
+	clif_equiplist(sd);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+
 BUILDIN_FUNC(naviregisterwarp) {
 #ifdef MAP_GENERATOR
 	TBL_NPC* nd;
@@ -28619,6 +28714,9 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF2(rentalcountitem, "rentalcountitem4", "viiiiiiiirrr?"),
 
 	BUILDIN_DEF(getenchantgrade, "??"),
+	BUILDIN_DEF(setenchantgrade, "ii"),
+	BUILDIN_DEF(setitemcard, "iii"),
+
 
 	BUILDIN_DEF(mob_setidleevent, "is"),
 

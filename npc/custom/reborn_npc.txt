@@ -3,7 +3,6 @@
 // Função: Resetar Stats/Skills, reduzir EXP e aumentar Drop
 //=============================================================
 prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
-	
 	// ===== Configurações =====
 	.@req_base = 175;        // Nível base mínimo
 	.@req_job  = 70;        // Nível de classe mínimo
@@ -14,8 +13,8 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 	// #reborn_exp  = 0;
     // #reborn_drop = 0;
     // #drop_final = 0;
-    // #exp_final = #exp_base;
-	// add_reputation_points(7, -4000);
+    // #exp_final = exp_base_custom;
+	// add_reputation_points(1, -4000);
 	mes "[Reborn Master]";	
 
 	if(get_reputation_points(7) < 5000) {
@@ -25,11 +24,11 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 			+.@exp_penalty + "%^000000 da ganho de experiência.";
 		next;
 
-		// if (BaseLevel < .@req_base || JobLevel < .@req_job) {
-		// 	mes "Você precisa ter pelo menos Nível Base "+.@req_base+
-		// 		" e Nível de Classe "+.@req_job+" para renascer.";
-		// 	close;
-		// }
+		if (BaseLevel < .@req_base || JobLevel < .@req_job) {
+			mes "Você precisa ter pelo menos Nível Base "+.@req_base+
+				" e Nível de Classe "+.@req_job+" para renascer.";
+			close;
+		}
 
 		if (select("Quero renascer","Cancelar") == 2) close;
 
@@ -48,16 +47,13 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 
 		// Guarda em variáveis de personagem
 		
-		add_reputation_points(7, 1000);
+		callfunc("F_AddRep", 7, 1000, 110008, 5000);
 
-		set #exp_final, #exp_final - #reborn_exp;
-		set #drop_final, #drop_final - #reborn_drop;
-		
-		set #reborn_exp, #reborn_exp - (#exp_base * .@exp_penalty / 100);
-    	#reborn_drop = #reborn_drop + .@drop_bonus;
+		set #exp_final, #exp_final - (exp_base_custom * .@exp_penalty / 100);
 
-		set #exp_final, #exp_final + #reborn_exp;
-		set #drop_final, #drop_final + #reborn_drop;
+		set #drop_final, #drop_final + .@drop_bonus;
+
+		#reput_reborn = (get_reputation_points(7) / 1000) * 10;
 
 		set_reborn_exp(#exp_final);
 		set_reborn_drop(#drop_final);

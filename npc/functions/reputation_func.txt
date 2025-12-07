@@ -1,0 +1,26 @@
+function	script	F_AddRep	{
+
+	// args:
+	// 0: rep_id        (Id em reputation.yml)
+	// 1: add_points    (quanto vai adicionar)
+	// 2: ach_id        (achievement id, ex: 110002)
+	// 3: max_points    (Maximum em reputation.yml, ex: 3000)
+
+	.@rep_id     = getarg(0);
+	.@add_points = getarg(1);
+	.@ach_id     = getarg(2);
+	.@max_points = getarg(3);
+
+	// adiciona reputação
+	add_reputation_points(.@rep_id, .@add_points);
+
+	// pega valor atual
+	.@cur = get_reputation_points(.@rep_id);
+
+	// se chegou no máximo e ainda não tem o achievement, completa
+	if (.@cur >= .@max_points && !achievementexists(.@ach_id)) {
+		achievementcomplete(.@ach_id);
+	}
+
+	return;
+}

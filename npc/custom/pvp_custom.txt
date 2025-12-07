@@ -1,0 +1,355 @@
+// npc/custom/pvp_warp.txt
+prontera,145,203,4	script	PvP Warper	468,{
+	mes "[PvP Warper]";
+	mes "Quer entrar na Arena PvP?";	
+	next;
+
+	switch(select("Entrar no PvP:Ver Ranking:Cancelar")) {
+
+		case 1:
+			mes "[PvP Warper]";
+
+			.@now = gettimetick(2);
+
+			// IP do jogador que está tentando entrar
+			.@my_ip$ = getcharip(0);
+
+			// Verifica todos os jogadores no mapa PvP
+			.@map$ = "pvp_y_1-2";
+			getmapunits(BL_PC, "pvp_y_1-2", .@list1);
+			.@count1 = getarraysize(.@list1);
+
+			getmapunits(BL_PC, "pvp_y_2-2", .@list2);
+			.@count2 = getarraysize(.@list2);
+
+			.@choice = select(
+				"Sala 01 ^0000FF["+.@count1+"]^000000",
+    			"Sala 02 ^0000FF["+.@count2+"]^000000",
+				"Cancelar"
+			);
+
+			if (.@choice == 3) close;
+
+			// Definir mapa escolhido
+			if (.@choice == 1) .@map$ = "pvp_y_1-2";
+			else .@map$ = "pvp_y_2-2";
+
+			getmapunits(BL_PC, .@map$, .@units);
+
+			for (.@i = 0; .@i < .@units; .@i++) {
+				.@id = .@units[.@i];
+
+				// pega o IP de cada jogador
+				.@other_ip$ = getcharip(.@id);
+
+				// se o IP for igual ? bloqueia
+				if (.@other_ip$ == .@my_ip$) {
+					mes "^FF0000Entrada bloqueada.^000000";
+					mes "Já existe um jogador com o MESMO IP no PvP.";
+					close;
+				}
+			}
+
+			if (pvp_block_until > .@now) {
+				.@remaining = pvp_block_until - .@now;
+
+				mes "^FF0000Você está temporariamente bloqueado do PvP!^000000";
+				mes "Tempo restante: ^FF0000"+.@remaining+" segundos^000000.";
+				close;
+			}
+
+			mes "Boa sorte!";
+			// Warp aleatório seguro no PvP
+			setarray .@x[0],
+				128,  72, 200, 208,  62,  51,  51, 177, 160, 151,  96, 119, 116, 145, 138;
+
+			setarray .@y[0],
+				256, 250, 210, 162, 209, 168,  99,  72, 125, 204, 124, 145, 176, 172, 145;
+
+			.@i = rand(getarraysize(.@x));
+
+			warp .@map$, .@x[.@i], .@y[.@i];
+
+			close;
+
+		case 2:
+			switch(select("Ranking Semanal:Ranking Mensal:Ranking Total:Fechar")) {
+
+				case 1:
+					callsub S_RankingSemanal;
+					close;
+
+				case 2:
+					callsub S_RankingMensal;
+					close;
+
+				case 3:
+					callsub S_Ranking;
+					close;
+
+				case 4:
+					close;
+			}
+
+        case 3:
+			close;
+	}
+
+S_RankingSemanal:
+	mes "[PvP Ranking Semanal]";
+	mes "TOP 10 Jogadores:";
+	mes "---------------------------------";
+
+	query_sql("SELECT c.name, COALESCE(k.value,0) AS kills, COALESCE(d.value,0) AS deaths FROM `char` c LEFT JOIN `char_reg_num` k  ON k.char_id = c.char_id AND k.`key` = 'pvp_kills' AND k.`index` = 0 LEFT JOIN `char_reg_num` d  ON d.char_id = c.char_id AND d.`key` = 'pvp_deaths' AND d.`index` = 0 ORDER BY kills DESC LIMIT 10", .@name$, .@kills, .@deaths);
+
+    for (.@i = 0; .@i < getarraysize(.@name$); .@i++) {
+        mes (.@i+1)+". "+.@name$[.@i]
+            +"  -  ^00FF00Kills:^000000 "+.@kills[.@i]
+            +"  |  ^FF0000Mortes:^000000 "+.@deaths[.@i];
+    }
+
+	mes "---------------------------------";
+	end;
+
+S_RankingMensal:
+	mes "[PvP Ranking Mensal]";
+	mes "TOP 20 Jogadores:";
+	mes "---------------------------------";
+
+	query_sql("SELECT c.name, COALESCE(k.value,0) AS kills, COALESCE(d.value,0) AS deaths FROM `char` c LEFT JOIN `char_reg_num` k  ON k.char_id = c.char_id AND k.`key` = 'pvp_kills_month' AND k.`index` = 0 LEFT JOIN `char_reg_num` d  ON d.char_id = c.char_id AND d.`key` = 'pvp_deaths_month' AND d.`index` = 0 ORDER BY kills DESC LIMIT 20", .@name$, .@kills, .@deaths);
+
+    for (.@i = 0; .@i < getarraysize(.@name$); .@i++) {
+        mes (.@i+1)+". "+.@name$[.@i]
+            +"  -  ^00FF00Kills:^000000 "+.@kills[.@i]
+            +"  |  ^FF0000Mortes:^000000 "+.@deaths[.@i];
+    }
+
+	mes "---------------------------------";
+	end;
+
+S_Ranking:
+	mes "[PvP Ranking]";
+	mes "TOP 30 Jogadores:";
+	mes "---------------------------------";
+
+	query_sql("SELECT c.name, COALESCE(k.value,0) AS kills, COALESCE(d.value,0) AS deaths FROM `char` c LEFT JOIN `char_reg_num` k  ON k.char_id = c.char_id AND k.`key` = 'pvp_kills_total' AND k.`index` = 0 LEFT JOIN `char_reg_num` d  ON d.char_id = c.char_id AND d.`key` = 'pvp_deaths_total' AND d.`index` = 0 ORDER BY kills DESC LIMIT 30", .@name$, .@kills, .@deaths);
+
+    for (.@i = 0; .@i < getarraysize(.@name$); .@i++) {
+        mes (.@i+1)+". "+.@name$[.@i]
+            +"  -  ^00FF00Kills:^000000 "+.@kills[.@i]
+            +"  |  ^FF0000Mortes:^000000 "+.@deaths[.@i];
+    }
+
+	mes "---------------------------------";
+	end;
+}
+
+// npc/custom/pvp_kill_counter.txt
+-	script	PVP_KILL_COUNT	-1,{
+
+	OnPCKillEvent:
+		// Se o kill NÃO for no mapa PvP, ignora
+		if (strcharinfo(3) != "pvp_y_1-2" && strcharinfo(3) != "pvp_y_2-2") end;
+
+		.@killer = getcharid(0);
+		.@victim = killedrid;
+		.@now = gettimetick(2);
+
+		// não contar suicídio
+		if (.@killer == .@victim) end;
+
+		.@cd_var$  = .@killer+"_cd_"+.@victim;
+		.@cd_time$ = .@cd_var$+"_time";
+
+		//---------------------------------------
+		// ANTI FARM – Camada 1: cooldown por alvo
+		//---------------------------------------
+		// se matou o mesmo player antes de 300s (5 min) ? ignora
+		.@exp_cd = getd(.@cd_time$); // quando expira o cd desta vítima
+
+		if (.@exp_cd > 0 && .@now < .@exp_cd) {
+			.@cd_left = .@exp_cd - .@now;
+			dispbottom "Anti-Farm: Você matou este jogador recentemente. Aguarde "+.@cd_left+" segundos.";
+			end;
+		}
+
+		//---------------------------------------
+		// ANTI FARM – Camada 2: limite por dia
+		//---------------------------------------
+		// carrega variável dinâmica: pvp_farm_12345 (charid da vítima)
+		.@var$ = .@killer+"_kill_"+.@victim;
+		.@time$ = .@var$+"_time";
+		.@exp = getd(.@time$);	
+
+		// Se NÃO existir timer (0) OU já passou do prazo
+		if (.@exp == 0 || .@now > .@exp) {
+
+			// Resetar contagem
+			setd(.@var$, 0);
+
+			// Criar novo tempo de expiração
+			setd(.@time$, .@now + callfunc("get_daily_reset"));			
+		}
+
+		.@count = getd(.@var$);
+
+		// limite de 10 kills por vítima por dia
+		if (.@count >= 10) {
+			dispbottom "Limite diário de kills contra este jogador atingido.";
+			end;
+		}
+
+		//---------------------------------------
+		// ANTI FARM – Camada 3: mesmo IP
+		//---------------------------------------
+		if (getcharip(.@killer) == getcharip(.@victim)) {
+			dispbottom "Jogadores com o mesmo IP não contam kill.";
+			end;
+		}
+
+		//---------------------------------
+		// DOUBLE KILL / TRIPLE KILL - combo em segundos
+		//---------------------------------
+
+		// Se a última kill foi há menos de 10 segundos ? streak_combo++
+		if ((.@now - pvp_lastkill_time) <= 10)
+			pvp_streak_combo++;
+		else
+			pvp_streak_combo = 1;
+
+		//---------------------------------
+		// STREAK CONTÍNUO (multi kills sem morrer)
+		//---------------------------------
+		pvp_streak_total++;
+
+		//---------------------------------
+		// ANÚNCIOS DE COMBO
+		//---------------------------------
+
+		//----------------------------------------------
+		// KILL COMBO (várias kills em pouco tempo)
+		//----------------------------------------------
+		if (pvp_streak_combo == 2) {
+			announce strcharinfo(0)+" fez DOUBLE KILL!", bc_map,"0xff0000";
+			soundeffectall "kills/double_kill.wav", 0;
+		}
+		else if (pvp_streak_combo == 3) {
+			announce strcharinfo(0)+" fez TRIPLE KILL!", bc_map,"0xff0000";
+			soundeffectall "kills/triple_kill.wav", 0;
+		}
+		else if (pvp_streak_combo == 4) {
+			announce strcharinfo(0)+" fez MANIAC!!", bc_map,"0xff0000";
+			soundeffectall "kills/maniac.wav", 0;
+		}
+		else if (pvp_streak_combo == 5) {
+			announce strcharinfo(0)+" fez SAVAGE!!!", bc_map,"0xff0000";
+			soundeffectall "kills/savage.wav", 0;
+		}
+
+		//----------------------------------------------
+		// STREAKS CONTÍNUOS (sem morrer)
+		//----------------------------------------------
+		switch (pvp_streak_total) {
+
+			case 3:
+				announce strcharinfo(0)+" está em KILLING SPREE!", bc_map,"0xff0000";
+				soundeffectall "kills/killing_spree.wav", 0;
+				break;
+
+			case 4:
+				announce strcharinfo(0)+" está em MEGA KILL!", bc_map,"0xff0000";
+				soundeffectall "kills/mega_kill.wav", 0;
+				break;
+
+			case 5:
+				announce strcharinfo(0)+" está UNSTOPPABLE!!", bc_map,"0xff0000";
+				soundeffectall "kills/unstoppable.wav", 0;
+				break;
+
+			case 6:				
+				announce strcharinfo(0)+" fez MONSTER KILL!!!", bc_map,"0xff0000";
+				soundeffectall "kills/monster_kill.wav", 0;
+				break;
+
+			case 7:
+				announce strcharinfo(0)+" está GODLIKE!!!", bc_map,"0xff0000";
+				soundeffectall "kills/godlike.wav", 0;
+				break;
+
+			case 8:
+				announce strcharinfo(0)+" está LEGENDARY!!!!", bc_map,"0xff0000";
+				soundeffectall "kills/legendary.wav", 0;
+				break;
+		}
+
+		//---------------------------------------
+		// PASSOU PELOS FILTROS ? CONTA KILL
+		//---------------------------------------
+		pvp_kills++;
+		pvp_kills_month++;
+		pvp_kills_total++;
+
+		setd(.@cd_time$, .@now + 300);
+
+		pvp_lastkill_time = .@now;
+
+		// incrementa contador por vítima
+		setd(.@var$, .@count + 1);
+
+		dispbottom "Você ganhou 1 Kill Point. Total da Semana: ^00FF00"+pvp_kills+"^000000.";
+	end;
+
+    // Quando o player morre
+	OnPCDieEvent:
+		// Se não for no mapa PvP, ignora
+		if (strcharinfo(3) != "pvp_y_1-2" && strcharinfo(3) != "pvp_y_2-2") end;
+
+		.@now = gettimetick(2);
+
+		//------------------------------------------------
+		// 1. REGISTRAR TIMESTAMPS DE MORTE
+		//------------------------------------------------
+
+		// shift das mortes anteriores (mantém histórico)
+		death_time_2 = death_time_1;
+		death_time_1 = death_time_0;
+		death_time_0 = .@now;
+
+		//------------------------------------------------
+		// 2. CONTAR MORTES NOS ÚLTIMOS 3 MINUTOS (180s)
+		//------------------------------------------------
+		.@death_count = 0;
+
+		if (.@now - death_time_0 <= 180) .@death_count++;
+		if (.@now - death_time_1 <= 180) .@death_count++;
+		if (.@now - death_time_2 <= 180) .@death_count++;
+
+		//------------------------------------------------
+		// 3. BLOQUEAR CASO TENHA MAIS DE 3 MORTES EM 3 MINUTOS
+		//------------------------------------------------
+		if (.@death_count >= 3) {
+
+			// Bloquear entrada por 5 minutos (300s)
+			pvp_block_until = .@now + 300;
+
+			dispbottom "^FF0000Anti-Feed: Você morreu muitas vezes em pouco tempo.^000000";
+			dispbottom "Você está bloqueado do PvP por ^FF00005 minutos^000000.";
+
+			end; // encerra evento de morte
+		}
+
+		if (pvp_streak_total >= 3) {
+			announce strcharinfo(0)+" foi ELIMINADO APÓS UMA SEQUENCIA DE "+pvp_streak_total+" KILLS!!", bc_map,"0xff0000";
+			soundeffectall "kills/shutdown.wav", 0;
+		}
+		pvp_streak_total = 0;
+		pvp_streak_combo = 0;
+
+		pvp_deaths++;
+		pvp_deaths_month++;
+		pvp_deaths_total++;
+
+		dispbottom "Você morreu. Total de mortes esta Semana: ^FF0000"+pvp_deaths+"^000000.";
+	end;
+}
+

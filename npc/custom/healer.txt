@@ -18,11 +18,7 @@ OnTalk:
 
 	.@Buffs = 1;	// Also buff players? (1: yes / 0: no)
 	.@Delay = 5;	// Heal delay, in seconds
-	.@time = 300000;	// Heal delay, in seconds
-
-	if (getgroupid() != 0) {
-		.@time = 600000;
-	}
+	.@time = 300000;	// Heal delay, in seconds	
 
 	// Verifica tempo restante
 	if (@last_buff_time + .@delay > gettimetick(2)) {
@@ -39,6 +35,9 @@ OnTalk:
 
 OnBuffOnly:
 	// Buffs
+	if (getgroupid() != 0) {
+		.@time = 600000;
+	}
 	
 	// Aumentar Agilidade
 	specialeffect2 EF_INCAGILITY;

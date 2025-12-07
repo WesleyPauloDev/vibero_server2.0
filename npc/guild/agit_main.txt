@@ -68,6 +68,8 @@ OnAgitStart:
 
 // Spawn (fall through), or respawn the Emperium once it has been broken.
 OnStartArena:
+	debugmes "Entrou no OnStartArena do oficial!";
+	debugmes "Mapa: "+strnpcinfo(2);
 	// OnAgitStart will fall through and spawn the Emperium.
 	if (strnpcinfo(2) == "aldeg_cas01") { setarray .@emproom[0],216,23; }
 	else if (strnpcinfo(2) == "aldeg_cas02") { setarray .@emproom[0],213,23; }
@@ -94,8 +96,26 @@ OnStartArena:
 		end;
 	}
 	if (!mobcount(strnpcinfo(2),"Agit#"+strnpcinfo(2)+"::OnAgitBreak")) {
+		GvgOn "prtg_cas03";
 		monster strnpcinfo(2),.@emproom[0],.@emproom[1],"Emperium",1288,1,"Agit#"+strnpcinfo(2)+"::OnAgitBreak";
+		.@gid = $@mobid[0];
+		debugmes "Spawnou emp GID = "+.@gid;
+		getunitdata .@gid, .@info, 1;
+
+		debugmes "mode: "+.@info[UMOB_MODE];
+		debugmes "def: "+.@info[UMOB_DEF];
+		debugmes "mdef: "+.@info[UMOB_MDEF];
+		debugmes "hp: " + .@info[UMOB_MAXHP];
+		debugmes "race: "+.@info[UMOB_RACE];
+		debugmes "size: "+.@info[UMOB_SIZE];
+		debugmes "element: "+.@info[UMOB_ELETYPE];
+		
+		setunitdata .@gid, UMOB_MODE, 4133;
+		debugmes "mode: "+.@info[UMOB_MODE];
 	}
+	debugmes "mf_gvg = "+getmapflag(strnpcinfo(2), mf_gvg);
+	debugmes "mf_gvg_castle = "+getmapflag(strnpcinfo(2), mf_gvg_castle);
+	debugmes "agitcheck = "+agitcheck();
 	end;
 
 // The Emperium has been broken.

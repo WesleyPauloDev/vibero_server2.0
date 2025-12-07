@@ -96,9 +96,9 @@ Body:
     SubType: 1hSword
     Buy: 20
     Weight: 1000
-    Attack: 10
+    Attack: 180
     Range: 1
-    Slots: 1
+    Slots: 2
     Jobs:
       Alchemist: true
       Assassin: true
@@ -114,26 +114,18 @@ Body:
     Locations:
       Right_Hand: true
     WeaponLevel: 4
+    EquipLevelMin: 150
     Refineable: true
     Script: |
       .@r = getrefine();
-      bonus bUnbreakableWeapon;
-      bonus bBaseAtk,50+BaseLevel;
-      bonus2 bAddItemHealRate,501,100;
-      bonus2 bAddItemHealRate,502,100;
-      bonus2 bAddItemHealRate,503,100;
-      bonus2 bAddItemHealRate,504,100;
-      if (eaclass()&EAJL_THIRD && BaseJob == Job_Alchemist) {
-         bonus bHit,20;
-         bonus bAspdRate,10;
-         bonus bAtkRate,50;
-         if (.@r>=7) {
-            .@val = 50;
-            if (.@r>=9)
-                .@val += 50;
-            bonus2 bIgnoreDefRaceRate,RC_All,.@val;
-         }
+      if (.@r>0) {
+        bonus bAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
       }
+      bonus bCritAtkRate,30;
+      bonus bAtkRate,100;
+      bonus bCritical,25;
+      bonus bAspdRate,20;
   - Id: 1101
     AegisName: Sword
     Name: Sword
@@ -596,9 +588,9 @@ Body:
     Name: Tsurugi
     Type: Weapon
     SubType: 1hSword
-    Buy: 51000
+    Buy: 2000
     Weight: 1200
-    Attack: 130
+    Attack: 150
     Range: 1
     Slots: 1
     Jobs:
@@ -608,14 +600,26 @@ Body:
       Crusader: true
       Knight: true
       Merchant: true
+      Novice: true
       Rogue: true
+      SuperNovice: true
       Swordman: true
       Thief: true
     Locations:
       Right_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 27
+    EquipLevelMin: 100
     Refineable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bCritAtkRate,20;
+      bonus bAtkRate,75;
+      bonus bCritical,20;
+      bonus bAspdRate,15;
   - Id: 1120
     AegisName: Tsurugi_
     Name: Tsurugi
@@ -1382,9 +1386,9 @@ Body:
     Type: Weapon
     SubType: 2hSword
     Weight: 3500
-    Attack: 10
+    Attack: 220
     Range: 1
-    Slots: 1
+    Slots: 2
     Jobs:
       Crusader: true
       Knight: true
@@ -1392,7 +1396,7 @@ Body:
     Locations:
       Both_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 1
+    EquipLevelMin: 150
     Refineable: true
     Script: |
       bonus bUnbreakableWeapon;
@@ -1529,20 +1533,36 @@ Body:
     Name: Two-Handed Sword
     Type: Weapon
     SubType: 2hSword
-    Buy: 60000
+    Buy: 1000
     Weight: 2200
-    Attack: 160
+    Attack: 200
     Range: 1
     Slots: 1
     Jobs:
+      Alchemist: true
+      Assassin: true
+      Blacksmith: true
       Crusader: true
       Knight: true
+      Merchant: true
+      Novice: true
+      Rogue: true
+      SuperNovice: true
       Swordman: true
+      Thief: true
     Locations:
       Both_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 33
+    EquipLevelMin: 100
     Refineable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bDelayRate,-20;
+      bonus bAtkRate,75;
   - Id: 1158
     AegisName: Two_Hand_Sword_
     Name: Two-Handed Sword
@@ -1609,16 +1629,34 @@ Body:
     SubType: 2hSword
     Buy: 20
     Weight: 1000
-    Attack: 250
+    Attack: 220
     Range: 1
+    Slots: 2
+    Jobs:
+      Alchemist: true
+      Assassin: true
+      Blacksmith: true
+      Crusader: true
+      Knight: true
+      Merchant: true
+      Novice: true
+      Rogue: true
+      SuperNovice: true
+      Swordman: true
+      Thief: true
     Locations:
       Both_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 48
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      bonus bInt,20;
-      bonus bLuk,20;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bDelayRate,-25;
+      bonus bAtkRate,100;
   - Id: 1162
     AegisName: Broad_Sword_
     Name: Broad Sword
@@ -3226,35 +3264,30 @@ Body:
     Name: Gladius
     Type: Weapon
     SubType: Dagger
-    Buy: 43000
+    Buy: 1000
     Weight: 700
-    Attack: 105
+    Attack: 150
+    MagicAttack: 150
     Range: 1
-    Slots: 2
-    Jobs:
-      Alchemist: true
-      Archer: true
-      Assassin: true
-      BardDancer: true
-      Blacksmith: true
-      Crusader: true
-      Hunter: true
-      KagerouOboro: true
-      Knight: true
-      Mage: true
-      Merchant: true
-      Ninja: true
-      Rogue: true
-      Sage: true
-      SoulLinker: true
-      Swordman: true
-      Thief: true
-      Wizard: true
+    Slots: 3
     Locations:
       Right_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 24
+    EquipLevelMin: 100
     Refineable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,5 * .@r;
+        bonus bMAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bAspdRate,15;
+      bonus bAtkRate,75;
+      bonus bMAtkRate,75;
+      bonus bCritical,20;
+      bonus bCritAtkRate,20;
   - Id: 1220
     AegisName: Gladius_
     Name: Gladius
@@ -3365,35 +3398,27 @@ Body:
     SubType: Dagger
     Buy: 20
     Weight: 500
-    Attack: 90
+    Attack: 180
     Range: 1
-    Jobs:
-      Alchemist: true
-      Archer: true
-      Assassin: true
-      BardDancer: true
-      Blacksmith: true
-      Crusader: true
-      Hunter: true
-      KagerouOboro: true
-      Knight: true
-      Mage: true
-      Merchant: true
-      Ninja: true
-      Rogue: true
-      Sage: true
-      SoulLinker: true
-      Swordman: true
-      Thief: true
-      Wizard: true
+    Slots: 4    
     Locations:
       Right_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 24
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      bonus bLuk,5;
-      bonus bFlee2,20;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,10 * .@r;
+        bonus bMAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bAspdRate,20;
+      bonus bAtkRate,100;
+      bonus bMAtkRate,100;
+      bonus bCritical,25;
+      bonus bCritAtkRate,30;
   - Id: 1224
     AegisName: Sword_Breaker
     Name: Swordbreaker
@@ -4253,9 +4278,9 @@ Body:
     Name: Katar
     Type: Weapon
     SubType: Katar
-    Buy: 41000
+    Buy: 1000
     Weight: 1200
-    Attack: 148
+    Attack: 200
     Range: 1
     Slots: 1
     Jobs:
@@ -4263,10 +4288,18 @@ Body:
     Locations:
       Both_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 33
+    EquipLevelMin: 100
     Refineable: true
     Script: |
-      bonus bDex,1;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bAspdRate,15;
+      bonus bAtkRate,75;
+      bonus bCritical,20;
+      bonus bCritAtkRate,20;
   - Id: 1253
     AegisName: Katar_
     Name: Katar
@@ -4420,21 +4453,26 @@ Body:
     SubType: Katar
     Buy: 57000
     Weight: 1500
-    Attack: 140
+    Attack: 220
     Range: 1
+    Slots: 2
     Jobs:
       Assassin: true
     Locations:
       Both_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 75
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      bonus2 bAddRace,RC_DemiHuman,50;
-      bonus2 bAddRace,RC_Player_Human,50;
-      bonus bDef,3;
-      bonus bFlee,5;
-      bonus bFlee2,2;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bAspdRate,20;
+      bonus bAtkRate,100;
+      bonus bCritical,25;
+      bonus bCritAtkRate,30;
   - Id: 1262
     AegisName: Nail_Of_Loki
     Name: Loki's Nail
@@ -5378,9 +5416,9 @@ Body:
     SubType: 1hAxe
     Buy: 20
     Weight: 1200
-    Attack: 140
+    Attack: 180
     Range: 1
-    Slots: 3
+    Slots: 2
     Jobs:
       Alchemist: true
       Blacksmith: true
@@ -5388,15 +5426,22 @@ Body:
       Knight: true
       Merchant: true
       Swordman: true
+      SuperNovice: true
     Locations:
       Right_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 44
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      bonus2 bSubRace,RC_DemiHuman,5;
-      bonus2 bSubRace,RC_Player_Human,5;
-      bonus3 bAddMonsterDropItem,517,RC_Brute,3000;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bCritAtkRate,30;
+      bonus bAtkRate,100;
+      bonus bCritical,25;
+      bonus bAspdRate,20;
   - Id: 1301
     AegisName: Axe
     Name: Axe
@@ -5478,23 +5523,32 @@ Body:
     SubType: 1hAxe
     Buy: 20
     Weight: 1500
-    Attack: 75
+    Attack: 150
     Range: 1
+    Slots: 1
     Jobs:
       Alchemist: true
-      Assassin: true
       Blacksmith: true
       Crusader: true
       Knight: true
       Merchant: true
-      Novice: true
-      SuperNovice: true
       Swordman: true
+      SuperNovice: true
     Locations:
       Right_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 3
+    EquipLevelMin: 100
     Refineable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bCritAtkRate,20;
+      bonus bAtkRate,75;
+      bonus bCritical,20;
+      bonus bAspdRate,15;
   - Id: 1305
     AegisName: Cleaver
     Name: Cleaver
@@ -5767,8 +5821,9 @@ Body:
     Type: Weapon
     SubType: 2hAxe
     Buy: 2
-    Attack: 200
+    Attack: 220
     Range: 1
+    Slots: 2
     Jobs:
       Alchemist: true
       Blacksmith: true
@@ -5779,9 +5834,16 @@ Body:
     Locations:
       Both_Hand: true
     WeaponLevel: 4
+    EquipLevelMin: 150
+    Refineable: true
     Script: |
-      bonus bAtkEle,Ele_Wind;
-      skill "ITM_TOMAHAWK",1;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bDelayRate,-25;
+      bonus bAtkRate,100;
   - Id: 1315
     AegisName: F_Right_Epsilon_C
     Name: Right Epsilon
@@ -6459,16 +6521,17 @@ Body:
     Type: Weapon
     SubType: Huuma
     Weight: 1200
-    Attack: 150
+    Attack: 220
+    MagicAttack: 220
     Range: 1
-    Slots: 1
+    Slots: 2
     Jobs:
       KagerouOboro: true
       Ninja: true
     Locations:
       Both_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 70
+    EquipLevelMin: 150
     Refineable: true
     Script: |
       .@r = getrefine();
@@ -6502,17 +6565,17 @@ Body:
     Type: Weapon
     SubType: Mace
     Weight: 1200
-    Attack: 110
-    MagicAttack: 120
+    Attack: 180
+    MagicAttack: 180
     Range: 1
-    Slots: 1
+    Slots: 2
     Jobs:
       Priest: true
       SuperNovice: true
     Locations:
       Right_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 70
+    EquipLevelMin: 150
     Refineable: true
     Script: |
       .@r = getrefine();
@@ -6546,13 +6609,20 @@ Body:
     Type: Weapon
     SubType: 1hAxe
     Weight: 4400
-    Attack: 230
+    Attack: 200
     Range: 1
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
+      Alchemist: true
       Blacksmith: true
-    Classes:
-      Fourth: true
+      Crusader: true
+      Knight: true
+      Merchant: true
+      Swordman: true
+      SuperNovice: true
     Locations:
       Right_Hand: true
     WeaponLevel: 5
@@ -6560,39 +6630,38 @@ Body:
     Refineable: true
     Gradable: true
     Script: |
-      .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bUnbreakableWeapon;
-      bonus bAtkRate,5;
-      bonus bPow,2;
-      bonus2 bSkillAtk,"MT_TRIPLE_LASER",5;
-      if (.@r>=5) {
-         bonus2 bSkillAtk,"MT_TRIPLE_LASER",10;
-         if (.@r>=7) {
-            bonus bLongAtkRate,5;
-            if (.@r>=9) {
-               bonus2 bSkillAtk,"MT_TRIPLE_LASER",10;
-               if (.@r>=10) {
-                  bonus bCritical,10;
-                  if (.@r>=11) {
-                     bonus bCritAtkRate,20;
-                     bonus2 bSkillAtk,"MT_TRIPLE_LASER",5;
-                  }
-               }
-            }
-         }
+      if (.@r>0) {
+        bonus bAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
       }
-      if (.@g>=ENCHANTGRADE_D) {
-         bonus bLongAtkRate,10;
-         if (.@g>=ENCHANTGRADE_C) {
-            bonus2 bAddSize,Size_All,10;
-            if (.@g>=ENCHANTGRADE_B) {
-               bonus2 bAddRace,RC_All,10;
-               if (.@g>=ENCHANTGRADE_A) {
-                  bonus2 bAddEle,Ele_All,10;
-               }
-            }
-         }
+      bonus bCritAtkRate,40;
+      bonus bAtkRate,150;
+      bonus bCritical,30;
+      bonus bAspdRate,25;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bAtkRate,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bAtkRate,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
       }
   - Id: 1350
     AegisName: Comp_Avenger
@@ -6764,9 +6833,9 @@ Body:
     Name: Buster
     Type: Weapon
     SubType: 2hAxe
-    Buy: 34000
+    Buy: 1000
     Weight: 2200
-    Attack: 155
+    Attack: 200
     Range: 1
     Slots: 1
     Jobs:
@@ -6779,8 +6848,16 @@ Body:
     Locations:
       Both_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 30
+    EquipLevelMin: 100
     Refineable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bDelayRate,-20;
+      bonus bAtkRate,75;
   - Id: 1358
     AegisName: Buster_
     Name: Buster
@@ -7984,9 +8061,10 @@ Body:
     SubType: 1hSpear
     Buy: 20
     Weight: 1400
-    Attack: 140
+    Attack: 180
+    MagicAttack: 180
     Range: 3
-    Slots: 1
+    Slots: 2
     Jobs:
       Crusader: true
       Knight: true
@@ -7994,10 +8072,21 @@ Body:
     Locations:
       Right_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 160
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      bonus bBaseAtk,pow(min(getrefine(),15),2);
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMAtkRate,10 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bCritAtkRate,30;
+      bonus bAtkRate,100;
+      bonus bMAtkRate,100;
+      bonus bCritical,25;
+      bonus bAspdRate,20;
   - Id: 1401
     AegisName: Javelin
     Name: Javelin
@@ -8171,10 +8260,11 @@ Body:
     Name: Lance
     Type: Weapon
     SubType: 2hSpear
-    Buy: 60000
+    Buy: 1000
     Weight: 2500
-    Attack: 185
+    Attack: 200
     Range: 3
+    Slots: 1
     Jobs:
       Crusader: true
       Knight: true
@@ -8182,8 +8272,19 @@ Body:
     Locations:
       Both_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 33
+    EquipLevelMin: 100
     Refineable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,5 * .@r;
+        bonus bMAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bDelayRate,-20;
+      bonus bAtkRate,75;
+      bonus bMAtkRate,75;
   - Id: 1411
     AegisName: Lance_
     Name: Lance
@@ -8313,7 +8414,8 @@ Body:
     SubType: 1hSpear
     Buy: 20
     Weight: 3800
-    Attack: 160
+    Attack: 150
+    MagicAttack: 150
     Range: 3
     Slots: 1
     Jobs:
@@ -8323,12 +8425,18 @@ Body:
     Locations:
       Right_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 71
+    EquipLevelMin: 100
     Refineable: true
     Script: |
-      bonus bStr,1;
-      bonus bInt,2;
-      bonus bDex,1;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bCritAtkRate,20;
+      bonus bAtkRate,75;
+      bonus bCritical,20;
+      bonus bAspdRate,15;
   - Id: 1418
     AegisName: Gungnir_
     Name: Gungnir
@@ -9229,9 +9337,9 @@ Body:
     SubType: 2hSpear
     Buy: 20
     Weight: 2250
-    Attack: 225
+    Attack: 220
     Range: 3
-    Slots: 1
+    Slots: 2
     Jobs:
       Crusader: true
       Knight: true
@@ -9239,10 +9347,19 @@ Body:
     Locations:
       Both_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 160
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      bonus bBaseAtk,pow(min(getrefine(),15),2);
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,10 * .@r;
+        bonus bMAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bDelayRate,-25;
+      bonus bAtkRate,100;
+      bonus bMAtkRate,100;
   - Id: 1451
     AegisName: Guisarme
     Name: Guisarme
@@ -9663,22 +9780,35 @@ Body:
     SubType: 2hStaff
     Buy: 20
     Weight: 1400
-    Attack: 25
+    Attack: 200
     MagicAttack: 200
     Range: 1
+    Slots: 1
     Jobs:
       Mage: true
-      Sage: true
-      SoulLinker: true
       Wizard: true
+      Sage: true
+      Acolyte: true
+      Priest: true
+      SoulLinker: true
+      SuperNovice: true
     Locations:
       Both_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 73
+    EquipLevelMin: 100
     Refineable: true
     Script: |
-      bonus bInt,5;
-      bonus bAgi,2;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bMAtkRate,5 * .@r;
+        bonus bMAtk,10 * .@r;
+        bonus bHealPower,10 * .@r;
+      }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bMAtkRate,75;
+      bonus bHealPower,150;
+
   - Id: 1473
     AegisName: Wizardy_Staff
     Name: Wizardry Staff
@@ -9686,22 +9816,34 @@ Body:
     SubType: 2hStaff
     Buy: 20
     Weight: 2400
-    Attack: 120
-    MagicAttack: 200
+    Attack: 220
+    MagicAttack: 220
     Range: 1
+    Slots: 2
     Jobs:
       Mage: true
-      Sage: true
-      SoulLinker: true
       Wizard: true
+      Sage: true
+      Acolyte: true
+      Priest: true
+      SoulLinker: true
+      SuperNovice: true
     Locations:
       Both_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 90
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      bonus bInt,6;
-      bonus bDex,2;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bMAtkRate,10 * .@r;
+        bonus bMAtk,10 * .@r;
+        bonus bHealPower,20 * .@r;
+      }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bMAtkRate,100;
+      bonus bHealPower,200;
   - Id: 1474
     AegisName: Gae_Bolg
     Name: Gae Bolg
@@ -10043,7 +10185,7 @@ Body:
     Name: Lance
     Type: Weapon
     SubType: 2hSpear
-    Attack: 220
+    Attack: 200
     Range: 3
     Jobs:
       Crusader: true
@@ -10052,7 +10194,7 @@ Body:
     Locations:
       Both_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 1
+    EquipLevelMin: 100
     Trade:
       NoDrop: true
       NoTrade: true
@@ -10723,26 +10865,38 @@ Body:
     Name: Morning Star
     Type: Weapon
     SubType: Mace
-    Buy: 41000
+    Buy: 2000
     Weight: 1500
-    Attack: 110
+    Attack: 150
     Range: 1
     Slots: 1
     Jobs:
+      Novice: true
       Acolyte: true
+      Merchant: true
+      Swordman: true
+      SuperNovice: true
       Alchemist: true
       Blacksmith: true
       Crusader: true
       Knight: true
-      Merchant: true
       Monk: true
       Priest: true
-      Swordman: true
     Locations:
       Right_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 27
+    EquipLevelMin: 100
     Refineable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-15;
+      bonus bDelayRate,-20;
+      bonus bAspdRate,15;
+      bonus bAtkRate,75;
   - Id: 1514
     AegisName: Morning_Star_
     Name: Morning Star
@@ -10969,21 +11123,36 @@ Body:
     SubType: Mace
     Buy: 20
     Weight: 700
-    Attack: 85
+    Attack: 180
     Range: 1
+    Slots: 2
     Jobs:
+      Novice: true
       Acolyte: true
+      Merchant: true
+      Swordman: true
+      SuperNovice: true
+      Alchemist: true
+      Blacksmith: true
+      Crusader: true
+      Knight: true
       Monk: true
       Priest: true
     Locations:
       Right_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 40
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      bonus bCritical,40;
-      bonus bDefRate,-66;
-      bonus bDef2Rate,-66;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bAspdRate,20;
+      bonus bAtkRate,100;
   - Id: 1524
     AegisName: Golden_Mace
     Name: Golden Mace
@@ -11710,22 +11879,37 @@ Body:
     Name: Bible
     Type: Weapon
     SubType: Book
-    Buy: 60000
+    Buy: 2000
     Weight: 1000
-    Attack: 115
+    Attack: 150
+    MagicAttack: 150
     Range: 1
-    Slots: 2
+    Slots: 1
     Jobs:
-      Priest: true
+      Mage: true
+      Acolyte: true
       Sage: true
+      Wizard: true
+      Priest: true
       StarGladiator: true
     Locations:
       Right_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 27
+    EquipLevelMin: 100
     Refineable: true
     Script: |
-      bonus bInt,2;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,5 * .@r;
+        bonus bMAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-15;
+      bonus bDelayRate,-20;
+      bonus bAspdRate,15;
+      bonus bAtkRate,75;
+      bonus bMAtkRate,75;
   - Id: 1552
     AegisName: Tablet
     Name: Tablet
@@ -11832,24 +12016,35 @@ Body:
     SubType: Book
     Buy: 60000
     Weight: 800
-    Attack: 120
+    Attack: 180
+    MagicAttack: 180
     Range: 1
+    Slots: 2
     Jobs:
-      Priest: true
+      Mage: true
+      Acolyte: true
       Sage: true
+      Wizard: true
+      Priest: true
       StarGladiator: true
     Locations:
       Right_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 40
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      bonus bAtkEle,Ele_Dark;
-      bonus2 bAddEle,Ele_Water,7;
-      bonus2 bAddEle,Ele_Earth,7;
-      bonus2 bAddEle,Ele_Fire,7;
-      bonus2 bAddEle,Ele_Wind,7;
-      bonus2 bSubEle,Ele_Holy,-5;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,10 * .@r;
+        bonus bMAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bAspdRate,20;
+      bonus bAtkRate,100;
+      bonus bMAtkRate,100;
   - Id: 1558
     AegisName: Girl's_Diary
     Name: Girl's Diary
@@ -12982,29 +13177,35 @@ Body:
     SubType: Staff
     Buy: 20
     Weight: 600
-    Attack: 60
-    MagicAttack: 120
+    Attack: 180
+    MagicAttack: 180
     Range: 1
-    Slots: 1
+    Slots: 2
     Jobs:
       Acolyte: true
-      Mage: true
-      Monk: true
-      Novice: true
       Priest: true
-      Sage: true
-      SoulLinker: true
-      SuperNovice: true
+      Mage: true
       Wizard: true
+      Sage: true
+      Novice: true
+      SuperNovice: true
+      SoulLinker: true
     Locations:
       Right_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 160
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      bonus bMatk,pow(min(getrefine(),15),2);
-      bonus bInt,5;
-      bonus bUnbreakableWeapon;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bMAtkRate,10 * .@r;
+        bonus bMAtk,10 * .@r;
+        bonus bHealPower,20 * .@r;
+      }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bMAtkRate,100;
+      bonus bHealPower,200;
   - Id: 1601
     AegisName: Rod
     Name: Rod
@@ -13247,27 +13448,35 @@ Body:
     Name: Arc Wand
     Type: Weapon
     SubType: Staff
-    Buy: 45000
+    Buy: 2000
     Weight: 400
-    Attack: 60
-    MagicAttack: 95
+    Attack: 150
+    MagicAttack: 150
     Range: 1
     Slots: 1
     Jobs:
       Acolyte: true
-      Mage: true
-      Monk: true
       Priest: true
-      Sage: true
-      SoulLinker: true
+      Mage: true
       Wizard: true
+      Sage: true
+      Novice: true
+      SuperNovice: true
+      SoulLinker: true
     Locations:
       Right_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 24
+    EquipLevelMin: 100
     Refineable: true
     Script: |
-      bonus bInt,3;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bMAtkRate,5 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bMAtkRate,75;
   - Id: 1611
     AegisName: Arc_Wand_
     Name: Arc Wand
@@ -16123,9 +16332,9 @@ Body:
     Name: Arbalest
     Type: Weapon
     SubType: Bow
-    Buy: 48000
+    Buy: 1000
     Weight: 1000
-    Attack: 90
+    Attack: 200
     Range: 5
     Slots: 1
     Jobs:
@@ -16137,10 +16346,19 @@ Body:
     Locations:
       Both_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 33
+    EquipLevelMin: 100
     Refineable: true
     Script: |
-      bonus bDex,2;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bLongAtkRate,75;
+      bonus bAspdRate,15;
+      bonus bDelayRate,-15;
+      bonus bCritical,20;
+      bonus bCritAtkRate,20;
   - Id: 1714
     AegisName: Kakkung
     Name: Gakkung Bow
@@ -16229,16 +16447,30 @@ Body:
     SubType: Bow
     Buy: 20
     Weight: 500
-    Attack: 75
+    Attack: 220
     Range: 11
+    Slots: 2
     Jobs:
+      Archer: true
+      BardDancer: true
+      Hunter: true
       Rogue: true
-      Thief: true
     Locations:
       Both_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 48
+    EquipLevelMin: 150
     Refineable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bLongAtkRate,100;
+      bonus bAspdRate,20;
+      bonus bDelayRate,-20;
+      bonus bCritical,25;
+      bonus bCritAtkRate,30;
   - Id: 1720
     AegisName: Bow_Of_Rudra
     Name: Rudra Bow
@@ -16990,16 +17222,16 @@ Body:
     SubType: Knuckle
     Buy: 20
     Weight: 1500
-    Attack: 150
+    Attack: 180
     Range: 1
-    Slots: 1
+    Slots: 2
     Jobs:
       Monk: true
       Priest: true
     Locations:
       Right_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 160
+    EquipLevelMin: 150
     Refineable: true
     Script: |
       bonus bBaseAtk,pow(min(getrefine(),15),2);
@@ -17116,18 +17348,29 @@ Body:
     Name: Fist
     Type: Weapon
     SubType: Knuckle
-    Buy: 53000
+    Buy: 2000
     Weight: 650
-    Attack: 115
+    Attack: 150
     Range: 1
+    Slots: 1
     Jobs:
       Monk: true
       Priest: true
     Locations:
       Right_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 24
+    EquipLevelMin: 100
     Refineable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-15;
+      bonus bDelayRate,-20;
+      bonus bAspdRate,15;
+      bonus bAtkRate,75;
   - Id: 1808
     AegisName: Fist_
     Name: Fist
@@ -18517,45 +18760,42 @@ Body:
     Type: Weapon
     SubType: Knuckle
     Weight: 1500
-    Attack: 190
+    Attack: 180
     Range: 1
     Slots: 2
     Jobs:
       Monk: true
-    Classes:
-      All_Third: true
-      Fourth: true
+      Priest: true
     Locations:
       Right_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 170
+    EquipLevelMin: 150
     Refineable: true
     Script: |
       .@r = getrefine();
-      bonus bLongAtkRate,15;
-      bonus bBaseAtk,4*.@r;
-      if (.@r>=9) {
-         bonus2 bSkillAtk,"SR_RAMPAGEBLASTER",20;
+      if (.@r>0) {
+        bonus bAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
       }
-      if (.@r>=11) {
-         bonus2 bAddRace,RC_Undead,20;
-         bonus2 bAddRace,RC_Angel,20;
-         bonus2 bSkillCooldown,"SR_RAMPAGEBLASTER",-1000;
-      }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bAspdRate,20;
+      bonus bAtkRate,100;
   - Id: 1871
     AegisName: Bauxite_Knuckle_EXE
     Name: Bauxite Knuckle
     Type: Weapon
     SubType: Knuckle
     Weight: 1200
-    Attack: 100
+    Attack: 180
     Range: 1
+    Slots: 2
     Jobs:
       Monk: true
     Locations:
       Right_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 70
+    EquipLevelMin: 150
     Refineable: true
     Script: |
       .@r = getrefine();
@@ -18779,18 +19019,32 @@ Body:
     Name: Guitar
     Type: Weapon
     SubType: Musical
-    Buy: 47000
+    Buy: 2000
     Weight: 900
-    Attack: 142
+    Attack: 150
+    MagicAttack: 150
     Range: 1
+    Slots: 1
     Jobs:
       BardDancer: true
     Gender: Male
     Locations:
       Right_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 27
+    EquipLevelMin: 100
     Refineable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,5 * .@r;
+        bonus bMAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-15;
+      bonus bDelayRate,-20;
+      bonus bLongAtkRate,75;
+      bonus bMAtkRate,75;
   - Id: 1908
     AegisName: Guitar_
     Name: Guitar
@@ -18892,22 +19146,30 @@ Body:
     SubType: Musical
     Buy: 20
     Weight: 1800
-    Attack: 110
+    Attack: 180
+    MagicAttack: 180
     Range: 1
+    Slots: 2
     Jobs:
       BardDancer: true
     Gender: Male
     Locations:
       Right_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 70
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      skill "WZ_JUPITEL",1;
-      bonus3 bAutoSpell,"WZ_JUPITEL",1,100;
-      bonus bAtkEle,Ele_Wind;
-      bonus bInt,2;
-      bonus bAgi,1;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,10 * .@r;
+        bonus bMAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bLongAtkRate,100;
+      bonus bMAtkRate,100;
   - Id: 1914
     AegisName: Guitar_Of_Passion
     Name: Burning Passion Guitar
@@ -19934,18 +20196,32 @@ Body:
     Name: Rante Whip
     Type: Weapon
     SubType: Whip
-    Buy: 32000
+    Buy: 2000
     Weight: 900
-    Attack: 135
+    Attack: 150
+    MagicAttack: 150
     Range: 2
+    Slots: 1
     Jobs:
       BardDancer: true
     Gender: Female
     Locations:
       Right_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 30
+    EquipLevelMin: 100
     Refineable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,5 * .@r;
+        bonus bMAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-15;
+      bonus bDelayRate,-20;
+      bonus bLongAtkRate,75;
+      bonus bMAtkRate,75;
   - Id: 1957
     AegisName: Rante_
     Name: Rante Whip
@@ -20047,19 +20323,30 @@ Body:
     SubType: Whip
     Buy: 20
     Weight: 400
-    Attack: 100
+    Attack: 180
+    MagicAttack: 180
     Range: 2
+    Slots: 2
     Jobs:
       BardDancer: true
     Gender: Female
     Locations:
       Right_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 44
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      bonus bDex,5;
-      bonus bAgi,1;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,10 * .@r;
+        bonus bMAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bLongAtkRate,100;
+      bonus bMAtkRate,100;
   - Id: 1963
     AegisName: Rapture_Rose
     Name: Rapture Rose
@@ -58174,141 +58461,224 @@ Body:
       bonus bFlee,10;
       bonus bCritical,3;
       bonus bCritAtkRate,10;
+
+# --------------------------------------------- Pets ---------------------------------------------------------
   - Id: 9001
     AegisName: Poring_Egg
     Name: Poring Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9002
     AegisName: Drops_Egg
     Name: Drops Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9003
     AegisName: Poporing_Egg
     Name: Poporing Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9004
     AegisName: Lunatic_Egg
     Name: Lunatic Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9005
     AegisName: Picky_Egg
     Name: Picky Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9006
     AegisName: Chonchon_Egg
     Name: Chonchon Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9007
     AegisName: Steel_Chonchon_Egg
     Name: Steel Chonchon Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9008
     AegisName: Hunter_Fly_Egg
     Name: Hunter Fly Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9009
     AegisName: Savage_Bebe_Egg
     Name: Savage Babe Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9010
     AegisName: Baby_Desert_Wolf_Egg
     Name: Baby Desert Wolf Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9011
     AegisName: Rocker_Egg
     Name: Rocker Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9012
     AegisName: Spore_Egg
     Name: Spore Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9013
     AegisName: Poison_Spore_Egg
     Name: Poison Spore Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9014
     AegisName: PecoPeco_Egg
     Name: Peco Peco Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9015
     AegisName: Smokie_Egg
     Name: Smokie Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9016
     AegisName: Yoyo_Egg
     Name: Yoyo Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9017
     AegisName: Orc_Warrior_Egg
     Name: Orc Warrior Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9018
     AegisName: Munak_Egg
     Name: Munak Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9019
     AegisName: Dokkaebi_Egg
     Name: Dokebi Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9020
     AegisName: Sohee_Egg
     Name: Sohee Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9021
     AegisName: Isis_Egg
     Name: Isis Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9022
     AegisName: Green_Petite_Egg
     Name: Green Petite Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9023
     AegisName: Deviruchi_Egg
     Name: Deviruchi Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9024
     AegisName: Bapho_Jr._Egg
     Name: Bapho Jr. Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9025
     AegisName: Bongun_Egg
     Name: Bongun Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9026
     AegisName: Zherlthsh_Egg
     Name: Zealotus Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9027
     AegisName: Alice_Egg
     Name: Alice Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9028
     AegisName: Rice_Cake_Egg
     Name: Hard Rice Cake
@@ -58316,151 +58686,244 @@ Body:
     Buy: 20
     Trade:
       NoDrop: true
+      NoSell: true
+    Trade:
+      NoDrop: true
   - Id: 9029
     AegisName: Santa_Goblin_Egg
     Name: Christmas Goblin's Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9030
     AegisName: Chung_E_Egg
     Name: Green Maiden Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9031
     AegisName: Spring_Rabbit_Egg
     Name: Spring Rabbit Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9032
     AegisName: Knife_Goblin_Egg
     Name: Knife Goblin Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9033
     AegisName: Flail_Goblin_Egg
     Name: Flail Goblin Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9034
     AegisName: Hammer_Goblin_Egg
     Name: Hammer Goblin Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9035
     AegisName: Red_Deleter_Egg
     Name: Red Deleter Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9036
     AegisName: Diabolic_Egg
     Name: Diabolic Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9037
     AegisName: Wanderer_Egg
     Name: Wanderer Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9038
     AegisName: New_Year_Doll_Egg
     Name: New Year Doll Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9039
     AegisName: Bacsojin_Egg
     Name: Bacsojin Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9040
     AegisName: Civil_Servant_Egg
     Name: Civil Servant Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9041
     AegisName: Leaf_Cat_Egg
     Name: Leaf Cat Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9042
     AegisName: Loli_Ruri_Egg
     Name: Loli Ruri Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9043
     AegisName: Marionette_Egg
     Name: Marionette Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9044
     AegisName: Shinobi_Egg
     Name: Shinobi Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9045
     AegisName: Whisper_Egg
     Name: Whisper Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9046
     AegisName: Goblin_Leader_Egg
     Name: Goblin Leader Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9047
     AegisName: Wicked_Nymph_Egg
     Name: Wicked Nymph Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9048
     AegisName: Miyabi_Ningyo_Egg
     Name: Miyabi Ningyo Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9049
     AegisName: Dullahan_Egg
     Name: Dullahan Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9050
     AegisName: Medusa_Egg
     Name: Medusa Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9051
     AegisName: Stone_Shooter_Egg
     Name: Stone Shooter Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9052
     AegisName: Incubus_Egg
     Name: Incubus Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9053
     AegisName: Golem_Egg
     Name: Golem Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9054
     AegisName: Nightmare_Terror_Egg
     Name: Nightmare Terror Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9055
     AegisName: Succubus_Egg
     Name: Succubus Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9056
     AegisName: Imp_Egg
     Name: Imp Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9057
     AegisName: Egg_Of_Tiny
     Name: Egg Of Tiny
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9058
     AegisName: Snow_Rabbit_Egg
     Name: Christmas Snow Rabbit Egg
@@ -58468,306 +58931,479 @@ Body:
     Buy: 20
     Trade:
       NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+      NoSell: true
   - Id: 9059
     AegisName: Tikbalang_Pet
     Name: Tikbalang Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9060
     AegisName: Brownie_Egg
     Name: Domovoi Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9061
     AegisName: Marin_Egg
     Name: Marin Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9062
     AegisName: Novice_Poring_Egg
     Name: Novice Poring Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9063
     AegisName: Woodie_Egg
     Name: Woodie Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9064
     AegisName: Elephant_Egg
     Name: Elephant Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9065
     AegisName: Gorilla_Egg
     Name: Gorilla Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9066
     AegisName: Lion_Egg
     Name: Lion Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9067
     AegisName: Rhino_Egg
     Name: Rhino Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9068
     AegisName: Blue_Unicorn_Egg
     Name: Blue Unicorn Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9069
     AegisName: Mastering_Egg
     Name: Mastering Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9070
     AegisName: Savage_Egg
     Name: Savage Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9071
     AegisName: Grand_Peco_Egg
     Name: Grand Peco Peco Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9072
     AegisName: Orc_Hero_Egg
     Name: Orc Hero Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9073
     AegisName: Orc_Lord_Egg
     Name: Orc Lord Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9074
     AegisName: Rubylit_Egg
     Name: Rubylit Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9075
     AegisName: Sapphilit_Egg
     Name: Sapphilit Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9076
     AegisName: Emelit_Egg
     Name: Emelit Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9077
     AegisName: Topalit_Egg
     Name: Topalit Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9078
     AegisName: Amelit_Egg
     Name: Amelit Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9079
     AegisName: Mythlit_Egg
     Name: Mythlit Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9080
     AegisName: Tamadora_Egg
     Name: Tamadora Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9087
     AegisName: High_Orc_Egg
     Name: High Orc Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9088
     AegisName: Angeling_Egg
     Name: Angeling Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9089
     AegisName: Ammut_Egg
     Name: Am Mut Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9090
     AegisName: Littleisis_Egg
     Name: Little Isis Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9091
     AegisName: Choco_Egg
     Name: Choco Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9092
     AegisName: Eggring_Egg
     Name: Eggring Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9093
     AegisName: Hyegun_Egg
     Name: Hyegun Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9094
     AegisName: Leaf_Lunatic_Egg
     Name: Leaf Lunatic Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9095
     AegisName: Nine_Tail_Egg
     Name: Nine Tail Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9096
     AegisName: Cat_O_Nine_Tail_Egg
     Name: Cat o Nine Tail Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9097
     AegisName: Diabolic_Egg2
     Name: Diabolic Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9098
     AegisName: Red_Deleter_Egg2
     Name: Fire Deleter Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9099
     AegisName: Teddy_Bear_Egg
     Name: Teddy Bear Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9100
     AegisName: Gremlin_Egg
     Name: Gremlin Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9101
     AegisName: Scatletoncarrier
     Name: Scatleton's Cage
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9102
     AegisName: Mummy_Egg
     Name: Mummy Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9103
     AegisName: Wilow_Egg
     Name: Willow Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9104
     AegisName: Roween_Egg
     Name: Roween Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9105
     AegisName: Hodremlin_Egg
     Name: Hodremlin Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9106
     AegisName: Metaller_Egg
     Name: Metaller Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9107
     AegisName: Ancient_Mummy_Egg
     Name: Ancient Mummy Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9108
     AegisName: Xm_Teddybear_Egg
     Name: Xmas Teddy Bear Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9109
     AegisName: Sweets_Drops_Egg
     Name: Sweet Drops Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9111
     AegisName: Phreeoni_Egg
     Name: Phreeoni Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9112
     AegisName: Moonlight_Egg
     Name: Moonlight Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9113
     AegisName: Roost_Of_Skelion
     Name: Roost Of Skelion
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9114
     AegisName: Pouring_Egg
     Name: Pouring Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9115
     AegisName: Bacsojin_Egg2
     Name: Bacsojin Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9116
     AegisName: Nightmare_TerrorH_EGG
     Name: Rigid Nightmare Terror Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9117
     AegisName: Wanderer_H_EGG
     Name: Contaminated Wanderer Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9118
     AegisName: Aliot_EGG
     Name: Aliot Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9119
     AegisName: Alicel_EGG
     Name: Alicel Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9120
     AegisName: Aliza_EGG
     Name: Aliza Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9121
     AegisName: Ork_Hero_EGG
     Name: Orc Hero Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9122
     AegisName: Gloom_Under_Egg
     Name: Gloom Under Night Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9123
     AegisName: Ep17_2_C_Admin1_Egg
     Name: Child Admin Beta Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9124
     AegisName: Ep17_2_C_Admin2_Egg
     Name: Child Admin Alpha Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9125
     AegisName: E_Duckling_Egg
     Name: Wandering Duck Doll Egg
@@ -58777,121 +59413,185 @@ Body:
     Name: Kiel-D-01 Egg
     Type: PetEgg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9128
     AegisName: Dark_Priest_Egg
     Name: Dark Priest Egg
     Type: Petegg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9129
     AegisName: Desert_Wolf_Egg
     Name: Desert Wolf Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9130
     AegisName: Chaos_Bapho_Jr_Egg
     Name: Chaotic Baphomet Junior Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9131
     AegisName: Fire_Golem_Egg
     Name: Fire Golem Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9132
     AegisName: Abyss_Knight_Egg
     Name: Abysmal Knight Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9133
     AegisName: Change_W_Knight_Egg
     Name: Mutated White Knight Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9134
     AegisName: White_Knight_Egg
     Name: White Knight Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9137
     AegisName: Baphomet_Egg
     Name: Baphomet Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9138
     AegisName: Farmiliar_Egg
     Name: Familiar Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9139
     AegisName: Dark_Illusion_Egg
     Name: Dark Illusion Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9140
     AegisName: Blue_Moon_Loli_Ruri_Egg
     Name: Blue Moon Loli Ruri Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9141
     AegisName: Wild_Rose_Egg2
     Name: Wild Rose Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9142
     AegisName: Eddga_Egg2
     Name: Eddga Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9144
     AegisName: Larva_Violet_Egg
     Name: Violet Egg
     Type: PetEgg
     Trade:
       NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+      NoSell: true
   - Id: 9145
     AegisName: Copo_Egg
     Name: Copo Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9146
     AegisName: Grey_Icewind_Egg
     Name: Gray Icewind Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9147
     AegisName: Icewind_Egg
     Name: Icewind Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9148
     AegisName: Dark_Lord_Egg
     Name: Dark Lord Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9155
     AegisName: aegis_9155
     Name: Hornet Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9156
     AegisName: Sonic_Chao_Egg
     Name: Chao Egg
     Type: PetEgg
     Trade:
       NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+      NoSell: true
   - Id: 9157
     AegisName: aegis_9157
     Name: Ice Seahorse Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9183
     AegisName: CLB_SS_Egg01
     Name: Fei-Chai Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9184
     AegisName: CLB_SS_Egg02
     Name: Tai-Zi Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9192
     AegisName: aegis_9192
     Name: Giant Hornet Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
   - Id: 9193
     AegisName: aegis_9193
     Name: Mistress Egg
     Type: PetEgg
+    Trade:
+      NoDrop: true
+      NoSell: true
 
 # ===================================Ovos de Pet Custom====================================================
 
@@ -58900,18 +59600,27 @@ Body:
     Name: Ovo de Nydhog
     Type: PetEgg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
 
   - Id: 9201
     AegisName: VALKYRIE_N_Egg
     Name: Ovo de VALKYRIE
     Type: PetEgg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
 
   - Id: 9202
     AegisName: EDDGA_Egg
     Name: Ovo de EDDGA
     Type: PetEgg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
 
   - Id: 9203
     AegisName: OSIRIS_N_Egg
@@ -58924,14 +59633,18 @@ Body:
     Name: Ovo de PHREEONI
     Type: PetEgg
     Buy: 20
+    Trade:
+      NoDrop: true
+      NoSell: true
 
   - Id: 9205
     AegisName: DARK_LORD_N_Egg
     Name: Ovo de VALKYRIE
     Type: PetEgg
     Buy: 20
-
-  
+    Trade:
+      NoDrop: true
+      NoSell: true  
 
 # =========================================================================================================
 
@@ -62573,22 +63286,30 @@ Body:
     Name: Gold Lux
     Type: Weapon
     SubType: Revolver
-    Buy: 100000
+    Buy: 2000
     Weight: 500
-    Attack: 20
+    Attack: 200
     Range: 7
+    Slots: 1
     Jobs:
       Gunslinger: true
       Rebellion: true
     Locations:
       Both_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 12
+    EquipLevelMin: 100
     Refineable: true
     Script: |
-      bonus bHit,-10;
-      if (getskilllv("GS_GLITTERING")>0)
-         bonus3 bAutoSpell,"GS_GLITTERING",getskilllv("GS_GLITTERING"),100;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-15;
+      bonus bDelayRate,-20;
+      bonus bLongAtkRate,75;
+      bonus bCritical,20;
+      bonus bCritAtkRate,20;
   - Id: 13107
     AegisName: Wasteland_Outlaw
     Name: Wasteland's Outlaw
@@ -62678,41 +63399,28 @@ Body:
     Name: Glorious Pistol
     Type: Weapon
     SubType: Revolver
-    Attack: 80
+    Attack: 220
     Range: 7
+    Slots: 2
     Jobs:
       Gunslinger: true
       Rebellion: true
     Locations:
       Both_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 80
+    EquipLevelMin: 150
     Refineable: true
-    Trade:
-      NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
     Script: |
-      bonus2 bAddRace,RC_DemiHuman,55;
-      bonus2 bAddRace,RC_Player_Human,55;
-      bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20;
-      bonus2 bIgnoreDefRaceRate,RC_Player_Human,20;
-      bonus bUnbreakableWeapon;
       .@r = getrefine();
-      if (.@r>5) {
-         bonus2 bAddRace,RC_DemiHuman,pow(min(14,.@r)-4,2);
-         bonus2 bAddRace,RC_Player_Human,pow(min(14,.@r)-4,2);
-         bonus2 bIgnoreDefRaceRate,RC_DemiHuman,5;
-         bonus2 bIgnoreDefRaceRate,RC_Player_Human,5;
+      if (.@r>0) {
+        bonus bLongAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
       }
-      if (.@r>8) {
-         bonus4 bAutoSpellOnSkill,"GS_RAPIDSHOWER","GS_GLITTERING",1,1000;
-         bonus2 bSkillAtk,"GS_RAPIDSHOWER",.@r*2;
-      }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bLongAtkRate,100;
+      bonus bCritical,25;
+      bonus bCritAtkRate,30;
   - Id: 13111
     AegisName: Sharpshooter_Revolver
     Name: Sharpshooter Revolver
@@ -63734,21 +64442,30 @@ Body:
     Name: Butcher
     Type: Weapon
     SubType: Gatling
-    Buy: 130000
+    Buy: 2000
     Weight: 2500
-    Attack: 75
+    Attack: 200
     Range: 9
+    Slots: 1
     Jobs:
       Gunslinger: true
       Rebellion: true
     Locations:
       Both_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 68
+    EquipLevelMin: 100
     Refineable: true
     Script: |
-      bonus2 bCriticalAddRace,RC_Brute,10;
-      bonus2 bCriticalAddRace,RC_Player_Doram,10;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-15;
+      bonus bDelayRate,-20;
+      bonus bLongAtkRate,75;
+      bonus bCritical,20;
+      bonus bCritAtkRate,20;
   - Id: 13159
     AegisName: Butcher_
     Name: Butcher
@@ -63832,23 +64549,30 @@ Body:
     Name: Long Barrel
     Type: Weapon
     SubType: Rifle
-    Buy: 40000
+    Buy: 2000
     Weight: 1000
-    Attack: 150
+    Attack: 200
     Range: 9
+    Slots: 1
     Jobs:
       Gunslinger: true
       Rebellion: true
     Locations:
       Both_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 70
+    EquipLevelMin: 100
     Refineable: true
     Script: |
-      bonus bHit,10;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-15;
+      bonus bDelayRate,-20;
+      bonus bLongAtkRate,75;
       bonus bCritical,20;
-      bonus bAspdRate,-3;
-      bonus3 bAutoSpell,"GS_TRACKING",5,20;
+      bonus bCritAtkRate,20;
   - Id: 13164
     AegisName: Long_Barrel_
     Name: Long Barrel
@@ -63924,29 +64648,36 @@ Body:
     SubType: Shotgun
     Buy: 72000
     Weight: 1300
-    Attack: 200
+    Attack: 220
     Range: 9
+    Slots: 2
     Jobs:
       Gunslinger: true
       Rebellion: true
     Locations:
       Both_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 70
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      bonus bSplashRange,1;
-      bonus3 bAutoSpell,"GS_SPREADATTACK",6,50;
-      bonus bDef,getrefine();
-      bonus bDex,1;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bLongAtkRate,100;
+      bonus bCritical,25;
+      bonus bCritAtkRate,30;
   - Id: 13168
     AegisName: Thunder_P
     Name: Thunder P
     Type: Weapon
     SubType: Shotgun
-    Buy: 76000
+    Buy: 2000
     Weight: 700
-    Attack: 80
+    Attack: 200
     Range: 9
     Slots: 1
     Jobs:
@@ -63955,12 +64686,19 @@ Body:
     Locations:
       Both_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 70
+    EquipLevelMin: 100
     Refineable: true
     Script: |
-      bonus bSplashRange,1;
-      bonus bHit,-5;
-      bonus bAspdRate,20;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-15;
+      bonus bDelayRate,-20;
+      bonus bLongAtkRate,75;
+      bonus bCritical,20;
+      bonus bCritAtkRate,20;
   - Id: 13169
     AegisName: Thunder_P_
     Name: Thunder P
@@ -64106,33 +64844,28 @@ Body:
     Name: Soldier Grenade Launcher
     Type: Weapon
     SubType: Grenade
-    Attack: 300
+    Attack: 200
     Range: 9
+    Slots: 1
     Jobs:
       Gunslinger: true
       Rebellion: true
     Locations:
       Both_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 80
+    EquipLevelMin: 100
     Refineable: true
-    Trade:
-      NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
     Script: |
-      bonus bSplashRange,1;
-      bonus2 bAddRace,RC_DemiHuman,35;
-      bonus2 bAddRace,RC_Player_Human,35;
-      bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20;
-      bonus2 bIgnoreDefRaceRate,RC_Player_Human,20;
-      bonus bDex,2;
-      autobonus "{ bonus bBaseAtk,300; bonus2 bHPLossRate,120,1000; }",30,9000,BF_WEAPON,"{ specialeffect2 EF_BASH3D; }";
-      bonus bUnbreakableWeapon;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-15;
+      bonus bDelayRate,-20;
+      bonus bLongAtkRate,75;
+      bonus bCritical,20;
+      bonus bCritAtkRate,20;
   - Id: 13175
     AegisName: Lever_Action_Rifle_C
     Name: Lever Action Rifle
@@ -64170,42 +64903,28 @@ Body:
     Name: Glorious Rifle
     Type: Weapon
     SubType: Rifle
-    Attack: 90
+    Attack: 220
     Range: 9
+    Slots: 2
     Jobs:
       Gunslinger: true
       Rebellion: true
     Locations:
       Both_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 80
+    EquipLevelMin: 150
     Refineable: true
-    Trade:
-      NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
     Script: |
-      bonus2 bAddRace,RC_DemiHuman,75;
-      bonus2 bAddRace,RC_Player_Human,75;
-      bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20;
-      bonus2 bIgnoreDefRaceRate,RC_Player_Human,20;
-      bonus2 bSkillAtk,"GS_TRIPLEACTION",30;
-      bonus bUnbreakableWeapon;
       .@r = getrefine();
-      if (.@r>5) {
-         bonus2 bAddRace,RC_DemiHuman,pow(min(14,.@r)-4,2);
-         bonus2 bAddRace,RC_Player_Human,pow(min(14,.@r)-4,2);
-         bonus2 bIgnoreDefRaceRate,RC_DemiHuman,5;
-         bonus2 bIgnoreDefRaceRate,RC_Player_Human,5;
+      if (.@r>0) {
+        bonus bLongAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
       }
-      if (.@r>8) {
-         bonus2 bVariableCastrate,"GS_TRACKING",-25;
-         bonus2 bSkillAtk,"GS_TRACKING",.@r * 3;
-      }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bLongAtkRate,100;
+      bonus bCritical,25;
+      bonus bCritAtkRate,30;
   - Id: 13177
     AegisName: Krieger_Gatling1
     Name: Glorious Gatling Gun
@@ -64293,43 +65012,28 @@ Body:
     Name: Glorious Grenade Launcher
     Type: Weapon
     SubType: Grenade
-    Attack: 330
+    Attack: 220
     Range: 9
+    Slots: 2
     Jobs:
       Gunslinger: true
       Rebellion: true
     Locations:
       Both_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 80
+    EquipLevelMin: 150
     Refineable: true
-    Trade:
-      NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
     Script: |
-      bonus2 bAddRace,RC_DemiHuman,35;
-      bonus2 bAddRace,RC_Player_Human,35;
-      bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20;
-      bonus2 bIgnoreDefRaceRate,RC_Player_Human,20;
-      bonus2 bSkillAtk,"GS_TRIPLEACTION",30;
-      bonus bUnbreakableWeapon;
       .@r = getrefine();
-      if (.@r>5) {
-         bonus2 bAddRace,RC_DemiHuman,pow(min(.@r,14)-4,2);
-         bonus2 bAddRace,RC_Player_Human,pow(min(.@r,14)-4,2);
-         bonus2 bIgnoreDefRaceRate,RC_DemiHuman,5;
-         bonus2 bIgnoreDefRaceRate,RC_Player_Human,5;
+      if (.@r>0) {
+        bonus bLongAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
       }
-      if (.@r>8) {
-         bonus2 bSkillAtk,"GS_GROUNDDRIFT",.@r * 2;
-         bonus3 bAddEffOnSkill,"GS_SPREADATTACK",Eff_Stun,2000;
-         autobonus "{ bonus bAspdRate,20; }",200,20000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; }";
-      }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bLongAtkRate,100;
+      bonus bCritical,25;
+      bonus bCritAtkRate,30;
   - Id: 13180
     AegisName: Novice_Rifle
     Name: Novice Rifle
@@ -64725,20 +65429,30 @@ Body:
     SubType: Huuma
     Buy: 90000
     Weight: 3000
-    Attack: 150
+    Attack: 220
+    MagicAttack: 220
     Range: 1
+    Slots: 2
     Jobs:
       KagerouOboro: true
       Ninja: true
     Locations:
       Both_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 65
+    EquipLevelMin: 150
     Refineable: true
     Script: |
-      bonus bAtkEle,Ele_Wind;
-      bonus bDex,-2;
-      bonus bAgi,-1;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,10 * .@r;
+        bonus bMAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bAtkRate,100;
+      bonus bMAtkRate,100;
   - Id: 13301
     AegisName: Huuma_Giant_Wheel
     Name: Huuma Giant Wheel Shuriken
@@ -64807,20 +65521,30 @@ Body:
     SubType: Huuma
     Buy: 20
     Weight: 1550
-    Attack: 112
+    Attack: 200
+    MagicAttack: 200
     Range: 1
-    Slots: 2
+    Slots: 1
     Jobs:
       KagerouOboro: true
       Ninja: true
     Locations:
       Both_Hand: true
     WeaponLevel: 3
-    EquipLevelMin: 70
+    EquipLevelMin: 100
     Refineable: true
     Script: |
-      bonus2 bSkillAtk,"NJ_HUUMA",30;
-      bonus bNoCastCancel;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,5 * .@r;
+        bonus bMAtkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-15;
+      bonus bDelayRate,-20;
+      bonus bAtkRate,75;
+      bonus bMAtkRate,75;
   - Id: 13305
     AegisName: BF_Huuma_Shuriken1
     Name: Brave Huuma Front Shuriken
@@ -74299,16 +75023,8 @@ Body:
     Name: Rabbit Pattern Shirt
     Type: Armor
     Weight: 500
-    Defense: 10
-    Slots: 1
-    Jobs:
-      Acolyte: true
-      Mage: true
-      Monk: true
-      Priest: true
-      Sage: true
-      SoulLinker: true
-      Wizard: true
+    Defense: 100
+    Slots: 2
     Locations:
       Armor: true
     ArmorLevel: 2
@@ -74318,30 +75034,37 @@ Body:
     Script: |
       .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bSMatk,1+(.@r/2);
-      bonus bSpl,1;
-      bonus bMatk,5*.@r;
-      if (.@r>=7) {
-         bonus bSMatk,2;
-         bonus bSpl,2;
-         if (.@r>=9) {
-            bonus bMaxHPrate,5;
-            bonus bMaxSPrate,5;
-            if (.@r>=11) {
-               bonus2 bMagicAtkEle,Ele_Ghost,35;
-               bonus2 bMagicAtkEle,Ele_Dark,35;
-            }
-         }
+
+      bonus bMDef,30;      
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      if (.@r>0) {
+        bonus bDef,10 * .@r;
+        bonus bMDef,5 * .@r;
       }
-      if (.@g >= ENCHANTGRADE_D) {
-         bonus bSMatk,2;
-         if (.@g >= ENCHANTGRADE_C) {
-            bonus bSMatk,1;
-            bonus bSpl,3;
-            if (.@g >= ENCHANTGRADE_B) {
-               bonus2 bMagicAddEle,Ele_All,15;
-            }
-         }
+      if (.@r>=8) {
+          bonus2 bResEff,Eff_Freeze,5000;
+          bonus2 bSubEle,Ele_Neutral,20;
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+          bonus bDef,50;
+          bonus bMDef,30;
+          if (.@g>=ENCHANTGRADE_C) {
+              bonus bDef,50;
+              bonus bMDef,30;
+              if (.@g>=ENCHANTGRADE_B) {
+                  bonus bDef,50;
+                  bonus bMDef,30;
+                  bonus2 bSubEle,Ele_Neutral,20;      
+                  if (.@g>=ENCHANTGRADE_A) {
+                      bonus bDef,50;
+                      bonus bMDef,30;
+                      bonus2 bResEff,Eff_Freeze,5000;
+                  }
+              }
+          }
       }
   - Id: 15283
     AegisName: Armor_of_Rosary
@@ -117597,13 +118320,24 @@ Body:
     Type: Weapon
     SubType: 2hSword
     Weight: 2500
-    Attack: 280
+    Attack: 250
     Range: 1
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
+      Alchemist: true
+      Assassin: true
+      Blacksmith: true
+      Crusader: true
       Knight: true
-    Classes:
-      Fourth: true
+      Merchant: true
+      Novice: true
+      Rogue: true
+      SuperNovice: true
+      Swordman: true
+      Thief: true
     Locations:
       Both_Hand: true
     WeaponLevel: 5
@@ -117611,19 +118345,36 @@ Body:
     Refineable: true
     Gradable: true
     Script: |
-      .@g = getenchantgrade();
       .@r = getrefine();
-      bonus2 bSkillAtk,"DK_STORMSLASH",6*(.@r/2);
-      bonus2 bSkillAtk,"DK_HACKANDSLASHER",5*(.@r/3);
-      bonus bShortAtkRate,3*(.@r/4);
+      if (.@r>0) {
+        bonus bAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+      }
+      bonus bDelayRate,-30;
+      bonus bAtkRate,150;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
       if (.@g >= ENCHANTGRADE_D) {
-         bonus bPow,2;
-         if (.@g >= ENCHANTGRADE_C) {
-            bonus2 bSkillAtk,"DK_STORMSLASH",10;
-            if (.@g >= ENCHANTGRADE_B) {
-               bonus bPAtk,2;
-            }
-         }
+          bonus bAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bAtkRate,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bAtkRate,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
       }
   - Id: 21064
     AegisName: aegis_21064
@@ -139238,15 +139989,22 @@ Body:
     Type: Weapon
     SubType: Staff
     Weight: 300
-    Attack: 117
+    Attack: 200
     MagicAttack: 200
     Range: 1
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
+      Acolyte: true
+      Priest: true
       Mage: true
-      Sage: true
-      SoulLinker: true
       Wizard: true
+      Sage: true
+      Novice: true
+      SuperNovice: true
+      SoulLinker: true
     Locations:
       Right_Hand: true
     WeaponLevel: 5
@@ -139254,30 +140012,43 @@ Body:
     Refineable: true
     Gradable: true
     Script: |
-      .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bUnbreakableWeapon;
-      bonus2 bMagicAddRace,RC_Formless,10;
-      bonus3 bAutoSpellWhenHit,"WZ_QUAGMIRE",1,10;
-      if (.@r>=7) {
-         bonus bVariableCastrate,-10;
-         bonus bMatk,35;
-         if (.@r>=9) {
-            bonus2 bMagicAddRace,RC_Formless,10;
-            if (.@r>=11) {
-               bonus bDelayrate,-10;
-            }
-         }
+      if (.@r>0) {
+        bonus bMAtkRate,20 * .@r;
+        bonus bMAtk,20 * .@r;
+        bonus bHealPower,30 * .@r;
       }
+      bonus bVariableCastrate,-30;
+      bonus bDelayRate,-35;
+      bonus bMAtkRate,150;
+      bonus bHealPower,300;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
       if (.@g >= ENCHANTGRADE_D) {
-         bonus bSMatk,2;
-         if (.@g >= ENCHANTGRADE_C) {
-            bonus bSMatk,1;
-            bonus bSpl,3;
-            if (.@g >= ENCHANTGRADE_B) {
-               bonus bVariableCastrate,-5;
-            }
-         }
+          bonus bMAtkRate,50;
+          bonus bMAtk,50;
+          bonus bHealPower,30;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bMAtkRate,50;
+              bonus bMAtk,50;
+              bonus bHealPower,30;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bMAtkRate,50;
+                  bonus bMAtk,50;
+                  bonus bHealPower,30;
+                  bonus bCastRate, -.@r;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bMAtkRate,50;
+                      bonus bMAtk,50;
+                      bonus bHealPower,30;
+                      bonus bDelayRate, -.@r;
+                  }
+              }
+          }
       }
   - Id: 26142
     AegisName: Local01_Wand
@@ -143835,7 +144606,7 @@ Body:
     SubType: Gatling
     Buy: 20
     Weight: 2500
-    Attack: 210
+    Attack: 220
     Range: 9
     Slots: 2
     Jobs:
@@ -143844,22 +144615,19 @@ Body:
     Locations:
       Both_Hand: true
     WeaponLevel: 4
-    EquipLevelMin: 120
+    EquipLevelMin: 150
     Refineable: true
     Script: |
       .@r = getrefine();
-      bonus bLongAtkRate,2*(readparam(bStr)/15);
-      bonus bBaseAtk,10*.@r;
-      if (.@r >= 7) {
-         bonus2 bSkillAtk,"RL_FIRE_RAIN",20;
-         if (.@r >= 9) {
-            bonus2 bSkillAtk,"RL_R_TRIP",15;
-            if (.@r >= 11) {
-               bonus2 bAddRace,RC_Brute,30;
-               bonus2 bAddRace,RC_Demon,30;
-            }
-         }
+      if (.@r>0) {
+        bonus bLongAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
       }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bLongAtkRate,100;
+      bonus bCritical,25;
+      bonus bCritAtkRate,30;
   - Id: 28255
     AegisName: Master_Soul_Rifle
     Name: Master Soul Rifle
@@ -165440,9 +166208,9 @@ Body:
     AegisName: Glacier_Helm_1
     Name: Issgard Warrior Crown
     Type: Armor
-    Weight: 300
-    Defense: 80
-    Slots: 1
+    Weight: 400
+    Defense: 100
+    Slots: 2
     Locations:
       Head_Top: true
     ArmorLevel: 2
@@ -165453,30 +166221,37 @@ Body:
     Script: |
       .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bShortAtkRate,10;
-      bonus bAtkRate,3*(.@r/2);
-      bonus2 bAddSize,Size_All,4*(.@r/3);
-      if (.@r>=7) {
-         bonus bDelayrate,-8;
-         if (.@r>=9) {
-            bonus bShortAtkRate,10;
-            bonus bPAtk,10;
-         }
+
+      bonus bMDef,30;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      if (.@r>0) {
+        bonus bDef,10 * .@r;
+        bonus bMDef,5 * .@r;
+      }
+      if (.@r>=8) {
+          bonus bVariableCastrate,-20;
+          bonus bDelayRate,-20;
       }
       if (.@g>=ENCHANTGRADE_D) {
-         bonus bPAtk,5;
-         if (.@g>=ENCHANTGRADE_C) {
-            bonus bMdef,30;
-            bonus bDef,150;
-            if (.@g>=ENCHANTGRADE_B) {
-               bonus bPow,5;
-               bonus bCon,5;
-               if (.@g>=ENCHANTGRADE_A) {
-                  bonus bMRes,50;
-                  bonus bRes,50;
-               }
-            }
-         }
+          bonus bDef,50;
+          bonus bMDef,30;
+          if (.@g>=ENCHANTGRADE_C) {
+              bonus bDef,50;
+              bonus bMDef,30;
+              if (.@g>=ENCHANTGRADE_B) {
+                  bonus bDef,50;
+                  bonus bMDef,30;
+                  bonus bFixedCast,-200;
+                  if (.@g>=ENCHANTGRADE_A) {
+                      bonus bDef,50;
+                      bonus bMDef,30;
+                      bonus bFixedCast,-300;
+                  }
+              }
+          }
       }
   - Id: 400106
     AegisName: Glacier_Helm_2
@@ -165567,8 +166342,11 @@ Body:
     Name: Boitata Hat
     Type: Armor
     Weight: 400
-    Defense: 25
-    Slots: 1
+    Defense: 100
+    Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Locations:
       Head_Top: true
     ArmorLevel: 2
@@ -165579,38 +166357,37 @@ Body:
     Script: |
       .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bHit,-25;
-      bonus bPow,5;
-      bonus bCrt,5;
-      bonus bAspdRate,10;
-      bonus bBaseAtk,20*(.@r/2);
-      bonus bDef,10*(.@r/2);
-      if (.@r>=7) {
-         bonus bShortAtkRate,15;
-         bonus bLongAtkRate,15;
-         if (.@r>=9) {
-            bonus bAtkRate,10;
-            bonus bBaseAtk,30;
-            if (.@r>=11) {
-               bonus bCritAtkRate,25;
-               bonus bPAtk,8;
-            }
-         }
+
+      bonus bMDef,30;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      if (.@r>0) {
+        bonus bDef,10 * .@r;
+        bonus bMDef,5 * .@r;
+      }
+      if (.@r>=8) {
+          bonus bVariableCastrate,-20;
+          bonus bDelayRate,-20;
       }
       if (.@g>=ENCHANTGRADE_D) {
-         bonus bAtkRate,5;
-         bonus bPow,5;
-         if (.@g>=ENCHANTGRADE_C) {
-            bonus bCRate,3;
-            bonus bCritical,15;
-            if (.@g>=ENCHANTGRADE_B) {
-               bonus bFixedCast,-300;
-               if (.@g>=ENCHANTGRADE_A) {
-                  bonus bCritAtkRate,14*(.@r/3);
-                  bonus bCRate,(.@r/3);
-               }
-            }
-         }
+          bonus bDef,50;
+          bonus bMDef,30;
+          if (.@g>=ENCHANTGRADE_C) {
+              bonus bDef,50;
+              bonus bMDef,30;
+              if (.@g>=ENCHANTGRADE_B) {
+                  bonus bDef,50;
+                  bonus bMDef,30;
+                  bonus bFixedCast,-200;
+                  if (.@g>=ENCHANTGRADE_A) {
+                      bonus bDef,50;
+                      bonus bMDef,30;
+                      bonus bFixedCast,-300;
+                  }
+              }
+          }
       }
   - Id: 400110
     AegisName: Beelzebub_Crown_K
@@ -168377,6 +169154,9 @@ Body:
     Weight: 100
     Defense: 10
     Slots: 1
+    Trade:
+      NoDrop: true
+      NoSell: true
     Locations:
       Head_Top: true
     ArmorLevel: 2
@@ -191328,22 +192108,49 @@ Body:
     AegisName: Vague_Star_Robe
     Name: Faint Star's Robe
     Type: Armor
-    Weight: 500
-    Defense: 105
-    Slots: 1
+    Weight: 400
+    Defense: 100
+    Slots: 2
     Locations:
       Armor: true
     ArmorLevel: 2
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
+      .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bMatk,125+(15*(.@r/2));
-      if (.@r>=9) {
-         bonus bVariableCastrate,-10;
-         if (.@r>=11) {
-            bonus2 bMagicAtkEle,Ele_All,10;
-         }
+
+      bonus bMDef,30;      
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      if (.@r>0) {
+        bonus bDef,10 * .@r;
+        bonus bMDef,5 * .@r;
+      }
+      if (.@r>=8) {
+          bonus2 bResEff,Eff_Freeze,5000;
+          bonus2 bSubEle,Ele_Neutral,20;
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+          bonus bDef,50;
+          bonus bMDef,30;
+          if (.@g>=ENCHANTGRADE_C) {
+              bonus bDef,50;
+              bonus bMDef,30;
+              if (.@g>=ENCHANTGRADE_B) {
+                  bonus bDef,50;
+                  bonus bMDef,30;
+                  bonus2 bSubEle,Ele_Neutral,20;      
+                  if (.@g>=ENCHANTGRADE_A) {
+                      bonus bDef,50;
+                      bonus bMDef,30;
+                      bonus2 bResEff,Eff_Freeze,5000;
+                  }
+              }
+          }
       }
   - Id: 450167
     AegisName: Vague_Star_Suit
@@ -191371,22 +192178,52 @@ Body:
     AegisName: Vague_Star_Armor
     Name: Faint Star's Armor
     Type: Armor
-    Weight: 2500
-    Defense: 175
-    Slots: 1
+    Weight: 400
+    Defense: 100
+    Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Locations:
       Armor: true
     ArmorLevel: 2
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
+      .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bBaseAtk,125+15*(.@r/2);
-      if (.@r>=9) {
-         bonus bMaxHPrate,7;
-         if (.@r>=11) {
-            bonus bShortAtkRate,10;
-         }
+
+      bonus bMDef,30;      
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      if (.@r>0) {
+        bonus bDef,10 * .@r;
+        bonus bMDef,5 * .@r;
+      }
+      if (.@r>=8) {
+          bonus2 bResEff,Eff_Freeze,5000;
+          bonus2 bSubEle,Ele_Neutral,20;
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+          bonus bDef,50;
+          bonus bMDef,30;
+          if (.@g>=ENCHANTGRADE_C) {
+              bonus bDef,50;
+              bonus bMDef,30;
+              if (.@g>=ENCHANTGRADE_B) {
+                  bonus bDef,50;
+                  bonus bMDef,30;
+                  bonus2 bSubEle,Ele_Neutral,20;      
+                  if (.@g>=ENCHANTGRADE_A) {
+                      bonus bDef,50;
+                      bonus bMDef,30;
+                      bonus2 bResEff,Eff_Freeze,5000;
+                  }
+              }
+          }
       }
   - Id: 450169
     AegisName: Star_Armor_Of_Pow
@@ -193619,8 +194456,8 @@ Body:
     Name: Glacier Manteau
     Type: Armor
     Weight: 1600
-    Defense: 112
-    Slots: 1
+    Defense: 100
+    Slots: 2
     Locations:
       Garment: true
     ArmorLevel: 2
@@ -193630,23 +194467,40 @@ Body:
     Script: |
       .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bMaxHP,2500+200*(.@r/2);
-      bonus bMaxSP,500+50*(.@r/2);
-      if (.@r>=7) {
-         bonus bAspdRate,7;
-         if (.@r>=9) {
-            bonus bPow,3;
-            if (.@r>=10) {
-               bonus bVariableCastrate,-5;
-            }
-         }
+
+      bonus bMDef,30;      
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      if (.@r>0) {
+        bonus bDef,10 * .@r;
+        bonus bMDef,5 * .@r;
       }
+
       if (.@g>=ENCHANTGRADE_D) {
-         bonus bPAtk,2;
-         bonus bAtkRate,3;
-         if (.@g>=ENCHANTGRADE_C) {
-            bonus bVariableCastrate,-10;
-         }
+          bonus bDef,50;
+          bonus bMDef,30;
+          bonus bFlee,50;
+          bonus bFlee2,10;
+          if (.@g>=ENCHANTGRADE_C) {
+              bonus bDef,50;
+              bonus bMDef,30;
+              bonus bFlee,50;
+              bonus bFlee2,10;
+              if (.@g>=ENCHANTGRADE_B) {
+                  bonus bDef,50;
+                  bonus bMDef,30;
+                  bonus bFlee,50;
+                  bonus bFlee2,10;
+                  if (.@g>=ENCHANTGRADE_A) {
+                      bonus bDef,50;
+                      bonus bMDef,30;
+                      bonus bFlee,50;
+                      bonus bFlee2,10;
+                  }
+              }
+          }
       }
   - Id: 450267
     AegisName: Glacier_Muffler
@@ -193687,8 +194541,8 @@ Body:
     Name: Glacier Shoes
     Type: Armor
     Weight: 1000
-    Defense: 70
-    Slots: 1
+    Defense: 100
+    Slots: 2
     Locations:
       Shoes: true
     ArmorLevel: 2
@@ -193698,27 +194552,36 @@ Body:
     Script: |
       .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bMaxHPrate,6;
-      bonus bMaxSPrate,6+(.@r/2);
-      bonus bDef,15*(.@r/2);
-      if (.@r>=7) {
-         bonus2 bMagicAtkEle,Ele_All,7;
-         if (.@r>=9) {
-            bonus bSMatk,3;
-            if (.@r>=10) {
-               bonus bVariableCastrate,-7;
-               bonus bDef,100;
-            }
-         }
+
+      bonus bMDef,30;      
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      if (.@r>0) {
+        bonus bDef,10 * .@r;
+        bonus bMDef,5 * .@r;
       }
+
       if (.@g>=ENCHANTGRADE_D) {
-         bonus bMRes,25;
-         bonus bRes,25;
-         if (.@g>=ENCHANTGRADE_C) {
-            bonus bSMatk,2;
-            bonus bSpl,2;
-            bonus bCon,2;
-         }
+          bonus bDef,50;
+          bonus bMDef,30;
+          bonus bSpeedRate,25;
+          if (.@g>=ENCHANTGRADE_C) {
+              bonus bDef,50;
+              bonus bMDef,30;
+              bonus bSpeedRate,25;
+              if (.@g>=ENCHANTGRADE_B) {
+                  bonus bDef,50;
+                  bonus bMDef,30;
+                  bonus bSpeedRate,25;
+                  if (.@g>=ENCHANTGRADE_A) {
+                      bonus bDef,50;
+                      bonus bMDef,30;
+                      bonus bSpeedRate,25;
+                  }
+              }
+          }
       }
   - Id: 450269
     AegisName: aegis_450269
@@ -197018,27 +197881,47 @@ Body:
     Type: Armor
     Weight: 1500
     Defense: 150
-    Slots: 1
+    Slots: 2
     Locations:
       Left_Hand: true
     ArmorLevel: 2
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     View: 1
     Script: |
+      .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bAtkRate,3;
-      bonus bMdef,10;
-      if (.@r>=7) {
-         bonus bCritical,3;
-         bonus bBaseAtk,25;
-         if (.@r>=9) {
-            bonus bAspdRate,5;
-            if (.@r>=12) {
-               bonus bCritAtkRate,10;
-               bonus bAtkRate,7;
-            }
-         }
+
+      bonus bMDef,50;      
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      if (.@r>0) {
+        bonus bDef,20 * .@r;
+        bonus bMDef,10 * .@r;
+      }
+      if (.@r>=8) {
+          bonus bNoKnockback;
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+          bonus bDef,50;
+          bonus bMDef,30;
+          bonus2 bSubEle,Ele_Neutral,10;      
+          if (.@g>=ENCHANTGRADE_C) {
+              bonus bDef,50;
+              bonus bMDef,30;
+              bonus2 bSubEle,Ele_Neutral,10;
+              if (.@g>=ENCHANTGRADE_B) {
+                  bonus bDef,100;
+                  bonus bMDef,50;
+                  if (.@g>=ENCHANTGRADE_A) {
+                      bonus bDef,100;
+                      bonus bMDef,50;
+                  }
+              }
+          }
       }
   - Id: 460009
     AegisName: Apocalypse_Of_Destiny
@@ -197104,12 +197987,11 @@ Body:
     Name: Poenitentia Aegis
     Type: Armor
     Weight: 1500
-    Defense: 120
-    Slots: 1
-    Jobs:
-      Crusader: true
-    Classes:
-      Fourth: true
+    Defense: 150
+    Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Locations:
       Left_Hand: true
     ArmorLevel: 2
@@ -197120,20 +198002,36 @@ Body:
     Script: |
       .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bMaxHPrate,5;
-      bonus bMaxSPrate,5;
-      bonus bMdef,10*(.@r/3);
-      bonus bDef,50*(.@r/3);
-      if (.@g >= ENCHANTGRADE_D) {
-         bonus2 bSkillAtk,"IG_SHIELD_SHOOTING",5;
-         if (.@g >= ENCHANTGRADE_C) {
-            bonus2 bSkillAtk,"IG_SHIELD_SHOOTING",8;
-            if (.@g >= ENCHANTGRADE_B) {
-               bonus bPow,1;
-               bonus bSpl,1;
-               bonus2 bSkillAtk,"IG_SHIELD_SHOOTING",15;
-            }
-         }
+
+      bonus bMDef,50;      
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      if (.@r>0) {
+        bonus bDef,20 * .@r;
+        bonus bMDef,10 * .@r;
+      }
+      if (.@r>=8) {
+          bonus bNoKnockback;
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+          bonus bDef,50;
+          bonus bMDef,30;
+          bonus2 bSubEle,Ele_Neutral,10;      
+          if (.@g>=ENCHANTGRADE_C) {
+              bonus bDef,50;
+              bonus bMDef,30;
+              bonus2 bSubEle,Ele_Neutral,10;
+              if (.@g>=ENCHANTGRADE_B) {
+                  bonus bDef,100;
+                  bonus bMDef,50;
+                  if (.@g>=ENCHANTGRADE_A) {
+                      bonus bDef,100;
+                      bonus bMDef,50;
+                  }
+              }
+          }
       }
   - Id: 460014
     AegisName: Illusion_Shield_B
@@ -201025,13 +201923,51 @@ Body:
     Name: Varmundt Rune Greaves
     Type: Armor
     Weight: 700
-    Defense: 25
-    Slots: 1
+    Defense: 100
+    Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Locations:
       Shoes: true
     ArmorLevel: 2
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+
+      bonus bMDef,30;      
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      if (.@r>0) {
+        bonus bDef,10 * .@r;
+        bonus bMDef,5 * .@r;
+      }
+
+      if (.@g>=ENCHANTGRADE_D) {
+          bonus bDef,50;
+          bonus bMDef,30;
+          bonus bSpeedRate,25;
+          if (.@g>=ENCHANTGRADE_C) {
+              bonus bDef,50;
+              bonus bMDef,30;
+              bonus bSpeedRate,25;
+              if (.@g>=ENCHANTGRADE_B) {
+                  bonus bDef,50;
+                  bonus bMDef,30;
+                  bonus bSpeedRate,25;
+                  if (.@g>=ENCHANTGRADE_A) {
+                      bonus bDef,50;
+                      bonus bMDef,30;
+                      bonus bSpeedRate,25;
+                  }
+              }
+          }
+      }
   - Id: 470108
     AegisName: Barmund_Plain_Boots
     Name: Varmundt Glade Rune Boots
@@ -208807,17 +209743,55 @@ Body:
     Name: Engraved Survival Manteau
     Type: Armor
     Weight: 550
-    Defense: 10
-    Slots: 1
+    Defense: 100
+    Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Locations:
       Garment: true
     ArmorLevel: 2
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
-      bonus bVit,10;
-      bonus bCon,3;
-      bonus bMaxHPrate,5;
+      .@g = getenchantgrade();
+      .@r = getrefine();
+
+      bonus bMDef,30;      
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      if (.@r>0) {
+        bonus bDef,10 * .@r;
+        bonus bMDef,5 * .@r;
+      }
+
+      if (.@g>=ENCHANTGRADE_D) {
+          bonus bDef,50;
+          bonus bMDef,30;
+          bonus bFlee,50;
+          bonus bFlee2,10;
+          if (.@g>=ENCHANTGRADE_C) {
+              bonus bDef,50;
+              bonus bMDef,30;
+              bonus bFlee,50;
+              bonus bFlee2,10;
+              if (.@g>=ENCHANTGRADE_B) {
+                  bonus bDef,50;
+                  bonus bMDef,30;
+                  bonus bFlee,50;
+                  bonus bFlee2,10;
+                  if (.@g>=ENCHANTGRADE_A) {
+                      bonus bDef,50;
+                      bonus bMDef,30;
+                      bonus bFlee,50;
+                      bonus bFlee2,10;
+                  }
+              }
+          }
+      }
   - Id: 480144
     AegisName: Barmund_Manteau
     Name: Varmundt Rune Pauldron
@@ -217565,20 +218539,50 @@ Body:
     Name: Heroic Token (Arch Mage)
     Type: Armor
     Weight: 200
-    Defense: 10
-    Slots: 1
-    Jobs:
-      Wizard: true
-    Classes:
-      Fourth: true
+    Defense: 50
+    Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Locations:
       Both_Accessory: true
     ArmorLevel: 2
     EquipLevelMin: 175
+    Refineable: true
+    Gradable: true
     Script: |
-      bonus bMatkRate,10;
-      bonus bAtkRate,10;
-      bonus bVariableCastrate,-10;
+      .@g = getenchantgrade();
+      .@r = getrefine();
+
+      bonus bMDef,30;      
+
+      bonus bMaxHPRate,10;
+      bonus bMaxSPRate,10;
+
+      if (.@r>0) {
+        bonus bDef,20 * .@r;
+        bonus bMDef,10 * .@r;
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+          bonus bDef,50;
+          bonus bMDef,30;
+          bonus bAllStats,5;   
+          if (.@g>=ENCHANTGRADE_C) {
+              bonus bDef,50;
+              bonus bMDef,30;
+              bonus bAllStats,5;
+              if (.@g>=ENCHANTGRADE_B) {
+                  bonus bDef,50;
+                  bonus bMDef,30;
+                  bonus bAllStats,5;
+                  if (.@g>=ENCHANTGRADE_A) {
+                      bonus bDef,50;
+                      bonus bMDef,30;
+                      bonus bAllStats,5;
+                  }
+              }
+          }
+      }
   - Id: 490153
     AegisName: Hero_Token_WH
     Name: Heroic Token (Windhawk)
@@ -217656,15 +218660,57 @@ Body:
     Name: Engraved Orlean's Glove
     Type: Armor
     Weight: 100
-    Slots: 1
+    Defense: 50
+    Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Locations:
       Both_Accessory: true
     ArmorLevel: 2
     EquipLevelMin: 175
+    Refineable: true
+    Gradable: true
     Script: |
-      bonus bSMatk,3;
-      bonus bSpl,2;
-      bonus bCrt,2;
+      .@g = getenchantgrade();
+      .@r = getrefine();
+
+      bonus bMDef,30;      
+
+      bonus bMaxHPRate,10;
+      bonus bMaxSPRate,10;
+
+      bonus2 bIgnoredefRaceRate,RC_All,20;
+      bonus2 bIgnoreMdefRaceRate,RC_All,20;
+
+      if (.@r>0) {
+        bonus bDef,20 * .@r;
+        bonus bMDef,10 * .@r;
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+          bonus bDef,50;
+          bonus bMDef,30;
+          bonus2 bIgnoredefRaceRate,RC_All,20;
+          bonus2 bIgnoreMdefRaceRate,RC_All,20;
+          if (.@g>=ENCHANTGRADE_C) {
+              bonus bDef,50;
+              bonus bMDef,30;
+              bonus2 bIgnoredefRaceRate,RC_All,20;
+              bonus2 bIgnoreMdefRaceRate,RC_All,20;
+              if (.@g>=ENCHANTGRADE_B) {
+                  bonus bDef,50;
+                  bonus bMDef,30;
+                  bonus2 bIgnoredefRaceRate,RC_All,20;
+                  bonus2 bIgnoreMdefRaceRate,RC_All,20;
+                  if (.@g>=ENCHANTGRADE_A) {
+                      bonus bDef,50;
+                      bonus bMDef,30;
+                      bonus2 bIgnoredefRaceRate,RC_All,20;
+                      bonus2 bIgnoreMdefRaceRate,RC_All,20;
+                  }
+              }
+          }
+      }
   - Id: 490161
     AegisName: ST_Pinquicula_Corsage
     Name: Engraved Pinguicula's Corsage
@@ -225625,20 +226671,61 @@ Body:
     Attack: 200
     Range: 1
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       Alchemist: true
-    Classes:
-      Fourth: true
+      Assassin: true
+      Blacksmith: true
+      Crusader: true
+      Knight: true
+      Merchant: true
+      Novice: true
+      Rogue: true
+      SuperNovice: true
+      Swordman: true
+      Thief: true
     Locations:
       Right_Hand: true
     WeaponLevel: 5
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
       .@r = getrefine();
-      bonus2 bSkillAtk,"BO_ACIDIFIED_ZONE_WIND",5*(.@r/2);
-      bonus2 bSkillAtk,"BO_ACIDIFIED_ZONE_FIRE",5*(.@r/2);
-      bonus bAtkRate,3*(.@r/4);
+      if (.@r>0) {
+        bonus bAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+      }
+      bonus bCritAtkRate,40;
+      bonus bAtkRate,150;
+      bonus bCritical,30;
+      bonus bAspdRate,25;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bAtkRate,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bAtkRate,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
+      }
   - Id: 500019
     AegisName: Poenitentia_Gladius
     Name: Poenitentia Gladius
@@ -228328,49 +229415,63 @@ Body:
     Type: Weapon
     SubType: Dagger
     Weight: 100
-    Attack: 100
+    Attack: 200
+    MagicAttack: 200
     Range: 1
-    Slots: 1
-    Jobs:
-      Alchemist: true
-      Archer: true
-      Assassin: true
-      BardDancer: true
-      Blacksmith: true
-      Crusader: true
-      Hunter: true
-      KagerouOboro: true
-      Knight: true
-      Mage: true
-      Merchant: true
-      Ninja: true
-      Novice: true
-      Rogue: true
-      Sage: true
-      SoulLinker: true
-      SuperNovice: true
-      Swordman: true
-      Thief: true
-      Wizard: true
+    Slots: 4
+    Trade:
+      NoDrop: true
+      NoSell: true
     Locations:
       Right_Hand: true
     WeaponLevel: 5
+    EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
-      .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bAllTraitStats,1;
-      if (.@g>=ENCHANTGRADE_D) {
-         bonus bPow,.@r;
+      if (.@r>0) {
+        bonus bAtkRate,20 * .@r;
+        bonus bMAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+        bonus bMAtk,20 * .@r;
       }
-      if (.@g>=ENCHANTGRADE_C) {
-         bonus bSpl,.@r;
-      }
-      if (.@g>=ENCHANTGRADE_B) {
-         bonus bSta,.@r;
-         bonus bPAtk,.@r*2;
-         bonus bSMatk,.@r*2;
-         bonus bCRate,.@r;
+      bonus bAspdRate,25;
+      bonus bAtkRate,150;
+      bonus bMAtkRate,150;
+      bonus bCritical,30;
+      bonus bCritAtkRate,40;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bMAtkRate,50;
+          bonus bAtkRate,50;
+          bonus bAtk,50;
+          bonus bMAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bMAtkRate,50;
+              bonus bAtkRate,50;
+              bonus bAtk,50;
+              bonus bMAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bMAtkRate,50;
+                  bonus bAtkRate,50;
+                  bonus bAtk,50;
+                  bonus bMAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bMAtkRate,50;
+                      bonus bAtkRate,50;
+                      bonus bAtk,50;
+                      bonus bMAtk,50;
+                  }
+              }
+          }
       }
   - Id: 510022
     AegisName: Up_Fog_Dew_Sword
@@ -232111,21 +233212,67 @@ Body:
     SubType: 1hSpear
     Weight: 1400
     Attack: 200
+    MagicAttack: 200
     Range: 3
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       Crusader: true
-    Classes:
-      Fourth: true
+      Knight: true
+      Swordman: true
     Locations:
       Right_Hand: true
     WeaponLevel: 5
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
       .@r = getrefine();
-      bonus2 bSkillAtk,"IG_SHIELD_SHOOTING",5*(.@r/2);
-      bonus bLongAtkRate,2*(.@r/4);
+      if (.@r>0) {
+        bonus bAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+        bonus bMAtkRate,20 * .@r;
+        bonus bMAtk,20 * .@r;
+      }
+      bonus bCritAtkRate,40;
+      bonus bAtkRate,150;
+      bonus bMAtkRate,150;
+      bonus bCritical,30;
+      bonus bAspdRate,25;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bAtkRate,50;
+          bonus bAtk,50;
+          bonus bMAtkRate,50;
+          bonus bMAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bAtkRate,50;
+              bonus bAtk,50;
+              bonus bMAtkRate,50;
+              bonus bMAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bAtkRate,50;
+                  bonus bAtk,50;
+                  bonus bMAtkRate,50;
+                  bonus bMAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bAtkRate,50;
+                      bonus bAtk,50;
+                      bonus bMAtkRate,50;
+                      bonus bMAtk,50;
+                  }
+              }
+          }
+      }
   - Id: 530010
     AegisName: Poenitentia_Hasta
     Name: Poenitentia Hasta
@@ -233455,24 +234602,71 @@ Body:
     Type: Weapon
     SubType: Book
     Weight: 800
-    Attack: 190
-    MagicAttack: 210
+    Attack: 200
+    MagicAttack: 200
     Range: 1
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
+      Mage: true
+      Acolyte: true
       Sage: true
-    Classes:
-      Fourth: true
+      Wizard: true
+      Priest: true
+      StarGladiator: true
     Locations:
       Right_Hand: true
     WeaponLevel: 5
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
       .@r = getrefine();
-      bonus bUnbreakableWeapon;
-      bonus2 bSkillAtk,"EM_CONFLAGRATION",5*(.@r/2);
-      bonus2 bMagicAtkEle,Ele_All,2*(.@r/4);
+      if (.@r>0) {
+        bonus bAtkRate,20 * .@r;
+        bonus bMAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+        bonus bMAtk,20 * .@r;
+      }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bAspdRate,25;
+      bonus bAtkRate,150;
+      bonus bMAtkRate,150;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bAtkRate,50;
+          bonus bMAtkRate,50;
+          bonus bMAtk,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bAtkRate,50;
+              bonus bMAtkRate,50;
+              bonus bMAtk,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bAtkRate,50;
+                  bonus bMAtkRate,50;
+                  bonus bMAtk,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bAtkRate,50;
+                      bonus bMAtkRate,50;
+                      bonus bMAtk,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
+      }
   - Id: 540014
     AegisName: Poenitentia_Codex
     Name: Poenitentia Codex
@@ -241724,23 +242918,55 @@ Body:
     Type: Weapon
     SubType: Knuckle
     Weight: 1300
-    Attack: 210
+    Attack: 200
     Range: 1
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       Monk: true
-    Classes:
-      Fourth: true
+      Priest: true
     Locations:
       Right_Hand: true
     WeaponLevel: 5
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
       .@r = getrefine();
-      bonus2 bSkillAtk,"IQ_SECOND_FAITH",5*(.@r/2);
-      bonus2 bSkillAtk,"IQ_SECOND_JUDGEMENT",5*(.@r/2);
-      bonus bShortAtkRate,2*(.@r/4);
+      if (.@r>0) {
+        bonus bAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+      }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bAspdRate,25;
+      bonus bAtkRate,150;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bAtkRate,50;
+                  bonus bAtk,50;
+                  bonus bCastRate, -.@r;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bAtkRate,50;
+                      bonus bAtk,50;
+                      bonus bDelayRate, -.@r;
+                  }
+              }
+          }
+      }
   - Id: 560012
     AegisName: Poenitentia_Caestus
     Name: Poenitentia Caestus
@@ -243426,24 +244652,66 @@ Body:
     Type: Weapon
     SubType: Musical
     Weight: 1250
-    Attack: 205
+    Attack: 200
+    MagicAttack: 200
     Range: 1
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       BardDancer: true
-    Classes:
-      Fourth: true
     Gender: Male
     Locations:
       Right_Hand: true
     WeaponLevel: 5
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
       .@r = getrefine();
-      bonus2 bSkillAtk,"TR_ROSEBLOSSOM",5*(.@r/2);
-      bonus2 bSkillAtk,"TR_ROSEBLOSSOM_ATK",5*(.@r/2);
-      bonus bLongAtkRate,2*(.@r/4);
+      if (.@r>0) {
+        bonus bLongAtkRate,20 * .@r;
+        bonus bMAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+        bonus bMAtk,20 * .@r;
+      }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bLongAtkRate,150;
+      bonus bMAtkRate,150;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bLongAtkRate,50;
+          bonus bMAtkRate,50;
+          bonus bAtk,50;
+          bonus bMAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bLongAtkRate,50;
+              bonus bMAtkRate,50;
+              bonus bAtk,50;
+              bonus bMAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bLongAtkRate,50;
+                  bonus bMAtkRate,50;
+                  bonus bAtk,50;
+                  bonus bMAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bLongAtkRate,50;
+                      bonus bMAtkRate,50;
+                      bonus bAtk,50;
+                      bonus bMAtk,50;
+                  }
+              }
+          }
+      }
   - Id: 570013
     AegisName: Poenitentia_Chorda
     Name: Poenitentia Chorda
@@ -245099,24 +246367,66 @@ Body:
     Type: Weapon
     SubType: Whip
     Weight: 1250
-    Attack: 205
+    Attack: 200
+    MagicAttack: 200
     Range: 2
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       BardDancer: true
-    Classes:
-      Fourth: true
     Gender: Female
     Locations:
       Right_Hand: true
     WeaponLevel: 5
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
       .@r = getrefine();
-      bonus2 bSkillAtk,"TR_ROSEBLOSSOM",5*(.@r/2);
-      bonus2 bSkillAtk,"TR_ROSEBLOSSOM_ATK",5*(.@r/2);
-      bonus bLongAtkRate,2*(.@r/4);
+      if (.@r>0) {
+        bonus bLongAtkRate,20 * .@r;
+        bonus bMAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+        bonus bMAtk,20 * .@r;
+      }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bLongAtkRate,150;
+      bonus bMAtkRate,150;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bLongAtkRate,50;
+          bonus bMAtkRate,50;
+          bonus bAtk,50;
+          bonus bMAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bLongAtkRate,50;
+              bonus bMAtkRate,50;
+              bonus bAtk,50;
+              bonus bMAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bLongAtkRate,50;
+                  bonus bMAtkRate,50;
+                  bonus bAtk,50;
+                  bonus bMAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bLongAtkRate,50;
+                      bonus bMAtkRate,50;
+                      bonus bAtk,50;
+                      bonus bMAtk,50;
+                  }
+              }
+          }
+      }
   - Id: 580013
     AegisName: Poenitentia_Flagellum
     Name: Poenitentia Flagellum
@@ -246913,25 +248223,64 @@ Body:
     Type: Weapon
     SubType: Mace
     Weight: 1300
-    Attack: 190
-    MagicAttack: 210
+    Attack: 200
     Range: 1
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
+      Novice: true
+      Acolyte: true
+      Merchant: true
+      Swordman: true
+      SuperNovice: true
+      Alchemist: true
+      Blacksmith: true
+      Crusader: true
+      Knight: true
+      Monk: true
       Priest: true
-    Classes:
-      Fourth: true
     Locations:
       Right_Hand: true
     WeaponLevel: 5
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
-      bonus bUnbreakableWeapon;
       .@r = getrefine();
-      bonus2 bSkillAtk,"CD_FRAMEN",5*(.@r/2);
-      bonus bHealPower,5*(.@r/2);
-      bonus2 bMagicAtkEle,Ele_All,2*(.@r/4);
+      if (.@r>0) {
+        bonus bAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+      }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bAspdRate,25;
+      bonus bAtkRate,150;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bAtkRate,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bAtkRate,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
+      }
   - Id: 590016
     AegisName: Poenitentia_Clava
     Name: Poenitentia Clava
@@ -250001,22 +251350,54 @@ Body:
     Type: Weapon
     SubType: Katar
     Weight: 1800
-    Attack: 260
+    Attack: 250
     Range: 1
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       Assassin: true
-    Classes:
-      Fourth: true
     Locations:
       Both_Hand: true
     WeaponLevel: 5
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
       .@r = getrefine();
-      bonus2 bSkillAtk,"SHC_IMPACT_CRATER",5*(.@r/2);
-      bonus bShortAtkRate,2*(.@r/4);
+      if (.@r>0) {
+        bonus bAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+      }
+      bonus bAspdRate,25;
+      bonus bAtkRate,150;
+      bonus bCritical,30;
+      bonus bCritAtkRate,40;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bAtkRate,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bAtkRate,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
+      }
   - Id: 610016
     AegisName: Poenitentia_Manus
     Name: Poenitentia Manus
@@ -251346,13 +252727,15 @@ Body:
     Type: Weapon
     SubType: Huuma
     Weight: 2800
-    Attack: 380
+    Attack: 250
+    MagicAttack: 250
     Range: 1
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       KagerouOboro: true
-    Classes:
-      Fourth: true
     Locations:
       Both_Hand: true
     WeaponLevel: 5
@@ -251360,44 +252743,48 @@ Body:
     Refineable: true
     Gradable: true
     Script: |
-      .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bUnbreakableWeapon;
-      bonus2 bSkillAtk,"SS_KUNAIKAITEN",10;
-      if (BaseLevel>=210) {
-         bonus bAtkRate,7;
-         bonus bBaseAtk,70;
+      if (.@r>0) {
+        bonus bAtkRate,20 * .@r;
+        bonus bMAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+        bonus bMAtk,20 * .@r;
       }
-      if (BaseLevel>=220) {
-         bonus2 bSkillAtk,"SS_KUNAIKAITEN",5;
-      }
-      if (BaseLevel>=230) {
-         bonus2 bAddSize,Size_All,10;
-      }
-      if (.@r>=7) {
-         bonus bLongAtkRate,10;
-         if (.@r>=9) {
-            bonus2 bSkillAtk,"SS_KUNAIKAITEN",10;
-            if (.@r>=10) {
-               bonus bLongAtkRate,10;
-               if (.@r>=11) {
-                  bonus2 bSkillAtk,"SS_KUNAIKAITEN",10;
-               }
-            }
-         }
-      }
-      if (.@g>=ENCHANTGRADE_D) {
-         bonus bLongAtkRate,15;
-         if (.@g>=ENCHANTGRADE_C) {
-            bonus2 bSkillAtk,"SS_KUNAIKAITEN",5;
-            if (.@g>=ENCHANTGRADE_B) {
-               bonus2 bSkillAtk,"SS_KUNAIKUSSETSU",10;
-               if (.@g>=ENCHANTGRADE_A) {
-                  bonus bPAtk,4*(.@r/2);
-                  bonus bAtkRate,4*(.@r/2);
-               }
-            }
-         }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bAtkRate,150;
+      bonus bMAtkRate,150;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bAtkRate,50;
+          bonus bMAtkRate,50;
+          bonus bAtk,50;
+          bonus bMAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bAtkRate,50;
+              bonus bMAtkRate,50;
+              bonus bAtk,50;
+              bonus bMAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bAtkRate,50;
+                  bonus bMAtkRate,50;
+                  bonus bAtk,50;
+                  bonus bMAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bAtkRate,50;
+                      bonus bMAtkRate,50;
+                      bonus bAtk,50;
+                      bonus bMAtk,50;
+                  }
+              }
+          }
       }
   - Id: 620001
     AegisName: Woe_Twohand_Axe2_Z
@@ -251521,23 +252908,57 @@ Body:
     Type: Weapon
     SubType: 2hAxe
     Weight: 3000
-    Attack: 280
+    Attack: 250
     Range: 1
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
+      Alchemist: true
       Blacksmith: true
-    Classes:
-      Fourth: true
+      Crusader: true
+      Knight: true
+      Merchant: true
+      Swordman: true
     Locations:
       Both_Hand: true
     WeaponLevel: 5
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
       .@r = getrefine();
-      bonus bUnbreakableWeapon;
-      bonus2 bSkillAtk,"MT_AXE_STOMP",5*(.@r/2);
-      bonus bShortAtkRate,2*(.@r/4);
+      if (.@r>0) {
+        bonus bAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+      }
+      bonus bDelayRate,-30;
+      bonus bAtkRate,150;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bAtkRate,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bAtkRate,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
+      }
   - Id: 620006
     AegisName: Poenitentia_Ascia
     Name: Poenitentia Ascia
@@ -252783,20 +254204,57 @@ Body:
     Type: Weapon
     SubType: 2hSpear
     Weight: 3000
-    Attack: 200
+    Attack: 250
     Range: 3
+    Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
+      Crusader: true
       Knight: true
+      Swordman: true
     Locations:
       Both_Hand: true
     WeaponLevel: 5
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
-      bonus bCritAtkRate,-7;
-      bonus bLongAtkRate,15;
-      bonus bVariableCastrate,7;
-      bonus bHit,50;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bAtkRate,20 * .@r;
+        bonus bMAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+        bonus bMAtk,20 * .@r;
+      }
+      bonus bDelayRate,-30;
+      bonus bAtkRate,150;
+      bonus bMAtkRate,150;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bAtkRate,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bAtkRate,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
+      }
   - Id: 630021
     AegisName: aegis_630021
     Name: 1Lv Two-handed Spear
@@ -253604,24 +255062,66 @@ Body:
     Type: Weapon
     SubType: 2hStaff
     Weight: 2100
-    Attack: 140
-    MagicAttack: 240
+    Attack: 250
+    MagicAttack: 250
     Range: 1
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
+      Mage: true
       Wizard: true
-    Classes:
-      Fourth: true
+      Sage: true
+      Acolyte: true
+      Priest: true
+      SoulLinker: true
+      SuperNovice: true
     Locations:
       Both_Hand: true
     WeaponLevel: 5
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
       .@r = getrefine();
-      bonus bUnbreakableWeapon;
-      bonus2 bSkillAtk,"AG_FROZEN_SLASH",5*(.@r/2);
-      bonus2 bMagicAtkEle,Ele_All,2*(.@r/4);
+      if (.@r>0) {
+        bonus bMAtkRate,20 * .@r;
+        bonus bMAtk,20 * .@r;
+        bonus bHealPower,30 * .@r;
+      }
+      bonus bVariableCastrate,-30;
+      bonus bDelayRate,-35;
+      bonus bMAtkRate,150;
+      bonus bHealPower,300;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bMAtkRate,50;
+          bonus bMAtk,50;
+          bonus bHealPower,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bMAtkRate,50;
+              bonus bMAtk,50;
+              bonus bHealPower,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bMAtkRate,50;
+                  bonus bMAtk,50;
+                  bonus bHealPower,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bMAtkRate,50;
+                      bonus bMAtk,50;
+                      bonus bHealPower,50;
+                  }
+              }
+          }
+      }
   - Id: 640014
     AegisName: Poenitentia_Termes
     Name: Poenitentia Termes
@@ -256919,22 +258419,59 @@ Body:
     Type: Weapon
     SubType: Bow
     Weight: 1700
-    Attack: 210
+    Attack: 250
     Range: 5
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
+      Archer: true
+      BardDancer: true
       Hunter: true
-    Classes:
-      Fourth: true
+      Rogue: true
     Locations:
       Both_Hand: true
     WeaponLevel: 5
     EquipLevelMin: 175
     Refineable: true
+    Gradable: true
     Script: |
       .@r = getrefine();
-      bonus2 bSkillAtk,"WH_GALESTORM",5*(.@r/2);
-      bonus bLongAtkRate,2*(.@r/4);
+      if (.@r>0) {
+        bonus bLongAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+      }
+      bonus bLongAtkRate,150;
+      bonus bAspdRate,25;
+      bonus bDelayRate,-25;
+      bonus bCritical,30;
+      bonus bCritAtkRate,40;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bLongAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bLongAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bLongAtkRate,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bLongAtkRate,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
+      }
+      
   - Id: 700022
     AegisName: Poenitentia_Tenon
     Name: Poenitentia Tenon
@@ -259219,10 +260756,11 @@ Body:
     Attack: 250
     Range: 7
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       Rebellion: true
-    Classes:
-      Fourth: true
     Locations:
       Both_Hand: true
     WeaponLevel: 5
@@ -259230,19 +260768,39 @@ Body:
     Refineable: true
     Gradable: true
     Script: |
-      .@g = getenchantgrade();
       .@r = getrefine();
-      bonus2 bSkillAtk,"NW_ONLY_ONE_BULLET",7*(.@r/2);
-      bonus2 bSkillAtk,"RL_FIREDANCE",10*(.@r/3);
-      bonus bLongAtkRate,4*(.@r/4);
+      if (.@r>0) {
+        bonus bLongAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+      }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bLongAtkRate,150;
+      bonus bCritical,30;
+      bonus bCritAtkRate,40;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
       if (.@g >= ENCHANTGRADE_D) {
-         bonus bCon,2;
-         if (.@g >= ENCHANTGRADE_C) {
-            bonus2 bSkillAtk,"NW_ONLY_ONE_BULLET",10;
-            if (.@g >= ENCHANTGRADE_B) {
-               bonus bPAtk,2;
-            }
-         }
+          bonus bLongAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bLongAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bLongAtkRate,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bLongAtkRate,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
       }
   - Id: 800010
     AegisName: Fourth_Revolver
@@ -260039,13 +261597,14 @@ Body:
     Type: Weapon
     SubType: Rifle
     Weight: 1800
-    Attack: 300
+    Attack: 250
     Range: 9
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       Rebellion: true
-    Classes:
-      Fourth: true
     Locations:
       Both_Hand: true
     WeaponLevel: 5
@@ -260053,19 +261612,39 @@ Body:
     Refineable: true
     Gradable: true
     Script: |
-      .@g = getenchantgrade();
       .@r = getrefine();
-      bonus2 bSkillAtk,"NW_SPIRAL_SHOOTING",7*(.@r/2);
-      bonus2 bSkillAtk,"RL_HAMMER_OF_GOD",10*(.@r/3);
-      bonus bLongAtkRate,4*(.@r/4);
+      if (.@r>0) {
+        bonus bLongAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+      }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bLongAtkRate,150;
+      bonus bCritical,30;
+      bonus bCritAtkRate,40;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
       if (.@g >= ENCHANTGRADE_D) {
-         bonus bCon,2;
-         if (.@g >= ENCHANTGRADE_C) {
-            bonus2 bSkillAtk,"NW_SPIRAL_SHOOTING",10;
-            if (.@g >= ENCHANTGRADE_B) {
-               bonus bPAtk,2;
-            }
-         }
+          bonus bLongAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bLongAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bLongAtkRate,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bLongAtkRate,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
       }
   - Id: 810006
     AegisName: Fourth_Rifle
@@ -260880,13 +262459,14 @@ Body:
     Type: Weapon
     SubType: Shotgun
     Weight: 2200
-    Attack: 330
+    Attack: 250
     Range: 9
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       Rebellion: true
-    Classes:
-      Fourth: true
     Locations:
       Both_Hand: true
     WeaponLevel: 5
@@ -260894,20 +262474,39 @@ Body:
     Refineable: true
     Gradable: true
     Script: |
-      .@g = getenchantgrade();
       .@r = getrefine();
-      bonus bSplashRange,1;
-      bonus2 bSkillAtk,"NW_THE_VIGILANTE_AT_NIGHT",7*(.@r/2);
-      bonus2 bSkillAtk,"RL_BANISHING_BUSTER",10*(.@r/3);
-      bonus bLongAtkRate,4*(.@r/4);
+      if (.@r>0) {
+        bonus bLongAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+      }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bLongAtkRate,150;
+      bonus bCritical,30;
+      bonus bCritAtkRate,40;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
       if (.@g >= ENCHANTGRADE_D) {
-         bonus bCon,2;
-         if (.@g >= ENCHANTGRADE_C) {
-            bonus2 bSkillAtk,"NW_THE_VIGILANTE_AT_NIGHT",10;
-            if (.@g >= ENCHANTGRADE_B) {
-               bonus bPAtk,2;
-            }
-         }
+          bonus bLongAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bLongAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bLongAtkRate,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bLongAtkRate,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
       }
   - Id: 820005
     AegisName: Fourth_Shotgun
@@ -261686,13 +263285,14 @@ Body:
     Type: Weapon
     SubType: Gatling
     Weight: 2600
-    Attack: 290
+    Attack: 250
     Range: 9
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       Rebellion: true
-    Classes:
-      Fourth: true
     Locations:
       Both_Hand: true
     WeaponLevel: 5
@@ -261700,19 +263300,39 @@ Body:
     Refineable: true
     Gradable: true
     Script: |
-      .@g = getenchantgrade();
       .@r = getrefine();
-      bonus2 bSkillAtk,"NW_MAGAZINE_FOR_ONE",7*(.@r/2);
-      bonus2 bSkillAtk,"RL_R_TRIP",10*(.@r/3);
-      bonus bLongAtkRate,4*(.@r/4);
+      if (.@r>0) {
+        bonus bLongAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+      }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bLongAtkRate,150;
+      bonus bCritical,30;
+      bonus bCritAtkRate,40;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
       if (.@g >= ENCHANTGRADE_D) {
-         bonus bCon,2;
-         if (.@g >= ENCHANTGRADE_C) {
-            bonus2 bSkillAtk,"NW_MAGAZINE_FOR_ONE",10;
-            if (.@g >= ENCHANTGRADE_B) {
-               bonus bPAtk,2;
-            }
-         }
+          bonus bLongAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bLongAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bLongAtkRate,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bLongAtkRate,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
       }
   - Id: 830009
     AegisName: Fourth_Gatling
@@ -262474,13 +264094,14 @@ Body:
     Type: Weapon
     SubType: Grenade
     Weight: 3300
-    Attack: 370
+    Attack: 250
     Range: 9
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       Rebellion: true
-    Classes:
-      Fourth: true
     Locations:
       Both_Hand: true
     WeaponLevel: 5
@@ -262488,19 +264109,39 @@ Body:
     Refineable: true
     Gradable: true
     Script: |
-      .@g = getenchantgrade();
       .@r = getrefine();
-      bonus2 bSkillAtk,"NW_WILD_FIRE",7*(.@r/2);
-      bonus2 bSkillAtk,"RL_H_MINE",10*(.@r/3);
-      bonus bLongAtkRate,4*(.@r/4);
+      if (.@r>0) {
+        bonus bLongAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+      }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bLongAtkRate,150;
+      bonus bCritical,30;
+      bonus bCritAtkRate,40;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
       if (.@g >= ENCHANTGRADE_D) {
-         bonus bCon,2;
-         if (.@g >= ENCHANTGRADE_C) {
-            bonus2 bSkillAtk,"NW_WILD_FIRE",10;
-            if (.@g >= ENCHANTGRADE_B) {
-               bonus bPAtk,2;
-            }
-         }
+          bonus bLongAtkRate,50;
+          bonus bAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bLongAtkRate,50;
+              bonus bAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bLongAtkRate,50;
+                  bonus bAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bLongAtkRate,50;
+                      bonus bAtk,50;
+                  }
+              }
+          }
       }
   - Id: 840005
     AegisName: Fourth_Grenade

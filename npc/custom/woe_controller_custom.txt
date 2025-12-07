@@ -1,0 +1,314 @@
+//============================================================
+//   WoE Control — Versão Ultra Simplificada
+//   Autor: ChatGPT + Wesley
+//   Compatível: rAthena 2021~2025
+//============================================================
+
+//============================================================
+//   NPC de Informações (menu principal)
+//============================================================
+prontera,156,197,4	script	Informações de Guerra	111,{
+	mes "[WoE – Informações]";
+	.Castle$ = "prtg_cas03";
+
+    if (agitcheck())
+        mes "Status: ^00FF00ATIVA^000000";
+    else
+        mes "Status: ^FF0000INATIVA^000000";
+
+    mes "Castelo: ^0055FF"+getcastlename(.Castle$)+"^000000";
+
+    next;
+    switch(select("~ Ir ao Castelo:~ Ver Dono:~ Sair")) {
+
+		case 1:
+            if (getcharid(2) == 0) {
+                mes "Você precisa estar em uma guild para entrar no castelo.";
+                close;
+            }
+            
+			warp .Castle$, 164, 174;
+			close;
+
+		case 2:
+			.@o = getcastledata(.Castle$,1);
+			mes "[Dono do Castelo]";
+			if (.@o)
+				mes "Atualmente dominado pela guilda ^00AAFF"+getguildname(.@o)+"^000000.";
+			else
+				mes "Nenhuma guilda possui este castelo.";
+			next;
+			doevent "WOE_CONTROL#Custom::OnMenu";
+			end;
+
+		case 3:
+			close;
+    }
+OnAgitStart:
+    while(agitcheck() || agitcheck2() || agitcheck3()) {
+        sleep 500;
+        specialeffect EF_BEGINSPELL6;
+    }
+	end;
+}
+
+//============================================================
+//   SCRIPT PRINCIPAL
+//============================================================
+-	script	WOE_CONTROL#Custom	-1,{
+
+//------------------------------------------------------------
+//  CONFIGURAÇÃO GERAL
+//------------------------------------------------------------
+OnInit:
+
+    // Horário da WoE (somente 1 horário)
+    .woe_day   = 1;   // 0=Domingo … 6=Sábado
+    .woe_hour   = 11;
+    
+    // Nome do castelo (1 castelo)
+
+    .Castle$ = "prtg_cas03";
+	setmapflag .Castle$, mf_loadevent;
+	setmapflag .Castle$, mf_gvg_castle;
+    MapRespawnGuildID .Castle$, GetCastleData(.Castle$,CD_GUILD_ID), 6;
+
+    // Warp para o castelo
+    .MapX  = 17;
+    .MapY  = 221;
+
+    end;
+
+//============================================================
+//   CONTROLE DE HORÁRIO (a cada minuto)
+//============================================================
+OnClock1141:
+
+    .@day  = gettime(DT_DAYOFWEEK);
+
+    // Início
+    if (.@day != .woe_day) end;
+
+    // Resetar dono do castelo ao carregar script
+	setcastledata(.Castle$, 1, 0); // 0 = sem guild
+	setcastledata(.Castle$, 2, 0); // Remove economia
+	setcastledata(.Castle$, 3, 0); // Remove defesa
+
+    callfunc("ClearCastle", .Castle$, .@gid);
+
+    AgitStart;
+    if (agitcheck())
+        GvgOn .Castle$;
+        sleep 200;
+        donpcevent "WOE_CONTROL#Custom::OnEVENT";
+    end;
+
+    // Fim
+OnClock1150:
+    
+    announce "[WoE] A Guerra do Emperium terminou!", bc_all|bc_woe;
+
+    killmonster .Castle$, strnpcinfo(3)+"::OnEmpDie";
+
+    stopnpctimer;
+
+    AgitEnd;
+    sleep 100; // aguarda atualização do estado
+    donpcevent strnpcinfo(3) + "::OnReward";
+
+    end;
+
+// ======================================================================
+// SPAWN DO EMPERIUM
+// ======================================================================
+OnEVENT:
+    // remove o anterior	
+    killmonster .Castle$, strnpcinfo(3)+"::OnEmpDie";
+
+    monster .Castle$, .MapX, .MapY, "Emperium", 1905, 1, strnpcinfo(3)+"::OnEmpDie";
+
+    announce "[WoE] A Guerra do Emperium começou!", bc_all|bc_woe;
+    end;
+
+// ======================================================================
+// EVENTO DE MORTE DO EMPERIUM
+// ======================================================================
+OnEmpDie:
+    .@gid = getcharid(2);
+    .@gname$ = getguildname(.@gid);
+
+	setcastledata .Castle$, 1, .@gid;
+    initnpctimer;
+
+    announce "[WoE] "+.@gname$+" quebrou o Emperium em "+.Castle$+"!", bc_all|bc_woe;
+
+	sleep 1000;
+	// Expulsar todos que não são da guild vencedora
+	callfunc("ClearCastle", .Castle$, .@gid);
+
+    killmonster .Castle$, strnpcinfo(3)+"::OnEmpDie";
+    sleep 7000;
+
+    guardian .Castle$, 17, 221,
+        "Emperium", 1905,
+        strnpcinfo(3)+"::OnEmpDie", 0;
+
+    end;
+
+// A cada minuto
+OnTimer6000:
+
+	// WoE ativa?
+	if (!agitcheck()) end;
+
+	.@gid = getcastledata(.Castle$, 1); // guild dona atual
+    debugmes "Pontos adicioando a guild " + getguildname(.@gid) + " Total: " + $WOE_TIME[.@gid];
+
+	if (.@gid > 0) {
+		// Soma 1 minuto ao dono atual
+		$WOE_TIME[.@gid] = $WOE_TIME[.@gid] + 1;
+
+		// Se ainda não existe na lista de participantes, adiciona
+		if (inarray($WOE_LIST, .@gid) < 0) {
+			$WOE_LIST[getarraysize($WOE_LIST)] = .@gid;
+		}
+	}
+
+	initnpctimer;
+
+	end;
+
+//============================================================
+//   RECOMPENSA SIMPLIFICADA
+//============================================================
+OnReward:
+
+    .@winner = getcastledata(.Castle$, 1);
+    if (!.@winner) end;
+    debugmes "Vencedor da WOE: " + .@winner;
+    announce "[WoE] A guilda "+getguildname(.@winner)+" Conquistou o castelo ("+.Castle$+")!", bc_all|bc_woe;
+
+    //-----------------------------------------
+    // 1. PREMIO POR QUEBRAR A EMP (JÁ EXISTE)
+    //-----------------------------------------
+    getguildmember .@winner, 1, .@cid;
+    .@sz = getguildmember(.@winner, 2, .@aid);
+
+    for (.@i = 0; .@i < .@sz; .@i++) {
+        if (isloggedin(.@aid[.@i], .@cid[.@i])) {
+            attachrid(.@aid[.@i], true);
+
+            for (.@r = 0; .@r < .reward_id_size; .@r++)
+                getitem .reward_id[.@r], .reward_amount[.@r];
+
+            dispbottom "[WoE] Você recebeu sua recompensa por Conquistar o Castelo!";
+        }
+    }
+
+    // líder
+    .@leader_cid = getguildmasterid(.@winner);
+    .@sender$ = "Sistema de WoE";
+    .@title$  = "Recompensa de Liderança (Conquista)",
+    .@body$   =  "Sua guild conquistou o castelo! Parabéns, líder!",
+
+    // Arrays obrigatórios:
+    setarray .@item_id[0], 9647;
+    setarray .@amount[0],  500;
+    setarray .@refine[0],  0;
+    setarray .@bound[0],   0;
+    setarray .@card0[0],   0;
+    setarray .@card1[0],   0;
+    setarray .@card2[0],   0;
+    setarray .@card3[0],   0;
+
+    mail .@leader_cid, .@sender$, .@title$, .@body$, 0,
+        .@item_id, .@amount, .@refine, .@bound,
+        .@card0, .@card1, .@card2, .@card3;
+
+    //-----------------------------------------
+    // 2. PREMIO PARA DEFENSORA (MAIOR TEMPO)
+    //-----------------------------------------
+
+    .@best_gid = 0;
+    .@best_time = 0;
+
+    for (.@i = 0; .@i < getarraysize($WOE_LIST); .@i++) {
+        .@gid = $WOE_LIST[.@i];
+
+        if ($WOE_TIME[.@gid] > .@best_time) {
+            .@best_time = $WOE_TIME[.@gid];
+            .@best_gid  = .@gid;
+        }
+    }
+
+    $WOE_WIN_TIME = .@best_gid; // guild que dominou por mais tempo
+
+    sleep 5000;
+    if (.@best_gid > 0) {
+        announce "[WoE] A guilda "+getguildname(.@best_gid)+" dominou o castelo por mais tempo ("+.@best_time+" minutos)!", bc_all|bc_woe;
+
+        // DAR PREMIO DE DEFENSOR
+        getguildmember .@best_gid, 1, .@cid;
+        .@sz = getguildmember(.@best_gid, 2, .@aid);
+
+        for (.@i = 0; .@i < .@sz; .@i++) {
+            if (isloggedin(.@aid[.@i], .@cid[.@i])) {
+                attachrid(.@aid[.@i], true);
+                getitem 14002, 1; // EXEMPLO: item especial defensor
+                dispbottom "[WoE] Recompensa por maior tempo de domínio ("+.@best_time+" min)!";
+            }
+        }
+
+        // líder
+        .@leader_cid = getguildmasterid(.@best_gid);
+
+        .@title$  = "Recompensa de Liderança (Defesa)",
+        .@body$   = "Sua guild defendeu o castelo por mais tempo! Parabéns, líder!",
+
+        // Arrays obrigatórios:
+        setarray .@item_id[0], 9646;
+
+        mail .@leader_cid, .@sender$, .@title$, .@body$, 0,
+            .@item_id, .@amount, .@refine, .@bound,
+            .@card0, .@card1, .@card2, .@card3;
+
+    } else {
+        announce "[WoE] Nenhuma guilda dominou o castelo por longo tempo!", bc_all|bc_woe;
+    }
+
+    // reset para próxima WoE
+    deletearray $WOE_TIME;
+    deletearray $WOE_LIST;
+    $WOE_WIN_TIME = 0;
+
+end;
+}
+
+//============================================================
+// Expulsar TODOS que não são da guild vencedora
+//============================================================
+function	script	ClearCastle	{	
+
+	.@castle$ = getarg(0);       // mapa do castelo
+	.@owner_gid = getarg(1);     // guild vencedora
+
+	// pega todos os players do castelo
+	getmapunits(BL_PC, .@castle$, .@list);
+
+	for (.@i = 0; .@i < getarraysize(.@list); .@i++) {
+
+		if (attachrid(.@list[.@i])) {
+
+			// se não é da guild dona ? expulsa
+			if (getcharid(2) != .@owner_gid) {
+				warp "SavePoint", 0, 0;
+			}
+
+			detachrid();
+		}
+	}
+
+	return;
+}
+
+

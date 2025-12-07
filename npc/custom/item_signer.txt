@@ -13,21 +13,21 @@
 //= 1.1a Added 'disable_items' command. [Euphy]
 //============================================================
 
--	script	Perchik	47,{
+-	script	Patentiador	47,{
 	
 	setarray .@Item[0],644,3;	// Itens necessários: <ID>,<Quantidade>{,...} (0 para desativar)
 	setarray .@Cost[0],0,5000;	// Zeny necessários: <preço base>,<preço por refine>
 
 	disable_items;
-	mes "[Perchik]";
+	mes "[Patentiador]";
 	mes "Eu posso ^0055FFassinar seu nome^000000 em quase qualquer item raro que você tenha.";
 	next;
 	if(select("Me conte mais...:Assinar meus itens, por favor!") == 1) {
-		mes "[Perchik]";
+		mes "[Patentiador]";
 		mes "Eu posso colocar seu nome em qualquer equipamento ou arma sem slots.";
 		emotion ET_AHA;
 		next;
-		mes "[Perchik]";
+		mes "[Patentiador]";
 		if (getarraysize(.@Item) || getarraysize(.@Cost)) {
 			mes "Para meu trabalho, aceito:";
 			if (getarraysize(.@Item)) for(set .@i,0; .@i<getarraysize(.@Item); set .@i,.@i+2)
@@ -38,17 +38,17 @@
 		else mes "Eu trabalho de graça, mas...";
 		next;
 		emotion ET_CRY;
-		mes "[Perchik]";
+		mes "[Patentiador]";
 		mes "Infelizmente, eu tenho 12 filhos famintos";
 		mes "e uma esposa muito brava.";
 		next;
-		mes "[Perchik]";
+		mes "[Patentiador]";
 		mes "Ou seriam 12 filhos bravos";
 		mes "e uma esposa muito faminta...";
 		emotion ET_SCRATCH;
 		close;
 	}
-	mes "[Perchik]";
+	mes "[Patentiador]";
 	mes "Mostre-me seus itens para assinar...";
 	next;
 	setarray .@indices[1], EQI_HEAD_TOP, EQI_ARMOR, EQI_HAND_L, EQI_HAND_R, EQI_GARMENT, EQI_SHOES, EQI_ACC_L, EQI_ACC_R, EQI_HEAD_MID, EQI_HEAD_LOW;
@@ -60,7 +60,7 @@
 	set .@part, .@indices[ select(.@menu$) ];
 	set .@id, getequipid(.@part);
 	set .@ref, getequiprefinerycnt(.@part);
-	mes "[Perchik]";
+	mes "[Patentiador]";
 	if (!getequipisequiped(.@part)) {
 		mes "Nada está equipado aí!";
 		emotion ET_KEK;
@@ -104,12 +104,12 @@
 	mes "Quer que eu assine seu ^0055FF"+getitemname(.@id)+"^000000?";
 	next;
 	if(select("Ok!:Sair")==2) {
-		mes "[Perchik]";
+		mes "[Patentiador]";
 		mes "Até mais...";
 		emotion ET_SLEEPY;
 		close;
 	}
-	mes "[Perchik]";
+	mes "[Patentiador]";
 	if (Zeny < .@price || .@nr) {
 		mes "Eu não trabalho de graça.";
 		emotion ET_SORRY;
@@ -117,7 +117,7 @@
 	}
 	if (!countitem2(.@id,1,.@ref,0,.@slot[0],.@slot[1],.@slot[2],.@slot[3])) {
 		mes "Onde está o "+getitemname(@id)+"...?"; 
-		npctalk "Perchik : Você é um trapaceiro sonolento!";
+		npctalk "Patentiador : Você é um trapaceiro sonolento!";
 		logmes "Hack: Tentou assinar um item que não possui: "+getitemname(@id);
 		emotion ET_KEK;
 		close;

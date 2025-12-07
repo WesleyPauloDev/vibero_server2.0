@@ -1,17 +1,26 @@
 //=====================================================
 // Sistema de Escolha de Rate no Primeiro Login
-// Autor: ChatGPT (adaptado para seu sistema Reborn)
 //=====================================================
 
 -	script	RateEscolha#login	-1,{
 
 OnPCLoginEvent:
+    addtimer 500, "RateEscolha#login::OnStartRate";
+    end;
+
+OnStartRate:
+	.@var$ = "#rate_escolhido_" + getcharid(0);
+	// setd(.@var$, 0);
+	// set exp_base_custom, 0;
+
     // #drop_final = 0;
     // #exp_final = 0;
 
-    // #rate_escolhido = 0;
+    // rate_escolhido = 0;
 	// Se já escolheu a taxa, apenas aplica os bônus
-	if (#rate_escolhido > 0) end;
+	if (getd(.@var$) > 0) {
+		end;
+	}
 
 	mes "^00AAFFBem-vindo, " + strcharinfo(0) + "!^000000";
 	mes "Antes de começar sua jornada, escolha sua taxa de experiência:";
@@ -30,56 +39,85 @@ OnPCLoginEvent:
 
 		switch(select("^00FF001x^000000", "^88FF882x^000000", "^FFAA005x^000000", "^FF000010x^000000")) {
 			case 1:
-				#rate_escolhido = 1;
-				#bonus_drop = 100; // máximo bônus de drop
+				.@rate_escolhida = 1;
+				.@bonus_drop = 100; // máximo bônus de drop
 				.@drop_display$ = "2";
 				break;
 			case 2:
-				#rate_escolhido = 2;
-				#bonus_drop = 50;
+				.@rate_escolhida = 2;
+				.@bonus_drop = 50;
 				.@drop_display$ = "1.5";
 				break;
 			case 3:
-				#rate_escolhido = 5;
-				#bonus_drop = 20;
+				.@rate_escolhida = 5;
+				.@bonus_drop = 20;
 				.@drop_display$ = "1.2";
 				break;
 			case 4:
-				#rate_escolhido = 10;
-				#bonus_drop = 0; // sem bônus
+				.@rate_escolhida = 10;
+				.@bonus_drop = 0; // sem bônus
 				.@drop_display$ = "1";
 				break;
 		}
-        mes "Você escolheu a taxa de ^FFAA00" + #rate_escolhido + "X^000000 de XP.";
+        mes "Você escolheu a taxa de ^FFAA00" + .@rate_escolhida + "X^000000 de XP.";
         mes "Bônus de Drop: ^00AAFF" + .@drop_display$ + "X^000000.";
         mes " ";
         mes "Sua escolha é permanente!";
         mes "Tem certeza que deseja continuar com esta Rate?";
         if (select("Sim","Não") == 1) break;
 	}	
-    mes "Rate escolhida foi ^FFAA00" + #rate_escolhido + "x^000000 de XP.";
+    mes "Rate escolhida foi ^FFAA00" + .@rate_escolhida + "x^000000 de XP.";
+	setd(.@var$, .@rate_escolhida);
 	close2;
 
-    // #rate_bonus = 0;
-    if (!#rate_bonus) {
-        if (!#exp_final) #exp_final = 1;
+	// ========================
+	// Atribuir título por Rate
+	// ========================
+
+	if (.@rate_escolhida == 1) {
+		if (!achievementexists(110010))
+			achievementcomplete 110010;
+	}
+	else if (.@rate_escolhida == 2) {
+		if (!achievementexists(110011))
+			achievementcomplete 110011;
+	}
+	else if (.@rate_escolhida == 5) {
+		if (!achievementexists(110012))
+			achievementcomplete 110012;
+	}
+	else if (.@rate_escolhida == 10) {
+		if (!achievementexists(110013))
+			achievementcomplete 110013;
+	}
+
+	// ========================
+	// Atribuir Bonus por Rate
+	// ========================
+
+    // .@rate_bonus = 0;
+    if (!.@rate_bonus) {
+        if (!exp_base_custom) exp_base_custom = 1;
         
-        if (#rate_escolhido == 1) {
-            #exp_final = 1;
+        if (.@rate_escolhida == 1) {
+            exp_base_custom = 1;
         } else {
-            set #exp_final, (#exp_final * #rate_escolhido * 100) - 100;
+            set exp_base_custom, (exp_base_custom * .@rate_escolhida * 100) - 100;
         }
             
-        if (!#drop_final) #drop_final = 0;
-        set #drop_final, #drop_final + #bonus_drop;
-        #rate_bonus = 1;
+        if (!drop_base) drop_base = 0;
+        set drop_base, .@bonus_drop;
+        .@rate_bonus = 1;
     }
+
+	// set #exp_final, #exp_final + exp_base_custom;
+	.@reput_reborn = (get_reputation_points(7) / 1000) * 10;
+	set #exp_final, exp_base_custom * .@reput_reborn / 100;
+	// set #drop_final, #drop_final + drop_base;
+	set #drop_final, #reborn_drop + drop_base;
 
 	set_reborn_exp(#exp_final);
 	set_reborn_drop(#drop_final);
-
-	set #exp_base, #exp_final;
-	set #drop_base, #drop_final;
 
 	end;
 }

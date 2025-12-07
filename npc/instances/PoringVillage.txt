@@ -9,6 +9,9 @@
 
 // Instance
 -	script	PoringVillage_Instance#Custom	999,{
+	if (!attachrid(#INSTANCERID)) end;
+    // limpa depois
+    #INSTANCERID = 0;
 	
 	OnStartInstance:
 		callfunc("F_InstanceEntry",
@@ -448,7 +451,8 @@ OnTouch:
 	
 	// Premiações do Servidor
 	if (#PORING_STATUS == 2) {
-		add_reputation_points(1, 10);
+		// add_reputation_points(1, 10);
+		callfunc("F_AddRep", 1, 10, 110002, 3000);
 		set #instancia, 2;
 		if (#inst60_name$ == "[30+] Vila dos Porings") {			
 			set #inst60_status,2;

@@ -1,0 +1,139 @@
+-	script	InstanceMenu	-1,{
+
+OnInit:	
+	bindatcmd "instance", strnpcinfo(3)+"::OnAtcommand";
+	end;
+
+// =======================================================
+// @instance ? Abre o menu de seleção de instâncias
+// =======================================================
+OnAtcommand:
+
+	// 1. Verifica se o jogador já está vinculado a alguma instância
+	.@iid = instance_id(IM_PARTY);
+
+	if (.@iid > 0) {
+		// Jogador já tem instância ativa ? reentrar
+		#INSTANCERID = getcharid(3);
+		doevent #INSTANCENAME$ + "_Instance#Custom::OnStartInstance"; // centralizamos a lógica
+		end;
+	}
+
+	mes "[Instâncias Disponíveis]";
+	mes "Escolha uma instância para entrar:";
+	#INSTANCERID = getcharid(3);
+
+	next;
+	.@s = select(
+		"[30+] Vila dos Porings",
+		"[40+] Batalha dos Orcs",
+		"[50+] Torre Sem Fim",
+		"[55+] Ninho de Nidhog",
+		"[60+] Maldição de Glast Heim",
+		"[75+] Santuário Selado",
+		"[90+] Laboratório Werner",
+		"[95+] Memórias de Sara",
+		"[100+] Espaço Infinito",
+		"[120+] Lago Bakonawa",
+		"[125+] Assalto ao Dirigível",
+		"[130+] Torre do Demônio",
+		"[135+] Laboratório Central",
+		"[140+] Fábrica de Brinquedos de Terror",
+		"[150+] Laboratório Wolfchev",
+		"[160+] Templo do Rei Demônio",
+		"[???] WaterGarden"
+	);
+
+	close2;
+
+	switch(.@s) {
+
+		case 1:
+			#INSTANCENAME$ = "PoringVillage";
+			doevent "PoringVillage_Instance#Custom::OnStartInstance";
+			end;
+
+		case 2:
+			#INSTANCENAME$ = "BatalhaOrcs";
+			doevent "BatalhaOrcs_Instance#Custom::OnStartInstance";
+			end;
+
+		case 3:
+			#INSTANCENAME$ = "ET";
+			doevent "ET_Instance#Custom::OnStartInstance";
+			end;
+
+		case 4:
+			#INSTANCENAME$ = "Nyd";
+			doevent "Nyd_Instance#Custom::OnStartInstance";
+			end;
+
+		case 5:
+			#INSTANCENAME$ = "MGH";
+			doevent "MGH_Instance#Custom::OnStartInstance";
+			end;
+
+		case 6:
+			#INSTANCENAME$ = "SantuarioSelado";
+			doevent "SantuarioSelado_Instance#Custom::OnStartInstance";
+			end;
+
+		case 7:
+			#INSTANCENAME$ = "WLCR";
+			doevent "WLCR_Instance#Custom::OnStartInstance";
+			end;
+
+		case 8:
+			#INSTANCENAME$ = "SaraMemory";
+			doevent "SaraMemory_Instance#Custom::OnStartInstance";
+			end;
+
+		case 9:
+			#INSTANCENAME$ = "InfiniteSpace";
+			doevent "InfiniteSpace_Instance#Custom::OnStartInstance";
+			end;
+
+		case 10:
+			#INSTANCENAME$ = "BakonawaLake";
+			doevent "BakonawaLake_Instance#Custom::OnStartInstance";
+			end;
+
+		case 11:
+			#INSTANCENAME$ = "AirshipAssault";
+			doevent "AirshipAssault_Instance#Custom::OnStartInstance";
+			end;
+
+		case 12:
+			#INSTANCENAME$ = "DevilTower";
+			doevent "DevilTower_Instance#Custom::OnStartInstance";
+			end;
+
+		case 13:
+			#INSTANCENAME$ = "LaboratorioCentral";
+			doevent "LaboratorioCentral_Instance#Custom::OnStartInstance";
+			end;
+
+		case 14:
+			#INSTANCENAME$ = "HTF";
+			doevent "HTF_Instance#Custom::OnStartInstance";
+			end;
+
+		case 15:
+			#INSTANCENAME$ = "WolfchevLaboratory";
+			doevent "WolfchevLaboratory_Instance#Custom::OnStartInstance";
+			end;
+
+		case 16:
+			#INSTANCENAME$ = "TRG";
+			doevent "TRG_Instance#Custom::OnStartInstance";
+			end;
+
+		case 17:
+			#INSTANCENAME$ = "WATERGARDEN";
+			doevent "WATERGARDEN_Instance#Custom::OnStartInstance";
+			end;
+
+	}
+
+	end;
+}

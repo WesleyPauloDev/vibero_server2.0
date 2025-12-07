@@ -16,35 +16,24 @@ OnAtcommand:
 function	script	Menu_Lojas	{	
 	mes "[Menu de Lojas]";
 
-    switch(select("Instância", "Cheffenia", "Bio5", "Anubis", "Éden", "Votos", "Pontos MVP", "Loja de Presença")) {
-        case 1:
-            switch(select("Equipamentos", "Itens")) {
+    switch(select("Éden", "Anubis", "Instância", "Cheffenia", "Bio5", "Votos", "Pontos MVP", "Presença", "Pets", "Minérios")) {
+         case 1: // Éden            
+            mes "[Loja do Éden]";
+            switch(select("Consumíveis:Armas:Equipamentos:Sair")) {
                 case 1:
-                    callshop "instancia_barter",1;
+                    callshop "consumable_eden"; // Loja de Consumíveis
                     end;
                 case 2:
-                    callshop "instancia_items_barter",1;
+                    callshop "weapons_eden"; // Loja de armas
                     end;
+                case 3:
+                    callshop "equipments_eden"; // Loja de equipamentos
+                    end;
+                default:
+                    mes "Volte sempre!";
+                    close;
             }
-        case 2:
-            switch(select("Cheffenia Normal", "Cheffenia Hard")) {
-                case 1:
-                    callshop "cheffenia_barter",1;
-                    end;
-                case 2:
-                    callshop "cheffenia_hard_barter",1;
-                    end;
-            }
-        case 3:
-            switch(select("Bio5 Normal", "Bio5 Hard")) {
-                case 1:
-                    callshop "bio5_barter",1;
-                    end;
-                case 2:
-                    callshop "bio5_hard_barter",1;
-                    end;
-            }
-        case 4:
+        case 2:  // Anubis
             switch(select("Encantamentos", "Armas", "Equipamentos")) {
                 case 1:
                     callshop "enchant_anubis",1;
@@ -56,37 +45,93 @@ function	script	Menu_Lojas	{
                     callshop "equipments_anubis",1;
                     end;
             }
-        case 5:
-            next;
-            mes "[Loja do Éden]";
-            switch(select("Consumíveis:Armas:Equipamentos:Sair")) {
+        case 3:  // Instância
+            switch(select("Equipamentos", "Armas", "Itens", "Grades")) {
                 case 1:
-                    callshop "consumable_eden"; // Loja de Consumíveis
+                    callshop "instancia_barter",1;
                     end;
-
                 case 2:
-                    callshop "weapons_eden"; // Loja de armas
+                    callshop "weapons_instancia_barter",1;
                     end;
-
                 case 3:
-                    callshop "equipments_eden"; // Loja de equipamentos
+                    callshop "instancia_items_barter",1;
                     end;
-                default:
-                    mes "Volte sempre!";
-                    close;
+                case 4:
+                    callshop "grade_instancia_barter",1;
+                    end;
             }
-        case 6:
+        case 4:  // Cheffenia
+            switch(select("Cheffenia Normal", "Cheffenia Hard")) {
+                case 1:
+                    switch(select("Equipamentos", "Armas", "Itens")) {
+                        case 1:
+                            callshop "cheffenia_barter",1;
+                            end;
+                        case 2:
+                            callshop "weapons_cheffenia_barter",1;
+                            end;
+                        case 3:
+                            callshop "items_cheffenia_barter",1;
+                            end;
+                    }
+                case 2:
+                    switch(select("Equipamentos", "Armas", "Itens")) {
+                        case 1:
+                            callshop "cheffenia_hard_barter",1;
+                            end;
+                        case 2:
+                            callshop "weapons_cheffeniaH_barter",1;
+                            end;
+                        case 3:
+                            callshop "items_cheffeniaH_barter",1;
+                            end;
+                    }
+            }
+        case 5:  // Bio5
+            switch(select("Bio5 Normal", "Bio5 Hard")) {
+                case 1:
+                    switch(select("Equipamentos", "Armas", "Itens")) {
+                        case 1:
+                            callshop "bio5_barter",1;
+                            end;
+                        case 2:
+                            callshop "weapons_bio5_barter",1;
+                            end;
+                        case 3:
+                            callshop "items_bio5_barter",1;
+                            end;
+                    }
+                case 2:
+                    switch(select("Equipamentos", "Armas", "Itens")) {
+                        case 1:
+                            callshop "bio5_hard_barter",1;
+                            end;
+                        case 2:
+                            callshop "weapons_bio5H_barter",1;
+                            end;
+                        case 3:
+                            callshop "items_bio5H_barter",1;
+                            end;
+                    }
+            }
+        case 6:  // Votos
             next;
             doEvent "Loja de Votos::OnTalk";
             end;
-        case 7:
+        case 7:  // Pontos MVP
             next;
             doEvent "Loja de Pontos MVP::OnTalk";
             end;        
-        case 8:
+        case 8:  // Pontos de Presença
             next;            
             doEvent "Loja de Presença::OnTalk";
             end;        
+        case 9:  // Pets
+            callshop "pet_egg_barter_shop",1;
+            end;
+        case 10:  // Minérios
+            callshop "ore_barter_shop",1;
+            end;     
     }
     close;
 	

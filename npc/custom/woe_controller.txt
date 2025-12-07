@@ -26,16 +26,16 @@
 
 // Information NPC
 //============================================================
-// prontera,156,196,4	script	Informações de Guerra	835,{
-// 	doevent "WOE_CONTROL::OnMenu";
-// 	end;
-// OnAgitStart:
-// 	while(agitcheck() || agitcheck2() || agitcheck3()) {
-// 		sleep 425;
-// 		specialeffect EF_BEGINSPELL6;
-// 	}
-// 	end;
-// }
+prontera,149,183,4	script	WOE Information	835,{
+	doevent "WOE_CONTROL::OnMenu";
+	end;
+OnAgitStart:
+	while(agitcheck() || agitcheck2() || agitcheck3()) {
+		sleep 425;
+		specialeffect EF_BEGINSPELL6;
+	}
+	end;
+}
 
 // Script Core
 //============================================================
@@ -45,6 +45,20 @@ function Region;
 function Castle;
 
 OnInit:
+	SetCastleData "prtg_cas03", CD_GUILD_ID, 0;
+	AgitStart; AgitStart2; AgitStart3;
+	// Limpar sessões antigas
+	deletearray $WOE_CONTROL[0], getarraysize($WOE_CONTROL);
+
+	// Criar sessão: Quarta (3), 20h–22h, castelo prtg_cas03 (index 2)
+	setarray $WOE_CONTROL[0],
+		0,      // Dia  (0=Dom, 1=Seg ... 3=Quarta)
+		19,     // Hora início
+		20,     // Hora fim
+		(1<<2); // Bitmask para prtg_cas03
+
+	// Atualizar tamanho
+	set .Size, getarraysize($WOE_CONTROL);
 // -----------------------------------------------------------
 //  Configuration settings.
 // -----------------------------------------------------------
@@ -167,7 +181,7 @@ OnInit:
 	set .Init,1;
 	.current_region = 0;
 
-OnMinute00:
+OnMinute06:
 	freeloop(1);
 	if (agitcheck() || agitcheck2() || agitcheck3()) {
 		for(set .@i,0; .@i<.Size; set .@i,.@i+4) {
@@ -202,9 +216,9 @@ OnMinute00:
 					if (.Active[0]&(1<<.@j)) {
 						if (!.Init) Disp_Owner(.Castles$[.@j],0);
 						set .Active[1], .Active[1] | (1<<.castle_region[.@j]);
-					} else {
-						donpcevent .event_name_agitend$[.@j];
-						killmonster .Castles$[.@j], .event_name_killmob$[.@j];
+					// } else {
+					// 	donpcevent .event_name_agitend$[.@j];
+					// 	killmonster .Castles$[.@j], .event_name_killmob$[.@j];
 					}
 				}
 				break;
