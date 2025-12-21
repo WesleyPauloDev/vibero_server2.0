@@ -13,10 +13,13 @@ OnAtcommand:
 	.@iid = instance_id(IM_PARTY);
 
 	if (.@iid > 0) {
-		// Jogador já tem instância ativa ? reentrar
-		#INSTANCERID = getcharid(3);
-		doevent #INSTANCENAME$ + "_Instance#Custom::OnStartInstance"; // centralizamos a lógica
-		end;
+		// Líder já criou a instância ? entrar
+		if (getcharid(1) && getpartyleader(getcharid(1), 2) == getcharid(0)) {
+			#INSTANCERID = getcharid(3);
+			debugmes #INSTANCENAME$;
+			doevent #INSTANCENAME$ + "_Instance#Custom::OnStartInstance"; // centralizamos a lógica
+			end;
+		}
 	}
 
 	mes "[Instâncias Disponíveis]";
@@ -41,7 +44,7 @@ OnAtcommand:
 		"[140+] Fábrica de Brinquedos de Terror",
 		"[150+] Laboratório Wolfchev",
 		"[160+] Templo do Rei Demônio",
-		"[???] WaterGarden"
+		"[170+] WaterGarden"
 	);
 
 	close2;

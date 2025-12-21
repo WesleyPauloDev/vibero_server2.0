@@ -1,8 +1,8 @@
 // npc/custom/pvp_weekly_reset.txt
 -	script	PVP_WEEKLY_REWARD	-1,{
-	
-	 // Roda todo dia às 22:00
-	OnClock2200:
+
+	 // Roda todo dia
+	OnClock2359:
 		// 6 = sábado
 		if (gettime(DT_DAYOFWEEK) != 6) end;
 
@@ -27,13 +27,20 @@
 		
 		announce "Sistema PvP: Checando Ranking Semanal...",bc_all,"0xFB9D04",FW_NORMAL,12;
 
-		sleep 20000;
+		sleep 10000;
 
 		// Pega top 3
-		query_sql(" SELECT c.char_id, COALESCE(k.value,0) AS kills FROM `char` c LEFT JOIN `char_reg_num` k     ON k.char_id = c.char_id     AND k.`key` = 'pvp_kills'     AND k.`index` = 0 ORDER BY kills DESC LIMIT 3", .@cid, .@kills);
+		query_sql(" SELECT MAX(COALESCE(k.value,0)) FROM `char` c LEFT JOIN `char_reg_num` k ON k.char_id = c.char_id AND k.`key` = 'pvp_kills' AND k.`index` = 0", .@max_kills);
 
-		// === 1º LUGAR ===
-		if (.@cid[0]) {
+		if (.@max_kills <= 0) {
+			announce "PvP Semanal: Nenhum jogador fez kills esta semana. Premiação cancelada.", bc_all;
+			end;
+		}
+
+		query_sql(" SELECT c.char_id, COALESCE(k.value,0) AS kills FROM `char` c LEFT JOIN `char_reg_num` k ON k.char_id = c.char_id AND k.`key` = 'pvp_kills' AND k.`index` = 0 ORDER BY kills DESC LIMIT 3", .@cid, .@kills);
+
+ 		// === 1º LUGAR ===
+		if (.@cid[0] && .@kills[0] > 0) {
 
 			// pega nome do char
 			query_sql("SELECT name FROM `char` WHERE char_id = "+.@cid[0], .@name$);
@@ -56,7 +63,7 @@
 		}
 
 		// === 2º LUGAR ===
-		if (.@cid[1]) {
+		if (.@cid[1] && .@kills[1] > 0) {
 
 			query_sql("SELECT name FROM `char` WHERE char_id = "+.@cid[1], .@name$);
 
@@ -71,7 +78,7 @@
 		}
 
 		// PREMIAÇÃO 3º LUGAR
-		if (.@cid[2]) {
+		if (.@cid[2] && .@kills[2] > 0) {
 
 			query_sql("SELECT name FROM `char` WHERE char_id = "+.@cid[2], .@name$);
 

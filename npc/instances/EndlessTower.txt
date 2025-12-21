@@ -1156,7 +1156,7 @@ OnInstanceInit:
 OnMyMobDead:
 
 	// Drops
-	callfunc("CustomMapDrop", "1@tower", 607, 10);
+	callfunc("CustomMapDrop", "1@tower", 607, 5);
 	// XP
 	callfunc("MapExpBonus", "1@tower", 50, 20);
 
@@ -1363,6 +1363,11 @@ OnInstanceInit:
 	end;
 
 OnMyMobDead:
+	// Drops
+	callfunc("CustomMapDrop", "2@tower", 607, 5);
+	// XP
+	callfunc("MapExpBonus", "2@tower", 50, 20);
+
 	set .@map$, instance_mapname("2@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("Immortal Furnace#1")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
@@ -1479,6 +1484,10 @@ OnInstanceInit:
 	end;
 
 OnMyMobDead:
+	// Drops
+	callfunc("CustomMapDrop", "3@tower", 607, 5);
+	// XP
+	callfunc("MapExpBonus", "3@tower", 50, 20);
 	set .@map$, instance_mapname("3@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("Immortal Furnace#2")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
@@ -1595,6 +1604,11 @@ OnInstanceInit:
 	end;
 
 OnMyMobDead:
+	// Drops
+	callfunc("CustomMapDrop", "4@tower", 607, 5);
+	// XP
+	callfunc("MapExpBonus", "4@tower", 50, 20);
+
 	set .@map$, instance_mapname("4@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("Immortal Furnace#3")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
@@ -1870,6 +1884,11 @@ OnInstanceInit:
 	end;
 
 OnMyMobDead:
+	// Drops
+	callfunc("CustomMapDrop", "5@tower", 607, 5);
+	// XP
+	callfunc("MapExpBonus", "5@tower", 50, 20);
+
 	set .@map$, instance_mapname("5@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#102FShadowDust1")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
@@ -1995,6 +2014,11 @@ OnInstanceInit:
 	end;
 
 OnMyMobDead:
+	// Drops
+	callfunc("CustomMapDrop", "6@tower", 607, 5);
+	// XP
+	callfunc("MapExpBonus", "6@tower", 50, 20);
+
 	set .@mob_dead_num,mobcount(instance_mapname("6@tower"),instance_npcname("Tyrants Throne#")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
 		donpcevent instance_npcname("#1st Beeper")+"::OnEnable";
@@ -2028,7 +2052,7 @@ OnTimer15500:
 
 OnTimer20500:
 	set .@map$, instance_mapname("6@tower");
-	mapannounce .@map$,"Lets see who runs fastest. Are you ready?",bc_map,"0x00ffcc";
+	mapannounce .@map$,"Vamos ver quem corre mais rápido. Estão preparados?",bc_map,"0x00ffcc";
 	stopnpctimer;
 	areamonster .@map$,151,66,153,106,"Bone Guardian",1152,50,instance_npcname("#1st Beeper")+"::OnMyMobDead";
 	areamonster .@map$,158,66,160,106,"Bone Guardian",1152,50,instance_npcname("#1st Beeper")+"::OnMyMobDead";
@@ -2207,7 +2231,7 @@ OnMyMobDead:
 			setd("$party_current_floor_"+.@pid, 0);
 			setd("$party_current_map_"+.@pid, "");
 			setd("$etower_pid_by_iid_"+.@iid, 0);
-		}
+		}		
 
 		// Premiações do Servidor
 		if (#ETOWER_STATUS == 2) {

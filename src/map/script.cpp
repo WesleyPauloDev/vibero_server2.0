@@ -26830,6 +26830,32 @@ BUILDIN_FUNC(setenchantgrade)
 }
 
 
+BUILDIN_FUNC(openbuyingstore)
+{
+	map_session_data *sd = nullptr;
+
+	// O correto é: st, &sd, nullptr
+	if (!script_rid2sd(sd)) {
+		ShowError("openbuyingstore: no player attached!\n");
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	int slots = script_getnum(st, 2);
+
+	if (slots < 1)
+		slots = 1;
+	if (slots > MAX_BUYINGSTORE_SLOTS)
+		slots = MAX_BUYINGSTORE_SLOTS;
+
+	// Abre interface de criar loja de compra
+	buyingstore_setup(sd, slots);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+
+
+
 BUILDIN_FUNC(setitemcard)
 {
 	map_session_data* sd = nullptr;
@@ -28716,6 +28742,9 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getenchantgrade, "??"),
 	BUILDIN_DEF(setenchantgrade, "ii"),
 	BUILDIN_DEF(setitemcard, "iii"),
+
+
+	BUILDIN_DEF(openbuyingstore, "i"),
 
 
 	BUILDIN_DEF(mob_setidleevent, "is"),

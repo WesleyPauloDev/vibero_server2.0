@@ -9713,8 +9713,24 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 		break;
 
 	case MC_VENDING:
-		if(sd)
-		{	//Prevent vending of GMs with unnecessary Level to trade/drop. [Skotlex]
+		if (!sd)
+			break;
+
+		sd->vend_coin_selected = (pc_readglobalreg(sd, add_str("vend_coin_selected")) != 0);
+		sd->vend_coin_type = (int)pc_readglobalreg(sd, add_str("vend_coin_type"));
+
+		// Se ainda não escolheu moeda:
+		if (!sd->vend_coin_selected) {
+
+			// Salva o nível original para usar depois
+			sd->vend_skill_lv = skill_lv;
+
+			// Chama script menu
+			npc_event_do_id("VendingScriptFake::OnVendingMenu", sd->id);
+
+			return 0; // Impede vending original até escolher moeda
+		} else {		
+			//Prevent vending of GMs with unnecessary Level to trade/drop. [Skotlex]
 			if ( !pc_can_give_items(sd) )
 				clif_skill_fail( *sd, skill_id );
 			else {
@@ -9730,10 +9746,13 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 				else{
 					// Instantly open the vending UI
 					sd->state.pending_vending_ui = false;
+					sd->vend_coin_selected = false;
+					pc_setglobalreg(sd, add_str("vend_coin_selected"), 0);
 					clif_openvendingreq( *sd, 2+skill_lv );
 				}
 			}
 		}
+		
 		break;
 
 	case AL_TELEPORT:
@@ -23590,7 +23609,20 @@ bool skill_produce_mix(map_session_data *sd, uint16 skill_id, t_itemid nameid, i
 				return true;
 			}
 		} else if (tmp_item.amount) { //Success
+			if (nameid == 547) { // Poção Branca Compacta normal
+				unsigned char rank = pc_famerank(sd->status.char_id, MAPID_ALCHEMIST);
+
+				if (rank > 0 && rank <= 10) {
+					// Substitui pela poção personalizada (9681)
+					nameid = 9681;
+					tmp_item.nameid = 9681;
+
+					clif_displaymessage(sd->fd,
+						"Você Criou uma Poção Compacta Branca Rankeada.");
+				}
+			}
 			if ((flag = pc_additem(sd,&tmp_item,tmp_item.amount,LOG_TYPE_PRODUCE))) {
+
 				clif_additem(sd,0,0,flag);
 				if( battle_config.skill_drop_items_full ){
 					map_addflooritem(&tmp_item,tmp_item.amount,sd->m,sd->x,sd->y,0,0,0,4,0);

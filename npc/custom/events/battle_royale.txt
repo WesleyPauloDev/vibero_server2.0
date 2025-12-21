@@ -1,0 +1,185 @@
+-	script	BattleRoyale	-1,{
+
+	OnInit:
+        bindatcmd "br", "BattleRoyale::OnBR", 0, 0;
+        
+		.br_map$ = "guild_vs2";
+		.br_active = 0;
+		.br_pvp = 0;
+		end;
+
+	// // =========================
+	// // INICIAR EVENTO (GM)
+	// // =========================
+	OnClock1100:
+	OnClock1900:
+	OnClock2300:
+		if (.br_active) end;
+
+		.br_active = 1;
+		.br_pvp = 0;
+
+		announce "[Battle Royale] Evento Ativo! Use @br para participar!", bc_all;		
+
+		// Tempo de preparação
+		sleep 240000; // 4 minutos
+
+        announce "[Battle Royale] Evento iniciara em 1 minuto! Use @br para participar!", bc_all;	
+
+		sleep 60000; // 1 minuto
+
+        // =========================
+        // VERIFICA QUANTOS JOGADORES HÁ NO MAPA
+        // =========================
+        getmapunits(BL_PC, .br_map$, .@units);
+        .@count = getarraysize(.@units);
+
+        // Menos de 2 jogadores ? cancela evento
+        if (.@count < 2) {
+
+            announce "[Battle Royale] Evento cancelado por falta de participantes.", bc_all;
+
+            // Expulsa quem estiver no mapa
+            mapwarp .br_map$, "prontera",155,189;
+
+            .br_active = 0;
+            .br_pvp = 0;
+            end;
+        }
+
+        mapannounce .br_map$, "[Battle Royale] PvP liberado! Só um sobreviverá!", bc_map;
+
+		// Ativa PvP total
+		setmapflag "guild_vs2", mf_pvp;
+
+		.br_pvp = 1;
+		end;
+    // =========================
+	// COMANDO @BR
+	// =========================
+    OnBR:
+		if (!.br_active) {
+			dispbottom "Não há Battle Royale ativo.";
+			end;
+		}
+
+		if (.br_pvp) {
+			dispbottom "O Battle Royale já começou.";
+			end;
+		}
+
+        // VERIFICA SE ESTÁ EM PARTY
+        if (getcharid(1) > 0) {
+            dispbottom "Você não pode participar do Battle Royale estando em grupo.";
+            dispbottom "Saia do grupo e tente novamente.";
+            end;
+        }
+
+        // =========================
+        // VERIFICA IP DUPLICADO
+        // =========================
+        .@caller_rid = getcharid(3);
+        .@my_ip$ = getcharip();
+
+        getmapunits(BL_PC, .br_map$, .@units);
+        for (.@i = 0; .@i < getarraysize(.@units); .@i++) {
+            if (attachrid(.@units[.@i])) {
+                if (getcharip() == .@my_ip$) {
+                    // VOLTA o RID para quem usou o comando
+			        attachrid(.@caller_rid);
+
+                    dispbottom "Já existe um jogador conectado com este IP no Battle Royale.";
+                    dispbottom "Apenas um personagem por IP é permitido.";
+                    end;
+                }
+            }
+        }
+
+		warp .br_map$, 0, 0;
+		dispbottom "Você entrou no Battle Royale. Prepare seus buffs!";
+		end;
+
+	// =========================
+	// MORTE NO EVENTO
+	// =========================
+	OnPCDieEvent:
+		if (!.br_active) end;
+		if (strcharinfo(3) != .br_map$) end;
+
+        getitem 9608,10;
+
+		warp "prontera",155,189;
+		dispbottom "Você foi eliminado do Battle Royale.";
+
+		// Verifica se sobrou só 1
+		callsub S_CheckWinner;
+		end;
+
+	// =========================
+	// VERIFICAR VENCEDOR
+	// =========================
+	S_CheckWinner:
+		.@count = 0;
+		.@aid = 0;
+
+		getmapunits(BL_PC, .br_map$, .@units);
+		for (.@i = 0; .@i < getarraysize(.@units); .@i++) {
+			if (attachrid(.@units[.@i])) {
+				if (hp > 0) {
+					.@count++;
+					.@aid = getcharid(3);
+				}
+			}
+		}
+
+		if (.@count == 1) {
+			attachrid(.@aid);
+			callsub S_Winner;
+		}
+		end;
+
+	// =========================
+	// FINALIZAR EVENTO
+	// =========================
+	S_Winner:
+		announce "[Battle Royale] " + strcharinfo(0) + " é o vencedor!", bc_all;
+
+		// RECOMPENSA
+        getitem 9608,20;
+
+        // RECOMPENSA ALEATÓRIA (1 ITEM)
+        // =========================
+        .@reward[0] = 12411;
+        .@reward[1] = 12210;
+        .@reward[2] = 22818;
+        .@reward[3] = 7621;
+        .@reward[4] = 12223;
+        .@reward[5] = 12224;
+        .@reward[6] = 9642;
+        .@reward[7] = 9615;
+        .@reward[8] = 12103;
+        .@reward[9] = 12214;
+
+        // Sorteia
+        .@i = rand(getarraysize(.@reward));
+        getitem .@reward[.@i], 1;
+        
+		dispbottom "Parabéns! Você venceu o Battle Royale.";
+
+        sleep 3000;
+
+		// Limpeza
+		mapwarp .br_map$, "prontera",155,189;
+
+		.br_active = 0;
+		.br_pvp = 0;
+		end;
+}
+
+guild_vs2	mapflag	pvp_noguild
+guild_vs2	mapflag	pvp_noparty
+guild_vs2	mapflag	pvp	off
+guild_vs2	mapflag	nowarp
+guild_vs2	mapflag	nowarpto
+guild_vs2	mapflag	nosave
+

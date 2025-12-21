@@ -14164,7 +14164,20 @@ void clif_parse_OpenVending(int32 fd, map_session_data* sd){
 	if( message[0] == '\0' ) // invalid input
 		return;
 
-	vending_openvending(*sd, message, data, len/8, nullptr);
+	// Determinar prefixo conforme moeda escolhida
+	const char* prefix = "[Zeny] ";
+
+	if (sd->vend_coin_type == 1)
+		prefix = "[Rops] ";
+	else if (sd->vend_coin_type == 2)
+		prefix = "[RMT] ";
+
+	// Criar novo nome da loja sem risco de memória
+	char shopname_prefixed[128];
+	snprintf(shopname_prefixed, sizeof(shopname_prefixed), "%s%s", prefix, message);
+
+	// Abre a loja com o nome alterado
+	vending_openvending(*sd, shopname_prefixed, data, len/8, nullptr);
 }
 
 

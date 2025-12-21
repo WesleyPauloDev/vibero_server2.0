@@ -77,3 +77,282 @@ S_FreeStylist:
 	}
 	end;
 }
+
+//==================================================
+// Paleta Stress Test
+// Testa classes x paletas x sexo
+//==================================================
+// prontera,150,180,5	script	PaletteTester	4_F_EDEN_MASTER,{
+// 	mes "[Palette Tester]";
+// 	mes "Escolha o grupo de classes para testar.";
+// 	next;
+
+// 	set .@opt, select(
+// 		"No_Trans:"+
+// 		"Trans:"+
+// 		"3rd Classes:"+
+// 		"3rd Trans:"+
+// 		"Expandidas:"+
+// 		"Mini (Baby):"+
+// 		"Sair"
+// 	);
+
+// 	if (.@opt == 7)
+// 		close;
+
+// 	close2;
+
+// 	switch (.@opt) {
+// 	case 1: callsub S_TestJobs, "No_Trans"; break;
+// 	case 2: callsub S_TestJobs, "Trans"; break;
+// 	case 3: callsub S_TestJobs, "3";   break;
+// 	case 4: callsub S_TestJobs, "3T";  break;
+// 	case 5: callsub S_TestJobs, "EXP"; break;
+// 	case 6: callsub S_TestJobs, "BABY"; break;
+// 	}
+// 	end;
+
+// //--------------------------------------------------
+// // Sub: Testar lista de jobs
+// //--------------------------------------------------
+// S_TestJobs:
+// 	set .@group$, getarg(0);
+
+// 	set .@max_pal, getbattleflag("max_cloth_color");
+// 	if (.@max_pal > 4) set .@max_pal, 4;
+
+// 	// limpa lista
+// 	deletearray .@joblist;
+
+// 	//------------------------------------------------
+// 	// 1-1
+// 	if (.@group$ == "No_Trans") {
+// 		setarray .@joblist,
+// 			JOB_NOVICE,
+
+// 			JOB_SWORDMAN,
+// 			JOB_MAGE,
+// 			JOB_ARCHER,
+// 			JOB_ACOLYTE,
+// 			JOB_MERCHANT,
+// 			JOB_THIEF,
+
+// 			JOB_KNIGHT,
+// 			JOB_PRIEST,
+// 			JOB_WIZARD,
+// 			JOB_BLACKSMITH,
+// 			JOB_HUNTER,
+// 			JOB_ASSASSIN,
+
+// 			JOB_CRUSADER,
+// 			JOB_MONK,
+// 			JOB_SAGE,
+// 			JOB_ROGUE,
+// 			JOB_ALCHEMIST,
+// 			JOB_BARD,
+// 			JOB_DANCER;
+// 	}
+
+// 	//------------------------------------------------
+// 	// 1-2
+// 	if (.@group$ == "Trans") {
+// 		setarray .@joblist,
+// 			JOB_NOVICE_HIGH,
+
+// 			JOB_SWORDMAN_HIGH,
+// 			JOB_MAGE_HIGH,
+// 			JOB_ARCHER_HIGH,
+// 			JOB_ACOLYTE_HIGH,
+// 			JOB_MERCHANT_HIGH,
+// 			JOB_THIEF_HIGH,
+
+// 			JOB_LORD_KNIGHT,
+// 			JOB_HIGH_PRIEST,
+// 			JOB_HIGH_WIZARD,
+// 			JOB_WHITESMITH,
+// 			JOB_SNIPER,
+// 			JOB_ASSASSIN_CROSS,
+
+// 			JOB_PALADIN,
+// 			JOB_CHAMPION,
+// 			JOB_PROFESSOR,
+// 			JOB_STALKER,
+// 			JOB_CREATOR,
+// 			JOB_CLOWN,
+// 			JOB_GYPSY;
+// 	}
+
+// 	//------------------------------------------------
+// 	// 3rd
+// 	if (.@group$ == "3") {
+// 		setarray .@joblist,
+// 			JOB_RUNE_KNIGHT,
+// 			JOB_WARLOCK,
+// 			JOB_RANGER,
+// 			JOB_ARCH_BISHOP,
+// 			JOB_MECHANIC,
+// 			JOB_GUILLOTINE_CROSS,
+
+// 			JOB_ROYAL_GUARD,
+// 			JOB_SORCERER,
+// 			JOB_MINSTREL,
+// 			JOB_WANDERER,
+// 			JOB_SURA,
+// 			JOB_GENETIC,
+// 			JOB_SHADOW_CHASER;
+// 	}
+
+// 	//------------------------------------------------
+// 	// 3rd Trans
+// 	if (.@group$ == "3T") {
+// 		setarray .@joblist,
+// 			JOB_RUNE_KNIGHT_T,
+// 			JOB_WARLOCK_T,
+// 			JOB_RANGER_T,
+// 			JOB_ARCH_BISHOP_T,
+// 			JOB_MECHANIC_T,
+// 			JOB_GUILLOTINE_CROSS_T,
+
+// 			JOB_ROYAL_GUARD_T,
+// 			JOB_SORCERER_T,
+// 			JOB_MINSTREL_T,
+// 			JOB_WANDERER_T,
+// 			JOB_SURA_T,
+// 			JOB_GENETIC_T,
+// 			JOB_SHADOW_CHASER_T,
+
+// 			JOB_DRAGON_KNIGHT,
+// 			JOB_MEISTER,
+// 			JOB_SHADOW_CROSS,
+// 			JOB_ARCH_MAGE,
+// 			JOB_CARDINAL,
+// 			JOB_WINDHAWK,
+
+// 			JOB_IMPERIAL_GUARD,
+// 			JOB_BIOLO,
+// 			JOB_ABYSS_CHASER,
+// 			JOB_ELEMENTAL_MASTER,
+// 			JOB_INQUISITOR,
+// 			JOB_TROUBADOUR,
+// 			JOB_TROUVERE;
+// 	}
+
+// 	//------------------------------------------------
+// 	// Expandidas
+// 	if (.@group$ == "EXP") {
+// 		setarray .@joblist,
+			
+// 			JOB_TAEKWON,
+// 			JOB_STAR_GLADIATOR,			
+// 			JOB_STAR_EMPEROR,
+// 			JOB_SKY_EMPEROR,
+			
+// 			JOB_SOUL_LINKER,
+// 			JOB_SOUL_REAPER,
+// 			JOB_SOUL_ASCETIC,
+			
+// 			JOB_NINJA,
+// 			JOB_KAGEROU,
+// 			JOB_OBORO,
+// 			JOB_SHINKIRO,
+// 			JOB_SHIRANUI,
+
+// 			JOB_GUNSLINGER,
+// 			JOB_REBELLION,
+// 			JOB_NIGHT_WATCH,
+
+// 			JOB_SUPER_NOVICE,	
+// 			JOB_SUPER_NOVICE_E,
+// 			JOB_HYPER_NOVICE;
+// 	}
+
+// 	//------------------------------------------------
+// 	// Baby
+// 	if (.@group$ == "BABY") {
+// 		setarray .@joblist,
+// 			JOB_BABY,
+
+// 			JOB_BABY_SWORDMAN,
+// 			JOB_BABY_MAGE,
+// 			JOB_BABY_ARCHER,
+// 			JOB_BABY_ACOLYTE,
+// 			JOB_BABY_MERCHANT,
+// 			JOB_BABY_THIEF,
+
+// 			JOB_BABY_KNIGHT,
+// 			JOB_BABY_PRIEST,
+// 			JOB_BABY_WIZARD,
+// 			JOB_BABY_BLACKSMITH,
+// 			JOB_BABY_HUNTER,
+// 			JOB_BABY_ASSASSIN,
+
+// 			JOB_BABY_CRUSADER,
+// 			JOB_BABY_MONK,
+// 			JOB_BABY_SAGE,
+// 			JOB_BABY_ROGUE,
+// 			JOB_BABY_ALCHEMIST,
+// 			JOB_BABY_BARD,
+// 			JOB_BABY_DANCER,
+
+// 			JOB_SUPER_BABY,
+
+// 			JOB_BABY_NINJA,
+// 			JOB_BABY_KAGEROU,
+// 			JOB_BABY_OBORO,
+
+// 			JOB_BABY_TAEKWON,
+// 			JOB_BABY_STAR_GLADIATOR,
+// 			JOB_BABY_STAR_EMPEROR,
+
+// 			JOB_BABY_SOUL_LINKER,
+
+// 			JOB_BABY_GUNSLINGER,
+// 			JOB_BABY_REBELLION,
+
+// 			JOB_BABY_SOUL_REAPER,
+// 			JOB_SUPER_BABY,
+// 			JOB_SUPER_BABY_E,
+
+// 			JOB_BABY_RUNE_KNIGHT,
+// 			JOB_BABY_WARLOCK,
+// 			JOB_BABY_RANGER,
+// 			JOB_BABY_ARCH_BISHOP,
+// 			JOB_BABY_MECHANIC,
+// 			JOB_BABY_GUILLOTINE_CROSS,
+
+// 			JOB_BABY_ROYAL_GUARD,
+// 			JOB_BABY_SORCERER,
+// 			JOB_BABY_MINSTREL,
+// 			JOB_BABY_WANDERER,
+// 			JOB_BABY_SURA,
+// 			JOB_BABY_GENETIC,
+// 			JOB_BABY_SHADOW_CHASER;
+// 	}
+
+// 	//------------------------------------------------
+// 	// EXECUÇÃO DO TESTE
+// 	//------------------------------------------------
+// 	for (.@i = 0; .@i < getarraysize(.@joblist); .@i++) {
+
+// 		jobchange 0;
+// 		sleep2 1000;
+// 		jobchange .@joblist[.@i];
+
+// 		for (.@pal = 1; .@pal <= .@max_pal; .@pal++) {
+
+// 			setlook LOOK_CLOTHES_COLOR, .@pal;
+
+// 			dispbottom
+// 				"TESTE -> Grupo: "+.@group$+
+// 				" | Job: "+.@joblist[.@i]+
+// 				" | Paleta: "+.@pal;
+
+// 			sleep2 700;
+// 		}
+// 	}
+
+// 	dispbottom "Teste do grupo "+.@group$+" finalizado.";
+// 	end;
+// }
+
+

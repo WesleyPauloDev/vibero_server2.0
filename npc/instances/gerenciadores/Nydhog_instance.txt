@@ -78,6 +78,16 @@ OnStartInstance:
 
 	next;
 
+	// =========================
+	// BLOQUEIO POR PARTY + IP
+	// =========================
+	if (!callfunc("F_CheckInstanceIPPermission")) {
+		mes "[Ninho de Nydhog]";
+		mes "Jogadores com mesmo IP só podem participar de mais de uma ";
+		mes "Instância simultaneamente , se estiverem em grupos diferentes.";
+		close;
+	}
+
 	// Menu principal
 	switch(select("Gerar Instância:Entrar na Instância:Cancelar")) {
 		case 1: // Gerar

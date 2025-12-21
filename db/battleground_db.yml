@@ -206,6 +206,29 @@ Body:
           ActiveEvent: KvM03_BG::OnCroixActive
           Variable: $@KvM03BG_id2
 
+  - Id: 10
+    Name: KvM Custom
+    MinPlayers: 1
+    MaxPlayers: 10
+    Locations:
+      - Map: bat_c01
+        StartEvent: BG_KvM_CMD::OnStart
+        TeamA:
+          RespawnX: 53
+          RespawnY: 128
+          DeathEvent: BG_KvM_CMD::OnRedDie
+          QuitEvent: BG_KvM_CMD::OnRedQuit
+          ActiveEvent: BG_KvM_CMD::OnRedActive
+          Variable: $@KvM_Custom_Red
+        TeamB:
+          RespawnX: 146
+          RespawnY: 55
+          DeathEvent: BG_KvM_CMD::OnBlueDie
+          QuitEvent: BG_KvM_CMD::OnBlueQuit
+          ActiveEvent: BG_KvM_CMD::OnBlueActive
+          Variable: $@KvM_Custom_Blue
+
+
 Footer:
   Imports:
   - Path: db/import/battleground_db.yml

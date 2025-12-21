@@ -1,6 +1,6 @@
 //============================================================
 //   WoE Control — Versão Ultra Simplificada
-//   Autor: ChatGPT + Wesley
+//   Autor: Wesley
 //   Compatível: rAthena 2021~2025
 //============================================================
 
@@ -61,13 +61,7 @@ OnAgitStart:
 //  CONFIGURAÇÃO GERAL
 //------------------------------------------------------------
 OnInit:
-
-    // Horário da WoE (somente 1 horário)
-    .woe_day   = 1;   // 0=Domingo … 6=Sábado
-    .woe_hour   = 11;
-    
     // Nome do castelo (1 castelo)
-
     .Castle$ = "prtg_cas03";
 	setmapflag .Castle$, mf_loadevent;
 	setmapflag .Castle$, mf_gvg_castle;
@@ -82,11 +76,12 @@ OnInit:
 //============================================================
 //   CONTROLE DE HORÁRIO (a cada minuto)
 //============================================================
-OnClock1141:
+OnClock2200:
 
     .@day  = gettime(DT_DAYOFWEEK);
 
     // Início
+    .woe_day   = 2;   // 0=Domingo … 6=Sábado
     if (.@day != .woe_day) end;
 
     // Resetar dono do castelo ao carregar script
@@ -104,7 +99,7 @@ OnClock1141:
     end;
 
     // Fim
-OnClock1150:
+OnClock2230:
     
     announce "[WoE] A Guerra do Emperium terminou!", bc_all|bc_woe;
 
@@ -156,13 +151,13 @@ OnEmpDie:
     end;
 
 // A cada minuto
-OnTimer6000:
+OnTimer60000:
 
 	// WoE ativa?
 	if (!agitcheck()) end;
 
 	.@gid = getcastledata(.Castle$, 1); // guild dona atual
-    debugmes "Pontos adicioando a guild " + getguildname(.@gid) + " Total: " + $WOE_TIME[.@gid];
+    debugmes "Pontos adicionado a guild " + getguildname(.@gid) + " Total: " + $WOE_TIME[.@gid];
 
 	if (.@gid > 0) {
 		// Soma 1 minuto ao dono atual

@@ -25,6 +25,8 @@
 #include "pc.hpp"
 #include "pc_groups.hpp"
 
+#include "intif.hpp"
+
 static uint32 vending_nextid = 0; ///Vending_id counter
 static DBMap *vending_db; ///DB holder the vender : charid -> map_session_data
 
@@ -70,6 +72,7 @@ void vending_closevending(map_session_data* sd)
 		clif_closevendingboard( *sd, AREA_WOS, nullptr );
 		idb_remove(vending_db, sd->status.char_id);
 	}
+
 }
 
 /**
@@ -91,6 +94,17 @@ void vending_vendinglistreq(map_session_data* sd, int32 id)
 		clif_displaymessage( sd->fd, msg_txt( sd, 246 ) ); // Your GM level doesn't authorize you to perform this action.
 		return;
 	}
+
+	// -------- MENSAGEM AO ABRIR A LOJA --------
+    const char* coin_name = "Zeny";
+    if (vsd->vend_coin_type == 1)
+        coin_name = "Rops";
+    else if (vsd->vend_coin_type == 2)
+        coin_name = "RMT";
+
+    char msg[128];
+    sprintf(msg, "Loja de %s – Moeda: %s", vsd->status.name, coin_name);
+    clif_displaymessage(sd->fd, msg);
 
 	sd->vended_id = vsd->vender_id;  // register vending uid
 
@@ -121,7 +135,8 @@ static double vending_calc_tax(map_session_data *sd, double zeny)
  * @param count : number of different items he's trying to buy
  */
 void vending_purchasereq(map_session_data* sd, int32 aid, int32 uid, const uint8* data, int32 count)
-{
+{	
+
 	int32 i, j, cursor, w, new_ = 0, blank, vend_list[MAX_VENDING];
 	double z;
 	struct s_vending vending[MAX_VENDING]; // against duplicate packets
@@ -171,10 +186,18 @@ void vending_purchasereq(map_session_data* sd, int32 aid, int32 uid, const uint8
 			vend_list[i] = j;
 
 		z += ((double)vsd->vending[j].value * (double)amount);
-		if( z > (double)sd->status.zeny || z < 0. || z > (double)MAX_ZENY ) {
-			clif_buyvending( *sd, idx, amount, PURCHASEMC_NO_ZENY ); // you don't have enough zeny
+
+
+		// if( z > (double)sd->status.zeny || z < 0. || z > (double)MAX_ZENY ) {
+		// 	clif_buyvending( *sd, idx, amount, PURCHASEMC_NO_ZENY ); // you don't have enough zeny
+		// 	return;
+		// }
+		if( z > (double)sd->cashPoints || z < 0. ) {
+			clif_buyvending(*sd, idx, amount, PURCHASEMC_NO_ZENY); // pode customizar depois
 			return;
 		}
+
+
 		if( z + (double)vsd->status.zeny > (double)MAX_ZENY ) {
 			clif_buyvending( *sd, idx, vsd->vending[j].amount, PURCHASEMC_OUT_OF_STOCK ); // too much zeny = overflow
 			return;
@@ -213,40 +236,212 @@ void vending_purchasereq(map_session_data* sd, int32 aid, int32 uid, const uint8
 		}
 	}
 
-	pc_payzeny(sd, (int32)z, LOG_TYPE_VENDING, vsd->status.char_id);
-	achievement_update_objective(sd, AG_SPEND_ZENY, 1, (int32)z);
-	z = vending_calc_tax(sd, z);
-	pc_getzeny(vsd, (int32)z, LOG_TYPE_VENDING, sd->status.char_id);
+	//--------------------------------------------------
+	// 1) CALCULAR O TOTAL DA COMPRA (antes de tudo)
+	//--------------------------------------------------
+	double total_cash_cost = 0.;
 
-	for( i = 0; i < count; i++ ) {
+	for (i = 0; i < count; i++) {
 		int16 amount = *(uint16*)(data + 4*i + 0);
 		int16 idx    = *(uint16*)(data + 4*i + 2);
 		idx -= 2;
-		z = 0.; // zeny counter
 
-		// vending item
+		double price = (double)vsd->vending[vend_list[i]].value;
+		total_cash_cost += price * amount;
+	}
+
+	// Converter double ? int
+	int total_cost = (int)total_cash_cost;
+	int coin = vsd->vend_coin_type; // moeda configurada pelo vendedor
+
+	// 0 = ZENY
+	if (coin == 0)
+	{
+		if (sd->status.zeny < total_cost)
+		{
+			clif_buyvending(*sd, 0, 0, PURCHASEMC_NO_ZENY);
+			return;
+		}
+
+		// cobra do comprador
+		pc_payzeny(sd, total_cost, LOG_TYPE_VENDING, vsd->status.char_id);
+		achievement_update_objective(sd, AG_SPEND_ZENY, 1, total_cost);
+	}
+
+	// 1 = ROPS (CashPoints)
+	else if (coin == 1)
+	{
+		if (sd->cashPoints < total_cost)
+		{
+			clif_displaymessage(sd->fd, "Rops insuficientes.");
+			return;
+		}
+
+		sd->cashPoints -= total_cost;
+		pc_setaccountreg(sd, add_str(CASHPOINT_VAR), sd->cashPoints);
+		chrif_save(sd, CSAVE_NORMAL);
+	}
+
+	// 2 = RMT
+	else if (coin == 2)
+	{
+		int rmt_points = (int)pc_readaccountreg(sd, add_str(RMTPOINT_VAR));
+
+		if (rmt_points < total_cost)
+		{
+			clif_displaymessage(sd->fd, "Saldo RMT insuficiente.");
+			return;
+		}
+
+		rmt_points -= total_cost;
+		pc_setaccountreg(sd, add_str(RMTPOINT_VAR), rmt_points);
+		chrif_save(sd, CSAVE_NORMAL);
+	}
+
+
+	//--------------------------------------------------
+	// 2) PROCESSAR ITENS DA VENDA
+	//--------------------------------------------------
+	for (i = 0; i < count; i++) {
+
+		int16 amount = *(uint16*)(data + 4*i + 0);
+		int16 idx    = *(uint16*)(data + 4*i + 2);
+		idx -= 2;
+
+		double z = (double)vsd->vending[vend_list[i]].value * (double)amount;
+
+		// Entregar item ao comprador
 		pc_additem(sd, &vsd->cart.u.items_cart[idx], amount, LOG_TYPE_VENDING);
-		vsd->vending[vend_list[i]].amount -= amount;
-		z += ((double)vsd->vending[vend_list[i]].value * (double)amount);
 
-		if( vsd->vending[vend_list[i]].amount ) {
-			if( Sql_Query( mmysql_handle, "UPDATE `%s` SET `amount` = %d WHERE `vending_id` = %d and `cartinventory_id` = %d", vending_items_table, vsd->vending[vend_list[i]].amount, vsd->vender_id, vsd->cart.u.items_cart[idx].id ) != SQL_SUCCESS ) {
-				Sql_ShowDebug( mmysql_handle );
-			}
+		// Atualizar quantidade do vendedor
+		vsd->vending[vend_list[i]].amount -= amount;
+
+		if (vsd->vending[vend_list[i]].amount > 0) {
+			Sql_Query(mmysql_handle,
+				"UPDATE `%s` SET `amount` = %d WHERE `vending_id` = %d AND `cartinventory_id` = %d",
+				vending_items_table, vsd->vending[vend_list[i]].amount,
+				vsd->vender_id, vsd->cart.u.items_cart[idx].id);
 		} else {
-			if( Sql_Query( mmysql_handle, "DELETE FROM `%s` WHERE `vending_id` = %d and `cartinventory_id` = %d", vending_items_table, vsd->vender_id, vsd->cart.u.items_cart[idx].id ) != SQL_SUCCESS ) {
-				Sql_ShowDebug( mmysql_handle );
-			}
+			Sql_Query(mmysql_handle,
+				"DELETE FROM `%s` WHERE `vending_id` = %d AND `cartinventory_id` = %d",
+				vending_items_table, vsd->vender_id, vsd->cart.u.items_cart[idx].id);
 		}
 
 		pc_cart_delitem(vsd, idx, amount, 0, LOG_TYPE_VENDING);
-		z = vending_calc_tax(sd, z);
-		clif_vendingreport( *vsd, idx, amount, sd->status.char_id, (int32)z );
 
-		//print buyer's name
-		if( battle_config.buyer_name ) {
+		// Taxa
+		z = vending_calc_tax(sd, z);
+
+		// Mensagem do cliente
+		clif_vendingreport(*vsd, idx, amount, sd->status.char_id, (int32)z);
+
+		//--------------------------------------------------
+		// 3) GERAR EMAIL (Rodex)
+		//--------------------------------------------------
+
+		char subject[64];
+		char body[256];
+
+		struct item_data* id2 = itemdb_search(vsd->cart.u.items_cart[idx].nameid);
+		const char* item_name = (id2 ? id2->name.c_str() : "Item");
+
+		time_t now = time(nullptr);
+		char datebuf[32];
+		strftime(datebuf, sizeof(datebuf), "%d/%m/%Y %H:%M:%S", localtime(&now));
+
+		sprintf(subject, "Venda realizada na sua loja!");
+
+		// Prefixo de moeda
+		const char* prefix = " Zeny"; // zeny
+
+		if (coin == 1) prefix = " Rops"; // cash
+		else if (coin == 2) prefix = " RMT"; // rmt
+
+		// Preços formatados
+		char price_unit[32];
+		char price_total[32];
+
+		sprintf(price_unit, "%d%s", vsd->vending[vend_list[i]].value, prefix);
+		sprintf(price_total, "%d%s", (int32)z, prefix);
+
+		sprintf(body,
+			"Comprador: %s\r\n"
+			"Item: %s\r\n"
+			"Quantidade: %d\r\n"
+    		"Preço unitário: %s\r\n"
+			"Total recebido: %s\r\n"
+			"Data: %s\r\n",
+			sd->status.name,
+			item_name,
+			amount,
+			price_unit,
+    		price_total,
+			datebuf
+		);
+
+		// ESCAPE SQL
+		char esc_subject[256], esc_body[1024], esc_sender[64], esc_dest[64];
+		Sql_EscapeString(mmysql_handle, esc_subject, subject);
+		Sql_EscapeString(mmysql_handle, esc_body, body);
+		Sql_EscapeString(mmysql_handle, esc_sender, "Sistema de Vendas");
+		Sql_EscapeString(mmysql_handle, esc_dest, vsd->status.name);
+
+		int mail_id = 0;
+		char* sql_data = nullptr;
+		size_t sql_len = 0;
+
+		Sql_Query(mmysql_handle,
+			"INSERT INTO `mail` "
+			"(send_name, send_id, dest_name, dest_id, title, message, time, status, zeny, type) "
+			"VALUES ('%s', 0, '%s', %d, '%s', '%s', UNIX_TIMESTAMP(), 0, 0, 0)",
+			esc_sender, esc_dest, vsd->status.char_id, esc_subject, esc_body);
+
+		Sql_Query(mmysql_handle, "SELECT LAST_INSERT_ID()");
+		if (Sql_NextRow(mmysql_handle) == SQL_SUCCESS) {
+			Sql_GetData(mmysql_handle, 0, &sql_data, &sql_len);
+			mail_id = atoi(sql_data);
+		}
+		Sql_FreeResult(mmysql_handle);
+
+		struct mail_message msg;
+		memset(&msg, 0, sizeof(msg));
+		msg.id = mail_id;
+		msg.dest_id = vsd->status.char_id;
+		msg.send_id = 0;
+		safestrncpy(msg.send_name, "Sistema de Vendas", NAME_LENGTH);
+		safestrncpy(msg.title, subject, MAIL_TITLE_LENGTH);
+		msg.type = MAIL_INBOX_NORMAL;
+
+		//--------------------------------------------------
+		// PAGAR O VENDEDOR NA MESMA MOEDA
+		//--------------------------------------------------
+		if (coin == 0) {
+			int z = (int)vending_calc_tax(sd, total_cost);
+			pc_getzeny(vsd, z, LOG_TYPE_VENDING, sd->status.char_id);
+		}
+		else if (coin == 1) {
+			vsd->cashPoints += (int)z;
+    		pc_setaccountreg(vsd, add_str(CASHPOINT_VAR), vsd->cashPoints);
+		}
+		else if (coin == 2) {
+			int rmt_points = (int)pc_readaccountreg(vsd, add_str(RMTPOINT_VAR));
+			rmt_points += (int)z;
+			pc_setaccountreg(vsd, add_str(RMTPOINT_VAR), rmt_points);
+		}
+
+		chrif_save(vsd, CSAVE_NORMAL);
+
+
+		// Atualizar inbox RODEX
+		intif_Mail_requestinbox(vsd->status.char_id, 1, MAIL_INBOX_NORMAL);
+
+		// Notificação instantânea
+		clif_Mail_new(vsd, 0, "Sistema de Vendas", subject);
+
+		// Mensagem opcional no chat
+		if (battle_config.buyer_name) {
 			char temp[256];
-			sprintf(temp, msg_txt(sd,265), sd->status.name);
+			sprintf(temp, msg_txt(sd, 265), sd->status.name);
 			clif_messagecolor(vsd, color_table[COLOR_LIGHT_GREEN], temp, false, SELF);
 		}
 	}

@@ -1,0 +1,155 @@
+-	script	PoringFake_CMD	-1,{
+OnInit:
+    bindatcmd "poring", "PoringFake_CMD::OnJoin";
+    end;
+
+OnClock1130:
+OnClock2030:
+    $PoringEvent = 1;
+
+    announce "[Poring Fake] Evento irá iniciar em 1 Minuto. Digite @poring para participar!", bc_all;
+    sleep 60000;
+
+    callsub OnStartEvent;
+
+    end;
+OnJoin:
+    if (!$PoringEvent) {
+        dispbottom "O evento do Poring Falso não está em andamento.";
+        end;
+    }
+    warp "poring_w02",98,33;
+    end;
+
+OnStartEvent:
+	
+    initnpctimer;
+
+	announce "[Reino dos Porings] A caçada ao impostor começou!", bc_all;
+
+	// Limpeza de segurança
+	killmonsterall "poring_w02";
+
+	// Lista de monstros possíveis
+	setarray .@mob[0],
+		1002, // Poring
+		1031, // Poporing
+		1113, // Drops
+		1242; // Marin
+		// 1582; // Magmaring
+
+    // Coordenadas válidas para o Poring falso
+    setarray .@fx[0],
+        109,119,132,135,117,99,99,117,135,125,113,113,100,84,84,84,98,114,72,73,
+        64,62,64,80,99,81,72,75,84,83,99,113,113,112,98,84,123,123;
+
+    setarray .@fy[0],
+        65,66,66,80,82,83,100,99,99,119,121,133,133,133,122,110,111,111,120,101,
+        99,82,65,66,66,83,55,43,44,55,55,55,44,32,32,32,44,56;
+
+	.@total = 75; // quantidade total de monstros
+	.@fake = rand(.@total); // índice do impostor
+
+    // Escolhe posição válida para o falso
+	.@pos = rand(getarraysize(.@fx));
+	.@fxp = .@fx[.@pos];
+	.@fyp = .@fy[.@pos];
+
+	for (.@i = 0; .@i < .@total; .@i++) {
+
+		.@mob_id = .@mob[rand(getarraysize(.@mob))];
+
+		if (.@i == .@fake_index) {
+			// PORING FALSO (posição controlada)
+			monster "poring_w02", .@fxp, .@fyp, "Porring", .@mob_id, 1, strnpcinfo(0)+"::OnFakeDead";
+		} else {
+			// NORMAIS
+			monster "poring_w02",0,0,"Poring",.@mob_id,1;
+		}
+	}
+	end;
+
+OnTimer60000: // 1 minuto
+	if (!$PoringEvent) {
+		stopnpctimer;
+		end;
+	}
+
+	mapannounce "poring_w02",
+		"[Rei Poring]: O impostor ainda está entre nós! Procurem com atenção!",
+		bc_map;
+	end;
+
+OnTimer180000: // 3 minutos
+	if ($PoringEvent)
+		mapannounce "poring_w02",
+			"[Rei Poring]: Não confiem nas aparências! Um deles é falso!",
+			bc_map;
+	end;
+
+OnTimer300000: // 5 minutos
+	if ($PoringEvent)
+		mapannounce "poring_w02",
+			"[Rei Poring]: O tempo está passando! O reino depende de vocês!",
+			bc_map;
+	end;
+
+OnTimer480000: // 8 minutos
+	if ($PoringEvent)
+		mapannounce "poring_w02",
+			"[Rei Poring]: Ele está perto... sinto isso! Não desistam!",
+			bc_map;
+	end;
+
+OnTimer600000:
+    stopnpctimer;
+
+    if ($PoringEvent) {
+        announce "[Reino dos Porings] O evento do Poring Falso terminou! O impostor escapou...", bc_all;
+
+        // Limpeza
+        killmonsterall "poring_w02";
+
+        sleep 5000;
+
+        // Teleporta todos de volta
+        mapwarp "poring_w02","prontera",155,189;
+
+        $PoringEvent = 0;
+    }
+    end;
+
+OnFakeDead:
+	if (!$PoringEvent) end;
+
+	set $PoringEvent, 0;
+
+	announce "[Reino dos Porings] "+strcharinfo(0)+" encontrou o impostor!", bc_all;
+
+	// Recompensa (exemplo)
+	getitem 9608,20;
+	getitem 22818,1;
+
+    killmonsterall "poring_w02";
+
+	sleep 5000;
+
+	// Teleporta todos de volta
+	mapwarp "poring_w02","prontera",155,189;
+
+	end;
+}
+
+poring_w02,98,43,5	script	Rei Poring	3810,{
+
+	mes "[Rei Poring]";
+	mes "Blub blub! Algo está errado no Reino dos Porings...";
+	next;
+	mes "[Rei Poring]";
+	mes "Um impostor se esconde entre meus súditos!";
+	mes "Encontre aquele cujo nome está errado";
+	mes "e derrote-o para receber sua recompensa!";
+	close;
+}
+
+poring_w02	mapflag	noskill

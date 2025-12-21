@@ -189,9 +189,9 @@ void searchstore_query(map_session_data& sd, e_searchstore_searchtype type, uint
 			continue;
 
 		// Skip stores that are not in the map defined by the search
-		if (sd.searchstore.mapid != 0 && pl_sd->m != sd.searchstore.mapid) {
-			continue;
-		}
+		// if (sd.searchstore.mapid != 0 && pl_sd->m != sd.searchstore.mapid) {
+		// 	continue;
+		// }
 
 		if( !store_searchall(pl_sd, &s) ) { // exceeded result size
 			clif_search_store_info_failed(sd, SSI_FAILED_OVER_MAXCOUNT);
@@ -201,22 +201,34 @@ void searchstore_query(map_session_data& sd, e_searchstore_searchtype type, uint
 
 	dbi_destroy(iter);
 
-	if( !sd.searchstore.items.empty() ) {
-		// present results
-		clif_search_store_info_ack( sd );
+	// ----------------------------------------------------
+	// ORDENAR RESULTADOS POR PREÇO (ASC = mais barato)
+	// ----------------------------------------------------
+	if (!sd.searchstore.items.empty()) {
 
-		// one page displayed
-		sd.searchstore.pages++;
-	} else {
+		std::sort(sd.searchstore.items.begin(), sd.searchstore.items.end(),
+			[](const std::shared_ptr<s_search_store_info_item>& a,
+			const std::shared_ptr<s_search_store_info_item>& b)
+			{
+				return a->price < b->price;
+			});
+
+		// Enviar página 1 ao cliente
+		clif_search_store_info_ack(sd);
+
+		sd.searchstore.pages++; // conta página enviada
+	}
+	else {
 		// cleanup
 		searchstore_clear(sd);
 
-		// notify of failure (must go before updating uses)
+		// notify no results
 		clif_search_store_info_failed(sd, SSI_FAILED_NOTHING_SEARCH_ITEM);
 
-		// update uses
-		clif_search_store_info_ack( sd );
+		// update remaining uses
+		clif_search_store_info_ack(sd);
 	}
+
 }
 
 /**
@@ -318,11 +330,11 @@ void searchstore_click(map_session_data& sd, uint32 account_id, int32 store_id, 
 
 	switch( sd.searchstore.effect ) {
 		case SEARCHSTORE_EFFECT_NORMAL:
-			// display coords
-			if( sd.m != pl_sd->m ) // not on same map, wipe previous marker
-				clif_search_store_info_click_ack(sd, -1, -1);
-			else
-				clif_search_store_info_click_ack(sd, pl_sd->x, pl_sd->y);
+			// // display coords
+			// if( sd.m != pl_sd->m ) // not on same map, wipe previous marker
+			// 	clif_search_store_info_click_ack(sd, -1, -1);
+			// else
+			clif_search_store_info_click_ack(sd, pl_sd->x, pl_sd->y);
 			break;
 		case SEARCHSTORE_EFFECT_REMOTE:
 			// open remotely

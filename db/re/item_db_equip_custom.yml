@@ -356,9 +356,6 @@ Body:
     Attack: 100
     Range: 1
     Slots: 1
-    Jobs:
-      Monk: true
-      Priest: true
     Locations:
       Right_Hand: true
     WeaponLevel: 5
@@ -368,7 +365,7 @@ Body:
     Script: |
       bonus bStr,2;
       bonus bDex,1;
-      bonus2 bSkillCooldown,"SR_TIGERCANNON",-4000;
+      bonus2 bSkillCooldown,8203,-4000;
       bonus bVariableCastrate,-100;
       bonus bDelayRate,-100;
 
@@ -536,7 +533,7 @@ Body:
       KagerouOboro: true
       Ninja: true
     Locations:
-      Right_Hand: true
+      Both_Hand: true
     WeaponLevel: 1
     EquipLevelMin: 30
     Refineable: true
@@ -1393,8 +1390,100 @@ Body:
       bonus bNoCastCancel;
 
   
-
-  
+# ========================= Shadows ==============================
+  - Id: 24000
+    AegisName: T_Str1_Armor_S
+    Name: Shadow Armor (Tier 1)
+    Type: Shadowgear
+    Locations:
+      Shadow_Armor: true
+    EquipLevelMin: 1
+    Refineable: true
+    Script: |
+      .@r = getrefine();
+      .@percent = .@r * 15;
+      .@skill_cd_base = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 2);
+      .@skill_id = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 0);
+      .@reduction = (.@skill_cd_base * .@percent) / 1000;
+      bonus2 bSkillCooldown, .@skill_id, -.@reduction;
+  - Id: 24001
+    AegisName: T_Dex1_Weapon_S
+    Name: Shadow Gauntlets (Tier 1)
+    Type: Shadowgear
+    Locations:
+      Shadow_Weapon: true
+    EquipLevelMin: 1
+    Refineable: true
+    Script: |
+      .@r = getrefine();
+      .@percent = .@r * 20;
+      .@skill_cd_base = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 2);
+      .@skill_id = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 0);
+      .@reduction = (.@skill_cd_base * .@percent) / 1000;
+      bonus2 bSkillCooldown, .@skill_id, -.@reduction;
+  - Id: 24002
+    AegisName: T_Luk1_Shield_S
+    Name: Shadow Shield (Tier 1)
+    Type: Shadowgear
+    Locations:
+      Shadow_Shield: true
+    EquipLevelMin: 1
+    Refineable: true
+    Script: |
+      .@r = getrefine();
+      .@percent = .@r * 20;
+      .@skill_cd_base = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 2);
+      .@skill_id = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 0);
+      .@reduction = (.@skill_cd_base * .@percent) / 1000;
+      bonus2 bSkillCooldown, .@skill_id, -.@reduction;
+  - Id: 24003
+    AegisName: T_Agi1_Shoes_S
+    Name: Shadow Shoes (Tier 1)
+    Type: Shadowgear
+    Locations:
+      Shadow_Shoes: true
+    EquipLevelMin: 1
+    Refineable: true
+    Script: |
+      .@r = getrefine();
+      .@percent = .@r * 15;
+      .@skill_cd_base = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 2);
+      .@skill_id = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 0);
+      .@reduction = (.@skill_cd_base * .@percent) / 1000;
+      bonus2 bSkillCooldown, .@skill_id, -.@reduction;
+  - Id: 24004
+    AegisName: T_Vit1_Acc_R_S
+    Name: Shadow Ring (Tier 1)
+    Type: Shadowgear
+    Locations:
+      Shadow_Right_Accessory: true
+    EquipLevelMin: 1
+    Refineable: true
+    Script: |
+      .@r = getrefine();
+      .@percent = .@r * 15;
+      .@skill_cd_base = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 2);
+      .@skill_id = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 0);
+      .@reduction = (.@skill_cd_base * .@percent) / 1000;
+      bonus2 bSkillCooldown, .@skill_id, -.@reduction;
+  - Id: 24005
+    AegisName: T_Int1_Acc_L_S
+    Name: Shadow Pendant (Tier 1)
+    Type: Shadowgear
+    Locations:
+      Shadow_Left_Accessory: true
+    EquipLevelMin: 1
+    Refineable: true
+    Script: |
+      .@r = getrefine();
+      .@percent = .@r * 15;
+      .@skill_cd_base = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 2);
+      .@skill_id = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 0);
+      .@reduction = (.@skill_cd_base * .@percent) / 1000;
+      bonus2 bSkillCooldown, .@skill_id, -.@reduction;
+      bonus bVariableCastrate,-100;
+      bonus bFixedCastrate,-100;
+      bonus bDelayRate,-100;
 
 
 

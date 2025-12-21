@@ -2128,6 +2128,7 @@ ACMD_FUNC(go)
 		{ MAP_ECLAGE,      110,  39 }, // 35=Eclage
 		{ MAP_LASAGNA,     193, 182 }, // 36=Lasagna
 		{ "moc_para01", 30, 14 }, // 37 = Eden Group
+		{ "pront_inv", 155, 185 }, // 38 = Campo de Treino
 	};
 
 	nullpo_retr(-1, sd);
@@ -2254,8 +2255,10 @@ ACMD_FUNC(go)
 		town = 35;
 	} else if (strncmp(map_name, "lasagna", 2) == 0) {
 		town = 36;
-	} 	else if (strcasecmp(map_name, "eden") == 0) {
+	} else if (strcasecmp(map_name, "eden") == 0) {
 		town = 37;
+	} else if (strcasecmp(map_name, "treino") == 0) {
+		town = 38;
 	}
 
 	if (town >= 0 && town < ARRAYLENGTH(data))
@@ -6764,7 +6767,8 @@ ACMD_FUNC(autotrade) {
 		npc_script_event( *sd, NPCE_LOGOUT );
 
 	channel_pcquit(sd,0xF); //leave all chan
-	clif_authfail_fd(sd->fd, 15);
+	// clif_authfail_fd(sd->fd, 15);
+	set_eof(fd);	
 
 	chrif_save(sd, CSAVE_AUTOTRADE);
 
@@ -11425,6 +11429,94 @@ ACMD_FUNC(macrochecker){
 	return 0;
 }
 
+
+ACMD_FUNC(ws)
+{
+	if (!message || !*message) {
+		clif_displaymessage(fd, "Uso: @ws <item_id>");
+		return false;
+	}
+
+	int item_id = atoi(message);
+
+	// Nova verificação — compatível com rAthena atual
+	if (!item_db.exists(item_id)) {
+		clif_displaymessage(fd, "Item ID inválido.");
+		return false;
+	}
+
+	PACKET_CZ_SEARCH_STORE_INFO_item item = {};
+	item.itemId = item_id;
+
+	// Abre janela de busca no client
+	clif_open_search_store_info(*sd);
+
+	// Prepara contexto de busca
+	sd->searchstore.open  = true;
+	sd->searchstore.uses  = 1;
+	sd->searchstore.type  = SEARCHTYPE_VENDING;
+	sd->searchstore.mapid = 0; // 0 = buscar servidor inteiro
+	sd->searchstore.pages = 0;
+
+	// Executa busca REAL
+	searchstore_query(
+		*sd,
+		SEARCHTYPE_VENDING,
+		0,
+		UINT32_MAX,
+		&item,
+		1,
+		nullptr,
+		0
+	);
+
+	return true;
+}
+
+ACMD_FUNC(wb)
+{
+	if (!message || !*message) {
+		clif_displaymessage(fd, "Uso: @wb <item_id>");
+		return false;
+	}
+
+	int item_id = atoi(message);
+
+	if (item_id <= 0) {
+		clif_displaymessage(fd, "Item ID inválido.");
+		return false;
+	}
+
+	PACKET_CZ_SEARCH_STORE_INFO_item item = {};
+	item.itemId = item_id;
+
+	// abre UI de busca
+	clif_open_search_store_info(*sd);
+
+	// prepara contexto
+	sd->searchstore.open  = true;
+	sd->searchstore.uses  = 1;
+	sd->searchstore.type  = SEARCHTYPE_BUYING_STORE;
+	sd->searchstore.mapid = 0;
+	sd->searchstore.pages = 0;
+
+	sd->searchstore.effect = SEARCHSTORE_EFFECT_REMOTE;
+
+	// executa busca
+	searchstore_query(
+		*sd,
+		SEARCHTYPE_BUYING_STORE,
+		0,
+		UINT32_MAX,
+		&item,
+		1,
+		nullptr,
+		0
+	);
+
+	return true;
+}
+
 #include <custom/atcommand.inc>
 
 /**
@@ -11757,6 +11849,11 @@ void atcommand_basecommands(void) {
 		ACMD_DEFR(roulette, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
 		ACMD_DEF(setcard),
 		ACMD_DEF(macrochecker),
+		
+		
+		ACMD_DEF(ws),
+		ACMD_DEF(wb),
+		
 	};
 	AtCommandInfo* atcommand;
 	int32 i;

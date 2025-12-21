@@ -596,9 +596,9 @@ int32 bg_team_leave(map_session_data *sd, bool quit, bool deserter)
 		char output[CHAT_SIZE_MAX];
 
 		if (quit)
-			sprintf(output, "Server: %s has quit the game...", sd->status.name);
+			sprintf(output, "Server: %s desistiu do jogo...", sd->status.name);
 		else
-			sprintf(output, "Server: %s is leaving the battlefield...", sd->status.name);
+			sprintf(output, "Server: %s está deixando o campo de batalha...", sd->status.name);
 
 		clif_bg_message(bgteam.get(), 0, "Server", output, strlen(output) + 1);
 

@@ -49,6 +49,7 @@ class MapGuild;
 
 #define LANGTYPE_VAR "#langtype"
 #define CASHPOINT_VAR "#CASHPOINTS"
+#define RMTPOINT_VAR "#RMTPOINTS"
 #define KAFRAPOINT_VAR "#KAFRAPOINTS"
 #define BANK_VAULT_VAR "#BANKVAULT"
 #define ROULETTE_BRONZE_VAR "RouletteBronze"
@@ -488,6 +489,9 @@ public:
 	struct s_storage storage, premiumStorage;
 	struct s_storage inventory;
 	struct s_storage cart;
+
+	bool vend_coin_selected = false;
+	int  vend_coin_type = 0; // 0=zeny,1=rops,2=rmt...
 
 	struct item_data* inventory_data[MAX_INVENTORY]; // direct pointers to itemdb entries (faster than doing item_id lookups)
 	int16 equip_index[EQI_MAX];

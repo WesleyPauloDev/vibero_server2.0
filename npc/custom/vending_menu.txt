@@ -1,0 +1,35 @@
+// Menu que abre a seleção de moeda para Skill Comércio do Mercador
+-	script	VendingScriptFake	-1,{
+
+OnVendingMenu:
+
+    // setd "vend_coin_selected", 0;	
+
+	switch(select("ZENY:ROPS:RMT:Cancelar")) {
+
+		case 1:
+			set @coin, 0;
+			dispbottom "Moeda selecionada: ^00FF00ZENY^000000.";
+			break;
+
+		case 2:
+			set @coin, 1;
+			dispbottom "Moeda selecionada: ^00CCFFROPS^000000.";
+			break;
+
+		case 3:
+			set @coin, 2;
+			dispbottom "Moeda selecionada: ^FFCC00RMT^000000.";
+			break;
+
+		case 4:
+			setd "vend_coin_selected", 0;
+	}
+
+	// grava no C++
+	setd "vend_coin_selected", 1;
+	setd "vend_coin_type", @coin;
+    unitskilluseid getcharid(3), 41, getskilllv(41);
+
+	end;
+}
