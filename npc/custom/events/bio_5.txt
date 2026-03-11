@@ -1,0 +1,66 @@
+prontera,167,229,4	script	Porteiro de Bio-5	908,{
+OnTalk:
+	mes "[Bio 5]";
+	mes "Olá aventureiro!";
+	mes "Deseja participar da Bio-5?";	
+	if (select("Sim, quero participar:Não, obrigado") == 2) close;
+
+	next;
+	mes "Escolha a dificuldade:";
+	set .@dificuldade, select("Bio-5 Normal:Bio-5 Hard");
+
+	if (.@dificuldade == 1) {
+
+		mes "Isso lhe custará ^FF0000 50.000 zeny ^000000.";
+		next;
+		// Verifica zeny
+		if (Zeny < 50000) {
+			mes "Você precisa de pelo menos ^FF0000 50.000 zeny ^000000 para entrar.";
+			close;
+		}
+
+		// Escolha do mapa
+		mes "Escolha o mapa da Bio-5:";
+		next;
+		set .@mapa, select("Mapa 1:Mapa 2");
+	} else {
+		mes "Isso lhe custará ^FF0000 100.000 zeny ^000000.";
+		next;
+
+		if (Zeny < 100000) {
+			mes "Você precisa de pelo menos ^FF0000 100.000 zeny ^000000 para entrar.";
+			close;
+		}
+
+		// Escolha do mapa
+		mes "Escolha o mapa da Bio-5:";
+		next;
+		set .@mapa, select("Mapa 1:Mapa 2");
+	}
+
+	// Escolha do ponto de spawn
+	
+
+	if (.@dificuldade == 1) {
+		// Desconta zeny e teleporta
+		set Zeny, Zeny - 50000;
+		specialeffect2 EF_MAXPOWER;
+		if (.@mapa == 1)
+			warp "lhz_dun_n", 133, 262;
+		else
+			warp "lhz_dun_n2", 133, 262;
+	} else {
+		set Zeny, Zeny - 100000;
+		specialeffect2 EF_MAXPOWER;
+		if (.@mapa == 1)
+			warp "lhz_dun_n3", 133, 262;
+		else
+			warp "lhz_dun_n4", 133, 262;
+	}
+
+	end;
+}
+
+
+
+

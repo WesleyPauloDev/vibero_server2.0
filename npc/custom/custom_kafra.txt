@@ -1,0 +1,82 @@
+-	script	Servico Kafra	113,{
+	cutin "kafra_05",2;
+
+	mes "[Kafra Leilah]";
+	mes "Hm...?";  
+	mes "Oh, bem-vindo à";
+	mes "Sede da Corporação Kafra.";
+	mes "Você precisa de algo?";
+	next;
+
+	switch(select("Salvar Ponto de Retorno:Abrir Armazém:Cancelar")) {
+		case 1:
+			mes "[Kafra Leilah]";
+			mes "Seu ponto de respawn foi";
+			mes "salvo aqui, dentro da";
+			mes "Sede da Corporação Kafra.";
+			mes "Obrigado.";
+			next;
+
+			savepoint "prontera",147,185,1,1;
+			mes "[Kafra Leilah]";
+			mes "Por favor, utilize os";
+			mes "Serviços Kafra disponíveis";
+			mes "por todo Midgard.";
+			mes "Obrigado por visitar a";
+			mes "Sede da Kafra.";
+			close2;
+			break;
+
+		case 2:
+			if (Zeny < 0) {
+				mes "[Kafra Leilah]";
+				mes "Desculpe, mas parece que você";
+				mes "não tem os 20 zeny para pagar";
+				mes "a taxa de acesso ao Depósito...";
+				close;
+			}
+
+			mes "[Kafra Leilah]";		
+			mes "Eu acessarei seu Depósito para você.";
+
+			// set Zeny, Zeny-20;
+			// set RESRVPTS, RESRVPTS + (20/5);
+
+			// callfunc("F_CheckKafCode"); // Verifica senha do armazém, se houver
+			close2;
+			cutin "",255;
+			openstorage;
+			end;
+
+			
+		// case 3:
+			// 	mes "[Kafra Leilah]";
+			// 	mes "Minhas desculpas, mas eu não estou";
+			// 	mes "de plantão. Eu ajudaria você";
+			// 	mes "se pudesse, mas na verdade não tenho";
+			// 	mes "carrinhos de mão disponíveis.";
+			// 	mes "Por que você não pede ajuda a outro funcionário Kafra?";
+			// 	next;
+
+			// 	mes "[Kafra Leilah]";
+			// 	mes "Os funcionários Kafra estão";
+			// 	mes "espalhados por todo o";
+			// 	mes "continente de Midgard,";
+			// 	mes "e você deve encontrar muitos";
+			// 	mes "lá fora em Al De Baran.";
+			// 	close2;
+			// 	break;
+
+		case 3:
+			mes "[Kafra Leilah]";		
+			mes "Muito bem. Volte se precisar dos meus serviços..";
+			close2;
+			break;
+	}
+	
+	cutin "",255;
+	end;
+}
+
+
+

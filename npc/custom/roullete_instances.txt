@@ -1,0 +1,221 @@
+prontera,164,169,3	script	Roleta das Instâncias	563,{
+
+	// ===========================
+	// CONFIGURAÇÕES GERAIS
+	// ===========================
+
+	setarray .inst_60$, 
+        "[30+] Vila dos Porings",
+        "[40+] Batalha dos Orcs",
+        "[50+] Torre Sem Fim",
+        "[55+] Ninho de Nidhog",
+        "[60+] Maldição de Glast Heim";
+
+    setarray .inst_120$,  
+        "[75+] Santuário Selado",
+        "[90+] Laboratório Werner",
+        "[95+] Memórias de Sara",
+        "[100+] Espaço Infinito",
+        "[120+] Lago Bakonawa";
+
+    setarray .inst_175$,  
+        "[125+] Assalto ao Dirigível",
+        "[130+] Torre do Demônio",
+        "[135+] Laboratório Central",
+        "[140+] Fábrica de Brinquedos de Terror",
+        "[150+] Laboratório Wolfchev",
+        "[160+] Templo do Rei Demônio",
+        "[175+] Jardim Aquático";
+
+
+	setarray .inst_60_reward[0], 12259,12210,7621;
+	setarray .inst_120_reward[0], 22818,12223,12224;
+	setarray .inst_175_reward[0], 9609,12103,12214;
+
+	// Reset diário simples
+	// #recs = 0;
+	// set #inst60_status,2;
+	// set #inst120_status,2;
+	// set #inst175_status,0;
+	if (#inst_cooldown <= gettimetick(2)) {
+		set #inst60_status,0;
+		set #inst120_status,0;
+		set #inst175_status,0;
+		set #inst_cooldown, gettimetick(2) + callfunc("get_daily_reset");
+		#recs = 0;
+	}
+
+	if (#recs == 3) {
+		mes "[Roleta das Instâncias]";
+		mes "Parabéns! Você Conclui Todas Missões da Roleta hoje.";
+		getitem 12412,1;
+		#recs = 4;
+		close;
+	}
+	if (#recs == 4) {
+		mes "[Roleta das Instâncias]";
+		mes "Você já conclui todas missões de hoje.";
+		close;
+	}
+
+	mes "[Roleta das Instâncias]";
+	mes "Saudações, aventureiro!";
+	mes "Você pode realizar até ^00FF003 missões de instância diárias^000000:";
+	mes "? Uma de cada categoria de nível.";
+	next;
+
+	mes "Escolha a categoria de missão que deseja roletar:";
+	next;
+
+	if (#inst60_status < 2)      set .@lv30_60$, "^FF0000[Pendente]^000000";
+	else if (#inst60_status == 2)	set .@lv30_60$, "^0000FF[Resgatar]^000000";	
+	else                       set .@lv30_60$, "^00FF00[OK]^000000";
+	if (#inst120_status < 2)      set .@lv60_120$, "^FF0000[Pendente]^000000";
+	else if (#inst120_status == 2)	set .@lv60_120$, "^0000FF[Resgatar]^000000";	
+	else                       set .@lv60_120$, "^00FF00[OK]^000000";
+	if (#inst175_status < 2)      set .@lv120_175$, "^FF0000[Pendente]^000000";
+	else if (#inst175_status == 2)	set .@lv120_175$, "^0000FF[Resgatar]^000000";	
+	else                       set .@lv120_175$, "^00FF00[OK]^000000";
+
+	.@sel = select(
+		"Lv 30~60 " + .@lv30_60$,
+		"Lv 60~120 " + .@lv60_120$,
+		"Lv 120~175 " + .@lv120_175$,
+		"Sair"
+	);
+
+	if (.@sel == 4) close;
+
+	// ===============================
+	// CHECAGEM DE NÍVEL MÍNIMO
+	// ===============================
+	switch (.@sel) {
+		case 1:
+			if (#inst60_status == 3) {
+				mes "[Roleta das Instâncias]";
+				mes "Você já completou esta missão hoje!";
+				close;
+			} 
+			if(#inst60_status == 2) {
+				goto L_Rewards;
+				break;
+			}
+			if (BaseLevel < 30) {
+				mes "[Roleta das Instâncias]";
+				mes "Você precisa ser pelo menos nível ^FF000030^000000 para essa categoria.";
+				close;
+			}
+			set .@cat$, "60";
+			setarray .@inst$, .inst_60$;
+			break;
+
+		case 2:
+			if (#inst120_status == 3) {
+				mes "[Roleta das Instâncias]";
+				mes "Você já completou esta missão hoje!";
+				close;
+			} 
+			if(#inst120_status == 2) {
+				goto L_Rewards;
+				break;
+			}
+			if (BaseLevel < 60) {
+				mes "[Roleta das Instâncias]";
+				mes "Você precisa ser pelo menos nível ^FF000060^000000 para essa categoria.";
+				close;
+			}
+			set .@cat$, "120";
+			setarray .@inst$, .inst_120$;
+			break;
+
+		case 3:
+			if (#inst175_status == 3) {
+				mes "[Roleta das Instâncias]";
+				mes "Você já completou esta missão hoje!";
+				close;
+			} 
+			if(#inst175_status == 2) {
+				goto L_Rewards;
+				break;
+			}
+			if (BaseLevel < 120) {
+				mes "[Roleta das Instâncias]";
+				mes "Você precisa ser pelo menos nível ^FF0000120^000000 para essa categoria.";
+				close;
+			}
+			set .@cat$, "175";
+			setarray .@inst$, .inst_175$;
+			break;
+	}
+
+	// ===============================
+	// LIMITE DE MISSÕES
+	// ===============================
+    .@inst_status$ = "#inst" + .@cat$ + "_status";
+	if (getd(.@inst_status$) == 1) {
+		mes "[Roleta das Instâncias]";
+		mes "Você já tem uma missão ativa nesta categoria (LV-" + .@cat$ + ").";
+		mes "Sua missão é ^0000FF" + getd("#inst"+.@cat$+"_name$") + "^000000.";
+		close;
+	}
+
+	mes "[Roleta das Instâncias]";
+	mes "Preparado para girar a roleta da categoria ^FFA500Lv " + .@cat$ + "^000000?";
+	next;
+	if (select("Sim:Não") == 2) close;
+
+	// ===============================
+	// ANIMAÇÃO DE ROLETA ??
+	// ===============================	
+
+	mes "Girando a roleta...";
+	next;
+    .@quant = getarraysize(getd(".inst_"+.@cat$+"$"));    
+	.@roll_count = rand(0,.@quant - 1);
+	for (.@i = 0; .@i < .@quant; .@i++) {
+        if(.@i == .@roll_count) {
+            set .@final, .@i;            
+        }
+	}
+
+	.@var$ = ".inst_" + .@cat$ + "$";
+	.@sorteada$ = getd(.@var$+"["+.@final+"]");
+    .@inst_name$ = "#inst" + .@cat$ + "_name$";
+    .@inst_status$ = "#inst" + .@cat$ + "_status";
+    setd(.@inst_name$, .@sorteada$);
+    setd(.@inst_status$, 1);
+	mes "Sua missão de instância é: ^FFAA00" + getd("#inst"+.@cat$+"_name$") + "^000000!";
+	mes "Complete-a e volte aqui para sua recompensa.";
+	close;
+
+	// ===============================
+	// ENTREGA DE RECOMPENSAS
+	// ===============================
+L_Rewards:
+	mes "[Roleta das Instâncias]";	
+
+	if (#inst60_status == 2) {
+		getitem .inst_60_reward[rand(0,2)],1;
+		set #inst60_status,3;
+		mes "Recompensa da missão Lv 60 entregue!";
+		#recs++;
+		close;
+	}
+	if (#inst120_status == 2) {
+		getitem .inst_120_reward[rand(0,2)],1;
+		set #inst120_status,3;
+		mes "Recompensa da missão Lv 120 entregue!";
+		#recs++;
+		close;
+
+	}
+	if (#inst175_status == 2) {
+		getitem .inst_175_reward[rand(0,2)],1;
+		set #inst175_status,3;
+		mes "Recompensa da missão Lv 175 entregue!";
+		#recs++;
+		close;
+	}
+	
+	close;
+}

@@ -1,0 +1,19 @@
+function	script	CustomMapDrop	{
+    .@map$ = getarg(0);       // nome do mapa
+    .@items = getarg(1); 
+    .@rates = getarg(2); 
+    
+    if (strcharinfo(3) == .@map$ || strcharinfo(3) == instance_mapname(.@map$)) { // se o player estiver no mapa certo
+        .@bonus = get_drop_bonus(1018, 518);
+
+        .@drop_final = .@rates * .@bonus;        
+        if (rand(10000) < .@drop_final) {
+            getitem .@items, 1;
+        }
+        
+    }
+
+    return;
+}
+
+

@@ -1,0 +1,2260 @@
+# This file is a part of rAthena.
+#   Copyright(C) 2024 rAthena Development Team
+#   https://rathena.org - https://github.com/rathena
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+###########################################################################
+# Monster Database
+###########################################################################
+#
+# Monster Settings
+#
+###########################################################################
+# - Id                      Monster ID.
+#   AegisName               Server name to reference the monster in scripts and lookups, should use no spaces.
+#   Name                    Name in English.
+#   JapaneseName            Name in Japanese. (Default: 'Name' value)
+#   Level                   Level. (Default: 1)
+#   Hp                      Total HP. (Default: 1)
+#   Sp                      Total SP. (Default: 1)
+#   BaseExp                 Base experience gained. (Default: 0)
+#   JobExp                  Job experience gained. (Default: 0)
+#   MvpExp                  MVP experience gained. (Default: 0)
+#   Attack                  Minimum attack in pre-renewal and base attack in renewal. (Default: 0)
+#   Attack2                 Maximum attack in pre-renewal and base magic attack in renewal. (Default: 0)
+#   Defense                 Physical defense of the monster, reduces melee and ranged physical attack/skill damage. (Default: 0)
+#   MagicDefense            Magic defense of the monster, reduces magical skill damage. (Default: 0)
+#   Resistance              Physical resistance of the monster, reduces melee and ranged physical attack/skill damage. (Default: 0)
+#   MagicResistance         Magic resistance of the monster, reduces magical skill damage. (Default: 0)
+#   Str                     Strength which affects attack. (Default: 1)
+#   Agi                     Agility which affects flee. (Default: 1)
+#   Vit                     Vitality which affects defense. (Default: 1)
+#   Int                     Intelligence which affects magic attack. (Default: 1)
+#   Dex                     Dexterity which affects hit rate. (Default: 1)
+#   Luk                     Luck which affects perfect dodge/lucky flee/perfect flee/lucky dodge rate. (Default: 1)
+#   AttackRange             Attack range. (Default: 0)
+#   SkillRange              Skill cast range. (Default: 0)
+#   ChaseRange              Chase range. (Default: 0)
+#   Size                    Size. (Default: Small)
+#   Race                    Race. (Default: Formless)
+#   RaceGroups:             List of secondary groups the monster may be part of. (Optional)
+#     <group>: <value>      Group to toggle.
+#   Element                 Element. (Default: Neutral)
+#   ElementLevel            Level of element. (Default: 1)
+#   WalkSpeed               Walk speed. (Default: DEFAULT_WALK_SPEED)
+#   AttackDelay             Attack speed. (Default: 0)
+#   AttackMotion            Attack animation speed. (Default: 0)
+#   ClientAttackMotion      Client attack speed. (Default: AttackMotion)
+#   DamageMotion            Damage animation speed. (Default: 0)
+#   DamageTaken             Rate at which the monster will receive incoming damage. (Default: 100)
+#   GroupId                 Monster group ID. (Default: 0)
+#   Title                   Monster title. (Default: None)
+#   Ai                      Aegis monster type AI behavior. (Default: 06)
+#   Class                   Aegis monster class. (Default: Normal)
+#   Modes:                  List of unique behavior not defined by AI, Class, or Attribute. (Optional)
+#     <mode>: <value>       Mode to toggle.
+#   MvpDrops:               List of possible MVP prize items. Max of MAX_MVP_DROP. (Optional)
+#     - Item                Item name.
+#       Rate                Drop rate of item.
+#       RandomOptionGroup   Random Option Group applied to item on drop. (Default: None)
+#       Index               Index used for overwriting item. (Optional)
+#   Drops:                  List of possible normal item drops. Max of MAX_MOB_DROP. (Optional)
+#     - Item                Item name.
+#       Rate                Drop rate of item.
+#       StealProtected      If the item is shielded from TF_STEAL. (Default: false)
+#       RandomOptionGroup   Random Option Group applied to item on drop. (Default: None)
+#       Index               Index used for overwriting item. (Optional)
+###########################################################################
+
+Header:
+  Type: MOB_DB
+  Version: 5
+
+Body:
+
+# =====================Bio LAb===========================================
+  - Id: 3208
+    AegisName: V_EREMES
+    Name: Eremes Guille
+    JapaneseName: V Eremes
+    Level: 177
+    Hp: 3000000
+    BaseExp: 700000
+    JobExp: 1000000
+    Attack: 5333
+    Attack2: 1333
+    Defense: 180
+    MagicDefense: 100
+    Str: 150
+    Agi: 190
+    Vit: 60
+    Int: 70
+    Dex: 200
+    Luk: 80
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demon
+    RaceGroups:
+      Bio5_Swordman_Thief: true
+    Element: Poison
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 19
+    Class: Boss
+    Drops:
+      - Item: Soul_Of_Thief
+        Index: 0
+        Rate: 500
+      - Item: C_Circlet_Of_Bone
+        Index: 1
+        Rate: 50
+      - Item: C_Silent_Executer
+        Index: 2
+        Rate: 50
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 600
+      - Item: Pieces_Of_Grudge
+        Index: 4
+        Rate: 400
+      - Item: Pieces_Of_Grudge
+        Index: 5
+        Rate: 200
+      - Item: Particles_Of_Energy5
+        Index: 6
+        Rate: 1000
+      - Item: Real_Eremes_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3209
+    AegisName: V_MAGALETA
+    Name: Margaretha Sorin
+    JapaneseName: V Magaleta
+    Level: 177
+    Hp: 3000000
+    BaseExp: 700000
+    JobExp: 1000000
+    Attack: 1667
+    Attack2: 4667
+    Defense: 160
+    MagicDefense: 400
+    Str: 130
+    Agi: 80
+    Vit: 120
+    Int: 160
+    Dex: 150
+    Luk: 70
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Acolyte_Merchant: true
+    Element: Holy
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 576
+    AttackMotion: 384
+    ClientAttackMotion: 336
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 19
+    Class: Boss
+    Drops:
+      - Item: Soul_Of_Acolyte
+        Index: 0
+        Rate: 500
+      - Item: C_Mitra
+        Index: 1
+        Rate: 50
+      - Item: Pieces_Of_Sentiment
+        Index: 2
+        Rate: 600
+      - Item: Pieces_Of_Grudge
+        Index: 3
+        Rate: 400
+      - Item: Pieces_Of_Grudge
+        Index: 4
+        Rate: 200
+      - Item: Particles_Of_Energy5
+        Index: 5
+        Rate: 1000
+      - Item: Real_Magaleta_Card
+        Index: 6
+        Rate: 2
+        StealProtected: true
+  - Id: 3210
+    AegisName: V_KATRINN
+    Name: Kathryne Cheiron
+    JapaneseName: V Katrinn
+    Level: 177
+    Hp: 3000000
+    BaseExp: 700000
+    JobExp: 1000000
+    Attack: 1333
+    Attack2: 4000
+    Defense: 110
+    MagicDefense: 400
+    Str: 110
+    Agi: 80
+    Vit: 60
+    Int: 200
+    Dex: 210
+    Luk: 50
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mage_Archer: true
+    Element: Neutral
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 576
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 19
+    Class: Boss
+    Drops:
+      - Item: Soul_Of_Magicion
+        Index: 0
+        Rate: 500
+      - Item: C_Magic_Stone_Hat
+        Index: 1
+        Rate: 50
+      - Item: Pieces_Of_Sentiment
+        Index: 2
+        Rate: 600
+      - Item: Pieces_Of_Grudge
+        Index: 3
+        Rate: 400
+      - Item: Pieces_Of_Grudge
+        Index: 4
+        Rate: 200
+      - Item: Particles_Of_Energy5
+        Index: 5
+        Rate: 1000
+      - Item: Real_Katrinn_Card
+        Index: 6
+        Rate: 2
+        StealProtected: true
+  - Id: 3211
+    AegisName: V_SHECIL
+    Name: Shecil Damon
+    JapaneseName: V Shecil
+    Level: 177
+    Hp: 3000000
+    BaseExp: 700000
+    JobExp: 1000000
+    Attack: 4667
+    Attack2: 1333
+    Defense: 100
+    MagicDefense: 100
+    Str: 130
+    Agi: 130
+    Vit: 70
+    Int: 80
+    Dex: 300
+    Luk: 50
+    AttackRange: 14
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mage_Archer: true
+    Element: Wind
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 19
+    Class: Boss
+    Drops:
+      - Item: Soul_Of_Archer
+        Index: 0
+        Rate: 500
+      - Item: C_Camouflage_RabbitHood
+        Index: 1
+        Rate: 50
+      - Item: C_Sniper_Goggle
+        Index: 2
+        Rate: 50
+      - Item: Pieces_Of_Grudge
+        Index: 3
+        Rate: 400
+      - Item: Pieces_Of_Sentiment
+        Index: 4
+        Rate: 600
+      - Item: Pieces_Of_Grudge
+        Index: 5
+        Rate: 200
+      - Item: Particles_Of_Energy5
+        Index: 6
+        Rate: 1000
+      - Item: Real_Shecil_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3212
+    AegisName: V_HARWORD
+    Name: Harword Alt-Eisen
+    JapaneseName: V Harword
+    Level: 177
+    Hp: 3000000
+    BaseExp: 700000
+    JobExp: 1000000
+    Attack: 3333
+    Attack2: 2000
+    Defense: 200
+    MagicDefense: 100
+    Str: 160
+    Agi: 80
+    Vit: 200
+    Int: 60
+    Dex: 130
+    Luk: 50
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Acolyte_Merchant: true
+    Element: Water
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 19
+    Class: Boss
+    Drops:
+      - Item: Soul_Of_Merchant
+        Index: 0
+        Rate: 500
+      - Item: C_Driver_Band_R
+        Index: 1
+        Rate: 50
+      - Item: C_Driver_Band_Y
+        Index: 2
+        Rate: 50
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 600
+      - Item: Pieces_Of_Grudge
+        Index: 4
+        Rate: 400
+      - Item: Pieces_Of_Grudge
+        Index: 5
+        Rate: 200
+      - Item: Particles_Of_Energy5
+        Index: 6
+        Rate: 1000
+      - Item: Real_Harword_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3213
+    AegisName: V_SEYREN
+    Name: Seyren Windsor
+    JapaneseName: V Seyren
+    Level: 177
+    Hp: 3000000
+    BaseExp: 700000
+    JobExp: 1000000
+    Attack: 6000
+    Attack2: 2667
+    Defense: 400
+    MagicDefense: 200
+    Str: 170
+    Agi: 100
+    Vit: 200
+    Int: 50
+    Dex: 200
+    Luk: 60
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demon
+    RaceGroups:
+      Bio5_Swordman_Thief: true
+    Element: Fire
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 336
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 19
+    Class: Boss
+    Drops:
+      - Item: Soul_Of_Swordman
+        Index: 0
+        Rate: 500
+      - Item: C_Rune_Circlet
+        Index: 1
+        Rate: 50
+      - Item: Pieces_Of_Grudge
+        Index: 2
+        Rate: 400
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 600
+      - Item: Pieces_Of_Grudge
+        Index: 4
+        Rate: 200
+      - Item: Particles_Of_Energy5
+        Index: 5
+        Rate: 1000
+      - Item: Real_Seyren_Card
+        Index: 6
+        Rate: 2
+        StealProtected: true
+  - Id: 3214
+    AegisName: V_G_EREMES
+    Name: Guillotine Cross Eremes
+    JapaneseName: V G Eremes
+    Level: 178
+    Hp: 5000000
+    BaseExp: 1000000
+    JobExp: 1500000
+    Attack: 8000
+    Attack2: 2000
+    Defense: 360
+    MagicDefense: 200
+    Str: 300
+    Agi: 380
+    Vit: 120
+    Int: 140
+    Dex: 400
+    Luk: 160
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demon
+    RaceGroups:
+      Bio5_Swordman_Thief: true
+    Element: Poison
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+  - Id: 3215
+    AegisName: V_G_MAGALETA
+    Name: Arch Bishop Margaretha
+    JapaneseName: V G Magaleta
+    Level: 178
+    Hp: 5000000
+    BaseExp: 1000000
+    JobExp: 1500000
+    Attack: 2500
+    Attack2: 7000
+    Defense: 320
+    MagicDefense: 800
+    Str: 260
+    Agi: 160
+    Vit: 240
+    Int: 320
+    Dex: 300
+    Luk: 140
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Acolyte_Merchant: true
+    Element: Holy
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 576
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+  - Id: 3216
+    AegisName: V_G_KATRINN
+    Name: Warlock Kathryne
+    JapaneseName: V G Katrinn
+    Level: 178
+    Hp: 5000000
+    BaseExp: 1000000
+    JobExp: 1500000
+    Attack: 2000
+    Attack2: 6000
+    Defense: 220
+    MagicDefense: 800
+    Str: 220
+    Agi: 160
+    Vit: 120
+    Int: 400
+    Dex: 420
+    Luk: 100
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mage_Archer: true
+    Element: Neutral
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 576
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+  - Id: 3217
+    AegisName: V_G_SHECIL
+    Name: Ranger Cecil
+    JapaneseName: V G Shecil
+    Level: 178
+    Hp: 5000000
+    BaseExp: 1000000
+    JobExp: 1500000
+    Attack: 7000
+    Attack2: 2000
+    Defense: 200
+    MagicDefense: 200
+    Str: 260
+    Agi: 260
+    Vit: 140
+    Int: 160
+    Dex: 600
+    Luk: 100
+    AttackRange: 14
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mage_Archer: true
+    Element: Wind
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+  - Id: 3218
+    AegisName: V_G_HARWORD
+    Name: Mechanic Howard
+    JapaneseName: V G Harword
+    Level: 178
+    Hp: 5000000
+    BaseExp: 1000000
+    JobExp: 1500000
+    Attack: 5000
+    Attack2: 3000
+    Defense: 400
+    MagicDefense: 200
+    Str: 320
+    Agi: 160
+    Vit: 400
+    Int: 120
+    Dex: 260
+    Luk: 100
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Acolyte_Merchant: true
+    Element: Earth
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 240
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+  - Id: 3219
+    AegisName: V_G_SEYREN
+    Name: Rune Knight Seyren
+    JapaneseName: V G Seyren
+    Level: 178
+    Hp: 5000000
+    BaseExp: 1000000
+    JobExp: 1500000
+    Attack: 9000
+    Attack2: 4000
+    Defense: 800
+    MagicDefense: 400
+    Str: 340
+    Agi: 200
+    Vit: 400
+    Int: 100
+    Dex: 400
+    Luk: 120
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demon
+    RaceGroups:
+      Bio5_Swordman_Thief: true
+    Element: Fire
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+  - Id: 3220
+    AegisName: V_B_EREMES
+    Name: Guillotine Cross Eremes
+    Level: 179
+    Hp: 12600000
+    BaseExp: 3000000
+    JobExp: 3000000
+    #   MvpExp:
+    Attack: 8000
+    Attack2: 2000
+    Defense: 360
+    MagicDefense: 200
+    Str: 300
+    Agi: 380
+    Vit: 120
+    Int: 140
+    Dex: 400
+    Luk: 160
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mvp: true
+    Element: Poison
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+    Modes:
+      Mvp: true
+    MvpDrops:
+      - Item: Soul_Of_Thief
+        Index: 0
+        Rate: 5000
+      - Item: Soul_Of_Thief
+        Index: 1
+        Rate: 5000
+      - Item: Soul_Of_Thief
+        Index: 2
+        Rate: 5000
+    Drops:
+      - Item: Crystal_Of_Grudge
+        Index: 0
+        Rate: 3000
+      - Item: Manteau_Of_Fallen
+        Index: 1
+        Rate: 150
+      - Item: Manteau_Of_Fallen
+        Index: 2
+        Rate: 500
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 5000
+      - Item: Soul_Of_Thief
+        Index: 4
+        Rate: 10000
+      - Item: Soul_Of_Thief
+        Index: 5
+        Rate: 10000
+      - Item: Soul_Of_Thief
+        Index: 6
+        Rate: 10000
+      - Item: GuillotineCross_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3221
+    AegisName: V_B_MAGALETA
+    Name: Arch Bishop Margaretha
+    Level: 179
+    Hp: 14400000
+    BaseExp: 3000000
+    JobExp: 3000000
+    #   MvpExp:
+    Attack: 2500
+    Attack2: 7000
+    Defense: 320
+    MagicDefense: 800
+    Str: 260
+    Agi: 160
+    Vit: 240
+    Int: 320
+    Dex: 300
+    Luk: 140
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mvp: true
+    Element: Holy
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 576
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+    Modes:
+      Mvp: true
+    MvpDrops:
+      - Item: Soul_Of_Acolyte
+        Index: 0
+        Rate: 5000
+      - Item: Soul_Of_Acolyte
+        Index: 1
+        Rate: 5000
+      - Item: Soul_Of_Acolyte
+        Index: 2
+        Rate: 5000
+    Drops:
+      - Item: Crystal_Of_Grudge
+        Index: 0
+        Rate: 3000
+      - Item: Manteau_Of_Fallen
+        Index: 1
+        Rate: 150
+      - Item: Manteau_Of_Fallen
+        Index: 2
+        Rate: 500
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 5000
+      - Item: Soul_Of_Acolyte
+        Index: 4
+        Rate: 10000
+      - Item: Soul_Of_Acolyte
+        Index: 5
+        Rate: 10000
+      - Item: Soul_Of_Acolyte
+        Index: 6
+        Rate: 10000
+      - Item: Archbishop_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3222
+    AegisName: V_B_SHECIL
+    Name: Ranger Cecil
+    JapaneseName: Ranger Shecil
+    Level: 179
+    Hp: 12600000
+    BaseExp: 3000000
+    JobExp: 3000000
+    #   MvpExp:
+    Attack: 7000
+    Attack2: 2000
+    Defense: 200
+    MagicDefense: 200
+    Str: 260
+    Agi: 260
+    Vit: 140
+    Int: 160
+    Dex: 600
+    Luk: 100
+    AttackRange: 14
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mvp: true
+    Element: Wind
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+    Modes:
+      Mvp: true
+    MvpDrops:
+      - Item: Soul_Of_Archer
+        Index: 0
+        Rate: 5000
+      - Item: Soul_Of_Archer
+        Index: 1
+        Rate: 5000
+      - Item: Soul_Of_Archer
+        Index: 2
+        Rate: 5000
+    Drops:
+      - Item: Crystal_Of_Grudge
+        Index: 0
+        Rate: 3000
+      - Item: Manteau_Of_Fallen
+        Index: 1
+        Rate: 150
+      - Item: Manteau_Of_Fallen
+        Index: 2
+        Rate: 500
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 5000
+      - Item: Soul_Of_Archer
+        Index: 4
+        Rate: 10000
+      - Item: Soul_Of_Archer
+        Index: 5
+        Rate: 10000
+      - Item: Soul_Of_Archer
+        Index: 6
+        Rate: 10000
+      - Item: Ranger_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3223
+    AegisName: V_B_HARWORD
+    Name: Mechanic Howard
+    JapaneseName: Mechanic Harword
+    Level: 179
+    Hp: 18000000
+    BaseExp: 3000000
+    JobExp: 3000000
+    #   MvpExp:
+    Attack: 5000
+    Attack2: 3000
+    Defense: 400
+    MagicDefense: 200
+    Str: 320
+    Agi: 160
+    Vit: 400
+    Int: 120
+    Dex: 260
+    Luk: 100
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mvp: true
+    Element: Water
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 240
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+    Modes:
+      Mvp: true
+    MvpDrops:
+      - Item: Soul_Of_Merchant
+        Index: 0
+        Rate: 5000
+      - Item: Soul_Of_Merchant
+        Index: 1
+        Rate: 5000
+      - Item: Soul_Of_Merchant
+        Index: 2
+        Rate: 5000
+    Drops:
+      - Item: Crystal_Of_Grudge
+        Index: 0
+        Rate: 3000
+      - Item: Manteau_Of_Fallen
+        Index: 1
+        Rate: 150
+      - Item: Manteau_Of_Fallen
+        Index: 2
+        Rate: 500
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 5000
+      - Item: Soul_Of_Merchant
+        Index: 4
+        Rate: 10000
+      - Item: Soul_Of_Merchant
+        Index: 5
+        Rate: 10000
+      - Item: Soul_Of_Merchant
+        Index: 6
+        Rate: 10000
+      - Item: Mechanic_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3224
+    AegisName: V_B_KATRINN
+    Name: Warlock Kathryne
+    JapaneseName: Warlock Katrinn
+    Level: 179
+    Hp: 10800000
+    BaseExp: 3000000
+    JobExp: 3000000
+    #   MvpExp:
+    Attack: 2000
+    Attack2: 6000
+    Defense: 220
+    MagicDefense: 800
+    Str: 220
+    Agi: 160
+    Vit: 120
+    Int: 400
+    Dex: 420
+    Luk: 100
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mvp: true
+    Element: Neutral
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 576
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+    Modes:
+      Mvp: true
+    MvpDrops:
+      - Item: Soul_Of_Magicion
+        Index: 0
+        Rate: 5000
+      - Item: Soul_Of_Magicion
+        Index: 1
+        Rate: 5000
+      - Item: Soul_Of_Magicion
+        Index: 2
+        Rate: 5000
+    Drops:
+      - Item: Crystal_Of_Grudge
+        Index: 0
+        Rate: 3000
+      - Item: Manteau_Of_Fallen
+        Index: 1
+        Rate: 150
+      - Item: Manteau_Of_Fallen
+        Index: 2
+        Rate: 500
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 5000
+      - Item: Soul_Of_Magicion
+        Index: 4
+        Rate: 10000
+      - Item: Soul_Of_Magicion
+        Index: 5
+        Rate: 10000
+      - Item: Soul_Of_Magicion
+        Index: 6
+        Rate: 10000
+      - Item: Warlock_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3225
+    AegisName: V_B_SEYREN
+    Name: Rune Knight Seyren
+    Level: 179
+    Hp: 14400000
+    BaseExp: 3000000
+    JobExp: 3000000
+    #   MvpExp:
+    Attack: 9000
+    Attack2: 4000
+    Defense: 800
+    MagicDefense: 400
+    Str: 340
+    Agi: 200
+    Vit: 400
+    Int: 100
+    Dex: 400
+    Luk: 120
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mvp: true
+    Element: Fire
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+    Modes:
+      Mvp: true
+    MvpDrops:
+      - Item: Soul_Of_Swordman
+        Index: 0
+        Rate: 5000
+      - Item: Soul_Of_Swordman
+        Index: 1
+        Rate: 5000
+      - Item: Soul_Of_Swordman
+        Index: 2
+        Rate: 5000
+    Drops:
+      - Item: Crystal_Of_Grudge
+        Index: 0
+        Rate: 3000
+      - Item: Manteau_Of_Fallen
+        Index: 1
+        Rate: 150
+      - Item: Manteau_Of_Fallen
+        Index: 2
+        Rate: 500
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 5000
+      - Item: Soul_Of_Swordman
+        Index: 4
+        Rate: 10000
+      - Item: Soul_Of_Swordman
+        Index: 5
+        Rate: 10000
+      - Item: Soul_Of_Swordman
+        Index: 6
+        Rate: 10000
+      - Item: RuneKnight_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3226
+    AegisName: V_RANDEL
+    Name: Randel Lawrence
+    JapaneseName: V Randel
+    Level: 177
+    Hp: 3000000
+    BaseExp: 700000
+    JobExp: 1000000
+    Attack: 4000
+    Attack2: 1333
+    Defense: 300
+    MagicDefense: 200
+    Str: 200
+    Agi: 80
+    Vit: 200
+    Int: 50
+    Dex: 190
+    Luk: 70
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Swordman_Thief: true
+    Element: Holy
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 336
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 19
+    Class: Boss
+    Drops:
+      - Item: Soul_Of_Swordman
+        Index: 0
+        Rate: 500
+      - Item: C_Protect_Of_Crown
+        Index: 1
+        Rate: 50
+      - Item: C_Schmidt_Helm
+        Index: 2
+        Rate: 50
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 600
+      - Item: Pieces_Of_Grudge
+        Index: 4
+        Rate: 400
+      - Item: Pieces_Of_Grudge
+        Index: 5
+        Rate: 200
+      - Item: Particles_Of_Energy5
+        Index: 6
+        Rate: 1000
+      - Item: Real_Randel_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3227
+    AegisName: V_FLAMEL
+    Name: Flamel Emule
+    JapaneseName: V Flamel
+    Level: 177
+    Hp: 3000000
+    BaseExp: 700000
+    JobExp: 1000000
+    Attack: 3333
+    Attack2: 3333
+    Defense: 130
+    MagicDefense: 100
+    Str: 140
+    Agi: 80
+    Vit: 70
+    Int: 150
+    Dex: 200
+    Luk: 50
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Acolyte_Merchant: true
+    Element: Fire
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 336
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 19
+    Class: Boss
+    Drops:
+      - Item: Soul_Of_Merchant
+        Index: 0
+        Rate: 500
+      - Item: C_Midas_Whisper
+        Index: 1
+        Rate: 50
+      - Item: Pieces_Of_Sentiment
+        Index: 2
+        Rate: 600
+      - Item: Pieces_Of_Grudge
+        Index: 3
+        Rate: 400
+      - Item: Pieces_Of_Grudge
+        Index: 4
+        Rate: 200
+      - Item: Particles_Of_Energy5
+        Index: 5
+        Rate: 1000
+      - Item: Real_Flamel_Card
+        Index: 6
+        Rate: 2
+        StealProtected: true
+  - Id: 3228
+    AegisName: V_CELIA
+    Name: Celia Alde
+    JapaneseName: V Celia
+    Level: 177
+    Hp: 3000000
+    BaseExp: 700000
+    JobExp: 1000000
+    Attack: 2000
+    Attack2: 3333
+    Defense: 110
+    MagicDefense: 800
+    Str: 140
+    Agi: 100
+    Vit: 60
+    Int: 150
+    Dex: 120
+    Luk: 50
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mage_Archer: true
+    Element: Neutral
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 576
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 19
+    Class: Boss
+    Drops:
+      - Item: Soul_Of_Magicion
+        Index: 0
+        Rate: 500
+      - Item: C_Wind_Whisper
+        Index: 1
+        Rate: 50
+      - Item: Pieces_Of_Sentiment
+        Index: 2
+        Rate: 600
+      - Item: Pieces_Of_Grudge
+        Index: 3
+        Rate: 400
+      - Item: Pieces_Of_Grudge
+        Index: 4
+        Rate: 200
+      - Item: Particles_Of_Energy5
+        Index: 5
+        Rate: 1000
+      - Item: Real_Ceila_Card
+        Index: 6
+        Rate: 2
+        StealProtected: true
+  - Id: 3229
+    AegisName: V_CHEN
+    Name: Chen Liu
+    JapaneseName: V Chen
+    Level: 177
+    Hp: 3000000
+    BaseExp: 700000
+    JobExp: 1000000
+    Attack: 5333
+    Attack2: 2000
+    Defense: 180
+    MagicDefense: 100
+    Str: 150
+    Agi: 80
+    Vit: 90
+    Int: 130
+    Dex: 200
+    Luk: 60
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demon
+    RaceGroups:
+      Bio5_Acolyte_Merchant: true
+    Element: Water
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 288
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 19
+    Class: Boss
+    Drops:
+      - Item: Soul_Of_Acolyte
+        Index: 0
+        Rate: 500
+      - Item: C_Blazing_Soul
+        Index: 1
+        Rate: 50
+      - Item: Pieces_Of_Sentiment
+        Index: 2
+        Rate: 600
+      - Item: Pieces_Of_Grudge
+        Index: 3
+        Rate: 400
+      - Item: Pieces_Of_Grudge
+        Index: 4
+        Rate: 200
+      - Item: Particles_Of_Energy5
+        Index: 5
+        Rate: 1000
+      - Item: Real_Chen_Card
+        Index: 6
+        Rate: 2
+        StealProtected: true
+  - Id: 3230
+    AegisName: V_GERTIE
+    Name: Gertie Wie
+    JapaneseName: V Gertie
+    Level: 177
+    Hp: 3000000
+    BaseExp: 700000
+    JobExp: 1000000
+    Attack: 4667
+    Attack2: 1667
+    Defense: 160
+    MagicDefense: 100
+    Str: 180
+    Agi: 130
+    Vit: 60
+    Int: 50
+    Dex: 210
+    Luk: 50
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demon
+    RaceGroups:
+      Bio5_Swordman_Thief: true
+    Element: Poison
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 336
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 19
+    Class: Boss
+    Drops:
+      - Item: Soul_Of_Thief
+        Index: 0
+        Rate: 500
+      - Item: C_Shadow_Handicraft
+        Index: 1
+        Rate: 50
+      - Item: Pieces_Of_Sentiment
+        Index: 2
+        Rate: 600
+      - Item: Pieces_Of_Grudge
+        Index: 3
+        Rate: 400
+      - Item: Pieces_Of_Grudge
+        Index: 4
+        Rate: 200
+      - Item: Particles_Of_Energy5
+        Index: 5
+        Rate: 1000
+      - Item: Real_Gertie_Card
+        Index: 6
+        Rate: 2
+        StealProtected: true
+  - Id: 3231
+    AegisName: V_ALPHOCCIO
+    Name: Alphoccio Basil
+    JapaneseName: V Alphoccio
+    Level: 177
+    Hp: 3000000
+    BaseExp: 700000
+    JobExp: 1000000
+    Attack: 2667
+    Attack2: 4000
+    Defense: 120
+    MagicDefense: 100
+    Str: 120
+    Agi: 150
+    Vit: 70
+    Int: 200
+    Dex: 150
+    Luk: 90
+    AttackRange: 7
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mage_Archer: true
+    Element: Wind
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 336
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 19
+    Class: Boss
+    Drops:
+      - Item: Soul_Of_Archer
+        Index: 0
+        Rate: 500
+      - Item: C_Minstrel_Song_Hat
+        Index: 1
+        Rate: 50
+      - Item: Pieces_Of_Sentiment
+        Index: 2
+        Rate: 600
+      - Item: Pieces_Of_Grudge
+        Index: 3
+        Rate: 400
+      - Item: Pieces_Of_Grudge
+        Index: 4
+        Rate: 200
+      - Item: Particles_Of_Energy5
+        Index: 5
+        Rate: 1000
+      - Item: Real_Alphoccio_Card
+        Index: 6
+        Rate: 2
+        StealProtected: true
+  - Id: 3232
+    AegisName: V_TRENTINI
+    Name: Trentini
+    JapaneseName: V Trentini
+    Level: 177
+    Hp: 3000000
+    BaseExp: 700000
+    JobExp: 1000000
+    Attack: 2667
+    Attack2: 4000
+    Defense: 100
+    MagicDefense: 100
+    Str: 110
+    Agi: 150
+    Vit: 70
+    Int: 200
+    Dex: 150
+    Luk: 80
+    AttackRange: 7
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mage_Archer: true
+    Element: Wind
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 336
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 19
+    Class: Boss
+    Drops:
+      - Item: Soul_Of_Archer
+        Index: 0
+        Rate: 500
+      - Item: C_Dying_Swan
+        Index: 1
+        Rate: 50
+      - Item: Pieces_Of_Sentiment
+        Index: 2
+        Rate: 600
+      - Item: Pieces_Of_Grudge
+        Index: 3
+        Rate: 400
+      - Item: Pieces_Of_Grudge
+        Index: 4
+        Rate: 200
+      - Item: Particles_Of_Energy5
+        Index: 5
+        Rate: 1000
+      - Item: Real_Trentini_Card
+        Index: 6
+        Rate: 2
+        StealProtected: true
+  - Id: 3233
+    AegisName: V_G_RANDEL
+    Name: Royal Guard Randel
+    JapaneseName: V G Randel
+    Level: 178
+    Hp: 5000000
+    BaseExp: 1000000
+    JobExp: 1500000
+    Attack: 6000
+    Attack2: 2000
+    Defense: 600
+    MagicDefense: 400
+    Str: 400
+    Agi: 160
+    Vit: 400
+    Int: 100
+    Dex: 380
+    Luk: 140
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Swordman_Thief: true
+    Element: Holy
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 672
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+  - Id: 3234
+    AegisName: V_G_FLAMEL
+    Name: Genetic Flamel
+    JapaneseName: V G Flamel
+    Level: 178
+    Hp: 5000000
+    BaseExp: 1000000
+    JobExp: 1500000
+    Attack: 5000
+    Attack2: 5000
+    Defense: 260
+    MagicDefense: 200
+    Str: 280
+    Agi: 160
+    Vit: 140
+    Int: 300
+    Dex: 400
+    Luk: 100
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Acolyte_Merchant: true
+    Element: Fire
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 672
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+  - Id: 3235
+    AegisName: V_G_CELIA
+    Name: Sorcerer Celia
+    JapaneseName: V G Celia
+    Level: 178
+    Hp: 5000000
+    BaseExp: 1000000
+    JobExp: 1500000
+    Attack: 3000
+    Attack2: 5000
+    Defense: 220
+    MagicDefense: 800
+    Str: 280
+    Agi: 200
+    Vit: 120
+    Int: 300
+    Dex: 240
+    Luk: 100
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mage_Archer: true
+    Element: Neutral
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 576
+    AttackMotion: 384
+    ClientAttackMotion: 672
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+  - Id: 3236
+    AegisName: V_G_CHEN
+    Name: Sura Chen
+    JapaneseName: V G Chen
+    Level: 178
+    Hp: 5000000
+    BaseExp: 1000000
+    JobExp: 1500000
+    Attack: 8000
+    Attack2: 3000
+    Defense: 360
+    MagicDefense: 200
+    Str: 300
+    Agi: 160
+    Vit: 180
+    Int: 260
+    Dex: 400
+    Luk: 120
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demon
+    RaceGroups:
+      Bio5_Acolyte_Merchant: true
+    Element: Water
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 576
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+  - Id: 3237
+    AegisName: V_G_GERTIE
+    Name: Shadow Chaser Gertie
+    JapaneseName: V G Gertie
+    Level: 178
+    Hp: 5000000
+    BaseExp: 1000000
+    JobExp: 1500000
+    Attack: 7000
+    Attack2: 2500
+    Defense: 320
+    MagicDefense: 200
+    Str: 360
+    Agi: 260
+    Vit: 120
+    Int: 100
+    Dex: 420
+    Luk: 100
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demon
+    RaceGroups:
+      Bio5_Swordman_Thief: true
+    Element: Poison
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 672
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+  - Id: 3238
+    AegisName: V_G_ALPHOCCIO
+    Name: Minstrel Alphoccio
+    JapaneseName: V G Alphoccio
+    Level: 178
+    Hp: 5000000
+    BaseExp: 1000000
+    JobExp: 1500000
+    Attack: 4000
+    Attack2: 6000
+    Defense: 240
+    MagicDefense: 200
+    Str: 240
+    Agi: 300
+    Vit: 140
+    Int: 400
+    Dex: 300
+    Luk: 180
+    AttackRange: 7
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mage_Archer: true
+    Element: Wind
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 672
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+  - Id: 3239
+    AegisName: V_G_TRENTINI
+    Name: Wanderer Trentini
+    JapaneseName: V G Trentini
+    Level: 178
+    Hp: 5000000
+    BaseExp: 1000000
+    JobExp: 1500000
+    Attack: 4000
+    Attack2: 6000
+    Defense: 200
+    MagicDefense: 200
+    Str: 220
+    Agi: 300
+    Vit: 140
+    Int: 400
+    Dex: 300
+    Luk: 160
+    AttackRange: 7
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mage_Archer: true
+    Element: Wind
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 672
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+  - Id: 3240
+    AegisName: V_B_RANDEL
+    Name: Royal Guard Randel
+    Level: 179
+    Hp: 18000000
+    BaseExp: 3000000
+    JobExp: 3000000
+    #   MvpExp:
+    Attack: 6000
+    Attack2: 2000
+    Defense: 600
+    MagicDefense: 400
+    Str: 401
+    Agi: 160
+    Vit: 400
+    Int: 100
+    Dex: 380
+    Luk: 140
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mvp: true
+    Element: Holy
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 672
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+    Modes:
+      Mvp: true
+    MvpDrops:
+      - Item: Soul_Of_Swordman
+        Index: 0
+        Rate: 5000
+      - Item: Soul_Of_Swordman
+        Index: 1
+        Rate: 5000
+      - Item: Soul_Of_Swordman
+        Index: 2
+        Rate: 5000
+    Drops:
+      - Item: Crystal_Of_Grudge
+        Index: 0
+        Rate: 3000
+      - Item: Manteau_Of_Fallen
+        Index: 1
+        Rate: 150
+      - Item: Manteau_Of_Fallen
+        Index: 2
+        Rate: 500
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 5000
+      - Item: Soul_Of_Swordman
+        Index: 4
+        Rate: 10000
+      - Item: Soul_Of_Swordman
+        Index: 5
+        Rate: 10000
+      - Item: Soul_Of_Swordman
+        Index: 6
+        Rate: 10000
+      - Item: RoyalGuard_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3241
+    AegisName: V_B_FLAMEL
+    Name: Genetic Flamel
+    Level: 179
+    Hp: 14400000
+    BaseExp: 3000000
+    JobExp: 3000000
+    #   MvpExp:
+    Attack: 5000
+    Attack2: 5000
+    Defense: 260
+    MagicDefense: 200
+    Str: 280
+    Agi: 160
+    Vit: 140
+    Int: 300
+    Dex: 400
+    Luk: 100
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mvp: true
+    Element: Fire
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 672
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+    Modes:
+      Mvp: true
+    MvpDrops:
+      - Item: Soul_Of_Merchant
+        Index: 0
+        Rate: 5000
+      - Item: Soul_Of_Merchant
+        Index: 1
+        Rate: 5000
+      - Item: Soul_Of_Merchant
+        Index: 2
+        Rate: 5000
+    Drops:
+      - Item: Crystal_Of_Grudge
+        Index: 0
+        Rate: 3000
+      - Item: Manteau_Of_Fallen
+        Index: 1
+        Rate: 150
+      - Item: Manteau_Of_Fallen
+        Index: 2
+        Rate: 500
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 5000
+      - Item: Soul_Of_Merchant
+        Index: 4
+        Rate: 10000
+      - Item: Soul_Of_Merchant
+        Index: 5
+        Rate: 10000
+      - Item: Soul_Of_Merchant
+        Index: 6
+        Rate: 10000
+      - Item: Genetic_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3242
+    AegisName: V_B_CELIA
+    Name: Sorcerer Celia
+    Level: 179
+    Hp: 16200000
+    BaseExp: 3000000
+    JobExp: 3000000
+    #   MvpExp:
+    Attack: 3000
+    Attack2: 5000
+    Defense: 220
+    MagicDefense: 800
+    Str: 280
+    Agi: 200
+    Vit: 120
+    Int: 300
+    Dex: 240
+    Luk: 100
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mvp: true
+    Element: Neutral
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 576
+    AttackMotion: 384
+    ClientAttackMotion: 672
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+    Modes:
+      Mvp: true
+    MvpDrops:
+      - Item: Soul_Of_Magicion
+        Index: 0
+        Rate: 5000
+      - Item: Soul_Of_Magicion
+        Index: 1
+        Rate: 5000
+      - Item: Soul_Of_Magicion
+        Index: 2
+        Rate: 5000
+    Drops:
+      - Item: Crystal_Of_Grudge
+        Index: 0
+        Rate: 3000
+      - Item: Manteau_Of_Fallen
+        Index: 1
+        Rate: 150
+      - Item: Manteau_Of_Fallen
+        Index: 2
+        Rate: 500
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 5000
+      - Item: Soul_Of_Magicion
+        Index: 4
+        Rate: 10000
+      - Item: Soul_Of_Magicion
+        Index: 5
+        Rate: 10000
+      - Item: Soul_Of_Magicion
+        Index: 6
+        Rate: 10000
+      - Item: Sorcerer_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3243
+    AegisName: V_B_CHEN
+    Name: Sura Chen
+    Level: 179
+    Hp: 12600000
+    BaseExp: 3000000
+    JobExp: 3000000
+    #   MvpExp:
+    Attack: 8000
+    Attack2: 3000
+    Defense: 360
+    MagicDefense: 200
+    Str: 300
+    Agi: 160
+    Vit: 180
+    Int: 260
+    Dex: 400
+    Luk: 120
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mvp: true
+    Element: Water
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 576
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+    Modes:
+      Mvp: true
+    MvpDrops:
+      - Item: Soul_Of_Acolyte
+        Index: 0
+        Rate: 5000
+      - Item: Soul_Of_Acolyte
+        Index: 1
+        Rate: 5000
+      - Item: Soul_Of_Acolyte
+        Index: 2
+        Rate: 5000
+    Drops:
+      - Item: Crystal_Of_Grudge
+        Index: 0
+        Rate: 3000
+      - Item: Manteau_Of_Fallen
+        Index: 1
+        Rate: 150
+      - Item: Manteau_Of_Fallen
+        Index: 2
+        Rate: 500
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 5000
+      - Item: Soul_Of_Acolyte
+        Index: 4
+        Rate: 10000
+      - Item: Soul_Of_Acolyte
+        Index: 5
+        Rate: 10000
+      - Item: Soul_Of_Acolyte
+        Index: 6
+        Rate: 10000
+      - Item: Sura_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3244
+    AegisName: V_B_GERTIE
+    Name: Shadow Chaser Gertie
+    Level: 179
+    Hp: 14400000
+    BaseExp: 3000000
+    JobExp: 3000000
+    #   MvpExp:
+    Attack: 7000
+    Attack2: 2500
+    Defense: 320
+    MagicDefense: 200
+    Str: 360
+    Agi: 260
+    Vit: 120
+    Int: 100
+    Dex: 420
+    Luk: 100
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mvp: true
+    Element: Poison
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 672
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+    Modes:
+      Mvp: true
+    MvpDrops:
+      - Item: Soul_Of_Thief
+        Index: 0
+        Rate: 5000
+      - Item: Soul_Of_Thief
+        Index: 1
+        Rate: 5000
+      - Item: Soul_Of_Thief
+        Index: 2
+        Rate: 5000
+    Drops:
+      - Item: Crystal_Of_Grudge
+        Index: 0
+        Rate: 3000
+      - Item: Manteau_Of_Fallen
+        Index: 1
+        Rate: 150
+      - Item: Manteau_Of_Fallen
+        Index: 2
+        Rate: 500
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 5000
+      - Item: Soul_Of_Thief
+        Index: 4
+        Rate: 10000
+      - Item: Soul_Of_Thief
+        Index: 5
+        Rate: 10000
+      - Item: Soul_Of_Thief
+        Index: 6
+        Rate: 10000
+      - Item: ShadowChaser_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3245
+    AegisName: V_B_ALPHOCCIO
+    Name: Minstrel Alphoccio
+    Level: 179
+    Hp: 10800000
+    BaseExp: 3000000
+    JobExp: 3000000
+    #   MvpExp:
+    Attack: 4000
+    Attack2: 6000
+    Defense: 240
+    MagicDefense: 200
+    Str: 240
+    Agi: 300
+    Vit: 140
+    Int: 400
+    Dex: 300
+    Luk: 180
+    AttackRange: 7
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mvp: true
+    Element: Wind
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 672
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+    Modes:
+      Mvp: true
+    MvpDrops:
+      - Item: Soul_Of_Archer
+        Index: 0
+        Rate: 5000
+      - Item: Soul_Of_Archer
+        Index: 1
+        Rate: 5000
+      - Item: Soul_Of_Archer
+        Index: 2
+        Rate: 5000
+    Drops:
+      - Item: Crystal_Of_Grudge
+        Index: 0
+        Rate: 3000
+      - Item: Manteau_Of_Fallen
+        Index: 1
+        Rate: 150
+      - Item: Manteau_Of_Fallen
+        Index: 2
+        Rate: 500
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 5000
+      - Item: Soul_Of_Archer
+        Index: 4
+        Rate: 10000
+      - Item: Soul_Of_Archer
+        Index: 5
+        Rate: 10000
+      - Item: Soul_Of_Archer
+        Index: 6
+        Rate: 10000
+      - Item: Minstrel_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true
+  - Id: 3246
+    AegisName: V_B_TRENTINI
+    Name: Wanderer Trentini
+    Level: 179
+    Hp: 10800000
+    BaseExp: 3000000
+    JobExp: 3000000
+    #   MvpExp:
+    Attack: 4000
+    Attack2: 6000
+    Defense: 200
+    MagicDefense: 200
+    Str: 220
+    Agi: 300
+    Vit: 140
+    Int: 400
+    Dex: 300
+    Luk: 160
+    AttackRange: 7
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Demihuman
+    RaceGroups:
+      Bio5_Mvp: true
+    Element: Wind
+    ElementLevel: 4
+    WalkSpeed: 100
+    AttackDelay: 76
+    AttackMotion: 384
+    ClientAttackMotion: 672
+    DamageMotion: 288
+    # DamageTaken: 5
+    Ai: 21
+    Class: Boss
+    Modes:
+      Mvp: true
+    MvpDrops:
+      - Item: Soul_Of_Archer
+        Index: 0
+        Rate: 5000
+      - Item: Soul_Of_Archer
+        Index: 1
+        Rate: 5000
+      - Item: Soul_Of_Archer
+        Index: 2
+        Rate: 5000
+    Drops:
+      - Item: Crystal_Of_Grudge
+        Index: 0
+        Rate: 3000
+      - Item: Manteau_Of_Fallen
+        Index: 1
+        Rate: 150
+      - Item: Manteau_Of_Fallen
+        Index: 2
+        Rate: 500
+      - Item: Pieces_Of_Sentiment
+        Index: 3
+        Rate: 5000
+      - Item: Soul_Of_Archer
+        Index: 4
+        Rate: 10000
+      - Item: Soul_Of_Archer
+        Index: 5
+        Rate: 10000
+      - Item: Soul_Of_Archer
+        Index: 6
+        Rate: 10000
+      - Item: Wanderer_Card
+        Index: 7
+        Rate: 2
+        StealProtected: true

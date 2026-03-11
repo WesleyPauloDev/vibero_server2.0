@@ -1,0 +1,265 @@
+-	script	Lojas	-1,{
+
+OnInit:
+
+	bindatcmd "lojas", strnpcinfo(3)+"::OnAtcommand";	
+
+	end;
+
+OnAtcommand:
+
+	callfunc ("Menu_Lojas");
+
+	end;
+}
+
+function	script	Menu_Lojas	{	
+	mes "[Menu de Lojas]";
+
+    switch(select("Éden", "Anubis", "Instância", "Loja de Mana", "Cheffenia", "Bio5", "Votos", "Pontos MVP", "Presença", "Pets", "Minérios")) {
+        case 1: // Éden
+            mes "[Loja do Éden]";
+            switch(select("Consumíveis:Armas:Equipamentos:Trocar Poções:Sair")) {
+                case 1:
+                    callshop "consumable_eden"; // Loja de Consumíveis
+                    end;
+                case 2:
+                    callshop "weapons_eden"; // Loja de armas
+                    end;
+                case 3:
+                    callshop "equipments_eden"; // Loja de equipamentos
+                    end;
+                case 4:
+                    mes "Aqui você pode trocar suas Poções[Iniciante] por outras do mesmo tipo.";
+                    switch(select("Trocar Poções de HP em Poções de SP:Trocar Poções de SP em Poções de HP")) {
+                        case 1:
+                            mes "Quantas Poções deseja trocar?";
+                            input .@amount;
+                            if (.@amount <= 0) {
+                                mes "Quantidade inválida.";
+                                end;
+                            }
+                            if (countitem(9660) < .@amount) {
+                                mes "Você não possui Poções de HP suficientes.";
+                                end;
+                            }
+                            delitem 9660, .@amount; // Remove as poções de HP
+                            getitem 9661, .@amount; // Dá as poções de SP
+                            logshop "SCRIPT_EXCHANGE", "eden_potion_swap", 9661, .@amount, 0, 9660, .@amount, "", 0;
+                            end;
+                        case 2:
+                            mes "Quantas Poções deseja trocar?";
+                            input .@amount;
+                            if (.@amount <= 0) {
+                                mes "Quantidade inválida.";
+                                end;
+                            }
+                            if (countitem(9661) < .@amount) {
+                                mes "Você não possui Poções de SP suficientes.";
+                                end;
+                            }
+                            delitem 9661, .@amount; // Remove as poções de SP
+                            getitem 9660, .@amount; // Dá as poções de HP
+                            logshop "SCRIPT_EXCHANGE", "eden_potion_swap", 9660, .@amount, 0, 9661, .@amount, "", 0;
+                            end;
+                    }
+                    end;
+                default:
+                    mes "Volte sempre!";
+                    close;
+            }
+        case 2:  // Anubis
+            switch(select("Encantamentos", "Armas", "Equipamentos")) {
+                case 1:
+                    callshop "enchant_anubis",1;
+                    end;
+                case 2:
+                    callshop "weapons_anubis",1;
+                    end;
+                case 3:
+                    callshop "equipments_anubis",1;
+                    end;
+            }
+        case 3:  // Instância
+            switch(select("Equipamentos", "Armas", "Itens", "Grades")) {
+                case 1:
+                    callshop "instancia_barter",1;
+                    end;
+                case 2:
+                    callshop "weapons_instancia_barter",1;
+                    end;
+                case 3:
+                    callshop "instancia_items_barter",1;
+                    end;
+                case 4:
+                    callshop "grade_instancia_barter",1;
+                    end;
+            }
+        case 4:  // Loja de Mana
+            next;
+            doEvent "Loja de GLastHeim::OnTalk";
+            end;
+        case 5:  // Cheffenia
+            switch(select("Cheffenia Normal", "Cheffenia Hard")) {
+                case 1:
+                    switch(select("Equipamentos", "Armas", "Itens")) {
+                        case 1:
+                            callshop "cheffenia_barter",1;
+                            end;
+                        case 2:
+                            callshop "weapons_cheffenia_barter",1;
+                            end;
+                        case 3:
+                            callshop "items_cheffenia_barter",1;
+                            end;
+                    }
+                case 2:
+                    switch(select("Equipamentos", "Armas", "Itens", "Shadows")) {
+                        case 1:
+                            callshop "cheffenia_hard_barter",1;
+                            end;
+                        case 2:
+                            callshop "weapons_cheffeniaH_barter",1;
+                            end;
+                        case 3:
+                            callshop "items_cheffeniaH_barter",1;
+                            end;
+                        case 4:
+                            callshop "shadows_cheffeniaH_barter",1;
+                            end;
+                    }
+            }
+        case 6:  // Bio5
+            switch(select("Bio5 Normal", "Bio5 Hard")) {
+                case 1:
+                    switch(select("Equipamentos", "Armas", "Itens")) {
+                        case 1:
+                            callshop "bio5_barter",1;
+                            end;
+                        case 2:
+                            callshop "weapons_bio5_barter",1;
+                            end;
+                        case 3:
+                            callshop "items_bio5_barter",1;
+                            end;
+                    }
+                case 2:
+                    switch(select("Equipamentos", "Armas", "Itens", "Shadows")) {
+                        case 1:
+                            callshop "bio5_hard_barter",1;
+                            end;
+                        case 2:
+                            callshop "weapons_bio5H_barter",1;
+                            end;
+                        case 3:
+                            callshop "items_bio5H_barter",1;
+                            end;
+                        case 4:
+                            callshop "shadows_bio5H_barter",1;
+                            end;
+                    }
+            }
+        case 7:  // Votos
+            next;
+            doEvent "Loja de Votos::OnTalk";
+            end;
+        case 8:  // Pontos MVP
+            next;
+            doEvent "Loja de Pontos MVP::OnTalk";
+            end;
+        case 9:  // Pontos de Presença
+            next;
+            doEvent "Loja de Presença::OnTalk";
+            end;
+        case 10:  // Pets
+            switch(select("Comprar Pet:Vender Pet")) {
+                case 1:
+                    callshop "pet_egg_barter_shop",1;
+                    end;
+                case 2:
+                    callfunc("PetEggSellMenu");
+                    end;
+            }
+        case 11:  // Minérios
+            callshop "ore_barter_shop",1;
+            end;
+    }
+    close;
+
+	return;
+}
+
+function	script	PetEggSellMenu	{
+	.@pet_ticket_id = 9199;
+	.@total = 0;
+
+	// Ovos da pet_egg_barter_shop e seus valores em Pet_Ticket.
+	setarray .@egg_id[0],
+		9031, // Spring_Rabbit_Egg
+		9032, // Knife_Goblin_Egg
+		9035, // Red_Deleter_Egg
+		9036, // Diabolic_Egg
+		9037, // Wanderer_Egg
+		9096, // Cat_O_Nine_Tail_Egg
+		9090, // Littleisis_Egg
+		9070, // Savage_Egg
+		9087, // High_Orc_Egg
+		9091, // Choco_Egg
+		9107, // Ancient_Mummy_Egg
+		9089, // Ammut_Egg
+		9071, // Grand_Peco_Egg
+		9093, // Hyegun_Egg
+		9105, // Hodremlin_Egg
+		9108, // Xm_Teddybear_Egg
+		9092, // Eggring_Egg
+		9094, // Leaf_Lunatic_Egg
+		9200, // S_Nydhog_Egg
+		9201, // VALKYRIE_N_Egg
+		9202, // EDDGA_Egg
+		9203, // OSIRIS_N_Egg
+		9204, // PHREEONI_N_Egg
+		9205; // DARK_LORD_N_Egg
+
+	setarray .@ticket_value[0],
+		1,1,1,1,1,1,
+		5,5,5,5,5,5,
+		20,20,20,20,20,20,
+		100,100,100,100,100,100;
+
+	for (.@i = 0; .@i < getarraysize(.@egg_id); .@i++) {
+		if (countitem(.@egg_id[.@i]) > 0) {
+			.@slot[.@total] = .@i;
+			.@menu$ += getitemname(.@egg_id[.@i]) + " (x" + countitem(.@egg_id[.@i]) + ") -> " + .@ticket_value[.@i] + " Pet Ticket:";
+			.@total++;
+		}
+	}
+
+	mes "[Loja de Pets]";
+	if (!.@total) {
+		mes "Você não possui nenhum ovo de pet desta loja no inventário.";
+		close;
+	}
+
+	.@choice = select(.@menu$) - 1;
+	.@selected = .@slot[.@choice];
+	.@egg = .@egg_id[.@selected];
+	.@tickets = .@ticket_value[.@selected];
+
+	if (countitem(.@egg) < 1) {
+		mes "Esse ovo não está mais no seu inventário.";
+		close;
+	}
+
+	if (!checkweight(.@pet_ticket_id, .@tickets)) {
+		mes "Você está com peso alto. Libere peso e tente novamente.";
+		close;
+	}
+
+	delitem .@egg, 1;
+	getitem .@pet_ticket_id, .@tickets;
+	logshop "SCRIPT_EXCHANGE", "PetEggSellMenu", .@pet_ticket_id, .@tickets, 0, .@egg, 1, "", 0;
+
+	mes "Você vendeu 1x " + getitemname(.@egg) + ".";
+	mes "Recebeu " + .@tickets + "x " + getitemname(.@pet_ticket_id) + ".";
+	close;
+}

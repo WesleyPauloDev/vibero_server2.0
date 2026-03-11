@@ -1,0 +1,28 @@
+-	script	BuffVIP	-1,{
+
+OnInit:
+	bindatcmd "buff", strnpcinfo(3)+"::OnAtcommand";
+	end;
+
+OnAtcommand:
+	if (getgroupid() > 0) {
+		.@Delay = 5;
+		.@time = 600000;
+
+		// Verifica tempo restante
+		if (@last_buff_time + .@delay > gettimetick(2)) {
+			.@remaining = (@last_buff_time + .@delay) - gettimetick(2);
+			message strcharinfo(0), "Você poderá usar novamente em " + .@remaining + " segundo(s).";
+			end;
+		}
+
+		// Atualiza o tempo do último uso
+		@last_buff_time = gettimetick(2);
+		doevent "Healer::OnBuffOnly";
+		end;
+	}
+	
+    message strcharinfo(0), "Este comando é exclusivo para jogadores VIP.";
+
+	end;
+}

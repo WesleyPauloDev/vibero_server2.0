@@ -1,0 +1,103 @@
+// npc/custom/pvp_weekly_reset.txt
+-	script	PVP_WEEKLY_REWARD	-1,{
+
+	 // Roda todo dia
+	OnClock2359:
+		// 6 = sábado
+		if (gettime(DT_DAYOFWEEK) != 6) end;
+
+		donpcevent "PVP_WEEKLY_REWARD::OnWeeklyReward";
+		end;
+
+	OnClock0000:
+	if (gettime(DT_DAYOFMONTH) != 1) end;
+
+	// Zera kills mês
+	query_sql("DELETE FROM char_reg_num WHERE `key`='pvp_kills_month' AND `index`=0");
+
+	// Zera mortes mês
+	query_sql("DELETE FROM char_reg_num WHERE `key`='pvp_deaths_month' AND `index`=0");
+
+	announce "Sistema PvP: Ranking Mensal Resetado!", bc_all;
+
+	end;
+
+	// Aqui entra TODA a premiação
+	OnWeeklyReward:
+		
+		announce "Sistema PvP: Checando Ranking Semanal...",bc_all,"0xFB9D04",FW_NORMAL,12;
+
+		sleep 10000;
+
+		// Pega top 3
+		query_sql(" SELECT MAX(COALESCE(k.value,0)) FROM `char` c LEFT JOIN `char_reg_num` k ON k.char_id = c.char_id AND k.`key` = 'pvp_kills' AND k.`index` = 0", .@max_kills);
+
+		if (.@max_kills <= 0) {
+			announce "PvP Semanal: Nenhum jogador fez kills esta semana. Premiação cancelada.", bc_all;
+			end;
+		}
+
+		query_sql(" SELECT c.char_id, COALESCE(k.value,0) AS kills FROM `char` c LEFT JOIN `char_reg_num` k ON k.char_id = c.char_id AND k.`key` = 'pvp_kills' AND k.`index` = 0 ORDER BY kills DESC LIMIT 3", .@cid, .@kills);
+
+ 		// === 1º LUGAR ===
+		if (.@cid[0] && .@kills[0] > 0) {
+
+			// pega nome do char
+			query_sql("SELECT name FROM `char` WHERE char_id = "+.@cid[0], .@name$);
+
+			//--------------------------------------
+			// CRIA A MENSAGEM NA TABELA MAIL
+			//--------------------------------------
+			query_sql("INSERT INTO `mail` (send_name, send_id, dest_name, dest_id, title, message, time, status, zeny, type) VALUES ('PvP System', 0, '"+escape_sql(.@name$)+"', "+.@cid[0]+", 'Premiacao PvP Semanal', 'Parabens pelo 1 Lugar!', UNIX_TIMESTAMP(), 0, 0, 0)");
+
+			// pega o último id do mail criado
+			query_sql("SELECT LAST_INSERT_ID()", .@mail_id);
+
+			//--------------------------------------
+			// ADICIONA O ITEM NA TABELA mail_attachments
+			//--------------------------------------
+			query_sql("INSERT INTO `mail_attachments` (id, `index`, nameid, amount, refine, attribute, identify, card0, card1, card2, card3, option_id0, option_val0, option_parm0, option_id1, option_val1, option_parm1, option_id2, option_val2, option_parm2, option_id3, option_val3, option_parm3, option_id4, option_val4, option_parm4, unique_id, bound, enchantgrade) VALUES (" + .@mail_id + ", 0, 9199, 20, 0, 0, 1, 0,0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0, 0, 0)");
+
+			announce "PvP Semanal: "+.@name$+" ficou em 1º Lugar!", bc_all;
+			sleep 5000;
+		}
+
+		// === 2º LUGAR ===
+		if (.@cid[1] && .@kills[1] > 0) {
+
+			query_sql("SELECT name FROM `char` WHERE char_id = "+.@cid[1], .@name$);
+
+			query_sql("INSERT INTO `mail` (send_name, send_id, dest_name, dest_id, title, message, time, status, zeny, type) VALUES ('PvP System', 0, '"+escape_sql(.@name$)+"', "+.@cid[1]+", 'Premiacao PvP Semanal', 'Parabens pelo 1 Lugar!', UNIX_TIMESTAMP(), 0, 0, 0)");
+
+			query_sql("SELECT LAST_INSERT_ID()", .@mail_id);
+
+			query_sql("INSERT INTO `mail_attachments` (id, `index`, nameid, amount, refine, attribute, identify, card0, card1, card2, card3, option_id0, option_val0, option_parm0, option_id1, option_val1, option_parm1, option_id2, option_val2, option_parm2, option_id3, option_val3, option_parm3, option_id4, option_val4, option_parm4, unique_id, bound, enchantgrade) VALUES (" + .@mail_id + ", 0, 9199, 10, 0, 0, 1, 0,0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0, 0, 0)");
+
+			announce "PvP Semanal: "+.@name$+" ficou em 2º Lugar!", bc_all;
+			sleep 5000;
+		}
+
+		// PREMIAÇÃO 3º LUGAR
+		if (.@cid[2] && .@kills[2] > 0) {
+
+			query_sql("SELECT name FROM `char` WHERE char_id = "+.@cid[2], .@name$);
+
+			query_sql("INSERT INTO `mail` (send_name, send_id, dest_name, dest_id, title, message, time, status, zeny, type) VALUES ('PvP System', 0, '"+escape_sql(.@name$)+"', "+.@cid[2]+", 'Premiacao PvP Semanal', 'Parabens pelo 1 Lugar!', UNIX_TIMESTAMP(), 0, 0, 0)");
+
+			query_sql("SELECT LAST_INSERT_ID()", .@mail_id);
+
+			query_sql("INSERT INTO `mail_attachments` (id, `index`, nameid, amount, refine, attribute, identify, card0, card1, card2, card3, option_id0, option_val0, option_parm0, option_id1, option_val1, option_parm1, option_id2, option_val2, option_parm2, option_id3, option_val3, option_parm3, option_id4, option_val4, option_parm4, unique_id, bound, enchantgrade) VALUES (" + .@mail_id + ", 0, 9199, 5, 0, 0, 1, 0,0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0, 0, 0)");
+
+			announce "PvP Semanal: "+.@name$+" ficou em 3º Lugar!", bc_all;
+			sleep 5000;
+		}
+
+		// Zera todos os pontos
+		query_sql("DELETE FROM char_reg_num WHERE `key` = 'pvp_kills' AND `index` = 0");
+		query_sql("DELETE FROM char_reg_num WHERE `key` = 'pvp_deaths' AND `index` = 0");
+
+		announce "Sistema PvP: Pontuação resetada para a nova semana!", bc_all;
+
+	end;
+}
+

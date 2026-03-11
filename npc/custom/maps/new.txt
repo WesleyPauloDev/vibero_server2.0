@@ -1,0 +1,181 @@
+// ----------------------- Treinador -----------------------
+new_1-1,53,119,4	script	Treinador#new	811,{
+	mes "[Treinador]";
+	mes "Bem-vindo à Área de Treinamento!";
+	mes "Aqui você pode praticar e aprender sobre o jogo.";
+	next;
+
+	while (true) {
+		mes "[Treinador]";
+		mes "Gostaria de saber mais sobre o servidor?";
+		switch(select("Sim, quero continuar.:Não, obrigado.")) {
+			case 1:				
+				mes "Nosso servidor possui dinâmicas exclusivas, pensadas para trazer uma experiência nova e divertida.";
+				next;
+				
+				mes "[Treinador]";
+				mes "Ele é intuitivo e instrutivo, ideal até mesmo para quem nunca jogou Ragnarok.";
+				next;
+				
+				mes "[Treinador]";
+				mes "Temos um site com guias completos e um Discord ativo com suporte da staff e da comunidade.";
+				next;
+
+				mes "[Treinador]";
+				mes "Você pode trocar Cash do jogo por dinheiro real (RMT) através de um NPC especial, com pagamento via PIX.";
+				next;
+
+				mes "[Treinador]";
+				mes "Nosso foco é sempre expandir e atualizar o conteúdo para oferecer as melhores experiências aos jogadores.";
+				next;
+
+				mes "[Treinador]";
+				mes "Agora, algumas orientações importantes para novos jogadores:";
+				next;
+
+				mes "[Treinador]";
+				mes "Ao lado deste NPC, há um NPC de *Quests do Iniciante* que concede recompensas valiosas para te ajudar no começo.";
+				next;
+
+				mes "[Treinador]";
+				mes "Também próximo daqui, você encontrará uma *Curandeira* que pode restaurar sua vida e fornecer *buffs* para facilitar sua jornada.";
+				next;
+
+				mes "[Treinador]";
+				mes "Esses buffs são úteis para derrotar monstros mais rápido e upar com mais segurança.";
+				next;
+
+				mes "[Treinador]";
+				mes "Quando você alcançar o nível 10 de classe, estará pronto para prosseguir com sua jornada.";
+				next;
+
+				mes "[Treinador]";
+				mes "Nesse momento, siga para o lado direito do mapa (Leste) e fale com o NPC chamado ^0000FFExaminador^000000 para avançar.";
+				next;
+
+				mes "[Treinador]";
+				mes "Deseja rever todas as informações ou encerrar por aqui?";
+				if (select("Rever tudo.:Encerrar.") == 1) {
+					continue;
+				} else {
+					mes "Boa sorte em sua jornada! Estamos torcendo por você!";
+					close;
+				}
+				end;
+
+			case 2:
+				mes "Certo! Estarei por aqui se precisar de ajuda.";
+				close;
+		}
+	}
+}
+
+// ----------------------- Examinador -----------------------
+new_1-1,137,114,4	script	Examinador	642,{
+
+	mes "[Examinador]";
+	
+	if (Class == Job_Novice && JobLevel < 10) {
+		mes "Você precisa atingir o nível 10 de classe para prosseguir.";		
+		close;
+		
+	} else {
+		mes "Vejo que você adquiriu bastante Experiência de Batalha!";
+		mes "Está pronto para seguir sua jornada.";
+		next;
+		
+		if (select("Sim, me leve para Prontera.:Ainda não.") == 1) {
+			mes "[Examinador]";
+			mes "Boa sorte em sua aventura!";
+			close2;
+			warp "prontera", 156, 191; // Coordenadas centrais de Prontera
+			end;
+		} else {
+			mes "[Examinador]";
+			mes "Tudo bem, volte quando estiver pronto.";
+		}
+		close;
+	}
+	OnInit:
+		waitingroom "Examinador",0;
+		end;
+}
+
+// ----------------------- Quest do Iniciante -----------------------
+-	script	ContadorPoring	-1,{
+	OnNPCKillEvent:
+
+		if (quest_poring_started == 1 && killedrid == 1002) {
+			quest_poring_count++;
+			if (quest_poring_count < 20)
+			message strcharinfo(0), "Poring [ "+quest_poring_count+" / 20 ]";
+			else {
+				message strcharinfo(0), "Poring Completo";
+				quest_poring_started = 2;
+			}
+
+		}
+		end;
+}
+
+new_1-1,60,123,4	script	Quest do Iniciante	810,{
+
+	// quest_poring_done = 0;
+	// quest_poring_started = 1;
+	// quest_poring_count = 0;
+	if (quest_poring_done) {
+		mes "[Quest Iniciante]";
+		mes "Você já completou essa missão.";
+		close;
+	}
+
+	if (quest_poring_started == 0) {
+		mes "[Quest Iniciante]";
+		mes "Bem-vindo à Área de Treinamento!";
+		mes "Gostaria de me ajudar matando 20 Porings?";
+		mes "";
+		mes "[Recompensa]";
+		mes "- 100 Poções Vermelhas";
+		mes "- 100 Poções Azuis";
+		mes "- 5000 de experiência base";
+		next;
+		if (select("Sim:Não") == 2) close;
+
+		quest_poring_started = 1;
+		quest_poring_count = 0;
+		mes "[Quest Iniciante]";
+		mes "Boa sorte! Volte quando tiver derrotado 20 Porings.";
+		close;
+	}
+
+	if (quest_poring_started == 1 && quest_poring_count < 20) {
+		mes "[Quest Iniciante]";
+		mes "Você ainda não matou 20 Porings.";
+		mes "Progresso: " + quest_poring_count + " / 20";
+		close;
+	}
+
+	if (quest_poring_started == 2 && quest_poring_count >= 20) {
+		mes "[Quest Iniciante]";
+		mes "Parabéns! Você completou a missão.";
+		mes "Aqui está sua recompensa:";
+		mes "- 100 Poções Vermelhas";
+		mes "- 100 Poções Azuis";
+		mes "- 5000 de experiência base";
+		getitem 501, 100; // Poção Vermelha do iniciante
+		getitem 505, 100; // Poção Azul do iniciante
+		getexp 5000,0;      // Recompensa de experiência base
+		quest_poring_done = 1;
+		quest_poring_started = 0;
+		quest_poring_count = 0;
+		close;
+	}
+}
+
+// ----------------------- Mobs -----------------------
+new_1-1,0,0,150,150	monster	Poring	1002,100,3000,0,0
+
+
+
+
+

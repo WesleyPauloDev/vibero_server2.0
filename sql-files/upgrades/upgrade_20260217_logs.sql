@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS `cashshop_transactions` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `purchased_at` datetime NOT NULL,
+  `account_id` int(11) unsigned NOT NULL DEFAULT '0',
+  `char_id` int(11) unsigned NOT NULL DEFAULT '0',
+  `char_name` varchar(25) NOT NULL DEFAULT '',
+  `item_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `item_name` varchar(50) NOT NULL DEFAULT '',
+  `unit_price` int(10) unsigned NOT NULL DEFAULT '0',
+  `amount` int(10) unsigned NOT NULL DEFAULT '0',
+  `total_price` int(11) unsigned NOT NULL DEFAULT '0',
+  `cash_points_used` int(11) NOT NULL DEFAULT '0',
+  `kafra_points_used` int(11) NOT NULL DEFAULT '0',
+  `map` varchar(11) NOT NULL DEFAULT '',
+  `source` varchar(31) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  INDEX (`account_id`),
+  INDEX (`char_id`),
+  INDEX (`item_id`),
+  INDEX (`purchased_at`)
+) ENGINE=MyISAM;

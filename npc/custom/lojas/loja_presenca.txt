@@ -1,0 +1,73 @@
+-	script	Loja de Presença	-1,{
+OnTalk:
+	mes "[Vendedor]";
+	mes "Confira meus produtos!";
+	npcshopattach "Presence_Shop";
+	callshop "Presence_Shop",1;
+	dispbottom "Pontos de Presença: " + #presence_points;
+	end;
+
+OnBuyItem:
+	callfunc "Presence_Shop_Process", @bought_nameid, @bought_quantity, @bought_price;
+	end;
+}
+// Estes itens devem acompanhar o array shop_items e shop_prices
+-	shop	Presence_Shop	-1,9670:20,9671:20,9672:20,9673:50,9674:50,9642:100
+
+function	script	Presence_Shop_Process	{
+
+	// =============================
+	// CONFIGURAÇÃO DA LOJA
+	// =============================
+	// Itens e preços em pontos de presença
+	setarray .@shop_items[0], 9670, 9671, 9672, 9673, 9674, 9642;
+	setarray .@shop_prices[0], 20,   20,   20,     50, 50, 100; // preço por item em pontos
+
+	// =============================
+	// PARÂMETROS DA FUNÇÃO
+	// =============================
+	.@id  = getarg(0); // ID do item comprado
+	.@qtd = getarg(1); // Quantidade comprada
+	.@price = getarg(2); // ignorado, usamos tabela acima
+
+	// =============================
+	// PROCURA O ITEM NA TABELA
+	// =============================
+	.@found = 0;
+	for (.@i = 0; .@i < getarraysize(.@shop_items); .@i++) {
+		if (.@id == .@shop_items[.@i]) {
+			.@found = 1;
+			.@unit_price = .@shop_prices[.@i];
+			break;
+		}
+	}
+
+	if (!.@found) {
+		dispbottom "[Presença] Erro: item não está registrado na loja.";
+		return;
+	}
+
+	// =============================
+	// CALCULA O CUSTO TOTAL
+	// =============================
+	.@total_cost = .@unit_price * .@qtd;
+
+	// =============================
+	// VERIFICA PONTOS
+	// =============================
+	if (#presence_points < .@total_cost) {
+		dispbottom "Pontos de Presença insuficiente.";
+        return;
+	}
+
+	// =============================
+	// DESCONTA E ENTREGA
+	// =============================
+	#presence_points -= .@total_cost;
+	getitem .@id, .@qtd;
+	logshop "SCRIPT_SHOP_BUY", "Presence_Shop", .@id, .@qtd, 0, 0, 0, "#presence_points", .@total_cost;
+
+	dispbottom "[Presença] -" + .@total_cost + " ponto(s) de presença. Restam: " + #presence_points + ".";
+	return;
+}
+

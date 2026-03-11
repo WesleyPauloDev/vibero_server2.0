@@ -1,0 +1,1335 @@
+//===== rAthena Script =======================================
+//= Wolfchev's Laboratory
+//===== By: ==================================================
+//= Kisuka
+//===== Current Version: =====================================
+//= 1.0
+//===== Compatible With: =====================================
+//= rAthena Project
+//===== Description: =========================================
+//= Defeat Wolfchev's human experimentations.
+//===== Additional Comments: =================================
+//= 1.0 First version, edited. [Euphy]
+//= 1.1 Moved the Enchant (Sorcerer#Bio4Reward) and Reward
+//=		(Weird old man#Bio4Reward) NPC in merchant folder. [Capuche]
+//============================================================
+
+-	script	WolfchevLaboratory_Instance#Custom	-1,{
+
+	OnStartInstance:
+		// #WolfchevLaboratory_STATUS = 2;
+		// instance_create("Laboratório Wolfchev");
+		// instance_enter("Laboratório Wolfchev");
+		callfunc("F_InstanceEntry",
+			"Laboratório Wolfchev",        // Nome da instância
+			"Wolfchev",                 // Nome do NPC
+			"wolfchev_laboratory", // Variável de cooldown da conta
+			"WolfchevLaboratory",        // Variável de status da conta
+			150                      // Level mínimo
+		);
+	end;
+}
+
+// The Lab No.1 : System 1_1
+//============================================================
+1@lhz,35,108,4	script	Lab1#1_1	CLEAR_NPC,{
+	end;
+
+OnInstanceInit:
+	initnpctimer;
+	end;
+
+OnDisable:
+	stopnpctimer;
+	end;
+
+OnType_02:
+	donpcevent instance_npcname("Folha do Manual#1_1")+"::OnEnable";
+	donpcevent instance_npcname("Válvula#1_2")+"::OnEnable";
+	donpcevent instance_npcname("Válvula#1_3")+"::OnEnable";
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] as pessoas envolvidas, acesso com o método de acesso de emergência.",bc_map,"0xff9977";
+	end;
+
+OnTimer1000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Este é um aviso! Aviso de alerta! Intruso detectado.",bc_map,"0xff9977";
+	end;
+
+OnTimer2000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de segurança] Em 5 segundos, o sistema de segurança do Laboratório nº 1 será ativado.",bc_map,"0xff9977";
+	end;
+
+OnTimer7000:
+	donpcevent instance_npcname("MobCtrl1#mob01")+"::OnEnable";
+	end;
+}
+
+// The Lab No.1 Monster Control
+//============================================================
+1@lhz,37,108,4	script	MobCtrl1#mob01	CLEAR_NPC,{
+	end;
+
+OnEnable:
+	.@map$ = instance_mapname("1@lhz");
+	mapannounce .@map$,"[Sistema de Segurança] Sistema de segurança ativado!! Animais experimentais são liberados. As pessoas envolvidas devem ser evacuadas.",bc_map,"0xff9977";
+	areamonster .@map$,35,159,50,169,"Animal de Laboratório Faminto",2242,rand(10,15),instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
+	initnpctimer;
+	end;
+
+OnDisable:
+	killmonster instance_mapname("1@lhz"),instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
+	end;
+
+OnTimer180000:
+	stopnpctimer;
+	if (mobcount(instance_mapname("1@lhz"), instance_npcname(strnpcinfo(0))+"::OnMyMobDead") < 1) {
+		donpcevent instance_npcname("Lab1#1_1")+"::OnType_02";
+		mapannounce instance_mapname("1@lhz"),"[Sistema de segurança] O sistema de segurança do Laboratório nº 1 foi interrompido.",bc_map,"0xff9977";
+	} else {
+		initnpctimer;
+	}
+	end;
+
+OnMyMobDead:
+	if (mobcount(instance_mapname("1@lhz"), instance_npcname(strnpcinfo(0))+"::OnMyMobDead") < 1) {
+		donpcevent instance_npcname("Lab1#1_1")+"::OnType_02";
+		mapannounce instance_mapname("1@lhz"),"[Sistema de segurança] O sistema de segurança do Laboratório nº 1 foi interrompido.",bc_map,"0xff9977";
+		stopnpctimer;
+	}
+	end;
+}
+
+// Manual da Válvula de Acesso de Emergência
+//============================================================
+1@lhz,39,168,0	script	Folha do Manual#1_1	CLEAR_NPC,{
+	mes "Há folhas do manual da válvula espalhadas pelo chão.";
+	next;
+	if (is_party_leader() == true) {
+		mes "Você, o líder do partido, começou a ler o manual.";
+		next;
+		mes "[Manual da Válvula de Acesso de Emergência]";
+		switch(lght_duk02) {
+		case 0:
+			switch(rand(1,6)) {
+			case 1:
+				lght_duk02 = 1;
+				mes "Gire a válvula esquerda no sentido horário duas vezes, no sentido anti-horário uma vez, no sentido horário uma vez";
+				break;
+			case 2:
+				lght_duk02 = 2;
+				mes "Gire a válvula esquerda no sentido horário uma vez, no sentido anti-horário duas vezes, no sentido horário uma vez";
+				break;
+			case 3:
+				lght_duk02 = 3;
+				mes "Gire a válvula esquerda no sentido horário uma vez, no sentido anti-horário uma vez, no sentido horário duas vezes";
+				break;
+			case 4:
+				lght_duk02 = 4;
+				mes "Gire a válvula direita no sentido anti-horário duas vezes, no sentido horário uma vez, no sentido anti-horário uma vez";
+				break;
+			case 5:
+				lght_duk02 = 5;
+				mes "Gire a válvula direita no sentido anti-horário uma vez, no sentido horário duas vezes, no sentido anti-horário uma vez";
+				break;
+			case 6:
+				lght_duk02 = 6;
+				mes "Gire a válvula direita no sentido anti-horário uma vez, no sentido horário uma vez, no sentido anti-horário duas vezes";
+				break;
+			default:
+				mes "Este é um erro desconhecido. Se o mesmo problema persistir após mais uma tentativa, entre em contato com o GM.";
+				break;
+			}
+			break;
+		case 1:
+			mes "Gire a válvula esquerda no sentido horário duas vezes, no sentido anti-horário uma vez, no sentido horário uma vez";
+			break;
+		case 2:
+			mes "Gire a válvula esquerda no sentido horário uma vez, no sentido anti-horário duas vezes, no sentido horário uma vez";
+			break;
+		case 3:
+			mes "Gire a válvula esquerda no sentido horário uma vez, no sentido anti-horário uma vez, no sentido horário duas vezes";
+			break;
+		case 4:
+			mes "Gire a válvula direita no sentido anti-horário duas vezes, no sentido horário uma vez, no sentido anti-horário uma vez";
+			break;
+		case 5:
+			mes "Gire a válvula direita no sentido anti-horário uma vez, no sentido horário duas vezes, no sentido anti-horário uma vez";
+			break;
+		case 6:
+			mes "Gire a válvula direita no sentido anti-horário uma vez, no sentido horário uma vez, no sentido anti-horário duas vezes";
+			break;
+		default:
+			mes "Este é um erro desconhecido. Se o mesmo problema persistir após mais uma tentativa, entre em contato com um GM.";
+			break;
+		}
+	} else {
+		mes "Deixe que o líder do seu grupo manuseie a válvula.";
+	}
+	close;
+
+OnInstanceInit:
+	disablenpc instance_npcname("Folha do Manual#1_1");
+	end;
+
+OnEnable:
+	specialeffect EF_LIGHTSPHERE;
+	enablenpc instance_npcname("Folha do Manual#1_1");
+	end; 
+}
+
+// Válvula Esquerda
+//============================================================
+1@lhz,41,172,0	script	Válvula#1_2	CLEAR_NPC,{
+	.@open_portal = 0;
+	mes "Esta é a válvula esquerda para acesso de emergência.";
+	if (is_party_leader() == true) {
+		next;
+		mes "Para qual direção você deseja virar?";
+		next;
+		if (lght_duk02 < 1 || lght_duk02 > 3) {
+			for(.@i = 1; .@i <= 4; .@i++) {
+				select("Sentido horário", "Sentido anti-horário");
+				mes "-A metal sound-";
+				if (.@i != 4)
+					mes "e, então, para qual direção?";
+				next;
+			}
+		} else {
+			// lght_duk02 == 1 : Clockwise, Clockwise, Counterclockwise, Clockwise
+			// lght_duk02 == 2 : Clockwise, Counterclockwise, Counterclockwise, Clockwise
+			// lght_duk02 == 3 : Clockwise, Counterclockwise, Clockwise, Clockwise
+			for(.@i = 1; .@i <= 4; .@i++) {
+				switch(select("Sentido horário", "Sentido anti-horário")) {
+				case 1:
+					if ((.@i == 1 || .@i == 4) || (.@i == 2 && lght_duk02 == 1) || (.@i == 3 && lght_duk02 == 3)) {
+						.@open_portal += 1;
+					}
+				case 2:
+					if ((.@i == 2 && lght_duk02 != 1) || (.@i == 3 && lght_duk02 != 3)) {
+						.@open_portal += 1;
+					}
+				}
+				mes "-Um som metálico-";
+				if (.@i != 4)
+					mes "e, então, para qual direção?";
+				next;
+			}
+		}
+		if (.@open_portal == 4) {
+			donpcevent instance_npcname("#potal_01")+"::OnEnable";
+			lght_duk02 = 0;
+			mes "-Porta aberta-";
+			next;
+			mes "A porta que conecta ao Laboratório nº 2 agora está aberta.";
+		} else {
+			lght_duk02 = 0;
+			mes "Nada aconteceu.";
+			next;
+			mes "Você precisa revisar o manual.";
+		}
+	}
+	close;
+
+OnInstanceInit:
+	disablenpc instance_npcname("Válvula#1_2");
+	end;
+
+OnEnable:
+	specialeffect EF_LIGHTSPHERE;
+	enablenpc instance_npcname("Válvula#1_2");
+	end;
+}
+
+// Válvula Direita
+//============================================================
+1@lhz,52,172,0	script	Válvula#1_3	CLEAR_NPC,{
+	.@open_portal = 0;
+	mes "Esta é a válvula esquerda para acesso de emergência.";
+	if (is_party_leader() == true) {
+		next;
+		mes "Para qual direção você deseja virar?";
+		next;
+		if (lght_duk02 < 4 || lght_duk02 > 6) {
+			for(.@i = 1; .@i <= 4; .@i++) {
+				select("Sentido horário", "Sentido anti-horário");
+				mes "-Um som metálico-";
+				if (.@i != 4)
+					mes "e, então, para qual direção?";
+				next;
+			}
+		} else {
+			// lght_duk02 == 4 : Counterclockwise, Counterclockwise, Clockwise, Counterclockwise
+			// lght_duk02 == 5 : Counterclockwise, Clockwise, Clockwise, Counterclockwise
+			// lght_duk02 == 6 : Counterclockwise, Clockwise, Counterclockwise, Counterclockwise
+			for(.@i = 1; .@i <= 4; .@i++) {
+				switch(select("Sentido horário", "Sentido anti-horário")) {
+				case 1:
+					if ((.@i == 2 && lght_duk02 != 4) || (.@i == 3 && lght_duk02 != 6))
+						.@open_portal += 1;
+					break;
+				case 2:
+					if ((.@i == 1 || .@i == 4) || (.@i == 2 && lght_duk02 == 4) || (.@i == 3 && lght_duk02 == 6))
+						.@open_portal += 1;
+					break;
+				}
+				mes "-Um som metálico-";
+				if (.@i != 4)
+					mes "e, então, para qual direção?";
+				next;
+			}
+		}
+		if (.@open_portal == 4) {
+			donpcevent instance_npcname("#potal_01")+"::OnEnable";
+			lght_duk02 = 0;
+			mes "-Porta aberta-";
+			next;
+			mes "A porta que conecta ao Laboratório nº 2 agora está aberta.";
+		} else {
+			lght_duk02 = 0;
+			mes "Nada aconteceu.";
+			next;
+			mes "Você precisa revisar o manual.";
+		}
+	}
+	close;
+
+OnInstanceInit:
+	disablenpc instance_npcname("Válvula#1_3");
+	end;
+
+OnEnable:
+	specialeffect EF_LIGHTSPHERE;
+	enablenpc instance_npcname("Válvula#1_3");
+	end;
+}
+
+
+// The Lab No.1 >> The Lab No.2 Warp portal
+//============================================================
+1@lhz,45,173,0	script	#potal_01	WARPNPC,2,2,{
+	end;
+
+OnInstanceInit:
+OnDisable:
+	disablenpc instance_npcname("#potal_01");
+	end;
+
+OnEnable:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] A porta que conecta ao Laboratório nº 2 agora está aberta.",bc_map,"0xff9977";
+	enablenpc instance_npcname("#potal_01");
+	end;
+
+OnTouch_:
+	warp instance_mapname("1@lhz"), 151, 29;
+	end;
+}
+
+// The Lab No.2
+//============================================================
+1@lhz,151,29,0	script	#2_0	-1,1,1,{
+	end;
+
+OnEnable:
+	enablenpc instance_npcname("#2_0");
+	end;
+
+OnDisable:
+	disablenpc instance_npcname("#2_0");
+	end;
+
+OnTouch_:
+	donpcevent instance_npcname("Lab2#2_1")+"::OnEnable";
+	donpcevent instance_npcname("#2_0")+"::OnDisable";
+	end;
+}
+
+// The Lab No.2 2_1 System - Control of Monster Wave and Pipe right before exploding
+//============================================================
+1@lhz,35,106,4	script	Lab2#2_1	CLEAR_NPC,{
+	end;
+
+OnInstanceInit:
+OnDisable:
+	stopnpctimer;
+	end;
+
+OnEnable:
+	initnpctimer;
+	end;
+
+OnTimer1000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Este é um aviso! Aviso! Intruso detectado no Laboratório nº 2!!",bc_map,"0xff9977";
+	end;
+
+OnTimer3000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Em 5 segundos, o sistema de segurança do Laboratório No.2 começará a funcionar.",bc_map,"0xff9977";
+	end;
+
+OnTimer5000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] Atenção! A pressão da tubulação do Laboratório nº 2 está muito alta.",bc_map,"0xff99ff";
+	end;
+
+OnTimer8000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Primeiro sistema de segurança ativado!! As pessoas afetadas devem ser evacuadas.",bc_map,"0xff9977";
+	donpcevent instance_npcname("MobCtrl2#mob02")+"::On01";
+	end;
+
+OnTimer10000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] Atenção! A pressão da tubulação está muito alta. Abra a válvula.",bc_map,"0xff99ff";
+	donpcevent instance_npcname("Lab2#2_2")+"::OnPipePressure";
+	end;
+
+OnTimer190000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] Atenção! A pressão da tubulação está muito alta. Abra a válvula.",bc_map,"0xff99ff";
+	donpcevent instance_npcname("Lab2#2_2")+"::OnPipePressure";
+	end;
+
+OnTimer303000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Em 5 segundos, o Segundo Sistema de Segurança começará a funcionar.",bc_map,"0xff9977";
+	end;
+
+OnTimer308000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Segundo sistema de segurança ativado!! As pessoas envolvidas devem evacuar.",bc_map,"0xff9977";
+	donpcevent instance_npcname("MobCtrl2#mob02")+"::On02";
+	end;
+
+OnTimer370000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] Atenção! A pressão da tubulação está muito alta. Abra a válvula.",bc_map,"0xff99ff";
+	donpcevent instance_npcname("Lab2#2_2")+"::OnPipePressure";
+	end;
+
+OnTimer550000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] Atenção! A pressão da tubulação está muito alta. Abra a válvula.",bc_map,"0xff99ff";
+	donpcevent instance_npcname("Lab2#2_2")+"::OnPipePressure";
+	end;
+
+OnTimer603000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Em 5 segundos, o Terceiro Sistema de Segurança começará a funcionar.",bc_map,"0xff9977";
+	end;
+
+OnTimer608000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Terceiro sistema de segurança ativado!! As pessoas envolvidas devem evacuar.",bc_map,"0xff9977";
+	donpcevent instance_npcname("MobCtrl2#mob02")+"::On03";
+	end;
+
+OnTimer730000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] Atenção! A pressão da tubulação está muito alta. Abra a válvula.",bc_map,"0xff99ff";
+	donpcevent instance_npcname("Lab2#2_2")+"::OnPipePressure";
+	end;
+
+OnTimer903000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Em 5 segundos, o Quarto Sistema de Segurança começará a funcionar.",bc_map,"0xff9977";
+	end;
+
+OnTimer908000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Quarto sistema de segurança ativado!! As pessoas envolvidas devem evacuar.",bc_map,"0xff9977";
+	donpcevent instance_npcname("MobCtrl2#mob02")+"::On04";
+	end;
+
+OnTimer910000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] Atenção! A pressão da tubulação está muito alta. Abra a válvula.",bc_map,"0xff99ff";
+	donpcevent instance_npcname("Lab2#2_2")+"::OnPipePressure";
+	end;
+
+OnTimer1090000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] Atenção! A pressão da tubulação está muito alta. Abra a válvula.",bc_map,"0xff99ff";
+	donpcevent instance_npcname("Lab2#2_2")+"::OnPipePressure";
+	end;
+
+OnTimer1203000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Em 5 segundos, o Quinto Sistema de Segurança começará a funcionar.",bc_map,"0xff9977";
+	end;
+
+OnTimer1208000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Quinto sistema de segurança ativado!! As pessoas envolvidas devem evacuar.",bc_map,"0xff9977";
+	donpcevent instance_npcname("MobCtrl2#mob02")+"::On05";
+	end;
+
+OnTimer1270000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] Atenção! A pressão da tubulação está muito alta. Abra a válvula.",bc_map,"0xff99ff";
+	donpcevent instance_npcname("Lab2#2_2")+"::OnPipePressure";
+	stopnpctimer;
+	end;
+}
+
+// The Lab No.2 2_2 System - Pipe Operation Control
+// When 3 pipes explode, system will shut down.
+//============================================================
+1@lhz,37,106,4	script	Lab2#2_2	CLEAR_NPC,{
+	end;
+
+OnInstanceInit:
+	'broken_pipes = 0;
+	stopnpctimer;
+	end;
+
+OnPipePressure:
+	switch(rand(1,6)) {
+	case 1:
+		donpcevent instance_npcname("Válvula#2_1")+"::OnEnable";
+		donpcevent instance_npcname("MobCtrl2#mob02")+"::On2_01";
+	case 2:
+		donpcevent instance_npcname("Válvula#2_2")+"::OnEnable";
+		donpcevent instance_npcname("MobCtrl2#mob02")+"::On2_02";
+	case 3:
+		donpcevent instance_npcname("Válvula#2_3")+"::OnEnable";
+		donpcevent instance_npcname("MobCtrl2#mob02")+"::On2_03";
+	case 4:
+		donpcevent instance_npcname("Válvula#2_4")+"::OnEnable";
+		donpcevent instance_npcname("MobCtrl2#mob02")+"::On2_04";
+	case 5:
+		donpcevent instance_npcname("Válvula#2_5")+"::OnEnable";
+		donpcevent instance_npcname("MobCtrl2#mob02")+"::On2_05";
+	case 6:
+		donpcevent instance_npcname("Válvula#2_6")+"::OnEnable";
+		donpcevent instance_npcname("MobCtrl2#mob02")+"::On2_06";
+	}
+	initnpctimer;
+	end;
+
+OnDisableValve1:
+	disablenpc instance_npcname("Válvula#2_1");
+	stopnpctimer;
+	end;
+
+OnDisableValve2:
+	disablenpc instance_npcname("Válvula#2_2");
+	stopnpctimer;
+	end;
+
+OnDisableValve3:
+	disablenpc instance_npcname("Válvula#2_3");
+	stopnpctimer;
+	end;
+
+OnDisableValve4:
+	disablenpc instance_npcname("Válvula#2_4");
+	stopnpctimer;
+	end;
+
+OnDisableValve5:
+	disablenpc instance_npcname("Válvula#2_5");
+	stopnpctimer;
+	end;
+
+OnDisableValve6:
+	disablenpc instance_npcname("Válvula#2_6");
+	stopnpctimer;
+	end;
+
+OnTimer63000:
+	for(.@i = 1; .@i < 7; .@i++) {
+		specialeffect EF_SUI_EXPLOSION, AREA, instance_npcname("Válvula#2_"+.@i+"");
+		disablenpc instance_npcname("Válvula#2_"+.@i+"");
+	}
+	'broken_pipes += 1;
+	if ('broken_pipes == 3) {
+		donpcevent instance_npcname("#2_3")+"::OnEnable";
+		stopnpctimer;
+	} else {
+		mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] Explosão de cano detectada! Quando mais "+ (3 - 'broken_pipes) +" quebrar, o sistema irá parar.",bc_map,"0xff99ff";
+	}
+	end;
+}
+
+// The Lab No.2 2_3 System
+//============================================================
+1@lhz,151,48,0	script	#2_3	-1,20,20,{
+	end;
+
+OnInstanceInit:
+	disablenpc instance_npcname("#2_3");
+	end;
+
+OnEnable:
+	initnpctimer;
+	end;
+
+OnTimer1000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] Sistema trava! Sistema trava! Evacuem do laboratório em 10 segundos.",bc_map,"0xff99ff";
+	end;
+
+OnTimer11000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] Evacuar!!",bc_map,"0xff99ff";
+	enablenpc instance_npcname("#2_3");
+	end;
+
+OnTouch:
+	warp "lhz_dun04", 147, 273;
+	end;
+}
+
+// The Lab No.2 Monster Control
+//============================================================
+1@lhz,39,106,4	script	MobCtrl2#mob02	CLEAR_NPC,{
+	end;
+
+On01:
+	.@map$ = instance_mapname("1@lhz");
+	.@label$ = instance_npcname("MobCtrl2#mob02")+"::OnMyMobDead";
+	areamonster .@map$,139,37,164,58,"Animal de Laboratório Faminto",2242,10,.@label$;
+	end;
+
+On02:
+	.@map$ = instance_mapname("1@lhz");
+	.@label$ = instance_npcname("MobCtrl2#mob02")+"::OnMyMobDead";
+	areamonster .@map$,139,37,164,58,"Animal de Laboratório Faminto",2242,20,.@label$;
+	end;
+
+On03:
+	.@map$ = instance_mapname("1@lhz");
+	.@label$ = instance_npcname("MobCtrl2#mob02")+"::OnMyMobDead";
+	areamonster .@map$,139,37,164,58,"Animal de Laboratório Faminto",2242,16,.@label$;
+	end;
+
+On04:
+	.@map$ = instance_mapname("1@lhz");
+	.@label$ = instance_npcname("MobCtrl2#mob02")+"::OnMyMobDead";
+	areamonster .@map$,139,37,164,58,"Animal de Laboratório Faminto",2242,19,.@label$;
+	end;
+
+On05:
+	.@map$ = instance_mapname("1@lhz");
+	.@label$ = instance_npcname("MobCtrl2#mob02")+"::OnMyMobDead";
+	areamonster .@map$,139,37,164,58,"Animal de Laboratório Faminto",2242,20,.@label$;
+	end;
+
+On2_01:
+	.@label$ = instance_npcname("MobCtrl2#mob02")+"::OnMyMobDead";
+	areamonster instance_mapname("1@lhz"),155,43,161,49,"Animal de Laboratório Faminto",2243,5,.@label$;
+	end;
+
+On2_02:
+	.@label$ = instance_npcname("MobCtrl2#mob02")+"::OnMyMobDead";
+	areamonster instance_mapname("1@lhz"),137,40,143,46,"Animal de Laboratório Faminto",2243,5,.@label$;
+	end;
+
+On2_03:
+	.@label$ = instance_npcname("MobCtrl2#mob02")+"::OnMyMobDead";
+	areamonster instance_mapname("1@lhz"),137,51,143,57,"Animal de Laboratório Faminto",2243,5,.@label$;
+	end;
+
+On2_04:
+	.@label$ = instance_npcname("MobCtrl2#mob02")+"::OnMyMobDead";
+	areamonster instance_mapname("1@lhz"),143,56,149,62,"Animal de Laboratório Faminto",2243,5,.@label$;
+	end;
+
+On2_05:
+	.@label$ = instance_npcname("MobCtrl2#mob02")+"::OnMyMobDead";
+	areamonster instance_mapname("1@lhz"),160,48,166,54,"Animal de Laboratório Faminto",2243,5,.@label$;
+	end;
+
+On2_06:
+	.@label$ = instance_npcname("MobCtrl2#mob02")+"::OnMyMobDead";
+	areamonster instance_mapname("1@lhz"),135,44,141,50,"Animal de Laboratório Faminto",2243,5,.@label$;
+	end;
+
+OnDisable:
+	killmonster instance_mapname("1@lhz"),instance_npcname("MobCtrl2#mob02")+"::OnMyMobDead";
+	end;
+
+OnMyMobDead:
+	if (mobcount(instance_mapname("1@lhz"),instance_npcname("MobCtrl2#mob02")+"::OnMyMobDead") < 1) {
+		donpcevent instance_npcname("#potal_02")+"::OnEnable";
+		donpcevent instance_npcname("Lab2#2_1")+"::OnDisable";
+		mapannounce instance_mapname("1@lhz"),"[Sistema de segurança] O sistema de segurança do Laboratório nº 2 foi interrompido.",bc_map,"0xff9977";
+	}
+	end;
+}
+
+// The Lab No.2 Válvulas
+//============================================================
+-	script	bio4FLab2Válvula	-1,{
+	if (is_party_leader() == true) {
+		progressbar "0xffff00", 20;
+		stopnpctimer;
+		donpcevent instance_npcname("Lab2#2_2")+"::OnDisableValve1";
+		disablenpc();
+		end;
+	} else {
+		mes "Deixe que o líder do seu grupo manuseie a válvula.";
+		close;
+	}
+
+OnInstanceInit:
+	disablenpc();
+	end;
+
+OnEnable:
+	enablenpc();
+	initnpctimer;
+	end;
+
+OnTimer3000:
+	specialeffect EF_DRAGONSMOKE,AREA,instance_npcname(strnpcinfo(0));
+	stopnpctimer;
+	initnpctimer;
+	end;
+}
+1@lhz,158,46,0	duplicate(bio4FLab2Válvula)	Válvula#2_1	CLEAR_NPC
+1@lhz,138,43,0	duplicate(bio4FLab2Válvula)	Válvula#2_2	CLEAR_NPC
+1@lhz,139,54,0	duplicate(bio4FLab2Válvula)	Válvula#2_3	CLEAR_NPC
+1@lhz,145,60,0	duplicate(bio4FLab2Válvula)	Válvula#2_4	CLEAR_NPC
+1@lhz,165,51,0	duplicate(bio4FLab2Válvula)	Válvula#2_5	CLEAR_NPC
+1@lhz,137,47,0	duplicate(bio4FLab2Válvula)	Válvula#2_6	CLEAR_NPC
+
+// The Lab No.2 >> The Lab No.3 Warp portal(General)
+//============================================================
+1@lhz,151,64,0	script	#potal_02	WARPNPC,2,2,{
+	end;
+
+OnInstanceInit:
+OnDisable:
+	disablenpc instance_npcname("#potal_02");
+	end;
+
+OnEnable:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] A porta que liga ao Laboratório n.º 3 está agora aberta.",bc_map,"0xff99ff";
+	enablenpc instance_npcname("#potal_02");
+	end;
+
+OnTouch_:
+	warp instance_mapname("1@lhz"), 84, 28;
+	end;
+}
+
+// The Lab No.3
+//============================================================
+1@lhz,84,28,0	script	#3_0	-1,1,1,{
+	end;
+
+OnEnable:
+	enablenpc instance_npcname("#3_0");
+	end;
+
+OnDisable:
+	disablenpc instance_npcname("#3_0");
+	end;
+
+OnTouch_:
+	donpcevent instance_npcname("Lab3#3_1")+"::OnEnable";
+	donpcevent instance_npcname("#3_0")+"::OnDisable";
+	end;
+}
+
+// The Lab No.3 3_1 System - Monster wave control
+//============================================================
+1@lhz,35,104,4	script	Lab3#3_1	CLEAR_NPC,{
+	end;
+
+OnEnable:
+	initnpctimer;
+	end;
+
+OnDisable:
+	stopnpctimer;
+	end;
+
+OnTimer1000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Este é um aviso! Aviso de alerta!",bc_map,"0xff9977";
+	donpcevent instance_npcname("MobCtrl3#mob03")+"::OnDisable";
+	end;
+
+OnTimer5000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Intruso detectado no Laboratório nº 3!!",bc_map,"0xff9977";
+	end;
+
+OnTimer7000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Em 5 segundos, o sistema de segurança do Laboratório nº 3 começará a funcionar.",bc_map,"0xff9977";
+	end;
+
+OnTimer12000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Primeiro sistema de segurança do Laboratório nº 3 ativado!! As pessoas envolvidas devem evacuar.",bc_map,"0xff9977";
+	donpcevent instance_npcname("MobCtrl3#mob03")+"::On01";
+	end;
+
+OnTimer192000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Segundo sistema de segurança do Laboratório nº 3 ativado!! Os envolvidos devem ser evacuados.",bc_map,"0xff9977";
+	donpcevent instance_npcname("MobCtrl3#mob03")+"::On02";
+	end;
+
+OnTimer372000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Terceiro sistema de segurança do Laboratório nº 3 ativado!! Os envolvidos devem ser evacuados.",bc_map,"0xff9977";
+	donpcevent instance_npcname("MobCtrl3#mob03")+"::On03";
+	end;
+
+OnTimer552000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Quarto sistema de segurança do Laboratório nº 3 ativado!! Os envolvidos devem evacuar.",bc_map,"0xff9977";
+	donpcevent instance_npcname("MobCtrl3#mob03")+"::On04";
+	end;
+
+OnTimer732000:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Segurança] Quinto sistema de segurança do Laboratório nº 3 ativado!! Os envolvidos devem evacuar.",bc_map,"0xff9977";
+	donpcevent instance_npcname("MobCtrl3#mob03")+"::On05";
+	stopnpctimer;
+	end;
+}
+
+// The Lab No.3 Monster Control
+//============================================================
+1@lhz,37,104,4	script	MobCtrl3#mob03	CLEAR_NPC,{
+	end;
+
+On01:
+	.@map$ = instance_mapname("1@lhz");
+	.@label$ = instance_npcname("MobCtrl3#mob03")+"::OnMyMobDead";
+	monster .@map$,80,60,"Animal de Laboratório Faminto",2242,1,.@label$;
+	monster .@map$,81,58,"Animal de Laboratório Faminto",2242,1,.@label$;
+	monster .@map$,82,56,"Animal de Laboratório Faminto",2242,1,.@label$;
+	monster .@map$,84,60,"Animal de Laboratório Faminto",2242,1,.@label$;
+	monster .@map$,85,58,"Animal de Laboratório Faminto",2242,1,.@label$;
+	monster .@map$,82,60,"Animal de Laboratório Faminto",2243,1,.@label$;
+	monster .@map$,83,58,"Animal de Laboratório Faminto",2243,1,.@label$;
+	monster .@map$,85,56,"Animal de Laboratório Faminto",2243,1,.@label$;		
+	monster .@map$,86,60,"Animal de Laboratório Faminto",2243,1,.@label$;
+	monster .@map$,87,58,"Animal de Laboratório Faminto",2243,1,.@label$;
+	end;
+
+On02:
+	.@map$ = instance_mapname("1@lhz");
+	.@amount1 = rand(1,5);
+	.@amount2 = rand(1,5);
+	.@label$ = instance_npcname("MobCtrl3#mob03")+"::OnMyMobDead";
+	monster .@map$,80,60,"Animal de Laboratório Faminto",2242,.@amount1,.@label$;
+	monster .@map$,82,60,"Animal de Laboratório Faminto",2242,.@amount2,.@label$;
+	monster .@map$,84,60,"Animal de Laboratório Faminto",2243,.@amount1,.@label$;
+	monster .@map$,86,60,"Animal de Laboratório Faminto",2242,.@amount2,.@label$;
+	monster .@map$,81,58,"Animal de Laboratório Faminto",2242,.@amount1,.@label$;
+	monster .@map$,83,58,"Animal de Laboratório Faminto",2243,.@amount2,.@label$;
+	monster .@map$,85,58,"Animal de Laboratório Faminto",2242,.@amount1,.@label$;
+	monster .@map$,87,58,"Animal de Laboratório Faminto",2242,.@amount2,.@label$;
+	monster .@map$,82,56,"Animal de Laboratório Faminto",2243,.@amount1,.@label$;
+	monster .@map$,85,56,"Animal de Laboratório Faminto",2242,.@amount2,.@label$;
+	end;
+
+On03:
+	.@map$ = instance_mapname("1@lhz");
+	.@amount1 = rand(1,5);
+	.@amount2 = rand(1,5);
+	.@amount3 = rand(1,5);
+	.@label$ = instance_npcname("MobCtrl3#mob03")+"::OnMyMobDead";
+	monster .@map$,80,60,"Animal de Laboratório Faminto",2242,.@amount1,.@label$;
+	monster .@map$,82,60,"Animal de Laboratório Faminto",2242,.@amount2,.@label$;
+	monster .@map$,84,60,"Animal de Laboratório Faminto",2242,.@amount3,.@label$;
+	monster .@map$,86,60,"Animal de Laboratório Faminto",2243,.@amount1,.@label$;
+	monster .@map$,81,58,"Animal de Laboratório Faminto",2242,.@amount2,.@label$;
+	monster .@map$,83,58,"Animal de Laboratório Faminto",2242,.@amount3,.@label$;
+	monster .@map$,85,58,"Animal de Laboratório Faminto",2242,.@amount1,.@label$;
+	monster .@map$,87,58,"Animal de Laboratório Faminto",2243,.@amount2,.@label$;
+	monster .@map$,82,56,"Animal de Laboratório Faminto",2242,.@amount3,.@label$;
+	monster .@map$,85,56,"Animal de Laboratório Faminto",2242,.@amount1,.@label$;
+	end;
+
+On04:
+	.@map$ = instance_mapname("1@lhz");
+	.@amount1 = rand(1,5);
+	.@amount2 = rand(1,5);
+	.@amount3 = rand(1,5);
+	.@amount4 = rand(1,5);
+	.@label$ = instance_npcname("MobCtrl3#mob03")+"::OnMyMobDead";
+	monster .@map$,80,60,"Animal de Laboratório Faminto",2242,.@amount1,.@label$;
+	monster .@map$,82,60,"Animal de Laboratório Faminto",2242,.@amount2,.@label$;
+	monster .@map$,84,60,"Animal de Laboratório Faminto",2242,.@amount3,.@label$;
+	monster .@map$,86,60,"Animal de Laboratório Faminto",2242,.@amount4,.@label$;
+	monster .@map$,81,58,"Animal de Laboratório Faminto",2243,.@amount1,.@label$;
+	monster .@map$,83,58,"Animal de Laboratório Faminto",2242,.@amount2,.@label$;
+	monster .@map$,85,58,"Animal de Laboratório Faminto",2242,.@amount3,.@label$;
+	monster .@map$,87,58,"Animal de Laboratório Faminto",2242,.@amount4,.@label$;
+	monster .@map$,82,56,"Animal de Laboratório Faminto",2243,.@amount1,.@label$;
+	monster .@map$,85,56,"Animal de Laboratório Faminto",2242,.@amount2,.@label$;
+	end;
+
+On05:
+	.@map$ = instance_mapname("1@lhz");
+	.@amount1 = rand(1,5);
+	.@amount2 = rand(1,5);
+	.@amount3 = rand(1,5);
+	.@amount4 = rand(1,5);
+	.@amount5 = rand(1,5);
+	.@label$ = instance_npcname("MobCtrl3#mob03")+"::OnMyMobDead";
+	monster .@map$,80,60,"Animal de Laboratório Faminto",2243,.@amount1,.@label$;
+	monster .@map$,82,60,"Animal de Laboratório Faminto",2242,.@amount2,.@label$;
+	monster .@map$,84,60,"Animal de Laboratório Faminto",2242,.@amount3,.@label$;
+	monster .@map$,86,60,"Animal de Laboratório Faminto",2243,.@amount4,.@label$;
+	monster .@map$,81,58,"Animal de Laboratório Faminto",2242,.@amount5,.@label$;
+	monster .@map$,83,58,"Animal de Laboratório Faminto",2242,.@amount1,.@label$;
+	monster .@map$,85,58,"Animal de Laboratório Faminto",2243,.@amount2,.@label$;
+	monster .@map$,87,58,"Animal de Laboratório Faminto",2242,.@amount3,.@label$;
+	monster .@map$,82,56,"Animal de Laboratório Faminto",2242,.@amount4,.@label$;
+	monster .@map$,85,56,"Animal de Laboratório Faminto",2243,.@amount5,.@label$;
+	end;
+
+OnDisable:
+	killmonster instance_mapname("1@lhz"),instance_npcname("MobCtrl3#mob03")+"::OnMyMobDead";
+	end;
+
+OnMyMobDead:
+	if (mobcount(instance_mapname("1@lhz"),instance_npcname("MobCtrl3#mob03")+"::OnMyMobDead") < 1) {
+		donpcevent instance_npcname("#potal_03")+"::OnEnable";
+		donpcevent instance_npcname("Lab3#3_1")+"::OnDisable";
+		mapannounce instance_mapname("1@lhz"),"[Sistema de segurança] O sistema de segurança do Laboratório nº 3 foi interrompido.",bc_map,"0xff9977";
+	}
+	end;
+}
+
+// The Lab No.3 >> Boss's Room Warp portal
+//============================================================
+1@lhz,83,62,0	script	#potal_03	WARPNPC,2,2,{
+	end;
+
+OnInstanceInit:
+	disablenpc instance_npcname("#potal_03");
+	end;
+
+OnEnable:
+	mapannounce instance_mapname("1@lhz"),"[Sistema de Gestão] A porta que liga ao Laboratório n.º 4 está agora aberta.",bc_map,"0x7799ff";
+	enablenpc instance_npcname("#potal_03");
+	end;
+
+OnDisable:
+	disablenpc instance_npcname("#potal_03");
+	end;
+
+OnTouch_:
+	warp instance_mapname("1@lhz"), 137, 100;
+	end;
+}
+
+// The Lab No.4
+//============================================================
+1@lhz,137,100,0	script	#4_0	-1,1,1,{
+	end;
+
+OnEnable:
+	enablenpc instance_npcname("#4_0");
+	end;
+
+OnDisable:
+	disablenpc instance_npcname("#4_0");
+	end;
+
+OnTouch_:
+	donpcevent instance_npcname("Lab4#4_1")+"::OnEnable";
+	donpcevent instance_npcname("#4_0")+"::OnDisable";
+	end;
+}
+
+// The Lab No.4 4_1 System - Summon of Boss Monster
+//============================================================
+1@lhz,35,102,4	script	Lab4#4_1	CLEAR_NPC,{
+	end;
+
+OnEnable:
+	initnpctimer;
+	end;
+
+OnDisable:
+	stopnpctimer;
+	end;
+
+OnTimer1000:
+	mapannounce instance_mapname("1@lhz"),"Sussurro: Quem é você...",bc_map,"0x7DCBF0";
+	specialeffect EF_SPHERE,AREA,instance_npcname("Seyren Windsor#boss01");
+	end;
+
+OnTimer2000:
+	specialeffect EF_SPHERE,AREA,instance_npcname("Cecile Damon#boss02");
+	end;
+
+OnTimer3000:
+	mapannounce instance_mapname("1@lhz"),"Sussurro: Não se aproxime mais...",bc_map,"0x7DCBF0";
+	specialeffect EF_SPHERE,AREA,instance_npcname("Gertie Wie#boss03");
+	end;
+
+OnTimer4000:
+	specialeffect EF_SPHERE,AREA,instance_npcname("Eremes Guile#boss04");
+	end;
+
+OnTimer5000:
+	mapannounce instance_mapname("1@lhz"),"Sussurro: Este é um lugar muito perigoso.",bc_map,"0x7DCBF0";
+	specialeffect EF_SPHERE,AREA,instance_npcname("Trentini#boss05");
+	end;
+
+OnTimer6000:
+	specialeffect EF_SPHERE,AREA,instance_npcname("Chen Liu#boss06");
+	end;
+
+OnTimer7000:
+	mapannounce instance_mapname("1@lhz"),"Sussurro: Você não sairá vivo...",bc_map,"0x7DCBF0";
+	specialeffect EF_SPHERE,AREA,instance_npcname("Alphochio Basil#boss07");
+	end;
+
+OnTimer8000:
+	specialeffect EF_SPHERE,AREA,instance_npcname("Flamel Emul#boss08");
+	end;
+
+OnTimer9000:
+	mapannounce instance_mapname("1@lhz"),"Sussurro: Se você não quer fazer parte de nós...",bc_map,"0x7DCBF0";
+	specialeffect EF_SPHERE,AREA,instance_npcname("Randel Lawrence#boss09");
+	end;
+
+OnTimer10000:
+	specialeffect EF_SPHERE,AREA,instance_npcname("Celia Alde#boss10");
+	end;
+
+OnTimer11000:
+	mapannounce instance_mapname("1@lhz"),"Sussurro: Vá embora agora...",bc_map,"0x7DCBF0";
+	specialeffect EF_SPHERE,AREA,instance_npcname("Kathryne Keyron#boss11");
+	end;
+
+OnTimer12000:
+	specialeffect EF_SPHERE,AREA,instance_npcname("Margaretha Sorin#boss12");
+	end;
+
+OnTimer13000:
+	mapannounce instance_mapname("1@lhz"),"Sussurro: Antes que este lugar esteja completamente cheio de tristeza e dor...",bc_map,"0x7DCBF0";
+	specialeffect EF_SPHERE,AREA,instance_npcname("Howard Alt-Eisen#boss13");
+	end;
+
+OnTimer14000:
+	specialeffect EF_SPHERE,AREA,instance_npcname("Type_**Gren#boss14");
+	end;
+
+OnTimer15000:
+	specialeffect EF_SPHERE,AREA,instance_npcname("Type_**Roke#boss15");
+	end;
+
+OnTimer16000:
+	specialeffect EF_SPHERE,AREA,instance_npcname("Type_**Dree#boss16");
+	end;
+
+OnTimer17000:
+	mapannounce instance_mapname("1@lhz"),"Sussurro: Ah... é... é tarde demais...",bc_map,"0x7DCBF0";
+	donpcevent instance_npcname("MobCtrl4#mob04")+"::OnEnable";
+	stopnpctimer;
+	end;
+}
+
+// Area No. 4 - Controle de Invocação de Chefe
+//============================================================
+1@lhz,37,102,4	script	MobCtrl4#mob04	CLEAR_NPC,{
+	end;
+
+OnEnable:
+	switch(rand(1,13)) {
+	case 1:
+		donpcevent instance_npcname("Seyren Windsor#boss01")+"::OnEnable";
+		end;
+	case 2:
+		donpcevent instance_npcname("Cecile Damon#boss02")+"::OnEnable";
+		end;
+	case 3:
+		donpcevent instance_npcname("Gertie Wie#boss03")+"::OnEnable";
+		end;
+	case 4:
+		donpcevent instance_npcname("Eremes Guile#boss04")+"::OnEnable";
+		end;
+	case 5:
+		donpcevent instance_npcname("Trentini#boss05")+"::OnEnable";
+		end;
+	case 6:
+		donpcevent instance_npcname("Chen Liu#boss06")+"::OnEnable";
+		end;
+	case 7:
+		donpcevent instance_npcname("Alphochio Basil#boss07")+"::OnEnable";
+		end;
+	case 8:
+		donpcevent instance_npcname("Flamel Emul#boss08")+"::OnEnable";
+		end;
+	case 9:
+		donpcevent instance_npcname("Randel Lawrence#boss09")+"::OnEnable";
+		end;
+	case 10:
+		donpcevent instance_npcname("Celia Alde#boss10")+"::OnEnable";
+		end;
+	case 11:
+		donpcevent instance_npcname("Kathryne Keyron#boss11")+"::OnEnable";
+		end;
+	case 12:
+		donpcevent instance_npcname("Margaretha Sorin#boss12")+"::OnEnable";
+		end;
+	case 13:
+		donpcevent instance_npcname("Howard Alt-Eisen#boss13")+"::OnEnable";
+		end; 
+	}
+
+OnDisable:
+	//stopnpctimer;
+	end;
+}
+
+// Random Experiments in Tubes
+//============================================================
+1@lhz,156,148,3	script	Type_**Gren#boss14	4_M_03,{ end; }
+1@lhz,152,152,3	script	Type_**Roke#boss15	4_M_HUMAN_01,{ end; }
+1@lhz,148,156,3	script	Type_**Dree#boss16	4_M_DWARF,{ end; }
+
+// Bosses
+//============================================================
+-	script	bio4FBoss	-1,{
+	end;
+
+OnEnable:
+	.@map$ = instance_mapname("1@lhz");
+	.@label$ = instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
+	specialeffect EF_SUI_EXPLOSION;
+
+	if (strnpcinfo(0) == "Seyren Windsor#boss01")
+		monster .@map$,129,154,"Cavaleiro Seyren",1646,1,.@label$;
+	else if (strnpcinfo(0) == "Cecile Damon#boss02")
+		monster .@map$,125,150,"Atiradora Cecile",1650,1,.@label$;
+	else if (strnpcinfo(0) == "Gertie Wie#boss03")
+		monster .@map$,121,146,"Stalker Gertie",2239,1,.@label$;
+	else if (strnpcinfo(0) == "Eremes Guile#boss04")
+		monster .@map$,117,142,"Assassino Cross Eremes",1647,1,.@label$;
+	else if (strnpcinfo(0) == "Trentini#boss05")
+		monster .@map$,117,125,"Cigana Trentini",2241,1,.@label$;
+	else if (strnpcinfo(0) == "Chen Liu#boss06")
+		monster .@map$,121,121,"Campeão Chen",2238,1,.@label$;
+	else if (strnpcinfo(0) == "Alphochio Basil#boss07")
+		monster .@map$,125,117,"Crown Alphochio",2240,1,.@label$;
+	else if (strnpcinfo(0) == "Flamel Emul#boss08")
+		monster .@map$,129,113,"Criador Flamel",2236,1,.@label$;
+	else if (strnpcinfo(0) == "Randel Lawrence#boss09")
+		monster .@map$,146,113,"Paladino Randel",2235,1,.@label$;
+	else if (strnpcinfo(0) == "Celia Alde#boss10")
+		monster .@map$,150,117,"Professora Celia",2237,1,.@label$;
+	else if (strnpcinfo(0) == "Kathryne Keyron#boss11")
+		monster .@map$,154,121,"Alta Maga Kathryne",1651,1,.@label$;
+	else if (strnpcinfo(0) == "Margaretha Sorin#boss12")
+		monster .@map$,158,125,"Sumo Sacerdote Margaretha",1649,1,.@label$;
+	else if (strnpcinfo(0) == "Howard Alt-Eisen#boss13")
+		monster .@map$,158,142,"White Smith Howard",1648,1,.@label$;
+
+	end;
+
+OnDisable:
+	killmonster instance_mapname("1@lhz"),instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
+	disablenpc();
+	end;
+
+OnMyMobDead:
+	if (mobcount(instance_mapname("1@lhz"), instance_npcname(strnpcinfo(0))+"::OnMyMobDead") < 1) {
+		.@map$ = instance_mapname("1@lhz");
+
+		if (strnpcinfo(0) == "Seyren Windsor#boss01")
+		mapannounce .@map$,"Awww... Onde estão todos os meus companheiros...",bc_map,"0xFD3B02";
+		else if (strnpcinfo(0) == "Cecile Damon#boss02")
+		mapannounce .@map$,"Alguém... por favor, ajude... por favor...",bc_map,"0xFD3B02";
+		else if (strnpcinfo(0) == "Gertie Wie#boss03")
+		mapannounce .@map$,".. eu agi muito... precipitadamente...?",bc_map,"0xFD3B02";
+		else if (strnpcinfo(0) == "Eremes Guile#boss04")
+		mapannounce .@map$,"Ah..... Estou absolutamente derrotado....",bc_map,"0xFD3B02";
+		else if (strnpcinfo(0) == "Trentini#boss05")
+		mapannounce .@map$,"ah.. Se eu.. um dia puder... dançar e... cantar... felizmente....",bc_map,"0xFD3B02";
+		else if (strnpcinfo(0) == "Chen Liu#boss06")
+		mapannounce .@map$,"Eu.... sinto muito....",bc_map,"0xFD3B02";
+		else if (strnpcinfo(0) == "Alphochio Basil#boss07")
+		mapannounce .@map$,"...a nova música......era....para.....ela...",bc_map,"0xFD3B02";
+		else if (strnpcinfo(0) == "Flamel Emul#boss08")
+		mapannounce .@map$,"Ha...Eu queria mostrar.... a nova poção...",bc_map,"0xFD3B02";
+		else if (strnpcinfo(0) == "Randel Lawrence#boss09")
+		mapannounce .@map$,"Uau... todos foram derrotados.....??",bc_map,"0xFD3B02";
+		else if (strnpcinfo(0) == "Celia Alde#boss10")
+		mapannounce .@map$,"Não... este experimento é... uma droga...",bc_map,"0xFD3B02";
+		else if (strnpcinfo(0) == "Kathryne Keyron#boss11")
+		mapannounce .@map$,"awww.. estão todos bem...?",bc_map,"0xFD3B02";
+		else if (strnpcinfo(0) == "Margaretha Sorin#boss12")
+		mapannounce .@map$,"Meu bom menino... Não chore... ah... nosso Grande Odin... por favor, nos salve...",bc_map,"0xFD3B02";
+		else if (strnpcinfo(0) == "Howard Alt-Eisen#boss13")
+		mapannounce .@map$,"oh...não.... não consigo respirar.... e minha irmã...?? irmã!!",bc_map,"0xFD3B02";
+
+		donpcevent instance_npcname("Wolfchev#last")+"::OnEnable";
+		donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
+	}
+	end;
+}
+1@lhz,127,156,5	duplicate(bio4FBoss)	Seyren Windsor#boss01	1646
+1@lhz,123,152,5	duplicate(bio4FBoss)	Cecile Damon#boss02	1650
+1@lhz,119,148,5	duplicate(bio4FBoss)	Gertie Wie#boss03	2239
+1@lhz,115,144,5	duplicate(bio4FBoss)	Eremes Guile#boss04	1647
+1@lhz,115,123,7	duplicate(bio4FBoss)	Trentini#boss05	2241
+1@lhz,119,119,7	duplicate(bio4FBoss)	Chen Liu#boss06	2238
+1@lhz,123,115,7	duplicate(bio4FBoss)	Alphochio Basil#boss07	2240
+1@lhz,127,111,7	duplicate(bio4FBoss)	Flamel Emul#boss08	2236
+1@lhz,148,111,1	duplicate(bio4FBoss)	Randel Lawrence#boss09	2235
+1@lhz,152,115,1	duplicate(bio4FBoss)	Celia Alde#boss10	2237
+1@lhz,156,119,1	duplicate(bio4FBoss)	Kathryne Keyron#boss11	1651
+1@lhz,160,123,1	duplicate(bio4FBoss)	Margaretha Sorin#boss12	1649
+1@lhz,160,144,3	duplicate(bio4FBoss)	Howard Alt-Eisen#boss13	1648
+
+// Wolfchev - Final encounter
+//============================================================
+1@lhz,137,156,7	script	Wolfchev#last	4_LGTSCIENCE,{
+	if ((MaxWeight - Weight) < 1000 || !checkweight(1201, 1)) {
+		mes "^FF0000 Verifique seu inventário. Você tem itens demais para completar a missão. ^000000";
+		close;
+	}
+	
+	// Premiações do Servidor
+	if (#WolfchevLaboratory_STATUS == 2) {
+		// add_reputation_points(1, 10);
+		callfunc("F_AddRep", 1, 10, 110002, 3000);
+		set #instancia, 2;
+		if (#inst175_name$ == "[150+] Laboratório Wolfchev") {
+			set #inst175_status,2;
+		}
+		getitem 9608,10;	// Moeda de Instância
+		set #WolfchevLaboratory_STATUS, 3;
+	}
+
+	for(.@i = 5113; .@i <= 5125; .@i++) {
+		switch( checkquest(.@i,HUNTING) ) {
+		case -1:
+			break;
+		case 0:
+		case 1:
+			.@all_quests_complete += 1;
+			break;
+		case 2:
+			.@all_quests_complete += 2;
+			break;
+		}
+	}
+	if (.@all_quests_complete == 26) {
+		// Quests Complete. Get Rewards.
+		if (lght_duk01 == 8) {
+			// First time beating the instance.
+			mes "[Wolfchev]";
+			mes "Você finalmente derrotou minha criatura chefe.";
+			next;
+			mes "[Wolfchev]";
+			mes "Finalmente. É este o resultado? Para quem eu experimentei? Eles me enganaram?";
+			next;
+			mes "[Wolfchev]";
+			mes "O botão deveria ter sido pressionado para um caso de emergência... mas...";
+			next;
+			mes "[Wolfchev]";
+			mes "Ei... Você e eu nos conhecemos por uma conexão ruim...";
+			next;
+			mes "[Wolfchev]";
+			mes "Mas... você me ajudou... Como pôde fazer isso?";
+			next;
+			mes "["+ strcharinfo(0) +"]";
+			mes "Quando te conheci pela primeira vez, você parecia bravo, mas triste, mesmo que pudesse cometer aqueles experimentos cruéis e horríveis.";
+			next;
+			mes "["+ strcharinfo(0) +"]";
+			mes "Mas, na verdade, você fez isso porque estava sozinho... você se concentrou nisso por esse motivo, hein?";
+			next;
+			mes "[Wolfchev]";
+			mes "HAHAHAHA. Solidão... você disse?";
+			next;
+			mes "[Wolfchev]";
+			mes "Pode parecer assim para você. Mas não é. Solidão é apenas uma desculpa boa e fácil dos perdedores.";
+			next;
+			mes "[Wolfchev]";
+			mes "Estou tão feliz fazendo experimentos em busca da perfeição que nunca me sinto sozinho.";
+			next;
+			mes "[Wolfchev]";
+			mes "De qualquer forma, desde que percebi que Rekenber me traiu, não posso simplesmente deixá-los fazer o que querem.";
+			next;
+			mes "[Wolfchev]";
+			mes "Por enquanto, vou deixá-los em paz, mas vou fazê-los chorar e se arrepender de tentar remover Wolfchev.";
+			next;
+			mes "["+ strcharinfo(0) +"]";
+			mes "... .... ... ....";
+			next;
+			lght_duk01 = 9;
+			callsub L_Reward;
+			mes "[Wolfchev]";
+			mes "aaaaaah, "+ strcharinfo(0) +" Muito obrigada por remover meus meninos que enlouqueceram. Não é um grande presente, mas espero que não negue, não preciso mais disso.";
+			next;
+			mes "[Wolfchev]";
+			mes "E, se puder... espero que volte sempre, especialmente com seus amigos. Quero que o lugar volte a ter um coração humano para que a tristeza aqui desapareça.";
+			next;
+			mes "Olhei para Wolfchev novamente antes de sair do laboratório e pude sentir que ele não estava mais obcecado...";
+			close2;
+			warp "lhz_dun04", 147, 273;
+			end;
+		} else {
+			mes "[Wolfchev]";
+			mes "Você derrotou todas as criaturas chefes. Obrigado novamente.";
+			next;
+			callsub L_Reward;
+			mes "[Wolfchev]";
+			mes "Repito: "+ strcharinfo(0) +" Muito obrigado por remover meus rapazes que enlouqueceram. Não é um grande presente, mas desejo que não negue, não preciso mais disso.";
+			next;
+			mes "[Wolfchev]";
+			mes "Khahaha, até mais. Quer sair daqui agora?";
+			next;
+			if (select("Ainda não", "Sim") == 1) {
+			mes "[Wolfchev]";
+			mes "Então me diga quando quiser.";
+			close;
+			}
+			mes "[Wolfchev]";
+			mes "Então eu te mandarei embora.";
+			close2;
+			warp "lhz_dun04", 147, 273;
+			end;
+		}
+	} else {
+		if (.@all_quests_complete == 0) {
+			mes "[Wolfchev]";
+			mes "Eu estava olhando o sistema... não sei quem fez isso... mas é muito complicado de conseguir... não faço ideia...";
+			next;
+		} else {
+			mes "[Wolfchev]";
+			mes "Kakakaah... Obrigado. Você lidou bem com essas criaturas chefes...";
+			next;
+		}
+		if (lght_duk01 == 7) {
+			lght_duk01 = 8;
+			mes "[Wolfchev]";
+			mes "Enquanto você estava lutando...";
+			next;
+			mes "[Wolfchev]";
+			mes "Eu descobri uma coisa... e há um erro no sistema que não nos deixa entrar e sair livremente, então você pode me ajudar em 72 horas... Vá descansar em algum lugar antes de voltar.";
+			next;
+			mes "[Wolfchev]";
+			mes "Ah... e eu posso te mandar para fora do meu laboratório. Você quer?";
+			next;
+		} else {
+			mes "[Wolfchev]";
+			mes "Você quer sair daqui agora?";
+			next;
+		}
+		if (select("Ainda não", "Sim") == 1) {
+			mes "[Wolfchev]";
+			mes "Então me diga quando você quiser.";
+			close;
+		}
+		mes "[Wolfchev]";
+		mes "Então eu te enviarei.";
+		close2;
+		warp "lhz_dun04", 147, 273;
+		end;
+	}
+
+L_Reward:
+	for(.@i = 5113; .@i <= 5125; .@i++) {
+		erasequest .@i;
+	}
+	.@r = rand(1, 1000);
+	if      (.@r < 84)  getitem 2582,  1; //Salvage_Cape
+	else if (.@r < 167) getitem 18570, 1; //Ancient_Gold_Deco
+	else if (.@r < 250) getitem 1490,  1; //Giant_Lance
+	else if (.@r < 333) getitem 16017, 1; //Bloody_Cross
+	else if (.@r < 416) getitem 1291,  1; //Guillotine_Katar
+	else if (.@r < 499) getitem 1584,  1; //Chilly_Spell_Book
+	else if (.@r < 582) getitem 6471, 10; //Goast_Chill
+	else if (.@r < 665) getitem 6470, 10; //Blood_Thirst
+	else if (.@r < 748) getitem 6469, 10; //Will_Of_Warrior
+	else if (.@r < 831) getitem 6471, 20; //Goast_Chill
+	else if (.@r < 914) getitem 6470, 20; //Blood_Thirst
+	else                getitem 6469, 20; //Will_Of_Warrior
+	return;
+
+OnInstanceInit:
+OnDisable:
+	disablenpc instance_npcname("Wolfchev#last");
+	end;
+
+OnEnable:
+	enablenpc instance_npcname("Wolfchev#last");
+	end;
+}

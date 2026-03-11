@@ -1,0 +1,73 @@
+-	script	Loja de Pontos MVP	-1,{
+OnTalk:
+	mes "[Vendedor]";
+	mes "Confira meus produtos!";
+	callshop "MVP_Shop",1;
+	npcshopattach "MVP_Shop";
+	dispbottom "Pontos MVP: " + #mvp_points;
+	end;
+
+OnBuyItem:
+	callfunc "MVP_Shop_Process", @bought_nameid, @bought_quantity, @bought_price;
+	end;
+}
+// Estes itens devem acompanhar o array shop_items e shop_prices
+-	shop	MVP_Shop	-1,12411:20,9617:50
+
+function	script	MVP_Shop_Process	{
+
+	// =============================
+	// CONFIGURAÇÃO DA LOJA
+	// =============================
+	// Itens e preços em Pontos MVP
+	setarray .@shop_items[0], 12411, 9617;
+	setarray .@shop_prices[0], 20,   50; // preço por item em pontos
+
+	// =============================
+	// PARÂMETROS DA FUNÇÃO
+	// =============================
+	.@id  = getarg(0); // ID do item comprado
+	.@qtd = getarg(1); // Quantidade comprada
+	.@price = getarg(2); // ignorado, usamos tabela acima
+
+	// =============================
+	// PROCURA O ITEM NA TABELA
+	// =============================
+	.@found = 0;
+	for (.@i = 0; .@i < getarraysize(.@shop_items); .@i++) {
+		if (.@id == .@shop_items[.@i]) {
+			.@found = 1;
+			.@unit_price = .@shop_prices[.@i];
+			break;
+		}
+	}
+
+	if (!.@found) {
+		dispbottom "[Pontos MVP] Erro: item não está registrado na loja.";
+		return;
+	}
+
+	// =============================
+	// CALCULA O CUSTO TOTAL
+	// =============================
+	.@total_cost = .@unit_price * .@qtd;
+
+	// =============================
+	// VERIFICA PONTOS
+	// =============================
+	if (#mvp_points < .@total_cost) {
+		dispbottom "Pontos MVP insuficiente.";
+        return;
+	}
+
+	// =============================
+	// DESCONTA E ENTREGA
+	// =============================
+	#mvp_points -= .@total_cost;
+	getitem .@id, .@qtd;
+	logshop "SCRIPT_SHOP_BUY", "MVP_Shop", .@id, .@qtd, 0, 0, 0, "#mvp_points", .@total_cost;
+
+	dispbottom "[Pontos MVP] -" + .@total_cost + " ponto(s) de MVP. Restam: " + #mvp_points + ".";
+	return;
+}
+

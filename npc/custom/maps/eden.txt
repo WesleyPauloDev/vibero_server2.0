@@ -1,0 +1,327 @@
+moc_para01,30,10,0	warp	edenwarp01	1,1,prontera,155,188
+
+moc_para01,24,22,5	duplicate(Servico Kafra)	Serviço Kafra#eden	113
+
+moc_para01,37,22,4	shop	Loja de Utilidades#eden	850,643:100,512:100,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,506:100,578:200,12414:500,645:1000,656:1500,657:2000,610:5000,1092:100,12580:100
+
+moc_para01,43,22,4	shop	Loja de Grimórios#eden	620,100065:1000,100066:1000,100067:1000,100068:1000,100069:1000,100070:1000,100071:1000,100072:1000,100073:1000,100074:1000
+
+moc_para01,24,13,5	duplicate(Healer)	Curandeira#eden	640
+
+// ----------------------- Está em npc/custom/barter.yml -----------------------
+moc_para01,24,35,5	script	Loja do Éden	611,{
+OnTalk:
+	mes "[Loja do Éden]";
+
+	switch(select("Consumíveis:Armas:Equipamentos:Trocar Poções:Sair")) {
+        case 1:
+            callshop "consumable_eden"; // Loja de Consumíveis
+            end;
+
+        case 2:
+            callshop "weapons_eden"; // Loja de armas
+            end;
+
+		case 3:
+			callshop "equipments_eden"; // Loja de equipamentos
+			end;
+		
+		case 4:
+			mes "Aqui você pode trocar suas Poções[Iniciante] por outras do mesmo tipo.";
+			switch(select("Trocar Poções de HP em Poções de SP:Trocar Poções de SP em Poções de HP")) {
+				case 1:
+					mes "Quantas Poções deseja trocar?";
+					input .@amount;
+					if (.@amount <= 0) {
+						mes "Quantidade invalida.";
+						end;
+					}
+					if (countitem(9660) < .@amount) {
+						mes "Você nao possui Poções de HP suficientes.";
+						end;
+					}
+					delitem 9660, .@amount; // Remove as pocoes de HP
+					getitem 9661, .@amount; // Da as pocoes de SP
+					end;
+				case 2:
+					mes "Quantas Poções deseja trocar?";
+					input .@amount;
+					if (.@amount <= 0) {
+						mes "Quantidade invalida.";
+						end;
+					}
+					if (countitem(9661) < .@amount) {
+						mes "Você nao possui Poções de SP suficientes.";
+						end;
+					}
+					delitem 9661, .@amount; // Remove as pocoes de SP
+					getitem 9660, .@amount; // Da as pocoes de HP
+					end;
+			}
+			end;
+
+		default:
+			mes "Volte sempre!";
+			close;
+    }
+	end;
+}
+
+// ----------------------- Quests do Éden ---------------------------------------------------------
+// ----------------------- Contador de kill está em npc/custom/quest_eden.txt -----------------------
+moc_para01,27,35,5	script	Secretário do Éden	810,{
+
+	if (BaseLevel < 20) {
+		mes "[Secretário do Éden]";
+		mes "Volte quando estiver no nível 20 ou superior para participar das missões do Éden.";
+		close;
+	}
+
+	// Se o jogador já tem missão ativa, oferece menu de progresso, recompensa ou cancelar
+	if (eden_missao_ativa) {
+		mes "[Secretário do Éden]";
+		mes "Você já está em uma missão.";
+		next;
+		.@choice = select("Ver Progresso:Receber Recompensa:Cancelar Missao:Fechar");
+
+		if (.@choice == 1) {
+			mes "[Missão Ativa]";
+			mes "Progresso:";
+			mes "Missão Lvl " +eden_nivel + " Mapa " + eden_mapa  ;
+			mes "- Monstro: ^00bb00" + eden_mob1_name$ + " " + eden_mob1_kill + " / " + eden_mob_quant + "^000000";
+			mes "- Monstro: ^00bb00" + eden_mob2_name$ + " " + eden_mob2_kill + " / " + eden_mob_quant + "^000000";
+			mes "Deseja ser teleportado agora para o mapa da missão?";
+			if (select("Sim:Não") == 1) {
+				if (eden_mapa_quest$ != "") warp eden_mapa_quest$, 0,0;
+			}
+			close;
+		}
+
+		if (.@choice == 2) {
+			if (eden_missao_concluida) {
+				mes "[Secretário do Éden]";
+				mes "Parabéns por completar a missão!";
+				mes "Aqui está sua recompensa.";
+				getexp eden_quest_exp, eden_quest_job_exp;
+				Zeny += eden_quest_zeny;
+				getitem 9607, eden_quest_medals;
+				
+				// Limpa dados da missão
+				eden_missao_ativa = 0;
+				eden_quest_count = 0;
+				eden_quant = 0;
+				eden_quest_mob_id = 0;
+				eden_quest_mob_name$ = "";
+				eden_quest_map$ = "";
+				eden_quest_medals = 0;
+				eden_quest_zeny = 0;
+				eden_quest_exp = 0;
+				eden_quest_job_exp = 0;
+
+				close;
+			} else {
+				mes "[Secretário do Éden]";
+				mes "Você ainda não derrotou todos os monstros necessários.";
+				mes "Progresso:";
+				mes "Missão Lvl " +eden_nivel + " Mapa " + eden_mapa  ;
+				mes "- Monstro: ^00bb00" + eden_mob1_name$ + " " + eden_mob1_kill + " / " + eden_mob_quant + "^000000";
+				mes "- Monstro: ^00bb00" + eden_mob2_name$ + " " + eden_mob2_kill + " / " + eden_mob_quant + "^000000";
+				mes "Deseja ser teleportado agora para o mapa da missão para completa-la?";
+				if (select("Sim:Não") == 1) {
+					if (eden_mapa_quest$ != "") warp eden_mapa_quest$, 0,0;
+				}
+				close;
+			}
+		}
+
+		if (.@choice == 3) {
+			mes "[Secretário do Éden]";
+			mes "Tem certeza que deseja cancelar a missão atual?";
+			if (select("Sim, cancelar missao:Nao, continuar") == 1) {
+				eden_missao_ativa = 0;
+				eden_quest_count = 0;
+				eden_quant = 0;
+				eden_quest_mob_id = 0;
+				eden_quest_mob_name$ = "";
+				eden_quest_map$ = "";
+				eden_quest_medals = 0;
+				eden_quest_zeny = 0;
+				eden_quest_exp = 0;
+				eden_quest_job_exp = 0;
+				mes "Missão cancelada com sucesso.";
+				close;
+			} else {
+				mes "Missão mantida. Boa sorte!";
+				close;
+			}
+		}
+
+		if (.@choice == 4) {
+			close;
+		}
+	}
+	mes "[Secretário do Éden]";
+	mes "Bem-vindo ao Programa de Missões do Éden!";
+	mes "Você pode realizar missões repetíveis que dão EXP, Zeny e Medalhas do Éden!";
+	next;
+
+	MainMenu:
+		mes "[Secretário do Éden]";
+		mes "Escolha a faixa de nível da missão:";
+		.@choice = select("Lv. 20~39:Lv. 40~59:Lv. 60~79:Lv. 80+:Cancelar");
+		if (.@choice == 5) {
+			mes "Tudo bem, volte quando quiser realizar uma missão.";
+			close;
+		}	
+
+		.@nivel = ((.@choice - 1) * 20) + 20;
+
+		if (BaseLevel < .@nivel) {
+			mes "Você ainda não é forte o bastante para esta missão.";
+			next;
+			goto MainMenu;
+		}
+
+		callsub L_MissaoMenu, .@nivel;
+		end;
+
+	L_MissaoMenu:
+		.@nivel = getarg(0);
+
+		mes "[Missões Nível " + .@nivel + "+]";
+		mes "Escolha a missão que deseja:";
+		next;
+
+		.@op = select("Mapa 1:Mapa 2:Voltar");
+		if (.@op == 3) goto MainMenu;
+
+		callsub L_IniciarMissao, .@nivel, .@op;
+		end;
+
+	L_IniciarMissao:
+		.@nivel = getarg(0);
+		.@mapa  = getarg(1);	
+
+		// Quantidade e recompensas escalam com o nível
+		.@quant = .@nivel;
+		.@medalhas = .@nivel / 20;
+		.@zeny = (.@nivel / 20) * 5000;
+		if (.@nivel == 20) {
+			.@exp = 34687;
+			.@job_exp = 23300;
+		}
+		else if (.@nivel == 40) {
+			.@exp = 78562;
+			.@job_exp = 97180;
+		}
+		else if (.@nivel == 60) {
+			.@exp = 257972;
+			.@job_exp = 287109;
+		}
+		else if (.@nivel == 80) {
+			.@exp = 1258714;
+			.@job_exp = 974343;
+		}
+		else {
+			.@exp = 0;
+			.@job_exp = 0;
+		}
+
+		// Armazena recompensas nas variáveis do jogador
+		eden_quest_medals = .@medalhas;
+		eden_quest_zeny   = .@zeny;
+		eden_quest_exp    = .@exp;
+		eden_quest_job_exp = .@job_exp;
+
+		// Define missões
+		if (.@nivel == 20 && .@mapa == 1) {
+			.@mapname$ = "anthell01";
+			.@mob1$ = "Piere"; .@mob1_id = 1160;
+			.@mob2$ = "Deniro"; .@mob2_id = 1105;
+		}
+		else if (.@nivel == 20 && .@mapa == 2) {
+			.@mapname$ = "pay_fild08";
+			.@mob1$ = "Esporo"; .@mob1_id = 1014;
+			.@mob2$ = "Rabo de Verme"; .@mob2_id = 1024;
+		}
+		else if (.@nivel == 40 && .@mapa == 1) {
+			.@mapname$ = "gef_fild10";
+			.@mob1$ = "Guerreiro Orc"; .@mob1_id = 1023;
+			.@mob2$ = "Orc Lady"; .@mob2_id = 1273;
+		}
+		else if (.@nivel == 40 && .@mapa == 2) {
+			.@mapname$ = "orcsdun02";
+			.@mob1$ = "Orc Skeleton"; .@mob1_id = 1152;
+			.@mob2$ = "Zenorc"; .@mob2_id = 1177;
+		}
+		else if (.@nivel == 60 && .@mapa == 1) {
+			.@mapname$ = "moc_fild17";
+			.@mob1$ = "Sandman"; .@mob1_id = 1165;
+			.@mob2$ = "Hode"; .@mob2_id = 1127;
+		}
+		else if (.@nivel == 60 && .@mapa == 2) {
+			.@mapname$ = "gef_fild06";
+			.@mob1$ = "Petite"; .@mob1_id = 1155;
+			.@mob2$ = "Louva-a-Deus"; .@mob2_id = 1139;
+		}
+		else if (.@nivel == 80 && .@mapa == 1) {
+			.@mapname$ = "gl_church";
+			.@mob1$ = "Druida Maligno"; .@mob1_id = 1117;
+			.@mob2$ = "Alma Penada"; .@mob2_id = 1192;
+		}
+		else if (.@nivel == 80 && .@mapa == 2) {
+			.@mapname$ = "yuno_fild04";
+			.@mob1$ = "Harpia"; .@mob1_id = 1376;
+			.@mob2$ = "Bode"; .@mob2_id = 1372;
+		}
+		else {
+			mes "Missão não encontrada.";
+			close;
+		}
+
+		// Armazenar variáveis da missão para o sistema de contagem	
+		eden_missao_concluida = 0;
+		eden_nivel = .@nivel;
+		eden_nivel = .@nivel;
+		eden_mapa  = .@mapa;
+		eden_mapa  = .@mapa;
+		eden_mapa_quest$ = .@mapname$;
+		eden_mob1_name$ = .@mob1$;
+		eden_mob2_name$ = .@mob2$;
+		eden_mob1_id = .@mob1_id;
+		eden_mob2_id = .@mob2_id;
+		eden_quant = .@quant;
+		eden_mob_quant = eden_quant;
+		eden_mob1_kill = 0;
+		eden_mob2_kill = 0;
+
+
+		mes "[Missão do Éden]";
+		mes "Você escolheu caçar:";
+		mes "- " + eden_quant + " " + .@mob1$;
+		mes "- " + eden_quant + " " + .@mob2$;	
+		mes "[Recompensas]";
+		mes "- " + .@medalhas + " Medalha(s) do Éden";
+		mes "- " + .@zeny + " Zeny";
+		mes "- " + .@exp + " de EXP de Base";
+		mes "- " + .@job_exp + " de EXP de Classe";
+		mes "";
+		mes "Você confirma esta missão?";
+		if (select("Sim:Não") == 2) {
+			goto L_MissaoMenu;
+		}
+		eden_missao_ativa = 1;
+		next;
+		mes "Deseja ser teleportado agora para o mapa da missão?";
+		if (select("Sim:Não") == 1) {
+				if (.@mapname$ != "") warp .@mapname$, 0,0;
+		}
+		close;
+
+	OnInit:
+		end;
+}
+
+
+
+

@@ -1,0 +1,240 @@
+-	script	PoringFake_CMD	-1,{
+OnInit:
+    bindatcmd "poring", "PoringFake_CMD::OnJoin";
+    .impostors_left = 0;
+    end;
+
+OnClock1130:
+OnClock2030:
+    $PoringEvent = 1;
+
+    announce "[Poring Fake] Evento ira iniciar em 1 minuto. Digite @poring para participar!", bc_all;
+    sleep 60000;
+
+    callsub OnStartEvent;
+
+    end;
+OnJoin:
+    if (!$PoringEvent) {
+        dispbottom "O evento do Poring Falso nao esta em andamento.";
+        end;
+    }
+    warp "poring_w02",98,33;
+    end;
+
+OnStartEvent:
+    initnpctimer;
+
+    announce "[Reino dos Porings] A cacada aos impostores comecou!", bc_all;
+
+    // Limpeza de seguranca
+    killmonsterall "poring_w02";
+
+    // Lista de monstros possiveis
+    setarray .@mob[0],
+        1002, // Poring
+        1031, // Poporing
+        1113, // Drops
+        1242; // Marin
+
+    // Nomes dos impostores (4 comuns + 1 lider oculto)
+    setarray .@fake_name$[0],
+        "Poringg",
+        "Poriing",
+        "Porig",
+        "P0ring",
+        "Pooring";
+
+    // Coordenadas validas para os impostores
+    setarray .@fx[0],
+        109,119,132,135,117,99,99,117,135,125,113,113,100,84,84,84,98,114,72,73,
+        64,62,64,80,99,81,72,75,84,83,99,113,113,112,98,84,123,123;
+
+    setarray .@fy[0],
+        65,66,66,80,82,83,100,99,99,119,121,133,133,133,122,110,111,111,120,101,
+        99,82,65,66,66,83,55,43,44,55,55,55,44,32,32,32,44,56;
+
+    .@total = 75;      // quantidade total de monstros
+    .@fake_total = 5;  // quantidade de impostores
+    .impostors_left = .@fake_total;
+
+    // Indices unicos dos impostores dentro do total
+    for (.@i = 0; .@i < .@fake_total; .@i++) {
+        .@candidate = rand(.@total);
+        for (.@j = 0; .@j < .@i; .@j++) {
+            if (.@fake_index[.@j] == .@candidate) {
+                .@candidate = rand(.@total);
+                .@j = -1;
+            }
+        }
+        .@fake_index[.@i] = .@candidate;
+    }
+
+    // Posicoes unicas para os impostores
+    for (.@i = 0; .@i < .@fake_total; .@i++) {
+        .@candidate = rand(getarraysize(.@fx));
+        for (.@j = 0; .@j < .@i; .@j++) {
+            if (.@fake_pos[.@j] == .@candidate) {
+                .@candidate = rand(getarraysize(.@fx));
+                .@j = -1;
+            }
+        }
+        .@fake_pos[.@i] = .@candidate;
+    }
+
+    for (.@i = 0; .@i < .@total; .@i++) {
+        .@mob_id = .@mob[rand(getarraysize(.@mob))];
+        .@spawned_fake = 0;
+
+        for (.@j = 0; .@j < .@fake_total; .@j++) {
+            if (.@i == .@fake_index[.@j]) {
+                .@pos = .@fake_pos[.@j];
+                .@fxp = .@fx[.@pos];
+                .@fyp = .@fy[.@pos];
+
+                if (.@j == 0)
+                    monster "poring_w02", .@fxp, .@fyp, .@fake_name$[.@j], .@mob_id, 1, strnpcinfo(0)+"::OnFakeDead1";
+                else if (.@j == 1)
+                    monster "poring_w02", .@fxp, .@fyp, .@fake_name$[.@j], .@mob_id, 1, strnpcinfo(0)+"::OnFakeDead2";
+                else if (.@j == 2)
+                    monster "poring_w02", .@fxp, .@fyp, .@fake_name$[.@j], .@mob_id, 1, strnpcinfo(0)+"::OnFakeDead3";
+                else if (.@j == 3)
+                    monster "poring_w02", .@fxp, .@fyp, .@fake_name$[.@j], .@mob_id, 1, strnpcinfo(0)+"::OnFakeDead4";
+                else
+                    monster "poring_w02", .@fxp, .@fyp, .@fake_name$[.@j], .@mob_id, 1, strnpcinfo(0)+"::OnLeaderDead";
+
+                .@spawned_fake = 1;
+                break;
+            }
+        }
+
+        if (!.@spawned_fake)
+            monster "poring_w02",0,0,"Poring",.@mob_id,1;
+    }
+
+    mapannounce "poring_w02",
+        "[Reino dos Porings] Existem "+.impostors_left+" impostores vivos. Eliminem todos!",
+        bc_map;
+    end;
+
+OnTimer60000: // 1 minuto
+    if (!$PoringEvent) {
+        stopnpctimer;
+        end;
+    }
+
+    mapannounce "poring_w02",
+        "[Rei Poring]: Ainda restam "+.impostors_left+" impostores! Procurem com atencao!",
+        bc_map;
+    end;
+
+OnTimer180000: // 3 minutos
+    if ($PoringEvent)
+        mapannounce "poring_w02",
+            "[Rei Poring]: Nao confiem nas aparencias! Ainda faltam "+.impostors_left+"!",
+            bc_map;
+    end;
+
+OnTimer300000: // 5 minutos
+    if ($PoringEvent)
+        mapannounce "poring_w02",
+            "[Rei Poring]: O tempo esta passando! Faltam "+.impostors_left+" impostores!",
+            bc_map;
+    end;
+
+OnTimer480000: // 8 minutos
+    if ($PoringEvent)
+        mapannounce "poring_w02",
+            "[Rei Poring]: Eles ainda estao ai... faltam "+.impostors_left+"!",
+            bc_map;
+    end;
+
+OnTimer600000:
+    stopnpctimer;
+
+    if ($PoringEvent) {
+        announce "[Reino dos Porings] O evento do Poring Falso terminou! Os impostores escaparam...", bc_all;
+
+        // Limpeza
+        killmonsterall "poring_w02";
+
+        sleep 5000;
+
+        // Teleporta todos de volta
+        mapwarp "poring_w02","prontera",155,189;
+
+        $PoringEvent = 0;
+        .impostors_left = 0;
+    }
+    end;
+
+OnFakeDead1:
+OnFakeDead2:
+OnFakeDead3:
+OnFakeDead4:
+    if (!$PoringEvent) end;
+
+    .impostors_left--;
+    if (.impostors_left < 0) .impostors_left = 0;
+
+    // 4 impostores comuns: premio Refinador
+    getitem 9611,1;
+
+    mapannounce "poring_w02",
+        "[Reino dos Porings] Um impostor foi derrotado! Restam "+.impostors_left+" impostores.",
+        bc_map;
+
+    if (.impostors_left <= 0)
+        donpcevent strnpcinfo(0)+"::OnAllImpostorsDead";
+    end;
+
+OnLeaderDead:
+    if (!$PoringEvent) end;
+
+    .impostors_left--;
+    if (.impostors_left < 0) .impostors_left = 0;
+
+    // Recompensa do lider
+    getitem 9608,20;
+    getitem 22818,1;
+
+    announce "[Reino dos Porings] O Lider dos impostores foi derrotado por "+strcharinfo(0)+"!", bc_all;
+    mapannounce "poring_w02",
+        "[Reino dos Porings] Restam "+.impostors_left+" impostores.",
+        bc_map;
+
+    if (.impostors_left <= 0)
+        donpcevent strnpcinfo(0)+"::OnAllImpostorsDead";
+    end;
+
+OnAllImpostorsDead:
+    if (!$PoringEvent) end;
+
+    set $PoringEvent, 0;
+    .impostors_left = 0;
+
+    announce "[Reino dos Porings] Todos os impostores foram derrotados!", bc_all;
+
+    killmonsterall "poring_w02";
+
+    sleep 5000;
+
+    // Teleporta todos de volta
+    mapwarp "poring_w02","prontera",155,189;
+
+    end;
+}
+
+poring_w02,98,43,5	script	Rei Poring	3810,{
+
+    mes "[Rei Poring]";
+    mes "Blub blub! Algo esta errado no Reino dos Porings...";
+    next;
+    mes "[Rei Poring]";
+    mes "5 impostores se escondem entre meus suditos!";
+    mes "Um deles e o Lider dos impostores.";
+    mes "Derrote todos para salvar o reino!";
+    close;
+}
+
+poring_w02	mapflag	noskill

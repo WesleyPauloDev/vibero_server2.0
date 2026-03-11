@@ -1,0 +1,38 @@
+-	script	Eden	729,{
+
+	mes "[Secretária do Éden]";
+	mes "Olá! Bem-vindo(a) ao Projeto Éden.";
+
+	if (BaseLevel < 20) {
+		mes "Infelizmente, você ainda não tem o nível necessário para participar.";
+		mes "Volte quando estiver pelo menos no nível 20.";
+		close;
+	}
+
+	mes "O Projeto Éden é uma iniciativa para ajudar aventureiros como você.";
+	mes "A partir do nível 20, você pode participar de missões com recompensas incríveis!";
+	mes "Ganhe equipamentos exclusivos e uma ótima quantidade de experiência!";
+	next;
+
+	mes "Deseja visitar o Salão do Éden agora?";
+	menu "Sim, leve-me até lá!", Eden, 
+	     "O que é o Projeto Éden?", Info,
+	     "Agora não", Sair;
+
+Eden:
+	warp "moc_para01",30,14;
+	end;
+
+Info:
+	mes "[Secretária do Éden]";
+	mes "No Salão do Éden, você encontrará NPCs com missões adequadas ao seu nível.";
+	mes "Essas missões te darão experiência e equipamentos exclusivos para facilitar sua jornada.";
+	mes "Você pode voltar sempre que quiser e pegar novas tarefas!";
+	next;
+	mes "Deseja ir para o Éden agora?";
+	menu "Sim", Eden, "Não, obrigado", Sair;
+
+Sair:
+	mes "Estarei aqui se precisar de ajuda futuramente!";
+	close;
+}

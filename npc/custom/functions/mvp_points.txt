@@ -1,0 +1,27 @@
+-	script	MVP_Points_System	-1,{
+
+OnNPCKillEvent:
+
+	// Pega o ID do monstro morto
+	.@mob_id = killedrid;
+
+    // Verifica se o jogador está dentro de uma instância
+	if (instance_id() > 0)
+		end; // Dentro de instância, não ganha pontos
+
+	// Verifica se é um MVP
+	if (getmonsterinfo(.@mob_id, MOB_MVPEXP) > 0) {
+
+		// Adiciona 1 ponto
+		#mvp_points += 1;
+
+		dispbottom "[MVP] Você derrotou um MVP e ganhou 1 ponto de MVP!";
+		dispbottom "[MVP] Pontos acumulados: " + #mvp_points;
+
+		// Mensagem global opcional
+		announce strcharinfo(0) + " derrotou o MVP " + getmonsterinfo(.@mob_id, MOB_NAME) + "!", bc_all | bc_yellow;
+
+	}
+
+	end;
+}

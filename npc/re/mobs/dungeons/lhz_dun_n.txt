@@ -1,0 +1,256 @@
+//===== rAthena Script =======================================
+//= Nightmare Biolabs
+//===== Description: =========================================
+//= Nightmare Biolabs Monster Spawn Script.
+//===== Additional Comments: =================================
+//= 1.0 First version. Boss and slaves spawn are assumptions
+//		based on lhz_dun.txt monsters spawn. [Capuche]
+//= 1.1 Changed MvP spawn based on the amount of
+//		monsters killed. [Capuche]
+//============================================================
+-	script	lhz_dun_n	-1,{
+OnInit:
+	// === CONFIGURAÇÃO =========================================
+	// mapas onde quer repetir
+	setarray .@maps$[0], "lhz_dun_n", "lhz_dun_n2", "lhz_dun_n3", "lhz_dun_n4";	
+	setarray .@mob[0], 3208, 3209, 3210, 3211, 3212, 3213, 3226, 3227, 3228, 3229, 3230, 3231, 3232;	
+
+	.@quant = 20; // quantidade de cada mob por mapa
+	// ===========================================================
+
+	for ( .@m = 0; .@m < getarraysize(.@maps$); .@m++ ) {
+		for ( .@q = 0; .@q < .@quant; .@q++ ) {
+			for ( .@i = 0; .@i < getarraysize(.@mob); .@i++ ) {
+
+				// spawna 1 mob
+				// monster .@maps$[.@m],0,0,"--ja--", .@mob[.@i],1,"lhz_dun_n::OnRegularDead";
+				monster .@maps$[.@m],0,0,"--ja--",.@mob[.@i],1,"lhz_dun_n::OnRegularDead"; // Eremes Guille 
+				// monster .@maps$[.@m],0,0,"--ja--",3209,1,"lhz_dun_n::OnRegularDead"; // Magaleta Sorin 
+				// monster .@maps$[.@m],0,0,"--ja--",3210,1,"lhz_dun_n::OnRegularDead"; // Catherine Cheiron 
+				// monster .@maps$[.@m],0,0,"--ja--",3211,1,"lhz_dun_n::OnRegularDead"; // Shecil Damon 
+				// monster .@maps$[.@m],0,0,"--ja--",3212,1,"lhz_dun_n::OnRegularDead"; // Harword Alt-Eisen 
+				// monster .@maps$[.@m],0,0,"--ja--",3213,1,"lhz_dun_n::OnRegularDead"; // Seyren Windsor
+
+				// monster .@maps$[.@m],0,0,"--ja--",3226,1,"lhz_dun_n::OnRegularDead"; // Randel Lawrence 
+				// monster .@maps$[.@m],0,0,"--ja--",3227,1,"lhz_dun_n::OnRegularDead"; // Flamel Emule 
+				// monster .@maps$[.@m],0,0,"--ja--",3228,1,"lhz_dun_n::OnRegularDead"; // Celia Alde 
+				// monster .@maps$[.@m],0,0,"--ja--",3229,1,"lhz_dun_n::OnRegularDead"; // Chen Liu 
+				// monster .@maps$[.@m],0,0,"--ja--",3230,1,"lhz_dun_n::OnRegularDead"; // Gertie Wie 
+				// monster .@maps$[.@m],0,0,"--ja--",3231,1,"lhz_dun_n::OnRegularDead"; // Alphoccio Basil 
+				// monster .@maps$[.@m],0,0,"--ja--",3232,1,"lhz_dun_n::OnRegularDead"; // Trentini
+
+				if (.@maps$[.@m] == "lhz_dun_n" || .@maps$[.@m] == "lhz_dun_n2") {
+
+					.@gid = $@mobid[0];
+
+					getunitdata .@gid, .@info, 1;
+
+					setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] / 2;
+					setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] / 2;
+					setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] / 2;
+					setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] / 2;
+					setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] / 2;
+
+				}
+			}
+			sleep 5;
+		}	
+	}
+	end;
+
+OnRegularDead:	
+	monster strcharinfo(3),0,0,"--ja--",killedrid,1,"lhz_dun_n::OnRegularDead";	
+	if (strcharinfo(3) == "lhz_dun_n" || strcharinfo(3) == "lhz_dun_n2") {
+
+		.@gid = $@mobid[0];
+
+		getunitdata .@gid, .@info, 1;
+
+		setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] / 2;
+		setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] / 2;
+		setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] / 2;
+		setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] / 2;
+		setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] / 2;
+	}
+	callsub( OnNPCKillEvent, strcharinfo(3) );
+
+	end;
+
+// OnRegularDead3209: callsub( S_Regular, 3209 );
+// OnRegularDead3210: callsub( S_Regular, 3210 );
+// OnRegularDead3211: callsub( S_Regular, 3211 );
+// OnRegularDead3212: callsub( S_Regular, 3212 );
+// OnRegularDead3213: callsub( S_Regular, 3213 );
+
+// OnRegularDead3226: callsub( S_Regular, 3226 );
+// OnRegularDead3227: callsub( S_Regular, 3227 );
+// OnRegularDead3228: callsub( S_Regular, 3228 );
+// OnRegularDead3229: callsub( S_Regular, 3229 );
+// OnRegularDead3230: callsub( S_Regular, 3230 );
+// OnRegularDead3231: callsub( S_Regular, 3231 );
+// OnRegularDead3232: callsub( S_Regular, 3232 );
+
+S_Regular:
+	if (strcharinfo(3) != "lhz_dun_n" || strcharinfo(3) != "lhz_dun_n2" ||
+	    strcharinfo(3) != "lhz_dun_n3" || strcharinfo(3) != "lhz_dun_n4" ) {
+        end;
+    }
+	.@mob_id = getarg(0);
+	.@map$ = strcharinfo(3);
+
+	if ( getd("." + .@map$ + "[" + .@mob_id + "]") < 110 &&
+	     getd("." + .@map$ + "_boss") == 0 ) {
+
+		// incrementa o contador para este mob nesse mapa
+		setd "." + .@map$ + "[" + .@mob_id + "]", getd("." + .@map$ + "[" + .@mob_id + "]") + 1;
+
+		if ( getd("." + .@map$ + "[" + .@mob_id + "]") == 110 ) {
+			.@mini_boss = .@mob_id + 6 + (.@mob_id > 3219);	// mini boss version ID: regular ID +6 for non-transcendent, +7 for others
+			mapannounce strcharinfo(3), "Um Mini-Boss apareceu!", bc_map, 0xFF8000;
+			// monster "lhz_dun_n",0,0,"--en--",.@mini_boss,1, "lhz_dun_n::OnMiniDead" + .@mini_boss;
+			monster strcharinfo(3),0,0,"--ja--",.@mini_boss,1,"lhz_dun_n::OnMiniDead";	
+			
+			if (strcharinfo(3) == "lhz_dun_n" || strcharinfo(3) == "lhz_dun_n2") {
+
+				.@gid = $@mobid[0];
+
+				getunitdata .@gid, .@info, 1;
+
+				setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] / 2;
+				setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] / 2;
+				setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] / 2;
+				setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] / 2;
+				setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] / 2;
+			}
+		}
+	}
+	end;
+
+OnMiniDead: callsub( S_Mini, killedrid );
+// OnMiniDead3214: callsub( S_Mini, 3214 );
+// OnMiniDead3215: callsub( S_Mini, 3215 );
+// OnMiniDead3216: callsub( S_Mini, 3216 );
+// OnMiniDead3217: callsub( S_Mini, 3217 );
+// OnMiniDead3218: callsub( S_Mini, 3218 );
+// OnMiniDead3219: callsub( S_Mini, 3219 );
+
+// OnMiniDead3233: callsub( S_Mini, 3233 );
+// OnMiniDead3234: callsub( S_Mini, 3234 );
+// OnMiniDead3235: callsub( S_Mini, 3235 );
+// OnMiniDead3236: callsub( S_Mini, 3236 );
+// OnMiniDead3237: callsub( S_Mini, 3237 );
+// OnMiniDead3238: callsub( S_Mini, 3238 );
+// OnMiniDead3239: callsub( S_Mini, 3239 );
+
+S_Mini:
+	.@mob_id = getarg(0);
+	.@map$ = strcharinfo(3);              // mapa atual
+	.@key1$ = "." + .@map$ + "[" + .@mob_id + "]";
+	.@key2$ = "." + .@map$ + "_boss";
+
+	// checa contador e boss
+	if ( getd(.@key1$) < 4 && getd(.@key2$) == 0 ) { // lhz_dun_n[3214] < 4 && lhz_dun_n_boss == 0
+
+		// incrementa contador dinâmico
+		setd(.@key1$, getd(.@key1$) + 1); // lhz_dun_n[3214]++
+
+		mapannounce .@map$, "O Mini-Boss foi derrotado!", bc_map, 0xFF8000;
+
+		.@regular = .@mob_id - 6 - (.@mob_id > 3219); // 
+
+		if ( getd(.@key1$) < 4 ) { // lhz_dun_n[3214] < 4
+			// zera o índice regular equivalente
+			setd("." + .@map$ + "[" + .@regular + "]", 0);	// note: mini boss version can re-spawn when the count of mini boss dead is reached? (currently they don't)
+		} else {
+			setarray .@mini_boss_list[0], 3214,3215,3216,3217,3218,3219,3233,3234,3235,3236,3237,3238,3239;
+			for ( .@i = 0; .@i < 13; ++.@i ) {	
+				if ( getd("." + .@map$ + "[" + .@mini_boss_list[.@i] + "]") < 4 )
+					end;
+			}
+			// MvP monster seems to only spawn at 12 o'clock
+			// monster "lhz_dun_n",140,230,"--en--", F_Rand(3220,3221,3222,3223,3224,3225,3240,3241,3242,3243,3244,3245,3246),1, "lhz_dun_n::OnMyMVPDead";
+			monster strcharinfo(3),0,0,"--ja--",F_Rand(3220,3221,3222,3223,3224,3225,3240,3241,3242,3243,3244,3245,3246),1,"lhz_dun_n::OnMyMVPDead";
+			// mapannounce "lhz_dun_n", "Voz do Reaper: Já faz um tempo.", bc_map;	// unknown message
+			mapannounce strcharinfo(3), "Um MVP apareceu!", bc_map, 0xFF0000;
+			setd(.@key2$, 1);
+			// deletearray .lhz_dun_n;
+			deletearray getd("." + .@map$);
+
+			if (strcharinfo(3) == "lhz_dun_n" || strcharinfo(3) == "lhz_dun_n2") {
+
+				.@gid = $@mobid[0];
+
+				getunitdata .@gid, .@info, 1;
+
+				setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] / 2;
+				setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] / 2;
+				setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] / 2;
+				setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] / 2;
+				setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] / 2;
+			}
+		}
+	}
+	end;
+OnMyMVPDead:
+
+	.@map$ = strcharinfo(3);
+
+	initnpctimer;
+	setd "." + .@map$ + "_delay", 0;
+
+	// mata apenas os monstros registrados para esse mapa
+	killmonster .@map$, strnpcinfo(0) + "::OnMyMVPDead";
+	// mapannounce "lhz_dun_n", "Voz do Reaper: Até breve.", bc_map, "0x00FF00";
+	mapannounce strcharinfo(3), "O MVP foi derrotado!", bc_map, 0x00FF00;
+	end;
+OnTimer60000: // a cada 60 segundos
+	// recupera dinamicamente o mapa que disparou este timer
+	.@map$ = strcharinfo(3);
+	debugmes "Timer em " + .@map$ + " delay: " + getd("." + .@map$ + "_delay");
+
+	// delay ++
+	setd "." + .@map$ + "_delay", getd("." + .@map$ + "_delay") + 1;
+
+	if ( getd("." + .@map$ + "_delay") < 100 ) { // 100 minutos
+		initnpctimer;
+	} else {
+		stopnpctimer;
+		setd "." + .@map$ + "_delay", 0;
+		setd "." + .@map$ + "_boss", 0;
+	}
+	end;
+
+	OnNPCKillEvent:
+		.@map$ = strcharinfo(3);
+		// Só processa mobs
+		if (.@map$ == "lhz_dun_n" || .@map$ == "lhz_dun_n2") {				
+
+			#bio_kills++;
+
+			if ( #bio_kills >= 5 ) {
+				#bio_kills = 0; // zera contador
+				// add_reputation_points(5, 1); // dá 1 ponto no grupo 7
+				callfunc("F_AddRep", 5, 1, 110006, 5000);
+				dispbottom "[Reputação] Você recebeu +1 ponto de reputação Bio5 Normal!";
+			}
+			callfunc("CustomMapDrop", strcharinfo(3), 9648, 20);			
+		}
+
+		if (.@map$ == "lhz_dun_n3" || .@map$ == "lhz_dun_n4") {
+			
+			#bio_hardkills++;
+
+			if ( #bio_hardkills >= 5 ) {
+				#bio_hardkills = 0; // zera contador
+				// add_reputation_points(6, 1); // dá 1 ponto no grupo 7
+				callfunc("F_AddRep", 6, 1, 110007, 5000);
+				dispbottom "[Reputação] Você recebeu +1 ponto de reputação Bio5 Hard!";
+				
+			}
+			callfunc("CustomMapDrop", strcharinfo(3), 9649, 20);			
+		}
+		callsub( S_Regular, killedrid );
+
+	end;
+}
+

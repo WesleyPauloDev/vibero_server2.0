@@ -1,0 +1,448 @@
+//===== rAthena Script ======================================= 
+//= Bossnia Warp NPCs
+//===== By: ================================================== 
+//= Masao
+//===== Current Version: ===================================== 
+//= 1.3
+//===== Compatible With: ===================================== 
+//= rAthena Project
+//===== Description: ========================================= 
+//= Bossnia MVP event.
+//===== Additional Comments: ================================= 
+//= 1.0 Converted from the official script.
+//= 1.1 Optimized. [Euphy]
+//= 1.2 Moved spawns and warps (by Masao) to this file. [Euphy]
+//= 1.3 Added VIP features. [Euphy]
+//============================================================ 
+
+//============================================================
+// Cheffenia Warp NPC – Português
+//============================================================
+
+prontera,145,230,6	script	Porteiro de Cheffenia	908,{
+OnTalk:
+	mes "[Cheffenia]";
+	mes "Olá aventureiro!";
+	mes "Deseja participar da Cheffenia?";	
+	if (select("Sim, quero participar:Não, obrigado") == 2) close;
+
+	next;
+	mes "Escolha a dificuldade:";
+	set .@dificuldade, select("Cheffenia Normal:Cheffenia Hard");
+
+	if (.@dificuldade == 1) {
+
+		mes "Isso lhe custará ^FF0000 50.000 zeny ^000000.";
+		next;
+		// Verifica zeny
+		if (Zeny < 50000) {
+			mes "Você precisa de pelo menos ^FF0000 50.000 zeny ^000000 para entrar.";
+			close;
+		}
+
+		// Escolha do mapa
+		mes "Escolha o mapa da Cheffenia:";
+		next;
+		set .@mapa, select("Mapa 1:Mapa 2");
+	} else {
+		mes "Isso lhe custará ^FF0000 100.000 zeny ^000000.";
+		next;
+
+		if (Zeny < 100000) {
+			mes "Você precisa de pelo menos ^FF0000 100.000 zeny ^000000 para entrar.";
+			close;
+		}
+
+		// Escolha do mapa
+		mes "Escolha o mapa da Cheffenia:";
+		next;
+		set .@mapa, select("Mapa 1:Mapa 2");
+	}
+
+	// Escolha do ponto de spawn
+	mes "Escolha o ponto onde deseja aparecer:";
+	next;
+	set .@spot, select("Canto Superior Esquerdo:Canto Superior Direito:Canto Inferior Esquerdo:Canto Inferior Direito");
+
+	// Define coordenadas de spawn
+	switch (.@spot) {
+		case 1: set .@x,31;  set .@y,208; break;
+		case 2: set .@x,208; set .@y,208; break;
+		case 3: set .@x,31;  set .@y,31;  break;
+		case 4: set .@x,208; set .@y,31;  break;
+	}	
+
+	if (.@dificuldade == 1) {
+		// Desconta zeny e teleporta
+		set Zeny, Zeny - 50000;
+		specialeffect2 EF_MAXPOWER;
+		if (.@mapa == 1)
+			warp "bossnia_01", .@x, .@y;
+		else
+			warp "bossnia_02", .@x, .@y;
+	} else {
+		set Zeny, Zeny - 100000;
+		specialeffect2 EF_MAXPOWER;
+		if (.@mapa == 1)
+			warp "bossnia_03", .@x, .@y;
+		else
+			warp "bossnia_04", .@x, .@y;
+	}
+
+	end;
+}
+
+-	script	NpcCheffeniaHard_1	844,{
+
+	OnInit:
+
+		// Lista de mobs e quantidade de spawn
+		setarray .@mob_list[0], 21402,21403,21404,21405,21406,21407,21408,21409,21410,
+							21411,21413,21414,21415,21416,21417,21418,21419,21420,21421,
+							21422,21423,21424,21425,21426,21427,21428,21429,21430,21431,
+							21432,21433,21434,21435,21438,21440,21441;
+
+		 set .@spawn_count, 1; // quantidade de cada mob
+
+		for (.@i = 0; .@i < getarraysize(.@mob_list); .@i++) {
+			for (.@q = 0; .@q < .@spawn_count; .@q++) {
+				monster "bossnia_03",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffeniaHard_1::OnBossDead";
+
+				// Aplica setunitdata ao último GID spawnado
+				.@gid = $@mobid[0];
+				getunitdata .@gid, .@info, 1;
+
+				setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP];
+				setunitdata .@gid, UMOB_HP, .@info[UMOB_HP];
+				setunitdata .@gid, UMOB_INT, .@info[UMOB_INT];
+				setunitdata .@gid, UMOB_DEF, .@info[UMOB_DEF];
+				setunitdata .@gid, UMOB_MDEF, .@info[UMOB_MDEF];
+
+				// Pequena pausa para evitar loop infinito / travamento
+			}
+			sleep 5;
+		}
+
+    	end;
+
+	OnBossDead:
+		#cheffenia_hardkills++;		
+
+		if ( #cheffenia_hardkills >= 5 ) {
+			#cheffenia_hardkills = 0; // zera contador
+			// add_reputation_points(4, 1); // dá 1 ponto no grupo 7
+			callfunc("F_AddRep", 4, 1, 110005, 5000);
+			#reput_cheffenia_hard = min(#reput_cheffenia_hard + 1, 5000);
+			dispbottom "[Reputação] Você recebeu +1 ponto de reputação Cheffenia Hard!";
+			
+		}
+		callfunc("CustomMapDrop", "bossnia_03", 9647, 20);
+
+        // GID do mob morto
+		.@gid = killedrid;
+		monster "bossnia_03",0,0,"--ja--",.@gid,1,"NpcCheffeniaHard_1::OnBossDead";
+        .@gid = $@mobid[0];
+
+		getunitdata .@gid, .@info, 1;
+
+		setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP];
+		setunitdata .@gid, UMOB_HP, .@info[UMOB_HP];
+		setunitdata .@gid, UMOB_INT, .@info[UMOB_INT];
+		setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF];
+		setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF];
+
+		getunitdata .@gid, .@info, 1;		
+
+		end;	
+}
+
+-	script	NpcCheffeniaHard_2	844,{
+
+	OnInit:	
+
+		// Lista de mobs e quantidade de spawn
+		setarray .@mob_list[0], 21402,21403,21404,21405,21406,21407,21408,21409,21410,
+							21411,21413,21414,21415,21416,21417,21418,21419,21420,21421,
+							21422,21423,21424,21425,21426,21427,21428,21429,21430,21431,
+							21432,21433,21434,21435,21438,21440,21441;
+
+		 set .@spawn_count, 1; // quantidade de cada mob
+		
+		
+
+		for (.@i = 0; .@i < getarraysize(.@mob_list); .@i++) {
+			for (.@q = 0; .@q < .@spawn_count; .@q++) {
+				monster "bossnia_04",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffeniaHard_2::OnBossDead";
+
+				// Aplica setunitdata ao último GID spawnado
+				.@gid = $@mobid[0];
+				getunitdata .@gid, .@info, 1;
+
+				setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP];
+				setunitdata .@gid, UMOB_HP, .@info[UMOB_HP];
+				setunitdata .@gid, UMOB_INT, .@info[UMOB_INT];
+				setunitdata .@gid, UMOB_DEF, .@info[UMOB_DEF];
+				setunitdata .@gid, UMOB_MDEF, .@info[UMOB_MDEF];
+
+				// Pequena pausa para evitar loop infinito / travamento
+			}
+			sleep 5;
+		}	
+
+    	end;
+
+	OnBossDead:
+		
+		#cheffenia_hardkills++;		
+
+		if ( #cheffenia_hardkills >= 5 ) {
+			#cheffenia_hardkills = 0; // zera contador
+			// add_reputation_points(4, 1); // dá 1 ponto no grupo 7
+			callfunc("F_AddRep", 4, 1, 110005, 5000);
+			#reput_cheffenia_hard = min(#reput_cheffenia_hard + 1, 5000);
+			dispbottom "[Reputação] Você recebeu +1 ponto de reputação Cheffenia Hard!";
+			
+		}
+		callfunc("CustomMapDrop", "bossnia_04", 9647, 20);
+
+        // GID do mob morto
+		.@gid = killedrid;
+		monster "bossnia_04",0,0,"--ja--",.@gid,1,"NpcCheffeniaHard_2::OnBossDead";
+        .@gid = $@mobid[0];
+
+		getunitdata .@gid, .@info, 1;
+
+		// debugmes "UMOB_MDEF antes: " + .@info[UMOB_MDEF];
+		// debugmes "UMOB_INT antes: " + .@info[UMOB_INT];
+		// debugmes "UMOB_DEF antes: " + .@info[UMOB_DEF];
+		// debugmes "UMOB_MAXHP antes: " + .@info[UMOB_MAXHP];
+		// debugmes "HP antes: " + .@info[UMOB_HP];
+
+		setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP];
+		setunitdata .@gid, UMOB_HP, .@info[UMOB_HP];
+		setunitdata .@gid, UMOB_INT, .@info[UMOB_INT];
+		setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF];
+		setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF];
+
+		// getunitdata .@gid, .@info, 1;
+		// debugmes "Anubis spawnado! GID: " + .@gid;
+		// debugmes "UMOB_MDEF depois: " + .@info[UMOB_MDEF];
+		// debugmes "UMOB_INT depois: " + .@info[UMOB_INT];
+		// debugmes "UMOB_DEF depois: " + .@info[UMOB_DEF];
+		// debugmes "UMOB_MAXHP depois: " + .@info[UMOB_MAXHP];
+		// debugmes "HP depois: " + .@info[UMOB_HP];
+
+		end;
+}
+
+-	script	NpcCheffenia	-1,{
+
+	OnInit:
+
+		// Lista de mobs e quantidade de spawn
+		setarray .@mob_list[0], 21402,21403,21404,21405,21406,21407,21408,21409,21410,
+							21411,21413,21414,21415,21416,21417,21418,21419,21420,21421,
+							21422,21423,21424,21425,21426,21427,21428,21429,21430,21431,
+							21432,21433,21434,21435,21438,21440,21441;
+
+		 set .@spawn_count, 1; // quantidade de cada mob
+
+		for (.@i = 0; .@i < getarraysize(.@mob_list); .@i++) {
+			for (.@q = 0; .@q < .@spawn_count; .@q++) {
+				monster "bossnia_01",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffenia::OnBossDead";
+
+				// Aplica setunitdata ao último GID spawnado
+				.@gid = $@mobid[0];
+				getunitdata .@gid, .@info, 1;
+
+				setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] / 2;
+				setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] / 2;
+				setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] / 2;
+				setunitdata .@gid, UMOB_DEF, .@info[UMOB_DEF] / 2;
+				setunitdata .@gid, UMOB_MDEF, .@info[UMOB_MDEF] / 2;
+			}
+			sleep 5;
+		}
+		for (.@i = 0; .@i < getarraysize(.@mob_list); .@i++) {
+			for (.@q = 0; .@q < .@spawn_count; .@q++) {
+				monster "bossnia_02",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffenia::OnBossDead2";
+
+				// Aplica setunitdata ao último GID spawnado
+				.@gid = $@mobid[0];
+				getunitdata .@gid, .@info, 1;
+
+				setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] / 2;
+				setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] / 2;
+				setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] / 2;
+				setunitdata .@gid, UMOB_DEF, .@info[UMOB_DEF] / 2;
+				setunitdata .@gid, UMOB_MDEF, .@info[UMOB_MDEF] / 2;
+			}
+			sleep 5;
+		}
+
+    	end;
+
+	OnBossDead:
+		#cheffenia_kills++;		
+
+		if ( #cheffenia_kills >= 5 ) {
+			#cheffenia_kills = 0; // zera contador
+			// add_reputation_points(3, 1); // dá 1 ponto no grupo 7
+			callfunc("F_AddRep", 3, 1, 110004, 5000);
+			#reput_cheffenia = min(#reput_cheffenia + 1, 5000);
+			dispbottom "[Reputação] Você recebeu +1 ponto de reputação Cheffenia Normal!";
+			
+		}
+		callfunc("CustomMapDrop", "bossnia_01", 9646, 20);
+
+		.@gid = killedrid;
+		monster "bossnia_01",0,0,"--ja--",.@gid,1,"NpcCheffenia::OnBossDead";
+
+		.@gid = $@mobid[0];
+
+		getunitdata .@gid, .@info, 1;
+
+		setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] / 2;
+		setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] / 2;
+		setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] / 2;
+		setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] / 2;
+		setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] / 2;
+
+		end;	
+	OnBossDead2:
+		#cheffenia_kills++;		
+
+		if ( #cheffenia_kills >= 5 ) {
+			#cheffenia_kills = 0; // zera contador
+			// add_reputation_points(3, 1); // dá 1 ponto no grupo 7
+			callfunc("F_AddRep", 3, 1, 110004, 5000);
+			#reput_cheffenia = min(#reput_cheffenia + 1, 5000);
+			dispbottom "[Reputação] Você recebeu +1 ponto de reputação Cheffenia Normal!";
+			
+		}
+		callfunc("CustomMapDrop", "bossnia_02", 9646, 20);
+		
+		.@gid = killedrid;
+		monster "bossnia_02",0,0,"--ja--",.@gid,1,"NpcCheffenia::OnBossDead2";
+
+		.@gid = $@mobid[0];
+
+		getunitdata .@gid, .@info, 1;
+
+		setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] / 2;
+		setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] / 2;
+		setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] / 2;
+		setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] / 2;
+		setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] / 2;
+
+		end;	
+}
+
+
+
+//============================================================
+// Duplicatas em outras cidades (opcional)
+// geffen,124,169,4	duplicate(Cheffenia Staff)	Cheffenia Staff#2	908
+// payon,165,150,4	duplicate(Cheffenia Staff)	Cheffenia Staff#3	908
+// morocc,142,100,4	duplicate(Cheffenia Staff)	Cheffenia Staff#4	908
+// lighthalzen,203,140,4	duplicate(Cheffenia Staff)	Cheffenia Staff#5	908
+// rachel,132,144,4	duplicate(Cheffenia Staff)	Cheffenia Staff#6	908
+
+// Warp Portals
+//============================================================
+// bossnia_01,204,204,0	warp	bossnia01	1,1,prontera,155,180
+// bossnia_02,204,204,0	warp	bossnia02	1,1,prontera,155,180
+// bossnia_03,204,204,0	warp	bossnia03	1,1,prontera,155,180
+// bossnia_04,204,204,0	warp	bossnia04	1,1,prontera,155,180
+
+// Monster Spawns
+//============================================================
+
+//----------------------------------------------------------------------------
+// bossnia_01 - Bossnia
+//----------------------------------------------------------------------------
+// bossnia_01,0,0	monster	Garm	21402,5,3000
+// bossnia_01,0,0	monster	Gloom Under Night	21403,2,7200000
+// bossnia_01,0,0	monster	Dark Lord	21404,3,7200000
+// bossnia_01,0,0	monster	Doppelganger	21405,10,7200000
+// bossnia_01,0,0	monster	Dracula	21406,5,1800000
+// bossnia_01,0,0	monster	Drake	21407,10,1800000
+// bossnia_01,0,0	monster	Detale	21408,2,7200000
+// bossnia_01,0,0	monster	Maya	21409,10,1800000
+// bossnia_01,0,0	monster	Mistress	21410,1,1800000
+// bossnia_01,0,0	monster	Baphomet	21411,10,1800000
+// // bossnia_01,0,0	monster	Egnigem Cenia	21412,10,1800000
+// bossnia_01,0,0	monster	Amon Ra	21413,1,1800000
+// bossnia_01,0,0	monster	Atroce	21414,10,1800000
+// bossnia_01,0,0	monster	Vesper	21415,2,7200000
+// bossnia_01,0,0	monster	Eddga	21416,1,1800000
+// bossnia_01,0,0	monster	Osiris	21417,10,7200000
+// bossnia_01,0,0	monster	Orc Lord	21418,10,7200000
+// bossnia_01,0,0	monster	Orc Hero	21419,2,1800000
+// bossnia_01,0,0	monster	Samurai Specter	21420,1,3600000
+// bossnia_01,0,0	monster	Moonlight Flower	21421,1,3600000
+// bossnia_01,0,0	monster	Lord of the Dead	21422,1,3600000
+// bossnia_01,0,0	monster	Ktullanux	21423,2,7200000
+// bossnia_01,0,0	monster	Kiel D-01	21424,2,7200000
+// bossnia_01,0,0	monster	Thanatos Phantom	21425,2,7200000
+// bossnia_01,0,0	monster	Lady Tanee	21426,1,3600000
+// bossnia_01,0,0	monster	Tao Gunka	21427,1,3600000
+// bossnia_01,0,0	monster	Turtle General	21428,10,7200000
+// bossnia_01,0,0	monster	Pharaoh	21429,2,3600000
+// bossnia_01,0,0	monster	Stormy Knight	21430,2,3600000
+// bossnia_01,0,0	monster	Falling Bishop	21431,5,7200000
+// bossnia_01,0,0	monster	Phreeoni	21432,10,7200000
+// bossnia_01,0,0	monster	Golden Thief Bug	21433,10,3600000
+// bossnia_01,0,0	monster	Evil Snake Lord	21434,10,7200000
+// bossnia_01,0,0	monster	RSX-0806	21435,5,7200000
+// // bossnia_01,0,0	monster	Assassin Cross Eremes	21436,1
+// // bossnia_01,137,118,1,1	monster	Whitesmith Howard	21437,1
+// bossnia_01,122,195,1,1	monster	Beelzebub	21438,1
+// bossnia_01,45,118,1,1	monster	Beelzebub	21438,1
+// bossnia_01,196,122,1,1	monster	Valkyrie Randgris	21440,1
+// bossnia_01,142,61,1,1	monster	Ifrit	21441,1
+
+//----------------------------------------------------------------------------
+// bossnia_04 - Bossnia
+//----------------------------------------------------------------------------
+// monster "bossnia_04",0,0,"--ja--",21402,5,"NpcCheffeniaHard_2::OnBossDead"; // Garm
+		// monster "bossnia_04",0,0,"--ja--",21403,2,"NpcCheffeniaHard_2::OnBossDead"; // Gloom Under Night
+		// monster "bossnia_04",0,0,"--ja--",21404,3,"NpcCheffeniaHard_2::OnBossDead"; // Dark Lord
+		// monster "bossnia_04",0,0,"--ja--",21405,10,"NpcCheffeniaHard_2::OnBossDead"; // Doppelganger
+		// monster "bossnia_04",0,0,"--ja--",21406,5,"NpcCheffeniaHard_2::OnBossDead"; // Dracula
+		// monster "bossnia_04",0,0,"--ja--",21407,10,"NpcCheffeniaHard_2::OnBossDead"; // Drake
+		// monster "bossnia_04",0,0,"--ja--",21408,5,"NpcCheffeniaHard_2::OnBossDead"; // Detale
+		// monster "bossnia_04",0,0,"--ja--",21409,10,"NpcCheffeniaHard_2::OnBossDead"; // Maya
+		// monster "bossnia_04",0,0,"--ja--",21410,1,"NpcCheffeniaHard_2::OnBossDead"; // Mistress
+		// monster "bossnia_04",0,0,"--ja--",21411,10,"NpcCheffeniaHard_2::OnBossDead"; // Baphomet
+		// // monster "bossnia_04",0,0,"--ja--",21412,10,"NpcCheffeniaHard_2::OnBossDead"; // Egnigem Cenia
+		// monster "bossnia_04",0,0,"--ja--",21413,1,"NpcCheffeniaHard_2::OnBossDead"; // Amon Ra
+		// monster "bossnia_04",0,0,"--ja--",21414,10,"NpcCheffeniaHard_2::OnBossDead"; // Atroce
+		// monster "bossnia_04",0,0,"--ja--",21415,2,"NpcCheffeniaHard_2::OnBossDead"; // Vesper
+		// monster "bossnia_04",0,0,"--ja--",21416,1,"NpcCheffeniaHard_2::OnBossDead"; // Eddga
+		// monster "bossnia_04",0,0,"--ja--",21417,10,"NpcCheffeniaHard_2::OnBossDead"; // Osiris
+		// monster "bossnia_04",0,0,"--ja--",21418,10,"NpcCheffeniaHard_2::OnBossDead"; // Orc Lord
+		// monster "bossnia_04",0,0,"--ja--",21419,2,"NpcCheffeniaHard_2::OnBossDead"; // Orc Hero
+		// monster "bossnia_04",0,0,"--ja--",21420,1,"NpcCheffeniaHard_2::OnBossDead"; // Samurai Specter
+		// monster "bossnia_04",0,0,"--ja--",21421,1,"NpcCheffeniaHard_2::OnBossDead"; // Moonlight Flower
+		// monster "bossnia_04",0,0,"--ja--",21422,1,"NpcCheffeniaHard_2::OnBossDead"; // Lord of the Dead
+		// monster "bossnia_04",0,0,"--ja--",21423,2,"NpcCheffeniaHard_2::OnBossDead"; // Ktullanux
+		// monster "bossnia_04",0,0,"--ja--",21424,2,"NpcCheffeniaHard_2::OnBossDead"; // Kiel D-01
+		// monster "bossnia_04",0,0,"--ja--",21425,2,"NpcCheffeniaHard_2::OnBossDead"; // Thanatos Phantom
+		// monster "bossnia_04",0,0,"--ja--",21426,1,"NpcCheffeniaHard_2::OnBossDead"; // Lady Tanee
+		// monster "bossnia_04",0,0,"--ja--",21427,1,"NpcCheffeniaHard_2::OnBossDead"; // Tao Gunka
+		// monster "bossnia_04",0,0,"--ja--",21428,10,"NpcCheffeniaHard_2::OnBossDead"; // Turtle General
+		// monster "bossnia_04",0,0,"--ja--",21429,2,"NpcCheffeniaHard_2::OnBossDead"; // Pharaoh
+		// monster "bossnia_04",0,0,"--ja--",21430,2,"NpcCheffeniaHard_2::OnBossDead"; // Stormy Knight
+		// monster "bossnia_04",0,0,"--ja--",21431,5,"NpcCheffeniaHard_2::OnBossDead"; // Falling Bishop
+		// monster "bossnia_04",0,0,"--ja--",21432,10,"NpcCheffeniaHard_2::OnBossDead"; // Phreeoni
+		// monster "bossnia_04",0,0,"--ja--",21433,10,"NpcCheffeniaHard_2::OnBossDead"; // Golden Thief Bug
+		// monster "bossnia_04",0,0,"--ja--",21434,10,"NpcCheffeniaHard_2::OnBossDead"; // Evil Snake Lord
+		// monster "bossnia_04",0,0,"--ja--",21435,5,"NpcCheffeniaHard_2::OnBossDead"; // RSX-0806
+		// // monster "bossnia_04",0,0,"--ja--",21436,1,"NpcCheffeniaHard_2::OnBossDead";   // Assassin Cross Eremes
+		// // monster "bossnia_04",137,118,"--ja--",21437,1,"NpcCheffeniaHard_2::OnBossDead"; // Whitesmith Howard
+		// monster "bossnia_04",0,0,"--ja--",21438,1,"NpcCheffeniaHard_2::OnBossDead";  // Beelzebub_Flying
+		// monster "bossnia_04",0,0,"--ja--",21438,1,"NpcCheffeniaHard_2::OnBossDead"; // Beelzebub
+		// monster "bossnia_04",0,0,"--ja--",21440,1,"NpcCheffeniaHard_2::OnBossDead"; // Valkyrie Randgris
+		// monster "bossnia_04",0,0,"--ja--",21441,1,"NpcCheffeniaHard_2::OnBossDead"; // Ifrit
+

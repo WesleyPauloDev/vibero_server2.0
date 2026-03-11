@@ -1,0 +1,86 @@
+//===== rAthena Script ======================================= 
+//= Encontre o Cogumelo
+//===== By: ================================================== 
+//= Mysterious
+//===== Current Version: ===================================== 
+//= 3.6a
+//===== Compatible With: ===================================== 
+//= rAthena Project
+//===== Description: ========================================= 
+//= Encontre o Cogumelo - random amount of Mushrooms spawns in random maps.
+//= Players need to find these mushrooms and kill them to gain prizes!
+//===== Additional Comments: =================================
+//= 3.0 Fully Functional with Rewritten script. [Mysterious]
+//= 3.6a Slightly edited. [Euphy]
+//============================================================ 
+
+prontera,147,160,6	script	Encontre o Cogumelo	1077,{
+	mes "[ Encontre o Cogumelo ]";
+	if (.status == 1) {
+		.@count = mobcount( .event_map$, strnpcinfo(0) + "::OnMobKilled" );
+		if (.@count > 0) {
+			mes "Restam " + .@count + " cogumelos em " + .event_map$ + "!";
+			// mes "Encontre e mate os cogumelos para ganhar " + getitemname(.prize) + "!";
+			close;
+		}
+		.event_map$ = "";
+		.status = 0;
+		mes "Todos os cogumelos morreram?";
+	}
+	mes "Não há nenhum evento no momento!";
+	if (.status || getgmlevel() < .GM) close;
+	mes "Iniciar o evento?";
+	next;
+	if (select("- Sim:- Não") == 2) close;
+	donpcevent strnpcinfo(0) + "::OnClock0045";
+	mes "[ Encontre o Cogumelo ]";
+	mes "O evento começou!";
+	close;
+
+OnInit:
+	// .prize = #CashPoint;	// Reward item ID
+	// .amount = 10;	// Reward item amount
+	.GM = 60;		// GM level required to access NPC
+	setarray .maps_list$[0],"izlude","geffen","morocc","prontera"; // Possible maps
+	end;
+
+OnClock0045:	// Start time (every hour)
+OnClock0245:
+OnClock0445:
+OnClock0645:
+OnClock0845:
+OnClock1045:
+OnClock1245:
+OnClock1445:
+OnClock1645:
+OnClock1845:
+OnClock2045:
+OnClock2245:
+	if (.status) end;
+	.status = 1;
+	.@spawn = rand(5,10);	// How many Mushrooms should spawn?
+	.event_map$ = .maps_list$[ rand(getarraysize(.maps_list$)) ];
+	.@label$ = strnpcinfo(0) + "::OnMobKilled";
+	killmonster .event_map$, .@label$;
+	monster .event_map$,0,0,"Por favor, não me mate!",1084,.@spawn, .@label$;
+	announce "Encontre o Cogumelo : Um total de " + .@spawn + " cogumelos foram gerados em " + .event_map$ + "!",0;
+	sleep 2500;
+	announce "Encontre o Cogumelo: Cada cogumelo que você matar lhe dará um ótimo Prêmio!",0;
+	end;
+
+OnMobKilled:
+	if (playerattached() == 0)
+		end;
+	set #CASHPOINTS, #CASHPOINTS + 100;
+	#Spore_Killer = #Spore_Killer + 1;
+	dispbottom "Você recebeu 100 Cash Points por matar o Cogumelo!";
+	.@spawn = mobcount( .event_map$, strnpcinfo(0) + "::OnMobKilled" );
+	if (.@spawn > 0)
+		announce "[ " + strcharinfo(0) + " ] matou um Cogumelo. Agora restam " + .@spawn + " Cogumelo(s) em "+.event_map$+".",bc_all;
+	else {
+		announce "[Encontre o Cogumelo] O evento terminou. Todos os cogumelos foram eliminados.",0;
+		.status = 0;
+		.event_map$ = "";
+	}
+	end;
+}

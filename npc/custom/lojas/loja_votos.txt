@@ -1,0 +1,73 @@
+-	script	Loja de Votos	-1,{
+OnTalk:
+	mes "[Vendedor]";
+	mes "Confira meus produtos!";
+	callshop "Vote_Shop",1;
+	npcshopattach "Vote_Shop";
+	dispbottom "Pontos de Votos: " + #VOTE_POINT;
+	end;
+
+OnBuyItem:
+	callfunc "Vote_Shop_Process", @bought_nameid, @bought_quantity, @bought_price;
+	end;
+}
+// Estes itens devem acompanhar o array shop_items e shop_prices
+-	shop	Vote_Shop	-1,400012:20,12210:5,12223:5,12224:5,9615:5,7776:30
+
+function	script	Vote_Shop_Process	{
+
+	// =============================
+	// CONFIGURAÇÃO DA LOJA
+	// =============================
+	// Itens e preços em pontos de Votos
+	setarray .@shop_items[0], 400012, 12210, 12223, 12224, 9615, 7776;
+	setarray .@shop_prices[0], 20,   5,   5,     5, 5, 30; // preço por item em pontos
+
+	// =============================
+	// PARÂMETROS DA FUNÇÃO
+	// =============================
+	.@id  = getarg(0); // ID do item comprado
+	.@qtd = getarg(1); // Quantidade comprada
+	.@price = getarg(2); // ignorado, usamos tabela acima
+
+	// =============================
+	// PROCURA O ITEM NA TABELA
+	// =============================
+	.@found = 0;
+	for (.@i = 0; .@i < getarraysize(.@shop_items); .@i++) {
+		if (.@id == .@shop_items[.@i]) {
+			.@found = 1;
+			.@unit_price = .@shop_prices[.@i];
+			break;
+		}
+	}
+
+	if (!.@found) {
+		dispbottom "[Votos] Erro: item não está registrado na loja.";
+		return;
+	}
+
+	// =============================
+	// CALCULA O CUSTO TOTAL
+	// =============================
+	.@total_cost = .@unit_price * .@qtd;
+
+	// =============================
+	// VERIFICA PONTOS
+	// =============================
+	if (#VOTE_POINT < .@total_cost) {
+		dispbottom "Pontos de Votos insuficiente.";
+        return;
+	}
+
+	// =============================
+	// DESCONTA E ENTREGA
+	// =============================
+	#VOTE_POINT -= .@total_cost;
+	getitem .@id, .@qtd;
+	logshop "SCRIPT_SHOP_BUY", "Vote_Shop", .@id, .@qtd, 0, 0, 0, "#VOTE_POINT", .@total_cost;
+
+	dispbottom "[Votos] -" + .@total_cost + " ponto(s) de votos. Restam: " + #VOTE_POINT + ".";
+	return;
+}
+

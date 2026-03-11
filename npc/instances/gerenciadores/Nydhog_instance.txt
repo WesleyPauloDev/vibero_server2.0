@@ -1,0 +1,424 @@
+-	script	Nyd_Instance#Custom	709,{
+
+OnStartInstance:
+	set .@player_char_id, getattachedrid();
+
+	attachrid(.@player_char_id);
+
+	sleep2 100; // espera 0.1s pra liberar a stack anterior
+
+	mes "[Guardião do Portão de Yggdrasil]";
+
+	// Verificação de Nível
+	if (BaseLevel < 55) {
+		mes "Sinto muito, mas O Ninho de Nydhog é um lugar perigoso. Você precisa ter no mínimo o nível 50 para poder entrar.";
+		close;
+	}
+
+	// Verificação de Grupo
+	set .@party_id, getcharid(1);
+	if (.@party_id == 0) {
+        mes "Você precisa estar em um grupo para ir para O Ninho de Nydhog.";
+        close;
+	}
+	
+	set .@pid, getcharid(1);	
+	if (.@pid <= 0) { mes "Você precisa estar em um grupo."; close; }
+	// Tempo
+	set .@hora, gettime(3);
+	set .@min, gettime(2);
+	set .@seg, gettime(1);
+	set .@segundos_do_dia, (.@hora * 3600) + (.@min * 60) + .@seg;
+	set .@faltam_reset, 86400 - .@segundos_do_dia;
+
+	if (#NYD_COOLDOWN_4H <= gettimetick(2) && #NYD_COOLDOWN_4H > 0) {
+		// Tempo de Instância acabou
+		set #NYD_STATUS, 3;
+	}
+	
+	// set #NYD_STATUS, 0;
+	// Cooldown
+	set .@restante, #NYD_COOLDOWN - gettimetick(2);
+	if (#NYD_STATUS == 3 && .@restante <= 0) {
+		// cooldown acabou
+		set #NYD_STATUS, 0;
+	}	
+
+	set .@partyName$, getpartyname(.@pid);
+
+	// Mostrar status atual
+	if (#NYD_STATUS == 0) {
+		mes "Bem vindo a Instância Ninho de Nydhog.";
+		if (checkquest(3135,PLAYTIME) >= 0) {
+			erasequest 3135;
+
+			// limpa progresso do grupo
+			.@pid = getcharid(1);
+			if (.@pid > 0) {
+				setd("$party_nyd"+.@pid, 0);
+				setd("$party_current_nyd"+.@pid, "");
+			}
+		}
+	} else if (#NYD_STATUS == 1) {
+		mes "Você já abriu uma instância.";
+	} else if (#NYD_STATUS == 2) {
+		mes "Sua instância Ninho de Nydhog está ativa.";
+	} else if (#NYD_STATUS == 3) {
+		set .@h, (.@restante % 86400) / 3600;
+		set .@m, ((.@restante % 86400) % 3600) / 60;
+		mes "Sua entrada será permitida somente amanhã.";
+		mes "Aguarde ^FF0000"+.@h+" horas e "+.@m+" minutos^000000.";
+		close;
+	} else if (#NYD_STATUS == 4) {		
+		mes "Parabéns, você já realizou uma grande conquista hoje no Ninho de Nydhog!";
+    	mes "Aguarde o descanso necessário para continuar a sua jornada amanhã.";
+		set #NYD_STATUS, 3;
+		close;
+	}
+
+	next;
+
+	// =========================
+	// BLOQUEIO POR PARTY + IP
+	// =========================
+	if (!callfunc("F_CheckInstanceIPPermission")) {
+		mes "[Ninho de Nydhog]";
+		mes "Jogadores com mesmo IP só podem participar de mais de uma ";
+		mes "Instância simultaneamente , se estiverem em grupos diferentes.";
+		close;
+	}
+
+	// Menu principal
+	switch(select("Gerar Instância:Entrar na Instância:Cancelar")) {
+		case 1: // Gerar
+			if (is_party_leader() != true) {
+				mes "[Guardião do Portão de Yggdrasil]";
+				mes "Apenas o líder do grupo pode gerar a Instância.";			
+				close;
+			}
+
+			if (#NYD_STATUS > 0) {
+				mes "[Guardião do Portão de Yggdrasil]";
+				mes "Você já possui uma instância em andamento.";
+				close;
+			}
+			.@instance_check = instance_create("Nidhoggur's Nest");
+			if (.@instance_check < 0) {
+				mes "[Guardião do Portão de Yggdrasil]";
+				mes "Você  tem uma Instância aberta.";
+				close;
+			}
+
+			// Marca como criada
+			set #NYD_STATUS, 1;
+			set #NYD_PARTY, getcharid(1); // salva o id do grupo
+			
+			announce "O grupo "+.@partyName$+" abriu a Instância Ninho de Nydhog!", bc_all, 0xFF0000;
+
+			mes "[Guardião do Portão de Yggdrasil]";
+			mes "Instância criada! Use ^0000FFEntrar na Instância^000000 para começar.";
+			close;
+
+		case 2: // Entrar
+			.@party_id = getcharid(1);			
+
+			switch(instance_enter("Nidhoggur's Nest")) {
+				case IE_OK:
+					set #NYD_STATUS, 2;
+					
+					set etower_timer, gettimetick(2);
+					set .@pid, getcharid(1);
+					set .@iid, instance_id(IM_PARTY);
+					
+					if (checkquest(3135,PLAYTIME) < 0) {
+						
+						setquest 3135;
+
+						set #NYD_COOLDOWN_4H, gettimetick(2) + 14400000;
+						set #NYD_COOLDOWN, gettimetick(2) + .@faltam_reset;
+						set ins_nyd2, 0;
+	
+						addtimer 14400000, strnpcinfo(3)+"::OnTimeout_NYD"; // 4h = 14400000 ms					
+					}
+					
+					end;
+
+				case IE_NOINSTANCE:
+					if (#NYD_STATUS == 0) {
+						mes "[Guardião do Portão de Yggdrasil]";
+						mes "Você não possui nenhuma instância criada.";
+						close;
+					}
+					// instância destruída, entra em cooldown
+					erasequest 3135;
+					set #NYD_STATUS, 3;
+
+					// limpa progresso do grupo
+					.@pid = getcharid(1);
+					if (.@pid > 0) {
+						setd("$party_nyd"+.@pid, 0);
+						setd("$party_current_nyd"+.@pid, "");
+					}
+					mes "[Guardião do Portão de Yggdrasil]";
+					mes "Tempo de espera atualizado.";
+					close;
+
+				default:
+					mes "Não foi possível entrar na instância.";
+					close;
+			}
+
+		case 3: // Cancelar
+			close;
+	}
+
+	// Handler do Timeout da Endless Tower
+	OnTimeout_NYD:
+    .@iid = instance_id(IM_PARTY);
+	if (.@iid > 0) {
+		// pega o party_id salvo para essa instância
+		.@pid = getd("$nyd_pid_by_iid_"+.@iid);
+
+		if (.@pid > 0) {
+			// limpa o progresso do grupo
+			setd("$party_nyd"+.@pid, 0);
+			setd("$party_current_nyd"+.@pid, "");
+			setd("$nyd_pid_by_iid_"+.@iid, 0);
+		}
+
+		erasequest 3135;
+		set #NYD_STATUS, 3;
+
+		mapannounce strcharinfo(3),
+			"O tempo da instância terminou! O Ninho de Nydhog foi destruída.",
+			bc_map, "0xff0000";
+		sleep2 1000; // espera 5 segundos pra evitar bugs
+		instance_destroy .@iid;
+	}
+	end;
+
+}
+
+1@nyd,1,1,0	script	nyd_call_mon_1#Custom	-1,{
+OnInstanceInit:
+	enablenpc instance_npcname("nyd_call_mon_1#Custom");
+	end;
+
+OnEnable:
+	set .@map$, instance_mapname("1@nyd");
+	monster .@map$,220,250,"Nidhoggur's Guardian#1",2020,1,instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
+	monster .@map$,220,252,"Nidhoggur's Guardian#2",2020,1,instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
+	monster .@map$,240,270,"Nidhoggur's Guardian#3",2020,1,instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
+	monster .@map$,240,272,"Nidhoggur's Guardian#4",2020,1,instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
+	monster .@map$,200,200,"Nidhoggur's Guardian#5",2020,1,instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
+	monster .@map$,210,210,"Nidhoggur's Guardian#6",2020,1,instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
+	monster .@map$,225,265,"Nidhoggur's Guardian#7",2021,1,instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
+	monster .@map$,225,270,"Nidhoggur's Guardian#8",2021,1,instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
+	monster .@map$,245,235,"Nidhoggur's Guardian#9",2021,1,instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
+	monster .@map$,255,255,"Nidhoggur's Guardian#10",2021,1,instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
+	monster .@map$,225,245,"Nidhoggur's Guardian#11",2021,1,instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
+	monster .@map$,230,280,"Nidhoggur's Guardian#12",2021,1,instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
+	mapannounce .@map$, "Guardião de Nidhoggur: Proteja o Santuário do Guardião. Livre-se dos intrusos.",bc_map,"0x00ff99";
+	end;
+
+OnDisable:
+	killmonster instance_mapname("1@nyd"),instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
+	disablenpc instance_npcname("nyd_call_mon_1#Custom");
+	end;
+
+OnMyMobDead:
+	set .@map$, instance_mapname("1@nyd");
+	set .@mob_dead_num,mobcount(.@map$, instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead");
+	if (.@mob_dead_num < 1) {
+		mapannounce .@map$, "Todos os Guardiões de Nidhoggur foram derrotados!",bc_map,"0x00ff99";
+		donpcevent instance_npcname("ins_nyd_1f_timer#Custom")+"::OnDisable";
+		donpcevent instance_npcname("nyd_to2f_warp")+"::OnEnable";
+		ins_nyd2 = 2;
+	} else {
+		mapannounce .@map$, "Restam "+.@mob_dead_num+" Guardiões de Nidhoggur.",bc_map,"0x00ff99";
+	}
+	end;
+}
+
+1@nyd,213,277,5	script	Yggdrasil Assassinada#1F	437,{
+OnTouch:
+	if (ins_nyd2 == 0) {
+		mes "Quando uma fraca luz entra em seu coração, uma voz ecoa em sua mente.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Tudo acabou... servos do Guardião... Apressem-se e deixem este lugar.";
+		next;
+		while(1) {
+			switch(select("Quem é você?:O que quer dizer?")) {
+			case 1:
+				mes "[Árvore do Mundo Yggdrasil]";
+				mes "Eu... Eu sou Yggdrasil, a Árvore do Mundo, serva do Guardião Nidhoggur, bem como a Alta Sacerdotisa que lidera a Tribo Laphine.";
+				next;
+				mes "[Árvore do Mundo Yggdrasil]";
+				mes "Então você não é uma sacerdotisa da Tribo Laphine... Como conseguiu entrar aqui? Não importa, não há tempo para isso.";
+				next;
+				mes "[Árvore do Mundo Yggdrasil]";
+				mes "Rápido... vá embora... saia deste lugar antes que seja tarde demais.";
+				next;
+				break;
+			case 2:
+				mes "[Árvore do Mundo Yggdrasil]";
+				mes "O Guardião... algo está errado com o Guardião. Não sei o que o deixou assim.";
+				next;
+				mes "[Árvore do Mundo Yggdrasil]";
+				mes "Isto... isto não é mais o Ninho do Guardião da Árvore do Mundo Yggdrasil.";
+				next;
+				mes "[Árvore do Mundo Yggdrasil]";
+				mes "A escuridão tomou conta do Guardião e destruiu todos os seres vivos... agora este lugar se tornou o lar amaldiçoado de monstros.";
+				next;
+				mes "[Árvore do Mundo Yggdrasil]";
+				mes "Agora, a vil Sombra de Nidhoggur está causando destruição aqui...";
+				next;
+				mes "[Árvore do Mundo Yggdrasil]";
+				mes "Ainda há tempo, vá embora... conte à Tribo Laphine sobre isso... avise os comandantes de Alfheim...";
+				next;
+				mes "[Árvore do Mundo Yggdrasil]";
+				mes "Minha alma... foi aprisionada aqui. Agora, vocês são os únicos em quem posso confiar.";
+				next;
+				set .@exit,1;
+			}
+			if (.@exit) break;
+		}
+		select("Sombra de Nidhoggur?");
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "O Guardião Nidhoggur... ele não está mais no ninho.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Ele... por algum motivo, abandonou sua própria sombra e partiu.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Tudo o que restou é a feia Sombra do Guardião de Nidhoggur... a Sombra que enlouqueceu.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "A Sombra sugou todos os nutrientes da Árvore do Mundo Yggdrasil e enlouqueceu quando não havia mais nada para consumir. Agora, ela deseja esta terra.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Quando a terrível Sombra sair daqui para roubar o poder de outras Árvores do Mundo Yggdrasil, haverá uma grande destruição. Este mundo se tornará um inferno.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Você deve... avisar os comandantes de Alfheim sobre isso e elaborar um plano. Somente eles...";
+		next;
+		select("Não há mais nada que possamos fazer?");
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Com nossos poderes atuais... é impossível derrotar o Guardião.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Mas quem está enlouquecendo não é o Guardião, e sim sua Sombra sombria... talvez possamos aprisioná-la aqui...";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Você está disposto a aceitar esta missão? Mesmo que isso custe sua vida?";
+		next;
+		if(select("Deixe conosco.:Não podemos fazer isso.") == 2)
+			close;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Agradeço profundamente por sua decisão. Usarei o que resta de meus poderes para abrir o caminho até o Ninho do Guardião.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "O caminho até o Ninho do Guardião fica logo após a cachoeira, próxima à grande Árvore do Mundo Yggdrasil ao norte. Os mecanismos de defesa do Santuário serão ativados imediatamente.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Derrote todos os guardiões de Nidhoggur e atravesse a cachoeira até o ninho... detenha a Sombra de Nidhoggur lá.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "O portão se abrirá em breve. Derrote todos os guardiões... vocês devem eliminá-los em até 30 minutos antes que o portão se abra...";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "30 minutos... esse é o limite dos meus poderes. Por favor, apresse-se.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "E... tenham cuidado... cuidado com o poder da sombra.";
+		if (is_party_leader() == true) {
+			
+			set ins_nyd2, 1;
+			donpcevent instance_npcname("ins_nyd_1f_timer#Custom")+"::OnEnable";
+			donpcevent instance_npcname("nyd_call_mon_1#Custom")+"::OnEnable";
+			debugmes "ins_nyd2 set to 1";
+			close;
+		
+		} else {
+			mes "[Árvore do Mundo Yggdrasil]";
+			mes "Somente o Líder pode iniciar a missão.";
+			close;
+		}
+	} else if (ins_nyd2 == 1) {
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "O caminho até o Ninho do Guardião fica logo após a cachoeira, próxima à grande Árvore do Mundo Yggdrasil ao norte. Os mecanismos de defesa serão ativados imediatamente.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Derrote todos os guardiões de Nidhoggur e atravesse a cachoeira até o ninho... detenha a Sombra de Nidhoggur lá.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "O portão se abrirá em breve. Derrote todos os guardiões.";
+		close;
+	} else if (ins_nyd2 == 2) {
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "O caminho até o Ninho do Guardião fica logo após a cachoeira, próxima à grande Árvore do Mundo Yggdrasil ao norte.";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Usem seus poderes... e destruam a vil Sombra...";
+		next;
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Isso é... tudo o que posso fazer por vocês...";
+		close;
+	} else {
+		mes "[Árvore do Mundo Yggdrasil]";
+		mes "Aqueles que desejam profanar o Santuário Sagrado do Guardião... Saiam daqui.";
+	}
+	end;
+}
+
+1@nyd,1,2,0	script	ins_nyd_1f_timer#Custom	-1,{
+OnInstanceInit:
+	disablenpc instance_npcname("ins_nyd_1f_timer#Custom");
+	end;
+
+OnEnable:
+	enablenpc instance_npcname("ins_nyd_1f_timer#Custom");
+	initnpctimer;
+	end;
+
+OnDisable:
+	disablenpc instance_npcname("ins_nyd_1f_timer#Custom");
+	stopnpctimer;
+	killmonsterall instance_mapname("1@nyd");
+	end;
+
+OnTimer900000:
+	mapannounce instance_mapname("1@nyd"), "Árvore do Mundo Yggdrasil: O tempo está acabando... por favor, apresse-se!", bc_map, "0xFFFF00";
+	end;
+
+OnTimer1200000:
+	mapannounce instance_mapname("1@nyd"), "Árvore do Mundo Yggdrasil: Minhas forças estão desaparecendo... rápido, não há muito tempo!", bc_map, "0xFFFF00";
+	end;
+
+OnTimer1500000:
+	mapannounce instance_mapname("1@nyd"), "Árvore do Mundo Yggdrasil: Eu... estou quase no meu limite... por favor, apresse-se!", bc_map, "0xFFFF00";
+	end;
+
+OnTimer1800000:
+	mapannounce instance_mapname("1@nyd"), "Árvore do Mundo Yggdrasil: Vocês falharam... mas usarei o pouco poder que me resta... para tirá-los daqui.", bc_map, "0xFFFF00";
+	end;
+
+OnTimer1830000:
+	mapannounce instance_mapname("1@nyd"), "A abertura do Portão falhou.", bc_map, "0xFFFF00";
+	end;
+
+OnTimer1850000:
+	donpcevent instance_npcname("ins_nyd_1f_timer#Custom")+"::OnDisable";
+	donpcevent instance_npcname("nyd_call_mon_1#Custom")+"::OnDisable";
+	instance_warpall "mid_camp",310,150, instance_id();
+	stopnpctimer;
+	end;
+}
+
+
+
+
+
+
+

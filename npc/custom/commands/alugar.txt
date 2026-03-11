@@ -1,0 +1,61 @@
+-	script	Alugar	-1,{
+
+OnInit:
+
+	bindatcmd "alugar", strnpcinfo(3)+"::OnAtcommand";
+	end;
+
+OnPCLoginEvent:
+	if (getskilllv("MC_PUSHCART") && !checkcart() && !checkmadogear())
+		setcart;
+	end;
+
+OnAtcommand:
+	
+	callfunc("alugar_function");
+
+	end;
+}
+
+function	script	alugar_function	{
+
+	// Se for um Ranger e nao tem a flauta de invocar o lobo
+	if (((eaclass() & EAJ_THIRDMASK) == EAJ_RANGER) && !countitem(6124)) {
+		// Se nao tem falcao, tem a skill de falcao, e nao tem Warg
+		if (!checkfalcon() && getskilllv("HT_FALCON") && !checkwug()) {
+			// Pergunta se quer falcao ou warg (lobo)
+			if (select(" ~ Falcao: ~ Warg") == 1) setfalcon;
+			else getitem 6124, 1; // Da a Flauta do Lobo (Wolf's Flute)
+		} else getitem 6124, 1;
+
+	// Se for um Mecanico e tem a skill carrinho mas ainda nao tem um
+	} else if (((eaclass() & EAJ_THIRDMASK) == EAJ_MECHANIC) && !checkcart() && getskilllv("MC_PUSHCART")) {
+		// Se nao esta com Madogear e tem a skill para usar Madogear
+		if (!checkmadogear() && getskilllv("NC_MADOLICENCE")) {
+			if (select(" ~ Carrinho: ~ Madogear") == 1) setcart;
+			else setmadogear;
+		} else setcart;
+
+	// Se tem a skill de carrinho e nao tem carrinho
+	} else if (!checkcart() && getskilllv("MC_PUSHCART")) setcart;
+
+	// Se tem a skill de falcao e nao tem falcao ou warg
+	else if (!checkfalcon() && getskilllv("HT_FALCON") && !checkwug()) setfalcon;
+
+	// Se tem a skill de montar e nao esta montado nem com dragao
+	else if (!checkriding() && !checkdragon() && getskilllv("KN_RIDING")) {
+		if ((eaclass() & EAJ_THIRDMASK) == EAJ_RUNE_KNIGHT) setdragon;
+		else setriding;
+
+	// Se tem a skill de usar Madogear e nao esta com um
+	} else if (!checkmadogear() && getskilllv("NC_MADOLICENCE")) setmadogear;
+
+	// Se nao atende nenhum criterio
+	else {
+		message strcharinfo(0), "Voce nao atende aos requisitos para alugar.";		
+	}
+
+	specialeffect2 EF_TEIHIT3; // Efeito visual ao alugar
+
+    return;	
+}

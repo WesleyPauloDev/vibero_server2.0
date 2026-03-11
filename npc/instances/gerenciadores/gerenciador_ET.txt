@@ -1,0 +1,255 @@
+// Salve este arquivo como "npc/custom/endless_tower_simplified.txt"
+-	script	ET_Instance#Custom	709,{
+
+OnStartInstance:
+	set .@player_char_id, getattachedrid();
+
+	if (!isloggedin(.@player_char_id)) {
+		end;
+	}
+
+	attachrid(.@player_char_id);
+
+	sleep2 100; // espera 0.1s pra liberar a stack anterior
+
+	mes "[Captain Janssen]";
+
+	// Verificação de Nível
+	if (BaseLevel < 50) {
+		mes "Sinto muito, mas a Torre Sem Fim é um lugar perigoso. Você precisa ter no mínimo o nível 50 para poder entrar.";
+		close;
+	}
+	
+	set .@pid, getcharid(1);	
+	if (.@pid <= 0) { mes "Você precisa estar em um grupo."; close; }
+
+	set .@floor, getd("$party_current_floor_"+.@pid);
+	set .@current_map$, getd("$party_current_map_"+.@pid);
+	if (.@floor <= 0) set .@floor, 1; // default
+
+	// Tempo
+	set .@hora, gettime(3);
+	set .@min, gettime(2);
+	set .@seg, gettime(1);
+	set .@segundos_do_dia, (.@hora * 3600) + (.@min * 60) + .@seg;
+	set .@faltam_reset, 86400 - .@segundos_do_dia;
+
+	if (#ETOWER_COOLDOWN_4H <= gettimetick(2) && #ETOWER_COOLDOWN_4H > 0) {
+		// Tempo de Instância acabou
+		set #ETOWER_STATUS, 3;
+	}
+	
+	set #ETOWER_STATUS, 0;
+	// Cooldown
+	set .@restante, #ETOWER_COOLDOWN - gettimetick(2);
+	if (#ETOWER_STATUS == 3 && .@restante <= 0) {
+		// cooldown acabou
+		set #ETOWER_STATUS, 0;
+	}	
+
+	set .@partyName$, getpartyname(.@pid);
+
+	// Mostrar status atual
+	if (#ETOWER_STATUS == 0) {
+		mes "Bem vindo a Instância Torre Sem Fim.";
+		if (checkquest(60201,PLAYTIME) >= 0) {
+			erasequest 60201;
+
+			// limpa progresso do grupo
+			.@pid = getcharid(1);
+			if (.@pid > 0) {
+				setd("$party_current_floor_"+.@pid, 0);
+				setd("$party_current_map_"+.@pid, "");
+			}
+		}
+	} else if (#ETOWER_STATUS == 1) {
+		mes "Você já abriu uma instância.";
+	} else if (#ETOWER_STATUS == 2) {
+		mes "Sua instância da Torre está ativa.";
+	} else if (#ETOWER_STATUS == 3) {
+		set .@h, (.@restante % 86400) / 3600;
+		set .@m, ((.@restante % 86400) % 3600) / 60;
+		mes "Sua entrada será permitida somente amanhã.";
+		mes "Aguarde ^FF0000"+.@h+" horas e "+.@m+" minutos^000000.";
+		close;
+	} else if (#ETOWER_STATUS == 4) {		
+		mes "Parabéns, você já realizou uma grande conquista hoje na Torre Sem Fim!";
+    	mes "Aguarde o descanso necessário para continuar a sua jornada amanhã.";
+		set #ETOWER_STATUS, 3;
+		close;
+	}
+
+	next;
+
+	// =========================
+	// BLOQUEIO POR PARTY + IP
+	// =========================
+	if (!callfunc("F_CheckInstanceIPPermission")) {
+		mes "[Torre Sem Fim]";
+		mes "Jogadores com mesmo IP só podem participar de mais de uma ";
+		mes "Instância simultaneamente , se estiverem em grupos diferentes.";
+		close;
+	}
+	
+	// .@instance_id = instance_id(IM_PARTY); // ID da instância
+	// if (.@instance_id > 0) {		
+	// 	.@ip$         = getcharip();           // IP do jogador
+	// 	.@day$        = gettimestr("%Y%m%d", 2); // Data (reboot-safe)
+	// 	.@pid         = getcharid(1);           // Party ID CORRETO
+
+	// 	.@permission_key$ = "#IR_" + .@day$ + "_" + .@instance_id + "_" + .@ip$ + "_" + .@pid;
+
+	// 	.@exists = 0;
+	// 	query_sql(
+	// 		"SELECT 1 FROM acc_reg_num WHERE `key` = '"+ .@permission_key$ +"' LIMIT 1",
+	// 		.@exists
+	// 	);
+
+	// 	if (.@exists) {		
+
+	// 		.@saved_cid = 0;
+
+	// 		query_sql(
+	// 			"SELECT `value` FROM acc_reg_num "+
+	// 			"WHERE `key` = '"+ .@permission_key$ +"' "+
+	// 			"LIMIT 1",
+	// 			.@saved_cid
+	// 		);
+			
+	// 		// Se NÃO for o mesmo char ? bloqueia
+	// 		if (.@saved_cid != getcharid(0)) {
+	// 			mes "[Captain Janssen]";
+	// 			mes "Apenas um personagem por IP pode entrar nesta instância neste grupo.";
+	// 			close;
+	// 		}
+	// 	}
+
+	// 	if (.@saved_cid <= 0) {
+	// 		query_sql(
+	// 			"INSERT INTO acc_reg_num (`account_id`, `key`, `value`) VALUES ("+
+	// 			getcharid(3)+", '"+ .@permission_key$ +"', '"+ getcharid(0) +"')"
+	// 		);
+	// 	}
+
+	// }
+
+	// Menu principal
+	switch(select("Gerar Instância:Entrar na Instância:Cancelar")) {
+		case 1: // Gerar
+			if (is_party_leader() != true) {
+				mes "[Captain Janssen]";
+				mes "Apenas o líder do grupo pode gerar a Instância.";			
+				close;
+			}
+
+			if (#ETOWER_STATUS > 0) {
+				mes "[Captain Janssen]";
+				mes "Você já possui uma instância em andamento.";
+				close;
+			}
+
+			if (instance_create("Endless Tower") < 0) {
+				mes "[Captain Janssen]";
+				mes "Você  tem uma Instância aberta.";
+				close;
+			}
+
+			// Marca como criada
+			set #ETOWER_STATUS, 1;
+			set #ETOWER_PARTY, getcharid(1); // salva o id do grupo
+			
+			announce "O grupo "+.@partyName$+" abriu a Instância Torre Sem Fim!", bc_all, 0xFF0000;
+
+			mes "[Captain Janssen]";
+			mes "Instância criada! Use '^0000FFEntrar na Instância^000000' para começar.";
+			close;
+
+		case 2: // Entrar
+			.@party_id = getcharid(1);			
+
+			switch(instance_enter("Endless Tower")) {
+				case IE_OK:					
+					set #ETOWER_STATUS, 2;
+					
+					set etower_timer, gettimetick(2);
+					set .@pid, getcharid(1);
+					set .@iid, instance_id(IM_PARTY);
+
+					setd("$etower_pid_by_iid_"+.@iid, .@pid);
+
+					// inicializa o andar do grupo, se vazio
+					if (getd("$party_current_floor_"+.@pid) <= 0)
+						setd("$party_current_floor_"+.@pid, 1);
+
+					set .@saved, getd("$party_current_floor_"+.@pid);
+
+					if (checkquest(60201,PLAYTIME) < 0) {
+						
+						setquest 60201;
+
+						set #ETOWER_COOLDOWN_4H, gettimetick(2) + 14400000;
+						set #ETOWER_COOLDOWN, gettimetick(2) + .@faltam_reset;
+	
+						addtimer 14400000, strnpcinfo(3)+"::OnTimeout_ET"; // 4h = 14400000 ms					
+					}					
+					
+					end;
+
+				case IE_NOINSTANCE:
+					if (#ETOWER_STATUS == 0) {
+						mes "[Captain Janssen]";
+						mes "Você não possui nenhuma instância criada.";
+						close;
+					}
+					// instância destruída, entra em cooldown
+					erasequest 60201;
+					set #ETOWER_STATUS, 3;
+
+					// limpa progresso do grupo
+					.@pid = getcharid(1);
+					if (.@pid > 0) {
+						setd("$party_current_floor_"+.@pid, 0);
+						setd("$party_current_map_"+.@pid, "");
+					}
+					mes "[Captain Janssen]";
+					mes "Tempo de espera atualizado.";
+					close;
+
+				default:
+					mes "Não foi possível entrar na instância.";
+					close;
+			}
+
+		case 3: // Cancelar
+			close;
+	}
+
+	// Handler do Timeout da Endless Tower
+	OnTimeout_ET:
+    .@iid = instance_id(IM_PARTY);
+	if (.@iid > 0) {
+		// pega o party_id salvo para essa instância
+		.@pid = getd("$etower_pid_by_iid_"+.@iid);
+
+		if (.@pid > 0) {
+			// limpa o progresso do grupo
+			setd("$party_current_floor_"+.@pid, 0);
+			setd("$party_current_map_"+.@pid, "");
+			setd("$etower_pid_by_iid_"+.@iid, 0);
+		}
+
+		erasequest 60201;
+		set #ETOWER_STATUS, 3;
+
+		instance_destroy .@iid;
+		mapannounce "e_tower",
+			"O tempo da instância terminou! A Torre Sem Fim foi destruída.",
+			bc_all, "0xff0000";
+	}
+	end;
+
+}
+
+alberta,214,77,6	duplicate(ET_Instance#Custom)	Torre Sem Fim#alberta	709
+
+

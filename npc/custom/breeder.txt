@@ -1,0 +1,70 @@
+//===== rAthena Script =======================================
+//= Universal Rental NPC
+//===== By: ==================================================
+//= Euphy
+//===== Current Version: =====================================
+//= 1.0a
+//===== Compatible With: =====================================
+//= rAthena Project
+//===== Description: =========================================
+//= One-click automatic mount rentals.
+//============================================================
+-	script	Aluguel Universal	726,{
+	mes "[Aluguel Universal]";
+	mes "Olá aventureiro!";
+	mes "Eu posso fornecer montarias, falcões, carrinhos, wargs e até mesmo o Robô do Mecânico.";
+	mes "Basta você ter as habilidades corretas!";
+	next;
+
+	if (select("Sim, quero alugar.:Não, obrigado.") == 2) {
+		mes "[Aluguel Universal]";
+		mes "Tudo bem! Estarei por aqui caso mude de ideia.";
+		close;
+	}
+
+	// Se o jogador já está montado em algo
+	if (ismounting()) {
+		message strcharinfo(0), "Você precisa desmontar primeiro.";
+		end;
+
+	// Se for um Ranger e não tem a flauta de invocar o lobo
+	} else if (((eaclass() & EAJ_THIRDMASK) == EAJ_RANGER) && !countitem(6124)) {
+		// Se não tem falcão, tem a skill de falcão, e não tem Warg
+		if (!checkfalcon() && getskilllv("HT_FALCON") && !checkwug()) {
+			// Pergunta se quer falcão ou warg (lobo)
+			if (select(" ~ Falcão: ~ Warg") == 1) setfalcon;
+			else getitem 6124, 1; // DÃ¡ a Flauta do Lobo (Wolf's Flute)
+		} else getitem 6124, 1;
+
+	// Se for um Mecânico e tem a skill carrinho mas ainda não tem um
+	} else if (((eaclass() & EAJ_THIRDMASK) == EAJ_MECHANIC) && !checkcart() && getskilllv("MC_PUSHCART")) {
+		// Se não está com Madogear e tem a skill para usar Madogear
+		if (!checkmadogear() && getskilllv("NC_MADOLICENCE")) {
+			if (select(" ~ Carrinho: ~ Madogear") == 1) setcart;
+			else setmadogear;
+		} else setcart;
+
+	// Se tem a skill de carrinho e não tem carrinho
+	} else if (!checkcart() && getskilllv("MC_PUSHCART")) setcart;
+
+	// Se tem a skill de falcão e não tem falcão ou warg
+	else if (!checkfalcon() && getskilllv("HT_FALCON") && !checkwug()) setfalcon;
+
+	// Se tem a skill de montar e não está montado nem com dragão
+	else if (!checkriding() && !checkdragon() && getskilllv("KN_RIDING")) {
+		if ((eaclass() & EAJ_THIRDMASK) == EAJ_RUNE_KNIGHT) setdragon;
+		else setriding;
+
+	// Se tem a skill de usar Madogear e não está com um
+	} else if (!checkmadogear() && getskilllv("NC_MADOLICENCE")) setmadogear;
+
+	// Se não atende nenhum critério
+	else {
+		message strcharinfo(0), "Você não atende aos requisitos para alugar.";
+		end;
+	}
+
+	specialeffect2 EF_TEIHIT3; // Efeito visual ao alugar
+	end;
+}
+

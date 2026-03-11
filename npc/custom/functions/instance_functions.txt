@@ -1,0 +1,150 @@
+function	script	F_InstanceEntry	{
+
+	// ==============================
+	// Parâmetros esperados:
+	// ==============================
+	// getarg(0) -> Nome da instância (string)
+	// getarg(1) -> Nome do NPC (string)
+	// getarg(2) -> Nome da variável de cooldown (string de variável de conta)
+	// getarg(3) -> Nome da variável de status (string de variável de conta)
+	// getarg(4) -> Level mínimo (número)
+	// ==============================
+
+	.@md_name$ = getarg(0);
+	.@npc_name$ = getarg(1);
+	.@cooldown_var$ = getarg(2);
+	.@status_var$ = getarg(3);
+	.@min_level = getarg(4);
+
+    .@cooldown_name$ = "#cooldown_" + .@cooldown_var$;
+    .@status_name$ = "#" + .@status_var$ + "_STATUS";
+
+    // debugmes ".@md_name$: " + .@md_name$;
+    // debugmes ".@npc_name$: " + .@npc_name$;
+    // debugmes ".@cooldown_name$: " + getd(.@cooldown_name$);
+    // debugmes ".@status_name$: " + getd(.@status_name$);
+    // debugmes ".@min_level: " + .@min_level;
+
+	// Checa jogador anexado
+	if (!isloggedin(getcharid(3))) end;
+
+	// Salva ID do jogador
+	.@player_rid = getattachedrid();
+	attachrid(.@player_rid);
+	sleep2 100;
+    
+	// ============================
+	// 1. Checa Level mínimo
+	// ============================
+	if (BaseLevel < .@min_level) {
+		mes "[" + .@npc_name$ + "]";
+		mes "Uau~ Você ainda é muito inexperiente!";
+		mes "Volte quando atingir o nível base ^FF5555" + .@min_level + "^000000.";
+		close;
+	}
+
+	// ============================
+	// 2. Checa se está em grupo
+	// ============================
+	if (getcharid(1) < 1) {
+		mes "[" + .@npc_name$ + "]";
+		mes "Você precisa estar em um grupo para entrar na instância.";
+		close;
+	}
+
+	// ============================
+	// 3. Reseta cooldown se expirou
+	// ============================
+	if (getd(.@cooldown_name$) < gettimetick(2) && getd(.@status_name$) != 0) {
+        setd(.@status_name$, 0);
+    }
+
+	// ============================
+	// 4. Se já completou hoje
+	// ============================
+	if (getd(.@status_name$) == 3) {
+		mes "[" + .@npc_name$ + "]";
+		mes "Você já fez esta instância hoje.";
+		mes "Volte amanhã após o descanso.";
+		close;
+	}
+
+	// =========================
+	// BLOQUEIO POR PARTY + IP
+	// =========================
+	if (!callfunc("F_CheckInstanceIPPermission")) {
+		mes "[" + .@npc_name$ + "]";
+		mes "Jogadores com mesmo IP só podem participar de mais de uma ";
+		mes "Instância simultaneamente , se estiverem em grupos diferentes.";
+		close;
+	}
+
+	// ============================
+	// 5. Diálogo inicial
+	// ============================
+	mes "[" + .@npc_name$ + "]";
+	mes "Olá, aventureiro! Deseja criar ou entrar na instância ^0055FF" + .@md_name$ + "^000000?";
+	next;
+
+	switch(select("Criar instância", "Entrar na instância", "Cancelar")) {
+
+		// ============================
+		// 6. Criar instância
+		// ============================
+		case 1:
+			if (!is_party_leader()) {
+				mes "Somente o líder do grupo pode criar a instância.";
+				close;
+			}
+			if (getd(.@status_name$)) == 0 {
+				if (instance_create(.@md_name$) >= 0) {
+					mes "[" + .@npc_name$ + "]";
+					mes "A Instância está se abrindo...";
+					announce "[" + .@md_name$ + "] O jogador " + strcharinfo(0) + " do grupo " + getpartyname(getcharid(1)) + " criou a instância.", bc_all, "0xFF9900";
+
+					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
+					setd(.@status_name$), 1;
+				} else {
+					mes "Falha ao criar a instância.";
+				}
+			} else {
+				mes "A instância já foi criada. Use ^0000FF'Entrar na instância'^000000 para entrar.";
+			}
+			close;
+
+		// ============================
+		// 7. Entrar na instância
+		// ============================
+		case 2:
+			switch(instance_enter(.@md_name$)) {
+				case IE_OK:
+					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
+					setd(.@status_name$), 2;
+					end;
+				case IE_NOINSTANCE:
+                    if(#PORING_STATUS == 0) {
+					    mes "A instância ainda não foi criada.";
+                        close;
+                    }
+                    mes "Você já entrou na instância hoje.";
+                    setd(.@status_name$), 3;
+					close;
+				case IE_NOMEMBER:
+					mes "Você não faz parte de um grupo válido para esta instância.";
+					close;
+				default:
+					mes "Ocorreu um erro desconhecido ao tentar entrar.";
+					close;
+			}
+			close;
+
+		// ============================
+		// 8. Cancelar
+		// ============================
+		case 3:
+			mes "[" + .@npc_name$ + "]";
+			mes "Tudo bem, volte quando estiver pronto.";
+			close;
+	}
+	return;
+}

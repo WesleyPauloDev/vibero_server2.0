@@ -1,0 +1,429 @@
+
+pront_inv,182,214,3	script	Configurador de Dummy	794,{
+
+    .x1 =  174;
+    .y1 =  208;
+    .x2 =  176;
+    .y2 = 210;
+
+    .map$ = "pront_inv";
+
+    callfunc("Mob_Damage", .x1, .y1, .x2, .y2, 1);
+
+OnInit:    
+    initnpctimer;    
+    end;
+OnTimer500:
+    specialeffect EF_BAT2;
+    specialeffect EF_SANDWIND;
+    specialeffect EF_POISONSMOKE;
+    end;
+OnTimer2000:
+    for (.@i = 0; .@i < 20; .@i++) {
+         specialeffect EF_SANDWIND;
+        specialeffect EF_POISONSMOKE;
+        sleep 2000;
+    }
+    initnpctimer;
+    end;
+}
+
+pront_inv,165,231,3	script	Configurador de Dummy#2	794,{
+    .x1 =  154;
+    .y1 =  227;
+    .x2 =  157;
+    .y2 = 228;
+
+    .map$ = "pront_inv";
+
+    callfunc("Mob_Damage", .x1, .y1, .x2, .y2, 2);
+
+OnMobDead1_2:
+    killmonster .map$, strnpcinfo(3)+"::OnMobDead1_2";
+    end;
+OnMobDead2_2:
+    killmonster .map$, strnpcinfo(3)+"::OnMobDead2_2";
+    end;
+
+OnInit:    
+    initnpctimer;    
+    end;
+OnTimer500:
+    specialeffect EF_BAT2;
+    specialeffect EF_SANDWIND;
+    specialeffect EF_POISONSMOKE;
+    end;
+OnTimer2000:
+    for (.@i = 0; .@i < 20; .@i++) {
+         specialeffect EF_SANDWIND;
+        specialeffect EF_POISONSMOKE;
+        sleep 2000;
+    }
+    initnpctimer;
+    end;
+}
+
+pront_inv,156,195,4	script	Configurador de Dummy#3	794,{
+    .x1 =  154;
+    .y1 =  188;
+    .x2 =  157;
+    .y2 = 188;   
+
+    .map$ = "pront_inv"; 
+
+    callfunc("Mob_Damage", .x1, .y1, .x2, .y2, 3);
+
+OnMobDead1_3:
+    killmonster .map$, strnpcinfo(3)+"::OnMobDead1_3";
+    end;
+OnMobDead2_3:
+    killmonster .map$, strnpcinfo(3)+"::OnMobDead2_3";
+    end;
+
+OnInit:    
+    initnpctimer;    
+    end;
+OnTimer500:
+    specialeffect EF_BAT2;
+    specialeffect EF_SANDWIND;
+    specialeffect EF_POISONSMOKE;
+    end;
+OnTimer2000:
+    for (.@i = 0; .@i < 20; .@i++) {
+         specialeffect EF_SANDWIND;
+        specialeffect EF_POISONSMOKE;
+        sleep 2000;
+    }
+    initnpctimer;
+    end;
+}
+
+pront_inv,129,215,6	script	Configurador de Dummy#4	794,{
+    .x1 =  135;
+    .y1 =  206;
+    .x2 =  138;
+    .y2 = 205;
+
+    .map$ = "pront_inv";
+
+    callfunc("Mob_Damage", .x1, .y1, .x2, .y2, 4);
+
+OnMobDead1_4:
+    killmonster .map$, strnpcinfo(3)+"::OnMobDead1_4";
+    end;
+OnMobDead2_4:
+    killmonster .map$, strnpcinfo(3)+"::OnMobDead2_4";
+    end;
+
+OnInit:    
+    initnpctimer;    
+    end;
+OnTimer500:
+    specialeffect EF_BAT2;
+    specialeffect EF_SANDWIND;
+    specialeffect EF_POISONSMOKE;
+    end;
+OnTimer2000:
+    for (.@i = 0; .@i < 20; .@i++) {
+         specialeffect EF_SANDWIND;
+        specialeffect EF_POISONSMOKE;
+        sleep 2000;
+    }
+    initnpctimer;
+    end;
+}
+
+function	script	Mob_Damage	{
+    
+    if(getarg(0)) .x1 = getarg(0);
+    if(getarg(1)) .y1 = getarg(1);
+    if(getarg(2)) .x2 = getarg(2);
+    if(getarg(3)) .y2 = getarg(3);
+    if(getarg(4)) .npc = getarg(4);
+
+	mes "[Dummy Test]";
+	mes "Vamos configurar o boneco de teste.";
+	next;
+
+    .map$ = "pront_inv";
+
+	// =========================
+	// TAMANHO
+	// =========================
+	mes "[Tamanho]";
+	mes "Escolha o tamanho do alvo:";
+	next;
+	.@s_idx = select(
+        "Pequeno",
+        "Médio",
+        "Grande"
+    ) - 1;
+
+    // Nome
+    setarray .@size_name$,
+        "Pequeno","Médio","Grande";
+
+    // Valor real
+    setarray .@size_value,
+        0, 1, 2;
+
+    // Resultado
+    set .@dummy_size_name$, .@size_name$[.@s_idx];
+    set .@dummy_size, .@size_value[.@s_idx];
+
+
+	// =========================
+	// RAÇA
+	// =========================
+	mes "[Raça]";
+	mes "Escolha a raça do alvo:";
+	next;
+	.@r_idx = select(
+        "Amorfo",
+        "Morto-Vivo",
+        "Bruto",
+        "Planta",
+        "Inseto",
+        "Peixe",
+        "Demônio",
+        "Humanoide",
+        "Anjo",
+        "Dragão"
+    ) - 1;
+
+    // Nome (visual)
+    setarray .@race_name$,
+        "Amorfo","Morto-Vivo","Bruto","Planta","Inseto",
+        "Peixe","Demônio","Humanoide","Anjo","Dragão";
+
+    // Valor real rAthena
+    setarray .@race_value,
+        RC_FORMLESS,RC_UNDEAD,RC_BRUTE,RC_PLANT,RC_INSECT,
+        RC_FISH,RC_DEMON,RC_DEMIHUMAN,RC_ANGEL,RC_DRAGON;
+
+    // Resultado final
+    set .@dummy_race_name$, .@race_name$[.@r_idx];
+    set .@dummy_race, .@race_value[.@r_idx];
+
+	// =========================
+	// ELEMENTO
+	// =========================
+	mes "[Elemento]";
+	mes "Escolha o elemento do alvo:";
+	next;
+	// Menu (PT-BR)
+    .@e_idx = select(
+        "Neutro",
+        "Água",
+        "Terra",
+        "Fogo",
+        "Vento",
+        "Veneno",
+        "Sombrio",
+        "Sagrado",
+        "Fantasma",
+        "Morto-Vivo"
+    ) - 1;
+
+    // Nome (visual)
+    setarray .@ele_name$,
+        "Neutro","Água","Terra","Fogo","Vento",
+        "Veneno","Sombrio","Sagrado","Fantasma","Morto-Vivo";
+
+    // Valor real rAthena
+    setarray .@ele_value,
+        ELE_NEUTRAL,ELE_WATER,ELE_EARTH,ELE_FIRE,ELE_WIND,
+        ELE_POISON,ELE_DARK,ELE_HOLY,ELE_GHOST,ELE_UNDEAD;
+
+    // Resultado final
+    set .@dummy_ele_name$, .@ele_name$[.@e_idx];
+    set .@dummy_ele, .@ele_value[.@e_idx];
+
+
+	// Nível do elemento (fixo por enquanto)
+	set .@dummy_ele_level, 4;
+
+	// =========================
+	// RESUMO
+	// =========================
+	mes "[Resumo]";
+	mes "Tamanho : " + .@dummy_size_name$;
+	mes "Raça    : " + .@dummy_race_name$;
+	mes "Elemento: " + .@dummy_ele_name$;
+	next;
+
+    .npc$ = .npc;
+
+    monster .map$,.x1,.y1,"Boneco de Treino",2408,1,strnpcinfo(3) + "::OnMobDead1_" + .npc$;    
+    
+    .@gid = $@mobid[0];
+
+    getunitdata .@gid, .@info, 1;
+
+    setunitdata .@gid, UMOB_FLEE, 0;
+    setunitdata .@gid, UMOB_SIZE, .@dummy_size;
+    setunitdata .@gid, UMOB_RACE, .@dummy_race;
+    setunitdata .@gid, UMOB_ELETYPE,.@dummy_ele;
+    setunitdata .@gid, UMOB_ELELEVEL, 4;
+    setunitdata .@gid, UMOB_LOOKDIR, 5;
+
+    monster .map$,.x2,.y2,"Boneco de Treino",2408,1,strnpcinfo(3) + "::OnMobDead2_" + .npc$; 
+    
+    .@gid = $@mobid[0];
+
+    getunitdata .@gid, .@info, 1;
+
+    setunitdata .@gid, UMOB_FLEE, 0;
+    setunitdata .@gid, UMOB_SIZE, .@dummy_size;
+    setunitdata .@gid, UMOB_RACE, .@dummy_race;
+    setunitdata .@gid, UMOB_ELETYPE,.@dummy_ele;
+    setunitdata .@gid, UMOB_ELELEVEL, 4;
+    setunitdata .@gid, UMOB_LOOKDIR, 5;
+	end;
+}
+
+-	script	prontera_fog	-1,{
+OnInit:
+    // setmapflag "pront_inv", mf_snow;
+    setmapflag "pront_inv", MF_SAKURA;
+    setmapflag "pront_inv", MF_CLOUDS;
+    setmapflag "pront_inv", MF_LEAVES;
+    atcommand("@night");
+    end;
+}
+
+-	script	Restos Mortais	-1,{
+OnInit:    
+    initnpctimer;    
+    end;
+OnTimer500:
+    specialeffect EF_BAT2;
+    specialeffect EF_SANDWIND;
+    specialeffect EF_POISONSMOKE;
+    end;
+OnTimer2000:
+    for (.@i = 0; .@i < 20; .@i++) {
+         specialeffect EF_SANDWIND;
+        specialeffect EF_POISONSMOKE;
+        sleep 2000;
+    }
+    initnpctimer;
+    end;
+}
+
+
+//NPCs
+pront_inv,159,193,5	duplicate(Healer)	Curandeira#pront_inv	856
+
+pront_inv,166,200,6	duplicate(Removedora de Cartas)	Removedora de Cartas#pront_inv	650
+
+pront_inv,146,204,3	duplicate(Aluguel Universal)	Aluguel Universal#pront_inv	950
+
+pront_inv,152,193,3	duplicate(Servico Kafra)	Serviço Kafra#pront_inv	1433
+
+pront_inv,148,195,3	duplicate(Resetadora)	Resetador#pront_inv	998
+
+pront_inv,145,200,3	shop	Loja de Utilidades#pront_inv	1046,643:100,512:100,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,578:200,12414:500,645:1000,656:1500,657:2000,610:5000,1092:100,12580:100
+
+
+pront_inv,140,180,4	duplicate(Restos Mortais)	Restos Mortais#1	844
+pront_inv,155,210,4	duplicate(Restos Mortais)	Restos Mortais#2	844
+pront_inv,170,260,4	duplicate(Restos Mortais)	Restos Mortais#3	844
+pront_inv,190,300,4	duplicate(Restos Mortais)	Restos Mortais#4	844
+pront_inv,220,180,4	duplicate(Restos Mortais)	Restos Mortais#5	844
+pront_inv,250,220,4	duplicate(Restos Mortais)	Restos Mortais#6	844
+pront_inv,120,240,4	duplicate(Restos Mortais)	Restos Mortais#7	844
+pront_inv,90,200,4	duplicate(Restos Mortais)	Restos Mortais#8	844
+pront_inv,60,160,4	duplicate(Restos Mortais)	Restos Mortais#9	844
+pront_inv,30,120,4	duplicate(Restos Mortais)	Restos Mortais#10	844
+
+pront_inv,200,140,4	duplicate(Restos Mortais)	Restos Mortais#11	844
+pront_inv,230,170,4	duplicate(Restos Mortais)	Restos Mortais#12	844
+pront_inv,260,210,4	duplicate(Restos Mortais)	Restos Mortais#13	844
+pront_inv,280,250,4	duplicate(Restos Mortais)	Restos Mortais#14	844
+pront_inv,240,290,4	duplicate(Restos Mortais)	Restos Mortais#15	844
+pront_inv,210,330,4	duplicate(Restos Mortais)	Restos Mortais#16	844
+pront_inv,180,310,4	duplicate(Restos Mortais)	Restos Mortais#17	844
+pront_inv,150,280,4	duplicate(Restos Mortais)	Restos Mortais#18	844
+pront_inv,120,300,4	duplicate(Restos Mortais)	Restos Mortais#19	844
+pront_inv,90,330,4	duplicate(Restos Mortais)	Restos Mortais#20	844
+
+pront_inv,50,300,4	duplicate(Restos Mortais)	Restos Mortais#21	844
+pront_inv,20,260,4	duplicate(Restos Mortais)	Restos Mortais#22	844
+pront_inv,40,220,4	duplicate(Restos Mortais)	Restos Mortais#23	844
+pront_inv,70,190,4	duplicate(Restos Mortais)	Restos Mortais#24	844
+pront_inv,100,160,4	duplicate(Restos Mortais)	Restos Mortais#25	844
+pront_inv,130,130,4	duplicate(Restos Mortais)	Restos Mortais#26	844
+pront_inv,160,100,4	duplicate(Restos Mortais)	Restos Mortais#27	844
+pront_inv,190,80,4	duplicate(Restos Mortais)	Restos Mortais#28	844
+pront_inv,220,60,4	duplicate(Restos Mortais)	Restos Mortais#29	844
+pront_inv,250,40,4	duplicate(Restos Mortais)	Restos Mortais#30	844
+
+pront_inv,270,90,4	duplicate(Restos Mortais)	Restos Mortais#31	844
+pront_inv,240,120,4	duplicate(Restos Mortais)	Restos Mortais#32	844
+pront_inv,210,150,4	duplicate(Restos Mortais)	Restos Mortais#33	844
+pront_inv,180,180,4	duplicate(Restos Mortais)	Restos Mortais#34	844
+pront_inv,150,210,4	duplicate(Restos Mortais)	Restos Mortais#35	844
+pront_inv,120,240,4	duplicate(Restos Mortais)	Restos Mortais#36	844
+pront_inv,100,270,4	duplicate(Restos Mortais)	Restos Mortais#37	844
+pront_inv,130,300,4	duplicate(Restos Mortais)	Restos Mortais#38	844
+pront_inv,170,330,4	duplicate(Restos Mortais)	Restos Mortais#39	844
+pront_inv,210,310,4	duplicate(Restos Mortais)	Restos Mortais#40	844
+
+pront_inv,240,280,4	duplicate(Restos Mortais)	Restos Mortais#41	844
+pront_inv,260,240,4	duplicate(Restos Mortais)	Restos Mortais#42	844
+pront_inv,230,200,4	duplicate(Restos Mortais)	Restos Mortais#43	844
+pront_inv,200,170,4	duplicate(Restos Mortais)	Restos Mortais#44	844
+pront_inv,170,140,4	duplicate(Restos Mortais)	Restos Mortais#45	844
+pront_inv,140,110,4	duplicate(Restos Mortais)	Restos Mortais#46	844
+pront_inv,110,90,4	duplicate(Restos Mortais)	Restos Mortais#47	844
+pront_inv,80,70,4	duplicate(Restos Mortais)	Restos Mortais#48	844
+pront_inv,50,50,4	duplicate(Restos Mortais)	Restos Mortais#49	844
+pront_inv,20,30,4	duplicate(Restos Mortais)	Restos Mortais#50	844
+
+pront_inv,145,177,4	duplicate(Restos Mortais)	Restos Mortais#51	844
+pront_inv,160,215,4	duplicate(Restos Mortais)	Restos Mortais#52	844
+pront_inv,175,265,4	duplicate(Restos Mortais)	Restos Mortais#53	844
+pront_inv,195,305,4	duplicate(Restos Mortais)	Restos Mortais#54	844
+pront_inv,225,185,4	duplicate(Restos Mortais)	Restos Mortais#55	844
+pront_inv,255,225,4	duplicate(Restos Mortais)	Restos Mortais#56	844
+pront_inv,125,245,4	duplicate(Restos Mortais)	Restos Mortais#57	844
+pront_inv,95,205,4	duplicate(Restos Mortais)	Restos Mortais#58	844
+pront_inv,65,165,4	duplicate(Restos Mortais)	Restos Mortais#59	844
+pront_inv,35,125,4	duplicate(Restos Mortais)	Restos Mortais#60	844
+
+pront_inv,205,145,4	duplicate(Restos Mortais)	Restos Mortais#61	844
+pront_inv,235,175,4	duplicate(Restos Mortais)	Restos Mortais#62	844
+pront_inv,265,215,4	duplicate(Restos Mortais)	Restos Mortais#63	844
+pront_inv,275,255,4	duplicate(Restos Mortais)	Restos Mortais#64	844
+pront_inv,245,295,4	duplicate(Restos Mortais)	Restos Mortais#65	844
+pront_inv,215,335,4	duplicate(Restos Mortais)	Restos Mortais#66	844
+pront_inv,185,315,4	duplicate(Restos Mortais)	Restos Mortais#67	844
+pront_inv,155,285,4	duplicate(Restos Mortais)	Restos Mortais#68	844
+pront_inv,125,305,4	duplicate(Restos Mortais)	Restos Mortais#69	844
+pront_inv,95,335,4	duplicate(Restos Mortais)	Restos Mortais#70	844
+
+pront_inv,166,177,4	duplicate(Restos Mortais)	Restos Mortais#101	844
+pront_inv,165,205,4	duplicate(Restos Mortais)	Restos Mortais#102	844
+pront_inv,180,255,4	duplicate(Restos Mortais)	Restos Mortais#103	844
+pront_inv,200,295,4	duplicate(Restos Mortais)	Restos Mortais#104	844
+pront_inv,230,175,4	duplicate(Restos Mortais)	Restos Mortais#105	844
+pront_inv,260,215,4	duplicate(Restos Mortais)	Restos Mortais#106	844
+pront_inv,130,235,4	duplicate(Restos Mortais)	Restos Mortais#107	844
+pront_inv,100,195,4	duplicate(Restos Mortais)	Restos Mortais#108	844
+pront_inv,70,155,4	duplicate(Restos Mortais)	Restos Mortais#109	844
+pront_inv,40,115,4	duplicate(Restos Mortais)	Restos Mortais#110	844
+
+pront_inv,210,135,4	duplicate(Restos Mortais)	Restos Mortais#111	844
+pront_inv,240,165,4	duplicate(Restos Mortais)	Restos Mortais#112	844
+pront_inv,270,205,4	duplicate(Restos Mortais)	Restos Mortais#113	844
+pront_inv,280,245,4	duplicate(Restos Mortais)	Restos Mortais#114	844
+pront_inv,250,285,4	duplicate(Restos Mortais)	Restos Mortais#115	844
+pront_inv,220,325,4	duplicate(Restos Mortais)	Restos Mortais#116	844
+pront_inv,190,305,4	duplicate(Restos Mortais)	Restos Mortais#117	844
+pront_inv,160,275,4	duplicate(Restos Mortais)	Restos Mortais#118	844
+pront_inv,130,295,4	duplicate(Restos Mortais)	Restos Mortais#119	844
+pront_inv,100,325,4	duplicate(Restos Mortais)	Restos Mortais#120	844
+
+
+

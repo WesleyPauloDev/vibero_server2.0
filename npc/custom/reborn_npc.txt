@@ -1,0 +1,75 @@
+//=============================================================
+// NPC: Reborn Master/// Função: Resetar Stats/Skills, reduzir EXP e aumentar Drop
+//=============================================================
+prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
+	// ===== Configurações =====
+	.@req_base = 175;        // Nível base mínimo
+	.@req_job  = 70;        // Nível de classe mínimo
+	.@exp_penalty = 10;  // -10% EXP
+    .@drop_bonus = 20;   // +20% DROP
+	
+	mes "[Reborn Master]";	
+
+	if (reborn_count < 0) set reborn_count, 0;
+	if (reborn_count > 5) set reborn_count, 5;
+	set_reputation_points(7, reborn_count * 1000);
+
+	if(reborn_count < 5) {
+		mes "Eu posso guiá-lo pelo renascimento.";
+		mes "Você perderá seus status e habilidades, voltara ao nível 1, mas ganhará ^00FF00"
+			+.@drop_bonus + "%^000000 de taxa de drop e reduzira ^FF0000"
+			+.@exp_penalty + "%^000000 da ganho de experiência.";
+		next;
+
+		if (BaseLevel < .@req_base || JobLevel < .@req_job) {
+			mes "Você precisa ter pelo menos Nível Base "+.@req_base+
+				" e Nível de Classe "+.@req_job+" para renascer.";
+			close;
+		}
+
+		if (select("Quero renascer","Cancelar") == 2) close;
+
+		// Confirmação
+		mes "[Reborn Master]";
+		mes "Tem certeza? Isso não pode ser desfeito.";
+		if (select("Sim, estou pronto","Não, cancelar") == 2) close;
+
+		// ===== Aplicar renascimento =====
+		// Mesmo fluxo do Job Master:
+		// salva a linha de classe base para manter progressão no Job Master.
+		lastJob = BaseJob;
+		jobchange Job_Novice_High;
+		resetlvl(1);
+		setpcblock(0,1); // evita movimentos durante ajustes
+
+		// Guarda em variáveis de personagem		
+		
+		set reborn_count, reborn_count + 1;
+		if (reborn_count < 0) set reborn_count, 0;
+		if (reborn_count > 5) set reborn_count, 5;
+		set_reputation_points(7, reborn_count * 1000);
+		
+		callfunc("F_AddRep", 7, 0, 110008, 5000);
+
+		set exp_final, exp_final - (exp_base_custom * .@exp_penalty / 100);
+
+		set drop_final, drop_final + .@drop_bonus;
+
+		set_reborn_exp(exp_final);
+		set_reborn_drop(drop_final);
+
+		specialeffect2 EF_ANGEL2;
+		specialeffect2 EF_ELECTRIC;
+
+		setpcblock(0,0);
+
+		getitem 9616, 1; // item de renascimento, pode ser usado para futuras quests ou eventos
+
+		mes "[Reborn Master]";
+		mes "Parabéns, você renasceu!";
+		close;
+	} else {
+		mes "Você já atingiu máximo de Reborn!";
+		close;
+	}
+}

@@ -1,0 +1,41 @@
+
+
+inter01,0,0,1	monster	Anubis	21400,450,2000,0,0
+
+-	script	MapCustomDrops	-1,{
+
+	OnInit:
+	
+    	end;
+
+	OnNPCKillEvent:
+		
+		// Exemplo de chamada da função
+		// Mapa: prt_fild08
+		// Itens: 607, 501
+		// Rates: 1%, 1%
+		callfunc("CustomMapDrop", "inter01", 607, 1);
+        callfunc("CustomMapDrop", "inter01", 9611, 1);
+
+		// Mapa: inter01
+        // Bônus: +50% BaseExp e +20% JobExp
+        callfunc("MapExpBonus", "inter01", 100, 20);
+
+
+		if (strcharinfo(3) == "inter01" &&
+			killedrid == 21400 &&
+			#d_monstros == 1) {
+			#d_monstros_count++;
+			// quando chegar a 100, marca como completa
+			if (#d_monstros_count >= 100) {
+				#d_monstros = 2;
+				dispbottom "[Diária] Você derrotou 100 Anubis! Fale com o Mural para receber a recompensa.";
+			} else {
+				dispbottom "[Diária] Anubis mortos: " + #d_monstros_count + "/100";
+			}
+		}
+		end;
+}
+
+
+

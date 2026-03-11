@@ -1,0 +1,111 @@
+//=====================================================
+// Sistema de Escolha de Rate no Primeiro Login
+//=====================================================
+
+-	script	RateEscolha#login	-1,{
+
+OnPCLoginEvent:
+    addtimer 500, "RateEscolha#login::OnStartRate";
+    end;
+
+OnStartRate:
+    // Se ja escolheu a taxa, apenas aplica os bonus no login
+	if (rate_escolhido > 0) {
+		end;
+	}
+
+	mes "^00AAFFBem-vindo, " + strcharinfo(0) + "!^000000";
+	mes "Antes de comecar sua jornada, escolha sua taxa de experiencia:";
+	mes " ";
+	mes "Quanto menor a taxa de XP, maior sera o bonus de drop!";
+	next;
+
+	while (true) {
+		mes "Selecione sua taxa de experiencia:";
+		mes "";
+		mes "^00FF00[1x]^000000  XP normal, Taxa de Drop (2x)";
+		mes "^88FF88[2x]^000000  XP (2X), Taxa de Drop (1.5x)";
+		mes "^FFAA00[5x]^000000  XP (5X), Taxa de Drop (1.2x)";
+		mes "^FF0000[10x]^000000 XP (10X), Sem bonus de Drop";
+		next;
+
+		switch(select("^00FF001x^000000", "^88FF882x^000000", "^FFAA005x^000000", "^FF000010x^000000")) {
+			case 1:
+				.@rate_escolhida = 1;
+				.@bonus_drop = 100;
+				.@drop_display$ = "2";
+				break;
+			case 2:
+				.@rate_escolhida = 2;
+				.@bonus_drop = 50;
+				.@drop_display$ = "1.5";
+				break;
+			case 3:
+				.@rate_escolhida = 5;
+				.@bonus_drop = 20;
+				.@drop_display$ = "1.2";
+				break;
+			case 4:
+				.@rate_escolhida = 10;
+				.@bonus_drop = 0;
+				.@drop_display$ = "1";
+				break;
+		}
+        mes "Voce escolheu a taxa de ^FFAA00" + .@rate_escolhida + "X^000000 de XP.";
+        mes "Bonus de Drop: ^00AAFF" + .@drop_display$ + "X^000000.";
+        mes " ";
+        mes "Sua escolha e permanente!";
+        mes "Tem certeza que deseja continuar com esta Rate?";
+        if (select("Sim","Nao") == 1) break;
+	}
+
+    mes "Rate escolhida foi ^FFAA00" + .@rate_escolhida + "x^000000 de XP.";
+	rate_escolhido = .@rate_escolhida;
+	close2;
+
+	if (rate_escolhido <= 0) {
+		end;
+	}
+
+	if (.@rate_escolhida == 1) {
+		if (!achievementexists(110010))
+			achievementcomplete 110010;
+	}
+	else if (.@rate_escolhida == 2) {
+		if (!achievementexists(110011))
+			achievementcomplete 110011;
+	}
+	else if (.@rate_escolhida == 5) {
+		if (!achievementexists(110012))
+			achievementcomplete 110012;
+	}
+	else if (.@rate_escolhida == 10) {
+		if (!achievementexists(110013))
+			achievementcomplete 110013;
+	}
+
+    // Definir rates baseadas na escolha
+	if (!.@rate_bonus) {
+		switch(.@rate_escolhida) {
+			case 1: .@rate_xp = 1; .@drop_bonus = 100; break;
+			case 2: .@rate_xp = 2; .@drop_bonus = 50; break;
+			case 5: .@rate_xp = 5; .@drop_bonus = 20; break;
+			case 10: .@rate_xp = 10; .@drop_bonus = 0; break;
+			default: .@rate_xp = 1; .@drop_bonus = 100;
+		}
+		.@rate_bonus = 1;
+	}
+
+	exp_base_custom = .@rate_xp * 100;
+	drop_base = .@drop_bonus;
+
+	// XP base para o sistema = (rate_xp - 1) * 100
+	.@xp_base = (.@rate_xp - 1) * 100;
+	exp_final = .@xp_base;
+	drop_final = .@drop_bonus;
+
+	set_reborn_exp(exp_final);
+	set_reborn_drop(drop_final);
+
+	end;
+}

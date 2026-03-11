@@ -1,0 +1,132 @@
+//===== rAthena Script =======================================
+//= Healer
+//===== By: ==================================================
+//= Euphy
+//===== Current Version: =====================================
+//= 1.1
+//===== Compatible With: =====================================
+//= rAthena Project
+//===== Description: =========================================
+//= Basic healer script.
+//===== Additional Comments: =================================
+//= 1.0 Initial script.
+//= 1.1 Aligned coordinates with @go.
+//============================================================
+
+-	script	Healer	-1,{
+OnTalk:
+
+	.@Buffs = 1;	// Also buff players? (1: yes / 0: no)
+	.@Delay = 5;	// Heal delay, in seconds
+	.@time = 300000;	// Heal delay, in seconds	
+
+	// Verifica tempo restante
+	if (@last_buff_time + .@delay > gettimetick(2)) {
+		.@remaining = (@last_buff_time + .@delay) - gettimetick(2);
+		message strcharinfo(0), "Você poderá usar novamente em " + .@remaining + " segundo(s).";
+		end;
+	}
+
+	// Atualiza o tempo do último uso
+	@last_buff_time = gettimetick(2);
+
+	specialeffect2 EF_HEAL2;
+	percentheal 100,100;
+
+OnBuffOnly:
+	// Buffs
+	if (getgroupid() != 0) {
+		.@time = 600000;
+	}
+	
+	// Aumentar Agilidade
+	specialeffect2 EF_INCAGILITY;
+	sc_start SC_INCREASEAGI,.@time,10;
+
+	// Benção
+	specialeffect2 EF_BLESSING;
+	sc_start SC_BLESSING,.@time,10;
+
+	if (getgroupid() != 0) {
+
+		// Impositio Manus
+		sc_start SC_IMPOSITIO,.@time,5;
+
+		// Kyrie Eleison
+		// sc_start SC_KYRIE,.@time,10;
+
+		// Glória
+		sc_start SC_GLORIA,.@time,5;
+
+		// Magnificat
+		sc_start SC_MAGNIFICAT,.@time,5;
+
+		sc_start SC_FOOD_STR_CASH,600000,10;
+		sc_start SC_FOOD_AGI_CASH,600000,10;
+		sc_start SC_FOOD_VIT_CASH,600000,10;
+		sc_start SC_FOOD_INT_CASH,600000,10;
+		sc_start SC_FOOD_DEX_CASH,600000,10;
+		sc_start SC_FOOD_LUK_CASH,600000,10;		
+
+		getinventorylist;
+		.@needsRepair = 0;
+		for (.@i = 0; .@i < @inventorylist_count; .@i++) {
+			// attribute == 1 => quebrado (mesmo critério usado no repairall em C)
+			if (@inventorylist_attribute[.@i] == 1) {
+				.@needsRepair = 1;
+				break;
+			}
+		}
+
+		if (.@needsRepair) {
+			atcommand("@repairall");
+			message strcharinfo(0), "Itens quebrados foram reparados.";
+		}		
+	}
+	end;
+}
+
+// Duplicates
+//============================================================
+alberta,24,240,3	duplicate(Healer)	Curandeira#alb	640
+aldebaran,135,118,6	duplicate(Healer)	Curandeira#alde	640
+amatsu,200,79,4	duplicate(Healer)	Curandeira#ama	640
+ayothaya,207,169,6	duplicate(Healer)	Curandeira#ayo	640
+comodo,184,158,6	duplicate(Healer)	Curandeira#com	640
+einbech,57,36,6	duplicate(Healer)	Curandeira#einbe	640
+einbroch,57,202,6	duplicate(Healer)	Curandeira#einbr	640
+geffen,115,72,6	duplicate(Healer)	Curandeira#gef	640
+gonryun,156,122,6	duplicate(Healer)	Curandeira#gon	640
+hugel,89,150,6	duplicate(Healer)	Curandeira#hug	640
+izlude,121,150,6	duplicate(Healer)	Curandeira#izl	640	//Pre-RE: (125,1640
+jawaii,250,139,4	duplicate(Healer)	Curandeira#jaw	640
+lighthalzen,152,100,6	duplicate(Healer)	Curandeira#lhz	640
+louyang,226,103,4	duplicate(Healer)	Curandeira#lou	640
+manuk,272,144,6	duplicate(Healer)	Curandeira#man	640
+mid_camp,203,289,6	duplicate(Healer)	Curandeira#mid	640
+moc_ruins,72,164,4	duplicate(Healer)	Curandeira#moc	640
+morocc,153,97,6	duplicate(Healer)	Curandeira#mor	640
+moscovia,218,191,5	duplicate(Healer)	Curandeira#mos	640
+niflheim,212,182,5	duplicate(Healer)	Curandeira#nif	640
+payon,179,106,4	duplicate(Healer)	Curandeira#pay	640
+rachel,125,116,6	duplicate(Healer)	Curandeira#rac	640
+splendide,201,153,4	duplicate(Healer)	Curandeira#spl	640
+thor_camp,249,74,4	duplicate(Healer)	Curandeira#thor	640
+umbala,105,148,3	duplicate(Healer)	Curandeira#umb	640
+veins,217,121,4	duplicate(Healer)	Curandeira#ve	640
+xmas,143,136,4	duplicate(Healer)	Curandeira#xmas	640
+yuno,164,45,4	duplicate(Healer)	Curandeira#yuno	640
+
+// Duplicates (Renewal)
+//============================================================
+brasilis,194,221,6	duplicate(Healer)	Curandeira#bra	640
+dewata,195,187,4	duplicate(Healer)	Curandeira#dew	640
+dicastes01,201,194,4	duplicate(Healer)	Curandeira#dic	640
+ecl_in01,45,60,4	duplicate(Healer)	Curandeira#ecl	640
+malangdo,132,114,6	duplicate(Healer)	Curandeira#mal	640
+malaya,227,204,6	duplicate(Healer)	Curandeira#ma	640
+mora,55,152,4	duplicate(Healer)	Curandeira#mora	640
+
+// Duplicates (Custom)
+//============================================================
+new_1-1,67,119,4	duplicate(Healer)	Curandeira#new	640

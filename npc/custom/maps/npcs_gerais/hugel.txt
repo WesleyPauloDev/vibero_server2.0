@@ -1,0 +1,57 @@
+hugel,101,142,3	duplicate(Servico Kafra)	Serviço Kafra#hugel	113
+
+hugel,92,158,5	duplicate(Eden)	Agente do Eden#hugel	729
+
+hugel,254,115,4	duplicate(Mestre de Refino)	Mestre de Refino#hugel	63
+
+hugel,92,166,5	shop	Loja de Utilidades#hugel	850,643:100,512:100,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,578:200,12414:500,645:1000,656:1500,657:2000,610:5000,1092:100,12580:100
+
+hugel,72,156,5	duplicate(PvP Warper)	PvP Warper#hugel	468
+
+//Warps
+hugel,95,33,0	warp	hugel02	1,1,hu_fild06,200,367
+hu_fild06,200,372,0	warp	hugel01	1,1,hugel,95,37
+
+hugel,174,161,4	script	Atendente do Dirigível#hugel	790,{
+	mes "[Dirigível]";
+	mes "O dirigível está pronto para partir.";
+	mes "Para onde deseja voar?";
+	next;
+
+	switch(select(
+		"Izlude",
+		"Juno",
+		"Rachel",
+		"Hugel",
+		"Lighthalzen",
+		"Cancelar"
+	)) {
+
+	case 1: // Izlude
+		warp "izlude",198,74;
+		break;
+
+	case 2: // Juno
+		warp "yuno",53,207;
+		break;
+
+	case 3: // Rachel
+		warp "ra_fild12",289,204;
+		break;
+
+	case 4: // Hugel
+		warp "hugel",178,152;
+		break;
+
+	case 5: // Lighthalzen
+		warp "lighthalzen",260,75;
+		break;
+
+	default:
+		mes "[Dirigível]";
+		mes "Boa viagem quando desejar.";
+		close;
+	}
+
+	close;
+}

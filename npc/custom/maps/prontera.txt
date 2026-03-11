@@ -1,0 +1,876 @@
+prontera,131,216,5	duplicate(Aluguel Universal)	Aluguel Universal#prontera	726
+
+prontera,175,219,4	duplicate(Removedora de Cartas)	Removedora de Cartas#prontera	78
+
+prontera,154,193,5	duplicate(Servico Kafra)	Serviço Kafra#prontera	113
+
+prontera,162,194,5	duplicate(Healer)	Curandeira#prontera	640
+
+prontera,163,175,4	duplicate(Eden)	Agente do Eden#prontera	729
+
+prontera,181,215,4	duplicate(Patentiador)	Patentiador#prontera	47
+
+prontera,149,194,4	duplicate(Mestre de Classes)	Mestre de Classes#prontera	123
+
+prontera,127,212,5	duplicate(Habilidade Platinum)	Habilidade de Platina#prontera	84
+prontera,124,209,5	shop	Loja de Grimórios#prontera	620,100065:50000,100066:50000,100067:50000,100068:50000,100069:50000,100070:50000,100071:50000,100072:50000,100073:50000,100074:50000
+
+prontera,129,214,5	duplicate(Resetadora)	Resetadora#prontera	124
+
+prontera,183,213,4	duplicate(Estilista)	Estilista#prontera	648
+
+prontera,157,193,5	duplicate(Warper)	Teleportador#prontera	405
+prontera,146,89,5	duplicate(Warper)	Teleportador#prontera2	405
+
+prontera,183,194,1	script	Plagiador#prontera	1260,{
+	mes "[Plagiador]";
+	mes "Eu ajudo Arruaceiros e evoluções que dominam a habilidade ^0055FFPlágio^000000.";
+	next;
+
+	if (getskilllv("RG_PLAGIARISM") <= 0) {
+		mes "[Plagiador]";
+		mes "Você ainda nao possui ^0055FFPlágio^000000.";
+		mes "Aprenda a habilidade e volte aqui.";
+		close;
+	}
+
+	.@max_lv = getskilllv("RG_PLAGIARISM");
+
+	mes "[Plagiador]";
+	mes "Seu nivel de Plágio atual permite copiar ate nivel ^0055FF" + .@max_lv + "^000000.";
+	mes "Escolha a categoria:";
+	next;
+
+	while (true) {
+		.@cat = select(
+			"Espadachins e evoluções",
+			"Mercadores e evoluções",
+			"Arqueiros e evoluções",
+			"Noviços e evoluções",
+			"Magos e evoluções",
+			"Expandidas",
+			"Taekwons e evoluções",
+			"Gatunos e evoluções",
+			"Limpar skill copiada",
+			"Cancelar"
+		);
+
+		switch (.@cat) {
+			case 1:
+				.@sel = select("Golpe Fulminante:Impacto de Tyr:Impacto Explosivo:Crux Magnum:Crux Divinum:Escudo Bumerangue:Punição Divina:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 5; .@skill_name$ = "5"; break;
+					case 2: .@skill_id = 62; .@skill_name$ = "62"; break;
+					case 3: .@skill_id = 7; .@skill_name$ = "7"; break;
+					case 4: .@skill_id = 254; .@skill_name$ = "254"; break;
+					case 5: .@skill_id = 32; .@skill_name$ = "32"; break;
+					case 6: .@skill_id = 251; .@skill_name$ = "251"; break;
+					case 7: .@skill_id = 156; .@skill_name$ = "156"; break;
+					default: continue;
+				}
+				break;
+
+			case 2:
+				.@sel = select("Mammonita:Fogo Grego:Terror Acido:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 42; .@skill_name$ = "42"; break;
+					case 2: .@skill_id = 229; .@skill_name$ = "229"; break;
+					case 3: .@skill_id = 230; .@skill_name$ = "230"; break;
+					default: continue;
+				}
+				break;
+
+			case 3:
+				.@sel = select("Rajada de Flechas:Tiro Preciso:Chuva de Flechas:Armadilha Atordoante:Instalar Mina:Armadilha Extenuante:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 46; .@skill_name$ = "46"; break;
+					case 2: .@skill_id = 382; .@skill_name$ = "382"; break;
+					case 3: .@skill_id = 47; .@skill_name$ = "47"; break;
+					case 4: .@skill_id = 116; .@skill_name$ = "116"; break;
+					case 5: .@skill_id = 122; .@skill_name$ = "122"; break;
+					case 6: .@skill_id = 118; .@skill_name$ = "118"; break;
+					default: continue;
+				}
+				break;
+
+			case 4:
+				.@sel = select("Curar:Asperio:Magnus Exorcismus:Ressuscitar:Santuario:Esconjurar:Revelacao:Combo Triplo:Luz Divina:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 28; .@skill_name$ = "28"; break;
+					case 2: .@skill_id = 68; .@skill_name$ = "68"; break;
+					case 3: .@skill_id = 79; .@skill_name$ = "79"; break;
+					case 4: .@skill_id = 54; .@skill_name$ = "54"; break;
+					case 5: .@skill_id = 70; .@skill_name$ = "70"; break;
+					case 6: .@skill_id = 77; .@skill_name$ = "77"; break;
+					case 7: .@skill_id = 24; .@skill_name$ = "24"; break;
+					case 8: .@skill_id = 263; .@skill_name$ = "263"; break;
+					case 9: .@skill_id = 156; .@skill_name$ = "156"; break;
+					default: continue;
+				}
+				break;
+
+			case 5:
+				.@sel = select("Lanças de Fogo:Lanças de Gelo:Relâmpago:Bolas de Fogo:Barreira de Fogo:Rajada Congelante:Espíritos Anciões:Petrificar:Coluna de Fogo:Chuva de Meteoros:Nevasca:Trovão de Jupiter:Ira de Thor:Congelar:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 19; .@skill_name$ = "19"; break;
+					case 2: .@skill_id = 14; .@skill_name$ = "14"; break;
+					case 3: .@skill_id = 20; .@skill_name$ = "20"; break;
+					case 4: .@skill_id = 17; .@skill_name$ = "17"; break;
+					case 5: .@skill_id = 18; .@skill_name$ = "18"; break;
+					case 6: .@skill_id = 15; .@skill_name$ = "15"; break;
+					case 7: .@skill_id = 13; .@skill_name$ = "13"; break;
+					case 8: .@skill_id = 16; .@skill_name$ = "16"; break;
+					case 9: .@skill_id = 80; .@skill_name$ = "80"; break;
+					case 10: .@skill_id = 83; .@skill_name$ = "83"; break;
+					case 11: .@skill_id = 89; .@skill_name$ = "89"; break;
+					case 12: .@skill_id = 84; .@skill_name$ = "84"; break;
+					case 13: .@skill_id = 85; .@skill_name$ = "85"; break;
+					case 14: .@skill_id = 88; .@skill_name$ = "88"; break;
+					case 15: .@skill_id = 91; .@skill_name$ = "91"; break;
+					default: continue;
+				}
+				break;
+
+			case 6:
+				.@sel = select("Escudo de Chamas:Pétalas Flamejantes:Dragao Explosivo:Lança Congelante:Grande Floco de Neve:Lamina de Vento:Descarga Eletrica:Brisa Cortante:Virar Tatami:Corte da Nevoa:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 535; .@skill_name$ = "535"; break;
+					case 2: .@skill_id = 534; .@skill_name$ = "534"; break;
+					case 3: .@skill_id = 536; .@skill_name$ = "536"; break;
+					case 4: .@skill_id = 537; .@skill_name$ = "537"; break;
+					case 5: .@skill_id = 539; .@skill_name$ = "539"; break;
+					case 6: .@skill_id = 542; .@skill_name$ = "542"; break;
+					case 7: .@skill_id = 541; .@skill_name$ = "541"; break;
+					case 8: .@skill_id = 540; .@skill_name$ = "540"; break;
+					case 9: .@skill_id = 527; .@skill_name$ = "527"; break;
+					case 10: .@skill_id = 528; .@skill_name$ = "528"; break;
+					default: continue;
+				}
+				break;
+
+			case 7:
+				.@sel = select("Chute Aereo:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 421; .@skill_name$ = "421"; break;
+					default: continue;
+				}
+				break;
+
+			case 8:
+				.@sel = select("Arremessar Pedra:Chutar Areia:Apunhalar:Explosao Toxica:Faca Envenenada:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 152; .@skill_name$ = "152"; break;
+					case 2: .@skill_id = 149; .@skill_name$ = "149"; break;
+					case 3: .@skill_id = 212; .@skill_name$ = "212"; break;
+					case 4: .@skill_id = 141; .@skill_name$ = "141"; break;
+					case 5: .@skill_id = 52; .@skill_name$ = "52"; break;
+					default: continue;
+				}
+				break;
+
+			case 9:
+				.@cleaned = 0;
+				if (plagiarizeskillreset(1))
+					.@cleaned = 1;
+				if (plagiarizeskillreset(2))
+					.@cleaned = 1;
+				if (PlagiadorSkillId > 0) {
+					skill PlagiadorSkillId, 0, 3;
+					PlagiadorSkillId = 0;
+					.@cleaned = 1;
+				}
+				mes "[Plagiador]";
+				if (.@cleaned)
+					mes "Skill copiada removida com sucesso.";
+				else
+					mes "Nao havia skill copiada para remover.";
+				close;
+
+			default:
+				close;
+		}
+
+		.@skill_lv = .@max_lv;
+		// Evita bloqueio por estado antigo de copia/preservar.
+		sc_end SC_PRESERVE;
+		plagiarizeskillreset(1);
+		plagiarizeskillreset(2);
+		if (PlagiadorSkillId > 0) {
+			skill PlagiadorSkillId, 0, 3;
+			PlagiadorSkillId = 0;
+		}
+
+		// Remove skill permanente residual da mesma id (de testes antigos).
+		skill .@skill_id, 0, 3;
+		if (plagiarizeskill(.@skill_id, .@skill_lv)) {
+			mes "[Plagiador]";
+			mes "Plágio aplicado com sucesso no nivel ^0055FF" + .@skill_lv + "^000000.";
+			close;
+		}
+
+		mes "[Plagiador]";
+		mes "Falha ao aplicar Plágio nessa skill.";
+		mes "Debug: " + .@skill_name$ + " (ID " + .@skill_id + "), Plágio Lv " + .@max_lv + ".";
+		close;
+	}
+}
+
+// ----------------------- Script est em npc/custom/custom_shop.txt -----------------------
+prontera,138,184,7	duplicate(Loja)	Loja do Iniciante#prontera	478
+prontera,146,211,3	duplicate(Loja_Conversor)	Loja de Conversor#prontera	526
+prontera,140,225,5	duplicate(LojaMunicoes)	Loja de Munições#prontera	528
+prontera,135,220,5	shop	Loja de Utilidades#prontera	850,643:100,512:100,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,506:100,578:200,12414:500,645:1000,656:1500,657:2000,610:5000,1092:100,12580:100,712:1,611:100
+prontera,133,188,7	shop	Loja de Assistentes#prontera	580,12276:10000,12184:100,12185:100,12241:1000,12242:1500,12243:2000
+//==================================================
+// Loja de Pets - Todos os ovos por 50.000z
+//==================================================
+prontera,129,192,7	shop	Loja de Pets#prontera	4_M_JPNOJI,9055:50000, 9056:50000, 9030:50000, 9054:50000, 9042:50000, 9046:50000, 9052:50000, 9048:50000, 9045:50000, 9047:50000, 9050:50000, 9051:50000, 9043:50000, 9041:50000, 9049:50000, 9044:50000, 9053:50000, 9040:50000, 9001:50000, 9002:50000, 9003:50000, 9004:50000, 9005:50000, 9014:50000, 9009:50000, 9012:50000, 9013:50000, 9006:50000, 9007:50000, 9022:50000, 9023:50000, 9021:50000, 9015:50000, 9019:50000, 9010:50000, 9016:50000, 9020:50000, 9011:50000, 9008:50000, 9017:50000, 9024:50000, 9018:50000, 9025:50000, 9029:50000, 9028:50000, 9026:50000, 9027:50000, 9058:50000, 9059:50000;
+
+prontera,172,186,4	script	Gerenciador de Instâncias#prontera	421,{
+	
+	doevent "InstanceMenu::OnAtcommand";
+	end;
+}
+
+prontera,162,133,2	script	YuPi#prontera	102,{
+	mes "[YuPi]";
+	mes "Embora muitos monstros possam parecer iguais, tenha cuidado! Existem variaes entre monstros que tm a mesma forma bsica.";
+	next;
+	mes "[YuPi]";
+	mes "Um monstro que parece ser calmo e fraco pode, na verdade, ser selvagem e feroz!";
+	next;
+	mes "[YuPi]";
+	mes "Voc pode diferenciar esses tipos de monstros pela cor do corpo. Monstros mais selvagens e poderosos geralmente tm cores mais perigosas.";
+	close;
+}
+
+prontera,167,181,4	script	Treinadora#prontera	811,{
+	mes "[Treinadora]";
+	mes "Bem-vindo  cidade de ^0000FFProntera^000000, o corao do nosso servidor!";
+	mes "Aqui voc encontrar muitos jogadores e NPCs que iro te auxiliar durante sua jornada.";
+	next;
+
+	while (true) {
+		mes "[Treinadora]";
+		mes "Gostaria de conhecer melhor o que h nesta cidade e no comeo da sua aventura?";
+		switch(select("Sim, quero saber mais.:No, obrigado.")) {
+			case 1:
+				mes "Aqui em Prontera, voc pode conversar com diversos NPCs que oferecem misses, servios e recompensas.";
+				next;
+
+				mes "[Treinadora]";
+				mes "Esta cidade  onde tudo comea.  aqui que voc ir escolher sua classe e comear a se especializar.";
+				next;
+
+				mes "[Treinadora]";
+				mes "Cada classe possui habilidades nicas. Escolha com sabedoria e torne-se um verdadeiro mestre!";
+				next;
+
+				mes "[Treinadora]";
+				mes "Ao sul da cidade, h um portal que leva a uma rea com monstros iniciantes.";
+				next;
+
+				mes "[Treinadora]";
+				mes "Derrotar monstros  essencial para ganhar ^00FF00experincia^000000 e ^FFAA00itens^000000.";
+				next;
+
+				mes "[Treinadora]";
+				mes "Alguns itens voc pode usar para se fortalecer, outros voc pode vender para conseguir ^0000FFZeny^000000.";
+				next;
+
+				mes "[Treinadora]";
+				mes "Com Zeny, voc pode comprar ^FF0000poes^000000 de cura e buffs, ^FF0000equipamentos^000000 poderosos e at ^FF0000cartas^000000.";
+				next;
+
+				mes "[Treinadora]";
+				mes "Tudo isso ser essencial para enfrentar desafios maiores e conquistar recompensas melhores.";
+				next;
+
+				mes "[Treinadora]";
+				mes "Aproveite cada etapa e no tenha medo de explorar. O servidor foi feito para guiar voc e proporcionar diverso.";
+				next;
+
+				mes "[Treinadora]";
+				mes "Se tiver dvidas, busque ajuda com outros jogadores, nos NPCs de suporte, ou em nosso Discord.";
+				next;
+
+				mes "[Treinadora]";
+				mes "Deseja rever todas essas informaes ou encerrar por aqui?";
+				if (select("Rever tudo.:Encerrar.") == 1) {
+					continue;
+				} else {
+					mes "Boa sorte na sua jornada! Estamos torcendo por voc!";
+					close;
+				}
+				end;
+
+			case 2:
+				mes "Tudo bem! Estarei aqui caso mude de ideia.";
+				close;
+		}
+	}
+}
+
+prontera,186,210,4	script	Criador de Homunculos#prontera	740,{
+	debugmes "Classe: " + Class;
+
+	mes "[Criador de Homunculos]";
+	mes "Hey, sou um poderoso criador";
+	mes "de Homunculos!";
+	next;
+
+	.@is_creator = (Class == 18 || Class == 4019 || Class == 4071 || Class == 4078 || Class == 4259 || Class == 4041 || Class == 4107);
+	.@hom_class = gethominfo(1);
+	.@has_hom = (.@hom_class > 0);
+	.@hom_lv = gethominfo(6);
+	.@is_gm99 = (getgroupid() == 99);
+
+	// 6009~6016 = evoluidos (H/H2), 6048~6052 = Homunculus S
+	.@is_evolved = (.@hom_class >= 6009 && .@hom_class <= 6016);
+	.@is_s = (.@hom_class >= 6048 && .@hom_class <= 6052);
+
+	.@can_evolve = (.@has_hom && !.@is_evolved && !.@is_s);
+	.@can_mutate_s = (.@has_hom && .@is_evolved && !.@is_s && .@hom_lv >= 99);
+	.@can_reset_s_skills = (.@has_hom && .@is_s);
+	.@debug_target_lv = (.@is_s ? 175 : 99);
+	.@can_debug_hom99 = (.@is_gm99 && .@has_hom && .@hom_lv < .@debug_target_lv);
+	.@can_delete_hom = 1;
+
+	if (!.@is_creator) {
+		.@sel = select("Sobre Homunculos:Cancelar");
+		if (.@sel == 1) goto L_About;
+		goto L_Cancel;
+	}
+
+	if (!.@has_hom) {
+		.@sel = select("Criar Homunculo:Deletar Homunculo (Reset):Sobre Homunculos:Cancelar");
+		switch (.@sel) {
+			case 1: goto L_Create;
+			case 2: goto L_DeleteHom;
+			case 3: goto L_About;
+			default: goto L_Cancel;
+		}
+	}
+
+	.@menu$ = "";
+	if (.@can_evolve)
+		.@menu$ += "Evoluir:";
+	if (.@can_mutate_s)
+		.@menu$ += "Mutar para S:";
+	if (.@can_reset_s_skills)
+		.@menu$ += "Resetar skills do Homunculus S:";
+	if (.@can_debug_hom99)
+		.@menu$ += "DEBUG: Setar Hom 99:";
+	if (.@can_delete_hom)
+		.@menu$ += "Deletar Homunculo (Reset):";
+	.@menu$ += "Informacoes do seu Homunculo:Sobre Homunculos:Cancelar";
+
+	.@sel = select(.@menu$);
+	.@idx = 1;
+
+	if (.@can_evolve) {
+		if (.@sel == .@idx)
+			goto L_Evolve;
+		.@idx++;
+	}
+
+	if (.@can_mutate_s) {
+		if (.@sel == .@idx)
+			goto L_MutateS;
+		.@idx++;
+	}
+
+	if (.@can_reset_s_skills) {
+		if (.@sel == .@idx)
+			goto L_ResetSSkills;
+		.@idx++;
+	}
+
+	if (.@can_debug_hom99) {
+		if (.@sel == .@idx)
+			goto L_DebugHom99;
+		.@idx++;
+	}
+
+	if (.@can_delete_hom) {
+		if (.@sel == .@idx)
+			goto L_DeleteHom;
+		.@idx++;
+	}
+
+	if (.@sel == .@idx)
+		goto L_Info;
+	if (.@sel == .@idx + 1)
+		goto L_About;
+	goto L_Cancel;
+
+	L_Create:
+		mes "[Criador de Homunculos]";
+		mes "Qual homunculo voce deseja criar?";
+		next;
+		switch (select("- Lif:- Amistr:- Filir:- Vanilmirth")) {
+			case 1: setarray .@type$[0], "Lif", 6001, 6005; break;
+			case 2: setarray .@type$[0], "Amistr", 6002, 6006; break;
+			case 3: setarray .@type$[0], "Filir", 6003, 6007; break;
+			case 4: setarray .@type$[0], "Vanilmirth", 6004, 6008; break;
+		}
+		mes "[Criador de Homunculos]";
+		mes "Existe dois tipos de " + .@type$[0] + ", qual voce deseja criar?";
+		next;
+		.@choice = select("- " + .@type$[0] + "[1]", "- " + .@type$[0] + "[2]");
+		mes "[Criador de Homunculos]";
+		mes "Cuide bem de seu novo amiguinho!";
+		atcommand "@makehomun " + .@type$[.@choice];
+		close;
+
+	L_Evolve:
+		mes "[Criador de Homunculos]";
+		homevolution;
+		mes "Muito bem, agora seu amiguinho esta mais forte e com uma nova aparencia!";
+		close;
+
+	L_MutateS:
+		if (!.@has_hom || .@is_s || !.@is_evolved || .@hom_lv < 99) {
+			mes "[Criador de Homunculos]";
+			mes "Seu homunculo ainda nao cumpre os requisitos para mutar para S.";
+			close;
+		}
+
+		mes "[Criador de Homunculos]";
+		mes "Seu homunculo esta pronto para virar Homunculus S!";
+
+		mes "Escolha qual forma S deseja:";
+		next;
+		switch (select("Eira:Bayeri:Sera:Dieter:Eleanor:Cancelar")) {
+			case 1: .@s_class = 6048; break; // Eira
+			case 2: .@s_class = 6049; break; // Bayeri
+			case 3: .@s_class = 6050; break; // Sera
+			case 4: .@s_class = 6051; break; // Dieter
+			case 5: .@s_class = 6052; break; // Eleanor
+			default: goto L_Cancel;
+		}
+		// hommutate exige estado MORPH + Strange Embryo.
+		// Se ainda nao estiver em MORPH, prepara automaticamente.
+		.@hstate = checkhomcall();
+		if (.@hstate != 2) {
+			.@ok = morphembryo();
+			if (!.@ok) {
+				mes "[Criador de Homunculos]";
+				mes "Nao consegui preparar a mutacao.";
+				mes "Verifique se seu homunculo esta invocado e se voce tem espaco no inventario.";
+				close;
+			}
+		}
+
+		.@ok = hommutate(.@s_class);
+		if (!.@ok) {
+			mes "[Criador de Homunculos]";
+			mes "A mutacao falhou.";
+			mes "Confirme se o homunculo esta evoluido e no nivel 99+.";
+			close;
+		}
+		mes "[Criador de Homunculos]";
+		mes "Mutacao concluida! Treine bem seu novo Homunculus S.";
+		close;
+
+	L_ResetSSkills:
+		if (!.@has_hom || !.@is_s) {
+			mes "[Criador de Homunculos]";
+			mes "Esse reset e exclusivo para Homunculus S.";
+			close;
+		}
+
+		.@bonus_pts = (.@hom_lv > 99 ? .@hom_lv - 99 : 0);
+		mes "[Criador de Homunculos]";
+		mes "Vou resetar as skills do seu Homunculus S.";
+		mes "Regra especial ativa: cada nivel acima do 99 vale +1 ponto.";
+		mes "No seu nivel atual, bonus extra: " + .@bonus_pts + ".";
+		if (select("Confirmar reset:Cancelar") == 2)
+			goto L_Cancel;
+
+		.@ok = homresetskill(1);
+		if (!.@ok) {
+			mes "[Criador de Homunculos]";
+			mes "Nao consegui resetar agora.";
+			mes "Deixe o homunculo ativo e tente novamente.";
+			close;
+		}
+
+		mes "[Criador de Homunculos]";
+		mes "Skills resetadas com sucesso!";
+		mes "Redistribua os pontos como preferir.";
+		close;
+
+	L_DebugHom99:
+		if (getgroupid() != 99) {
+			mes "[Criador de Homunculos]";
+			mes "Opcao restrita a administradores.";
+			close;
+		}
+
+		if (!gethominfo(1)) {
+			mes "[Criador de Homunculos]";
+			mes "Voce nao possui homunculo ativo.";
+			close;
+		}
+
+		.@target_lv = (.@is_s ? 175 : 99);
+		.@need_lv = .@target_lv - gethominfo(6);
+		if (.@need_lv <= 0) {
+			mes "[Criador de Homunculos]";
+			mes "Seu homunculo ja esta no nivel " + .@target_lv + " ou acima.";
+			close;
+		}
+
+		atcommand "@homlevel " + .@need_lv;
+		mes "[Criador de Homunculos]";
+		mes "Pronto! Seu homunculo foi ajustado para o nivel " + .@target_lv + ".";
+		close;
+
+	L_DeleteHom:
+		mes "[Criador de Homunculos]";
+		mes "Isso vai remover seu homunculo atual (ou vinculo fantasma).";
+		if (select("Sim, deletar:Cancelar") == 2)
+			goto L_Cancel;
+
+		.@ok = deletehomunculus();
+		if (.@ok)
+			mes "Homunculo removido com sucesso.";
+		else
+			mes "Nao encontrei homunculo para remover.";
+		close;
+
+	L_Info:
+		mes "[Criador de Homunculos]";
+		mes "Informacoes do seu Homunculo:";
+		mes "Nome: " + gethominfo(2) + ".";
+		mes "Amizade: " + gethominfo(3) + ".";
+		mes "Fome: " + gethominfo(4) + ".";
+		mes "Level: " + gethominfo(6) + ".";
+		close;
+
+	L_About:
+		mes "[Criador de Homunculos]";
+		mes "Homunculos sao criaturas especiais criadas";
+		mes "para ajudar em batalhas e aventuras!";
+		mes "Voce pode evoluir seu Homunculo a qualquer momento";
+		mes "Somente os Alquimistas e suas evolucoes";
+		mes "podem ter Homunculos!";
+		mes "Se voce for um posso te dar um homunculo a sua escolha.";
+		mes "Se voce ja tem cuide bem, evolua e treine seu Homunculo.";
+		next;
+		mes "[Criador de Homunculos]";
+		mes "Regras de evolucao/mutacao:";
+		mes "- Evoluir: homunculo base (nao evoluido).";
+		mes "- Mutar para S: homunculo evoluido e nivel 99+.";
+		mes "- Reset Skill S: disponivel para Homunculus S.";
+		mes "- Bonus do reset S: 1 ponto por nivel acima de 99.";
+		next;
+		mes "[Criador de Homunculos]";
+		mes "Mutacao S disponivel:";
+		mes "Voce pode escolher livremente:";
+		mes "Eira, Bayeri, Sera, Dieter ou Eleanor.";
+		close;
+
+	L_Cancel:
+		mes "[Criador de Homunculos]";
+		mes "Tudo bem, volte qualquer dia!";
+		close;
+}
+
+prontera,146,197,4	script	Loja de Tickets	408,{
+	mes "[Loja do den]";
+    mes "Bem Vindo a nossa loja!"; 
+    next;
+
+	callshop "luck_egg_barter_shop";
+	end;
+}
+
+prontera,166,198,5	script	Dominio de Classes	588,{
+OnTalk:
+	// #class_mastered_4096 = 0;
+	// changesex;
+	// sleep 1000;
+	// end;
+	// #classes_mastered = 4;
+
+	mes "[Domnio das Classes]";
+	mes "Saudaes, guerreiro.";
+	mes "Eu sou o guardio do ^FFCC00Domnio das Classes^000000.";
+	mes "Aqui, cada vez que voc atingir o nvel mximo com uma classe diferente sendo rate 1X,";
+	mes "sua reputao perante os deuses aumentar!";
+	next;
+
+	mes "[Domnio das Classes]";
+	mes "Cada classe nova que atingir o nvel mximo (175/70) sendo rate 1X, lhe dar ^00FF00pontos de reputao^000000.";
+	mes "Ao alcanar certos nveis de reputao, voc ganhar bnus especiais permanentes!";
+	next;
+
+	// Tabela de classes (3rd e transclasses)
+	setarray .@classes_id[0],
+		4060, // Rune Knight T
+		4073, // Royal Guard T
+		4065, // Guillotine Cross T
+		4079, // Shadow Chaser T
+		4063, // Arch Bishop T
+		4077, // Sura T
+		4061, // Warlock T
+		4074, // Sorcerer T
+		4062, // Ranger T
+		4075, // Minstrel
+		// 4076, // Wanderer
+		4064, // Mechanic
+		4078, // Genetic
+		4211, // Kagerou
+		// 4212, // Oboro
+		4215, // Rebellion
+		4239, // Star Emperor
+		4240, // Soul Reaper
+		4190; // Super Novice Expandido
+
+	switch(select("Registrar minha classe:Ver progresso das classes:Sair")) {
+		case 1:
+			if (exp_base_custom > 100) {
+				mes "[Domnio das Classes]";
+				mes "Somente Rate 1X sero reconhecidos pelos deuses.";
+				close;
+			}
+
+			if (BaseLevel < 175 || JobLevel < 70) {
+				mes "[Domnio das Classes]";
+				mes "Voc ainda no alcanou o nvel necessrio (175/70).";
+				close;
+			}	
+
+			.@class_id = Class;
+
+			if (getd("#class_mastered_" + .@class_id)) {
+				mes "[Domnio das Classes]";
+				mes "Voc j alcanou o domnio desta classe.";
+				close;
+			}
+
+			// Tabela de equivalncia entre classes masculino/feminino
+			switch (.@class_id) {
+				// ?? Minstrel <-> Wanderer
+				case 4075: // Minstrel
+					setd("#class_mastered_4076", 1);
+					break;
+				case 4076: // Wanderer
+					setd("#class_mastered_4075", 1);
+					break;
+
+				// ?? Ninja <-> Kunoichi (Kagerou / Oboro)
+				case 4211: // Kagerou
+					setd("#class_mastered_4212", 1);
+					break;
+				case 4212: // Oboro
+					setd("#class_mastered_4211", 1);
+					break;
+			}
+			
+			switch (.@class_id) {
+				// Minstrel/Wanderer -> 4075
+				case 4076: .@class_id = 4075; break;
+
+				// Kagerou/Oboro -> 4211
+				case 4212: .@class_id = 4211; break;
+			}
+
+			// --- Verifica se a classe atual  elegvel (pertence  lista) ---
+			.@eligible = 0;
+			for (.@i = 0; .@i < getarraysize(.@classes_id); .@i++) {
+				if (.@class_id == .@classes_id[.@i]) { .@eligible = 1; break; }
+			}
+			if (!.@eligible) {
+				mes "[Domnio das Classes]";
+				mes "Voc no pode receber esta conquista com a classe atual.";
+				close;
+				end;
+			}
+
+			setd("#class_mastered_" + .@class_id, 1);
+			#classes_mastered++;
+			specialeffect2 EF_JOBLVUP50;			
+
+			mes "[Domnio das Classes]";
+			mes "Parabns! Voc atingiu o nvel mximo com uma nova classe!";
+			mes "Total de classes dominadas: ^00FF00" + #classes_mastered + "/17^000000.";
+
+			// Recompensa
+			// add_reputation_points(8, 300);
+			callfunc("F_AddRep", 8, 300, 110009, 5000);
+
+			close;
+
+		case 2:
+			mes "Classes conquistadas: ^00FF00" + #classes_mastered + "^000000";
+			mes "Classes restantes: ^FF0000" + (17 - #classes_mastered) + "^000000";
+			next;
+
+			setarray .@classes_name$[0],
+				"Rune Knight Transcendente",
+				"Royal Guard Transcendente",
+				"Guillotine Cross Transcendente",
+				"Shadow Chaser Transcendente",
+				"Arch Bishop Transcendente",
+				"Sura Transcendente",
+				"Warlock Transcendente",
+				"Sorcerer Transcendente",
+				"Ranger Transcendente",
+				"Minstrel/Wanderer",
+				// "Minstrel/Wanderer",
+				"Mechanic",
+				"Genetic",
+				"Kagerou/Oboro",
+				// "Kagerou/Oboro",
+				"Rebellion",
+				"Star Emperor",
+				"Soul Reaper",
+				"Super Aprendiz Expandido";
+
+			// Listar progresso
+			mes "==== ^00FF00Classes Conquistadas^000000 ====";
+			for (.@i = 0; .@i < getarraysize(.@classes_id); .@i++) {
+				// setd("#class_mastered_" + .@classes_id[.@i], 0);
+				switch (.@classes_id[.@i]) {
+					case 4211: // Kagerou/Oboro
+						// setd("#class_mastered_4212", 0);
+						if (getd("#class_mastered_4211") || getd("#class_mastered_4212"))
+							mes "^00FF00- " + .@classes_name$[.@i] + "^000000";
+						break;
+					case 4075: // Minstrel/Wanderer
+						// setd("#class_mastered_4076", 0);
+						if (getd("#class_mastered_4075") || getd("#class_mastered_4076"))
+							mes "^00FF00- " + .@classes_name$[.@i] + "^000000";
+						break;
+					default:
+						if (getd("#class_mastered_" + .@classes_id[.@i]))
+							mes "^00FF00- " + .@classes_name$[.@i] + "^000000";
+						break;
+				}
+			}
+
+			mes "===== ^FF0000Classes Restantes^000000 =====";
+			for (.@i = 0; .@i < getarraysize(.@classes_id); .@i++) {
+				switch (.@classes_id[.@i]) {
+					case 4211: // Kagerou/Oboro
+						if (!getd("#class_mastered_4211") && !getd("#class_mastered_4212"))
+							mes "^FF0000- " + .@classes_name$[.@i] + "^000000";
+						break;
+					case 4075: // Minstrel/Wanderer
+						if (!getd("#class_mastered_4075") && !getd("#class_mastered_4076"))
+							mes "^FF0000- " + .@classes_name$[.@i] + "^000000";
+						break;
+					default:
+						if (!getd("#class_mastered_" + .@classes_id[.@i]))
+							mes "^FF0000- " + .@classes_name$[.@i] + "^000000";
+						break;
+				}
+			}
+			close;
+
+		case 3:
+			mes "[Domnio das Classes]";
+			mes "Retorne quando estiver pronto para provar seu domnio.";
+			close;
+	}
+	end;
+}
+
+prontera,141,171,5	script	Premio do Amigo	612,{
+
+	mes "[Premio do Amigo]";
+	switch(select("Quero saber sobre o premio!","Um amigo me indicou!","Sair")) {
+		case 1:
+			mes "Uma caixa especial recebida ao indicar um amigo.";
+			mes "Contem os seguintes itens:";
+			mes "^0055FF10x Goma de Mascar^000000";
+			mes "^0055FF10x Super Pocao Media de Vida^000000";
+			mes "^0055FF10x Macaroons Sortidos^000000";
+			mes "^0055FF10x Taca da Felicidade^000000";
+			mes "^0055FF10x Amuleto de Ziegfried^000000";
+			mes "^0055FF4x Diario de Aventuras^000000";
+			close;
+		case 2:
+			break;
+		default:
+			close;
+	}
+
+	if (BaseLevel < 20) {
+		mes "E necessario mais experiencia no jogo.";
+		mes "Volte quando alcancar o nivel 20.";
+		close;
+	}
+
+	// Cada conta so pode informar quem indicou uma unica vez.
+	if (#friend_ref_set) {
+		mes "Você ja nos informou quem te indicou.";
+		close;
+	}
+
+	.@ip$ = getcharip();
+
+	while (true) {
+		mes "Digite o nick de quem te indicou:";
+		input .@friend$;
+
+		query_sql("SELECT char_id, account_id FROM `char` WHERE name = '"+escape_sql(.@friend$)+"'", .@friend_id, .@friend_aid);
+		if (!getarraysize(.@friend_id)) {
+			mes "Nick nao encontrado. Deseja tentar novamente?";
+			if (select("Tentar novamente","Cancelar") == 1)
+				next;
+			mes "Indicação cancelada.";
+			break;
+		}
+
+		// Impedir auto-indicação (mesma conta)
+		if (.@friend_aid[0] == getcharid(2)) {
+			mes "Você nao pode indicar a si proprio.";
+			break;
+		}
+
+		// Impedir indicação de quem joga do mesmo IP
+		query_sql("SELECT last_ip FROM `login` WHERE account_id = "+.@friend_aid[0], .@friend_ip$);
+		if (getarraysize(.@friend_ip$) > 0 && .@friend_ip$[0] == .@ip$) {
+			mes "Você nao pode indicar alguem que joga do mesmo IP.";
+			break;
+		}
+
+		// Registra quem indicou para bloquear novas alterações nesta conta.
+		#friend_ref_set = 1;
+		#friend_ref_name$ = .@friend$;
+		#friend_ref_time = gettimetick(2);
+
+		next;
+		mes "[Premio do Amigo]";
+		mes "Nick encontrado! Sua indicação foi registrada.";
+
+		// Premia quem foi indicado (pode receber varias vezes de pessoas diferentes).
+		setarray .@mail_item_id[0], 9663;
+		setarray .@mail_item_amount[0], 1;
+		mail(.@friend_id[0], "Evento do Amigo", "Indicação de Amigo", "Você foi indicado por "+strcharinfo(0)+"! Parabens!", 0, .@mail_item_id, .@mail_item_amount);
+		mes "O premio foi enviado ao seu amigo!";
+		break;
+	}
+	close;
+}
+// ----------------------- warps -----------------------
+prontera,156,22,0	warp	prt001	3,2,prt_fild08,170,375
+prontera,22,203,0	warp	prt002	2,3,prt_fild05,367,205
+prontera,289,203,0	warp	prt003	2,3,prt_fild06,27,193
+prontera,156,358,0	warp	prt004	2,3,prt_fild01,199,29
+
+
+// prontera,129,205,4	script	Mudanca de Classe	123,{
+// 	mes "[Mudanca de Classe]";
+// 	mes "Deseja mudar sua classe para 4002?";
+// 	if (select("Sim:Cancelar") == 2)
+// 		close;
+
+// 	jobchange 4002;
+// 	mes "Classe alterada para 4002 com sucesso.";
+// 	close;
+// }

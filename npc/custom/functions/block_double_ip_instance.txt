@@ -1,0 +1,61 @@
+function	script	F_CheckInstanceIPPermission	{
+
+	// =========================
+	// Só funciona em instância
+	// =========================
+	.@instance_id = instance_id(IM_PARTY);
+	if (.@instance_id <= 0)
+		return 1; // fora de instância ? permite
+
+	// =========================
+	// Dados
+	// =========================
+	.@ip$  = getcharip();
+	.@day$ = gettimestr("%Y%m%d", 2);
+	.@pid  = getcharid(1); // party_id
+
+	.@permission_key$ = "#IR_" + .@day$ + "_" + .@instance_id + "_" + .@ip$ + "_" + .@pid;
+
+	// =========================
+	// Busca char autorizado
+	// =========================
+	.@saved_cid = 0;
+	query_sql(
+		"SELECT `value` FROM acc_reg_num "+
+		"WHERE `key` = '"+ .@permission_key$ +"' "+
+		"LIMIT 1",
+		.@saved_cid
+	);
+
+	// =========================
+	// Já existe alguém
+	// =========================
+	if (.@saved_cid > 0) {
+
+		// Outro char ? bloqueia
+		if (.@saved_cid != getcharid(0))
+			return 0; // negado
+
+		// Mesmo char ? permite reentrada
+		return 1;
+	}
+
+	// =========================
+	// Deleta a Variável anterior
+	// =========================
+    query_sql(
+        "DELETE FROM acc_reg_num "+
+        "WHERE `account_id` = "+ getcharid(3) +" "+
+        "AND `key` LIKE '#IR_%' "
+    );
+
+	// =========================
+	// Primeiro a entrar ? registra
+	// =========================
+	query_sql(
+		"INSERT INTO acc_reg_num (`account_id`, `key`, `value`) VALUES ("+
+		getcharid(3)+", '"+ .@permission_key$ +"', '"+ getcharid(0) +"')"
+	);
+
+	return 1; // permitido
+}

@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS `vending_transactions` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `vending_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `seller_account_id` int(11) unsigned NOT NULL DEFAULT '0',
+  `seller_char_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `seller_name` varchar(30) NOT NULL DEFAULT '',
+  `buyer_account_id` int(11) unsigned NOT NULL DEFAULT '0',
+  `buyer_char_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `buyer_name` varchar(30) NOT NULL DEFAULT '',
+  `item_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `amount` int(10) unsigned NOT NULL DEFAULT '0',
+  `coin_type` enum('Zeny','Rops','RMT') NOT NULL DEFAULT 'Zeny',
+  `unit_price` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `total_price` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `total_received` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `purchased_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_seller_char_id` (`seller_char_id`),
+  KEY `idx_buyer_char_id` (`buyer_char_id`),
+  KEY `idx_item_id` (`item_id`),
+  KEY `idx_purchased_at` (`purchased_at`)
+) ENGINE=MyISAM;

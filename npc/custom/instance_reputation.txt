@@ -1,0 +1,124 @@
+//=============================================================
+// NPC: Aumento de Reputação
+// Autor original: (você)
+// Revisado por: ChatGPT
+//=============================================================
+prontera,160,180,4	script	Reputation Increaser	4_EP19_IWIN,{
+
+	// ===== CONFIGURAÇÕES =====
+	.@zeny_cost      = 1;    // Zeny necessários por investimento
+	.@zeny_reputation = -6000;        // Reputação ganha por investimento em Zeny
+	.@item_cost      = 5;          // Quantidade de item por investimento
+	.@item_reputation = 100;       // Reputação ganha por investimento em item
+	.@item_id        = 7179;       // ID do item (POD)
+
+	// Lista de reputações:
+	// <ID da reputação>, "<Nome>", <Limite máximo>
+	setarray .@rep$, 
+        1,"Instâncias",3000,
+        2,"Votos",3000,
+        3,"Cheffênia Normal",5000,
+        4,"Cheffênia Hard",5000,
+        5,"Bio 5 Normal",5000,
+        6,"Bio 5 Hard",5000,
+        7,"Reborn",5000;
+
+	// ===== INÍCIO =====
+	disable_items;
+	cutin "ep19_iwin04.png",2;
+
+	mes "[Aumento de Reputação]";
+	// set .@reputation, get_reputation_points(atoi(.@rep$[0]));
+	// .@zeny_reputation = .@zeny_reputation - .@reputation;
+	// mes "Reputação: " + .@reputation;
+	if(getarraysize(.@rep$) > 3)
+		mes "Olá, posso ^FF8000aumentar sua reputação^000000 em várias áreas usando ^FF8000Zeny ou POD^000000.";
+	else
+		mes "Olá, posso ^FF8000aumentar sua reputação^000000 em "+.@rep$[1]+" usando ^FF8000Zeny ou POD^000000.";
+	next;
+
+	switch(select("Como funciona?","Investir Zeny","Investir POD","Sair")) {
+	case 1:
+		mes "[Aumento de Reputação]";
+		mes "Para cada doação, sua reputação sobe na área escolhida.";
+		if(getarraysize(.@rep$)>3) {
+			mes "Áreas disponíveis:";
+			for(.@i=0; .@i<getarraysize(.@rep$); .@i+=3)
+				mes "- "+.@rep$[.@i+1];
+		}
+		next;
+		mes "Cada "+F_InsertComma(.@zeny_cost)+"z = "+.@zeny_reputation+" pontos, ou "+
+		    .@item_cost+" "+mesitemlink(.@item_id)+" = "+.@item_reputation+" pontos.";
+		close;
+	case 2: .@use_zeny = true; break;
+	case 3: .@use_item = true; break;
+	default:
+		cutin "",255;
+		close;
+	}
+
+	// ===== Escolher área =====
+	mes "[Aumento de Reputação]";
+	mes "Escolha a área:";
+	.@menu$="";
+	for(.@i=0; .@i<getarraysize(.@rep$); .@i+=3)
+		.@menu$ += .@rep$[.@i+1]+":";
+	.@s = (select(.@menu$)-1)*3;
+	next;
+
+	// ===== Verificar limite atual =====
+	if(get_reputation_points(atoi(.@rep$[.@s])) >= atoi(.@rep$[.@s+2])) {
+		mes "Sua reputação em "+.@rep$[.@s+1]+" já atingiu o máximo.";
+		cutin "",255;
+		close;
+	}
+
+	// ===== Calcular quantidade =====
+	mes "[Aumento de Reputação]";
+	mes "Quantas vezes deseja investir? (0 para cancelar)";
+	input .@times;
+	if(.@times < 1) close;
+
+	// Ajustar se não tiver recursos
+	if(.@use_zeny) {
+		if(.@times * .@zeny_cost > Zeny)
+			.@times = Zeny / .@zeny_cost;
+	} else {
+		if(.@times * .@item_cost > countitem(.@item_id))
+			.@times = countitem(.@item_id) / .@item_cost;
+	}
+	if(.@times < 1) {
+		mes "Você não possui recursos suficientes.";
+		cutin "",255;
+		close;
+	}
+
+	// ===== Confirmar =====
+	.@gain = (.@use_zeny) ? .@zeny_reputation * .@times : .@item_reputation * .@times;
+	if(get_reputation_points(atoi(.@rep$[.@s])) + .@gain > atoi(.@rep$[.@s+2])) {
+		mes "Essa quantidade excederia o máximo permitido.";
+		cutin "",255;
+		close;
+	}
+
+	mes "Confirma investir para ganhar ^FF0000"+F_InsertComma(.@gain)+
+	    "^000000 pontos em "+.@rep$[.@s+1]+"?";
+	if(select("Cancelar","Confirmar") == 1) close;
+
+	// ===== Cobrar e adicionar reputação =====
+	if(.@use_zeny) {
+		if(Zeny < .@times * .@zeny_cost) { mes "Zeny insuficiente."; close; }
+		Zeny -= .@times * .@zeny_cost;
+	} else {
+		if(countitem(.@item_id) < .@times * .@item_cost) { mes "Itens insuficientes."; close; }
+		delitem .@item_id, .@times * .@item_cost;
+	}
+	add_reputation_points(atoi(.@rep$[.@s]), .@gain);
+
+	// ===== Fim =====
+	mes "Sua reputação em "+.@rep$[.@s+1]+" aumentou em "+F_InsertComma(.@gain)+" pontos!";
+	specialeffect2 EF_STEALCOIN;
+	emotion ET_DELIGHT;
+	cutin "",255;
+	close;
+}
