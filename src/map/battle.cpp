@@ -10123,6 +10123,16 @@ struct Damage battle_calc_attack(int32 attack_type,struct block_list *bl,struct 
 			memset(&d,0,sizeof(d));
 			break;
 		}
+
+	if (skill_id != 0 && (d.damage > 0 || d.damage2 > 0)) {
+		std::shared_ptr<s_skill_db> skill = skill_db.find(skill_id);
+
+		if (skill != nullptr && skill->damage_rate != 100) {
+			d.damage = d.damage * skill->damage_rate / 100;
+			d.damage2 = d.damage2 * skill->damage_rate / 100;
+		}
+	}
+
 	if( d.damage + d.damage2 < 1 )
 	{	//Miss/Absorbed
 		//Weapon attacks should go through to cause additional effects.

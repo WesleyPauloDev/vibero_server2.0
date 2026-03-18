@@ -16526,11 +16526,7 @@ std::shared_ptr<s_skill_unit_group> skill_unitsetting(struct block_list *src, ui
 				unit_val2 = map_getcell(src->m, ux, uy, CELL_GETTYPE);
 				break;
 			case WZ_WATERBALL:
-				//Check if there are cells that can be turned into waterball units
-				if (!sd || map_getcell(src->m, ux, uy, CELL_CHKWATER) 
-					|| (map_find_skill_unit_oncell(src, ux, uy, SA_DELUGE, nullptr, 1)) != nullptr || (map_find_skill_unit_oncell(src, ux, uy, NJ_SUITON, nullptr, 1)) != nullptr)
-					break; //Turn water, deluge or suiton into waterball cell
-				continue;
+				break;
 			case GS_DESPERADO:
 				unit_val1 = abs(layout->dx[i]);
 				unit_val2 = abs(layout->dy[i]);
@@ -19734,12 +19730,14 @@ bool skill_check_condition_castend( map_session_data& sd, uint16 skill_id, uint1
 		}
 #ifdef RENEWAL
 		case ASC_EDP:
-			int16 item_edp = itemdb_group.item_exists_pc(&sd, IG_EDP);
-			if (item_edp < 0) {
-				clif_skill_fail( sd, skill_id, USESKILL_FAIL_NEED_ITEM, 1, ITEMID_POISON_BOTTLE ); // [%s] required '%d' amount.
-				return false;
-			} else
-				pc_delitem(&sd, item_edp, 1, 0, 1, LOG_TYPE_CONSUME);
+			if (!pc_isvip(&sd)) {
+				int16 item_edp = itemdb_group.item_exists_pc(&sd, IG_EDP);
+				if (item_edp < 0) {
+					clif_skill_fail( sd, skill_id, USESKILL_FAIL_NEED_ITEM, 1, ITEMID_POISON_BOTTLE ); // [%s] required '%d' amount.
+					return false;
+				} else
+					pc_delitem(&sd, item_edp, 1, 0, 1, LOG_TYPE_CONSUME);
+			}
 			break;
 #endif
 	}
@@ -25266,6 +25264,14 @@ uint64 SkillDatabase::parseBodyNode(const ryml::NodeRef& node) {
 	} else {
 		if (!exists)
 			memset(skill->num, 0, sizeof(skill->num));
+	}
+
+	if (this->nodeExists(node, "DamageRate")) {
+		if (!this->asInt32(node, "DamageRate", skill->damage_rate))
+			return 0;
+	} else {
+		if (!exists)
+			skill->damage_rate = 100;
 	}
 
 	if (this->nodeExists(node, "Element")) {

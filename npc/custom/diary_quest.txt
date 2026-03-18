@@ -1,29 +1,28 @@
-// Salve este arquivo como "npc/custom/mission_board.txt"
 prontera,147,173,5	script	Mural de Missões	888,{
 
 	// IDs fictícios para cada missão
-	// (coloque IDs únicos acima de 60000)
-	setarray .Diarias[0], 60400, 60401, 60402, 60403, 60404; 
+	// (coloque IDs unicos acima de 60000)
+	setarray .Diarias[0], 60400, 60401, 60402, 60403, 60404;
 	// 0 = Matar 100 monstros
 	// 1 = Completar 1 instância
 	// 2 = Votar no servidor
 	// 3 = Participar de evento diário
 	// 4 = Completar todas as diárias
 
-	setarray .Semanais[0], 60500, 60501, 60502; 
-	// 0 = Completar Torre Sem Fim
+	setarray .Semanais[0], 60500, 60501, 60502;
+	// 0 = Completar Torre sem Fim
 	// 1 = Participar do Boss Global
 	// 2 = Completar todas as semanais
 
 	mes "[Mural de Missões]";
 	mes "Bem-vindo ao Mural de Missões!";
 	next;
-	
+
 	switch(select("Missões Diárias:Missões Semanais:Sair")) {
-		case 1: // ---------- DIÁRIAS ----------
-			callsub L_Diarias;
+		case 1:
+			callsub L_Diarias; 
 			end;
-		case 2: // ---------- SEMANAIS ----------
+		case 2:
 			callsub L_Semanais;
 			end;
 		case 3:
@@ -31,99 +30,115 @@ prontera,147,173,5	script	Mural de Missões	888,{
 			close;
 	}
 
-	// ======================================================
-// Sub-routine: Missões Diárias (menu com status)
-// ======================================================
 L_Diarias:
-
-	// #cooldown_diario = 0;
-
 	if (#cooldown_diario <= gettimetick(2)) {
 		#d_monstros = 1;
 		#d_monstros_count = 0;
 		#instancia = 1;
-		#voto = 0;
+		#voto = 1;
 		#evento = 1;
 		#todas = 1;
 		#todas_count = 0;
 		#cooldown_diario = gettimetick(2) + callfunc("get_daily_reset");
 	}
 
-	if (#instancia != 1 && #d_monstros != 1 && #voto != 1 && #evento != 1) {
-		set #todas    , 2;  // Todas diárias
-	} 
+	// Valida voto do dia pela tabela cp_votes.
+	// 1 = pendente, 2 = pode resgatar, 0 = recompensa já recebida hoje.
+	if (#voto == 1) {
+		.@votes_today = 0;
+		.@last_vote$ = "";
+		.@login_user$ = "";
+		query_sql(
+			"SELECT `userid` FROM `login` WHERE `account_id` = " + getcharid(3) + " LIMIT 1",
+			.@login_user$
+		);
+		query_sql(
+			"SELECT COUNT(*), COALESCE(DATE_FORMAT(MAX(`vote_date`), '%Y-%m-%d %H:%i:%s'), '') " +
+			"FROM `cp_votes` " +
+			"WHERE (`account_id` = " + getcharid(3) + " OR `username` = '" + escape_sql(.@login_user$) + "') " +
+			"AND `vote_date` >= CURDATE() " +
+			"AND `vote_date` < CURDATE() + INTERVAL 1 DAY",
+			.@votes_today, .@last_vote$
+		);
+		if (.@votes_today > 0)
+			#voto = 2;
+	}
 
-	// Monta menu com status
+	if (#instancia != 1 && #d_monstros != 1 && #voto != 1 && #evento != 1)
+		#todas = 2;
+
 	mes "[Mural de Missões]";
 	mes "Missões disponíveis hoje:";
 	next;
 
-	if (#d_monstros == 1)      set .@st_monstros$, "^FF0000[Pendente]^000000";
-	else if (#d_monstros == 2)	set .@st_monstros$, "^0000FF[Resgatar]^000000";	
-	else                       set .@st_monstros$, "^00FF00[OK]^000000";
+	if (#d_monstros == 1) set .@st_monstros$, "^FF0000[Pendente]^000000";
+	else if (#d_monstros == 2) set .@st_monstros$, "^0000FF[Resgatar]^000000";
+	else set .@st_monstros$, "^777777[Recebida Hoje]^000000";
+
 	if (#instancia == 1) set .@st_instancia$, "^FF0000[Pendente]^000000";
-	else if (#instancia == 2)	set .@st_instancia$, "^0000FF[Resgatar]^000000";
-	else                  set .@st_instancia$, "^00FF00[OK]^000000";
-	if (#voto == 0) set .@st_voto$, "^FF0000[Pendente]^000000";
-	else if (#voto == 1)	set .@st_voto$, "^0000FF[Resgatar]^000000";
-	else                  set .@st_voto$, "^00FF00[OK]^000000";
+	else if (#instancia == 2) set .@st_instancia$, "^0000FF[Resgatar]^000000";
+	else set .@st_instancia$, "^777777[Recebida Hoje]^000000";
+
+	if (#voto == 1) set .@st_voto$, "^FF0000[Pendente]^000000";
+	else if (#voto == 2) set .@st_voto$, "^0000FF[Resgatar]^000000";
+	else set .@st_voto$, "^777777[Recebida Hoje]^000000";
+
 	if (#evento == 1) set .@st_evento$, "^FF0000[Pendente]^000000";
-	else if (#evento == 2)	set .@st_evento$, "^0000FF[Resgatar]^000000";
-	else                  set .@st_evento$, "^00FF00[OK]^000000";
+	else if (#evento == 2) set .@st_evento$, "^0000FF[Resgatar]^000000";
+	else set .@st_evento$, "^777777[Recebida Hoje]^000000";
+
 	if (#todas == 1) set .@st_todas$, "^FF0000[Pendente]^000000";
-	else if (#todas == 2)	set .@st_todas$, "^0000FF[Resgatar]^000000";
-	else                  set .@st_todas$, "^00FF00[OK]^000000";
+	else if (#todas == 2) set .@st_todas$, "^0000FF[Resgatar]^000000";
+	else set .@st_todas$, "^777777[Recebida Hoje]^000000";
 
 	.@opt = select(
 		"1) Derrote " + #d_monstros_count + "/100 Anubis " + .@st_monstros$,
 		"2) Complete 1 Instância " + .@st_instancia$,
 		"3) Vote no Servidor " + .@st_voto$,
 		"4) Participe de um Evento " + .@st_evento$,
-		"5) Todas as Diárias " + #todas_count + "/4" + .@st_todas$,
+		"5) Todas as Diarias " + #todas_count + "/4 " + .@st_todas$,
 		"Sair"
 	);
 
 	switch(.@opt) {
-		case 1: // Monstros
+		case 1:
 			if (#d_monstros == 2) {
 				mes "[Mural de Missões]";
 				mes "Você derrotou 100 Anubis!";
 				mes "Aqui está sua recompensa.";
-				getitem 12412, 1; // Exemplo: 5 Poções Vermelhas
+				getitem 12412, 1;
 				#d_monstros = 0;
 				#todas_count++;
 				close;
 			} else if (#d_monstros == 0) {
 				mes "[Mural de Missões]";
-				mes "Você Já Recebeu sua recompensa!";
+				mes "Você já recebeu sua recompensa hoje!";
 				close2;
 				goto L_Diarias;
 			} else {
-				// set .@progress, getq2(.Diarias[0]); // Progresso atual de kills
 				mes "[Mural de Missões]";
-				mes "Missão: Derrote 100 Anubis no Mapa de Anubis.";
+				mes "Missão: Derrote 100 Anubis no mapa de Anubis.";
 				mes "Deseja ir ao mapa agora?";
 				if (select("Sim:Não") == 1) {
 					close2;
-					warp "inter01",220,359; // Teleporta para o mapa de Anubis
+					warp "inter01",220,359;
 				}
-				// mes "Progresso: ^0000FF" + .@progress + "/100^000000.";
 				close;
 			}
 			break;
 
-		case 2: // Instância
+		case 2:
 			if (#instancia == 2) {
 				mes "[Mural de Missões]";
 				mes "Parabéns por completar uma instância!";
 				mes "Aqui está sua recompensa.";
-				getitem 22818, 2; // Exemplo: 2 Poções Azuis
+				getitem 22818, 2;
 				#instancia = 0;
 				#todas_count++;
 				close;
 			} else if (#instancia == 0) {
 				mes "[Mural de Missões]";
-				mes "Você Já Recebeu sua recompensa!";
+				mes "Você já recebeu sua recompensa hoje!";
 				close2;
 				goto L_Diarias;
 			} else {
@@ -134,40 +149,42 @@ L_Diarias:
 			}
 			break;
 
-		case 3: // Voto
-			if (#voto == 1) {
+		case 3:
+			if (#voto == 2) {
 				mes "[Mural de Missões]";
 				mes "Obrigado por votar no servidor!";
 				mes "Aqui está sua recompensa.";
-				getitem 607, 50; // Exemplo: 3 Yggdrasil Seed
-				#voto = 2;
+				getitem 607, 50;
+				#voto = 0;
 				#todas_count++;
 				close;
-			} else if (#voto == 2) {
+			} else if (#voto == 0) {
 				mes "[Mural de Missões]";
-				mes "Você Já Recebeu sua recompensa!";
+				mes "Você já recebeu sua recompensa hoje!";
 				close2;
 				goto L_Diarias;
 			} else {
 				mes "[Mural de Missões]";
 				mes "Missão: Vote no servidor pelo nosso painel de controle.";
-				mes "Após votar, a missão será concluída.";
+				mes "A missão procura voto de hoje por account_id ou username.";
+				if (.@last_vote$ != "")
+					mes "Último voto encontrado: " + .@last_vote$;
 				close;
 			}
 			break;
 
-		case 4: // Evento diário
+		case 4:
 			if (#evento == 2) {
 				mes "[Mural de Missões]";
 				mes "Você participou de um evento diário!";
 				mes "Receba sua recompensa.";
-				getitem 7621, 5; // Exemplo: 5 Blue Herbs
+				getitem 7621, 5;
 				#evento = 0;
 				#todas_count++;
 				close;
 			} else if (#evento == 0) {
 				mes "[Mural de Missões]";
-				mes "Você Já Recebeu sua recompensa!";
+				mes "Você já recebeu sua recompensa hoje!";
 				close2;
 				goto L_Diarias;
 			} else {
@@ -178,24 +195,24 @@ L_Diarias:
 			}
 			break;
 
-		case 5: // Todas
+		case 5:
 			if (#todas == 2) {
 				mes "[Mural de Missões]";
 				mes "Incrível! Você completou todas as missões diárias.";
 				mes "Recompensa especial!";
-				getitem 12223, 2; // Exemplo: Old Card Album
+				getitem 12223, 2;
 				#todas = 0;
 				close;
 			} else if (#todas == 0) {
 				mes "[Mural de Missões]";
-				mes "Você Já Recebeu sua recompensa!";
+				mes "Você já recebeu sua recompensa hoje!";
 				close2;
 				goto L_Diarias;
 			} else {
 				mes "[Mural de Missões]";
-				mes "Missão: Conclua todas as diárias para Resgatar sua Recompensa.";
+				mes "Missão: Conclua todas as diárias para resgatar sua recompensa.";
 				close;
-			}			
+			}
 			break;
 
 		case 6:
@@ -203,12 +220,7 @@ L_Diarias:
 			close;
 	}
 
-
-	// ======================================================
-// Sub-routine: Missões Semanais (menu com status)
-// ======================================================
 L_Semanais:
-	
 	if (#cooldown_semanal <= gettimetick(2)) {
 		#torre = 1;
 		#boss = 1;
@@ -217,70 +229,67 @@ L_Semanais:
 		#cooldown_semanal = gettimetick(2) + callfunc("get_weekly_reset");
 	}
 
-	// Monta menu com status
 	mes "[Mural de Missões]";
 	mes "Missões semanais:";
 	next;
 
-	if (#torre != 1 && #boss != 1) {
-		set #todas_semanais   , 2;  // Todas diárias
-	} 
-	
-	// Ícones (use cores em vez de ?/? se preferir)
-	if (#torre == 1)  set .@st_torre$, "^FF0000[Pendente]^000000";
-	else if (#torre == 2)  set .@st_torre$, "^0000FF[Resgatar]^000000";
-	else               set .@st_torre$, "^00FF00[OK]^000000";
-	if (#boss == 1)   set .@st_boss$, "^FF0000[Pendente]^000000";
-	else if (#boss == 2)  set .@st_boss$, "^0000FF[Resgatar]^000000";
-	else               set .@st_boss$, "^00FF00[OK]^000000";
-	if (#todas_semanais == 1)  set .@st_todas_semanais$, "^FF0000[Pendente]^000000";
-	else if (#todas_semanais == 2)  set .@st_todas_semanais$, "^0000FF[Resgatar]^000000";
-	else               set .@st_todas_semanais$, "^00FF00[OK]^000000";
+	if (#torre != 1 && #boss != 1)
+		#todas_semanais = 2;
+
+	if (#torre == 1) set .@st_torre$, "^FF0000[Pendente]^000000";
+	else if (#torre == 2) set .@st_torre$, "^0000FF[Resgatar]^000000";
+	else set .@st_torre$, "^777777[Recebida Esta Semana]^000000";
+
+	if (#boss == 1) set .@st_boss$, "^FF0000[Pendente]^000000";
+	else if (#boss == 2) set .@st_boss$, "^0000FF[Resgatar]^000000";
+	else set .@st_boss$, "^777777[Recebida Esta Semana]^000000";
+
+	if (#todas_semanais == 1) set .@st_todas_semanais$, "^FF0000[Pendente]^000000";
+	else if (#todas_semanais == 2) set .@st_todas_semanais$, "^0000FF[Resgatar]^000000";
+	else set .@st_todas_semanais$, "^777777[Recebida Esta Semana]^000000";
 
 	.@opt = select(
 		"1) Torre Sem Fim " + .@st_torre$,
-		"2) Boss Global "   + .@st_boss$,
-		"3) Todas Semanais " + #semanal_count + "/2" + .@st_todas_semanais$,
+		"2) Boss Global " + .@st_boss$,
+		"3) Todas Semanais " + #semanal_count + "/2 " + .@st_todas_semanais$,
 		"Sair"
 	);
 
 	switch(.@opt) {
-		case 1: // Torre Sem Fim
+		case 1:
 			if (#torre == 2) {
 				mes "[Mural de Missões]";
-				mes "Parabéns! Você já completou a Torre Sem Fim.";
+				mes "Parabéns! Você já completou a Torre sem Fim.";
 				mes "Aqui está sua recompensa!";
-				// Recompensa
-				getitem 12223, 5; // Exemplo: 3 Poções Azuis
-				set #torre, 0;
+				getitem 12223, 5;
+				#torre = 0;
 				#semanal_count++;
 				close;
 			} else if (#torre == 0) {
 				mes "[Mural de Missões]";
-				mes "Você Já Recebeu sua recompensa!";
+				mes "Você já recebeu sua recompensa esta semana!";
 				close2;
 				goto L_Semanais;
 			} else {
 				mes "[Mural de Missões]";
-				mes "Missão: Complete a Torre Sem Fim.";
-				mes "Entre na instância, derrote os desafios até o final.";
+				mes "Missão: Complete a Torre sem Fim.";
+				mes "Entre na instância e derrote os desafios até o final.";
 				close;
 			}
 			break;
 
-		case 2: // Boss Global
+		case 2:
 			if (#boss == 2) {
 				mes "[Mural de Missões]";
 				mes "Ótimo! Você participou do Boss Global.";
 				mes "Receba sua recompensa!";
-				// Recompensa
-				getitem 12224, 5; // Exemplo: 5 Yggdrasil Seed
-				set #boss,  0;
+				getitem 12224, 5;
+				#boss = 0;
 				#semanal_count++;
 				close;
 			} else if (#boss == 0) {
 				mes "[Mural de Missões]";
-				mes "Você Já Recebeu sua recompensa!";
+				mes "Você já recebeu sua recompensa esta semana!";
 				close2;
 				goto L_Semanais;
 			} else {
@@ -291,24 +300,23 @@ L_Semanais:
 			}
 			break;
 
-		case 3: // Todas semanais
+		case 3:
 			if (#todas_semanais == 2) {
 				mes "[Mural de Missões]";
 				mes "Incrível! Você concluiu todas as missões semanais.";
 				mes "Recompensa épica para você!";
-				// Recompensa final
-				getitem 12411, 2; // Exemplo: Old Card Album
-				set #todas_semanais, 0;
+				getitem 12411, 2;
+				#todas_semanais = 0;
 				close;
 			} else if (#todas_semanais == 0) {
 				mes "[Mural de Missões]";
-				mes "Você Já Recebeu sua recompensa!";
+				mes "Você já recebeu sua recompensa esta semana!";
 				close2;
 				goto L_Semanais;
 			} else {
 				mes "[Mural de Missões]";
 				mes "Missão: Concluir todas as semanais.";
-				mes "Finalize ^FF0000Torre Sem Fim^000000 e ^FF0000Boss Global^000000 para liberar esta.";
+				mes "Finalize Torre sem Fim e Boss Global para liberar esta.";
 				close;
 			}
 			break;
@@ -318,7 +326,3 @@ L_Semanais:
 			close;
 	}
 }
-
-
-	
-	

@@ -116,7 +116,7 @@ case $1 in
 		else
 		 echo "Logging is disabled"
 		fi
-		for i in ${L_SRV} ${C_SRV} ${M_SRV} ${W_SRV}
+		for i in ${L_SRV} ${C_SRV} ${W_SRV} ${M_SRV}
 		do
 			start_serv $i $ENLOG
 		done
@@ -127,7 +127,7 @@ case $1 in
 		if [ -z $2 ]; then Restart_count=10; else Restart_count=$2; fi
 		if [ -z $3 ]; then Restart_sleep=3; else Restart_sleep=$3; fi
 		echo "Going to watch rAthena for restart_count = $Restart_count, restart_sleep = $Restart_sleep"
-		for i in ${L_SRV} ${C_SRV} ${M_SRV} ${W_SRV}
+		for i in ${L_SRV} ${C_SRV} ${W_SRV} ${M_SRV}
 		do
 			start_serv $i 1
 		done
@@ -135,7 +135,7 @@ case $1 in
 		echo "Watching rAthena now."
 	;;
 	'stop')
-		for i in ${W_SRV} ${M_SRV} ${C_SRV} ${L_SRV}
+		for i in ${M_SRV} ${W_SRV} ${C_SRV} ${L_SRV}
 		do
 			PIDFILE=.${i}.pid
 			if [ -e ./${PIDFILE} ]; then
@@ -154,7 +154,7 @@ case $1 in
 		done
 	;;
 	'restart')
-		 restart "$@"
+		 restart "$2"
 	;;
 	'status')
 		for i in ${L_SRV} ${C_SRV} ${M_SRV} ${W_SRV}
@@ -223,5 +223,3 @@ case $1 in
 		$0 $readEnterKey
 	;;
 esac
-
-

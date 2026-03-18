@@ -1,0 +1,325 @@
+//==================================================
+// [Custom] Random Enchant System
+//==================================================
+
+function	script	F_CustomRandomEnchant_OptionName	{
+	switch (getarg(0)) {
+		case 3: return "STR";
+		case 4: return "AGI";
+		case 5: return "VIT";
+		case 6: return "INT";
+		case 7: return "DEX";
+		case 8: return "LUK";
+		case 16: return "ASPD";
+		case 24: return "CRIT";
+		default: return "Bonus";
+	}
+}
+
+function	script	F_CustomRandomEnchant	{
+	.@catalyst_id = getarg(0);
+
+	switch (.@catalyst_id) {
+		case 9675:
+			.@roll_count = 2;
+			.@pool_size = 8;
+			.@allow_cards = true;
+			.@min_refine = 0;
+			.@max_refine = 20;
+			.@allow_existing_random = true;
+			.@required_random_options = 0;
+			.@allow_any_equip = true;
+			// Tier 1: bonus basicos com faixa baixa.
+			setarray .@pool_opt[0], 3, 4, 5, 6, 7, 8, 16, 24;
+			setarray .@pool_min[0], 1, 1, 1, 1, 1, 1, 1, 1;
+			setarray .@pool_max[0], 3, 3, 3, 3, 3, 3, 5, 1;
+			break;
+		case 9676:
+			.@roll_count = 2;
+			.@pool_size = 8;
+			.@allow_cards = true;
+			.@min_refine = 0;
+			.@max_refine = 20;
+			.@allow_existing_random = true;
+			.@required_random_options = 0;
+			.@allow_any_equip = true;
+			// Tier 2: mesmos bonus, com faixa superior ao tier 1.
+			setarray .@pool_opt[0], 3, 4, 5, 6, 7, 8, 16, 24;
+			setarray .@pool_min[0], 4, 4, 4, 4, 4, 4, 6, 2;
+			setarray .@pool_max[0], 8, 8, 8, 8, 8, 8, 10, 4;
+			break;
+		default:
+			dispbottom "[Encantamento] Item de encantamento nao configurado.";
+			return;
+	}
+
+	getinventorylist;
+
+	.@menu$ = "";
+	.@choice_count = 0;
+
+	for (.@i = 0; .@i < @inventorylist_count; .@i++) {
+		.@item_id = @inventorylist_id[.@i];
+
+		if (.@allow_any_equip) {
+			.@item_type = getiteminfo(.@item_id, ITEMINFO_TYPE);
+			if (.@item_type != IT_WEAPON && .@item_type != IT_ARMOR && .@item_type != IT_SHADOWGEAR)
+				continue;
+		} else if (inarray(.@target_items[0], .@item_id) == -1) {
+			continue;
+		}
+		if (@inventorylist_identify[.@i] != 1)
+			continue;
+		if (@inventorylist_equip[.@i] != 0)
+			continue;
+		if (@inventorylist_refine[.@i] < .@min_refine || @inventorylist_refine[.@i] > .@max_refine)
+			continue;
+
+		.@random_count = 0;
+		for (.@j = 0; .@j < 5; .@j++) {
+			if (getd("@inventorylist_option_id" + (.@j + 1) + "[" + .@i + "]"))
+				.@random_count++;
+		}
+
+		if (.@required_random_options > 0 && .@random_count < .@required_random_options)
+			continue;
+		if (!.@allow_existing_random && .@random_count > 0)
+			continue;
+
+		if (!.@allow_cards) {
+			if (@inventorylist_card1[.@i] || @inventorylist_card2[.@i] || @inventorylist_card3[.@i] || @inventorylist_card4[.@i])
+				continue;
+		}
+
+		.@menu$ += getitemname(.@item_id) + " [+" + @inventorylist_refine[.@i] + "]:";
+		.@candidate_inv_index[.@choice_count] = .@i;
+		.@choice_count++;
+	}
+
+	if (.@choice_count == 0) {
+		mes "[Encantamento]";
+		mes "Voce nao possui nenhum equipamento valido para este abrasivo.";
+		mes "Requisitos atuais:";
+		mes " - item identificado";
+		mes " - desequipado";
+		mes " - dentro do refine permitido";
+		if (!.@allow_existing_random)
+			mes " - sem bonus aleatorios existentes";
+		close;
+	}
+
+	disable_items;
+
+	mes "[Encantamento]";
+	mes "Escolha o equipamento que recebera os bonus aleatorios.";
+	next;
+
+	.@selected = select(.@menu$ + "Cancelar") - 1;
+	if (.@selected == .@choice_count)
+		close;
+
+	.@inv_i = .@candidate_inv_index[.@selected];
+	.@item_id = @inventorylist_id[.@inv_i];
+	.@identify = @inventorylist_identify[.@inv_i];
+	.@refine = @inventorylist_refine[.@inv_i];
+	.@attribute = @inventorylist_attribute[.@inv_i];
+	.@card1 = @inventorylist_card1[.@inv_i];
+	.@card2 = @inventorylist_card2[.@inv_i];
+	.@card3 = @inventorylist_card3[.@inv_i];
+	.@card4 = @inventorylist_card4[.@inv_i];
+	.@bound = @inventorylist_bound[.@inv_i];
+	.@grade = @inventorylist_enchantgrade[.@inv_i];
+
+	for (.@j = 0; .@j < 5; .@j++) {
+		.@old_opt_id[.@j] = getd("@inventorylist_option_id" + (.@j + 1) + "[" + .@inv_i + "]");
+		.@old_opt_val[.@j] = getd("@inventorylist_option_value" + (.@j + 1) + "[" + .@inv_i + "]");
+		.@old_opt_param[.@j] = getd("@inventorylist_option_parameter" + (.@j + 1) + "[" + .@inv_i + "]");
+	}
+	.@existing_random_count = 0;
+	for (.@j = 0; .@j < 5; .@j++) {
+		if (.@old_opt_id[.@j] != 0)
+			.@existing_random_count++;
+	}
+
+	mes "[Encantamento]";
+	mes "Equipamento selecionado: " + mesitemlink(.@item_id, false);
+	mes "Refino atual: +" + .@refine;
+	next;
+	mes "[Encantamento]";
+	if (.@existing_random_count > 0) {
+		mes "O equipamento ja possui " + .@existing_random_count + " bonus aleatorio(s).";
+		.@mode = select("Substituir 1 bonus escolhido:Trocar todos os bonus:Cancelar");
+		if (.@mode == 3)
+			close;
+	} else {
+		mes "O equipamento ainda nao possui bonus aleatorios.";
+		.@mode = 2;
+	}
+	next;
+	mes "[Encantamento]";
+	mes "Deseja consumir " + mesitemlink(.@catalyst_id, false) + " para tentar o encantamento?";
+	if (select("Aplicar:Cancelar") == 2)
+		close;
+
+	if (countitem(.@catalyst_id) < 1) {
+		mes "[Encantamento]";
+		mes "Voce nao possui mais o abrasivo necessario.";
+		close;
+	}
+
+	delitem .@catalyst_id, 1;
+
+	if (countitem4(.@item_id, .@identify, .@refine, .@attribute, .@card1, .@card2, .@card3, .@card4, .@grade, .@old_opt_id, .@old_opt_val, .@old_opt_param) < 1) {
+		mes "[Encantamento]";
+		mes "O equipamento selecionado nao esta mais disponivel.";
+		close;
+	}
+
+	if (.@pool_size == 0) {
+		mes "[Encantamento]";
+		mes "Nao ha bonus configurados para este item.";
+		close;
+	}
+
+	if (.@roll_count > .@pool_size)
+		.@roll_count = .@pool_size;
+
+	for (.@j = 0; .@j < 5; .@j++) {
+		.@opt_id[.@j] = .@old_opt_id[.@j];
+		.@opt_value[.@j] = .@old_opt_val[.@j];
+		.@opt_param[.@j] = .@old_opt_param[.@j];
+	}
+
+	switch (.@mode) {
+		case 1:
+			.@replace_menu$ = "";
+			.@replace_count = 0;
+			for (.@slot = 0; .@slot < 5; .@slot++) {
+				if (.@old_opt_id[.@slot] == 0)
+					continue;
+
+				.@replace_menu$ += "Slot " + (.@slot + 1) + " - " + callfunc("F_CustomRandomEnchant_OptionName", .@old_opt_id[.@slot]) + " +" + .@old_opt_val[.@slot] + ":";
+				.@replace_slot[.@replace_count] = .@slot;
+				.@replace_count++;
+			}
+
+			if (.@replace_count == 0) {
+				mes "[Encantamento]";
+				mes "Nao ha bonus atual para substituir.";
+				close;
+			}
+
+			.@replace_pick = select(.@replace_menu$ + "Cancelar") - 1;
+			if (.@replace_pick == .@replace_count)
+				close;
+
+			.@target_slot = .@replace_slot[.@replace_pick];
+			while (true) {
+				.@pick = rand(.@pool_size);
+				.@candidate_opt = .@pool_opt[.@pick];
+				.@duplicate = false;
+
+				for (.@j = 0; .@j < 5; .@j++) {
+					if (.@j == .@target_slot)
+						continue;
+					if (.@opt_id[.@j] == .@candidate_opt) {
+						.@duplicate = true;
+						break;
+					}
+				}
+
+				if (.@duplicate)
+					continue;
+
+				.@opt_id[.@target_slot] = .@candidate_opt;
+				if (.@pool_max[.@pick] <= .@pool_min[.@pick])
+					.@opt_value[.@target_slot] = .@pool_min[.@pick];
+				else
+					.@opt_value[.@target_slot] = rand((.@pool_max[.@pick] - .@pool_min[.@pick]) + 1) + .@pool_min[.@pick];
+				.@opt_param[.@target_slot] = 0;
+				break;
+			}
+
+			mes "[Encantamento]";
+			mes "Bonus atual:";
+			mes " - Slot " + (.@target_slot + 1) + ": " + callfunc("F_CustomRandomEnchant_OptionName", .@old_opt_id[.@target_slot]) + " +" + .@old_opt_val[.@target_slot];
+			mes "Bonus rolado:";
+			mes " - Slot " + (.@target_slot + 1) + ": " + callfunc("F_CustomRandomEnchant_OptionName", .@opt_id[.@target_slot]) + " +" + .@opt_value[.@target_slot];
+			next;
+			if (select("Trocar pelo novo:Manter o atual") == 2)
+				close;
+			break;
+
+		case 2:
+			for (.@j = 0; .@j < 5; .@j++) {
+				.@new_opt_id[.@j] = 0;
+				.@new_opt_value[.@j] = 0;
+				.@new_opt_param[.@j] = 0;
+			}
+
+			for (.@slot = 0; .@slot < .@roll_count; .@slot++) {
+				while (true) {
+					.@pick = rand(.@pool_size);
+					.@candidate_opt = .@pool_opt[.@pick];
+					.@duplicate = false;
+
+					for (.@j = 0; .@j < .@slot; .@j++) {
+						if (.@new_opt_id[.@j] == .@candidate_opt) {
+							.@duplicate = true;
+							break;
+						}
+					}
+
+					if (.@duplicate)
+						continue;
+
+					.@new_opt_id[.@slot] = .@candidate_opt;
+					if (.@pool_max[.@pick] <= .@pool_min[.@pick])
+						.@new_opt_value[.@slot] = .@pool_min[.@pick];
+					else
+						.@new_opt_value[.@slot] = rand((.@pool_max[.@pick] - .@pool_min[.@pick]) + 1) + .@pool_min[.@pick];
+					.@new_opt_param[.@slot] = 0;
+					break;
+				}
+			}
+
+			mes "[Encantamento]";
+			mes "Bonus atuais:";
+			if (.@existing_random_count == 0) {
+				mes " - Nenhum";
+			} else {
+				for (.@j = 0; .@j < 5; .@j++) {
+					if (.@old_opt_id[.@j] == 0)
+						continue;
+					mes " - Slot " + (.@j + 1) + ": " + callfunc("F_CustomRandomEnchant_OptionName", .@old_opt_id[.@j]) + " +" + .@old_opt_val[.@j];
+				}
+			}
+			mes "Bonus rolados:";
+			for (.@j = 0; .@j < 5; .@j++) {
+				if (.@new_opt_id[.@j] == 0)
+					continue;
+				mes " - Slot " + (.@j + 1) + ": " + callfunc("F_CustomRandomEnchant_OptionName", .@new_opt_id[.@j]) + " +" + .@new_opt_value[.@j];
+			}
+			next;
+			if (select("Trocar pelos novos:Manter os atuais") == 2)
+				close;
+
+			for (.@j = 0; .@j < 5; .@j++) {
+				.@opt_id[.@j] = .@new_opt_id[.@j];
+				.@opt_value[.@j] = .@new_opt_value[.@j];
+				.@opt_param[.@j] = .@new_opt_param[.@j];
+			}
+			break;
+	}
+
+	delitem4 .@item_id, 1, .@identify, .@refine, .@attribute, .@card1, .@card2, .@card3, .@card4, .@grade, .@old_opt_id, .@old_opt_val, .@old_opt_param;
+
+	if (.@bound > 0)
+		getitembound4 .@item_id, 1, .@identify, .@refine, .@attribute, .@card1, .@card2, .@card3, .@card4, .@bound, .@grade, .@opt_id, .@opt_value, .@opt_param;
+	else
+		getitem4 .@item_id, 1, .@identify, .@refine, .@attribute, .@card1, .@card2, .@card3, .@card4, .@grade, .@opt_id, .@opt_value, .@opt_param;
+
+	mes "[Encantamento]";
+	mes "O item foi encantado com sucesso.";
+	close;
+}

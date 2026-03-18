@@ -1,0 +1,357 @@
+// ============================================================
+// MVP Kill Ranking (Weekly / Monthly / Global) + Weekly Rewards
+// ============================================================
+// - #mvp_points continua sendo "moeda" (gasta na loja).
+// - Este script cria variaveis separadas para contar MVP kills por personagem:
+//   MVP_Kills_Total  (global, nao reseta)
+//   MVP_Kills_Week[week_id]   (ranking semanal, por indice)
+//   MVP_Kills_Month[month_id] (ranking mensal, por indice)
+// - Premios semanais: definidos no controlador e resgatados pelo NPC.
+//
+// OBS: Foi criado em UTF-8 para evitar edicao de scripts legados em ISO-8859-1.
+//
+
+function	script	F_MVP_WeekId	{
+	// Usa a data do domingo que inicia a semana atual (YYYYMMDD).
+	// Assim, a semana fecha no sabado 23:59 e uma nova comeca no domingo 00:00.
+	.@tick = gettimetick(2) - (gettime(DT_DAYOFWEEK) * 86400);
+	return atoi(gettimestr("%Y%m%d", 9, .@tick));
+}
+
+function	script	F_MVP_MonthId	{
+	// YYYYMM
+	return (gettime(DT_YEAR) * 100) + gettime(DT_MONTH);
+}
+
+// ------------------------------------------------------------
+// Contador de MVP kills (roda em paralelo ao sistema de pontos)
+// ------------------------------------------------------------
+-	script	MVP_Kills_Counter	-1,{
+OnNPCKillEvent:
+	.@mob_id = killedrid;
+
+	// Mantem o mesmo comportamento do sistema atual: instancias nao contam.
+	if (instance_id() > 0)
+		end;
+
+	// Apenas MVP.
+	if (getmonsterinfo(.@mob_id, MOB_MVPEXP) <= 0)
+		end;
+
+	MVP_Kills_Total += 1;
+
+	.@week_id = $MVP_Kills_CurrentWeekId;
+	if (.@week_id == 0)
+		.@week_id = callfunc("F_MVP_WeekId");
+	MVP_Kills_Week[.@week_id] += 1;
+
+	.@month_id = $MVP_Kills_CurrentMonthId;
+	if (.@month_id == 0)
+		.@month_id = callfunc("F_MVP_MonthId");
+	MVP_Kills_Month[.@month_id] += 1;
+	end;
+}
+
+// ------------------------------------------------------------
+// Controlador: fecha a semana e grava vencedores/premios
+// ------------------------------------------------------------
+-	script	MVP_Kills_Ranking_Controller	-1,{
+OnInit:
+	// Config: premios (Top 3)
+	setarray .WeeklyRewardItem1[0], 12411, 12411;
+	setarray .WeeklyRewardAmt1[0], 5, 5;
+	setarray .WeeklyRewardItem2[0], 12411, 12411;
+	setarray .WeeklyRewardAmt2[0], 3, 3;
+	setarray .WeeklyRewardItem3[0], 12411, 12411;
+	setarray .WeeklyRewardAmt3[0], 1, 1;
+
+	callsub S_CheckPeriodRollovers;
+	end;
+
+OnClock0000:
+	callsub S_CheckPeriodRollovers;
+	end;
+
+S_CheckPeriodRollovers:
+	.@now_week = callfunc("F_MVP_WeekId");
+	.@now_month = callfunc("F_MVP_MonthId");
+
+	if ($MVP_Kills_CurrentWeekId == 0)
+		$MVP_Kills_CurrentWeekId = .@now_week;
+	else if ($MVP_Kills_CurrentWeekId != .@now_week) {
+		callsub S_CloseWeek, $MVP_Kills_CurrentWeekId;
+		$MVP_Kills_LastWeekId = $MVP_Kills_CurrentWeekId;
+		$MVP_Kills_CurrentWeekId = .@now_week;
+	}
+
+	if ($MVP_Kills_CurrentMonthId == 0)
+		$MVP_Kills_CurrentMonthId = .@now_month;
+	else if ($MVP_Kills_CurrentMonthId != .@now_month) {
+		callsub S_CloseMonth, $MVP_Kills_CurrentMonthId;
+		$MVP_Kills_LastMonthId = $MVP_Kills_CurrentMonthId;
+		$MVP_Kills_CurrentMonthId = .@now_month;
+	}
+	return;
+
+S_CloseWeek:
+	.@week_id = getarg(0);
+
+	// Busca Top 3 do week_id fechado.
+	// Usa o indice da variavel (MVP_Kills_Week[week_id]) para manter historico por semana.
+	.@rows = query_sql(
+		"SELECT wk.char_id, wk.value " +
+		"FROM `char_reg_num` wk " +
+		"WHERE wk.`key` = 'MVP_Kills_Week' AND wk.`index` = " + .@week_id + " AND wk.value > 0 " +
+		"ORDER BY wk.value DESC " +
+		"LIMIT 3",
+		.@cid, .@kills
+	);
+
+	$MVP_Kills_RewardWeekId = .@week_id;
+	$MVP_Kills_Winner1_CID = 0; $MVP_Kills_Winner1_Kills = 0;
+	$MVP_Kills_Winner2_CID = 0; $MVP_Kills_Winner2_Kills = 0;
+	$MVP_Kills_Winner3_CID = 0; $MVP_Kills_Winner3_Kills = 0;
+
+	if (.@rows > 0) { $MVP_Kills_Winner1_CID = .@cid[0]; $MVP_Kills_Winner1_Kills = .@kills[0]; }
+	if (.@rows > 1) { $MVP_Kills_Winner2_CID = .@cid[1]; $MVP_Kills_Winner2_Kills = .@kills[1]; }
+	if (.@rows > 2) { $MVP_Kills_Winner3_CID = .@cid[2]; $MVP_Kills_Winner3_Kills = .@kills[2]; }
+
+	if (.@rows > 0)
+		announce "[MVP Ranking] Semana encerrada. Fale com o NPC em Prontera (140,175) para ver o Top e resgatar premio (Top 3).", bc_all | bc_yellow;
+
+	return;
+
+S_CloseMonth:
+	.@month_id = getarg(0);
+	$MVP_Kills_LastMonthId = .@month_id;
+	announce "[MVP Ranking] Mes encerrado. Fale com o NPC em Prontera (140,175) para ver o ranking mensal anterior.", bc_all | bc_yellow;
+	return;
+}
+
+// ------------------------------------------------------------
+// NPC: Ranking + Resgate do Prêmio Semanal
+// ------------------------------------------------------------
+prontera,140,175,5	script	Ranking MVP	615,{
+	mes "[Ranking MVP]";
+	mes "Aqui você vê o ranking de MVP kills.";
+	next;
+
+	while (true) {
+		.@opt = select("Ranking semanal:Ranking mensal:Ranking global:Prêmio semanal:Fechar");
+		switch (.@opt) {
+			case 1:
+				callsub S_ShowWeekly;
+				break;
+			case 2:
+				callsub S_ShowMonthly;
+				break;
+			case 3:
+				callsub S_ShowGlobal;
+				break;
+			case 4:
+				callsub S_WeeklyReward;
+				break;
+			default:
+				close;
+		}
+		next;
+	}
+
+S_ShowWeekly:
+	.@now_week = $MVP_Kills_CurrentWeekId;
+	if (.@now_week == 0)
+		.@now_week = callfunc("F_MVP_WeekId");
+	.@prev_week = $MVP_Kills_LastWeekId;
+
+	mes "[Ranking MVP]";
+	mes "Ranking Semanal";
+	.@menu$ = "Semana atual";
+	if (.@prev_week > 0)
+		.@menu$ += ":Semana passada";
+	.@menu$ += ":Voltar";
+	.@sel = select(.@menu$);
+	if (.@sel == 3 || (.@prev_week == 0 && .@sel == 2))
+		return;
+	if (.@prev_week > 0 && .@sel == 2)
+		.@week_id = .@prev_week;
+	else
+		.@week_id = .@now_week;
+	.@my_week = MVP_Kills_Week[.@week_id];
+
+	mes "Seus MVP kills na semana: " + .@my_week;
+
+	.@rows = query_sql(
+		"SELECT c.name, c.class, wk.value " +
+		"FROM `char_reg_num` wk " +
+		"INNER JOIN `char` c ON c.char_id = wk.char_id " +
+		"WHERE wk.`key` = 'MVP_Kills_Week' AND wk.`index` = " + .@week_id + " AND wk.value > 0 " +
+		"ORDER BY wk.value DESC " +
+		"LIMIT 20",
+		.@name$, .@class, .@kills
+	);
+if (.@rows <= 0) {
+		mes " ";
+		if (.@my_week > 0) {
+			mes "1. " + strcharinfo(0) + " : " + .@my_week;
+			mes "Obs: ranking ainda não foi salvo/atualizado para consulta.";
+		} else
+			mes "Sem registros nesta semana ainda.";
+		return;
+	}
+	for (.@i = 0; .@i < .@rows; .@i++) {
+		mes (.@i + 1) + ". " + .@name$[.@i] + " [" + jobname(.@class[.@i]) + "] : " + .@kills[.@i];
+	}
+	return;
+
+S_ShowMonthly:
+	.@now_month = $MVP_Kills_CurrentMonthId;
+	if (.@now_month == 0)
+		.@now_month = callfunc("F_MVP_MonthId");
+	.@prev_month = $MVP_Kills_LastMonthId;
+	if (.@prev_month == 0) {
+		.@py = .@now_month / 100;
+		.@pm = .@now_month % 100;
+		.@pm -= 1;
+		if (.@pm <= 0) {
+			.@py -= 1;
+			.@pm = 12;
+		}
+		.@prev_month = (.@py * 100) + .@pm;
+	}
+
+	mes "[Ranking MVP]";
+	mes "Ranking Mensal";
+	.@menu$ = "Mês atual:Mês passado:Voltar";
+	.@sel = select(.@menu$);
+	if (.@sel == 3)
+		return;
+	if (.@sel == 2)
+		.@month_id = .@prev_month;
+	else
+		.@month_id = .@now_month;
+	.@my_month = MVP_Kills_Month[.@month_id];
+
+	mes "Seus MVP kills no mês: " + .@my_month;
+
+	.@rows = query_sql(
+		"SELECT c.name, c.class, mk.value " +
+		"FROM `char_reg_num` mk " +
+		"INNER JOIN `char` c ON c.char_id = mk.char_id " +
+		"WHERE mk.`key` = 'MVP_Kills_Month' AND mk.`index` = " + .@month_id + " AND mk.value > 0 " +
+		"ORDER BY mk.value DESC " +
+		"LIMIT 30",
+		.@name$, .@class, .@kills
+	);
+if (.@rows <= 0) {
+		mes " ";
+		if (.@my_month > 0) {
+			mes "1. " + strcharinfo(0) + " : " + .@my_month;
+			mes "Obs: ranking ainda não foi salvo/atualizado para consulta.";
+		} else
+			mes "Sem registros neste mês ainda.";
+		return;
+	}
+	for (.@i = 0; .@i < .@rows; .@i++) {
+			if (.@name$[.@i] == "")
+				.@name$[.@i] = "(desconhecido)";
+		mes (.@i + 1) + ". " + .@name$[.@i] + " [" + jobname(.@class[.@i]) + "] : " + .@kills[.@i];
+	}
+	return;
+
+S_ShowGlobal:
+	mes "[Ranking MVP]";
+	mes "Ranking Global";
+	mes "Seus MVP kills no total: " + MVP_Kills_Total;
+	.@my_total = MVP_Kills_Total;
+
+	.@rows = query_sql(
+		"SELECT c.name, c.class, tk.value " +
+		"FROM `char_reg_num` tk " +
+		"INNER JOIN `char` c ON c.char_id = tk.char_id " +
+		"WHERE tk.`key` = 'MVP_Kills_Total' AND tk.`index` = 0 AND tk.value > 0 " +
+		"ORDER BY tk.value DESC " +
+		"LIMIT 50",
+		.@name$, .@class, .@kills
+	);
+if (.@rows <= 0) {
+		mes " ";
+		if (.@my_total > 0) {
+			mes "1. " + strcharinfo(0) + " : " + .@my_total;
+			mes "Obs: ranking ainda nao foi salvo/atualizado para consulta.";
+		} else
+			mes "Sem registros ainda.";
+		return;
+	}
+	for (.@i = 0; .@i < .@rows; .@i++) {
+		mes (.@i + 1) + ". " + .@name$[.@i] + " [" + jobname(.@class[.@i]) + "] : " + .@kills[.@i];
+	}
+	return;
+
+S_WeeklyReward:
+	mes "[Ranking MVP]";
+	if ($MVP_Kills_RewardWeekId == 0) {
+		mes "Ainda não existe uma semana encerrada para premiação.";
+		return;
+	}
+	.@w = $MVP_Kills_RewardWeekId;
+	mes "Premiação da semana encerrada.";
+	next;
+
+	.@n1$ = "-"; .@n2$ = "-"; .@n3$ = "-";
+	if ($MVP_Kills_Winner1_CID > 0)
+		query_sql("SELECT name FROM `char` WHERE char_id = " + $MVP_Kills_Winner1_CID + " LIMIT 1", .@n1$);
+	if ($MVP_Kills_Winner2_CID > 0)
+		query_sql("SELECT name FROM `char` WHERE char_id = " + $MVP_Kills_Winner2_CID + " LIMIT 1", .@n2$);
+	if ($MVP_Kills_Winner3_CID > 0)
+		query_sql("SELECT name FROM `char` WHERE char_id = " + $MVP_Kills_Winner3_CID + " LIMIT 1", .@n3$);
+
+	mes "1. " + .@n1$ + " (" + $MVP_Kills_Winner1_Kills + " kills)";
+	mes "2. " + .@n2$ + " (" + $MVP_Kills_Winner2_Kills + " kills)";
+	mes "3. " + .@n3$ + " (" + $MVP_Kills_Winner3_Kills + " kills)";
+	next;
+
+	.@cid = getcharid(0);
+	.@rank = 0;
+	if (.@cid == $MVP_Kills_Winner1_CID) .@rank = 1;
+	else if (.@cid == $MVP_Kills_Winner2_CID) .@rank = 2;
+	else if (.@cid == $MVP_Kills_Winner3_CID) .@rank = 3;
+
+	if (.@rank == 0) {
+		mes "Você não ficou no Top 3 nesta semana.";
+		return;
+	}
+	if (MVP_Kills_RewardedWeek == .@w) {
+		mes "Prêmio desta semana já foi resgatado neste personagem.";
+		return;
+	}
+
+	mes "Você ficou em #" + .@rank + " nesta semana!";
+	if (select("Resgatar prêmio:Cancelar") == 2)
+		return;
+
+	if (.@rank == 1) {
+		.@size = getarraysize(getvariableofnpc(.WeeklyRewardItem1, "MVP_Kills_Ranking_Controller"));
+		copyarray .@reward_item[0], getvariableofnpc(.WeeklyRewardItem1, "MVP_Kills_Ranking_Controller"), .@size;
+		copyarray .@reward_amt[0], getvariableofnpc(.WeeklyRewardAmt1, "MVP_Kills_Ranking_Controller"), .@size;
+		for (.@i = 0; .@i < .@size; .@i++)
+			getitem .@reward_item[.@i], .@reward_amt[.@i];
+	}
+	else if (.@rank == 2) {
+		.@size = getarraysize(getvariableofnpc(.WeeklyRewardItem2, "MVP_Kills_Ranking_Controller"));
+		copyarray .@reward_item[0], getvariableofnpc(.WeeklyRewardItem2, "MVP_Kills_Ranking_Controller"), .@size;
+		copyarray .@reward_amt[0], getvariableofnpc(.WeeklyRewardAmt2, "MVP_Kills_Ranking_Controller"), .@size;
+		for (.@i = 0; .@i < .@size; .@i++)
+			getitem .@reward_item[.@i], .@reward_amt[.@i];
+	}
+	else {
+		.@size = getarraysize(getvariableofnpc(.WeeklyRewardItem3, "MVP_Kills_Ranking_Controller"));
+		copyarray .@reward_item[0], getvariableofnpc(.WeeklyRewardItem3, "MVP_Kills_Ranking_Controller"), .@size;
+		copyarray .@reward_amt[0], getvariableofnpc(.WeeklyRewardAmt3, "MVP_Kills_Ranking_Controller"), .@size;
+		for (.@i = 0; .@i < .@size; .@i++)
+			getitem .@reward_item[.@i], .@reward_amt[.@i];
+	}
+
+	MVP_Kills_RewardedWeek = .@w;
+	mes "Prêmio entregue. Parabéns!";
+	return;
+}

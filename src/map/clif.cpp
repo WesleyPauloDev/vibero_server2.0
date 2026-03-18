@@ -143,7 +143,7 @@ static inline uint32 disguised_bl_id( uint32 bl_id ){
 #if PACKETVER_MAIN_NUM >= 20181121 || PACKETVER_RE_NUM >= 20180704 || PACKETVER_ZERO_NUM >= 20181114
 static inline uint32 client_nameid( t_itemid server_nameid ){
 	if( server_nameid == 9672 ){
-		return 7621; // Token_Of_Siegfried[NN] uses official Token_Of_Siegfried client behavior.
+		return 7621;
 	}
 
 	t_itemid view = itemdb_viewid( server_nameid );
@@ -157,7 +157,7 @@ static inline uint32 client_nameid( t_itemid server_nameid ){
 #else
 static inline uint16 client_nameid( t_itemid server_nameid ){
 	if( server_nameid == 9672 ){
-		return 7621; // Token_Of_Siegfried[NN] uses official Token_Of_Siegfried client behavior.
+		return 7621;
 	}
 
 	t_itemid view = itemdb_viewid( server_nameid );

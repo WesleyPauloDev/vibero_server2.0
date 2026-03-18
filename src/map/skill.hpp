@@ -263,6 +263,7 @@ struct s_skill_db {
 	int32 splash[MAX_SKILL_LEVEL];				///< Splash effect
 	uint16 max;									///< Max level
 	int32 num[MAX_SKILL_LEVEL];					///< Number of hit
+	int32 damage_rate;							///< Final offensive skill damage rate in percent
 	bool castcancel;							///< Cancel cast when being hit
 	uint16 cast_def_rate;						///< Def rate during cast a skill
 	e_battle_flag skill_type;					///< Skill type

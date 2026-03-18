@@ -10,61 +10,61 @@ moc_para01,24,13,5	duplicate(Healer)	Curandeira#eden	640
 
 // ----------------------- Está em npc/custom/barter.yml -----------------------
 moc_para01,24,35,5	script	Loja do Éden	611,{
-OnTalk:
-	mes "[Loja do Éden]";
+	OnTalk:
+		mes "[Loja do Éden]";
 
-	switch(select("Consumíveis:Armas:Equipamentos:Trocar Poções:Sair")) {
-        case 1:
-            callshop "consumable_eden"; // Loja de Consumíveis
-            end;
+		switch(select("Consumíveis:Armas:Equipamentos:Trocar Poções:Sair")) {
+			case 1:
+				callshop "consumable_eden"; // Loja de Consumíveis
+				end;
 
-        case 2:
-            callshop "weapons_eden"; // Loja de armas
-            end;
+			case 2:
+				callshop "weapons_eden"; // Loja de armas
+				end;
 
-		case 3:
-			callshop "equipments_eden"; // Loja de equipamentos
-			end;
-		
-		case 4:
-			mes "Aqui você pode trocar suas Poções[Iniciante] por outras do mesmo tipo.";
-			switch(select("Trocar Poções de HP em Poções de SP:Trocar Poções de SP em Poções de HP")) {
-				case 1:
-					mes "Quantas Poções deseja trocar?";
-					input .@amount;
-					if (.@amount <= 0) {
-						mes "Quantidade invalida.";
+			case 3:
+				callshop "equipments_eden"; // Loja de equipamentos
+				end;
+			
+			case 4:
+				mes "Aqui você pode trocar suas Poções[Iniciante] por outras do mesmo tipo.";
+				switch(select("Trocar Poções de HP em Poções de SP:Trocar Poções de SP em Poções de HP")) {
+					case 1:
+						mes "Quantas Poções deseja trocar?";
+						input .@amount;
+						if (.@amount <= 0) {
+							mes "Quantidade invalida.";
+							end;
+						}
+						if (countitem(9660) < .@amount) {
+							mes "Você nao possui Poções de HP suficientes.";
+							end;
+						}
+						delitem 9660, .@amount; // Remove as pocoes de HP
+						getitem 9661, .@amount; // Da as pocoes de SP
 						end;
-					}
-					if (countitem(9660) < .@amount) {
-						mes "Você nao possui Poções de HP suficientes.";
+					case 2:
+						mes "Quantas Poções deseja trocar?";
+						input .@amount;
+						if (.@amount <= 0) {
+							mes "Quantidade invalida.";
+							end;
+						}
+						if (countitem(9661) < .@amount) {
+							mes "Você nao possui Poções de SP suficientes.";
+							end;
+						}
+						delitem 9661, .@amount; // Remove as pocoes de SP
+						getitem 9660, .@amount; // Da as pocoes de HP
 						end;
-					}
-					delitem 9660, .@amount; // Remove as pocoes de HP
-					getitem 9661, .@amount; // Da as pocoes de SP
-					end;
-				case 2:
-					mes "Quantas Poções deseja trocar?";
-					input .@amount;
-					if (.@amount <= 0) {
-						mes "Quantidade invalida.";
-						end;
-					}
-					if (countitem(9661) < .@amount) {
-						mes "Você nao possui Poções de SP suficientes.";
-						end;
-					}
-					delitem 9661, .@amount; // Remove as pocoes de SP
-					getitem 9660, .@amount; // Da as pocoes de HP
-					end;
-			}
-			end;
+				}
+				end;
 
-		default:
-			mes "Volte sempre!";
-			close;
-    }
-	end;
+			default:
+				mes "Volte sempre!";
+				close;
+		}
+		end;
 }
 
 // ----------------------- Quests do Éden ---------------------------------------------------------
