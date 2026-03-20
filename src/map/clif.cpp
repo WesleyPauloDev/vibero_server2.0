@@ -10476,6 +10476,127 @@ static bool clif_process_message(map_session_data* sd, bool whisperFormat, char*
 		sprintf( out_full_message, "%s%s%s", out_name, seperator, out_message );
 	}
 
+	// Client-side emotion mappings can be broken or missing. Allow specific
+	// slash-emote fallbacks to be handled server-side when they arrive as plain chat.
+	if( !whisperFormat ){
+		char emote_message[CHAT_SIZE_MAX];
+		char* emote_text;
+		size_t emote_len;
+
+		safestrncpy( emote_message, out_message, sizeof( emote_message ) );
+		emote_text = emote_message;
+
+		while( *emote_text != '\0' && ISSPACE( static_cast<unsigned char>( *emote_text ) ) ){
+			++emote_text;
+		}
+
+		emote_len = strlen( emote_text );
+		while( emote_len > 0 && ISSPACE( static_cast<unsigned char>( emote_text[emote_len - 1] ) ) ){
+			emote_text[--emote_len] = '\0';
+		}
+
+		struct emote_alias_entry {
+			const char* alias;
+			emotion_type type;
+		};
+
+		static const emote_alias_entry emote_aliases[] = {
+			{"/!", ET_SURPRISE},
+			{"/?", ET_QUESTION},
+			{"/lala", ET_DELIGHT},
+			{"/amor", ET_THROB},
+			{"/gt", ET_SWEAT},
+			{"/ideia", ET_AHA},
+			{"/grr", ET_FRET},
+			{"/grr2", ET_ANGER},
+			{"/$", ET_MONEY},
+			{"/...", ET_THINK},
+			{"/scissors", ET_SCISSOR},
+			{"/rock", ET_ROCK},
+			{"/paper", ET_WRAP},
+			{"/korea", ET_FLAG},
+			{"/amor2", ET_BIGTHROB},
+			{"/vlw", ET_THANKS},
+			{"/aiai", ET_KEK},
+			{"/desc", ET_SORRY},
+			{"/heh", ET_SMILE},
+			{"/gt2", ET_PROFUSELY_SWEAT},
+			{"/hmm", ET_SCRATCH},
+			{"/ok", ET_BEST},
+			{"/n", ET_STARE_ABOUT},
+			{"/uau", ET_HUK},
+			{"/omg", ET_HUK},
+			{"/o", ET_O},
+			{"/x", ET_X},
+			{"/X", ET_X},
+			{"/sos", ET_HELP},
+			{"/go", ET_GO},
+			{"/snif", ET_CRY},
+			{"/mal", ET_KIK},
+			{"/bj", ET_CHUP},
+			{"/bj2", ET_CHUPCHUP},
+			{"/pif", ET_HNG},
+			{"/s", ET_OK},
+			{"/bzz", ET_STARE},
+			{"/grr3", ET_STARE},
+			{"/fome", ET_HUNGRY},
+			{"/awsm", ET_COOL},
+			{"/cool", ET_COOL},
+			{"/amor3", ET_COOL},
+			{"/:p", ET_MERONG},
+			{"/verg", ET_SHY},
+			{"/bom", ET_GOODBOY},
+			{"/sp", ET_SPTIME},
+			{"/o.o", ET_SEXY},
+			{"/vem", ET_COMEON},
+			{"/sono", ET_SLEEPY},
+			{"/prbs", ET_CONGRATULATION},
+			{"/grat", ET_CONGRATULATION},
+			{"/hp", ET_HPTIME},
+			{"/philippines", ET_PH_FLAG},
+			{"/malaysia", ET_MY_FLAG},
+			{"/singapore", ET_SI_FLAG},
+			{"/brazil", ET_BR_FLAG},
+			{"/bling", ET_SPARK},
+			{"/fsh", ET_SPARK},
+			{"/spin", ET_CONFUSE},
+			{"/sigh", ET_OHNO},
+			{"/twnk", ET_HUM},
+			{"/dum", ET_HUM},
+			{"/noisy", ET_BLABLA},
+			{"/crwd", ET_BLABLA},
+			{"/OTL", ET_OTL},
+			{"/otl", ET_OTL},
+			{"/desp", ET_OTL},
+			{"/dice", ET_DICE1},
+			{"/india", ET_INDIA_FLAG},
+			{"/amore", ET_LUV},
+			{"/love", ET_LUV},
+			{"/russia", ET_FLAG8},
+			{"/mobile", ET_MOBILE},
+			{"/mail", ET_MAIL},
+			{"/antenna0", ET_ANTENNA0},
+			{"/antenna1", ET_ANTENNA1},
+			{"/antenna2", ET_ANTENNA2},
+			{"/antenna3", ET_ANTENNA3},
+			{"/hum", ET_HUM2},
+			{"/abs", ET_ABS},
+			{"/oops", ET_OOPS},
+			{"/spit", ET_SPIT},
+			{"/ene", ET_ENE},
+			{"/panic", ET_PANIC},
+			{"/whisp", ET_WHISP},
+			{"/chinese", ET_YUT1},
+		};
+
+		for( const emote_alias_entry& entry : emote_aliases ){
+			if( strcasecmp( emote_text, entry.alias ) == 0 ){
+				clif_emotion( *sd, entry.type );
+				return false;
+			}
+		}
+	}
+
 	if( is_atcommand( fd, sd, out_message, 1 )  )
 		return false;
 
@@ -10852,6 +10973,8 @@ void clif_parse_LoadEndAck(int32 fd,map_session_data *sd)
 			clif_status_load(sd, EFST_WUGRIDER, 1);
 		else if (sd->sc.getSCE(SC_ALL_RIDING))
 			clif_status_load(sd, EFST_ALL_RIDING, 1);
+		if (sd->status.title_id)
+			status_load_title_icon(sd, sd->status.title_id);
 
 		if(sd->status.manner < 0)
 			sc_start(sd,sd,SC_NOCHAT,100,0,0);
@@ -20044,6 +20167,13 @@ void clif_ranklist( map_session_data& sd, e_rank rankingtype ){
 	for( i = 0; i < size; i++ ){
 		p.CIDs[i] = list[i].id;
 		p.points[i] = list[i].fame;
+
+		// Newer clients receive only character IDs for fame rankings.
+		// Proactively resolve and push the nick so the client can display names
+		// even when these rankers are offline or unknown locally.
+		if( p.CIDs[i] > 0 ){
+			map_reqnickdb(&sd, p.CIDs[i]);
+		}
 	}
 
 	size = ARRAYLENGTH( p.CIDs );
@@ -20698,14 +20828,14 @@ void clif_parse_change_title(int32 fd, map_session_data *sd)
 		// It is exactly the same as the old one
 		return;
 	}else if( title_id <= 0 ){
-		sd->status.title_id = 0;
+		set_status_title_id(sd, 0);
 	}else{
 		if (std::find(sd->titles.begin(), sd->titles.end(), title_id) == sd->titles.end()) {
 			clif_change_title_ack(sd, 1, title_id);
 			return;
 		}
 
-		sd->status.title_id = title_id;
+		set_status_title_id(sd, title_id);
 	}
 	
 	clif_name_area(sd);

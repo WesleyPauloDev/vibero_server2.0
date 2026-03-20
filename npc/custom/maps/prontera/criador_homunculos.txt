@@ -1,0 +1,266 @@
+-	script	Criador de Homunculos#base	-1,{
+	debugmes "Classe: " + Class;
+
+	mes "[Criador de Homúnculos]";
+	mes "Hey, sou um poderoso criador";
+	mes "de Homúnculos!";
+	next;
+
+	.@is_creator = (Class == 18 || Class == 4019 || Class == 4071 || Class == 4078 || Class == 4259 || Class == 4041 || Class == 4107);
+	.@hom_class = gethominfo(1);
+	.@has_hom = (.@hom_class > 0);
+	.@hom_lv = gethominfo(6);
+	.@is_gm99 = (getgroupid() == 99);
+
+	// 6009~6016 = evoluídos (H/H2), 6048~6052 = Homunculus S
+	.@is_evolved = (.@hom_class >= 6009 && .@hom_class <= 6016);
+	.@is_s = (.@hom_class >= 6048 && .@hom_class <= 6052);
+
+	.@can_evolve = (.@has_hom && !.@is_evolved && !.@is_s);
+	.@can_mutate_s = (.@has_hom && .@is_evolved && !.@is_s && .@hom_lv >= 99);
+	.@can_reset_s_skills = (.@has_hom && .@is_s);
+	.@debug_target_lv = (.@is_s ? 175 : 99);
+	.@can_debug_hom99 = (.@is_gm99 && .@has_hom && .@hom_lv < .@debug_target_lv);
+	.@can_delete_hom = 1;
+
+	if (!.@is_creator) {
+		.@sel = select("Sobre Homúnculos:Cancelar");
+		if (.@sel == 1) goto L_About;
+		goto L_Cancel;
+	}
+
+	if (!.@has_hom) {
+		.@sel = select("Criar Homúnculo:Deletar Homúnculo (Reset):Sobre Homúnculos:Cancelar");
+		switch (.@sel) {
+			case 1: goto L_Create;
+			case 2: goto L_DeleteHom;
+			case 3: goto L_About;
+			default: goto L_Cancel;
+		}
+	}
+
+	.@menu$ = "";
+	if (.@can_evolve)
+		.@menu$ += "Evoluir:";
+	if (.@can_mutate_s)
+		.@menu$ += "Mutar para S:";
+	if (.@can_reset_s_skills)
+		.@menu$ += "Resetar skills do Homunculus S:";
+	if (.@can_debug_hom99)
+		.@menu$ += "DEBUG: Setar Hom 99:";
+	if (.@can_delete_hom)
+		.@menu$ += "Deletar Homúnculo (Reset):";
+	.@menu$ += "Informações do seu Homúnculo:Sobre Homúnculos:Cancelar";
+
+	.@sel = select(.@menu$);
+	.@idx = 1;
+
+	if (.@can_evolve) {
+		if (.@sel == .@idx)
+			goto L_Evolve;
+		.@idx++;
+	}
+
+	if (.@can_mutate_s) {
+		if (.@sel == .@idx)
+			goto L_MutateS;
+		.@idx++;
+	}
+
+	if (.@can_reset_s_skills) {
+		if (.@sel == .@idx)
+			goto L_ResetSSkills;
+		.@idx++;
+	}
+
+	if (.@can_debug_hom99) {
+		if (.@sel == .@idx)
+			goto L_DebugHom99;
+		.@idx++;
+	}
+
+	if (.@can_delete_hom) {
+		if (.@sel == .@idx)
+			goto L_DeleteHom;
+		.@idx++;
+	}
+
+	if (.@sel == .@idx)
+		goto L_Info;
+	if (.@sel == .@idx + 1)
+		goto L_About;
+	goto L_Cancel;
+
+	L_Create:
+		mes "[Criador de Homúnculos]";
+		mes "Qual homúnculo você desejá criar?";
+		next;
+		switch (select("- Lif:- Amistr:- Filir:- Vanilmirth")) {
+			case 1: setarray .@type$[0], "Lif", 6001, 6005; break;
+			case 2: setarray .@type$[0], "Amistr", 6002, 6006; break;
+			case 3: setarray .@type$[0], "Filir", 6003, 6007; break;
+			case 4: setarray .@type$[0], "Vanilmirth", 6004, 6008; break;
+		}
+		mes "[Criador de Homúnculos]";
+		mes "Existem dois tipos de " + .@type$[0] + ", qual você desejá criar?";
+		next;
+		.@choice = select("- " + .@type$[0] + "[1]", "- " + .@type$[0] + "[2]");
+		mes "[Criador de Homúnculos]";
+		mes "Cuide bem de seu novo amiguinho!";
+		atcommand "@makehomun " + .@type$[.@choice];
+		close;
+
+	L_Evolve:
+		mes "[Criador de Homúnculos]";
+		homevolution;
+		mes "Muito bem, agora seu amiguinho está mais forte e com uma nova aparência!";
+		close;
+
+	L_MutateS:
+		if (!.@has_hom || .@is_s || !.@is_evolved || .@hom_lv < 99) {
+			mes "[Criador de Homúnculos]";
+			mes "Seu homúnculo ainda não cumpre os requisitos para mutar para S.";
+			close;
+		}
+
+		mes "[Criador de Homúnculos]";
+		mes "Seu homúnculo está pronto para virar Homunculus S!";
+
+		mes "Escolha qual forma S deseja:";
+		next;
+		switch (select("Eira:Bayeri:Sera:Dieter:Eleanor:Cancelar")) {
+			case 1: .@s_class = 6048; break; // Eira
+			case 2: .@s_class = 6049; break; // Bayeri
+			case 3: .@s_class = 6050; break; // Sera
+			case 4: .@s_class = 6051; break; // Dieter
+			case 5: .@s_class = 6052; break; // Eleanor
+			default: goto L_Cancel;
+		}
+		// hommutate exige estádo MORPH + Strange Embryo.
+		// Se ainda não estiver em MORPH, prepara automaticamente.
+		.@hstate = checkhomcall();
+		if (.@hstate != 2) {
+			.@ok = morphembryo();
+			if (!.@ok) {
+				mes "[Criador de Homúnculos]";
+				mes "Não consegui preparar a mutação.";
+				mes "Verifique se seu homúnculo está invocado e se você tem espaco no inventario.";
+				close;
+			}
+		}
+
+		.@ok = hommutate(.@s_class);
+		if (!.@ok) {
+			mes "[Criador de Homúnculos]";
+			mes "A mutação falhou.";
+			mes "Confirme se o homúnculo está evoluído e no nível 99+.";
+			close;
+		}
+		mes "[Criador de Homúnculos]";
+		mes "Mutação concluida! Treine bem seu novo Homunculus S.";
+		close;
+
+	L_ResetSSkills:
+		if (!.@has_hom || !.@is_s) {
+			mes "[Criador de Homúnculos]";
+			mes "Esse reset é exclusivo para Homunculus S.";
+			close;
+		}
+
+		.@bonus_pts = (.@hom_lv > 99 ? .@hom_lv - 99 : 0);
+		mes "[Criador de Homúnculos]";
+		mes "Vou resetar as skills do seu Homunculus S.";
+		mes "Regra especial ativa: cada nível acima do 99 vale +1 ponto.";
+		mes "No seu nível atual, bonus extra: " + .@bonus_pts + ".";
+		if (select("Confirmar reset:Cancelar") == 2)
+			goto L_Cancel;
+
+		.@ok = homresetskill(1);
+		if (!.@ok) {
+			mes "[Criador de Homúnculos]";
+			mes "Não consegui resetar agora.";
+			mes "Deixe o homúnculo ativo e tente novamente.";
+			close;
+		}
+
+		mes "[Criador de Homúnculos]";
+		mes "Skills resetadas com sucesso!";
+		mes "Redistribua os pontos como preferir.";
+		close;
+
+	L_DebugHom99:
+		if (getgroupid() != 99) {
+			mes "[Criador de Homúnculos]";
+			mes "Opção restrita a administradores.";
+			close;
+		}
+
+		if (!gethominfo(1)) {
+			mes "[Criador de Homúnculos]";
+			mes "Você não possui homúnculo ativo.";
+			close;
+		}
+
+		.@target_lv = (.@is_s ? 175 : 99);
+		.@need_lv = .@target_lv - gethominfo(6);
+		if (.@need_lv <= 0) {
+			mes "[Criador de Homúnculos]";
+			mes "Seu homúnculo já está no nível " + .@target_lv + " ou acima.";
+			close;
+		}
+
+		atcommand "@homlevel " + .@need_lv;
+		mes "[Criador de Homúnculos]";
+		mes "Pronto! Seu homúnculo foi ajustado para o nível " + .@target_lv + ".";
+		close;
+
+	L_DeleteHom:
+		mes "[Criador de Homúnculos]";
+		mes "Isso vai remover seu homúnculo atual (ou vinculo fantasma).";
+		if (select("Sim, deletar:Cancelar") == 2)
+			goto L_Cancel;
+
+		.@ok = deletehomunculus();
+		if (.@ok)
+			mes "Homúnculo removido com sucesso.";
+		else
+			mes "Não encontrei homúnculo para remover.";
+		close;
+
+	L_Info:
+		mes "[Criador de Homúnculos]";
+		mes "Informações do seu Homúnculo:";
+		mes "Nome: " + gethominfo(2) + ".";
+		mes "Amizade: " + gethominfo(3) + ".";
+		mes "Fome: " + gethominfo(4) + ".";
+		mes "Level: " + gethominfo(6) + ".";
+		close;
+
+	L_About:
+		mes "[Criador de Homúnculos]";
+		mes "Homúnculos sao criaturas especiais criadas";
+		mes "para ajudar em batalhas e aventuras!";
+		mes "Você pode evoluir seu Homúnculo a qualquer momento";
+		mes "Somente os Alquimistas e suas evoluções";
+		mes "podem ter Homúnculos!";
+		mes "Se você for um posso te dar um homúnculo a sua escolha.";
+		mes "Se você já tem cuide bem, evolua e treine seu Homúnculo.";
+		next;
+		mes "[Criador de Homúnculos]";
+		mes "Regras de evolucao/mutação:";
+		mes "- Evoluir: homúnculo base (não evoluído).";
+		mes "- Mutar para S: homúnculo evoluído e nível 99+.";
+		mes "- Reset Skill S: disponível para Homunculus S.";
+		mes "- Bonus do reset S: 1 ponto por nível acima de 99.";
+		next;
+		mes "[Criador de Homúnculos]";
+		mes "Mutação S disponível:";
+		mes "Você pode escolher livremente:";
+		mes "Eira, Bayeri, Sera, Dieter ou Eleanor.";
+		close;
+
+	L_Cancel:
+		mes "[Criador de Homúnculos]";
+		mes "Tudo bem, volte qualquer dia!";
+		close;
+}

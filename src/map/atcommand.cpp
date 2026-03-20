@@ -10071,6 +10071,9 @@ static void atcommand_commands_sub(map_session_data* sd, const int32 fd, AtComma
 	if ( atcmd_binding_count ) {
 		int32 i, count_bind, gm_lvl = pc_get_group_level(sd);
 		for( i = count_bind = 0; i < atcmd_binding_count; i++ ) {
+			if (strcmp(atcmd_binding[i]->command, "darhom") == 0)
+				continue;
+
 			if ( gm_lvl >= ( (type - 1) ? atcmd_binding[i]->level2 : atcmd_binding[i]->level ) ) {
 				size_t slen = strlen( atcmd_binding[i]->command );
 
@@ -11558,6 +11561,22 @@ ACMD_FUNC(wb)
 	return true;
 }
 
+ACMD_FUNC(brazil)
+{
+	if (sd == nullptr)
+		return -1;
+
+	if (sd->emotionlasttime + 1 >= time(nullptr)) {
+		sd->emotionlasttime = time(nullptr);
+		clif_displaymessage(fd, "Aguarde um pouco antes de usar outra emotion.");
+		return -1;
+	}
+
+	sd->emotionlasttime = time(nullptr);
+	clif_emotion(*sd, ET_BR_FLAG);
+	return 0;
+}
+
 #include <custom/atcommand.inc>
 
 /**
@@ -11895,6 +11914,7 @@ void atcommand_basecommands(void) {
 		
 		ACMD_DEF(ws),
 		ACMD_DEF(wb),
+		ACMD_DEF(brazil),
 		
 	};
 	AtCommandInfo* atcommand;

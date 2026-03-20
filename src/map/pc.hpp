@@ -835,6 +835,7 @@ public:
 
 	// Title system
 	std::vector<int32> titles;
+	uint16 title_icon = 0;
 
 	std::vector<int32> cloaked_npc;
 

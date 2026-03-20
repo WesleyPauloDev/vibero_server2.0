@@ -1,0 +1,86 @@
+-	script	Premio do Amigo#base	-1,{
+
+	mes "[Prêmio do Amigo]";
+	switch(select("Quero saber sobre o prêmio!","Um amigo me indicou!","Sair")) {
+		case 1:
+			mes "Uma caixa especial recebida ao indicar um amigo.";
+			mes "Contém os seguintes itens para quem indicou:";
+			mes "^0055FF10x Goma de Mascar^000000";
+			mes "^0055FF10x Super Pocao Media de Vida^000000";
+			mes "^0055FF10x Macaroons Sortidos^000000";
+			mes "^0055FF10x Taça da Felicidade^000000";
+			mes "^0055FF10x Amuleto de Ziegfried^000000";
+			mes "^0055FF4x Diario de Aventuras^000000";
+			next;
+			mes "Ao informar o nome de quem te indicou,";
+			mes "o amigo indicado recebe esse pacote.";
+			mes "Você também recebe ^0055FF1 unidade de cada item^000000.";
+			close;
+		case 2:
+			break;
+		default:
+			close;
+	}
+
+	if (BaseLevel < 20) {
+		mes "É necessário mais experiência no jogo.";
+		mes "Volte quando alcançar o nível 20.";
+		close;
+	}
+
+	// Cada conta só pode informar quem indicou uma única vez.
+	if (#friend_ref_set) {
+		mes "Você já nos informou quem te indicou.";
+		close;
+	}
+
+	.@ip$ = getcharip();
+
+	while (true) {
+		mes "Digite o nick de quem te indicou:";
+		input .@friend$;
+
+		query_sql("SELECT char_id, account_id FROM `char` WHERE name = '"+escape_sql(.@friend$)+"'", .@friend_id, .@friend_aid);
+		if (!getarraysize(.@friend_id)) {
+			mes "Nick não encontrado. Deseja tentar novamente?";
+			if (select("Tentar novamente","Cancelar") == 1)
+				next;
+			mes "Indicação cancelada.";
+			break;
+		}
+
+		// Impedir auto-indicação (mesma conta)
+		if (.@friend_aid[0] == getcharid(2)) {
+			mes "Você não pode indicar a si próprio.";
+			break;
+		}
+
+		// Impedir indicação de quem joga do mesmo IP
+		query_sql("SELECT last_ip FROM `login` WHERE account_id = "+.@friend_aid[0], .@friend_ip$);
+		if (getarraysize(.@friend_ip$) > 0 && .@friend_ip$[0] == .@ip$) {
+			mes "Você não pode indicar alguém que joga do mesmo IP.";
+			break;
+		}
+
+		// Registra quem indicou para bloquear novas alterações nesta conta.
+		#friend_ref_set = 1;
+		#friend_ref_name$ = .@friend$;
+		#friend_ref_time = gettimetick(2);
+
+		next;
+		mes "[Prêmio do Amigo]";
+		mes "Nick encontrado! Sua indicação foi registrada.";
+
+		// Premia quem indicou com o pacote maior.
+		setarray .@mail_item_id[0], 12210, 22818, 12223, 12224, 7621, 14545;
+		setarray .@mail_item_amount[0], 10, 10, 10, 10, 10, 4;
+		mail(.@friend_id[0], "Evento do Amigo", "Indicação de Amigo", "Você indicou "+strcharinfo(0)+" e recebeu seu prêmio! Parabens!", 0, .@mail_item_id, .@mail_item_amount);
+
+		// Premia quem foi indicado com 1 unidade de cada item.
+		setarray .@mail_item_amount[0], 1, 1, 1, 1, 1, 1;
+		mail(getcharid(0), "Evento do Amigo", "Indicação Registrada", "Sua indicação foi registrada com sucesso! Aqui está seu prêmio.", 0, .@mail_item_id, .@mail_item_amount);
+		mes "Os prêmios foram enviados para você e para seu amigo!";
+		break;
+	}
+	close;
+}

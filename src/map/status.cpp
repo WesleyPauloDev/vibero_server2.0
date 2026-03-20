@@ -3918,6 +3918,15 @@ int32 status_calc_pc_sub(map_session_data* sd, uint8 opt)
 		pet_delautobonus(*sd, sd->pd->autobonus3, true);
 	}
 
+	if (sd->status.title_id) {
+		std::shared_ptr<s_title_bonus_db> title = title_bonus_db.find(sd->status.title_id);
+		if (title != nullptr && title->script != nullptr) {
+			run_script(title->script, 0, sd->id, 0);
+			if (!calculating)
+				return 1;
+		}
+	}
+
 	// Parse equipment
 	for (i = 0; i < EQI_MAX; i++) {
 		current_equip_item_index = index = sd->equip_index[i]; // We pass INDEX to current_equip_item_index - for EQUIP_SCRIPT (new cards solution) [Lupus]
@@ -16493,6 +16502,110 @@ void StatusDatabase::loadingFinished(){
 
 StatusDatabase status_db;
 
+const std::string TitleBonusDatabase::getDefaultLocation() {
+	return std::string(db_path) + "/" + DBPATH + "title_bonus.yml";
+}
+
+uint64 TitleBonusDatabase::parseBodyNode(const ryml::NodeRef& node) {
+	uint16 id;
+
+	if (!this->asUInt16(node, "Id", id))
+		return 0;
+
+	std::shared_ptr<s_title_bonus_db> title = this->find(id);
+	bool exists = title != nullptr;
+
+	if (!exists) {
+		title = std::make_shared<s_title_bonus_db>();
+		title->id = id;
+		title->icon = 0;
+		title->script = nullptr;
+	}
+
+	if (this->nodeExists(node, "Script")) {
+		std::string script;
+
+		if (!this->asString(node, "Script", script))
+			return 0;
+
+		if (exists && title->script != nullptr) {
+			script_free_code(title->script);
+			title->script = nullptr;
+		}
+
+		title->script = parse_script(script.c_str(), this->getCurrentFile().c_str(), this->getLineNumber(node["Script"]), SCRIPT_IGNORE_EXTERNAL_BRACKETS);
+	}
+
+	if (this->nodeExists(node, "Icon")) {
+		uint16 icon;
+
+		if (!this->asUInt16(node, "Icon", icon))
+			return 0;
+
+		if (icon >= EFST_MAX) {
+			this->invalidWarning(node["Icon"], "Icon Id (%hu) should be lower than EFST_MAX (%d).\n", icon, EFST_MAX);
+			return 0;
+		}
+
+		title->icon = icon;
+	}
+
+	if (!exists)
+		this->put(id, title);
+
+	return 1;
+}
+
+TitleBonusDatabase title_bonus_db;
+
+void status_load_title_icon(map_session_data* sd, int32 title_id) {
+	nullpo_retv(sd);
+
+	std::shared_ptr<s_title_bonus_db> title = title_bonus_db.find(title_id);
+	if (title != nullptr && title->icon != 0) {
+		clif_status_load(sd, static_cast<efst_type>(title->icon), 1);
+		sd->title_icon = title->icon;
+	}
+}
+
+int32 set_status_title_id(map_session_data* sd, int32 title_id) {
+	nullpo_retr(0, sd);
+
+	if (sd->title_icon != 0) {
+		clif_status_load(sd, static_cast<efst_type>(sd->title_icon), 0);
+		sd->title_icon = 0;
+	}
+
+	sd->status.title_id = title_id;
+
+	if (sd->status.title_id != 0)
+		status_load_title_icon(sd, title_id);
+
+	status_calc_pc(sd, SCO_NONE);
+	return 1;
+}
+
+static void title_bonus_db_reload(void) {
+	struct s_mapiterator* iter = mapit_geteachpc();
+	map_session_data* sd = nullptr;
+
+	title_bonus_db.reload();
+
+	for (sd = (map_session_data*)mapit_first(iter); mapit_exists(iter); sd = (map_session_data*)mapit_next(iter)) {
+		if (sd->title_icon != 0) {
+			clif_status_load(sd, static_cast<efst_type>(sd->title_icon), 0);
+			sd->title_icon = 0;
+		}
+
+		if (sd->status.title_id != 0)
+			status_load_title_icon(sd, sd->status.title_id);
+
+		status_calc_pc(sd, SCO_FORCE);
+	}
+
+	mapit_free(iter);
+}
+
 /**
  * Sets defaults in tables and starts read db functions
  * sv_readdb reads the file, outputting the information line-by-line to
@@ -16539,11 +16652,13 @@ void status_readdb( bool reload ){
 		refine_db.reload();
 		status_db.reload();
 		enchantgrade_db.reload();
+		title_bonus_db_reload();
 	}else{
 		size_fix_db.load();
 		refine_db.load();
 		status_db.load();
 		enchantgrade_db.load();
+		title_bonus_db.load();
 	}
 	elemental_attribute_db.load();
 }
@@ -16571,6 +16686,7 @@ void do_final_status(void) {
 	size_fix_db.clear();
 	refine_db.clear();
 	status_db.clear();
+	title_bonus_db.clear();
 	elemental_attribute_db.clear();
 	delay_status.clear();
 }
