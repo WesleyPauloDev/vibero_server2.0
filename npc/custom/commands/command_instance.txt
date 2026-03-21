@@ -132,9 +132,20 @@ OnAtcommand:
 			end;
 
 		case 17:
-			#INSTANCENAME$ = "WATERGARDEN";
-			doevent "WATERGARDEN_Instance#Custom::OnStartInstance";
-			end;
+			switch(select("WaterGarden Normal","WaterGarden Hard","Cancelar")) {
+			case 1:
+				#WATERGARDEN_MODE = 0;
+				#INSTANCENAME$ = "WATERGARDEN";
+				doevent "WATERGARDEN_Instance#Custom::OnStartInstance";
+				end;
+			case 2:
+				#WATERGARDEN_MODE = 1;
+				#INSTANCENAME$ = "WATERGARDEN";
+				doevent "WATERGARDEN_Instance#Custom::OnStartInstance";
+				end;
+			case 3:
+				end;
+			}
 
 	}
 

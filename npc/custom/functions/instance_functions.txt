@@ -15,6 +15,7 @@ function	script	F_InstanceEntry	{
 	.@cooldown_var$ = getarg(2);
 	.@status_var$ = getarg(3);
 	.@min_level = getarg(4);
+	debugmes "[WG HARD] F_InstanceEntry md=" + .@md_name$ + " status_var=" + .@status_var$;
 
     .@cooldown_name$ = "#cooldown_" + .@cooldown_var$;
     .@status_name$ = "#" + .@status_var$ + "_STATUS";
@@ -116,14 +117,17 @@ function	script	F_InstanceEntry	{
 		// 7. Entrar na inst‚ncia
 		// ============================
 		case 2:
+				debugmes "[WG HARD] before instance_enter md=" + .@md_name$ + " status=" + getd(.@status_name$);
 			switch(instance_enter(.@md_name$)) {
 				case IE_OK:
 					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
+					debugmes "[WG HARD] IE_OK before set: " + getd(.@status_name$) + " md=" + .@md_name$;
 					setd(.@status_name$), 2;
+					debugmes "[WG HARD] IE_OK after set: " + getd(.@status_name$) + " md=" + .@md_name$;
 					end;
 				case IE_NOINSTANCE:
-                    if(#PORING_STATUS == 0) {
-					    mes "A inst‚ncia ainda n„o foi criada.";
+                    if(getd(.@status_name$) == 0) {
+				    mes "A inst√¢ncia ainda n√£o foi criada.";
                         close;
                     }
                     mes "VocÍ j· entrou na inst‚ncia hoje.";

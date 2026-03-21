@@ -13,16 +13,24 @@
 -	script	WATERGARDEN_Instance#Custom	-1,{
 
 	OnStartInstance:
-		// #WATERGARDEN_STATUS = 2;
-		// instance_create("Jardim Aquatico");
-		// instance_enter("Jardim Aquatico");
-		callfunc("F_InstanceEntry",
-			"Jardim Aquatico",        // Nome da instância
-			"Harad",                 // Nome do NPC
-			"water_garden", // Variável de cooldown da conta
-			"WATERGARDEN",        // Variável de status da conta
-			175                      // Level mínimo
-		);
+		if (#WATERGARDEN_MODE == 1) {
+			callfunc("F_InstanceEntry",
+				"Water Garden Hard",
+				"Harad",
+				"water_garden_hard",
+				"WATERGARDEN_HARD",
+				175
+			);
+		}
+		else {
+			callfunc("F_InstanceEntry",
+				"Jardim Aquatico",
+				"Harad",
+				"water_garden",
+				"WATERGARDEN",
+				175
+			);
+		}
 	end;
 }
 
@@ -134,7 +142,6 @@
 1@ghg,1,1,0	script	#172_water_garden_control	-1,{
 	end;
 OnInstanceInit:
-	// 'mode = 0;	// not resetted
 	'water_garden = 0;
 	'map_ghg$ = instance_mapname("1@ghg");
 
@@ -153,14 +160,10 @@ OnTouch:
 		end;
 	if ('water_garden != 0)
 		end;
-	if (isbegin_quest(16438) > 0) {
-		erasequest 16438;
+	if (#WATERGARDEN_MODE == 1)
 		'mode = 1;
-	}
-	else if (isbegin_quest(16437) > 0) {
-		erasequest 16437;
+	else
 		'mode = 0;
-	}
 	'water_garden = 1;
 	end;
 }
@@ -1068,15 +1071,27 @@ OnTouchNPC:
 		mes "Então, eu vou te mostrar o caminho para fora novamente!";
 		
 		// Premiações do Servidor
-		if (#WATERGARDEN_STATUS == 2) {
-			// add_reputation_points(1, 10);
-			callfunc("F_AddRep", 1, 10, 110002, 3000);
-			set #instancia, 2;
-			if (#inst175_name$ == "[175+] Jardim Aquático") {
-				set #inst175_status,2;
+		if ('mode == 1) {
+			if (#WATERGARDEN_HARD_STATUS == 2) {
+				callfunc("F_AddRep", 1, 20, 110002, 3000);
+				set #instancia, 2;
+				if (#inst175_name$ == "[175+] Jardim Aqu.tico") {
+					set #inst175_status,2;
+				}
+				getitem 9608,20;	// Moeda de Inst.ncia
+				set #WATERGARDEN_HARD_STATUS, 3;
 			}
-			getitem 9608,10;	// Moeda de Instância
-			set #WATERGARDEN_STATUS, 3;
+		}
+		else {
+			if (#WATERGARDEN_STATUS == 2) {
+				callfunc("F_AddRep", 1, 10, 110002, 3000);
+				set #instancia, 2;
+				if (#inst175_name$ == "[175+] Jardim Aqu.tico") {
+					set #inst175_status,2;
+				}
+				getitem 9608,10;	// Moeda de Inst.ncia
+				set #WATERGARDEN_STATUS, 3;
+			}
 		}
 		close2;
 		warp "ba_maison",233,46;
