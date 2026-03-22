@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS `instance_monitor_log` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `instance_name` VARCHAR(100) NOT NULL,
+  `party_id` INT UNSIGNED NOT NULL,
+  `party_name` VARCHAR(100) NOT NULL,
+  `created_by_account_id` INT UNSIGNED NOT NULL,
+  `created_by_char_id` INT UNSIGNED NOT NULL,
+  `created_by_name` VARCHAR(100) NOT NULL,
+  `finished_by_account_id` INT UNSIGNED DEFAULT NULL,
+  `finished_by_char_id` INT UNSIGNED DEFAULT NULL,
+  `finished_by_name` VARCHAR(100) DEFAULT NULL,
+  `status` VARCHAR(20) NOT NULL DEFAULT 'OPEN',
+  `started_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `completed_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_instance_status` (`instance_name`, `status`),
+  KEY `idx_party_status` (`party_id`, `status`),
+  KEY `idx_started_at` (`started_at`),
+  KEY `idx_completed_at` (`completed_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -102,6 +102,7 @@ function	script	F_InstanceEntry	{
 					mes "[" + .@npc_name$ + "]";
 					mes "A Instância está se abrindo...";
 					announce "[" + .@md_name$ + "] O jogador " + strcharinfo(0) + " do grupo " + getpartyname(getcharid(1)) + " criou a instância.", bc_all, "0xFF9900";
+					callfunc("F_InstanceLogStart", .@md_name$);
 
 					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
 					setd(.@status_name$), 1;
@@ -150,5 +151,41 @@ function	script	F_InstanceEntry	{
 			mes "Tudo bem, volte quando estiver pronto.";
 			close;
 	}
+	return;
+}
+
+function	script	F_InstanceLogStart	{
+	.@md_name$ = getarg(0);
+	.@party_id = getcharid(1);
+	if (.@party_id < 1)
+		return;
+	query_sql("INSERT INTO `instance_monitor_log` (`instance_name`, `party_id`, `party_name`, `created_by_account_id`, `created_by_char_id`, `created_by_name`, `status`, `started_at`) VALUES ('"
+		+ escape_sql(.@md_name$) + "', "
+		+ .@party_id + ", '"
+		+ escape_sql(getpartyname(.@party_id)) + "', "
+		+ getcharid(3) + ", "
+		+ getcharid(0) + ", '"
+		+ escape_sql(strcharinfo(0)) + "', 'OPEN', NOW())");
+	return;
+}
+
+function	script	F_InstanceLogFinish	{
+	.@md_name$ = getarg(0);
+	.@party_id = getcharid(1);
+	if (.@party_id < 1)
+		return;
+	query_sql("UPDATE `instance_monitor_log` SET `status` = 'COMPLETED', `completed_at` = NOW(), `finished_by_account_id` = "
+		+ getcharid(3) + ", `finished_by_char_id` = "
+		+ getcharid(0) + ", `finished_by_name` = '"
+		+ escape_sql(strcharinfo(0)) + "' WHERE `id` = (SELECT `id` FROM (SELECT `id` FROM `instance_monitor_log` WHERE `instance_name` = '"
+		+ escape_sql(.@md_name$) + "' AND `party_id` = "
+		+ .@party_id + " AND `status` = 'OPEN' ORDER BY `id` DESC LIMIT 1) AS `open_instance`)");
+	return;
+}
+
+function	script	F_InstanceFinishAnnounce	{
+	.@md_name$ = getarg(0);
+	callfunc("F_InstanceLogFinish", .@md_name$);
+	announce "[" + .@md_name$ + "] O jogador " + strcharinfo(0) + " do grupo " + getpartyname(getcharid(1)) + " finalizou a instância.", bc_all, "0xFF9900";
 	return;
 }
