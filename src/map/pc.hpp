@@ -62,6 +62,7 @@ class MapGuild;
 #define JOBCHANGE4TH_VAR "jobchange_level_4th"
 #define TKMISSIONID_VAR "TK_MISSION_ID"
 #define TKMISSIONCOUNT_VAR "TK_MISSION_COUNT"
+#define HOMUN_AI_MODE_VAR "HOMUN_AI_MODE"
 #define ATTENDANCE_DATE_VAR "#AttendanceDate"
 #define ATTENDANCE_COUNT_VAR "#AttendanceCounter"
 #define ACHIEVEMENTLEVEL "AchievementLevel"
@@ -484,6 +485,7 @@ public:
 
 	int32 langtype;
 	struct mmo_charstatus status;
+	uint8 hom_ai_mode = 0; // e_hom_ai_mode
 
 	// Item Storages
 	struct s_storage storage, premiumStorage;
@@ -833,6 +835,7 @@ public:
 
 	// Title system
 	std::vector<int32> titles;
+	uint16 title_icon = 0;
 
 	std::vector<int32> cloaked_npc;
 

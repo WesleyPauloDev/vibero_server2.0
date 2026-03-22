@@ -2377,6 +2377,7 @@ void pc_reg_received(map_session_data *sd)
 
 	// Cooking Exp
 	sd->cook_mastery = static_cast<int16>(pc_readglobalreg(sd, add_str(COOKMASTERY_VAR)));
+	sd->hom_ai_mode = static_cast<uint8>(cap_value(pc_readglobalreg(sd, add_str(HOMUN_AI_MODE_VAR)), HOM_AI_MODE_NORMAL, HOM_AI_MODE_SERVER));
 
 	if( (sd->class_&MAPID_BASEMASK) == MAPID_TAEKWON )
 	{ // Better check for class rather than skill to prevent "skill resets" from unsetting this
@@ -2435,6 +2436,7 @@ void pc_reg_received(map_session_data *sd)
 		return;
 	sd->state.active = 1;
 	sd->state.pc_loaded = false; // Ensure inventory data and status data is loaded before we calculate player stats
+	hom_update_ai_timer(sd);
 
 	intif_storage_request(sd,TABLE_STORAGE, 0, STOR_MODE_ALL); // Request storage data
 	intif_storage_request(sd,TABLE_CART, 0, STOR_MODE_ALL); // Request cart data
@@ -8352,8 +8354,6 @@ int32 pc_checkjoblevelup(map_session_data *sd)
 	clif_updatestatus(*sd,SP_SKILLPOINT);
 	status_calc_pc(sd,SCO_FORCE);
 	clif_misceffect( *sd, NOTIFYEFFECT_JOB_LEVEL_UP );
-	if (pc_checkskill(sd, SG_DEVIL) && ((sd->class_&MAPID_THIRDMASK) == MAPID_STAR_EMPEROR || pc_is_maxjoblv(sd)) )
-		clif_status_change(sd, EFST_DEVIL1, 1, 0, 0, 0, 1); //Permanent blind effect from SG_DEVIL.
 
 	npc_script_event( *sd, NPCE_JOBLVUP );
 
@@ -9197,8 +9197,6 @@ void pc_skillup(map_session_data *sd,uint16 skill_id)
 			clif_updatestatus(*sd,SP_SKILLPOINT);
 			if( skill_id == GN_REMODELING_CART ) /* cart weight info was updated by status_calc_pc */
 				clif_updatestatus(*sd,SP_CARTINFO);
-			if (pc_checkskill(sd, SG_DEVIL) && ((sd->class_&MAPID_THIRDMASK) == MAPID_STAR_EMPEROR || pc_is_maxjoblv(sd)))
-				clif_status_change(sd, EFST_DEVIL1, 1, 0, 0, 0, 1); //Permanent blind effect from SG_DEVIL.
 			if (!pc_has_permission(sd, PC_PERM_ALL_SKILL)) // may skill everything at any time anyways, and this would cause a huge slowdown
 				clif_skillinfoblock(sd);
 		}
@@ -10194,6 +10192,8 @@ bool pc_revive_item(map_session_data *sd) {
 		return false;
 
 	int16 item_position = itemdb_group.item_exists_pc(sd, IG_TOKEN_OF_SIEGFRIED);
+	if (item_position < 0)
+		item_position = pc_search_inventory(sd, 9672); // Token_Of_Siegfried[NN]
 	uint8 hp = 100, sp = 100;
 
 	if (item_position < 0) {

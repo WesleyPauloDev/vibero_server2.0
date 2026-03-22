@@ -84,6 +84,12 @@ enum e_hom_state2 : uint8 {
 	SP_HUNGRY   = 0x2,
 };
 
+enum e_hom_ai_mode : uint8 {
+	HOM_AI_MODE_NORMAL = 0,
+	HOM_AI_MODE_CLIENT = 1,
+	HOM_AI_MODE_SERVER = 2,
+};
+
 struct homun_data : public block_list {
 	struct unit_data  ud;
 	struct view_data *vd;
@@ -96,6 +102,10 @@ struct homun_data : public block_list {
 	int32 masterteleport_timer;
 	map_session_data *master; //pointer back to its master
 	int32 hungry_timer;	//[orn]
+	int32 ai_timer;
+	uint16 ai_skill_cursor;
+	uint8 ai_ele_combo_step;
+	t_tick ai_ele_next_skill_tick;
 	t_exp exp_next;
 	std::unordered_map<uint16, int32> scd;
 };
@@ -207,6 +217,7 @@ struct view_data* hom_get_viewdata(int32 class_);
 int32 hom_class2mapid(int32 hom_class);
 enum homun_type hom_class2type(int32 class_);
 int32 hom_dead(struct homun_data *hd);
+int32 hom_delete(struct homun_data *hd);
 void hom_skillup(struct homun_data *hd,uint16 skill_id);
 void hom_calc_skilltree(homun_data *hd);
 int16 hom_checkskill(struct homun_data *hd,uint16 skill_id);
@@ -220,6 +231,7 @@ int32 hom_vaporize(map_session_data *sd, int32 flag);
 int32 hom_ressurect(map_session_data *sd, unsigned char per, int16 x, int16 y);
 void hom_revive(struct homun_data *hd, uint32 hp, uint32 sp);
 void hom_reset_stats(struct homun_data *hd);
+int32 hom_reset_skills(struct homun_data *hd, bool s_bonus_above99);
 int32 hom_shuffle(struct homun_data *hd); // [Zephyrus]
 void hom_save(struct homun_data *hd);
 bool hom_call(map_session_data *sd);
@@ -227,6 +239,7 @@ bool hom_create_request(map_session_data *sd, int32 class_);
 void hom_menu(map_session_data *sd,int32 type);
 int32 hom_food(map_session_data *sd, struct homun_data *hd);
 int32 hom_hungry_timer_delete(struct homun_data *hd);
+int32 hom_ai_timer_delete(struct homun_data *hd);
 int32 hom_change_name(map_session_data *sd,char *name);
 void hom_change_name_ack(map_session_data *sd, char* name, int32 flag);
 int32 hom_increase_intimacy(struct homun_data * hd, uint32 value);
@@ -243,6 +256,8 @@ uint32 hom_intimacy_grade2intimacy(enum e_homun_grade grade);
 enum e_homun_grade hom_intimacy_intimacy2grade(uint32 intimacy);
 
 int16 hom_skill_get_index(uint16 skill_id);
+void hom_update_ai_timer(map_session_data *sd);
+const char* hom_ai_mode_name(uint8 mode);
 
 void do_final_homunculus(void);
 void do_init_homunculus(void);

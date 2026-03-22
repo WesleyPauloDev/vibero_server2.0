@@ -165,17 +165,24 @@ int8 buyingstore_create( map_session_data* sd, int32 zenylimit, unsigned char re
 		std::shared_ptr<item_data> id = item_db.find(item->itemId);
 
 		// invalid input
-		if( id == nullptr || item->amount == 0 ){	
+		if( id == nullptr || item->amount == 0 ){
+			ShowWarning("buyingstore_create: Reject item (nameid=%u, amount=%hu) - invalid input (null id or zero amount) (AID=%d CID=%d)\n",
+				item->itemId, item->amount, sd->status.account_id, sd->status.char_id);
 			break;
 		}
 
 		// invalid price: unlike vending, items cannot be bought at 0 Zeny
 		if( item->price <= 0 || item->price > BUYINGSTORE_MAX_PRICE ){
+			ShowWarning("buyingstore_create: Reject item (nameid=%u) - invalid price %d (AID=%d CID=%d)\n",
+				item->itemId, item->price, sd->status.account_id, sd->status.char_id);
 			break;
 		}
 
 		// restrictions: allowed and no character-bound items
-		if( !id->flag.buyingstore || !itemdb_cantrade_sub( id.get(), pc_get_group_level( sd ), pc_get_group_level( sd ) ) ){ 
+		if( !id->flag.buyingstore || !itemdb_cantrade_sub( id.get(), pc_get_group_level( sd ), pc_get_group_level( sd ) ) ){
+			ShowWarning("buyingstore_create: Reject item (nameid=%u) - buyingstore flag=%d cantrade=%d (AID=%d CID=%d)\n",
+				item->itemId, id->flag.buyingstore ? 1 : 0, itemdb_cantrade_sub( id.get(), pc_get_group_level( sd ), pc_get_group_level( sd ) ) ? 1 : 0,
+				sd->status.account_id, sd->status.char_id);
 			break;
 		}
 
@@ -183,11 +190,16 @@ int8 buyingstore_create( map_session_data* sd, int32 zenylimit, unsigned char re
 
 		// At least one must be owned
 		if( idx < 0 ){
+			ShowWarning("buyingstore_create: Reject item (nameid=%u) - player does not have at least one in inventory (AID=%d CID=%d)\n",
+				item->itemId, sd->status.account_id, sd->status.char_id);
 			break;
 		}
 
 		// too many items of same kind
 		if( sd->inventory.u.items_inventory[idx].amount + item->amount > BUYINGSTORE_MAX_AMOUNT ){
+			ShowWarning("buyingstore_create: Reject item (nameid=%u) - amount overflow (have=%d want=%d max=%d) (AID=%d CID=%d)\n",
+				item->itemId, sd->inventory.u.items_inventory[idx].amount, item->amount, BUYINGSTORE_MAX_AMOUNT,
+				sd->status.account_id, sd->status.char_id);
 			break;
 		}
 
@@ -197,7 +209,8 @@ int8 buyingstore_create( map_session_data* sd, int32 zenylimit, unsigned char re
 
 			// duplicate
 			if( listidx != i ){
-				ShowWarning( "buyingstore_create: Found duplicate item on buying list (nameid=%u, amount=%hu, account_id=%d, char_id=%d).\n", item->itemId, item->amount, sd->status.account_id, sd->status.char_id );
+				ShowWarning( "buyingstore_create: Found duplicate item on buying list (nameid=%u, amount=%hu, account_id=%d, char_id=%d).\n",
+					item->itemId, item->amount, sd->status.account_id, sd->status.char_id );
 				break;
 			}
 		}

@@ -1009,6 +1009,15 @@ bool skill_isNotOk_hom(struct homun_data *hd, uint16 skill_id, uint16 skill_lv)
 	}
 
 	switch(skill_id) {
+		case HAMI_CASTLE:
+			// In server AI mode, disable Castling for both Amistr forms.
+			if (sd->hom_ai_mode == HOM_AI_MODE_SERVER) {
+				int32 hom_mapid = hom_class2mapid(hd->homunculus.class_);
+
+				if (hom_mapid == MAPID_AMISTR || hom_mapid == MAPID_AMISTR_E)
+					return true;
+			}
+			break;
 		case HFLI_SBR44:
 			if (hom_get_intimacy_grade(hd) <= HOMGRADE_HATE_WITH_PASSION) {
 				clif_skill_fail( *sd, skill_id, USESKILL_FAIL_RELATIONGRADE );
@@ -1016,6 +1025,13 @@ bool skill_isNotOk_hom(struct homun_data *hd, uint16 skill_id, uint16 skill_lv)
 			}
 			break;
 		case HVAN_EXPLOSION:
+			// In server AI mode, disable Bio Explosion for Vanilmirth forms.
+			if (sd->hom_ai_mode == HOM_AI_MODE_SERVER) {
+				int32 hom_mapid = hom_class2mapid(hd->homunculus.class_);
+
+				if (hom_mapid == MAPID_VANILMIRTH || hom_mapid == MAPID_VANILMIRTH_E)
+					return true;
+			}
 			if (hd->homunculus.intimacy < (uint32)battle_config.hvan_explosion_intimate) {
 				clif_skill_fail( *sd, skill_id, USESKILL_FAIL_RELATIONGRADE );
 				return true;
@@ -2616,13 +2632,7 @@ int32 skill_counter_additional_effect (struct block_list* src, struct block_list
 		sc_start(src,src,SC_BLIND,2*skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
 		break;
 	case HFLI_SBR44:	//[orn]
-		if(src->type == BL_HOM){
-			homun_data& hd = reinterpret_cast<homun_data&>( *src );
-
-			hd.homunculus.intimacy = hom_intimacy_grade2intimacy(HOMGRADE_HATE_WITH_PASSION);
-
-			clif_send_homdata( hd, SP_INTIMATE );
-		}
+		// Custom: do not reduce homunculus intimacy when using S.B.R.44.
 		break;
 	case CR_GRANDCROSS:
 		if (src == bl) {
@@ -11229,8 +11239,6 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 			clif_skill_nodamage(src, *src, skill_id, skill_lv, 1);
 			map_foreachinshootrange(skill_area_sub, bl, skill_get_splash(skill_id, skill_lv), BL_CHAR | BL_SKILL, src, skill_id, skill_lv, tick, flag | BCT_ENEMY, skill_castend_damage_id);
 
-			hd->homunculus.intimacy = hom_intimacy_grade2intimacy(HOMGRADE_HATE_WITH_PASSION);
-			clif_send_homdata(*hd, SP_INTIMATE);
 
 			// There's a delay between the explosion and the homunculus death
 			skill_addtimerskill(src, tick + skill_get_time(skill_id, skill_lv), src->id, 0, 0, skill_id, skill_lv, 0, flag);
@@ -14434,9 +14442,31 @@ TIMER_FUNC(skill_castend_pos){
 
 		if (!sd || sd->skillitem != ud->skill_id || skill_get_delay(ud->skill_id, ud->skill_lv))
 			ud->canact_tick = i64max(tick + skill_delayfix(src, ud->skill_id, ud->skill_lv), ud->canact_tick - SECURITY_CASTTIME);
-		if (sd) { //Cooldown application
-			int32 cooldown = pc_get_skillcooldown(sd,ud->skill_id, ud->skill_lv);
-			if(cooldown) skill_blockpc_start(*sd, ud->skill_id, cooldown);
+		// Cooldown application
+		switch (src->type) {
+			case BL_PC:
+			{
+				int32 cooldown = pc_get_skillcooldown(sd, ud->skill_id, ud->skill_lv);
+				if (cooldown > 0)
+					skill_blockpc_start(*sd, ud->skill_id, cooldown);
+			}
+			break;
+			case BL_HOM:
+			{
+				homun_data &hd = reinterpret_cast<homun_data &>(*src);
+#ifdef RENEWAL
+				skill_blockhomun_start(hd, ud->skill_id, skill_get_cooldown(ud->skill_id, ud->skill_lv));
+#else
+				skill_blockhomun_start(hd, ud->skill_id, skill_get_delay(ud->skill_id, ud->skill_lv));
+#endif
+			}
+			break;
+			case BL_MER:
+			{
+				s_mercenary_data &mc = reinterpret_cast<s_mercenary_data &>(*src);
+				skill_blockmerc_start(mc, ud->skill_id, skill_get_cooldown(ud->skill_id, ud->skill_lv));
+			}
+			break;
 		}
 		if( battle_config.display_status_timers && sd )
 			clif_status_change(src, EFST_POSTDELAY, 1, skill_delayfix(src, ud->skill_id, ud->skill_lv), 0, 0, 0);
@@ -16496,11 +16526,7 @@ std::shared_ptr<s_skill_unit_group> skill_unitsetting(struct block_list *src, ui
 				unit_val2 = map_getcell(src->m, ux, uy, CELL_GETTYPE);
 				break;
 			case WZ_WATERBALL:
-				//Check if there are cells that can be turned into waterball units
-				if (!sd || map_getcell(src->m, ux, uy, CELL_CHKWATER) 
-					|| (map_find_skill_unit_oncell(src, ux, uy, SA_DELUGE, nullptr, 1)) != nullptr || (map_find_skill_unit_oncell(src, ux, uy, NJ_SUITON, nullptr, 1)) != nullptr)
-					break; //Turn water, deluge or suiton into waterball cell
-				continue;
+				break;
 			case GS_DESPERADO:
 				unit_val1 = abs(layout->dx[i]);
 				unit_val2 = abs(layout->dy[i]);
@@ -19704,12 +19730,14 @@ bool skill_check_condition_castend( map_session_data& sd, uint16 skill_id, uint1
 		}
 #ifdef RENEWAL
 		case ASC_EDP:
-			int16 item_edp = itemdb_group.item_exists_pc(&sd, IG_EDP);
-			if (item_edp < 0) {
-				clif_skill_fail( sd, skill_id, USESKILL_FAIL_NEED_ITEM, 1, ITEMID_POISON_BOTTLE ); // [%s] required '%d' amount.
-				return false;
-			} else
-				pc_delitem(&sd, item_edp, 1, 0, 1, LOG_TYPE_CONSUME);
+			if (!pc_isvip(&sd)) {
+				int16 item_edp = itemdb_group.item_exists_pc(&sd, IG_EDP);
+				if (item_edp < 0) {
+					clif_skill_fail( sd, skill_id, USESKILL_FAIL_NEED_ITEM, 1, ITEMID_POISON_BOTTLE ); // [%s] required '%d' amount.
+					return false;
+				} else
+					pc_delitem(&sd, item_edp, 1, 0, 1, LOG_TYPE_CONSUME);
+			}
 			break;
 #endif
 	}
@@ -25236,6 +25264,14 @@ uint64 SkillDatabase::parseBodyNode(const ryml::NodeRef& node) {
 	} else {
 		if (!exists)
 			memset(skill->num, 0, sizeof(skill->num));
+	}
+
+	if (this->nodeExists(node, "DamageRate")) {
+		if (!this->asInt32(node, "DamageRate", skill->damage_rate))
+			return 0;
+	} else {
+		if (!exists)
+			skill->damage_rate = 100;
 	}
 
 	if (this->nodeExists(node, "Element")) {

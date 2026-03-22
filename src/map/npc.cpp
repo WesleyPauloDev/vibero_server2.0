@@ -2513,6 +2513,8 @@ static enum e_CASHSHOP_ACK npc_cashshop_process_payment(struct npc_data *nd, int
  */
 int32 npc_cashshop_buylist( map_session_data *sd, int32 points, std::vector<s_npc_buy_list>& item_list ){
 	int32 i, j, amount, new_, w, vt;
+	int32 before_kafra_points = 0;
+	uint32 remaining_kafra_used = 0;
 	t_itemid nameid;
 	struct npc_data *nd = (struct npc_data *)map_id2bl(sd->npc_shopid);
 	enum e_CASHSHOP_ACK res;
@@ -2575,8 +2577,16 @@ int32 npc_cashshop_buylist( map_session_data *sd, int32 points, std::vector<s_np
 		return ERROR_TYPE_INVENTORY_WEIGHT;
 	if( points > vt ) points = vt;
 
+	if( nd->subtype == NPCTYPE_CASHSHOP ){
+		before_kafra_points = sd->kafraPoints;
+	}
+
 	if ((res = npc_cashshop_process_payment(nd, vt, points, sd)) != ERROR_TYPE_NONE)
 		return res;
+
+	if( nd->subtype == NPCTYPE_CASHSHOP ){
+		remaining_kafra_used = static_cast<uint32>( before_kafra_points - sd->kafraPoints );
+	}
 
 	// Delivery Process ----------------------------------------------------
 	for( i = 0; i < item_list.size(); i++ ) {
@@ -2594,9 +2604,23 @@ int32 npc_cashshop_buylist( map_session_data *sd, int32 points, std::vector<s_np
 			if ((itemdb_search(nameid))->flag.guid)
 				get_amt = 1;
 
-			for (j = 0; j < amount; j += get_amt)
-				pc_additem(sd,&item_tmp,get_amt,LOG_TYPE_NPC);
-		}
+				for (j = 0; j < amount; j += get_amt)
+					pc_additem(sd,&item_tmp,get_amt,LOG_TYPE_NPC);
+			}
+
+			if( nd->subtype == NPCTYPE_CASHSHOP ){
+				ARR_FIND( 0, nd->u.shop.count, j, nd->u.shop.shop_item[j].nameid == nameid || itemdb_viewid(nd->u.shop.shop_item[j].nameid) == nameid );
+				if( j < nd->u.shop.count ){
+					uint32 unit_price = nd->u.shop.shop_item[j].value;
+					uint32 item_total_price = unit_price * amount;
+					uint32 item_kafra_used = ( remaining_kafra_used > item_total_price ) ? item_total_price : remaining_kafra_used;
+					uint32 item_cash_used = item_total_price - item_kafra_used;
+
+					remaining_kafra_used -= item_kafra_used;
+
+					log_cashshop_purchase( sd, nameid, unit_price, amount, item_total_price, static_cast<int32>( item_cash_used ), static_cast<int32>( item_kafra_used ), "npc_cashshop" );
+				}
+			}
 	}
 
 	return ERROR_TYPE_NONE;
@@ -2674,6 +2698,7 @@ void npc_shop_currency_type(map_session_data *sd, struct npc_data *nd, int32 cos
 int32 npc_cashshop_buy(map_session_data *sd, t_itemid nameid, int32 amount, int32 points)
 {
 	struct npc_data *nd = (struct npc_data *)map_id2bl(sd->npc_shopid);
+	int32 before_cash_points = 0, before_kafra_points = 0;
 	int32 i, price, w;
 	enum e_CASHSHOP_ACK res;
 
@@ -2735,6 +2760,11 @@ int32 npc_cashshop_buy(map_session_data *sd, t_itemid nameid, int32 amount, int3
 	if( points > price )
 		points = price;
 
+	if( nd->subtype == NPCTYPE_CASHSHOP ){
+		before_cash_points = sd->cashPoints;
+		before_kafra_points = sd->kafraPoints;
+	}
+
 	if ((res = npc_cashshop_process_payment(nd, price, points, sd)) != ERROR_TYPE_NONE)
 		return res;
 
@@ -2751,6 +2781,10 @@ int32 npc_cashshop_buy(map_session_data *sd, t_itemid nameid, int32 amount, int3
 
 		for (int32 j = 0; j < amount; j += get_amt)
 			pc_additem(sd,&item_tmp, get_amt, LOG_TYPE_NPC);
+	}
+
+	if( nd->subtype == NPCTYPE_CASHSHOP ){
+		log_cashshop_purchase( sd, nameid, nd->u.shop.shop_item[i].value, amount, price, before_cash_points - sd->cashPoints, before_kafra_points - sd->kafraPoints, "npc_cashshop_legacy" );
 	}
 
 	return ERROR_TYPE_NONE;
@@ -2792,11 +2826,19 @@ static int32 npc_buylist_sub(map_session_data* sd, std::vector<s_npc_buy_list>& 
  * @return result code for clif_parse_NpcBuyListSend/clif_npc_market_purchase_ack
  */
 e_purchase_result npc_buylist( map_session_data* sd, std::vector<s_npc_buy_list>& item_list ){
+	struct s_npc_shop_buy_log_entry {
+		t_itemid nameid;
+		int32 amount;
+		int32 unit_price;
+		int32 total_price;
+	};
+
 	struct npc_data* nd;
 	struct npc_item_list *shop = nullptr;
 	double z;
 	int32 j,k,w,skill,new_;
 	uint8 market_index[MAX_INVENTORY];
+	std::vector<s_npc_shop_buy_log_entry> bought_items;
 
 	nullpo_retr(e_purchase_result::PURCHASE_FAIL_COUNT, sd);
 
@@ -2814,6 +2856,7 @@ e_purchase_result npc_buylist( map_session_data* sd, std::vector<s_npc_buy_list>
 	new_ = 0;
 
 	shop = nd->u.shop.shop_item;
+	bought_items.reserve( item_list.size() );
 
 	memset(market_index, 0, sizeof(market_index));
 	// process entries in buy list, one by one
@@ -2873,8 +2916,10 @@ e_purchase_result npc_buylist( map_session_data* sd, std::vector<s_npc_buy_list>
 		if (npc_shop_discount(nd))
 			value = pc_modifybuyvalue(sd,value);
 
-		z += (double)value * amount;
+		int32 total_price = value * amount;
+		z += (double)total_price;
 		w += itemdb_weight(nameid) * amount;
+		bought_items.push_back( { nameid, amount, value, total_price } );
 	}
 
 	if (nd->master_nd){ //Script-based shops.
@@ -2926,6 +2971,11 @@ e_purchase_result npc_buylist( map_session_data* sd, std::vector<s_npc_buy_list>
 				pc_additem(sd,&item_tmp,get_amt,LOG_TYPE_NPC);
 			}
 		}
+	}
+
+	const char* source = nd->subtype == NPCTYPE_MARKETSHOP ? "MARKET_BUY" : "SHOP_BUY";
+	for( const s_npc_shop_buy_log_entry& bought_item : bought_items ){
+		log_shop_transaction( sd, source, nd->name, nd->exname, bought_item.nameid, bought_item.amount, bought_item.total_price, 0, 0, "", 0 );
 	}
 
 	// custom merchant shop exp bonus
@@ -3028,9 +3078,17 @@ static int32 npc_selllist_sub(map_session_data* sd, int32 list_length, const PAC
 /// @return result code for clif_parse_NpcSellListSend
 uint8 npc_selllist(map_session_data* sd, int32 list_length, const PACKET_CZ_PC_SELL_ITEMLIST_sub* item_list)
 {
+	struct s_npc_shop_sale_log_entry {
+		t_itemid nameid;
+		int32 amount;
+		int32 unit_price;
+		int64 total_price;
+	};
+
 	double z;
 	int32 i,skill;
 	struct npc_data *nd;
+	std::vector<s_npc_shop_sale_log_entry> sold_items;
 
 	nullpo_retr(1, sd);
 	nullpo_retr(1, item_list);
@@ -3041,6 +3099,7 @@ uint8 npc_selllist(map_session_data* sd, int32 list_length, const PACKET_CZ_PC_S
 	}
 
 	z = 0;
+	sold_items.reserve( list_length );
 
 	// verify the sell list
 	for( i = 0; i < list_length; i++ )
@@ -3077,7 +3136,9 @@ uint8 npc_selllist(map_session_data* sd, int32 list_length, const PACKET_CZ_PC_S
 		else
 			value = pc_modifysellvalue(sd, sd->inventory_data[idx]->value_sell);
 
-		z+= (double)value*amount;
+		int64 total_price = static_cast<int64>( value ) * amount;
+		z += static_cast<double>( total_price );
+		sold_items.push_back( { nameid, amount, value, total_price } );
 	}
 
 	if( nd->master_nd )
@@ -3115,6 +3176,11 @@ uint8 npc_selllist(map_session_data* sd, int32 list_length, const PACKET_CZ_PC_S
 		z = MAX_ZENY;
 
 	pc_getzeny(sd, (int32)z, LOG_TYPE_NPC);
+
+	for( const s_npc_shop_sale_log_entry& sold_item : sold_items ){
+		int32 total_price = sold_item.total_price > INT32_MAX ? INT32_MAX : static_cast<int32>( sold_item.total_price );
+		log_shop_transaction( sd, "SHOP_SELL", nd->name, nd->exname, sold_item.nameid, sold_item.amount, total_price, 0, 0, "", 0 );
+	}
 
 	// custom merchant shop exp bonus
 	if( battle_config.shop_exp > 0 && z > 0 && ( skill = pc_checkskill(sd,MC_OVERCHARGE) ) > 0)
@@ -3322,6 +3388,20 @@ e_purchase_result npc_barter_purchase( map_session_data& sd, std::shared_ptr<s_n
 			}
 
 			reducedWeight += ( purchase.amount * requirement->amount * id->weight );
+		}
+
+		int64 zeny_cost = static_cast<int64>( purchase.item->price ) * purchase.amount;
+		int32 zeny_cost_int32 = zeny_cost > INT32_MAX ? INT32_MAX : static_cast<int32>( zeny_cost );
+
+		if( purchase.item->requirements.empty() ){
+			log_shop_transaction( &sd, "BARTER_BUY", barter->name.c_str(), barter->name.c_str(), purchase.item->nameid, purchase.amount, zeny_cost_int32, 0, 0, "", 0 );
+		}else{
+			for( const auto& requirementPair : purchase.item->requirements ){
+				const std::shared_ptr<s_npc_barter_requirement>& requirement = requirementPair.second;
+				uint32 required_amount = requirement->amount * purchase.amount;
+
+				log_shop_transaction( &sd, "BARTER_BUY", barter->name.c_str(), barter->name.c_str(), purchase.item->nameid, purchase.amount, zeny_cost_int32, requirement->nameid, required_amount, "", 0 );
+			}
 		}
 	}
 

@@ -350,6 +350,18 @@ OnCroixJoin:
 
 	set .@Guillaume, getwaitingroomstate(0,"Guillaume");
 	set .@Croix, getwaitingroomstate(0,"Croix");
+	set .@Diff, .@Guillaume - .@Croix;
+	if (.@Diff < 0) set .@Diff, .@Diff * -1;
+
+	// Aviso rapido quando houver vantagem numerica
+	if( .@Guillaume > .@Croix + 1 ) {
+		mapannounce "bat_room", "Guillaume em vantagem numerica. Entre na fila Croix para participar.", bc_map, 0xFFD966;
+		end;
+	}
+	if( .@Croix > .@Guillaume + 1 ) {
+		mapannounce "bat_room", "Croix em vantagem numerica. Entre na fila Guillaume para participar.", bc_map, 0xFFD966;
+		end;
+	}
 
 	if( .@Guillaume < 1 || .@Croix < 1 )
 		end;
@@ -360,7 +372,7 @@ OnCroixJoin:
 		set $@KvM01BG_Ready, 0;
 
 		mapannounce "bat_room",
-			"5x5 alcançado! A batalha começará agora!",
+			"5x5 alcancado! A batalha comecara agora!",
 			bc_map, 0x00FF00;
 
 		donpcevent "Croix::OnEnterBG";
@@ -369,12 +381,10 @@ OnCroixJoin:
 		end;
 	}
 
-	if ( !$@KvM01BG_Ready ) {
-		set $@KvM01BG_Ready, 1;
-		mapannounce "bat_room", "Mínimo de jogadores atingido! A batalha começará em 30 Segundos.", bc_map, 0x00FF00;
-
-		initnpctimer;
-	}
+	set $@KvM01BG_Ready, 1;
+	mapannounce "bat_room", "Minimo de jogadores atingido! A batalha comecara em 30 segundos.", bc_map, 0x00FF00;
+	stopnpctimer;
+	initnpctimer;
 	end;
 
 OnTimer30001:
@@ -382,13 +392,24 @@ OnTimer30001:
 
 	set .@Guillaume, getwaitingroomstate(0,"Guillaume");
 	set .@Croix, getwaitingroomstate(0,"Croix");
+	set .@Diff, .@Guillaume - .@Croix;
+	if (.@Diff < 0) set .@Diff, .@Diff * -1;
 
 	set $@KvM01BG_Ready, 0;
 
-	// Se alguém saiu, cancela
+	// Se alguem saiu, cancela
 	if( .@Guillaume < 1 || .@Croix < 1 ) {
+		set $@KvM01BG, 0;
+		set $@KvM01BG_Ready, 0;
 		mapannounce "bat_room",
-			"Jogadores insuficientes. A contagem foi cancelada.",
+			"Jogadores insuficientes. A contagem foi cancelada. Aguardando novos jogadores.",
+			bc_map, 0xFF0000;
+		end;
+	}
+	// Diferenca maxima permitida: 1
+	if( .@Diff > 1 ) {
+		mapannounce "bat_room",
+			"Times desbalanceados (max 1 de diferenca). Entrem na fila oposta.",
 			bc_map, 0xFF0000;
 		end;
 	}

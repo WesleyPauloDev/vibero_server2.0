@@ -112,7 +112,7 @@
 // 			mes "Have we met before? No way. It's my first time seeing you. What do you want?";
 // 		}
 // 		if (isbegin_quest(12318) == 0)
-// 			setquest 12318;// Corrupted Soul Hunt
+// 			setquest 12318;// Alma Corrompida Hunt
 // 		switch( select( .@menu$, "Enter Old Glast Heim", "Cancel" ) ) {
 // 		case 1:
 // 			switch( instance_create(.@md_name$) ) {
@@ -165,7 +165,7 @@
 // 	case 2:
 // 		mes "^0000ffAll traces of access to Old Glast Heim have been removed. Now you can talk with Hugin again.^000000";
 // 		if (isbegin_quest(12318) == 0)
-// 			setquest 12318;// Corrupted Soul Hunt
+// 			setquest 12318;// Alma Corrompida Hunt
 // 		erasequest 12317;
 // 		close;
 // 	}
@@ -1220,7 +1220,7 @@ OnTimer14500:
 	end;
 OnStart:
 	enablenpc instance_npcname("#ghmemorialmob04");
-	monster 'map_name$[0],150,259,"Corrupted Soul",2475,1, instance_npcname("#ghmemorialmob04") + "::OnMyMobDead";// MG_CORRUPTION_ROOT
+	monster 'map_name$[0],150,259,"Alma Corrompida",2475,1, instance_npcname("#ghmemorialmob04") + "::OnMyMobDead";// MG_CORRUPTION_ROOT
 	unittalk $@mobid[0],"Grrrrrrhh~~~";
 	end;
 OnMyMobDead:
@@ -1464,7 +1464,7 @@ OnMyMobDead7:
 	if ('mode == 2)	// Higher (but unknown) spawn rate in fast mode
 		.@r = 10;
 	else
-		.@r = 50;
+		.@r = 20;
 	if (rand(.@r) == 0) {
 		mapannounce 'map_name$[1], "Forças malignas estão aparecendo nesta área.", bc_map,0xFFFF44,FW_NORMAL,15;
 		killmonster 'map_name$[1], instance_npcname("#ghmemorialmob05") + "::OnBossDead";
@@ -1561,7 +1561,7 @@ OnMyMobDead7:
 	if ('mode == 2)	// Higher (but unknown) spawn rate in fast mode
 		.@r = 10;
 	else
-		.@r = 50;
+		.@r = 20;
 	if (rand(.@r) == 0) {
 		mapannounce 'map_name$[1], "Uma presença maligna se teletransportou para esta área.", bc_map,0xFFFF44,FW_NORMAL,15;
 		killmonster 'map_name$[1], instance_npcname("#ghmemorialmob06") + "::OnBossDead";
@@ -2031,8 +2031,14 @@ OnTimer10000:
 2@gl_k,158,241,1	script	Hugin#21	4_M_SAGE_C,{
 	if ('step != 9)
 		end;
-	if (checkquest(12319,HUNTING) == 2) {// note: complete hunting 'Corrupted Soul Hunt' prerequis
-		if (checkweight(6607,5, 6608,5) == 0) {
+	.@quest_reward = (checkquest(12319,HUNTING) == 2);
+	.@give_custom_reward = (#OldGlastHeim_STATUS != 3);
+	if (.@quest_reward) {
+		if (.@give_custom_reward && checkweight(6607,5, 6608,10, 9608,10) == 0) {
+			mes "^ff0000Parece que você possui muitos tipos ou peso de itens. Organize seu inventário.^000000";
+			close;
+		}
+		if (.@give_custom_reward == 0 && checkweight(6607,5, 6608,10) == 0) {
 			mes "^ff0000Parece que você possui muitos tipos ou peso de itens. Organize seu inventário.^000000";
 			close;
 		}
@@ -2051,6 +2057,22 @@ OnTimer10000:
 			getitem 6607,5;// Temporal_Crystal
 			getitem 6608,10;// Coagulated_Spell
 		}
+	}
+	else if (.@give_custom_reward && checkweight(9608,10) == 0) {
+		mes "^ff0000Parece que você possui muitos tipos ou peso de itens. Organize seu inventário.^000000";
+		close;
+	}
+	if (.@give_custom_reward) {
+		callfunc("F_AddRep", 1, 10, 110002, 3000);
+		set #instancia, 2;
+		callfunc("F_InstanceFinishAnnounce", "Maldição de Glast Heim");
+		if (#inst60_name$ == "[60+] Maldição de Glast Heim") {
+			set #inst60_status,2;
+		}
+		getitem 9608,10;	// Moeda de Instância
+		set #OldGlastHeim_STATUS, 3;
+	}
+	if (.@quest_reward) {
 		next;
 		mes "[Hugin]";
 		mes "O tempo de Varmundt está parado por minha causa.";
@@ -2067,29 +2089,17 @@ OnTimer10000:
 		mes "[Hugin]";
 		mes "Agora vou remover sua memória. Se me vir novamente, serei alguém novo.";
 		specialeffect2 EF_FREEZE;
-		close2;
-		warp 'map_name$[1],158,244;
-		end;
+		next;
 	}
-	mes "[Hugin]";
-	mes "Ops. Quase distorci o espaço-tempo. Venha até aqui, precisamos sair!";
-	next;
-	select("Você estava comigo...");
-	mes "[Hugin]";
-	mes "O que você disse antes?";
-	mes "De qualquer forma, isso não importa. O espaço-tempo será fechado, então precisamos sair daqui.";
-	next;
-
-	// Premiações do Servidor
-	if (#OGH_STATUS == 2) {
-		// add_reputation_points(1, 10);
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		set #instancia, 2;
-		if (#inst60_name$ == "[60+] Maldição de Glast Heim") {
-			set #inst60_status,2;
-		}
-		getitem 9608,10;	// Moeda de Instância
-		set #OldGlastHeim_STATUS, 3;
+	else {
+		mes "[Hugin]";
+		mes "Ops. Quase distorci o espaço-tempo. Venha até aqui, precisamos sair!";
+		next;
+		select("Você estava comigo...");
+		mes "[Hugin]";
+		mes "O que você disse antes?";
+		mes "De qualquer forma, isso não importa. O espaço-tempo será fechado, então precisamos sair daqui.";
+		next;
 	}
 	if (select("Deixe-me olhar mais:Por favor, me tire daqui") == 1) {
 		mes "[Hugin]";

@@ -32,7 +32,7 @@ prontera,147,160,6	script	Encontre o Cogumelo	1077,{
 	mes "Iniciar o evento?";
 	next;
 	if (select("- Sim:- Não") == 2) close;
-	donpcevent strnpcinfo(0) + "::OnMinute10";
+	donpcevent strnpcinfo(0) + "::OnClock0045";
 	mes "[ Encontre o Cogumelo ]";
 	mes "O evento começou!";
 	close;
@@ -72,8 +72,8 @@ OnMobKilled:
 	if (playerattached() == 0)
 		end;
 	set #CASHPOINTS, #CASHPOINTS + 100;
+	#Spore_Killer = #Spore_Killer + 1;
 	dispbottom "Você recebeu 100 Cash Points por matar o Cogumelo!";
-	// getitem .prize, .amount;
 	.@spawn = mobcount( .event_map$, strnpcinfo(0) + "::OnMobKilled" );
 	if (.@spawn > 0)
 		announce "[ " + strcharinfo(0) + " ] matou um Cogumelo. Agora restam " + .@spawn + " Cogumelo(s) em "+.event_map$+".",bc_all;

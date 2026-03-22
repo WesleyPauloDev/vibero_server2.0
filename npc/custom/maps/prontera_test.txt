@@ -1,72 +1,10 @@
-// //============================================================
-// // NPC: Controle de Comércio do Mapa
-// // Permite ativar/desativar Vending, Buying Store e Autotrade
-// //============================================================
+// // // //============================================================
+// // // // NPC: Controle de Comércio do Mapa
+// // // // Permite ativar/desativar Vending, Buying Store e Autotrade
+// // // //============================================================
 
-// prontera,150,180,4	script	Controlador de Comércio	4_F_KAFRA1,{
-// 	function MenuFlag;
-// 	function ApplyFlag;
-
-// 	mes "[Controle Comercial]";
-// 	mes "O que deseja configurar neste mapa?";
-// 	next;
-
-// 	switch(select("Bloquear/Desbloquear Vending",
-// 	              "Bloquear/Desbloquear Buying Store",
-// 	              "Bloquear/Desbloquear Autotrade",
-// 	              "Sair"))
-// 	{
-// 		case 1: MenuFlag(mf_novending); break;
-// 		case 2: MenuFlag(mf_nobuyingstore); break;
-// 		case 3: MenuFlag(mf_autotrade); break;
-// 		case 4: mes "Até logo!"; close;
-// 	}
-// 	end;
-
-// 	//===========================================
-// 	// Função de Menu genérico p/ qualquer flag
-// 	//===========================================
-// 	function MenuFlag {
-// 		.@flag$ = getarg(0);
-// 		.@flag = getarg(0);
-
-// 		.@map$ = strcharinfo(3);
-// 		.@active = getmapflag(strcharinfo(3), .@flag);
-
-//         debugmes "Map: "+.@map$+" | Flag: "+.@flag$+" | Active: "+.@active;
-
-// 		mes "[Controle Comercial]";
-// 		mes "Map: ^0000FF"+.@map$+"^000000";
-// 		mes "Flag atual: ^00FF00"+ ( .@active ? "ATIVADA" : "DESATIVADA" ) +"^000000";
-// 		next;
-
-// 		if (select( (.@active ? "Desativar" : "Ativar") , "Voltar" ) == 2)
-// 			close;
-
-// 		ApplyFlag(.@map$, .@flag$, !.@active);
-
-// 		mes "[Controle Comercial]";
-// 		mes "A flag foi alterada com sucesso!";
-// 		mes "Agora está: ^00FF00"+ ( !.@active ? "ATIVADA" : "DESATIVADA" ) +"^000000";
-// 		close;
-// 	}
-
-
-// 	//===================================================
-// 	// Função que realmente aplica a mudança mapflag
-// 	//===================================================
-// 	function ApplyFlag {
-// 		.@map$ = getarg(0);
-// 		.@flag$ = getarg(1);
-// 		.@mode  = getarg(2); // 1 = ativar, 0 = remover
-//         debugmes "Map: "+.@map$+" | Flag: "+.@flag$+" | Active: "+.@mode;
-
-// 		if (.@mode == 1)
-// 			setmapflag .@map$, .@flag$;
-// 		else
-// 			removemapflag .@map$, .@flag$;
-
-// 		return;
-// 	}
-
+// prontera,150,180,4	script	NPC de TESTE	4_F_KAFRA1,{
+// 	mes "Bem-vindo ao NPC de TESTE!";
+// 	set_bonus_allstats(getcharid(0), 500);
+// 	close;
 // }

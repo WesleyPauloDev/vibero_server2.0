@@ -1,0 +1,605 @@
+//===== rAthena Script =======================================
+//= Nightmare Biolab Hub
+//===== Description: =========================================
+//= Centraliza os 4 NPCs principais de troca/craft/enchant
+//= da Nightmare Biolab em um unico NPC custom.
+//============================================================
+
+prontera,169,181,1	script	Central Biolab Sombria	3029,{
+	disable_items;
+
+L_MainMenu:
+	mes "[Central Biolab Sombria]";
+	mes "Posso assumir a função dos 4 NPCs principais da Nightmare Biolab.";
+	next;
+	switch (select(
+		"Sombra do Remorso - Cria os chapéus",
+		"Sombra do Pesar - Transforma armas",
+		"Espectro Vagante - Encanta os chapéus",
+		"Espectro Silencioso - Troca almas por urna",
+		"Cancelar"
+	)) {
+	case 1: goto L_Sorrowful;
+	case 2: goto L_Victimized;
+	case 3: goto L_Wandering;
+	case 4: goto L_Silent;
+	default: close;
+	}
+
+L_Silent:
+	mes "[Espectro Silencioso]";
+	mes ". . . . . .!";
+	mes "...";
+	mes "^FF0000*Voce pode obter " + getitemname(22679) + " ao entregar 3 almas do mesmo tipo.*^000000";
+	next;
+	.@menu$ = "";
+	setarray .@item[0],6814,6815,6816,6817,6818,6819;
+	for (.@i = 0; .@i < 6; ++.@i) {
+		if (countitem(.@item[.@i]) < 3)
+			.@menu$ += "^777777Nao ha " + getitemname(.@item[.@i]) + " suficiente.^000000:";
+		else
+			.@menu$ += "Entregar 3 " + getitemname(.@item[.@i]) + ".:";
+	}
+	.@s = select(.@menu$ + "Voltar ao menu principal.") - 1;
+	if (.@s == 6)
+		goto L_MainMenu;
+	while (true) {
+		if (countitem(.@item[.@s]) < 3) {
+			emotion ET_HNG;
+			mes "[Espectro Silencioso]";
+			mes "!. . . . . .";
+			mes "^FF0000*Voce precisa de 3 almas do mesmo tipo para trocar por " + getitemname(22679) + ".*^000000";
+			close;
+		}
+		delitem .@item[.@s],3;
+		getitem 22679,1;// Chest_of_Death
+		emotion ET_HUNGRY;
+		mes "[Espectro Silencioso]";
+		mes ". . . . . .";
+		mes "...";
+		mes "^FF0000*Voce obteve " + getitemname(22679) + ". Deseja continuar a troca?*^000000";
+		next;
+		switch (select("Continuar a troca.","Voltar ao menu principal.","Encerrar")) {
+		case 1:
+			break;
+		case 2:
+			goto L_MainMenu;
+		default:
+			close;
+		}
+	}
+
+L_Wandering:
+	mes "[Espectro Vagante]";
+	mes "Kkk... Eu posso... sentir... os rancores... de incontaveis... cobaias...";
+	next;
+	mes "[Espectro Vagante]";
+	mes "Onde e... aqui?... Aaargh... Quem... sou... eu?... Eu nao consigo... lembrar...";
+	next;
+	mes "[Espectro Vagante]";
+	mes "Eu preciso... do rancor... de um poder... forte...";
+	next;
+	switch (select("Encantar Chapeu Memoravel","Resetar Chapeu Memoravel","Descricao do encantamento","Voltar ao menu principal")) {
+	case 1:
+		mes "[Espectro Vagante]";
+		mes "Traga-me... o forte poder... do rancor... Eu vou colocar... um poder especial... no elmo...";
+		mes "^FF0000*Se voce trouxer " + getitemname(23016) + ", podera encantar o chapéu memorável.*^000000";
+		next;
+		.@equip_id = getequipid(EQI_HEAD_TOP);
+		switch (.@equip_id) {
+		case 18971:
+		case 18972:
+		case 18973:
+		case 18974:
+		case 18975:
+		case 18976:
+		case 18977:
+		case 18978:
+		case 18979:
+		case 18980:
+		case 18981:
+		case 18982:
+		case 18983:
+		case 18984:
+			break;
+		default:
+			mes "[Espectro Vagante]";
+			mes "Nesse elmo... não existe a essência... preenchida por um poder especial...";
+			mes "^FF0000*Encantamento usando " + getitemname(23016) + " so e possivel em chapéu memorável.*^000000";
+			close;
+		}
+		.@requirement = 10;
+		setarray .@card[0], getequipcardid(EQI_HEAD_TOP,0), getequipcardid(EQI_HEAD_TOP,1), getequipcardid(EQI_HEAD_TOP,2), getequipcardid(EQI_HEAD_TOP,3);
+		.@refine = getequiprefinerycnt(EQI_HEAD_TOP);
+		// Se houver encantamentos de outro sistema nos slots 2, 3 ou 4, o fluxo
+		// do Espectro Vagante pode nao gerar o encantamento correto no 2o slot.
+		if ((.@card[3] && (.@card[3] < 4700 || .@card[3] > 4754))
+		 || (.@card[2] && (.@card[2] < 4700 || .@card[2] > 4754))
+		 || (.@card[1] && .@card[1] != 4703 && .@card[1] != 4704 && .@card[1] != 4713 && .@card[1] != 4714
+		 && .@card[1] != 4723 && .@card[1] != 4724 && .@card[1] != 4733 && .@card[1] != 4734
+		 && .@card[1] != 4743 && .@card[1] != 4744 && .@card[1] != 4753 && .@card[1] != 4754
+		 && (.@card[1] < 29061 || .@card[1] > 29120) && (.@card[1] < 29706 || .@card[1] > 29715))) {
+			mes "[Espectro Vagante]";
+			mes "^FF0000*Este item possui um encantamento nos slots 2, 3 ou 4 que não pertence a este NPC.*^000000";
+			next;
+			mes "[Espectro Vagante]";
+			mes "^FF0000*Se você continuar assim, o fluxo pode não aplicar o encantamento correto do 2º slot, como 29101 e os demais encantamentos fortes.*^000000";
+			next;
+			mes "[Espectro Vagante]";
+			mes "^FF0000*Se quiser que o encantamento siga o fluxo normal deste NPC, resete o item antes de encantar.*^000000";
+			close;
+		}
+		if (.@card[3] == 0) {
+			.@slot = 3;
+			mes "[Espectro Vagante]";
+			mes "Que tal... começarmos... de leve?...";
+			mes "^FF0000*Tenta encantar o 4o slot. Um entre 6 atributos sera encantado aleatoriamente.*^000000";
+		} else if (.@card[2] == 0) {
+			.@slot = 2;
+			mes "[Espectro Vagante]";
+			mes "Você... gostou... do seu... primeiro... encantamento?...";
+			mes "^FF0000*Tenta encantar o 3o slot. Um entre 6 atributos sera encantado aleatoriamente.*^000000";
+		} else if (.@card[1] == 0) {
+			.@slot = 1;
+			mes "[Espectro Vagante]";
+			mes "Agora sera decidido... se havera... um caminho... para obter... um poder muito maior...";
+			mes "^FF0000*Tenta encantar o 2o slot.";
+			mes "Depois de conseguir um encantamento especial elegivel, ele pode ser reforcado.*^000000";
+		} else {
+			switch (.@card[1]) {
+			case 29061:
+			case 29071:
+			case 29081:
+			case 29091:
+			case 29101:
+			case 29111:
+			case 29706:
+				mes "[Espectro Vagante]";
+				mes "Voce... tem sorte... So assim... voce vira me visitar... com ainda mais rancor...";
+				.@requirement = 20;
+				.@enchant_level = 1;
+				.@enchant_rate = 70;
+				break;
+			case 29062:
+			case 29072:
+			case 29082:
+			case 29092:
+			case 29102:
+			case 29112:
+			case 29707:
+				mes "[Espectro Vagante]";
+				mes "Reforco de 3o nivel?... Se tiver sucesso... ganhara um poder muito maior... se falhar... perdera o que reuniu ate agora...";
+				.@requirement = 40;
+				.@enchant_level = 2;
+				.@enchant_rate = 50;
+				break;
+			case 29063:
+			case 29073:
+			case 29083:
+			case 29093:
+			case 29103:
+			case 29113:
+			case 29708:
+				mes "[Espectro Vagante]";
+				mes "Reforco de 4o nivel?... Se tiver sucesso... ganhara um poder muito maior... se falhar... perdera o que reuniu ate agora...";
+				.@requirement = 50;
+				.@enchant_level = 3;
+				.@enchant_rate = 35;
+				break;
+			case 29064:
+			case 29074:
+			case 29084:
+			case 29094:
+			case 29104:
+			case 29114:
+			case 29709:
+				mes "[Espectro Vagante]";
+				mes "Reforco de 5o nivel?... Voce esta pronto para controlar um poder tao grande?...";
+				.@requirement = 70;
+				.@enchant_level = 4;
+				.@enchant_rate = 25;
+				break;
+			case 29065:
+			case 29075:
+			case 29085:
+			case 29095:
+			case 29105:
+			case 29115:
+			case 29710:
+				mes "[Espectro Vagante]";
+				mes "Reforco de 6o nivel?...";
+				.@requirement = 100;
+				.@enchant_level = 5;
+				.@enchant_rate = 18;
+				break;
+			case 29066:
+			case 29076:
+			case 29086:
+			case 29096:
+			case 29106:
+			case 29116:
+			case 29711:
+				mes "[Espectro Vagante]";
+				mes "Reforco de 7o nivel?...";
+				.@requirement = 150;
+				.@enchant_level = 6;
+				.@enchant_rate = 13;
+				break;
+			case 29067:
+			case 29077:
+			case 29087:
+			case 29097:
+			case 29107:
+			case 29117:
+			case 29712:
+				mes "[Espectro Vagante]";
+				mes "Reforco de 8o nivel?...";
+				.@requirement = 250;
+				.@enchant_level = 7;
+				.@enchant_rate = 9;
+				break;
+			case 29068:
+			case 29078:
+			case 29088:
+			case 29098:
+			case 29108:
+			case 29118:
+			case 29713:
+				mes "[Espectro Vagante]";
+				mes "Reforco de 9o nivel?...";
+				.@requirement = 500;
+				.@enchant_level = 8;
+				.@enchant_rate = 6;
+				break;
+			case 29069:
+			case 29079:
+			case 29089:
+			case 29099:
+			case 29109:
+			case 29119:
+			case 29714:
+				mes "[Espectro Vagante]";
+				mes "Reforco de 10o nivel?...";
+				.@requirement = 1000;
+				.@enchant_level = 9;
+				.@enchant_rate = 4;
+				break;
+			default:
+				mes "[Espectro Vagante]";
+				mes "E impossivel... reforcar... esse poder... O unico caminho agora e... resetar...";
+				close;
+			}
+			.@slot = 999;
+		}
+		next;
+		mes "[Espectro Vagante]";
+		mes "Sao necessarios " + .@requirement + " " + getitemname(23016) + ".";
+		next;
+		if (select("Pagar taxa.","Nao pagar taxa.") == 2)
+			close;
+		if (countitem(23016) < .@requirement) {
+			mes "[Espectro Vagante]";
+			mes "Voce nao possui " + getitemname(23016) + " suficiente.";
+			close;
+		}
+		mes "[Espectro Vagante]";
+		mes "^FF0000*Nao ha perda de refinamento, carta nem equipamento. Porem, o nivel do encantamento pode diminuir, dependendo de sucesso ou falha.*^000000";
+		next;
+		if (select("Realizar encantamento.","Nao realizar encantamento.") == 2)
+			close;
+		progressbar "000000",1;
+		delitem 23016,.@requirement;
+		if (callfunc("F_IsEquipIDHack", EQI_HEAD_TOP, .@equip_id) || callfunc("F_IsEquipCardHack", EQI_HEAD_TOP, .@card[0], .@card[1], .@card[2], .@card[3]) || callfunc("F_IsEquipRefineHack", EQI_HEAD_TOP, .@refine))
+			close;
+		switch (.@slot) {
+		case 3:
+		case 2:
+			setarray .@enchant[0],4700,4701,4702,4703,4704,4710,4711,4712,4713,4714,4720,4721,4722,4723,4724,4730,4731,4732,4733,4734,4740,4741,4742,4743,4744,4750,4751,4752,4753,4754;
+			.@card[.@slot] = .@enchant[rand(getarraysize(.@enchant))];
+			break;
+		case 1:
+			setarray .@enchant[0],4703,4704,4713,4714,4723,4724,4733,4734,4743,4744,4753,4754,29706,29061,29071,29081,29091,29101,29111;
+			.@card[1] = .@enchant[rand(getarraysize(.@enchant))];
+			break;
+		case 999:
+			if (.@enchant_rate > rand(100))
+				.@level_dt = 1;
+			else
+				.@level_dt = -1;
+			.@enchant_level += .@level_dt;
+			.@card[1] += .@level_dt;
+			if ((.@card[1] < 29061 || .@card[1] > 29120) && (.@card[1] < 29706 || .@card[1] > 29715)) {
+				mes "[Espectro Vagante]";
+				mes "Algo ruim aconteceu.";
+				close;
+			}
+			if (.@enchant_level < 1 || .@enchant_level > 10) {
+				specialeffect2 EF_SUI_EXPLOSION;
+				mes "[Espectro Vagante]";
+				mes "O poder do rancor entrou em frenesi...";
+				close;
+			}
+			break;
+		default:
+			mes "[Espectro Vagante]";
+			mes "Algo ruim aconteceu.";
+			close;
+		}
+		delequip EQI_HEAD_TOP;
+		getitem2 .@equip_id,1,1,.@refine,0,.@card[0],.@card[1],.@card[2],.@card[3];
+		if (.@level_dt == -1) {
+			specialeffect2 EF_SUI_EXPLOSION;
+			mes "[Espectro Vagante]";
+			mes "O encantamento falhou e o nivel caiu em 1.";
+			close;
+		}
+		specialeffect2 EF_FIREHIT;
+		mes "[Espectro Vagante]";
+		mes "Sucesso. O poder do rancor ficou mais forte.";
+		close;
+
+	case 2:
+		.@equip_id = getequipid(EQI_HEAD_TOP);
+		switch (.@equip_id) {
+		case 18971:
+		case 18972:
+		case 18973:
+		case 18974:
+		case 18975:
+		case 18976:
+		case 18977:
+		case 18978:
+		case 18979:
+		case 18980:
+		case 18981:
+		case 18982:
+		case 18983:
+		case 18984:
+			break;
+		default:
+			mes "[Espectro Vagante]";
+			mes "^FF0000*Reset so e possivel em chapéu memorável.*^000000";
+			close;
+		}
+		setarray .@card[0], getequipcardid(EQI_HEAD_TOP,0), getequipcardid(EQI_HEAD_TOP,1), getequipcardid(EQI_HEAD_TOP,2), getequipcardid(EQI_HEAD_TOP,3);
+		.@refine = getequiprefinerycnt(EQI_HEAD_TOP);
+		if (.@card[3] < 1) {
+			mes "[Espectro Vagante]";
+			mes "^FF0000*Esse elmo nao esta encantado, entao nao pode ser resetado.*^000000";
+			close;
+		}
+		mes "[Espectro Vagante]";
+		mes "^FF0000*Voce precisa de 10 " + getitemname(22687) + " para resetar.*^000000";
+		next;
+		if (select("Pagar taxa.","Voltar") == 2)
+			goto L_MainMenu;
+		if (countitem(22687) < 10) {
+			mes "[Espectro Vagante]";
+			mes "Voce nao possui " + getitemname(22687) + " suficiente.";
+			close;
+		}
+		progressbar "000000",2;
+		specialeffect2 EF_FIREHIT;
+		delitem 22687,10;
+		if (callfunc("F_IsEquipIDHack", EQI_HEAD_TOP, .@equip_id) || callfunc("F_IsEquipCardHack", EQI_HEAD_TOP, .@card[0], .@card[1], .@card[2], .@card[3]) || callfunc("F_IsEquipRefineHack", EQI_HEAD_TOP, .@refine))
+			close;
+		delequip EQI_HEAD_TOP;
+		getitem2 .@equip_id,1,1,.@refine,0,.@card[0],0,0,0;
+		mes "[Espectro Vagante]";
+		mes "O encantamento do chapéu memorável foi resetado.";
+		close;
+
+	case 3:
+		for (.@i = 18971; .@i <= 18984; ++.@i) {
+			if (.@i < 18977)
+				.@string$[0] += getitemname(.@i) + ", ";
+			else if (.@i < 18984)
+				.@string$[1] += getitemname(.@i) + ", ";
+			else
+				.@string$[2] = getitemname(.@i);
+		}
+		mes "[Espectro Vagante]";
+		mes "Voce pode encantar: " + .@string$[0] + .@string$[1] + .@string$[2] + ".";
+		next;
+		mes "[Espectro Vagante]";
+		mes "^FF0000*Voce precisa de " + getitemname(23016) + " para encantar.*^000000";
+		next;
+		mes "[Espectro Vagante]";
+		mes "^FF0000*O processo ocorre na ordem 4o, 3o e 2o slot. O primeiro encantamento de cada slot consome 10 " + getitemname(23016) + ".*^000000";
+		close;
+
+	default:
+		goto L_MainMenu;
+	}
+
+L_Victimized:
+	mes "[Sombra do Pesar]";
+	mes "Entregue uma arma preenchida por ressentimento, e eu a restaurarei em " + getitemname(6820) + ".";
+	mes "Chance: 70% para 1, 20% para 2 e 10% para 3 " + getitemname(6820) + ".";
+	while (true) {
+		next;
+		if (checkweight(2677,5) == 0) {
+			mes "[Sombra do Pesar]";
+			mes "Sua mochila esta cheia.";
+			close;
+		}
+		.@menu_main = select("Entregar arma.","Voltar ao menu principal.","Encerrar");
+		if (.@menu_main == 2)
+			goto L_MainMenu;
+		else if (.@menu_main == 3)
+			close;
+		mes "[Sombra do Pesar]";
+		mes "Que tipo de arma voce quer entregar?";
+		next;
+		while (true) {
+			switch (select("Voltar","Katar","Arco","Machado, Maca, Livro","Cajado","Espada, Adaga","Lanca, Espada de duas maos","Instrumento musical, Chicote, Soqueira")) {
+			case 1:
+				goto L_Victimized;
+			case 2:
+				callsub L_Exchange,1284,1290,1285,1291;
+				continue;
+			case 3:
+				callsub L_Exchange,18109,18110,1745,18103,18111;
+				continue;
+			case 4:
+				callsub L_Exchange,1311,1392,1393,16017,16010,2161,1584,16000,16001;
+				continue;
+			case 5:
+				callsub L_Exchange,2005,2004,1647,1659,1646,1654;
+				continue;
+			case 6:
+				callsub L_Exchange,13431,13421,13061,13062,13070,13069,13046,13047;
+				continue;
+			case 7:
+				callsub L_Exchange,1433,1435,1490,1196,1189;
+				continue;
+			case 8:
+				callsub L_Exchange,1930,1984,1985,1830;
+				continue;
+			}
+		}
+	}
+
+L_Exchange:
+	.@size = getargcount();
+	.@menu$ = "Voltar:";
+	for (.@i = 0; .@i < .@size; .@i++) {
+		if (countitem(getarg(.@i)) < 1)
+			.@menu$ += "^999999Falta " + getitemname(getarg(.@i)) + ".^000000:";
+		else
+			.@menu$ += "Entregar " + getitemname(getarg(.@i)) + ".:";
+	}
+	.@s = select(.@menu$) - 2;
+	if (.@s == -1)
+		return;
+	mes "[Sombra do Pesar]";
+	mes "Vou restaurar esta arma em " + getitemname(6820) + ". Voce concorda?";
+	next;
+	if (select("Cancelar.","Adquirir " + getitemname(6820) + ".") == 1)
+		return;
+	if (countitem(getarg(.@s)) < 1) {
+		mes "[Sombra do Pesar]";
+		mes "Voce nao possui ^006400" + getitemname(getarg(.@s)) + "^000000.";
+		return;
+	}
+	progressbar "000000",5;
+	specialeffect EF_BLACKBODY;
+	specialeffect EF_GUMGANG4;
+	specialeffect EF_DARKCASTING2;
+	specialeffect EF_RG_COIN7;
+	percentheal -50,-50;
+	specialeffect2 EF_POISONSMOKE;
+	specialeffect2 EF_NPC_BURNT;
+	delitem getarg(.@s),1;
+	.@r = rand(100);
+	if (.@r < 70)
+		.@amount = 1;
+	else if (.@r < 90)
+		.@amount = 2;
+	else
+		.@amount = 3;
+	getitem 6820,.@amount;
+	mes "[Sombra do Pesar]";
+	mes "A arma foi restaurada em " + .@amount + " " + getitemname(6820) + ".";
+	next;
+	mes "- Recebi dano critico da poderosa onda mental que invadiu meu corpo. -";
+	return;
+
+L_Sorrowful:
+	mes "[Sombra do Remorso]";
+	mes "Se voce me entregar as almas e os materiais certos, eu posso criar algo preenchido por poder especial.";
+	setarray .@item_name$[0],getitemname(18971),getitemname(18972),getitemname(18973),getitemname(18974),getitemname(18975),getitemname(18976),getitemname(18977),getitemname(18978),getitemname(18979),getitemname(18980),getitemname(18981),getitemname(18984),getitemname(18982),getitemname(18983),getitemname(20749);
+	while (true) {
+		next;
+		if (checkweight(2677,5) == 0) {
+			mes "[Sombra do Remorso]";
+			mes "Sua mochila esta cheia.";
+			close;
+		}
+		.@menu_main = select("Criar equipamento.","Voltar ao menu principal.","Encerrar");
+		if (.@menu_main == 2)
+			goto L_MainMenu;
+		if (.@menu_main == 3)
+			close;
+		mes "[Sombra do Remorso]";
+		mes "O que voce deseja criar?";
+		next;
+		switch (select("Voltar",.@item_name$[0],.@item_name$[1],.@item_name$[2],.@item_name$[3],.@item_name$[4],.@item_name$[5],.@item_name$[6],.@item_name$[7],.@item_name$[8],.@item_name$[9],.@item_name$[10],.@item_name$[11],.@item_name$[12],.@item_name$[13],.@item_name$[14] + "[1]")) {
+		case 1:
+			continue;
+		case 2: callsub L_Make,18971,19961,6814; break;
+		case 3: callsub L_Make,18972,19962,6819; break;
+		case 4: callsub L_Make,18973,19963,6815; break;
+		case 5: callsub L_Make,18974,19964,6815; break;
+		case 6: callsub L_Make,18975,19965,6816; break;
+		case 7: callsub L_Make,18976,19966,6818; break;
+		case 8: callsub L_Make,18977,19967,6815; break;
+		case 9: callsub L_Make,18978,19968,6817; break;
+		case 10: callsub L_Make,18979,19969,6819; break;
+		case 11: callsub L_Make,18980,19970,6817; break;
+		case 12: callsub L_Make,18981,19971,6818; break;
+		case 13: callsub L_Make,18984,19974,6818; break;
+		case 14: callsub L_Make,18982,19973,6816; break;
+		case 15: callsub L_Make,18983,19972,6814; break;
+		case 16: callsub L_Make,20749,20748,6471,true; break;
+		}
+	}
+
+L_Make:
+	.@reward_id = getarg(0);
+	.@equipment_req = getarg(1);
+	.@item_misc_req = getarg(2);
+	if (getarg(3,0)) {
+		setarray .@string$[0], "chill", "cloak";
+		setarray .@material[0],20,100;
+	} else {
+		setarray .@string$[0], "soul", "hat";
+		setarray .@material[0],1,20;
+	}
+	mes "[Sombra do Remorso]";
+	mes "Para criar ^006400" + getitemname(.@reward_id) + "^000000, eu preciso dos materiais corretos.";
+	next;
+	mes "[Sombra do Remorso]";
+	mes "Preciso de 1 " + getitemname(.@equipment_req) + ", " + .@material[0] + " " + getitemname(.@item_misc_req) + " e " + .@material[1] + " " + getitemname(6820) + ".";
+	mes "Se reunir 5 vezes essa quantidade de energias e " + .@string$[0] + "s, a criacao nunca falhara.";
+	next;
+	switch (select("Voltar","Usar quantidade normal (20% de chance)","Usar quantidade x5 (100% de chance)")) {
+	case 1:
+		return;
+	case 2:
+		.@rate = 1;
+		break;
+	case 3:
+		.@rate = 5;
+		break;
+	}
+	if (countitem(.@equipment_req) < 1 || countitem(.@item_misc_req) < (.@material[0] * .@rate) || countitem(6820) < (.@material[1] * .@rate)) {
+		mes "[Sombra do Remorso]";
+		mes "Voce nao possui materiais suficientes para criar ^006400" + getitemname(.@reward_id) + "^000000.";
+		return;
+	}
+	progressbar "000000",5;
+	percentheal -50,-50;
+	specialeffect2 EF_POISONSMOKE;
+	specialeffect2 EF_NPC_BURNT;
+	delitem .@equipment_req,1;
+	delitem .@item_misc_req, (.@material[0] * .@rate);
+	delitem 6820, (.@material[1] * .@rate);
+	if ((20 * .@rate) > rand(100)) {
+		specialeffect EF_BLACKBODY;
+		specialeffect EF_GUMGANG4;
+		specialeffect EF_DARKCASTING2;
+		specialeffect EF_RG_COIN7;
+		getitem .@reward_id,1;
+		mes "[Sombra do Remorso]";
+		mes "Aqui esta seu ^006400" + getitemname(.@reward_id) + "^000000.";
+	} else {
+		specialeffect EF_POISONSMOKE;
+		specialeffect EF_GUMGANG4;
+		mes "[Sombra do Remorso]";
+		mes "A criacao de ^006400" + getitemname(.@reward_id) + "^000000 falhou.";
+	}
+	next;
+	mes "- Recebi dano critico da poderosa onda mental que invadiu meu corpo. -";
+	return;
+}

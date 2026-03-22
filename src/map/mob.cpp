@@ -2525,7 +2525,7 @@ static std::shared_ptr<s_item_drop> mob_setdropitem(const std::shared_ptr<s_mob_
 	drop->item_data = { 0 };
 	drop->item_data.nameid = mobdrop->nameid;
 	drop->item_data.amount = qty;
-	drop->item_data.identify = itemdb_isidentified(mobdrop->nameid);
+	drop->item_data.identify = mobdrop->identified >= 0 ? mobdrop->identified : itemdb_isidentified(mobdrop->nameid);
 	mob_setdropitem_option(drop->item_data, mobdrop);
 	drop->mob_id = mob_id;
 
@@ -3516,7 +3516,7 @@ int32 mob_dead(struct mob_data* md, struct block_list* src, int32 type)
 
 				struct item item = {};
 				item.nameid = entry->nameid;
-				item.identify = itemdb_isidentified(item.nameid);
+				item.identify = entry->identified >= 0 ? entry->identified : itemdb_isidentified(item.nameid);
 				clif_mvp_item(mvp_sd, item.nameid);
 				log_mvp_nameid = item.nameid;
 
@@ -4944,6 +4944,17 @@ bool MobDatabase::parseDropNode(std::string nodeName, const ryml::NodeRef& node,
 				return false;
 		}
 
+		int8 identified = -1;
+
+		if (this->nodeExists(dropit, "Identified")) {
+			bool identified_flag;
+
+			if (!this->asBool(dropit, "Identified", identified_flag))
+				return false;
+
+			identified = identified_flag ? 1 : 0;
+		}
+
 		uint16 group = 0;
 
 		if (this->nodeExists(dropit, "RandomOptionGroup")) {
@@ -4960,6 +4971,7 @@ bool MobDatabase::parseDropNode(std::string nodeName, const ryml::NodeRef& node,
 		drop->rate = rate;
 		drop->steal_protected = steal;
 		drop->randomopt_group = group;
+		drop->identified = identified;
 
 		if (!exist) {
 			drops.push_back(drop);
@@ -7157,6 +7169,19 @@ bool MapDropDatabase::parseDrop(const ryml::NodeRef& node, std::unordered_map<ui
 		if (!exists) {
 			drop->randomopt_group = 0;
 		}
+	}
+
+	if (this->nodeExists(node, "Identified")) {
+		bool identified;
+
+		if (!this->asBool(node, "Identified", identified)) {
+			return false;
+		}
+
+		drop->identified = identified ? 1 : 0;
+	}
+	else if (!exists) {
+		drop->identified = -1;
 	}
 
 	if (!exists) {

@@ -1,5 +1,5 @@
 //===========================================================
-//  Evento Boss Global – Quarta e Sexta às 20:00
+//  Evento Boss Global - Quarta e Sexta às 20:00
 //  Comando: @evento (teleporta se ativo)
 //===========================================================
 
@@ -9,27 +9,20 @@ OnInit:
     .npc_name$ = strnpcinfo(3);           // guarda o nome do NPC
     .map$      = "boss_global";
     .active    = 0;    
+    disablenpc "Recompensa do Boss";
 
     // Checa a cada minuto se precisa iniciar
-	initnpctimer;
     end;
 
-OnTimer10000:
-    // verifica quarta (3) ou sexta (5) às 20h
-    .@w1 = callfunc("get_weekly_dayAndHour", 3, 20, 00);
-    .@w2 = callfunc("get_weekly_dayAndHour", 5, 20, 00);
+OnClock2000:
+    // verifica quarta (3) ou sexta (5) às 21h
+    .@day  = gettime(DT_DAYOFWEEK);
 	
-    if ((.@w1 || .@w2) && .active == 0) {   
+    if (.@day == 3 || .@day == 5) {   
         disablenpc "Recompensa do Boss";     
 		.active = 1;
-		stopnpctimer;
+		initnpctimer;
         announce "[Evento Boss Global] Começa em 5 minutos! Use @evento para participar.", bc_all, 0xFF0000;
-        initnpctimer;
-	} else {
-		if (.active != 1) {
-			// continua checando a cada minuto
-			initnpctimer;
-		}
     }
 
     end;
@@ -43,14 +36,13 @@ OnTimer240000:
     end;
 
 OnTimer300000:
-	announce "[Evento Boss Global Começou]", bc_all, 0xFF0000;
+    announce "[Evento Boss Global Começou]", bc_all, 0xFF0000;
     .active = 2;
     stopnpctimer;
     donpcevent .npc_name$ + "::OnStartEvent";
     end;
 
-OnStartEvent:
-	initnpctimer;
+OnStartEvent:	
     mapannounce .map$, "[Evento] O Boss Global apareceu!", bc_all;
     monster .map$, 50, 50, "Boss Global", 21401, 1, .npc_name$ + "::OnBossDead";    
     end;
@@ -61,10 +53,17 @@ OnBossDead:
 
     .active = 0;	
     end;
+
+OnClock2030:
+    if (.active == 2) {
+        announce "[Evento Boss Global] O tempo acabou! O Boss fugiu.", bc_all, 0xFF0000;
+        .active = 0;
+    }
+    end;
 }
 
 //-----------------------------------------------------------
-//  Comando @evento – Teleporta para o mapa se o evento ativo
+//  Comando @evento irá Teleporta para o mapa se o evento ativo
 //-----------------------------------------------------------
 -	script	cmd_evento	-1,{
 OnInit:
@@ -101,6 +100,7 @@ boss_global,50,50,4	script	Recompensa do Boss	10403,{
     }
     getitem 9608, 20;
     getitem .rewardID, 1;
+    #evento = 2;
 
     set #evento,  2;
     set #boss,  2;

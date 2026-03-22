@@ -1,0 +1,257 @@
+//====================================================
+// NPC: Saque RMT via Pix (rAthena)
+// Requisitos: rAthena (script padrão)
+// Faz: coleta Nome + Chave Pix, confirma, consome moedas e registra log
+//====================================================
+
+prontera,141,166,5	script	RMT Trader	619,{
+
+	mes "[Saque RMT - Pix]";
+	mes "Bem-vindo! O que você deseja fazer?";
+	next;
+
+	switch(select("Sacar RMT via Pix:Converter Pontos RMT em Moedas:Como funciona?:Cancelar")) {
+		case 1: goto L_SAQUE;
+		case 2: goto L_CONVERTER;
+		case 3: goto L_INFO;
+
+		default: 
+			mes "[Saque RMT - Pix]";
+			mes "Tudo bem! Se precisar, é só falar comigo.";
+			close;
+	}
+
+	L_INFO:
+		mes "[Como funciona o RMT?]";
+		mes "Esse sistema foi feito para você conseguir uma renda extra";
+		mes "jogando e negociando dentro do servidor, sem complicação.";
+		next;
+
+		mes "[Como conseguir RMT?]";
+		mes "Você pode comprar RMT no jogo de outros jogadores";
+		mes "usando ^00FF00Rops^000000 ou ^00FF00Zeny^000000.";
+		next;
+
+		mes "[Se eu não achar por Zeny?]";
+		mes "Se você não encontrar RMT por Zeny, você pode:";
+		mes "1) Comprar ^00FF00Rops^000000 usando ^00FF00Zeny^000000 (dentro do jogo)";
+		mes "2) E então usar esses Rops para negociar RMT com outros jogadores.";
+		next;
+
+		mes "[E o Zeny?]";
+		mes "Zeny você consegue farmando no jogo.";
+		mes "Quanto mais forte e mais experiente você ficar,";
+		mes "mais fácil será farmar, negociar e adquirir RMT.";
+		next;
+
+		mes "[Importante]";
+		mes "Quando você solicita um saque, nós precisamos de um tempo";
+		mes "para ^FFA500validar a origem do RMT^000000 e confirmar o pedido.";
+		mes "Isso ajuda a manter o servidor justo e seguro para todos.";
+		close;	
+
+	L_CONVERTER:
+
+		.@RMT_ITEM_ID = 40109;      // moeda RMT
+		.@RATE = 1;                 // 1 ponto = 1 moeda (mude se quiser)
+		.@MIN_POINTS = 1;
+
+		mes "[Converter Pontos em Moedas]";
+		mes "Seus pontos RMT: ^00FF00"+#RMTPOINTS+"^000000";
+		next;
+
+		if (#RMTPOINTS < .@MIN_POINTS) {
+			mes "[Converter Pontos em Moedas]";
+			mes "Você não tem pontos suficientes para converter.";
+			close;
+		}
+
+		mes "[Converter Pontos em Moedas]";
+		mes "Quantos ^00FF00pontos^000000 você quer converter?";
+		mes "Mínimo: "+.@MIN_POINTS;
+		next;
+		input .@pts;
+
+		if (.@pts < .@MIN_POINTS) {
+			mes "[Converter Pontos em Moedas]";
+			mes "Quantidade inválida.";
+			close;
+		}
+		if (.@pts > #RMTPOINTS) {
+			mes "[Converter Pontos em Moedas]";
+			mes "Você não tem pontos suficientes.";
+			close;
+		}
+
+		.@coins = .@pts; // 1:1
+
+		// Checar peso
+		if (!checkweight(.@RMT_ITEM_ID, .@coins)) {
+			mes "[Converter Pontos em Moedas]";
+			mes "Você está com peso/itens demais no inventário.";
+			mes "Guarde itens e tente novamente.";
+			close;
+		}
+
+		mes "[Confirmar Conversão]";
+		mes "Você vai converter: ^00FF00"+.@pts+"^000000 ponto(s)";
+		mes "Você vai receber: ^00FF00"+.@coins+"^000000 moeda(s) RMT";
+		next;
+
+		if (select("Confirmar:Cancelar") == 2) {
+			mes "[Converter Pontos em Moedas]";
+			mes "Conversão cancelada.";
+			close;
+		}
+
+		// Aplica conversão
+		set #RMTPOINTS, #RMTPOINTS - .@pts;
+		getitem .@RMT_ITEM_ID, .@coins;
+
+		mes "[Converter Pontos em Moedas]";
+		mes "^00FF00Conversão realizada com sucesso!^000000";
+		mes "Novo saldo de pontos: ^00FF00"+#RMTPOINTS+"^000000";
+		close;
+
+	// ============================
+	L_SAQUE:
+
+		// Verificar se já existe saque pendente para esse personagem
+		.@pending = 0;
+
+		query_sql(
+			"SELECT COUNT(*) FROM rmt_withdraw_requests "
+			+"WHERE char_id = "+getcharid(0)+" AND status = 'PENDING'",
+			.@pending
+		);
+
+		if (.@pending > 0) {
+			mes "[Saque RMT - Pix]";
+			mes "^FF0000Você já possui um pedido em análise.^000000";
+			mes "Aguarde a finalização do pedido atual";
+			mes "antes de solicitar um novo saque.";
+			close;
+		}
+
+		// ===== CONFIG =====
+		.@RMT_ITEM_ID = 40109; // <-- ID da sua moeda RMT (item_db)
+		.@MIN_RMT = 50;
+		.@MAX_RMT = 500; // limite por pedido (ajuste como quiser)
+		.@PRAZO_MSG$ = "Em até 3 dias úteis você receberá o pagamento.";
+
+		mes "[Saque RMT - Pix]";
+		mes "Aqui você solicita saque usando suas moedas RMT.";
+		next;
+
+		// Checar saldo
+		.@bal = countitem(.@RMT_ITEM_ID);
+		if (.@bal < .@MIN_RMT) {
+			mes "[Saque RMT - Pix]";
+			mes "Você não tem moedas RMT suficientes.";
+			mes "Saldo atual: ^FF0000"+.@bal+"^000000";
+			close;
+		}
+
+		mes "[Saque RMT - Pix]";
+		mes "Seu saldo de RMT: ^00FF00"+.@bal+"^000000";
+		mes "Quantas moedas você quer sacar?";
+		mes "Mín: "+.@MIN_RMT+"  Máx: "+( (.@bal < .@MAX_RMT) ? .@bal : .@MAX_RMT )+"";
+		next;
+
+		input .@qty;
+
+		// Validar quantidade
+		if (.@qty < .@MIN_RMT) {
+			mes "[Saque RMT - Pix]";
+			mes "Quantidade inválida.";
+			close;
+		}
+		if (.@qty > .@bal) {
+			mes "[Saque RMT - Pix]";
+			mes "Você não tem moedas suficientes.";
+			mes "Saldo: "+.@bal;
+			close;
+		}
+		if (.@qty > .@MAX_RMT) {
+			mes "[Saque RMT - Pix]";
+			mes "Quantidade acima do limite por pedido.";
+			mes "Limite: "+.@MAX_RMT;
+			close;
+		}
+
+		// Nome do jogador (pode ser o próprio charname, mas você pediu input)
+		mes "[Saque RMT - Pix]";
+		mes "Digite o nome do jogador (como deseja que fique registrado):";
+		next;
+		input .@player$;
+
+		if (.@player$ == "") {
+			mes "[Saque RMT - Pix]";
+			mes "Nome não pode ficar em branco.";
+			close;
+		}
+
+		// Chave Pix
+		mes "[Saque RMT - Pix]";
+		mes "Digite sua chave Pix (CPF/CNPJ/e-mail/telefone/aleatória):";
+		next;
+		input .@pix$;
+
+		if (.@pix$ == "") {
+			mes "[Saque RMT - Pix]";
+			mes "Chave Pix não pode ficar em branco.";
+			close;
+		}
+
+		// Confirmar
+		mes "[Saque RMT - Pix]";
+		mes "Confira os dados:";
+		mes "Personagem (char): ^00FF00"+strcharinfo(0)+"^000000";
+		mes "Conta (login): ^00FF00"+strcharinfo(3)+"^000000";
+		mes "Nome registrado: ^00FF00"+.@player$+"^000000";
+		mes "Chave Pix: ^00FF00"+.@pix$+"^000000";
+		mes "Moedas RMT: ^00FF00"+.@qty+"^000000";
+		mes "";
+		mes "^FFA500"+.@PRAZO_MSG$+"^000000";
+		next;
+
+		if (select("Confirmar pedido:Cancelar") == 2) {
+			mes "[Saque RMT - Pix]";
+			mes "Pedido cancelado.";
+			close;
+		}
+
+		// Consome moedas
+		delitem .@RMT_ITEM_ID, .@qty;
+
+		// Gera um ID simples do pedido (timestamp + charid)
+		.@reqid$ = ""+gettimetick(2)+"-"+getcharid(0);
+
+		// Log em arquivo (logs/atcommandlog.log ou scriptslog dependendo da conf)
+		// logmes escreve no log do mapa (map-server), pode ser suficiente
+		// Vamos usar logmes + announce opcional
+		logmes "[RMT_PIX_WITHDRAW] reqid="+.@reqid$+" acc="+getcharid(3)+" char="+getcharid(0)+" charname="+strcharinfo(0)+" regname="+.@player$+" pix="+.@pix$+" qty="+.@qty;
+
+		// (Opcional) guardar em variáveis do personagem para consulta posterior
+		set #rmt_last_reqid$, .@reqid$;
+		set #rmt_last_pix$, .@pix$;
+		set #rmt_last_regname$, .@player$;
+		set #rmt_last_qty, .@qty;
+		set #rmt_last_time, gettimetick(2);
+
+		mes "[Saque RMT - Pix]";
+		mes "^00FF00Pedido registrado com sucesso!^000000";
+		mes "Se tudo estiver correto,";
+		mes .@PRAZO_MSG$;
+
+		query_sql(
+			"INSERT INTO rmt_withdraw_requests "
+			+"(`char_id`,`char_name`,`pix_name`,`pix_key`,`amount_rmt`,`status`) VALUES "
+			+"("+getcharid(0)+", '"+escape_sql(strcharinfo(0))+"', "
+			+"'"+escape_sql(.@player$)+"', '"+escape_sql(.@pix$)+"', "+.@qty+", 'PENDING')"
+			);
+
+		end;
+
+	close;
+}

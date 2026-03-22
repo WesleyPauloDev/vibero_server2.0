@@ -1422,6 +1422,23 @@ Body:
       getitem 9660,200;
       getitem 9661,200;
 
+  - Id: 9663
+    AegisName: Friend_Box
+    Name: Caixa do Amigo
+    Type: Usable
+    Buy: 10000
+    Weight: 10
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      getitem 12210,10;
+      getitem 22818,10;
+      getitem 12223,10;
+      getitem 12224,10;
+      getitem 7621,10;
+      getitem 14545,4;
+
   - Id: 9680
     AegisName: Compact_White_Potions_Box[10]
     Name: Caixa de Poções Brancas Compactas
@@ -1491,6 +1508,7 @@ Body:
       NoSell: true
       NoCart: true
       NoGuildStorage: true
+      NoStorage: true
       NoMail: true
       NoAuction: true
     Script: |
@@ -1551,7 +1569,6 @@ Body:
       NoTrade: true
       NoSell: true
       NoCart: true
-      NoStorage: true
       NoGuildStorage: true
       NoMail: true
       NoAuction: true
@@ -1959,13 +1976,14 @@ Body:
   
   - Id: 9607
     AegisName: Mithril_Coin
-    Name: Moeda Do Edén
+    Name: Medalha Do Edén
     Type: Etc
-    Buy: 5000
+    Buy: 10000
     Weight: 10
+    Flags:
+      BuyingStore: true
     Trade:
       NoDrop: true
-      NoSell: true
 
   - Id: 9608
     AegisName: Evt_20th_Invasion
@@ -2033,6 +2051,18 @@ Body:
       NoSell: true
     Script: |
       set #CASHPOINTS, #CASHPOINTS + 1000;
+
+  - Id: 40109
+    AegisName: Moeda_RMT
+    Name: Moeda RMT
+    Type: Usable
+    Buy: 10
+    Weight: 0
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      set #RMTPOINTS, #RMTPOINTS + 1;
   
 # ======================== Loja de Presença ============================   
 
@@ -2075,7 +2105,7 @@ Body:
       sc_start SC_JEXPBOOST,1800000,50;
 
   - Id: 9672
-    AegisName: Token_Of_Siegfried[NN]
+    AegisName: Token_Of_Siegfried[NN] 
     Name: Token Of Siegfried
     Type: Etc
     Buy: 2
@@ -2107,6 +2137,40 @@ Body:
       specialeffect2 EF_HEAL3;
       sc_start2 SC_L_LIFEPOTION,3600000,-7,4;
       sc_start SC_SPEEDUP1,1800000,50;
+
+  - Id: 9675
+    AegisName: Test_Gray_Charcoal
+    Name: Abrasivo do Poder 1
+    Type: DelayConsume
+    Buy: 2
+    Weight: 50
+    Trade:
+      NoDrop: true
+      NoTrade: true
+      NoSell: true
+      NoCart: true
+      NoGuildStorage: true
+      NoMail: true
+      NoAuction: true
+    Script: |
+      callfunc "F_CustomRandomEnchant", 9675;
+
+  - Id: 9676
+    AegisName: Test_Gray_Charcoal_2
+    Name: Abrasivo do Poder 2
+    Type: DelayConsume
+    Buy: 2
+    Weight: 50
+    Trade:
+      NoDrop: true
+      NoTrade: true
+      NoSell: true
+      NoCart: true
+      NoGuildStorage: true
+      NoMail: true
+      NoAuction: true
+    Script: |
+      callfunc "F_CustomRandomEnchant", 9676;
 
   - Id: 9674
     AegisName: Chemical_Protection[NN]

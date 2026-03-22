@@ -8449,6 +8449,47 @@ ACMD_FUNC(homtalk)
 	return 0;
 }
 
+ACMD_FUNC(homai)
+{
+	char arg1[32];
+	int32 mode;
+
+	nullpo_retr(-1, sd);
+
+	if (!message || !*message) {
+		snprintf(atcmd_output, sizeof(atcmd_output), "Homunculus AI mode: %s (%d).", hom_ai_mode_name(sd->hom_ai_mode), sd->hom_ai_mode);
+		clif_displaymessage(fd, atcmd_output);
+		clif_displaymessage(fd, "Usage: @homai <normal|client|server|0|1|2>");
+		return 0;
+	}
+
+	if (sscanf(message, "%31s", arg1) < 1) {
+		clif_displaymessage(fd, "Usage: @homai <normal|client|server|0|1|2>");
+		return -1;
+	}
+
+	if (!strcmpi(arg1, "normal") || !strcmpi(arg1, "off") || !strcmpi(arg1, "0")) {
+		mode = HOM_AI_MODE_NORMAL;
+	} else if (!strcmpi(arg1, "client") || !strcmpi(arg1, "1")) {
+		mode = HOM_AI_MODE_CLIENT;
+	} else if (!strcmpi(arg1, "server") || !strcmpi(arg1, "2")) {
+		mode = HOM_AI_MODE_SERVER;
+	} else if (!strcmpi(arg1, "toggle")) {
+		mode = (sd->hom_ai_mode + 1) % 3;
+	} else {
+		clif_displaymessage(fd, "Usage: @homai <normal|client|server|0|1|2>");
+		return -1;
+	}
+
+	sd->hom_ai_mode = static_cast<uint8>(mode);
+	pc_setglobalreg(sd, add_str(HOMUN_AI_MODE_VAR), mode);
+	hom_update_ai_timer(sd);
+
+	snprintf(atcmd_output, sizeof(atcmd_output), "Homunculus AI mode set to %s (%d).", hom_ai_mode_name(sd->hom_ai_mode), sd->hom_ai_mode);
+	clif_displaymessage(fd, atcmd_output);
+	return 0;
+}
+
 /*==========================================
  * Show homunculus stats
  *------------------------------------------*/
@@ -10030,6 +10071,9 @@ static void atcommand_commands_sub(map_session_data* sd, const int32 fd, AtComma
 	if ( atcmd_binding_count ) {
 		int32 i, count_bind, gm_lvl = pc_get_group_level(sd);
 		for( i = count_bind = 0; i < atcmd_binding_count; i++ ) {
+			if (strcmp(atcmd_binding[i]->command, "darhom") == 0)
+				continue;
+
 			if ( gm_lvl >= ( (type - 1) ? atcmd_binding[i]->level2 : atcmd_binding[i]->level ) ) {
 				size_t slen = strlen( atcmd_binding[i]->command );
 
@@ -11517,6 +11561,22 @@ ACMD_FUNC(wb)
 	return true;
 }
 
+ACMD_FUNC(brazil)
+{
+	if (sd == nullptr)
+		return -1;
+
+	if (sd->emotionlasttime + 1 >= time(nullptr)) {
+		sd->emotionlasttime = time(nullptr);
+		clif_displaymessage(fd, "Aguarde um pouco antes de usar outra emotion.");
+		return -1;
+	}
+
+	sd->emotionlasttime = time(nullptr);
+	clif_emotion(*sd, ET_BR_FLAG);
+	return 0;
+}
+
 #include <custom/atcommand.inc>
 
 /**
@@ -11783,6 +11843,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(homfriendly),
 		ACMD_DEF(homhungry),
 		ACMD_DEF(homtalk),
+		ACMD_DEF(homai),
 		ACMD_DEF(hominfo),
 		ACMD_DEF(homstats),
 		ACMD_DEF(homshuffle),
@@ -11853,6 +11914,7 @@ void atcommand_basecommands(void) {
 		
 		ACMD_DEF(ws),
 		ACMD_DEF(wb),
+		ACMD_DEF(brazil),
 		
 	};
 	AtCommandInfo* atcommand;

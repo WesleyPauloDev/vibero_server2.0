@@ -15,6 +15,7 @@ function	script	F_InstanceEntry	{
 	.@cooldown_var$ = getarg(2);
 	.@status_var$ = getarg(3);
 	.@min_level = getarg(4);
+	debugmes "[WG HARD] F_InstanceEntry md=" + .@md_name$ + " status_var=" + .@status_var$;
 
     .@cooldown_name$ = "#cooldown_" + .@cooldown_var$;
     .@status_name$ = "#" + .@status_var$ + "_STATUS";
@@ -100,7 +101,8 @@ function	script	F_InstanceEntry	{
 				if (instance_create(.@md_name$) >= 0) {
 					mes "[" + .@npc_name$ + "]";
 					mes "A Inst‚ncia est· se abrindo...";
-					mapannounce "prontera", "[" + .@md_name$ + "] O jogador " + strcharinfo(0) + " do grupo " + getpartyname(getcharid(1)) + " criou a inst‚ncia.", bc_all, "0xFF9900";
+					announce "[" + .@md_name$ + "] O jogador " + strcharinfo(0) + " do grupo " + getpartyname(getcharid(1)) + " criou a inst‚ncia.", bc_all, "0xFF9900";
+					callfunc("F_InstanceLogStart", .@md_name$);
 
 					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
 					setd(.@status_name$), 1;
@@ -116,14 +118,17 @@ function	script	F_InstanceEntry	{
 		// 7. Entrar na inst‚ncia
 		// ============================
 		case 2:
+				debugmes "[WG HARD] before instance_enter md=" + .@md_name$ + " status=" + getd(.@status_name$);
 			switch(instance_enter(.@md_name$)) {
 				case IE_OK:
 					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
+					debugmes "[WG HARD] IE_OK before set: " + getd(.@status_name$) + " md=" + .@md_name$;
 					setd(.@status_name$), 2;
+					debugmes "[WG HARD] IE_OK after set: " + getd(.@status_name$) + " md=" + .@md_name$;
 					end;
 				case IE_NOINSTANCE:
-                    if(#PORING_STATUS == 0) {
-					    mes "A inst‚ncia ainda n„o foi criada.";
+                    if(getd(.@status_name$) == 0) {
+				    mes "A inst√¢ncia ainda n√£o foi criada.";
                         close;
                     }
                     mes "VocÍ j· entrou na inst‚ncia hoje.";
@@ -146,5 +151,41 @@ function	script	F_InstanceEntry	{
 			mes "Tudo bem, volte quando estiver pronto.";
 			close;
 	}
+	return;
+}
+
+function	script	F_InstanceLogStart	{
+	.@md_name$ = getarg(0);
+	.@party_id = getcharid(1);
+	if (.@party_id < 1)
+		return;
+	query_sql("INSERT INTO `instance_monitor_log` (`instance_name`, `party_id`, `party_name`, `created_by_account_id`, `created_by_char_id`, `created_by_name`, `status`, `started_at`) VALUES ('"
+		+ escape_sql(.@md_name$) + "', "
+		+ .@party_id + ", '"
+		+ escape_sql(getpartyname(.@party_id)) + "', "
+		+ getcharid(3) + ", "
+		+ getcharid(0) + ", '"
+		+ escape_sql(strcharinfo(0)) + "', 'OPEN', NOW())");
+	return;
+}
+
+function	script	F_InstanceLogFinish	{
+	.@md_name$ = getarg(0);
+	.@party_id = getcharid(1);
+	if (.@party_id < 1)
+		return;
+	query_sql("UPDATE `instance_monitor_log` SET `status` = 'COMPLETED', `completed_at` = NOW(), `finished_by_account_id` = "
+		+ getcharid(3) + ", `finished_by_char_id` = "
+		+ getcharid(0) + ", `finished_by_name` = '"
+		+ escape_sql(strcharinfo(0)) + "' WHERE `id` = (SELECT `id` FROM (SELECT `id` FROM `instance_monitor_log` WHERE `instance_name` = '"
+		+ escape_sql(.@md_name$) + "' AND `party_id` = "
+		+ .@party_id + " AND `status` = 'OPEN' ORDER BY `id` DESC LIMIT 1) AS `open_instance`)");
+	return;
+}
+
+function	script	F_InstanceFinishAnnounce	{
+	.@md_name$ = getarg(0);
+	callfunc("F_InstanceLogFinish", .@md_name$);
+	announce "[" + .@md_name$ + "] O jogador " + strcharinfo(0) + " do grupo " + getpartyname(getcharid(1)) + " finalizou a inst‚ncia.", bc_all, "0xFF9900";
 	return;
 }

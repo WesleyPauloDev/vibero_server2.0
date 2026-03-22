@@ -2341,8 +2341,9 @@ int32 intif_parse_Mail_inboxreceived(int32 fd)
 
 	if (sd == nullptr)
 	{
-		ShowError("intif_parse_Mail_inboxreceived: char not found %d\n",RFIFOL(fd,4));
-		return 0;
+		if (battle_config.etc_log)
+			ShowWarning("intif_parse_Mail_inboxreceived: char not online %d (ignored)\n", RFIFOL(fd,4));
+		return 1;
 	}
 
 	if (RFIFOW(fd,2) - 10 != sizeof(struct mail_data))

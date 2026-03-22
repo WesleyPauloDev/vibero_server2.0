@@ -4,7 +4,7 @@ OnTalk:
 	mes "Confira meus produtos!";
 	callshop "Vote_Shop",1;
 	npcshopattach "Vote_Shop";
-	dispbottom "Pontos de Votos: " + #votes_points;
+	dispbottom "Pontos de Votos: " + #VOTE_POINT;
 	end;
 
 OnBuyItem:
@@ -12,7 +12,7 @@ OnBuyItem:
 	end;
 }
 // Estes itens devem acompanhar o array shop_items e shop_prices
--	shop	Vote_Shop	-1,400012:20,12210:5,12223:5,12224:5,9615:5,7776:30
+-	shop	Vote_Shop	-1,400012:20,12210:5,12223:5,12224:5,9615:5,7776:30, 19637:30, 19641:30, 20538:30
 
 function	script	Vote_Shop_Process	{
 
@@ -20,8 +20,8 @@ function	script	Vote_Shop_Process	{
 	// CONFIGURAÇÃO DA LOJA
 	// =============================
 	// Itens e preços em pontos de Votos
-	setarray .@shop_items[0], 400012, 12210, 12223, 12224, 9615, 7776;
-	setarray .@shop_prices[0], 20,   5,   5,     5, 5, 30; // preço por item em pontos
+	setarray .@shop_items[0], 400012, 12210, 12223, 12224, 9615, 7776, 19637, 19641, 20538;
+	setarray .@shop_prices[0], 20,   5,   5,     5, 5, 30, 30, 30, 30; // preço por item em pontos
 
 	// =============================
 	// PARÂMETROS DA FUNÇÃO
@@ -55,7 +55,7 @@ function	script	Vote_Shop_Process	{
 	// =============================
 	// VERIFICA PONTOS
 	// =============================
-	if (#votes_points < .@total_cost) {
+	if (#VOTE_POINT < .@total_cost) {
 		dispbottom "Pontos de Votos insuficiente.";
         return;
 	}
@@ -63,10 +63,11 @@ function	script	Vote_Shop_Process	{
 	// =============================
 	// DESCONTA E ENTREGA
 	// =============================
-	#votes_points -= .@total_cost;
+	#VOTE_POINT -= .@total_cost;
 	getitem .@id, .@qtd;
+	logshop "SCRIPT_SHOP_BUY", "Vote_Shop", .@id, .@qtd, 0, 0, 0, "#VOTE_POINT", .@total_cost;
 
-	dispbottom "[Votos] -" + .@total_cost + " ponto(s) de votos. Restam: " + #votes_points + ".";
+	dispbottom "[Votos] -" + .@total_cost + " ponto(s) de votos. Restam: " + #VOTE_POINT + ".";
 	return;
 }
 

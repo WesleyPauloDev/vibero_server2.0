@@ -88,6 +88,19 @@ OnTalk:
 	// Coleta dados do item
 	set .@equip_id, getequipid(.@part);
 	set .@refine, getequiprefinerycnt(.@part);
+
+	// Bloqueia os chapeus da Nightmare Biolab neste sistema de encantamento.
+	if (.@equip_id == 18971 || .@equip_id == 18972 || .@equip_id == 18973 || .@equip_id == 18974
+	 || .@equip_id == 18975 || .@equip_id == 18976 || .@equip_id == 18977 || .@equip_id == 18978
+	 || .@equip_id == 18979 || .@equip_id == 18980 || .@equip_id == 18981 || .@equip_id == 18982
+	 || .@equip_id == 18983 || .@equip_id == 18984) {
+		mes " ";
+		mes "Esse chapéu memorável da Nightmare Biolab não pode ser encantado neste sistema.";
+		next;
+		mes "[Artesão Aprendiz]";
+		mes "Use o NPC específico da Biolab para encantar, melhorar ou resetar esse item.";
+		close;
+	}
 	set .@slot1, getequipcardid(.@part,0);
 	set .@slot2, getequipcardid(.@part,1);
 	set .@slot3, getequipcardid(.@part,2);

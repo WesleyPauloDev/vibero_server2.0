@@ -9,38 +9,30 @@ OnPCLoginEvent:
     end;
 
 OnStartRate:
-	.@var$ = "#rate_escolhido_" + getcharid(0);
-	// setd(.@var$, 0);
-	// set exp_base_custom, 0;
-
-    // #drop_final = 0;
-    // #exp_final = 0;
-
-    // rate_escolhido = 0;
-	// Se já escolheu a taxa, apenas aplica os bônus
-	if (getd(.@var$) > 0) {
+    // Se ja escolheu a taxa, apenas aplica os bonus no login
+	if (rate_escolhido > 0) {
 		end;
 	}
 
 	mes "^00AAFFBem-vindo, " + strcharinfo(0) + "!^000000";
-	mes "Antes de começar sua jornada, escolha sua taxa de experiência:";
+	mes "Antes de comecar sua jornada, escolha sua taxa de experiencia:";
 	mes " ";
-	mes "Quanto menor a taxa de XP, maior será o bônus de drop!";
+	mes "Quanto menor a taxa de XP, maior sera o bonus de drop!";
 	next;
 
 	while (true) {
-		mes "Selecione sua taxa de experiência:";
+		mes "Selecione sua taxa de experiencia:";
 		mes "";
 		mes "^00FF00[1x]^000000  XP normal, Taxa de Drop (2x)";
 		mes "^88FF88[2x]^000000  XP (2X), Taxa de Drop (1.5x)";
 		mes "^FFAA00[5x]^000000  XP (5X), Taxa de Drop (1.2x)";
-		mes "^FF0000[10x]^000000 XP (10X), Sem bônus de Drop";
+		mes "^FF0000[10x]^000000 XP (10X), Sem bonus de Drop";
 		next;
 
 		switch(select("^00FF001x^000000", "^88FF882x^000000", "^FFAA005x^000000", "^FF000010x^000000")) {
 			case 1:
 				.@rate_escolhida = 1;
-				.@bonus_drop = 100; // máximo bônus de drop
+				.@bonus_drop = 100;
 				.@drop_display$ = "2";
 				break;
 			case 2:
@@ -55,24 +47,25 @@ OnStartRate:
 				break;
 			case 4:
 				.@rate_escolhida = 10;
-				.@bonus_drop = 0; // sem bônus
+				.@bonus_drop = 0;
 				.@drop_display$ = "1";
 				break;
 		}
-        mes "Você escolheu a taxa de ^FFAA00" + .@rate_escolhida + "X^000000 de XP.";
-        mes "Bônus de Drop: ^00AAFF" + .@drop_display$ + "X^000000.";
+        mes "Voce escolheu a taxa de ^FFAA00" + .@rate_escolhida + "X^000000 de XP.";
+        mes "Bonus de Drop: ^00AAFF" + .@drop_display$ + "X^000000.";
         mes " ";
-        mes "Sua escolha é permanente!";
+        mes "Sua escolha e permanente!";
         mes "Tem certeza que deseja continuar com esta Rate?";
-        if (select("Sim","Não") == 1) break;
-	}	
+        if (select("Sim","Nao") == 1) break;
+	}
+
     mes "Rate escolhida foi ^FFAA00" + .@rate_escolhida + "x^000000 de XP.";
-	setd(.@var$, .@rate_escolhida);
+	rate_escolhido = .@rate_escolhida;
 	close2;
 
-	// ========================
-	// Atribuir título por Rate
-	// ========================
+	if (rate_escolhido <= 0) {
+		end;
+	}
 
 	if (.@rate_escolhida == 1) {
 		if (!achievementexists(110010))
@@ -91,33 +84,28 @@ OnStartRate:
 			achievementcomplete 110013;
 	}
 
-	// ========================
-	// Atribuir Bonus por Rate
-	// ========================
+    // Definir rates baseadas na escolha
+	if (!.@rate_bonus) {
+		switch(.@rate_escolhida) {
+			case 1: .@rate_xp = 1; .@drop_bonus = 100; break;
+			case 2: .@rate_xp = 2; .@drop_bonus = 50; break;
+			case 5: .@rate_xp = 5; .@drop_bonus = 20; break;
+			case 10: .@rate_xp = 10; .@drop_bonus = 0; break;
+			default: .@rate_xp = 1; .@drop_bonus = 100;
+		}
+		.@rate_bonus = 1;
+	}
 
-    // .@rate_bonus = 0;
-    if (!.@rate_bonus) {
-        if (!exp_base_custom) exp_base_custom = 1;
-        
-        if (.@rate_escolhida == 1) {
-            exp_base_custom = 1;
-        } else {
-            set exp_base_custom, (exp_base_custom * .@rate_escolhida * 100) - 100;
-        }
-            
-        if (!drop_base) drop_base = 0;
-        set drop_base, .@bonus_drop;
-        .@rate_bonus = 1;
-    }
+	exp_base_custom = .@rate_xp * 100;
+	drop_base = .@drop_bonus;
 
-	// set #exp_final, #exp_final + exp_base_custom;
-	.@reput_reborn = (get_reputation_points(7) / 1000) * 10;
-	set #exp_final, exp_base_custom * .@reput_reborn / 100;
-	// set #drop_final, #drop_final + drop_base;
-	set #drop_final, #reborn_drop + drop_base;
+	// XP base para o sistema = (rate_xp - 1) * 100
+	.@xp_base = (.@rate_xp - 1) * 100;
+	exp_final = .@xp_base;
+	drop_final = .@drop_bonus;
 
-	set_reborn_exp(#exp_final);
-	set_reborn_drop(#drop_final);
+	set_reborn_exp(exp_final);
+	set_reborn_drop(drop_final);
 
 	end;
 }

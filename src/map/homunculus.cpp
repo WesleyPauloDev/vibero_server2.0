@@ -23,11 +23,26 @@
 #include "npc.hpp"
 #include "party.hpp"
 #include "pc.hpp"
+#include "skill.hpp"
 #include "trade.hpp"
 
 using namespace rathena;
 
 static TIMER_FUNC(hom_hungry);
+static TIMER_FUNC(hom_server_ai);
+
+const char* hom_ai_mode_name(uint8 mode){
+	switch (mode) {
+		case HOM_AI_MODE_NORMAL:
+			return "Normal";
+		case HOM_AI_MODE_CLIENT:
+			return "Client";
+		case HOM_AI_MODE_SERVER:
+			return "Server";
+		default:
+			return "Unknown";
+	}
+}
 
 //For holding the view data of npc classes. [Skotlex]
 static struct view_data hom_viewdb[MAX_HOMUNCULUS_CLASS];
@@ -238,6 +253,7 @@ int32 hom_dead(struct homun_data *hd)
 
 	//Delete timers when dead.
 	hom_hungry_timer_delete(hd);
+	hom_ai_timer_delete(hd);
 	hd->homunculus.hp = 0;
 
 	if (!sd) //unit remove map will invoke unit free
@@ -254,7 +270,7 @@ int32 hom_dead(struct homun_data *hd)
 /**
 * Vaporize a character's homunculus
 * @param sd
-* @param flag 1: then HP needs to be 80% or above. 2: then set to morph state.
+ * @param flag 1: set to rest state. 2: set to morph state.
 */
 int32 hom_vaporize(map_session_data *sd, int32 flag)
 {
@@ -269,12 +285,10 @@ int32 hom_vaporize(map_session_data *sd, int32 flag)
 	if (status_isdead(*hd))
 		return 0; //Can't vaporize a dead homun.
 
-	if (flag == HOM_ST_REST && get_percentage(hd->battle_status.hp, hd->battle_status.max_hp) < 80)
-		return 0;
-
 	hd->regen.state.block = 3; //Block regen while vaporized.
 	//Delete timers when vaporized.
 	hom_hungry_timer_delete(hd);
+	hom_ai_timer_delete(hd);
 	hd->homunculus.vaporize = flag ? flag : HOM_ST_REST;
 	if (battle_config.hom_delay_reset_vaporize) {
 		skill_blockhomun_clear(*hd);
@@ -299,6 +313,7 @@ int32 hom_delete(struct homun_data *hd)
 	map_session_data *sd;
 	nullpo_ret(hd);
 	sd = hd->master;
+	hom_ai_timer_delete(hd);
 
 	if (!sd)
 		return unit_free(hd,CLR_DEAD);
@@ -362,6 +377,7 @@ void hom_calc_skilltree(homun_data *hd) {
 	nullpo_retv(hd);
 
 	std::shared_ptr<s_homunculus_db> homun_current = homunculus_db.homun_search(hd->homunculus.class_);
+	int32 m_class = hom_class2mapid(hd->homunculus.class_);
 
 	// If the current class can't be loaded, then for sure there's no prev_class!
 	if (homun_current == nullptr)
@@ -369,8 +385,8 @@ void hom_calc_skilltree(homun_data *hd) {
 
 	std::shared_ptr<s_homunculus_db> homun = homunculus_db.homun_search(hd->homunculus.prev_class);
 
-	/* load previous homunculus form skills first. */
-	if (homun != nullptr) {
+	/* load previous homunculus form skills first (except for Homunculus S). */
+	if (homun != nullptr && !(m_class & HOM_S)) {
 		hom_calc_skilltree_sub(*hd, homun->skill_tree);
 	}
 
@@ -655,6 +671,10 @@ int32 hom_mutate(struct homun_data *hd, int32 homun_id)
 	struct s_homunculus *hom;
 	map_session_data *sd;
 	int32 m_class, m_id, prev_class = 0;
+	int32 prev_agi, prev_dex;
+	int32 prev_hit, prev_amotion;
+	int32 target_level;
+	t_exp target_exp;
 	nullpo_ret(hd);
 
 	m_class = hom_class2mapid(hd->homunculus.class_);
@@ -669,6 +689,10 @@ int32 hom_mutate(struct homun_data *hd, int32 homun_id)
 	if (!sd)
 		return 0;
 
+	prev_agi = hd->homunculus.agi;
+	prev_dex = hd->homunculus.dex;
+	prev_hit = hd->battle_status.hit;
+	prev_amotion = hd->battle_status.amotion;
 	prev_class = hd->homunculus.class_;
 
 	if (!hom_change_class(hd, homun_id)) {
@@ -678,12 +702,56 @@ int32 hom_mutate(struct homun_data *hd, int32 homun_id)
 
 	clif_class_change(*hd, homun_id );
 
-	// status_Calc flag&1 will make current HP/SP be reloaded from hom structure
+	// Rebuild stats and skills for the new Homunculus S class.
+	// Previous class is kept so early levels can still use previous growth when configured.
 	hom = &hd->homunculus;
-	hom->hp = hd->battle_status.hp;
-	hom->sp = hd->battle_status.sp;
+	target_level = hom->level;
+	target_exp = hom->exp;
 	hom->prev_class = prev_class;
+
+	hom_reset_stats(hd);
+
+	for (int32 i = 1; i < target_level && hd->exp_next; i++) {
+		hd->homunculus.exp += hd->exp_next;
+		if (!hom_levelup(hd))
+			break;
+	}
+
+	hd->homunculus.exp = target_exp;
+	// On S mutation, start skill progression from zero points to avoid instantly maxing newly unlocked S skills.
+	hd->homunculus.skillpts = 0;
+	hom = &hd->homunculus;
+
+	// Custom boost on S mutation:
+	// - Keep strong offensive/defensive gains.
+	// - Ensure AGI/DEX scaling is enough to avoid ASPD/HIT regressions after class switch.
+	hom->max_hp *= 2;
+	hom->max_sp *= 2;
+	hom->str *= 2;
+	hom->vit *= 2;
+	hom->int_ *= 2;
+	hom->luk *= 2;
+	hom->agi += hom->agi / 2; // +50%
+	hom->dex += (hom->dex * 3) / 4; // +75%
+
+	// Keep AGI/DEX at least above old values from before mutation.
+	if (hom->agi < prev_agi + (prev_agi / 4))
+		hom->agi = prev_agi + (prev_agi / 4);
+	if (hom->dex < prev_dex + (prev_dex / 2))
+		hom->dex = prev_dex + (prev_dex / 2);
+
+	hom->hp = hom->max_hp;
+	hom->sp = hom->max_sp;
 	status_calc_homunculus(hd, SCO_FIRST);
+
+	// Final anti-regression pass for combat feel.
+	if (hd->battle_status.hit < prev_hit || hd->battle_status.amotion > prev_amotion) {
+		if (hd->battle_status.hit < prev_hit)
+			hom->dex += prev_dex / 3;
+		if (hd->battle_status.amotion > prev_amotion)
+			hom->agi += prev_agi / 3;
+		status_calc_homunculus(hd, SCO_FIRST);
+	}
 
 	clif_hominfo(sd, hd, 0);
 	// Official servers don't recaculate the skill tree after evolution
@@ -713,6 +781,11 @@ void hom_gainexp(struct homun_data *hd,t_exp exp)
 	if((m_class = hom_class2mapid(hd->homunculus.class_)) == -1) {
 		ShowError("hom_gainexp: Invalid class %d. \n", hd->homunculus.class_);
 		return;
+	}
+
+	// Custom boost: Homunculus S gains EXP faster.
+	if (m_class & HOM_S) {
+		exp *= 10;
 	}
 
 	if( hd->exp_next == 0 ||
@@ -864,6 +937,485 @@ void hom_menu(map_session_data *sd, int32 type)
 	}
 }
 
+static block_list* hom_server_ai_target(homun_data* hd){
+	block_list* target = nullptr;
+
+	if (hd == nullptr)
+		return nullptr;
+
+	target = map_id2bl(hd->ud.target);
+	if (target && !status_isdead(*target) && target->m == hd->m && battle_check_target(hd, target, BCT_ENEMY) > 0)
+		return target;
+
+	if (hd->master == nullptr)
+		return nullptr;
+
+	target = map_id2bl(hd->master->ud.target);
+	if (target && !status_isdead(*target) && target->m == hd->m && battle_check_target(hd, target, BCT_ENEMY) > 0)
+		return target;
+
+	return nullptr;
+}
+
+static int32 hom_server_ai_targetsearch_sub(block_list* bl, va_list ap){
+	homun_data* hd = va_arg(ap, homun_data*);
+	block_list** target = va_arg(ap, block_list**);
+
+	if (hd == nullptr || target == nullptr || bl == nullptr)
+		return 0;
+	if (bl->id == hd->id || (hd->master != nullptr && bl->id == hd->master->id))
+		return 0;
+	if (bl->m != hd->m || status_isdead(*bl))
+		return 0;
+	if (battle_check_target(hd, bl, BCT_ENEMY) <= 0)
+		return 0;
+
+	if (*target == nullptr || distance_bl(hd, bl) < distance_bl(hd, *target)) {
+		*target = bl;
+	}
+
+	return 0;
+}
+
+static int32 hom_server_ai_targetsearch_master_sub(block_list* bl, va_list ap){
+	homun_data* hd = va_arg(ap, homun_data*);
+	block_list** target = va_arg(ap, block_list**);
+
+	if (hd == nullptr || hd->master == nullptr || target == nullptr || bl == nullptr)
+		return 0;
+	if (bl->id == hd->id || bl->id == hd->master->id)
+		return 0;
+	if (bl->m != hd->m || status_isdead(*bl))
+		return 0;
+	if (battle_check_target(hd, bl, BCT_ENEMY) <= 0)
+		return 0;
+	// Prioritize enemies that are currently targeting the homunculus master.
+	if (battle_gettarget(bl) != hd->master->id)
+		return 0;
+
+	if (*target == nullptr || distance_bl(hd, bl) < distance_bl(hd, *target))
+		*target = bl;
+
+	return 0;
+}
+
+static block_list* hom_server_ai_target_aggressive(homun_data* hd){
+	block_list* target = nullptr;
+	// First priority: anything currently attacking the master.
+	const int16 search_range = 15;
+	map_foreachinallrange(hom_server_ai_targetsearch_master_sub, hd, search_range, BL_CHAR, hd, &target);
+	if (target != nullptr)
+		return target;
+
+	// Then keep current hom target / master's selected target.
+	target = hom_server_ai_target(hd);
+
+	if (target != nullptr)
+		return target;
+
+	// Aggressive fallback for server AI mode: pick nearest enemy in view range.
+	map_foreachinallrange(hom_server_ai_targetsearch_sub, hd, search_range, BL_CHAR, hd, &target);
+
+	return target;
+}
+
+static bool hom_is_s_skill(uint16 skill_id){
+	return skill_id >= MH_SUMMON_LEGION && skill_id <= MH_BLAZING_LAVA;
+}
+
+static bool hom_server_ai_is_custom_managed_skill(homun_data* hd, uint16 skill_id){
+	if (hd == nullptr)
+		return false;
+
+	switch (hd->homunculus.class_) {
+		case MER_BAYERI:
+			switch (skill_id) {
+				case MH_STAHL_HORN:
+				case MH_GOLDENE_FERSE:
+				case MH_STEINWAND:
+				case MH_HEILIGE_STANGE:
+				case MH_ANGRIFFS_MODUS:
+				case MH_LICHT_GEHORN:
+				case MH_GLANZEN_SPIES:
+				case MH_HEILIGE_PFERD:
+				case MH_GOLDENE_TONE:
+					return true;
+				default:
+					return false;
+			}
+		case MER_SERA:
+			switch (skill_id) {
+				case MH_SUMMON_LEGION:
+				case MH_NEEDLE_OF_PARALYZE:
+				case MH_POISON_MIST:
+				case MH_PAIN_KILLER:
+				case MH_POLISHING_NEEDLE:
+				case MH_TOXIN_OF_MANDARA:
+				case MH_NEEDLE_STINGER:
+					return true;
+				default:
+					return false;
+			}
+		case MER_DIETER:
+			switch (skill_id) {
+				case MH_MAGMA_FLOW:
+				case MH_GRANITIC_ARMOR:
+				case MH_LAVA_SLIDE:
+				case MH_PYROCLASTIC:
+				case MH_VOLCANIC_ASH:
+				case MH_BLAST_FORGE:
+				case MH_TEMPERING:
+				case MH_BLAZING_LAVA:
+					return true;
+				default:
+					return false;
+			}
+		default:
+			return false;
+	}
+}
+
+static bool hom_server_ai_is_custom_support_skill(homun_data* hd, uint16 skill_id){
+	if (hd == nullptr)
+		return false;
+
+	switch (hd->homunculus.class_) {
+		case MER_BAYERI:
+			switch (skill_id) {
+				case MH_GOLDENE_FERSE:
+				case MH_STEINWAND:
+				case MH_ANGRIFFS_MODUS:
+				case MH_GOLDENE_TONE:
+					return true;
+				default:
+					return false;
+			}
+		case MER_SERA:
+			switch (skill_id) {
+				case MH_SUMMON_LEGION:
+				case MH_PAIN_KILLER:
+					return true;
+				default:
+					return false;
+			}
+		case MER_DIETER:
+			switch (skill_id) {
+				case MH_GRANITIC_ARMOR:
+				case MH_PYROCLASTIC:
+				case MH_TEMPERING:
+					return true;
+				default:
+					return false;
+			}
+		default:
+			return false;
+	}
+}
+
+static bool hom_server_ai_is_heal_skill(uint16 skill_id){
+	switch (skill_id) {
+		case HLIF_HEAL:
+			return true;
+		default:
+			return false;
+	}
+}
+
+static int32 hom_server_ai_custom_cooldown(homun_data* hd, uint16 skill_id, uint16 skill_lv){
+	int32 hom_type;
+	int32 db_cooldown;
+
+	if (hd == nullptr)
+		return 0;
+
+	// Respect explicit DB cooldown values first.
+	db_cooldown = skill_get_cooldown(skill_id, skill_lv);
+	if (db_cooldown > 0)
+		return db_cooldown;
+
+	hom_type = hom_class2type(hd->homunculus.class_);
+	// Server AI policy for non-S homunculus:
+	// - offensive: 2s
+	// - heal: 5s
+	// - support/self buffs: use skill duration
+	if (hom_type != HT_S) {
+		int32 inf = skill_get_inf(skill_id);
+
+		if (inf == INF_PASSIVE_SKILL)
+			return 0;
+		if (hom_server_ai_is_heal_skill(skill_id))
+			return 5000;
+		if ((inf & INF_SUPPORT_SKILL) || (inf & INF_SELF_SKILL)) {
+			int32 duration = skill_get_time(skill_id, skill_lv);
+
+			if (duration > 0)
+				return duration;
+		}
+
+		return 2000;
+	}
+
+	if (!hom_server_ai_is_custom_managed_skill(hd, skill_id))
+		return 0;
+	if (hom_server_ai_is_custom_support_skill(hd, skill_id)) {
+		int32 duration = skill_get_time(skill_id, skill_lv);
+
+		if (duration > 0)
+			return duration;
+	}
+
+	return 3000;
+}
+
+static bool hom_server_ai_try_skill_eleanor(homun_data* hd, block_list* target){
+	static constexpr t_tick combo_interval = 500;
+	status_change* sc;
+	status_change_entry* sce;
+	uint16 style_lv;
+	t_tick tick;
+
+	if (hd == nullptr || target == nullptr)
+		return false;
+
+	tick = gettick();
+	sc = status_get_sc(hd);
+	sce = (sc != nullptr) ? sc->getSCE(SC_STYLE_CHANGE) : nullptr;
+	style_lv = hom_checkskill(hd, MH_STYLE_CHANGE);
+
+	// Keep Eleanor in Fighting mode for auto-attack + sphere generation.
+	if (style_lv > 0 && sce == nullptr) {
+		if (unit_skilluse_id(hd, hd->id, MH_STYLE_CHANGE, style_lv)) {
+			hd->ai_ele_next_skill_tick = tick + combo_interval;
+			return true;
+		}
+	}
+
+	if (style_lv > 0 && sce != nullptr && sce->val1 != MH_MD_FIGHTING) {
+		if (unit_skilluse_id(hd, hd->id, MH_STYLE_CHANGE, style_lv)) {
+			hd->ai_ele_next_skill_tick = tick + combo_interval;
+			return true;
+		}
+	}
+
+	if (DIFF_TICK(tick, hd->ai_ele_next_skill_tick) < 0)
+		return false;
+
+	static const uint16 combo_skills[] = {
+		// Keep this strict order because each skill chains into the next one.
+		// SONIC_CRAW -> SILVERVEIN_RUSH -> MIDNIGHT_FRENZY
+		// Then add the 2 standalone finishers.
+		MH_SONIC_CRAW,
+		MH_SILVERVEIN_RUSH,
+		MH_MIDNIGHT_FRENZY,
+	};
+
+	while (hd->ai_ele_combo_step < ARRAYLENGTH(combo_skills)) {
+		uint16 skill_id = combo_skills[hd->ai_ele_combo_step];
+		uint16 skill_lv = hom_checkskill(hd, skill_id);
+		int32 custom_cooldown = (skill_id == MH_SONIC_CRAW) ? 3000 : 0;
+
+		if (skill_lv == 0) {
+			hd->ai_ele_combo_step++;
+			continue;
+		}
+
+		if (skill_isNotOk_hom(hd, skill_id, skill_lv))
+			break;
+
+		if (unit_skilluse_id(hd, target->id, skill_id, skill_lv)) {
+			hd->ai_ele_combo_step = (hd->ai_ele_combo_step + 1) % ARRAYLENGTH(combo_skills);
+			hd->ai_ele_next_skill_tick = tick + combo_interval;
+			if (custom_cooldown > 0)
+				skill_blockhomun_start(*hd, skill_id, custom_cooldown);
+			return true;
+		}
+
+		break;
+	}
+
+	static const uint16 finisher_skills[] = {
+		MH_BLAZING_AND_FURIOUS,
+		MH_THE_ONE_FIGHTER_RISES,
+	};
+
+	for (uint16 skill_id : finisher_skills) {
+		uint16 skill_lv = hom_checkskill(hd, skill_id);
+		int32 custom_cooldown = 5000;
+
+		if (skill_lv == 0)
+			continue;
+		if (skill_isNotOk_hom(hd, skill_id, skill_lv))
+			continue;
+		if (unit_skilluse_id(hd, target->id, skill_id, skill_lv)) {
+			hd->ai_ele_next_skill_tick = tick + combo_interval;
+			skill_blockhomun_start(*hd, skill_id, custom_cooldown);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static bool hom_server_ai_try_skill(homun_data* hd, block_list* target){
+	int32 hom_hp_rate = 100;
+	int32 owner_hp_rate = 100;
+	int32 hom_type = HT_INVALID;
+	int32 hom_mapid = -1;
+	int32 pass_count = 1;
+
+	if (hd == nullptr || hd->master == nullptr)
+		return false;
+	if (hd->homunculus.class_ == MER_ELEANOR)
+		return hom_server_ai_try_skill_eleanor(hd, target);
+	hom_type = hom_class2type(hd->homunculus.class_);
+	hom_mapid = hom_class2mapid(hd->homunculus.class_);
+	if (hom_type == HT_S)
+		pass_count = 2; // Pass 0: prioritize S skills (MH_*), Pass 1: fallback to old skills.
+
+	if (hd->battle_status.max_hp > 0)
+		hom_hp_rate = get_percentage(hd->battle_status.hp, hd->battle_status.max_hp);
+	if (hd->master->battle_status.max_hp > 0)
+		owner_hp_rate = get_percentage(hd->master->battle_status.hp, hd->master->battle_status.max_hp);
+
+	for (int32 pass = 0; pass < pass_count; pass++) {
+		for (int32 offset = 0; offset < MAX_HOMUNSKILL; offset++) {
+			int32 i = (hd->ai_skill_cursor + offset) % MAX_HOMUNSKILL;
+			uint16 skill_id = hd->homunculus.hskill[i].id;
+			uint16 skill_lv = hd->homunculus.hskill[i].lv;
+			int32 inf;
+			bool is_s_skill;
+			bool custom_managed;
+			int32 custom_cooldown;
+
+				if (skill_id == 0 || skill_lv == 0)
+					continue;
+				// Do not allow Castling in server AI for both Amistr forms.
+				if (skill_id == HAMI_CASTLE && (hom_mapid == MAPID_AMISTR || hom_mapid == MAPID_AMISTR_E))
+					continue;
+				// Keep non-S homunculus safe for AFK by skipping self-destruct.
+				if (hom_type != HT_S && skill_id == HVAN_EXPLOSION)
+					continue;
+				if (skill_isNotOk_hom(hd, skill_id, skill_lv))
+					continue;
+
+			is_s_skill = hom_is_s_skill(skill_id);
+			if (hom_type == HT_S) {
+				if (pass == 0 && !is_s_skill)
+					continue;
+				if (pass == 1 && is_s_skill)
+					continue;
+			}
+
+			inf = skill_get_inf(skill_id);
+			if (inf == INF_PASSIVE_SKILL)
+				continue; // Passive skills are stat modifiers and should never be actively cast.
+			custom_managed = hom_server_ai_is_custom_managed_skill(hd, skill_id);
+			custom_cooldown = hom_server_ai_custom_cooldown(hd, skill_id, skill_lv);
+			if (inf & INF_GROUND_SKILL) {
+				// Allow offensive ground skills (e.g. MH_XENO_SLASHER) in server AI mode.
+				if (target && battle_check_target(hd, target, BCT_ENEMY) > 0) {
+					if (unit_skilluse_pos(hd, target->x, target->y, skill_id, skill_lv)) {
+						hd->ai_skill_cursor = (i + 1) % MAX_HOMUNSKILL;
+						if (custom_cooldown > 0)
+							skill_blockhomun_start(*hd, skill_id, custom_cooldown);
+						return true;
+					}
+				}
+				continue;
+			}
+
+			// Self-only support.
+			if (inf & INF_SELF_SKILL) {
+				if (hom_type != HT_S || custom_managed || hom_hp_rate <= 85) {
+					if (unit_skilluse_id(hd, hd->id, skill_id, skill_lv)) {
+						hd->ai_skill_cursor = (i + 1) % MAX_HOMUNSKILL;
+						if (custom_cooldown > 0)
+							skill_blockhomun_start(*hd, skill_id, custom_cooldown);
+						return true;
+					}
+				}
+				continue;
+			}
+
+			// Party/support skills should never be cast on enemy target.
+			if (inf & INF_SUPPORT_SKILL) {
+				bool is_heal = hom_server_ai_is_heal_skill(skill_id);
+				bool allow_master = (hom_type != HT_S) ? (!is_heal || owner_hp_rate < 80) : (custom_managed || owner_hp_rate <= 85);
+				bool allow_self = (hom_type != HT_S) ? (!is_heal) : (custom_managed || hom_hp_rate <= 85);
+
+				if (allow_master) {
+					if (unit_skilluse_id(hd, hd->master->id, skill_id, skill_lv)) {
+						hd->ai_skill_cursor = (i + 1) % MAX_HOMUNSKILL;
+						if (custom_cooldown > 0)
+							skill_blockhomun_start(*hd, skill_id, custom_cooldown);
+						return true;
+					}
+				}
+				if (allow_self) {
+					if (unit_skilluse_id(hd, hd->id, skill_id, skill_lv)) {
+						hd->ai_skill_cursor = (i + 1) % MAX_HOMUNSKILL;
+						if (custom_cooldown > 0)
+							skill_blockhomun_start(*hd, skill_id, custom_cooldown);
+						return true;
+					}
+				}
+				continue;
+			}
+
+			// Offensive skills only on valid enemies.
+			if (target && battle_check_target(hd, target, BCT_ENEMY) > 0) {
+				if (unit_skilluse_id(hd, target->id, skill_id, skill_lv)) {
+					hd->ai_skill_cursor = (i + 1) % MAX_HOMUNSKILL;
+					if (custom_cooldown > 0)
+						skill_blockhomun_start(*hd, skill_id, custom_cooldown);
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+static TIMER_FUNC(hom_server_ai){
+	TBL_HOM* hd = BL_CAST(BL_HOM, map_id2bl(id));
+	block_list* target = nullptr;
+
+	if (hd == nullptr)
+		return 0;
+	if (hd->ai_timer != tid)
+		return 0;
+
+	hd->ai_timer = INVALID_TIMER;
+
+	if (hd->master == nullptr || !hom_is_active(hd))
+		return 0;
+	if (hd->master->hom_ai_mode != HOM_AI_MODE_SERVER)
+		return 0;
+	// Faster update loop to improve reaction time against newly spawned/aggressive enemies.
+	hd->ai_timer = add_timer(tick + ((hd->homunculus.class_ == MER_ELEANOR) ? 150 : 250), hom_server_ai, hd->id, 0);
+
+	target = hom_server_ai_target_aggressive(hd);
+	if (target == nullptr) {
+		// Follow owner when there is no combat target.
+		if (!check_distance_bl(hd, hd->master, 3)) {
+			unit_calc_pos(hd, hd->master->x, hd->master->y, hd->master->ud.dir);
+			unit_walktoxy(hd, hd->ud.to_x, hd->ud.to_y, 4);
+		}
+		return 0;
+	}
+
+	// Keep auto-attack always active while we have a valid target.
+	unit_attack(hd, target->id, true);
+
+	// Respect current cast/after-cast state and avoid forcing skill casts every tick.
+	if (hd->ud.skilltimer != INVALID_TIMER || DIFF_TICK(tick, hd->ud.canact_tick) < 0)
+		return 0;
+
+	hom_server_ai_try_skill(hd, target);
+	return 0;
+}
+
 /**
 * Feed homunculus
 * @param sd
@@ -877,6 +1429,8 @@ int32 hom_food(map_session_data *sd, struct homun_data *hd)
 	nullpo_retr(1,hd);
 
 	if (hd->homunculus.vaporize)
+		return 1;
+	if (status_isdead(*hd) || hd->homunculus.hp <= 0)
 		return 1;
 
 	foodID = hd->homunculusDB->foodID;
@@ -943,6 +1497,10 @@ static TIMER_FUNC(hom_hungry){
 
 	hd->hungry_timer = INVALID_TIMER;
 
+	// Prevent dead homunculus from losing hunger/intimacy due to timer edge cases.
+	if (status_isdead(*hd) || hd->homunculus.hp <= 0)
+		return 1;
+
 	hd->homunculus.hunger--;
 	if(hd->homunculus.hunger <= 10) {
 		clif_emotion( *hd, ET_FRET );
@@ -982,6 +1540,16 @@ int32 hom_hungry_timer_delete(struct homun_data *hd)
 	if (hd->hungry_timer != INVALID_TIMER) {
 		delete_timer(hd->hungry_timer,hom_hungry);
 		hd->hungry_timer = INVALID_TIMER;
+	}
+	return 1;
+}
+
+int32 hom_ai_timer_delete(struct homun_data *hd)
+{
+	nullpo_ret(hd);
+	if (hd->ai_timer != INVALID_TIMER) {
+		delete_timer(hd->ai_timer, hom_server_ai);
+		hd->ai_timer = INVALID_TIMER;
 	}
 	return 1;
 }
@@ -1089,6 +1657,7 @@ void hom_alloc(map_session_data *sd, struct s_homunculus *hom)
 	status_calc_homunculus(hd, SCO_FIRST);
 
 	hd->hungry_timer = INVALID_TIMER;
+	hd->ai_timer = INVALID_TIMER;
 	hd->masterteleport_timer = INVALID_TIMER;
 }
 
@@ -1103,8 +1672,24 @@ void hom_init_timers(struct homun_data * hd)
 
 		hd->hungry_timer = add_timer(gettick()+hunger_delay,hom_hungry,hd->master->id,0);
 	}
+	if (hd->master)
+		hom_update_ai_timer(hd->master);
 	hd->regen.state.block = 0; //Restore HP/SP block.
 	hd->masterteleport_timer = INVALID_TIMER;
+}
+
+void hom_update_ai_timer(map_session_data *sd){
+	nullpo_retv(sd);
+
+	if (sd->hd == nullptr)
+		return;
+
+	if (sd->hom_ai_mode == HOM_AI_MODE_SERVER && hom_is_active(sd->hd)) {
+		if (sd->hd->ai_timer == INVALID_TIMER)
+			sd->hd->ai_timer = add_timer(gettick() + 1000, hom_server_ai, sd->hd->id, 0);
+	} else {
+		hom_ai_timer_delete(sd->hd);
+	}
 }
 
 /**
@@ -1133,6 +1718,7 @@ bool hom_call(map_session_data *sd)
 
 	hom_init_timers(hd);
 	hd->homunculus.vaporize = HOM_ST_ACTIVE;
+	hom_update_ai_timer(sd);
 	if (hd->prev == nullptr)
 	{	//Spawn him
 		hd->x = sd->x;
@@ -1354,6 +1940,9 @@ void hom_revive(struct homun_data *hd, uint32 hp, uint32 sp)
 	if( hd->homunculus.class_ == MER_ELEANOR ){
 		sc_start(hd,hd, SC_STYLE_CHANGE, 100, MH_MD_FIGHTING, INFINITE_TICK);
 	}
+
+	// Keep server-side homunculus AI mode active after revive.
+	hom_update_ai_timer(sd);
 }
 
 /**
@@ -1379,6 +1968,43 @@ void hom_reset_stats(struct homun_data *hd)
 	hd->exp_next = homun_exp_db.get_nextexp(hom->level);
 	memset(&hd->homunculus.hskill, 0, sizeof hd->homunculus.hskill);
 	hd->homunculus.skillpts = 0;
+}
+
+/**
+* Reset homunculus learned skill levels and refund skill points.
+* @param hd
+ * @param s_bonus_above99 If true, Homunculus S uses only (level - 99) skill points.
+* @return 0: failure, 1: success
+*/
+int32 hom_reset_skills(struct homun_data *hd, bool s_bonus_above99)
+{
+	nullpo_ret(hd);
+
+	int32 m_class = hom_class2mapid(hd->homunculus.class_);
+	if (m_class == -1)
+		return 0;
+
+	int32 skillpts = hd->homunculus.level / 3; // default progression: 1 point each 3 levels
+	if (s_bonus_above99 && (m_class & HOM_S))
+		skillpts = (hd->homunculus.level > 99) ? (hd->homunculus.level - 99) : 0;
+
+	for (int32 i = 0; i < MAX_HOMUNSKILL; i++) {
+		if (hd->homunculus.hskill[i].id == 0)
+			continue;
+		hd->homunculus.hskill[i].lv = 0;
+		hd->homunculus.hskill[i].flag = SKILL_FLAG_PERMANENT;
+	}
+
+	hd->homunculus.skillpts = skillpts;
+
+	hom_calc_skilltree(hd);
+	status_calc_homunculus(hd, SCO_NONE);
+
+	if (hd->master)
+		clif_hominfo(hd->master, hd, 0);
+	clif_homskillinfoblock(*hd);
+
+	return 1;
 }
 
 /**

@@ -3105,6 +3105,7 @@ bool unit_can_reach_bl(struct block_list *bl,struct block_list *tbl, int32 range
 int32 unit_calc_pos(struct block_list *bl, int32 tx, int32 ty, uint8 dir)
 {
 	int32 dx, dy, x, y;
+	int32 follow_cells = 2;
 	struct unit_data *ud = unit_bl2ud(bl);
 
 	nullpo_ret(ud);
@@ -3115,9 +3116,13 @@ int32 unit_calc_pos(struct block_list *bl, int32 tx, int32 ty, uint8 dir)
 	ud->to_x = tx;
 	ud->to_y = ty;
 
-	// 2 cells from Master Position
-	dx = -dirx[dir] * 2;
-	dy = -diry[dir] * 2;
+	// Homunculus follows 2 cells closer than default behavior.
+	if (bl->type == BL_HOM)
+		follow_cells = 0;
+
+	// Default: 2 cells from master position.
+	dx = -dirx[dir] * follow_cells;
+	dy = -diry[dir] * follow_cells;
 	x = tx + dx;
 	y = ty + dy;
 
@@ -3138,8 +3143,8 @@ int32 unit_calc_pos(struct block_list *bl, int32 tx, int32 ty, uint8 dir)
 			for( i = 0; i < 12; i++ ) {
 				int32 k = rnd_value<int32>(DIR_NORTH, DIR_NORTHEAST); // Pick a Random Dir
 
-				dx = -dirx[k] * 2;
-				dy = -diry[k] * 2;
+				dx = -dirx[k] * follow_cells;
+				dy = -diry[k] * follow_cells;
 				x = tx + dx;
 				y = ty + dy;
 

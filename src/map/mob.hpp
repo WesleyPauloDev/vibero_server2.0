@@ -252,10 +252,11 @@ struct s_mob_lootitem {
 
 /// Struct for monster's drop item
 struct s_mob_drop {
-	t_itemid nameid;
-	uint32 rate;
-	uint16 randomopt_group;
-	bool steal_protected;
+	t_itemid nameid = 0;
+	uint32 rate = 0;
+	uint16 randomopt_group = 0;
+	bool steal_protected = false;
+	int8 identified = -1; // -1: default by item type, 0: unidentified, 1: identified
 };
 
 struct s_mob_db {

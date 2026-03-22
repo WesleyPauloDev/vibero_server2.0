@@ -245,11 +245,16 @@ function	Job_Options	{
 				break;
 			case Job_Novice_High:
 				// Job change after rebirth
-				if( .LastJob && lastJob )
+				if( .LastJob && lastJob ) {
+					.@rebirth_job = roclass((eaclass(lastJob)&EAJ_BASEMASK)|EAJL_UPPER);
+					if (.@rebirth_job > 0)
+						Job_Options(.@job_opt, .@rebirth_job);
+					else
+						Job_Options(.@job_opt,
+							Job_Swordman_High, Job_Mage_High, Job_Archer_High,
+							Job_Acolyte_High, Job_Merchant_High, Job_Thief_High);
+				} else
 					Job_Options(.@job_opt,
-						roclass((eaclass(lastJob)&EAJ_BASEMASK)|EAJL_UPPER));
-				else
-					Job_Options(.@job_opt, 
 						Job_Swordman_High, Job_Mage_High, Job_Archer_High,
 						Job_Acolyte_High, Job_Merchant_High, Job_Thief_High);
 				break;
@@ -280,8 +285,32 @@ function	Job_Options	{
 		// dispbottom "Debug: Classes: class1 ("+.@class1+"), class2 ("+.@class2+")";
 		if(.LastJob && lastJob && (.@eac&EAJL_UPPER)) {
 			// Player is rebirth Cls and linear class changes are enforced
-			Require_Level(.Req_Second[0], .Req_Second[1]);
-			Job_Options(.@job_opt, lastJob + Job_Novice_High);
+			.@last_eac = eaclass(lastJob);
+			.@linear_job = -1;
+
+			if (.@last_eac != -1) {
+				if ((.@last_eac & EAJL_2_1) && .@class1 > 0)
+					.@linear_job = .@class1;
+				else if ((.@last_eac & EAJL_2_2) && .@class2 > 0)
+					.@linear_job = .@class2;
+				else
+					.@linear_job = lastJob + Job_Novice_High;
+			}
+
+			if (.@linear_job > 0 && eaclass(.@linear_job) != -1) {
+				Require_Level(.Req_Second[0], .Req_Second[1]);
+				Job_Options(.@job_opt, .@linear_job);
+			} else {
+				// lastJob invalido: permite escolha normal para nao travar o personagem.
+				if( .@class1 > 0 ) {
+					Require_Level(.Req_Second[0], .Req_Second[1]);
+					Job_Options(.@job_opt, .@class1);
+				}
+				if( .@class2 > 0 ) {
+					Require_Level(.Req_Second[0], .Req_Second[1]);
+					Job_Options(.@job_opt, .@class2);
+				}
+			}
 		} else {
 			// Class is not enforced, player can decide.
 			if( .@class1 > 0 ) { // 2-1
@@ -525,9 +554,9 @@ function	Get_Job_Equip	{
 			case Job_Assassin:
 				getitem 1254,1;	break;	//	Jamadhar [0]
 			case Job_Crusader:
-				getitem 1410,1;	break;	//	Lance [0]
+				getitem 1411,1;	break;	//	Lance_ [0]
 			case Job_Monk:
-				getitem 1807,1;	break;	//	Fist [0]
+				getitem 1806,1;	break;	//	Hora_ [3]
 			case Job_Sage:
 				getitem 1550,1;	break;	//	Book [3]
 			case Job_Rogue:
@@ -535,7 +564,7 @@ function	Get_Job_Equip	{
 			case Job_Alchemist:
 				getitem 1126,1;	break;	//	Saber [2]
 			case Job_Bard:
-				getitem 1907,1;	break;	//	Guitar [0]
+				getitem 1905,1;	break;	//	Lute [0]
 			case Job_Dancer:
 				getitem 1960,1;	break;	//	Whip [1]
 			case Job_Super_Novice:

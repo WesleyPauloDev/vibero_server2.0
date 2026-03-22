@@ -31,12 +31,13 @@ prontera,156,197,4	script	Informações de Guerra	111,{
 			close;
 
 		case 2:
-			.@o = getcastledata(.Castle$,1);
-			mes "[Dono do Castelo]";
-			if (.@o)
-				mes "Atualmente dominado pela guilda ^00AAFF"+getguildname(.@o)+"^000000.";
-			else
-				mes "Nenhuma guilda possui este castelo.";
+			mes "[Vencedor da Semana]";
+			if ($WOE_WEEK_WIN_GID > 0 && $WOE_WEEK_WIN_GNAME$ != "") {
+				mes "A guild vencedora da ultima WoE foi ^00AAFF"+$WOE_WEEK_WIN_GNAME$+"^000000.";
+				if ($WOE_WEEK_CASTLE$ != "")
+					mes "Castelo conquistado: ^777777"+getcastlename($WOE_WEEK_CASTLE$)+"^000000.";
+			} else
+				mes "Ainda nao ha uma guild vencedora registrada para esta semana.";
 			next;
 			doevent "WOE_CONTROL#Custom::OnMenu";
 			end;
@@ -69,8 +70,30 @@ OnInit:
 
     // Warp para o castelo
     .MapX  = 17;
+
+    // Recompensa base para membros na conquista (dominio).
+    setarray .reward_id[0], 14001;
+    setarray .reward_amount[0], 1;
+    .reward_id_size = getarraysize(.reward_id);
+
     .MapY  = 221;
 
+    end;
+
+OnPCLoadMapEvent:
+    if (strcharinfo(3) != .Castle$) end;
+    if (!agitcheck()) end;
+
+    .@gid = getcharid(2);
+    .@cid = getcharid(0);
+
+    if (.@gid <= 0) end;
+    if (inarray($WOE_ENTRY_CID, .@cid) >= 0) end;
+
+    $WOE_ENTRY_CID[getarraysize($WOE_ENTRY_CID)] = .@cid;
+    $WOE_ENTRY_COUNT[.@gid] = $WOE_ENTRY_COUNT[.@gid] + 1;
+    if (inarray($WOE_ENTRY_LIST, .@gid) < 0)
+        $WOE_ENTRY_LIST[getarraysize($WOE_ENTRY_LIST)] = .@gid;
     end;
 
 //============================================================
@@ -88,6 +111,12 @@ OnClock2200:
 	setcastledata(.Castle$, 1, 0); // 0 = sem guild
 	setcastledata(.Castle$, 2, 0); // Remove economia
 	setcastledata(.Castle$, 3, 0); // Remove defesa
+    deletearray $WOE_ENTRY_CID;
+    deletearray $WOE_ENTRY_LIST;
+    deletearray $WOE_ENTRY_COUNT;
+    deletearray $WOE_TIME;
+    deletearray $WOE_LIST;
+    $WOE_WIN_TIME = 0;
 
     callfunc("ClearCastle", .Castle$, .@gid);
 
@@ -100,6 +129,7 @@ OnClock2200:
 
     // Fim
 OnClock2230:
+    if (!agitcheck()) end;
     
     announce "[WoE] A Guerra do Emperium terminou!", bc_all|bc_woe;
 
@@ -179,101 +209,170 @@ OnTimer60000:
 OnReward:
 
     .@winner = getcastledata(.Castle$, 1);
-    if (!.@winner) end;
-    debugmes "Vencedor da WOE: " + .@winner;
-    announce "[WoE] A guilda "+getguildname(.@winner)+" Conquistou o castelo ("+.Castle$+")!", bc_all|bc_woe;
-
-    //-----------------------------------------
-    // 1. PREMIO POR QUEBRAR A EMP (JÁ EXISTE)
-    //-----------------------------------------
-    getguildmember .@winner, 1, .@cid;
-    .@sz = getguildmember(.@winner, 2, .@aid);
-
-    for (.@i = 0; .@i < .@sz; .@i++) {
-        if (isloggedin(.@aid[.@i], .@cid[.@i])) {
-            attachrid(.@aid[.@i], true);
-
-            for (.@r = 0; .@r < .reward_id_size; .@r++)
-                getitem .reward_id[.@r], .reward_amount[.@r];
-
-            dispbottom "[WoE] Você recebeu sua recompensa por Conquistar o Castelo!";
-        }
-    }
-
-    // líder
-    .@leader_cid = getguildmasterid(.@winner);
     .@sender$ = "Sistema de WoE";
-    .@title$  = "Recompensa de Liderança (Conquista)",
-    .@body$   =  "Sua guild conquistou o castelo! Parabéns, líder!",
 
-    // Arrays obrigatórios:
-    setarray .@item_id[0], 9647;
-    setarray .@amount[0],  500;
-    setarray .@refine[0],  0;
-    setarray .@bound[0],   0;
-    setarray .@card0[0],   0;
-    setarray .@card1[0],   0;
-    setarray .@card2[0],   0;
-    setarray .@card3[0],   0;
+    if (.@winner) {
+        $WOE_WEEK_WIN_GID = .@winner;
+        $WOE_WEEK_WIN_GNAME$ = getguildname(.@winner);
+        $WOE_WEEK_CASTLE$ = .Castle$;
+        debugmes "Vencedor da WOE: " + .@winner;
+        announce "[WoE] A guilda "+getguildname(.@winner)+" Conquistou o castelo ("+.Castle$+")!", bc_all|bc_woe;
 
-    mail .@leader_cid, .@sender$, .@title$, .@body$, 0,
-        .@item_id, .@amount, .@refine, .@bound,
-        .@card0, .@card1, .@card2, .@card3;
+        //-----------------------------------------
+        // 1. PREMIO DE DOMINIO (MEMBROS E LIDER)
+        //-----------------------------------------
+        getguildmember .@winner, 1, .@cid;
+        .@sz = getguildmember(.@winner, 2, .@aid);
 
-    //-----------------------------------------
-    // 2. PREMIO PARA DEFENSORA (MAIOR TEMPO)
-    //-----------------------------------------
-
-    .@best_gid = 0;
-    .@best_time = 0;
-
-    for (.@i = 0; .@i < getarraysize($WOE_LIST); .@i++) {
-        .@gid = $WOE_LIST[.@i];
-
-        if ($WOE_TIME[.@gid] > .@best_time) {
-            .@best_time = $WOE_TIME[.@gid];
-            .@best_gid  = .@gid;
-        }
-    }
-
-    $WOE_WIN_TIME = .@best_gid; // guild que dominou por mais tempo
-
-    sleep 5000;
-    if (.@best_gid > 0) {
-        announce "[WoE] A guilda "+getguildname(.@best_gid)+" dominou o castelo por mais tempo ("+.@best_time+" minutos)!", bc_all|bc_woe;
-
-        // DAR PREMIO DE DEFENSOR
-        getguildmember .@best_gid, 1, .@cid;
-        .@sz = getguildmember(.@best_gid, 2, .@aid);
+        .@title$ = "Recompensa de Dominio (Membro)";
+        .@body$  = "Sua guild conquistou o castelo na WoE. Esta recompensa e para fortalecer sua participacao na proxima batalha.";
 
         for (.@i = 0; .@i < .@sz; .@i++) {
-            if (isloggedin(.@aid[.@i], .@cid[.@i])) {
-                attachrid(.@aid[.@i], true);
-                getitem 14002, 1; // EXEMPLO: item especial defensor
-                dispbottom "[WoE] Recompensa por maior tempo de domínio ("+.@best_time+" min)!";
-            }
+            mail .@cid[.@i], .@sender$, .@title$, .@body$, 0, .reward_id, .reward_amount;
         }
 
-        // líder
-        .@leader_cid = getguildmasterid(.@best_gid);
+        .@leader_cid = getguildmasterid(.@winner);
+        .@title$ = "Recompensa de Lideranca (Dominio)";
+        .@body$  = "Sua guild conquistou o castelo! Compartilhe a estrategia e os recursos com seus membros para fortalecer o grupo para a proxima batalha.";
+        .@winner_participants = $WOE_ENTRY_COUNT[.@winner];
+        if (.@winner_participants < 1)
+            .@winner_participants = 1;
+        .@winner_coin_reward = .@winner_participants * 100;
+        if (.@winner_coin_reward > 500)
+            .@winner_coin_reward = 500;
 
-        .@title$  = "Recompensa de Liderança (Defesa)",
-        .@body$   = "Sua guild defendeu o castelo por mais tempo! Parabéns, líder!",
-
-        // Arrays obrigatórios:
-        setarray .@item_id[0], 9646;
+        setarray .@item_id[0], 9647;
+        setarray .@amount[0], .@winner_coin_reward;
+        setarray .@refine[0], 0;
+        setarray .@bound[0], 0;
+        setarray .@card0[0], 0;
+        setarray .@card1[0], 0;
+        setarray .@card2[0], 0;
+        setarray .@card3[0], 0;
 
         mail .@leader_cid, .@sender$, .@title$, .@body$, 0,
             .@item_id, .@amount, .@refine, .@bound,
             .@card0, .@card1, .@card2, .@card3;
 
     } else {
-        announce "[WoE] Nenhuma guilda dominou o castelo por longo tempo!", bc_all|bc_woe;
+        announce "[WoE] A WoE terminou sem guild dona do castelo.", bc_all|bc_woe;
     }
 
-    // reset para próxima WoE
+    //-----------------------------------------
+    // 2. PREMIO DE DEFESA (MAIOR PONTUACAO)
+    //-----------------------------------------
+    .@best_gid = 0;
+    .@best_time = 0;
+    .@second_gid = 0;
+    .@second_time = 0;
+
+    for (.@i = 0; .@i < getarraysize($WOE_LIST); .@i++) {
+        .@gid = $WOE_LIST[.@i];
+
+        if ($WOE_TIME[.@gid] > .@best_time) {
+            .@second_time = .@best_time;
+            .@second_gid = .@best_gid;
+            .@best_time = $WOE_TIME[.@gid];
+            .@best_gid  = .@gid;
+        } else if ($WOE_TIME[.@gid] > .@second_time) {
+            .@second_time = $WOE_TIME[.@gid];
+            .@second_gid  = .@gid;
+        }
+    }
+
+    $WOE_WIN_TIME = .@best_gid;
+
+    sleep 5000;
+    if (.@best_gid > 0 && .@best_time > 0) {
+        announce "[WoE] A guilda "+getguildname(.@best_gid)+" dominou o castelo por mais tempo ("+.@best_time+" minutos)!", bc_all|bc_woe;
+
+        getguildmember .@best_gid, 1, .@cid;
+        .@sz = getguildmember(.@best_gid, 2, .@aid);
+
+        .@title$ = "Recompensa de Defesa (Membro)";
+        .@body$  = "Sua guild manteve o dominio por mais tempo na WoE. Esta recompensa e para fortalecer o grupo para a proxima batalha.";
+
+        setarray .@item_id[0], 14002;
+        setarray .@amount[0], 1;
+        setarray .@refine[0], 0;
+        setarray .@bound[0], 0;
+        setarray .@card0[0], 0;
+        setarray .@card1[0], 0;
+        setarray .@card2[0], 0;
+        setarray .@card3[0], 0;
+
+        for (.@i = 0; .@i < .@sz; .@i++) {
+            mail .@cid[.@i], .@sender$, .@title$, .@body$, 0,
+                .@item_id, .@amount, .@refine, .@bound,
+                .@card0, .@card1, .@card2, .@card3;
+        }
+
+        .@leader_cid = getguildmasterid(.@best_gid);
+        .@title$ = "Recompensa de Lideranca (Defesa)";
+        .@body$  = "Sua guild defendeu o castelo por mais tempo! Compartilhe este premio com os membros para que todos fiquem fortalecidos para a proxima batalha.";
+        .@best_participants = $WOE_ENTRY_COUNT[.@best_gid];
+        if (.@best_participants < 1)
+            .@best_participants = 1;
+        .@best_coin_reward = .@best_participants * 100;
+        if (.@best_coin_reward > 500)
+            .@best_coin_reward = 500;
+
+        setarray .@item_id[0], 9646;
+        setarray .@amount[0], .@best_coin_reward;
+
+        mail .@leader_cid, .@sender$, .@title$, .@body$, 0,
+            .@item_id, .@amount, .@refine, .@bound,
+            .@card0, .@card1, .@card2, .@card3;
+
+    } else {
+        announce "[WoE] Nenhuma guilda pontuou tempo de dominio suficiente para premio de defesa!", bc_all|bc_woe;
+    }
+
+    //-----------------------------------------
+    // 3. PREMIO DE SEGUNDO LUGAR
+    //-----------------------------------------
+    if (.@second_gid == .@winner) {
+        .@second_gid = 0;
+        .@second_time = 0;
+        for (.@i = 0; .@i < getarraysize($WOE_LIST); .@i++) {
+            .@gid = $WOE_LIST[.@i];
+            if (.@gid == .@winner)
+                continue;
+            if ($WOE_TIME[.@gid] > .@second_time) {
+                .@second_time = $WOE_TIME[.@gid];
+                .@second_gid = .@gid;
+            }
+        }
+    }
+
+    if (.@second_gid > 0 && .@second_time > 0) {
+        sleep 2000;
+        announce "[WoE] A guilda "+getguildname(.@second_gid)+" ficou em segundo lugar na WoE!", bc_all|bc_woe;
+
+        .@second_leader_cid = getguildmasterid(.@second_gid);
+        .@title$ = "Recompensa de Lideranca (Segundo Lugar)";
+        .@body$  = "Sua guild ficou em segundo lugar na WoE. Reforce a equipe e volte mais forte na proxima batalha.";
+        .@second_participants = $WOE_ENTRY_COUNT[.@second_gid];
+        if (.@second_participants < 1)
+            .@second_participants = 1;
+        .@second_coin_reward = .@second_participants * 50;
+        if (.@second_coin_reward > 200)
+            .@second_coin_reward = 200;
+
+        setarray .@item_id[0], 9646;
+        setarray .@amount[0], .@second_coin_reward;
+
+        mail .@second_leader_cid, .@sender$, .@title$, .@body$, 0,
+            .@item_id, .@amount, .@refine, .@bound,
+            .@card0, .@card1, .@card2, .@card3;
+    }
+
+    // reset para proxima WoE
     deletearray $WOE_TIME;
     deletearray $WOE_LIST;
+    deletearray $WOE_ENTRY_CID;
+    deletearray $WOE_ENTRY_LIST;
+    deletearray $WOE_ENTRY_COUNT;
     $WOE_WIN_TIME = 0;
 
 end;

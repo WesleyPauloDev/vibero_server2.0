@@ -3366,9 +3366,9 @@ static int32 status_get_spbonus(struct block_list *bl, enum e_status_bonus type)
 				bonus += 2 * i;
 
 
-			// --- ADIÇÃO PERSONALIZADA: bônus de SP do sistema de conquistas ---		
+			// --- ADIï¿½ï¿½O PERSONALIZADA: bï¿½nus de SP do sistema de conquistas ---		
 			if (sd && sd->bonus_sp > 0) {
-				bonus += sd->bonus_sp; // aplica o mesmo % de bônus no SP
+				bonus += sd->bonus_sp; // aplica o mesmo % de bï¿½nus no SP
 			}		
 
 
@@ -3916,6 +3916,15 @@ int32 status_calc_pc_sub(map_session_data* sd, uint8 opt)
 		pet_delautobonus(*sd, sd->pd->autobonus, true);
 		pet_delautobonus(*sd, sd->pd->autobonus2, true);
 		pet_delautobonus(*sd, sd->pd->autobonus3, true);
+	}
+
+	if (sd->status.title_id) {
+		std::shared_ptr<s_title_bonus_db> title = title_bonus_db.find(sd->status.title_id);
+		if (title != nullptr && title->script != nullptr) {
+			run_script(title->script, 0, sd->id, 0);
+			if (!calculating)
+				return 1;
+		}
 	}
 
 	// Parse equipment
@@ -6777,6 +6786,13 @@ void status_calc_bl_(struct block_list* bl, std::bitset<SCB_MAX> flag, uint8 opt
  */
 static uint16 status_calc_str(struct block_list *bl, status_change *sc, int32 str)
 {
+	if (bl->type == BL_PC) {
+		map_session_data *sd = map_id2sd(bl->id);
+		if (sd && sd->bonus_allstats > 0) {
+			str += sd->bonus_allstats;
+		}
+	}
+	
 	if(sc == nullptr || sc->empty())
 		return cap_value(str,0,USHRT_MAX);
 
@@ -6831,15 +6847,6 @@ static uint16 status_calc_str(struct block_list *bl, status_change *sc, int32 st
 	if(sc->getSCE(SC_CHEERUP))
 		str += 3;
 
-
-	if (bl->type == BL_PC) {
-		map_session_data *sd = map_id2sd(bl->id);
-		if (sd && sd->bonus_allstats > 0) {
-			str += sd->bonus_allstats;
-		}
-	}
-
-
 #ifdef RENEWAL
 	if (sc->getSCE(SC_NIBELUNGEN) && sc->getSCE(SC_NIBELUNGEN)->val2 == RINGNBL_ALLSTAT)
 		str += 15;
@@ -6862,6 +6869,13 @@ static uint16 status_calc_str(struct block_list *bl, status_change *sc, int32 st
  */
 static uint16 status_calc_agi(struct block_list *bl, status_change *sc, int32 agi)
 {
+	if (bl->type == BL_PC) {
+		map_session_data *sd = map_id2sd(bl->id);
+		if (sd && sd->bonus_allstats > 0) {
+			agi += sd->bonus_allstats;
+		}
+	}
+
 	if(sc == nullptr || sc->empty())
 		return cap_value(agi,0,USHRT_MAX);
 
@@ -6913,16 +6927,6 @@ static uint16 status_calc_agi(struct block_list *bl, status_change *sc, int32 ag
 		agi += sc->getSCE(SC_ARCLOUSEDASH)->val2;
 	if(sc->getSCE(SC_CHEERUP))
 		agi += 3;
-
-
-	if (bl->type == BL_PC) {
-		map_session_data *sd = map_id2sd(bl->id);
-		if (sd && sd->bonus_allstats > 0) {
-			agi += sd->bonus_allstats;
-		}
-	}
-
-
 #ifdef RENEWAL
 	if (sc->getSCE(SC_NIBELUNGEN) && sc->getSCE(SC_NIBELUNGEN)->val2 == RINGNBL_ALLSTAT)
 		agi += 15;
@@ -6945,6 +6949,13 @@ static uint16 status_calc_agi(struct block_list *bl, status_change *sc, int32 ag
  */
 static uint16 status_calc_vit(struct block_list *bl, status_change *sc, int32 vit)
 {
+	if (bl->type == BL_PC) {
+		map_session_data *sd = map_id2sd(bl->id);
+		if (sd && sd->bonus_allstats > 0) {
+			vit += sd->bonus_allstats;
+		}
+	}
+
 	if(sc == nullptr || sc->empty())
 		return cap_value(vit,0,USHRT_MAX);
 
@@ -6984,16 +6995,6 @@ static uint16 status_calc_vit(struct block_list *bl, status_change *sc, int32 vi
 		vit += sc->getSCE(SC_DEFENCE)->val2;
 	if(sc->getSCE(SC_CHEERUP))
 		vit += 3;
-
-
-	if (bl->type == BL_PC) {
-		map_session_data *sd = map_id2sd(bl->id);
-		if (sd && sd->bonus_allstats > 0) {
-			vit += sd->bonus_allstats;
-		}
-	}
-
-
 #ifdef RENEWAL
 	if (sc->getSCE(SC_NIBELUNGEN) && sc->getSCE(SC_NIBELUNGEN)->val2 == RINGNBL_ALLSTAT)
 		vit += 15;
@@ -7016,6 +7017,13 @@ static uint16 status_calc_vit(struct block_list *bl, status_change *sc, int32 vi
  */
 static uint16 status_calc_int(struct block_list *bl, status_change *sc, int32 int_)
 {
+	if (bl->type == BL_PC) {
+		map_session_data *sd = map_id2sd(bl->id);
+		if (sd && sd->bonus_allstats > 0) {
+			int_ += sd->bonus_allstats;
+		}
+	}
+
 	if(sc == nullptr || sc->empty())
 		return cap_value(int_,0,USHRT_MAX);
 
@@ -7074,16 +7082,6 @@ static uint16 status_calc_int(struct block_list *bl, status_change *sc, int32 in
 		if(sc->getSCE(SC__STRIPACCESSORY))
 			int_ -= int_ * sc->getSCE(SC__STRIPACCESSORY)->val2 / 100;
 	}
-
-
-	if (bl->type == BL_PC) {
-		map_session_data *sd = map_id2sd(bl->id);
-		if (sd && sd->bonus_allstats > 0) {
-			int_ += sd->bonus_allstats;
-		}
-	}
-
-
 #ifdef RENEWAL
 	if (sc->getSCE(SC_NIBELUNGEN) && sc->getSCE(SC_NIBELUNGEN)->val2 == RINGNBL_ALLSTAT)
 		int_ += 15;
@@ -7104,6 +7102,13 @@ static uint16 status_calc_int(struct block_list *bl, status_change *sc, int32 in
  */
 static uint16 status_calc_dex(struct block_list *bl, status_change *sc, int32 dex)
 {
+	if (bl->type == BL_PC) {
+		map_session_data *sd = map_id2sd(bl->id);
+		if (sd && sd->bonus_allstats > 0) {
+			dex += sd->bonus_allstats;
+		}
+	}
+
 	if(sc == nullptr || sc->empty())
 		return cap_value(dex,0,USHRT_MAX);
 
@@ -7157,16 +7162,6 @@ static uint16 status_calc_dex(struct block_list *bl, status_change *sc, int32 de
 		dex += dex * sc->getSCE(SC_FULL_THROTTLE)->val3 / 100;
 	if(sc->getSCE(SC_CHEERUP))
 		dex += 3;
-
-
-	if (bl->type == BL_PC) {
-		map_session_data *sd = map_id2sd(bl->id);
-		if (sd && sd->bonus_allstats > 0) {
-			dex += sd->bonus_allstats;
-		}
-	}
-
-
 #ifdef RENEWAL
 	if (sc->getSCE(SC_NIBELUNGEN) && sc->getSCE(SC_NIBELUNGEN)->val2 == RINGNBL_ALLSTAT)
 		dex += 15;
@@ -7189,6 +7184,13 @@ static uint16 status_calc_dex(struct block_list *bl, status_change *sc, int32 de
  */
 static uint16 status_calc_luk(struct block_list *bl, status_change *sc, int32 luk)
 {
+	if (bl->type == BL_PC) {
+		map_session_data *sd = map_id2sd(bl->id);
+		if (sd && sd->bonus_allstats > 0) {
+			luk += sd->bonus_allstats;
+		}
+	}
+
 	if(sc == nullptr || sc->empty())
 		return cap_value(luk,0,USHRT_MAX);
 
@@ -7228,16 +7230,6 @@ static uint16 status_calc_luk(struct block_list *bl, status_change *sc, int32 lu
 		luk += luk * sc->getSCE(SC_FULL_THROTTLE)->val3 / 100;
 	if(sc->getSCE(SC_CHEERUP))
 		luk += 3;
-		
-
-	if (bl->type == BL_PC) {
-		map_session_data *sd = map_id2sd(bl->id);
-		if (sd && sd->bonus_allstats > 0) {
-			luk += sd->bonus_allstats;
-		}
-	}
-
-
 #ifdef RENEWAL
 	if (sc->getSCE(SC_NIBELUNGEN) && sc->getSCE(SC_NIBELUNGEN)->val2 == RINGNBL_ALLSTAT)
 		luk += 15;
@@ -16510,6 +16502,110 @@ void StatusDatabase::loadingFinished(){
 
 StatusDatabase status_db;
 
+const std::string TitleBonusDatabase::getDefaultLocation() {
+	return std::string(db_path) + "/" + DBPATH + "title_bonus.yml";
+}
+
+uint64 TitleBonusDatabase::parseBodyNode(const ryml::NodeRef& node) {
+	uint16 id;
+
+	if (!this->asUInt16(node, "Id", id))
+		return 0;
+
+	std::shared_ptr<s_title_bonus_db> title = this->find(id);
+	bool exists = title != nullptr;
+
+	if (!exists) {
+		title = std::make_shared<s_title_bonus_db>();
+		title->id = id;
+		title->icon = 0;
+		title->script = nullptr;
+	}
+
+	if (this->nodeExists(node, "Script")) {
+		std::string script;
+
+		if (!this->asString(node, "Script", script))
+			return 0;
+
+		if (exists && title->script != nullptr) {
+			script_free_code(title->script);
+			title->script = nullptr;
+		}
+
+		title->script = parse_script(script.c_str(), this->getCurrentFile().c_str(), this->getLineNumber(node["Script"]), SCRIPT_IGNORE_EXTERNAL_BRACKETS);
+	}
+
+	if (this->nodeExists(node, "Icon")) {
+		uint16 icon;
+
+		if (!this->asUInt16(node, "Icon", icon))
+			return 0;
+
+		if (icon >= EFST_MAX) {
+			this->invalidWarning(node["Icon"], "Icon Id (%hu) should be lower than EFST_MAX (%d).\n", icon, EFST_MAX);
+			return 0;
+		}
+
+		title->icon = icon;
+	}
+
+	if (!exists)
+		this->put(id, title);
+
+	return 1;
+}
+
+TitleBonusDatabase title_bonus_db;
+
+void status_load_title_icon(map_session_data* sd, int32 title_id) {
+	nullpo_retv(sd);
+
+	std::shared_ptr<s_title_bonus_db> title = title_bonus_db.find(title_id);
+	if (title != nullptr && title->icon != 0) {
+		clif_status_load(sd, static_cast<efst_type>(title->icon), 1);
+		sd->title_icon = title->icon;
+	}
+}
+
+int32 set_status_title_id(map_session_data* sd, int32 title_id) {
+	nullpo_retr(0, sd);
+
+	if (sd->title_icon != 0) {
+		clif_status_load(sd, static_cast<efst_type>(sd->title_icon), 0);
+		sd->title_icon = 0;
+	}
+
+	sd->status.title_id = title_id;
+
+	if (sd->status.title_id != 0)
+		status_load_title_icon(sd, title_id);
+
+	status_calc_pc(sd, SCO_NONE);
+	return 1;
+}
+
+static void title_bonus_db_reload(void) {
+	struct s_mapiterator* iter = mapit_geteachpc();
+	map_session_data* sd = nullptr;
+
+	title_bonus_db.reload();
+
+	for (sd = (map_session_data*)mapit_first(iter); mapit_exists(iter); sd = (map_session_data*)mapit_next(iter)) {
+		if (sd->title_icon != 0) {
+			clif_status_load(sd, static_cast<efst_type>(sd->title_icon), 0);
+			sd->title_icon = 0;
+		}
+
+		if (sd->status.title_id != 0)
+			status_load_title_icon(sd, sd->status.title_id);
+
+		status_calc_pc(sd, SCO_FORCE);
+	}
+
+	mapit_free(iter);
+}
+
 /**
  * Sets defaults in tables and starts read db functions
  * sv_readdb reads the file, outputting the information line-by-line to
@@ -16556,11 +16652,13 @@ void status_readdb( bool reload ){
 		refine_db.reload();
 		status_db.reload();
 		enchantgrade_db.reload();
+		title_bonus_db_reload();
 	}else{
 		size_fix_db.load();
 		refine_db.load();
 		status_db.load();
 		enchantgrade_db.load();
+		title_bonus_db.load();
 	}
 	elemental_attribute_db.load();
 }
@@ -16588,6 +16686,7 @@ void do_final_status(void) {
 	size_fix_db.clear();
 	refine_db.clear();
 	status_db.clear();
+	title_bonus_db.clear();
 	elemental_attribute_db.clear();
 	delay_status.clear();
 }

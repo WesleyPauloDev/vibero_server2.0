@@ -1,0 +1,112 @@
+-	script	BroadcastVoteReminder	-1,{
+
+OnInit:
+	// Cinco mensagens por hora, em minutos diferentes para nao conflitar com eventos comuns.
+	.enabled = true;
+	setarray .messages$[0],
+		"[VOTE] Fortaleça o servidor: vote no site, ganhe pontos e troque por itens exclusivos na Loja de Votos!",
+		"[INDIQUE] Participe do Evento do Amigo: traga um amigo para o jogo e ganhe ótimos prêmios no NPC!",
+		"[DICA] Não esqueça das missões diárias e da Roleta de Instâncias, que vão te deixar ainda mais próximo do topo!",
+		"[DESAFIO] Enfrente os desafios das Instâncias, Cheffenia e Bio5 e prove sua força!",
+		"[SUPORTE] Precisando de ajuda ou encontrou algum bug? Nossa Staff esta pronta para te atender no Discord. Conte com a gente!";
+	end;
+
+OnMinute12:
+	if (!.enabled)
+		end;
+
+	// Evita conflito com eventos globais customizados.
+	if (callsub(S_IsEventBusy))
+		end;
+
+	if (getarraysize(.messages$) < 1)
+		end;
+
+	announce .messages$[0], bc_all, 0x4FC3F7;
+	end;
+
+OnMinute22:
+	if (!.enabled)
+		end;
+
+	// Evita conflito com eventos globais customizados.
+	if (callsub(S_IsEventBusy))
+		end;
+
+	if (getarraysize(.messages$) < 4)
+		end;
+
+	announce .messages$[3], bc_all, 0x4FC3F7;
+	end;
+
+OnMinute32:
+	if (!.enabled)
+		end;
+
+	// Evita conflito com eventos globais customizados.
+	if (callsub(S_IsEventBusy))
+		end;
+
+	if (getarraysize(.messages$) < 5)
+		end;
+
+	announce .messages$[4], bc_all, 0x4FC3F7;
+	end;
+
+OnMinute42:
+	if (!.enabled)
+		end;
+
+	// Evita conflito com eventos globais customizados.
+	if (callsub(S_IsEventBusy))
+		end;
+
+	if (getarraysize(.messages$) < 2)
+		end;
+
+	announce .messages$[1], bc_all, 0x4FC3F7;
+	end;
+
+OnMinute52:
+	if (!.enabled)
+		end;
+
+	// Evita conflito com eventos globais customizados.
+	if (callsub(S_IsEventBusy))
+		end;
+
+	if (getarraysize(.messages$) < 3)
+		end;
+
+	announce .messages$[2], bc_all, 0x4FC3F7;
+	end;
+
+S_IsEventBusy:
+	.@hour = gettime(DT_HOUR);
+	.@min = gettime(DT_MINUTE);
+	.@dow = gettime(DT_DAYOFWEEK);
+
+	// Battle Royale: bloquear so fase de anuncio inicial (pre-start).
+	if (getvariableofnpc(.br_active, "BattleRoyale") && !getvariableofnpc(.br_pvp, "BattleRoyale"))
+		return 1;
+
+	// Poring Fake: janelas comuns de anuncio no inicio e no fim.
+	if ((.@hour == 11 || .@hour == 20) && .@min >= 29 && .@min <= 31)
+		return 1;
+	if ((.@hour == 11 || .@hour == 20) && .@min >= 39 && .@min <= 41)
+		return 1;
+
+	// Global Boss: bloquear so fase de anuncio inicial e janela do encerramento fixo.
+	if (getvariableofnpc(.active, "GlobalBossCtrl") == 1)
+		return 1;
+	if ((.@dow == 3 || .@dow == 5) && .@hour == 20 && .@min >= 29 && .@min <= 31)
+		return 1;
+
+	// Devil Square: janelas comuns de inicio/fim por horario fixo.
+	if ((.@hour == 0 || .@hour == 12 || .@hour == 18) && .@min >= 0 && .@min <= 6)
+		return 1;
+	if ((.@hour == 0 || .@hour == 12 || .@hour == 18) && .@min >= 29 && .@min <= 31)
+		return 1;
+
+	return 0;
+}

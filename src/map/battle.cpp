@@ -4337,7 +4337,7 @@ static void battle_calc_skill_base_damage(struct Damage* wd, struct block_list *
 			break;
 		case HFLI_SBR44:	//[orn]
 			if(src->type == BL_HOM)
-				wd->damage = ((TBL_HOM*)src)->homunculus.intimacy ;
+				wd->damage = 5000; // Custom: keep S.B.R.44 damage around 5k instead of scaling with intimacy.
 			break;
 
 		default:
@@ -10123,6 +10123,16 @@ struct Damage battle_calc_attack(int32 attack_type,struct block_list *bl,struct 
 			memset(&d,0,sizeof(d));
 			break;
 		}
+
+	if (skill_id != 0 && (d.damage > 0 || d.damage2 > 0)) {
+		std::shared_ptr<s_skill_db> skill = skill_db.find(skill_id);
+
+		if (skill != nullptr && skill->damage_rate != 100) {
+			d.damage = d.damage * skill->damage_rate / 100;
+			d.damage2 = d.damage2 * skill->damage_rate / 100;
+		}
+	}
+
 	if( d.damage + d.damage2 < 1 )
 	{	//Miss/Absorbed
 		//Weapon attacks should go through to cause additional effects.
@@ -12180,7 +12190,7 @@ static const struct _battle_data {
 	{ "devotion_standup_fix",               &battle_config.devotion_standup_fix,            1,      0,      1,              },
 	{ "feature.bgqueue",                    &battle_config.feature_bgqueue,                 1,      0,      1,              },
 	{ "bgqueue_nowarp_mapflag",             &battle_config.bgqueue_nowarp_mapflag,          0,      0,      1,              },
-	{ "homunculus_exp_gain",                &battle_config.homunculus_exp_gain,             10,     0,      100,            },
+	{ "homunculus_exp_gain",                &battle_config.homunculus_exp_gain,             10,     0,      INT_MAX,            },
 	{ "rental_item_novalue",                &battle_config.rental_item_novalue,             1,      0,      1,              },
 	{ "ping_timer_inverval",                &battle_config.ping_timer_interval,             30,     0,      99999999,       },
 	{ "ping_time",                          &battle_config.ping_time,                       20,     0,      99999999,       },

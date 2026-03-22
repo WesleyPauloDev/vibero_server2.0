@@ -1,0 +1,192 @@
+-	script	Plagiador#base	-1,{
+	mes "[Plagiador]";
+	mes "Eu ajudo Arruaceiros e evoluções que dominam a habilidade ^0055FFPlágio^000000.";
+	next;
+
+	if (getskilllv("RG_PLAGIARISM") <= 0) {
+		mes "[Plagiador]";
+		mes "Você ainda nao possui ^0055FFPlágio^000000.";
+		mes "Aprenda a habilidade e volte aqui.";
+		close;
+	}
+
+	.@max_lv = getskilllv("RG_PLAGIARISM");
+
+	mes "[Plagiador]";
+	mes "Seu nivel de Plágio atual permite copiar ate nivel ^0055FF" + .@max_lv + "^000000.";
+	mes "Escolha a categoria:";
+	next;
+
+	while (true) {
+		.@cat = select(
+			"Espadachins e evoluções",
+			"Mercadores e evoluções",
+			"Arqueiros e evoluções",
+			"Noviços e evoluções",
+			"Magos e evoluções",
+			"Expandidas",
+			"Taekwons e evoluções",
+			"Gatunos e evoluções",
+			"Limpar skill copiada",
+			"Cancelar"
+		);
+
+		switch (.@cat) {
+			case 1:
+				.@sel = select("Golpe Fulminante:Impacto de Tyr:Impacto Explosivo:Crux Magnum:Crux Divinum:Escudo Bumerangue:Punição Divina:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 5; .@skill_name$ = "5"; break;
+					case 2: .@skill_id = 62; .@skill_name$ = "62"; break;
+					case 3: .@skill_id = 7; .@skill_name$ = "7"; break;
+					case 4: .@skill_id = 254; .@skill_name$ = "254"; break;
+					case 5: .@skill_id = 32; .@skill_name$ = "32"; break;
+					case 6: .@skill_id = 251; .@skill_name$ = "251"; break;
+					case 7: .@skill_id = 156; .@skill_name$ = "156"; break;
+					default: continue;
+				}
+				break;
+
+			case 2:
+				.@sel = select("Mammonita:Fogo Grego:Terror Acido:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 42; .@skill_name$ = "42"; break;
+					case 2: .@skill_id = 229; .@skill_name$ = "229"; break;
+					case 3: .@skill_id = 230; .@skill_name$ = "230"; break;
+					default: continue;
+				}
+				break;
+
+			case 3:
+				.@sel = select("Rajada de Flechas:Tiro Preciso:Chuva de Flechas:Armadilha Atordoante:Instalar Mina:Armadilha Extenuante:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 46; .@skill_name$ = "46"; break;
+					case 2: .@skill_id = 382; .@skill_name$ = "382"; break;
+					case 3: .@skill_id = 47; .@skill_name$ = "47"; break;
+					case 4: .@skill_id = 116; .@skill_name$ = "116"; break;
+					case 5: .@skill_id = 122; .@skill_name$ = "122"; break;
+					case 6: .@skill_id = 118; .@skill_name$ = "118"; break;
+					default: continue;
+				}
+				break;
+
+			case 4:
+				.@sel = select("Curar:Asperio:Magnus Exorcismus:Ressuscitar:Santuario:Esconjurar:Revelacao:Combo Triplo:Luz Divina:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 28; .@skill_name$ = "28"; break;
+					case 2: .@skill_id = 68; .@skill_name$ = "68"; break;
+					case 3: .@skill_id = 79; .@skill_name$ = "79"; break;
+					case 4: .@skill_id = 54; .@skill_name$ = "54"; break;
+					case 5: .@skill_id = 70; .@skill_name$ = "70"; break;
+					case 6: .@skill_id = 77; .@skill_name$ = "77"; break;
+					case 7: .@skill_id = 24; .@skill_name$ = "24"; break;
+					case 8: .@skill_id = 263; .@skill_name$ = "263"; break;
+					case 9: .@skill_id = 156; .@skill_name$ = "156"; break;
+					default: continue;
+				}
+				break;
+
+			case 5:
+				.@sel = select("Lanças de Fogo:Lanças de Gelo:Relâmpago:Bolas de Fogo:Barreira de Fogo:Rajada Congelante:Espíritos Anciões:Petrificar:Coluna de Fogo:Chuva de Meteoros:Nevasca:Trovão de Jupiter:Ira de Thor:Congelar:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 19; .@skill_name$ = "19"; break;
+					case 2: .@skill_id = 14; .@skill_name$ = "14"; break;
+					case 3: .@skill_id = 20; .@skill_name$ = "20"; break;
+					case 4: .@skill_id = 17; .@skill_name$ = "17"; break;
+					case 5: .@skill_id = 18; .@skill_name$ = "18"; break;
+					case 6: .@skill_id = 15; .@skill_name$ = "15"; break;
+					case 7: .@skill_id = 13; .@skill_name$ = "13"; break;
+					case 8: .@skill_id = 16; .@skill_name$ = "16"; break;
+					case 9: .@skill_id = 80; .@skill_name$ = "80"; break;
+					case 10: .@skill_id = 83; .@skill_name$ = "83"; break;
+					case 11: .@skill_id = 89; .@skill_name$ = "89"; break;
+					case 12: .@skill_id = 84; .@skill_name$ = "84"; break;
+					case 13: .@skill_id = 85; .@skill_name$ = "85"; break;
+					case 14: .@skill_id = 88; .@skill_name$ = "88"; break;
+					case 15: .@skill_id = 91; .@skill_name$ = "91"; break;
+					default: continue;
+				}
+				break;
+
+			case 6:
+				.@sel = select("Escudo de Chamas:Pétalas Flamejantes:Dragão Explosivo:Lança Congelante:Grande Floco de Neve:Lâmina de Vento:Descarga Elétrica:Brisa Cortante:Virar Tatami:Corte da Névoa:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 535; .@skill_name$ = "535"; break;
+					case 2: .@skill_id = 534; .@skill_name$ = "534"; break;
+					case 3: .@skill_id = 536; .@skill_name$ = "536"; break;
+					case 4: .@skill_id = 537; .@skill_name$ = "537"; break;
+					case 5: .@skill_id = 539; .@skill_name$ = "539"; break;
+					case 6: .@skill_id = 542; .@skill_name$ = "542"; break;
+					case 7: .@skill_id = 541; .@skill_name$ = "541"; break;
+					case 8: .@skill_id = 540; .@skill_name$ = "540"; break;
+					case 9: .@skill_id = 527; .@skill_name$ = "527"; break;
+					case 10: .@skill_id = 528; .@skill_name$ = "528"; break;
+					default: continue;
+				}
+				break;
+
+			case 7:
+				.@sel = select("Chute Aereo:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 421; .@skill_name$ = "421"; break;
+					default: continue;
+				}
+				break;
+
+			case 8:
+				.@sel = select("Arremessar Pedra:Chutar Areia:Apunhalar:Explosao Toxica:Faca Envenenada:Voltar");
+				switch (.@sel) {
+					case 1: .@skill_id = 152; .@skill_name$ = "152"; break;
+					case 2: .@skill_id = 149; .@skill_name$ = "149"; break;
+					case 3: .@skill_id = 212; .@skill_name$ = "212"; break;
+					case 4: .@skill_id = 141; .@skill_name$ = "141"; break;
+					case 5: .@skill_id = 52; .@skill_name$ = "52"; break;
+					default: continue;
+				}
+				break;
+
+			case 9:
+				.@cleaned = 0;
+				if (plagiarizeskillreset(1))
+					.@cleaned = 1;
+				if (plagiarizeskillreset(2))
+					.@cleaned = 1;
+				if (PlagiadorSkillId > 0) {
+					skill PlagiadorSkillId, 0, 3;
+					PlagiadorSkillId = 0;
+					.@cleaned = 1;
+				}
+				mes "[Plagiador]";
+				if (.@cleaned)
+					mes "Skill copiada removida com sucesso.";
+				else
+					mes "Nao havia skill copiada para remover.";
+				close;
+
+			default:
+				close;
+		}
+
+		.@skill_lv = .@max_lv;
+		// Evita bloqueio por estado antigo de copia/preservar.
+		sc_end SC_PRESERVE;
+		plagiarizeskillreset(1);
+		plagiarizeskillreset(2);
+		if (PlagiadorSkillId > 0) {
+			skill PlagiadorSkillId, 0, 3;
+			PlagiadorSkillId = 0;
+		}
+
+		// Remove skill permanente residual da mesma id (de testes antigos).
+		skill .@skill_id, 0, 3;
+		if (plagiarizeskill(.@skill_id, .@skill_lv)) {
+			mes "[Plagiador]";
+			mes "Plágio aplicado com sucesso no nivel ^0055FF" + .@skill_lv + "^000000.";
+			close;
+		}
+
+		mes "[Plagiador]";
+		mes "Falha ao aplicar Plágio nessa skill.";
+		mes "Debug: " + .@skill_name$ + " (ID " + .@skill_id + "), Plágio Lv " + .@max_lv + ".";
+		close;
+	}
+}

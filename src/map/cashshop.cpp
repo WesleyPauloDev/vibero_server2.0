@@ -441,6 +441,8 @@ static void cashshop_read_db( void ){
 bool cashshop_buylist( map_session_data* sd, uint32 kafrapoints, int32 n, const PACKET_CZ_SE_PC_BUY_CASHITEM_LIST_sub* item_list ){
 	uint32 totalcash = 0;
 	uint32 totalweight = 0;
+	uint32 remaining_kafra_used = 0;
+	int32 before_kafra_points = 0;
 	int32 i,new_;
 
 	if( sd == nullptr || item_list == nullptr ){
@@ -532,10 +534,14 @@ bool cashshop_buylist( map_session_data* sd, uint32 kafrapoints, int32 n, const 
 		return false;
 	}
 
+	before_kafra_points = sd->kafraPoints;
+
 	if(pc_paycash( sd, totalcash, kafrapoints, LOG_TYPE_CASH ) <= 0){
 		clif_cashshop_result( sd, 0, CASHSHOP_RESULT_ERROR_SHORTTAGE_CASH );
 		return false;
 	}
+
+	remaining_kafra_used = static_cast<uint32>( before_kafra_points - sd->kafraPoints );
 
 	for( i = 0; i < n; ++i ){
 		t_itemid nameid = item_list[i].itemId;
@@ -617,6 +623,17 @@ bool cashshop_buylist( map_session_data* sd, uint32 kafrapoints, int32 n, const 
 				}
 			}
 #endif
+		}
+
+		std::shared_ptr<s_cash_item> cash_item = cash_shop_db.findItemInTab( static_cast<e_cash_shop_tab>( item_list[i].tab ), nameid );
+		if( cash_item != nullptr ){
+			uint32 item_total_price = cash_item->price * quantity;
+			uint32 item_kafra_used = ( remaining_kafra_used > item_total_price ) ? item_total_price : remaining_kafra_used;
+			uint32 item_cash_used = item_total_price - item_kafra_used;
+
+			remaining_kafra_used -= item_kafra_used;
+
+			log_cashshop_purchase( sd, nameid, cash_item->price, quantity, item_total_price, static_cast<int32>( item_cash_used ), static_cast<int32>( item_kafra_used ), "cashshop_ui" );
 		}
 	}
 

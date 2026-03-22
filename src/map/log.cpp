@@ -44,6 +44,8 @@ e_log_filter;
 
 
 struct Log_Config log_config;
+static constexpr const char* CASHSHOP_TRANSACTIONS_TABLE = "cashshop_transactions";
+static constexpr const char* SHOP_TRANSACTIONS_TABLE = "shop_transactions";
 
 
 #ifdef SQL_INNODB
@@ -517,6 +519,120 @@ void log_cash( map_session_data* sd, e_log_pick_type type, e_log_cash_type cash_
 		strftime( timestring, sizeof( timestring ), log_timestamp_format, localtime( &curtime ) );
 		fprintf( logfp, "%s - %s[%d]\t%d(%c)\t\n", timestring, sd->status.name, sd->status.account_id, amount, log_cashtype2char( cash_type ) );
 		fclose( logfp );
+	}
+}
+
+/// logs cash shop item purchases with item-level detail
+void log_cashshop_purchase( map_session_data* sd, t_itemid nameid, uint32 unit_price, uint32 amount, uint32 total_price, int32 cash_points_used, int32 kafra_points_used, const char* source ){
+	nullpo_retv( sd );
+
+	if( amount == 0 ){
+		return;
+	}
+
+	if( source == nullptr ){
+		source = "unknown";
+	}
+
+	std::shared_ptr<item_data> id = item_db.find( nameid );
+	const char* item_name = ( id != nullptr ) ? id->name.c_str() : "";
+
+	char esc_char_name[NAME_LENGTH * 2 + 1] = { 0 };
+	char esc_item_name[NAME_LENGTH * 2 + 1] = { 0 };
+	char esc_source[32] = { 0 };
+
+	Sql_EscapeString( logmysql_handle, esc_char_name, sd->status.name );
+	Sql_EscapeString( logmysql_handle, esc_item_name, item_name );
+	Sql_EscapeString( logmysql_handle, esc_source, source );
+
+	if( SQL_ERROR == Sql_Query( logmysql_handle,
+		LOG_QUERY " INTO `%s` (`purchased_at`, `account_id`, `char_id`, `char_name`, `item_id`, `item_name`, `unit_price`, `amount`, `total_price`, `cash_points_used`, `kafra_points_used`, `map`, `source`) "
+		"VALUES (NOW(), '%d', '%d', '%s', '%u', '%s', '%u', '%u', '%u', '%d', '%d', '%s', '%s')",
+		CASHSHOP_TRANSACTIONS_TABLE,
+		sd->status.account_id,
+		sd->status.char_id,
+		esc_char_name,
+		nameid,
+		esc_item_name,
+		unit_price,
+		amount,
+		total_price,
+		cash_points_used,
+		kafra_points_used,
+		mapindex_id2name( sd->mapindex ),
+		esc_source ) )
+	{
+		Sql_ShowDebug( logmysql_handle );
+	}
+}
+
+void log_shop_transaction( map_session_data* sd, const char* source, const char* npc_name, const char* shop_name, t_itemid item_id, uint32 amount, int32 zeny, t_itemid required_item_id, uint32 required_item_amount, const char* point_type, int32 point_amount ){
+	nullpo_retv( sd );
+
+	if( !log_config.sql_logs || amount == 0 ){
+		return;
+	}
+
+	if( source == nullptr ){
+		source = "UNKNOWN";
+	}
+
+	if( npc_name == nullptr ){
+		npc_name = "";
+	}
+
+	if( shop_name == nullptr ){
+		shop_name = "";
+	}
+
+	if( point_type == nullptr ){
+		point_type = "";
+	}
+
+	std::shared_ptr<item_data> item = item_db.find( item_id );
+	std::shared_ptr<item_data> required_item = item_db.find( required_item_id );
+
+	const char* item_name = item != nullptr ? item->name.c_str() : "";
+	const char* required_item_name = required_item != nullptr ? required_item->name.c_str() : "";
+
+	char esc_char_name[NAME_LENGTH * 2 + 1] = { 0 };
+	char esc_npc_name[(NPC_NAME_LENGTH + 1) * 2 + 1] = { 0 };
+	char esc_shop_name[(NPC_NAME_LENGTH + 1) * 2 + 1] = { 0 };
+	char esc_source[32] = { 0 };
+	char esc_item_name[NAME_LENGTH * 2 + 1] = { 0 };
+	char esc_required_item_name[NAME_LENGTH * 2 + 1] = { 0 };
+	char esc_point_type[32] = { 0 };
+
+	Sql_EscapeString( logmysql_handle, esc_char_name, sd->status.name );
+	Sql_EscapeString( logmysql_handle, esc_npc_name, npc_name );
+	Sql_EscapeString( logmysql_handle, esc_shop_name, shop_name );
+	Sql_EscapeString( logmysql_handle, esc_source, source );
+	Sql_EscapeString( logmysql_handle, esc_item_name, item_name );
+	Sql_EscapeString( logmysql_handle, esc_required_item_name, required_item_name );
+	Sql_EscapeString( logmysql_handle, esc_point_type, point_type );
+
+	if( SQL_ERROR == Sql_Query( logmysql_handle,
+		LOG_QUERY " INTO `%s` (`time`, `account_id`, `char_id`, `char_name`, `map`, `npc_name`, `shop_name`, `source`, `item_id`, `item_name`, `amount`, `zeny`, `required_item_id`, `required_item_name`, `required_item_amount`, `point_type`, `point_amount`) "
+		"VALUES (NOW(), '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%u', '%s', '%u', '%d', '%u', '%s', '%u', '%s', '%d')",
+		SHOP_TRANSACTIONS_TABLE,
+		sd->status.account_id,
+		sd->status.char_id,
+		esc_char_name,
+		mapindex_id2name( sd->mapindex ),
+		esc_npc_name,
+		esc_shop_name,
+		esc_source,
+		item_id,
+		esc_item_name,
+		amount,
+		zeny,
+		required_item_id,
+		esc_required_item_name,
+		required_item_amount,
+		esc_point_type,
+		point_amount ) )
+	{
+		Sql_ShowDebug( logmysql_handle );
 	}
 }
 

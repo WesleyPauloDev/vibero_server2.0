@@ -12,7 +12,7 @@ prontera,145,203,4	script	PvP Warper	468,{
 			.@now = gettimetick(2);
 
 			// IP do jogador que está tentando entrar
-			.@my_ip$ = getcharip(0);
+			.@my_ip$ = getcharip();
 
 			// Verifica todos os jogadores no mapa PvP
 			.@map$ = "pvp_y_1-2";
@@ -34,17 +34,17 @@ prontera,145,203,4	script	PvP Warper	468,{
 			if (.@choice == 1) .@map$ = "pvp_y_1-2";
 			else .@map$ = "pvp_y_2-2";
 
-			getmapunits(BL_PC, .@map$, .@units);
+			.@unit_count = getmapunits(BL_PC, .@map$, .@units[0]);
 
 			// Ceckar IPs dos jogadores na sala escolhida
-			for (.@i = 0; .@i < .@units; .@i++) {
+			for (.@i = 0; .@i < .@unit_count; .@i++) {
 				.@id = .@units[.@i];
 
 				// pega o IP de cada jogador
 				.@other_ip$ = getcharip(.@id);
 
 				// se o IP for igual ? bloqueia
-				if (.@other_ip$ == .@my_ip$) {
+				if (.@other_ip$ != "" && .@other_ip$ == .@my_ip$) {
 					mes "^FF0000Entrada bloqueada.^000000";
 					mes "Já existe um jogador com o MESMO IP no PvP.";
 					close;
@@ -171,7 +171,7 @@ S_Ranking:
 		if (.@exp_cd > 0 && .@now < .@exp_cd) {
 			.@cd_left = .@exp_cd - .@now;
 			dispbottom "Anti-Farm: Você matou este jogador recentemente. Aguarde "+.@cd_left+" segundos.";
-			end;
+			// end;
 		}
 
 		//---------------------------------------
@@ -197,7 +197,7 @@ S_Ranking:
 		// limite de 10 kills por vítima por dia
 		if (.@count >= 10) {
 			dispbottom "Limite diário de kills contra este jogador atingido.";
-			end;
+			// end;
 		}
 
 		//---------------------------------------
@@ -205,7 +205,7 @@ S_Ranking:
 		//---------------------------------------
 		if (getcharip(.@killer) == getcharip(.@victim)) {
 			dispbottom "Jogadores com o mesmo IP não contam kill.";
-			end;
+			// end;
 		}
 
 		//---------------------------------
@@ -230,57 +230,70 @@ S_Ranking:
 		//----------------------------------------------
 		// KILL COMBO (várias kills em pouco tempo)
 		//----------------------------------------------
+		.@played_combo = 0;
 		if (pvp_streak_combo == 2) {
 			announce strcharinfo(0)+" fez DOUBLE KILL!", bc_map,"0xff0000";
-			soundeffectall "kills/double_kill.wav", 0;
+			soundeffectall "kills/double_kill.wav", 0, strcharinfo(3);
+			.@played_combo = 1;
 		}
 		else if (pvp_streak_combo == 3) {
 			announce strcharinfo(0)+" fez TRIPLE KILL!", bc_map,"0xff0000";
-			soundeffectall "kills/triple_kill.wav", 0;
+			soundeffectall "kills/triple_kill.wav", 0, strcharinfo(3);
+			.@played_combo = 1;
 		}
 		else if (pvp_streak_combo == 4) {
 			announce strcharinfo(0)+" fez MANIAC!!", bc_map,"0xff0000";
-			soundeffectall "kills/maniac.wav", 0;
+			soundeffectall "kills/maniac.wav", 0, strcharinfo(3);
+			.@played_combo = 1;
 		}
-		else if (pvp_streak_combo == 5) {
+		else if (pvp_streak_combo >= 5) {
 			announce strcharinfo(0)+" fez SAVAGE!!!", bc_map,"0xff0000";
-			soundeffectall "kills/savage.wav", 0;
+			soundeffectall "kills/savage.wav", 0, strcharinfo(3);
+			.@played_combo = 1;
 		}
 
 		//----------------------------------------------
 		// STREAKS CONTÍNUOS (sem morrer)
 		//----------------------------------------------
-		switch (pvp_streak_total) {
+		if (!.@played_combo) {
+			switch (pvp_streak_total) {
 
-			case 3:
-				announce strcharinfo(0)+" está em KILLING SPREE!", bc_map,"0xff0000";
-				soundeffectall "kills/killing_spree.wav", 0;
-				break;
+				case 3:
+					announce strcharinfo(0)+" está em KILLING SPREE!", bc_map,"0xff0000";
+					soundeffectall "kills/killing_spree.wav", 0, strcharinfo(3);
+					break;
 
-			case 4:
-				announce strcharinfo(0)+" está em MEGA KILL!", bc_map,"0xff0000";
-				soundeffectall "kills/mega_kill.wav", 0;
-				break;
+				case 4:
+					announce strcharinfo(0)+" está em MEGA KILL!", bc_map,"0xff0000";
+					soundeffectall "kills/mega_kill.wav", 0, strcharinfo(3);
+					break;
 
-			case 5:
-				announce strcharinfo(0)+" está UNSTOPPABLE!!", bc_map,"0xff0000";
-				soundeffectall "kills/unstoppable.wav", 0;
-				break;
+				case 5:
+					announce strcharinfo(0)+" está UNSTOPPABLE!!", bc_map,"0xff0000";
+					soundeffectall "kills/unstoppable.wav", 0, strcharinfo(3);
+					break;
 
-			case 6:				
-				announce strcharinfo(0)+" fez MONSTER KILL!!!", bc_map,"0xff0000";
-				soundeffectall "kills/monster_kill.wav", 0;
-				break;
+				case 6:				
+					announce strcharinfo(0)+" fez MONSTER KILL!!!", bc_map,"0xff0000";
+					soundeffectall "kills/monster_kill.wav", 0, strcharinfo(3);
+					break;
 
-			case 7:
-				announce strcharinfo(0)+" está GODLIKE!!!", bc_map,"0xff0000";
-				soundeffectall "kills/godlike.wav", 0;
-				break;
+				case 7:
+					announce strcharinfo(0)+" está GODLIKE!!!", bc_map,"0xff0000";
+					soundeffectall "kills/godlike.wav", 0, strcharinfo(3);
+					break;
 
-			case 8:
-				announce strcharinfo(0)+" está LEGENDARY!!!!", bc_map,"0xff0000";
-				soundeffectall "kills/legendary.wav", 0;
-				break;
+				case 8:
+					announce strcharinfo(0)+" está LEGENDARY!!!!", bc_map,"0xff0000";
+					soundeffectall "kills/legendary.wav", 0, strcharinfo(3);
+					break;
+				default:
+					if (pvp_streak_total > 8) {
+						announce strcharinfo(0)+" está LEGENDARY!!!!", bc_map,"0xff0000";
+						soundeffectall "kills/legendary.wav", 0, strcharinfo(3);
+					}
+					break;
+			}
 		}
 
 		//---------------------------------------
@@ -341,7 +354,7 @@ S_Ranking:
 
 		if (pvp_streak_total >= 3) {
 			announce strcharinfo(0)+" foi ELIMINADO APÓS UMA SEQUENCIA DE "+pvp_streak_total+" KILLS!!", bc_map,"0xff0000";
-			soundeffectall "kills/shutdown.wav", 0;
+			soundeffectall "kills/shutdown.wav", 0, strcharinfo(3);
 		}
 		pvp_streak_total = 0;
 		pvp_streak_combo = 0;

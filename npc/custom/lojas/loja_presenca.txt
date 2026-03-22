@@ -2,17 +2,19 @@
 OnTalk:
 	mes "[Vendedor]";
 	mes "Confira meus produtos!";
-	callshop "Presence_Shop",1;
 	npcshopattach "Presence_Shop";
+	callshop "Presence_Shop",1;
 	dispbottom "Pontos de Presença: " + #presence_points;
 	end;
 
 OnBuyItem:
-	callfunc "Presence_Shop_Process", @bought_nameid, @bought_quantity, @bought_price;
+	for (.@i = 0; .@i < getarraysize(@bought_nameid); .@i++) {
+		callfunc "Presence_Shop_Process", @bought_nameid[.@i], @bought_quantity[.@i];
+	}
 	end;
 }
 // Estes itens devem acompanhar o array shop_items e shop_prices
--	shop	Presence_Shop	-1,9670:20,9671:20,9672:20,9673:50,9674:50,9642:100
+-	shop	Presence_Shop	-1,9670:20,9671:20,9673:50,9674:50,9642:100,12214:20
 
 function	script	Presence_Shop_Process	{
 
@@ -20,16 +22,14 @@ function	script	Presence_Shop_Process	{
 	// CONFIGURAÇÃO DA LOJA
 	// =============================
 	// Itens e preços em pontos de presença
-	setarray .@shop_items[0], 9670, 9671, 9672, 9673, 9674, 9642;
-	setarray .@shop_prices[0], 20,   20,   20,     50, 50, 100; // preço por item em pontos
+	setarray .@shop_items[0], 9670, 9671, 9673, 9674, 9642, 12214; 
+	setarray .@shop_prices[0], 20,   20,   50, 50, 100, 20; // preço por item em pontos
 
 	// =============================
 	// PARÂMETROS DA FUNÇÃO
 	// =============================
 	.@id  = getarg(0); // ID do item comprado
 	.@qtd = getarg(1); // Quantidade comprada
-	.@price = getarg(2); // ignorado, usamos tabela acima
-
 	// =============================
 	// PROCURA O ITEM NA TABELA
 	// =============================
@@ -65,6 +65,7 @@ function	script	Presence_Shop_Process	{
 	// =============================
 	#presence_points -= .@total_cost;
 	getitem .@id, .@qtd;
+	logshop "SCRIPT_SHOP_BUY", "Presence_Shop", .@id, .@qtd, 0, 0, 0, "#presence_points", .@total_cost;
 
 	dispbottom "[Presença] -" + .@total_cost + " ponto(s) de presença. Restam: " + #presence_points + ".";
 	return;

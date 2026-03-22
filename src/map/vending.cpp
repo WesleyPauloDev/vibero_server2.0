@@ -187,22 +187,45 @@ void vending_purchasereq(map_session_data* sd, int32 aid, int32 uid, const uint8
 
 		z += ((double)vsd->vending[j].value * (double)amount);
 
+		// =============================
+		// CHECK DE SALDO POR TIPO DE MOEDA
+		// =============================
+		int coin = vsd->vend_coin_type; // 0 zeny, 1 rops, 2 rmt
 
-		// if( z > (double)sd->status.zeny || z < 0. || z > (double)MAX_ZENY ) {
-		// 	clif_buyvending( *sd, idx, amount, PURCHASEMC_NO_ZENY ); // you don't have enough zeny
-		// 	return;
-		// }
-		if( z > (double)sd->cashPoints || z < 0. ) {
-			clif_buyvending(*sd, idx, amount, PURCHASEMC_NO_ZENY); // pode customizar depois
+		if (z < 0.) {
+			clif_buyvending(*sd, idx, amount, PURCHASEMC_NO_ZENY);
 			return;
 		}
 
-
-		if( z + (double)vsd->status.zeny > (double)MAX_ZENY ) {
-			clif_buyvending( *sd, idx, vsd->vending[j].amount, PURCHASEMC_OUT_OF_STOCK ); // too much zeny = overflow
-			return;
-
+		if (coin == 0) { // ZENY
+			if (z > (double)sd->status.zeny || z > (double)MAX_ZENY) {
+				clif_buyvending(*sd, idx, amount, PURCHASEMC_NO_ZENY);
+				return;
+			}
 		}
+		else if (coin == 1) { // ROPS
+			int rops = (int)pc_readaccountreg(sd, add_str(CASHPOINT_VAR));
+			if (z > (double)rops) {
+				clif_buyvending(*sd, idx, amount, PURCHASEMC_NO_ZENY);
+				return;
+			}
+		}
+		else if (coin == 2) { // RMT
+			int rmt = (int)pc_readaccountreg(sd, add_str(RMTPOINT_VAR));
+			if (z > (double)rmt) {
+				clif_buyvending(*sd, idx, amount, PURCHASEMC_NO_ZENY);
+				return;
+			}
+		}
+
+		// =============================
+		// OVERFLOW (SÓ PARA ZENY)
+		// =============================
+		if (coin == 0 && (z + (double)vsd->status.zeny > (double)MAX_ZENY)) {
+			clif_buyvending(*sd, idx, vsd->vending[j].amount, PURCHASEMC_OUT_OF_STOCK);
+			return;
+		}
+
 		w += itemdb_weight(vsd->cart.u.items_cart[idx].nameid) * amount;
 		if( w + sd->weight > sd->max_weight ) {
 			clif_buyvending( *sd, idx, amount, PURCHASEMC_OVERWEIGHT );
@@ -308,7 +331,9 @@ void vending_purchasereq(map_session_data* sd, int32 aid, int32 uid, const uint8
 		int16 idx    = *(uint16*)(data + 4*i + 2);
 		idx -= 2;
 
-		double z = (double)vsd->vending[vend_list[i]].value * (double)amount;
+		const int64 unit_price = vsd->vending[vend_list[i]].value;
+		const int64 total_price = unit_price * amount;
+		double z = (double)total_price;
 
 		// Entregar item ao comprador
 		pc_additem(sd, &vsd->cart.u.items_cart[idx], amount, LOG_TYPE_VENDING);
@@ -332,6 +357,37 @@ void vending_purchasereq(map_session_data* sd, int32 aid, int32 uid, const uint8
 		// Taxa
 		z = vending_calc_tax(sd, z);
 
+		char esc_seller_name[NAME_LENGTH * 2 + 1];
+		char esc_buyer_name[NAME_LENGTH * 2 + 1];
+		Sql_EscapeString(mmysql_handle, esc_seller_name, vsd->status.name);
+		Sql_EscapeString(mmysql_handle, esc_buyer_name, sd->status.name);
+
+		const char* coin_type_name = "Zeny";
+		if (coin == 1)
+			coin_type_name = "Rops";
+		else if (coin == 2)
+			coin_type_name = "RMT";
+
+		if( Sql_Query(mmysql_handle,
+			"INSERT INTO `%s` (`vending_id`, `seller_account_id`, `seller_char_id`, `seller_name`, `buyer_account_id`, `buyer_char_id`, `buyer_name`, `item_id`, `amount`, `coin_type`, `unit_price`, `total_price`, `total_received`, `purchased_at`) "
+			"VALUES (%d, %d, %d, '%s', %d, %d, '%s', %u, %d, '%s', %lld, %lld, %lld, NOW())",
+			vending_transactions_table,
+			vsd->vender_id,
+			vsd->status.account_id,
+			vsd->status.char_id,
+			esc_seller_name,
+			sd->status.account_id,
+			sd->status.char_id,
+			esc_buyer_name,
+			vsd->cart.u.items_cart[idx].nameid,
+			amount,
+			coin_type_name,
+			(long long)unit_price,
+			(long long)total_price,
+			(long long)((int64)z)
+		) != SQL_SUCCESS ) {
+			Sql_ShowDebug(mmysql_handle);
+		}
 		// Mensagem do cliente
 		clif_vendingreport(*vsd, idx, amount, sd->status.char_id, (int32)z);
 
@@ -339,8 +395,8 @@ void vending_purchasereq(map_session_data* sd, int32 aid, int32 uid, const uint8
 		// 3) GERAR EMAIL (Rodex)
 		//--------------------------------------------------
 
-		char subject[64];
-		char body[256];
+		char subject[MAIL_TITLE_LENGTH];
+		char body[MAIL_BODY_LENGTH];
 
 		struct item_data* id2 = itemdb_search(vsd->cart.u.items_cart[idx].nameid);
 		const char* item_name = (id2 ? id2->name.c_str() : "Item");
@@ -349,7 +405,7 @@ void vending_purchasereq(map_session_data* sd, int32 aid, int32 uid, const uint8
 		char datebuf[32];
 		strftime(datebuf, sizeof(datebuf), "%d/%m/%Y %H:%M:%S", localtime(&now));
 
-		sprintf(subject, "Venda realizada na sua loja!");
+		safestrncpy(subject, "Venda realizada na sua loja!", MAIL_TITLE_LENGTH);
 
 		// Prefixo de moeda
 		const char* prefix = " Zeny"; // zeny
@@ -357,67 +413,48 @@ void vending_purchasereq(map_session_data* sd, int32 aid, int32 uid, const uint8
 		if (coin == 1) prefix = " Rops"; // cash
 		else if (coin == 2) prefix = " RMT"; // rmt
 
-		// Preços formatados
+		// Precos formatados
 		char price_unit[32];
 		char price_total[32];
 
-		sprintf(price_unit, "%d%s", vsd->vending[vend_list[i]].value, prefix);
-		sprintf(price_total, "%d%s", (int32)z, prefix);
+		safesnprintf(price_unit, sizeof(price_unit), "%d%s", vsd->vending[vend_list[i]].value, prefix);
+		safesnprintf(price_total, sizeof(price_total), "%d%s", (int32)z, prefix);
 
-		sprintf(body,
+		safesnprintf(body, sizeof(body),
 			"Comprador: %s\r\n"
 			"Item: %s\r\n"
 			"Quantidade: %d\r\n"
-    		"Preço unitário: %s\r\n"
+			"Preco unitario: %s\r\n"
 			"Total recebido: %s\r\n"
 			"Data: %s\r\n",
 			sd->status.name,
 			item_name,
 			amount,
 			price_unit,
-    		price_total,
+			price_total,
 			datebuf
 		);
 
-		// ESCAPE SQL
-		char esc_subject[256], esc_body[1024], esc_sender[64], esc_dest[64];
-		Sql_EscapeString(mmysql_handle, esc_subject, subject);
-		Sql_EscapeString(mmysql_handle, esc_body, body);
-		Sql_EscapeString(mmysql_handle, esc_sender, "Sistema de Vendas");
-		Sql_EscapeString(mmysql_handle, esc_dest, vsd->status.name);
-
-		int mail_id = 0;
-		char* sql_data = nullptr;
-		size_t sql_len = 0;
-
-		Sql_Query(mmysql_handle,
-			"INSERT INTO `mail` "
-			"(send_name, send_id, dest_name, dest_id, title, message, time, status, zeny, type) "
-			"VALUES ('%s', 0, '%s', %d, '%s', '%s', UNIX_TIMESTAMP(), 0, 0, 0)",
-			esc_sender, esc_dest, vsd->status.char_id, esc_subject, esc_body);
-
-		Sql_Query(mmysql_handle, "SELECT LAST_INSERT_ID()");
-		if (Sql_NextRow(mmysql_handle) == SQL_SUCCESS) {
-			Sql_GetData(mmysql_handle, 0, &sql_data, &sql_len);
-			mail_id = atoi(sql_data);
-		}
-		Sql_FreeResult(mmysql_handle);
-
 		struct mail_message msg;
 		memset(&msg, 0, sizeof(msg));
-		msg.id = mail_id;
 		msg.dest_id = vsd->status.char_id;
 		msg.send_id = 0;
 		safestrncpy(msg.send_name, "Sistema de Vendas", NAME_LENGTH);
 		safestrncpy(msg.title, subject, MAIL_TITLE_LENGTH);
+		safestrncpy(msg.body, body, MAIL_BODY_LENGTH);
+		msg.status = MAIL_NEW;
 		msg.type = MAIL_INBOX_NORMAL;
+		msg.timestamp = time(nullptr);
 
+		if (!intif_Mail_send(0, &msg)) {
+			ShowError("vending_purchasereq: failed to send vending notification mail to '%s' (CID=%d)\n",
+				vsd->status.name, vsd->status.char_id);
+		}
 		//--------------------------------------------------
 		// PAGAR O VENDEDOR NA MESMA MOEDA
 		//--------------------------------------------------
 		if (coin == 0) {
-			int z = (int)vending_calc_tax(sd, total_cost);
-			pc_getzeny(vsd, z, LOG_TYPE_VENDING, sd->status.char_id);
+			pc_getzeny(vsd, (int)z, LOG_TYPE_VENDING, sd->status.char_id);
 		}
 		else if (coin == 1) {
 			vsd->cashPoints += (int)z;
@@ -606,6 +643,11 @@ int8 vending_openvending( map_session_data& sd, const char* message, const uint8
 	StringBuf_Destroy(&buf);
 
 	clif_openvending( sd );
+
+	/* Ensure vend_coin_type is loaded from the player's registry
+	   (script may have set it via setd "vend_coin_type") so
+	   the shown shop currency matches the seller's choice. */
+	sd.vend_coin_type = (int)pc_readglobalreg(&sd, add_str("vend_coin_type"));
 	clif_showvendingboard( sd );
 
 	idb_put(vending_db, sd.status.char_id, &sd);
@@ -767,8 +809,8 @@ void vending_reopen( map_session_data& sd )
 			// Immediate save
 			chrif_save(&sd, CSAVE_AUTOTRADE);
 
-			ShowInfo("Vending loaded for '" CL_WHITE "%s" CL_RESET "' with '" CL_WHITE "%d" CL_RESET "' items at " CL_WHITE "%s (%d,%d)" CL_RESET "\n",
-				sd.status.name, count, mapindex_id2name(sd.mapindex), sd.x, sd.y);
+			// ShowInfo("Vending loaded for '" CL_WHITE "%s" CL_RESET "' with '" CL_WHITE "%d" CL_RESET "' items at " CL_WHITE "%s (%d,%d)" CL_RESET "\n",
+			// 	sd.status.name, count, mapindex_id2name(sd.mapindex), sd.x, sd.y);
 		}
 		aFree(data);
 	}

@@ -358,28 +358,12 @@ Body:
     Slots: 1
     Locations:
       Right_Hand: true
-    WeaponLevel: 5
+    WeaponLevel: 1
     EquipLevelMin: 30
     Refineable: true
-    Gradable: true
     Script: |
       bonus bStr,2;
-      bonus bDex,1;
-
-      .@g = getenchantgrade();
-
-      if (.@g>=ENCHANTGRADE_D) {
-         bonus bLongAtkRate,10;
-         if (.@g>=ENCHANTGRADE_C) {
-            bonus2 bAddSize,Size_All,10;
-            if (.@g>=ENCHANTGRADE_B) {
-               bonus2 bAddRace,RC_All,10;
-               if (.@g>=ENCHANTGRADE_A) {
-                  bonus2 bAddEle,Ele_All,10;
-               }
-            }
-         }
-      }
+      bonus bDex,1;      
 
   - Id: 26244
     AegisName: Evolved_Instrument
@@ -1332,7 +1316,8 @@ Body:
     Locations:
       Both_Accessory: true
     Script: |
-      bonus bAtkRate,20;
+      bonus bShortAtkRate,20;
+      bonus bLongAtkRate,20;
       bonus bMatkRate,20;
       bonus bAspdRate,10;
       bonus bNoCastCancel;

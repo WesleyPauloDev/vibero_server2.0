@@ -26623,13 +26623,12 @@ Body:
           - Bell_Pigeon_J     # 19321
           - Valhalla_Idol_     # 19110
     Script: |
-      .@a = (readparam(bStr)/18);
-      .@b = (readparam(bLuk)/18);
-      bonus4 bAutoSpellWhenHit,"MG_SAFETYWALL",10,50,0;
-      bonus bMatkRate,5*.@a;
-      bonus2 bIgnoreMdefRaceRate,RC_All,5*.@a;
-      bonus bBaseAtk,25*.@b;
-      bonus2 bIgnoreDefRaceRate,RC_All,5*.@b;
+      .@agi = (readparam(bAgi)/20);
+      .@luk = (readparam(bLuk)/20);
+      bonus3 bAutoSpell,"MG_SAFETYWALL",10,50 + (.@agi * 20);
+      bonus bCritical,5 * .@luk;
+      bonus bBaseAtk,20 * .@luk;
+      bonus bMatk,20 * .@luk;
   - Combos:
       - Combo:
           - Jasper_Ring     # 490113

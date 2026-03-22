@@ -1,0 +1,66 @@
+-	script	CommandHomunculo	-1,{
+
+OnInit:
+	bindatcmd "darhom", strnpcinfo(3)+"::OnAtcommand", 99, 99;
+	end;
+
+OnAtcommand:
+	if (getgroupid() < 99) {
+		dispbottom "Comando exclusivo para GM.";
+		end;
+	}
+
+	if (.@atcmd_numparameters < 2) {
+		dispbottom "Uso: @darhom <nick> <nivel>";
+		dispbottom "Exemplo: @darhom jhor 10";
+		end;
+	}
+
+	.@target_name$ = .@atcmd_parameters$[0];
+	.@target_level = atoi(.@atcmd_parameters$[1]);
+
+	if (.@target_level < 1 || .@target_level > 175) {
+		dispbottom "Nivel invalido. Use 1 a 175.";
+		end;
+	}
+
+	.@gm_aid = getcharid(3);
+	.@target_aid = getcharid(3, .@target_name$);
+
+	if (!.@target_aid) {
+		dispbottom "Jogador nao encontrado ou offline.";
+		end;
+	}
+
+	if (!attachrid(.@target_aid)) {
+		attachrid .@gm_aid;
+		dispbottom "Falha ao anexar no alvo.";
+		end;
+	}
+
+	if (!getskilllv("AM_BIOETHICS")) {
+		attachrid .@gm_aid;
+		dispbottom "Alvo sem Bioetica.";
+		end;
+	}
+
+	if (checkhomcall() != 0) {
+		attachrid .@gm_aid;
+		dispbottom "O homunculo do alvo precisa estar invocado (ativo).";
+		end;
+	}
+
+	.@current_level = gethominfo(6);
+	if (.@target_level > .@current_level) {
+		atcommand "@homlevel " + (.@target_level - .@current_level);
+	} else if (.@target_level < .@current_level) {
+		attachrid .@gm_aid;
+		dispbottom "Nao eh possivel diminuir nivel de homunculo por este comando.";
+		end;
+	}
+
+	.@final_level = gethominfo(6);
+	attachrid .@gm_aid;
+	dispbottom "Homunculo de " + .@target_name$ + " ajustado para Lv " + .@final_level + ".";
+	end;
+}

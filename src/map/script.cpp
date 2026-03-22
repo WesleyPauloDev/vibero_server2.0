@@ -12808,6 +12808,33 @@ BUILDIN_FUNC(homunculus_shuffle)
 }
 
 /*==========================================
+ * Reset homunculus skill levels and refund points.
+ * Optional argument:
+ *   1 = for Homunculus S, grant +1 skill point per level above 99
+ *------------------------------------------*/
+BUILDIN_FUNC(homunculus_resetskill)
+{
+	TBL_PC *sd;
+	bool s_bonus_above99 = false;
+
+	if (!script_rid2sd(sd)) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	if (script_hasdata(st, 2))
+		s_bonus_above99 = script_getnum(st, 2) != 0;
+
+	if (sd->hd == nullptr) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	script_pushint(st, hom_reset_skills(sd->hd, s_bonus_above99));
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/*==========================================
  * Check for homunculus state.
  * Return: -1 = No homunculus
  *          0 = Homunculus is active
@@ -12829,6 +12856,42 @@ BUILDIN_FUNC(checkhomcall)
 	else
 		script_pushint(st, hd->homunculus.vaporize);
 
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/*==========================================
+ * Force delete player's homunculus (active or stale link).
+ * Returns:
+ *   1 = deleted/requested deletion
+ *   0 = no homunculus to delete
+ *------------------------------------------*/
+BUILDIN_FUNC(deletehomunculus)
+{
+	TBL_PC *sd;
+
+	if (!script_rid2sd(sd)) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	if (sd->status.hom_id == 0) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	if (sd->hd != nullptr) {
+		sd->hd->homunculus.intimacy = 0;
+		hom_delete(sd->hd);
+	}
+	else {
+		intif_homunculus_requestdelete(sd->status.hom_id);
+		sd->status.hom_id = 0;
+#ifdef RENEWAL
+		status_change_end(sd, SC_HOMUN_TIME);
+#endif
+	}
+
+	script_pushint(st, 1);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -16652,6 +16715,29 @@ BUILDIN_FUNC(logmes)
 		log_npc(nd,str);
 	}
 
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(logshop)
+{
+	map_session_data* sd = nullptr;
+	const char* source = script_getstr( st, 2 );
+	const char* shop_name = script_getstr( st, 3 );
+	t_itemid item_id = static_cast<t_itemid>( script_getnum( st, 4 ) );
+	uint32 amount = static_cast<uint32>( script_getnum( st, 5 ) );
+	int32 zeny = script_getnum( st, 6 );
+	t_itemid required_item_id = static_cast<t_itemid>( script_getnum( st, 7 ) );
+	uint32 required_item_amount = static_cast<uint32>( script_getnum( st, 8 ) );
+	const char* point_type = script_getstr( st, 9 );
+	int32 point_amount = script_getnum( st, 10 );
+	// Keep this field ASCII-safe for databases using utf8 connections while scripts are CP1252.
+	const char* npc_name = shop_name;
+
+	if( !script_rid2sd( sd ) ){
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	log_shop_transaction( sd, source, npc_name, shop_name, item_id, amount, zeny, required_item_id, required_item_amount, point_type, point_amount );
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -26791,7 +26877,7 @@ BUILDIN_FUNC(setenchantgrade)
 {
 	map_session_data *sd = nullptr;
 
-	// O correto é: st, &sd, nullptr
+	// O correto ï¿½: st, &sd, nullptr
 	if (!script_rid2sd(sd)) {
 		ShowError("setenchantgrade: no player attached!\n");
 		return SCRIPT_CMD_FAILURE;
@@ -26820,9 +26906,9 @@ BUILDIN_FUNC(setenchantgrade)
 	sd->inventory.u.items_inventory[index].enchantgrade = grade;
 
 	// RECALCULA STATUS
-	status_calc_pc(sd, SCO_NONE);
+	status_calc_pc(sd, SCO_FORCE);
 
-	// envia atualização visual
+	// envia atualizaï¿½ï¿½o visual
 	clif_inventorylist(sd);
 	clif_equiplist(sd);
 
@@ -26834,7 +26920,7 @@ BUILDIN_FUNC(openbuyingstore)
 {
 	map_session_data *sd = nullptr;
 
-	// O correto é: st, &sd, nullptr
+	// O correto ï¿½: st, &sd, nullptr
 	if (!script_rid2sd(sd)) {
 		ShowError("openbuyingstore: no player attached!\n");
 		return SCRIPT_CMD_FAILURE;
@@ -26860,7 +26946,7 @@ BUILDIN_FUNC(setitemcard)
 {
 	map_session_data* sd = nullptr;
 
-	// A SUA VERSÃO funciona assim:
+	// A SUA VERSï¿½O funciona assim:
 	if (!script_rid2sd(sd)) {
 		ShowError("setitemcard: no player attached!\n");
 		return SCRIPT_CMD_FAILURE;
@@ -26899,7 +26985,7 @@ BUILDIN_FUNC(setitemcard)
 	// Recalcula status
 	status_calc_pc(sd, SCO_NONE);
 
-	// envia atualização visual
+	// envia atualizaï¿½ï¿½o visual
 	clif_inventorylist(sd);
 	clif_equiplist(sd);
 
@@ -27283,14 +27369,14 @@ BUILDIN_FUNC(getjobexp_ratio){
 }
 
 /*========================================================
- * Retorna o bônus de drop para um item específico de um mob,
- * considerando os bônus do jogador que está executando o script.
+ * Retorna o bï¿½nus de drop para um item especï¿½fico de um mob,
+ * considerando os bï¿½nus do jogador que estï¿½ executando o script.
  * Uso em script: get_drop_bonus(<mob_id>, <item_id>);
  *-------------------------------------------------------*/
 BUILDIN_FUNC(get_drop_bonus)
 {
     map_session_data* sd;
-    // Obtém o jogador atual (charid tipo 4 = script executor)
+    // Obtï¿½m o jogador atual (charid tipo 4 = script executor)
     if ( !script_charid2sd(4, sd) ) {
         script_pushint(st, 100); // sem jogador, retorna 100%
         return SCRIPT_CMD_SUCCESS;
@@ -27305,7 +27391,7 @@ BUILDIN_FUNC(get_drop_bonus)
         return SCRIPT_CMD_SUCCESS;
     }
 
-    // Procura o drop específico
+    // Procura o drop especï¿½fico
     for (const auto& drop : mob->dropitem) {
         if (drop->nameid == item_id) {
             int32 drop_modifier = 100;
@@ -27313,12 +27399,12 @@ BUILDIN_FUNC(get_drop_bonus)
             drop_modifier = pc_level_penalty_mod(sd, PENALTY_DROP, mob);
     #endif
             int32 final_rate = mob_getdroprate(sd, mob, drop->rate, drop_modifier);
-            script_pushint(st, final_rate); // em centésimos de %
+            script_pushint(st, final_rate); // em centï¿½simos de %
             return SCRIPT_CMD_SUCCESS;
         }
     }
 
-    // Se não encontrar, retorna 0
+    // Se nï¿½o encontrar, retorna 0
     script_pushint(st, 0);
     return SCRIPT_CMD_SUCCESS;
 }
@@ -27342,7 +27428,7 @@ BUILDIN_FUNC( enchantgradeui ){
 #endif
 }
 
-// Função para script: define bônus de drop permanente
+// Funï¿½ï¿½o para script: define bï¿½nus de drop permanente
 BUILDIN_FUNC(set_reborn_drop)
 {
     map_session_data* sd;
@@ -27370,20 +27456,25 @@ BUILDIN_FUNC(set_reborn_exp)
 
 BUILDIN_FUNC(set_bonus_hpsp)
 {
-    map_session_data* sd;
-    int charid = script_getnum(st, 2); // char_id
-    int val_hp = script_getnum(st, 3); // bônus de HP
-    int val_sp = script_hasdata(st, 4) ? script_getnum(st, 4) : val_hp; // bônus de SP (opcional)
+    map_session_data* sd = nullptr;
+	int charid = script_getnum(st, 2);
 
-    if (!script_charid2sd(charid, sd))
-        return SCRIPT_CMD_FAILURE;
+	if (charid > 0) {
+		if (!script_charid2sd(2, sd))
+			return SCRIPT_CMD_FAILURE;
+	} else {
+		if (!script_rid2sd(sd))
+			return SCRIPT_CMD_FAILURE;
+	}
+    int val_hp = script_getnum(st, 3); // bï¿½nus de HP
+    int val_sp = script_hasdata(st, 4) ? script_getnum(st, 4) : val_hp; // bï¿½nus de SP (opcional)
 
     // Atribui os valores separadamente
     sd->bonus_hp = val_hp;
     sd->bonus_sp = val_sp;
 
-    // Força recalcular status completo
-    status_calc_pc(sd, SCO_NONE);
+    // Forï¿½a recalcular status completo
+	status_calc_pc(sd, SCO_FORCE);
 
     // Atualiza no cliente
     clif_updatestatus(*sd, SP_MAXHP);
@@ -27403,30 +27494,30 @@ BUILDIN_FUNC(set_bonus_hpsp)
 
 BUILDIN_FUNC(set_bonus_allstats)
 {
-	map_session_data* sd;
-	int charid = script_getnum(st, 2);
-	int val = script_getnum(st, 3);
+    map_session_data* sd = nullptr;
+    int charid = script_getnum(st, 2);
+    int val = script_getnum(st, 3);
 
-	if (!script_charid2sd(charid, sd))
-		return SCRIPT_CMD_FAILURE;
+	if (charid > 0) {
+		if (!script_charid2sd(2, sd))
+			return SCRIPT_CMD_FAILURE;
+	} else {
+		if (!script_rid2sd(sd))
+			return SCRIPT_CMD_FAILURE;
+	}
 
-	sd->bonus_allstats = val;
-
-	status_calc_pc(sd, SCO_NONE);
-
-	// Atualiza atributos no cliente
-	clif_updatestatus(*sd, SP_STR);
-	clif_updatestatus(*sd, SP_AGI);
-	clif_updatestatus(*sd, SP_VIT);
-	clif_updatestatus(*sd, SP_INT);
-	clif_updatestatus(*sd, SP_DEX);
-	clif_updatestatus(*sd, SP_LUK);
-
-	return SCRIPT_CMD_SUCCESS;
+    sd->bonus_allstats = val;
+    status_calc_pc(sd, SCO_FORCE);
+    
+    clif_updatestatus(*sd, SP_STR);
+    clif_updatestatus(*sd, SP_AGI);
+    clif_updatestatus(*sd, SP_VIT);
+    clif_updatestatus(*sd, SP_INT);
+    clif_updatestatus(*sd, SP_DEX);
+    clif_updatestatus(*sd, SP_LUK);
+    
+    return SCRIPT_CMD_SUCCESS;
 }
-
-
-
 
 
 BUILDIN_FUNC(set_reputation_points){
@@ -28369,6 +28460,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(guildgetexp,"i"),
 	BUILDIN_DEF(guildchangegm,"is"),
 	BUILDIN_DEF(logmes,"s"), //this command actls as MES but rints info into LOG file either SQL/TXT [Lupus]
+	BUILDIN_DEF(logshop,"ssiiiiisi"),
 	BUILDIN_DEF(summon,"si??"), // summons a slave monster [Celest]
 	BUILDIN_DEF(isnight,""), // check whether it is night time [Celest]
 	BUILDIN_DEF(isday,""), // check whether it is day time [Celest]
@@ -28495,7 +28587,9 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF2(homunculus_mutate,"hommutate","?"),
 	BUILDIN_DEF(morphembryo,""),
 	BUILDIN_DEF2(homunculus_shuffle,"homshuffle",""),	//[Zephyrus]
+	BUILDIN_DEF2(homunculus_resetskill,"homresetskill","?"),
 	BUILDIN_DEF(checkhomcall,""),
+	BUILDIN_DEF(deletehomunculus,""),
 	BUILDIN_DEF(eaclass,"??"),	//[Skotlex]
 	BUILDIN_DEF(roclass,"i?"),	//[Skotlex]
 	BUILDIN_DEF(checkvending,"?"),

@@ -1304,6 +1304,7 @@ extern char mob_skill_table[32];
 extern char mob_skill2_table[32];
 extern char vendings_table[32];
 extern char vending_items_table[32];
+extern char vending_transactions_table[32];
 extern char market_table[32];
 extern char partybookings_table[32];
 extern char roulette_table[32];

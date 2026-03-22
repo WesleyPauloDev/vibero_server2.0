@@ -80,6 +80,8 @@ void log_pick_pc(map_session_data* sd, e_log_pick_type type, int32 amount, struc
 void log_pick_mob(struct mob_data* md, e_log_pick_type type, int32 amount, struct item* itm);
 void log_zeny(const map_session_data &target_sd, e_log_pick_type type, uint32 src_id, int32 amount);
 void log_cash( map_session_data* sd, e_log_pick_type type, e_log_cash_type cash_type, int32 amount );
+void log_cashshop_purchase( map_session_data* sd, t_itemid nameid, uint32 unit_price, uint32 amount, uint32 total_price, int32 cash_points_used, int32 kafra_points_used, const char* source );
+void log_shop_transaction( map_session_data* sd, const char* source, const char* npc_name, const char* shop_name, t_itemid item_id, uint32 amount, int32 zeny, t_itemid required_item_id, uint32 required_item_amount, const char* point_type, int32 point_amount );
 void log_npc( struct npc_data* nd, const char* message );
 void log_npc(map_session_data* sd, const char *message);
 void log_chat(e_log_chat_type type, int32 type_id, int32 src_charid, int32 src_accid, const char* map, int32 x, int32 y, const char* dst_charname, const char* message);
