@@ -82122,6 +82122,40 @@ Body:
       bonus2 bSkillAtk,"AB_DUPLELIGHT_MELEE",(3*.@r);
       bonus2 bSkillAtk,"AB_DUPLELIGHT_MAGIC",(3*.@r);
       bonus bUnbreakableWeapon;
+  - Id: 16074
+    AegisName: Cosmic_Hammer
+    Name: Martelo Cosmico
+    Type: Weapon
+    SubType: Mace
+    Weight: 2000
+    Attack: 1
+    Range: 1
+    Slots: 2
+    Jobs:
+      SuperNovice: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 4
+    EquipLevelMin: 110
+    Refineable: true
+    View: 8
+    Script: |
+      bonus bUnbreakableWeapon;
+      skill "KN_BOWLINGBASH",getskilllv("SM_SWORD");
+      if (getskilllv("MC_PUSHCART") >= 10) {
+         skill "MC_CARTREVOLUTION",1;
+      }
+      bonus bBaseAtk,5 * getskilllv("BS_HILTBINDING");
+      bonus bBaseAtk,7 * getskilllv("AM_AXEMASTERY");
+      bonus bHit,5 * getskilllv("AM_AXEMASTERY");
+      bonus bBaseAtk,30 * getskilllv("MO_IRONHAND");
+      bonus bBaseAtk,10 * min(getrefine(),10);
+      if (readparam(bStr) >= 108) {
+         bonus bUseSPrate,-10;
+      }
+      if (readparam(bStr) >= 120) {
+         bonus bUseSPrate,-20;
+      }
   - Id: 16075
     AegisName: Rebeginer_NC_Mace
     Name: Beginner Mechanic's Mace

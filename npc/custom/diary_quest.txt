@@ -1,3 +1,27 @@
+function	script	F_DiaryRefreshDaily	{
+	if (#cooldown_diario <= gettimetick(2)) {
+		#d_monstros = 1;
+		#d_monstros_count = 0;
+		#instancia = 1;
+		#voto = 1;
+		#evento = 1;
+		#todas = 1;
+		#todas_count = 0;
+		#cooldown_diario = gettimetick(2) + callfunc("get_daily_reset");
+	}
+	return;
+}
+function	script	F_DiaryRefreshWeekly	{
+	if (#cooldown_semanal <= gettimetick(2)) {
+		#torre = 1;
+		#boss = 1;
+		#todas_semanais = 1;
+		#semanal_count = 0;
+		#cooldown_semanal = gettimetick(2) + callfunc("get_weekly_reset");
+	}
+	return;
+}
+
 prontera,147,173,5	script	Mural de Missões	888,{
 
 	// IDs fictícios para cada missão
@@ -31,16 +55,7 @@ prontera,147,173,5	script	Mural de Missões	888,{
 	}
 
 L_Diarias:
-	if (#cooldown_diario <= gettimetick(2)) {
-		#d_monstros = 1;
-		#d_monstros_count = 0;
-		#instancia = 1;
-		#voto = 1;
-		#evento = 1;
-		#todas = 1;
-		#todas_count = 0;
-		#cooldown_diario = gettimetick(2) + callfunc("get_daily_reset");
-	}
+	callfunc("F_DiaryRefreshDaily");
 
 	// Valida voto do dia pela tabela cp_votes.
 	// 1 = pendente, 2 = pode resgatar, 0 = recompensa já recebida hoje.
@@ -221,13 +236,7 @@ L_Diarias:
 	}
 
 L_Semanais:
-	if (#cooldown_semanal <= gettimetick(2)) {
-		#torre = 1;
-		#boss = 1;
-		#todas_semanais = 1;
-		#semanal_count = 0;
-		#cooldown_semanal = gettimetick(2) + callfunc("get_weekly_reset");
-	}
+	callfunc("F_DiaryRefreshWeekly");
 
 	mes "[Mural de Missões]";
 	mes "Missões semanais:";
