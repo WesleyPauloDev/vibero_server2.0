@@ -11,39 +11,54 @@
 // Timeless Item Quests
 // The Owner Of Old Ring
 //============================================================
-payon,157,54,5	script	An Old Woman#pa0829	8_F_GRANDMOTHER,{
+-	script	FacewormsNest_Instance#Custom	-1,{
+	if (!attachrid(#INSTANCERID)) end;
+	#INSTANCERID = 0;
+
+	OnStartInstance:
+		callfunc("F_InstanceEntry",
+			"Faceworm's Nest",
+			"Erudito Arcano",
+			"faceworms_nest",
+			"FacewormsNest",
+			140
+		);
+	end;
+}
+
+-	script	An Old Woman#pa0829	8_F_GRANDMOTHER,{
 	if (!checkweight(1201,1)) {
-		mes "Voce esta com itens de muitos tipos. Tente novamente depois de reduzir a variedade de itens.";
+		mes "Voc? est? com itens de muitos tipos. Tente novamente depois de reduzir a variedade de itens.";
 		close;
 	}
 	if (MaxWeight - Weight < 1000) {
-		mes "Seus pertences estao pesados demais para continuar. Tente novamente depois de reduzir o peso.";
+		mes "Seus pertences est?o pesados demais para continuar. Tente novamente depois de reduzir o peso.";
 		close;
 	}
 	if (BaseLevel < 140) {
 		mes "[Jeum-sun]";
-		mes "Ainda vivo nas memorias. Crie mais memorias...";
+		mes "Ainda vivo nas mem?rias. Crie mais mem?rias...";
 		next;
 		mes "[Jeum-sun]";
-		mes "Oh, voce ja alcancou o nivel 140? Nao falo com aventureiros fracos.";
+		mes "Oh, voc? j? alcancou o nivel 140? Nao falo com aventureiros fracos.";
 		close;
 	}
 	switch( checkquest(12326,PLAYTIME) ) {
 	case -1:
 		mes "[Jeum-sun]";
-		mes "Quando eu era uma jovem, muitos anos atras, havia um homem por quem eu era apaixonada. Eu nao sabia como dizer o que sentia...";
+		mes "Quando eu era uma jovem, muitos anos atr?s, havia um homem por quem eu era apaixonada. Eu n?o sabia como dizer o que sentia...";
 		next;
 		mes "[Jeum-sun]";
 		mes "Eu costumava provocar o Peco Peco dele, querendo que ele percebesse meu interesse. Isso durou por um bom tempo.";
 		next;
 		mes "[Jeum-sun]";
-		mes "Entao, de algum jeito, comecamos a namorar. Ainda fico com vergonha de falar disso.";
+		mes "Ent?o, de algum jeito, comecamos a namorar. Ainda fico com vergonha de falar disso.";
 		next;
 		mes "[Jeum-sun]";
-		mes "Enfim, nos casamos quando tivemos idade para isso. Ele sempre me pedia desculpas por nao poder comprar um anel para mim.";
+		mes "Enfim, nos casamos quando tivemos idade para isso. Ele sempre me pedia desculpas por n?o poder comprar um anel para mim.";
 		next;
 		mes "[Jeum-sun]";
-		mes "Ja se passaram 40 anos desde que nos casamos, e ele ainda dizia ^0000ff'Querida~ voce quer um anel?'^000000.";
+		mes "J? se passaram 40 anos desde que nos casamos, e ele ainda dizia ^0000ff'Querida~ voc? quer um anel?'^000000.";
 		next;
 		mes "[Jeum-sun]";
 		mes "Eu disse a ele... De que serviria um anel para uma senhora idosa?";
@@ -71,7 +86,7 @@ payon,157,54,5	script	An Old Woman#pa0829	8_F_GRANDMOTHER,{
 				mes "^0000ffVoce sente uma energia calorosa emanando. Talvez este seja o desejo do homem que fez esse anel.^000000";
 				specialeffect EF_SPHERE;
 				next;
-				mes "A energia calorosa inspirou voce com forca.";
+				mes "A energia calorosa inspirou voc? com forca.";
 				delitem 6650,1;// Shabby_Ring
 				setquest 12326;// The owner of old ring
 				getexp 70000,55000;
@@ -80,10 +95,10 @@ payon,157,54,5	script	An Old Woman#pa0829	8_F_GRANDMOTHER,{
 		close;
 	case 0:
 	case 1:
-		mes "A senhora continua chorando sem parar, segurando um anel. Parece inutil falar com ela agora.";
+		mes "A senhora continua chorando sem parar, segurando um anel. Parece in?til falar com ela agora.";
 		close;
 	case 2:
-		mes "Infelizmente, essa mulher nao parece se lembrar do passado por causa da mudanca brusca de emocao. Vamos falar com cuidado e ouvir sua historia.";
+		mes "Infelizmente, essa mulher n?o parece se lembrar do passado por causa da mudanca brusca de emocao. Vamos falar com cuidado e ouvir sua historia.";
 		erasequest 12326;
 		close;
 	}
@@ -91,21 +106,21 @@ payon,157,54,5	script	An Old Woman#pa0829	8_F_GRANDMOTHER,{
 
 // The Memory Of Old Photo Album
 //============================================================
-payon,161,54,3	script	Exotic Merchant#pa0829	4W_M_03,{
+-	script	Exotic Merchant#pa0829	4W_M_03,{
 	if (!checkweight(1201,1)) {
-		mes "Voce esta com itens de muitos tipos. Tente novamente depois de reduzir a variedade de itens.";
+		mes "Voc? est? com itens de muitos tipos. Tente novamente depois de reduzir a variedade de itens.";
 		close;
 	}
 	if (MaxWeight - Weight < 1000) {
-		mes "Seus pertences estao pesados demais para continuar. Tente novamente depois de reduzir o peso.";
+		mes "Seus pertences est?o pesados demais para continuar. Tente novamente depois de reduzir o peso.";
 		close;
 	}
 	if (BaseLevel < 140) {
 		mes "[Sergio]";
-		mes "Fortuna ou fama nao sao importantes. O mais importante e a familia.";
+		mes "Fortuna ou fama n?o sao importantes. O mais importante e a fam?lia.";
 		next;
 		mes "[Sergio]";
-		mes "Voce ja e pelo menos nivel 140?";
+		mes "Voc? j? e pelo menos nivel 140?";
 		close;
 	}
 	switch( checkquest(12327,PLAYTIME) ) {
@@ -117,13 +132,13 @@ payon,161,54,3	script	Exotic Merchant#pa0829	4W_M_03,{
 		mes "Lembro vagamente que todos do grupo se dispersaram depois de serem atacados por uma criatura gigante parecida com uma cobra.";
 		next;
 		mes "[Sergio]";
-		mes "Perdi minha familia naquela epoca. Nem sequer me lembro claramente dos rostos deles.";
+		mes "Perdi minha fam?lia naquela epoca. Nem sequer me lembro claramente dos rostos deles.";
 		next;
 		mes "[Sergio]";
-		mes "Agora formei meu proprio grupo de mercadores armados e recuperei minha vida. Mas as memorias do meu passado continuam me assombrando.";
+		mes "Agora formei meu proprio grupo de mercadores armados e recuperei minha vida. Mas as mem?rias do meu passado continuam me assombrando.";
 		next;
 		mes "[Sergio]";
-		mes "Passei por esta cidade na esperanca de encontrar algum registro da minha familia e do grupo de mercadores armados, mas ate agora nao encontrei nada.";
+		mes "Passei por est? cidade na esperanca de encontrar algum registro da minha fam?lia e do grupo de mercadores armados, mas ate agora n?o encontrei nada.";
 		if (countitem(6652)) {
 			next;
 			if (select("Parar de conversar.:Mostrar a ele o Album de Fotos Antigo") == 2) {
@@ -133,12 +148,12 @@ payon,161,54,3	script	Exotic Merchant#pa0829	4W_M_03,{
 				mes "[Sergio]";
 				mes "Meu Deus... Ha outras fotos aqui tambem...";
 				next;
-				mes "^0000ffUm sorriso de satisfacao solitaria se espalha pelo rosto de Sergio enquanto ele observa o album de fotos.^000000";
+				mes "^0000ffUm sorriso de satisfa??o solitaria se espalha pelo rosto de Sergio enquanto ele observa o album de fotos.^000000";
 				next;
 				mes "^0000ffUma energia suave envolve Sergio.^000000";
 				specialeffect EF_SPHERE;
 				next;
-				mes "Voce se comove ao ver a satisfacao no rosto de Sergio.";
+				mes "Voc? se comove ao ver a satisfa??o no rosto de Sergio.";
 				delitem 6652,1;// Aged_Photo_Album
 				setquest 12327;// The memory of old photo album
 				getexp 70000,55000;
@@ -150,7 +165,7 @@ payon,161,54,3	script	Exotic Merchant#pa0829	4W_M_03,{
 		mes "Sergio continua olhando o album de fotos. Vamos deixa-lo sozinho.";
 		close;
 	case 2:
-		mes "Voce podera falar com Sergio novamente quando encontrar outro album de fotos no Ninho dos Faceworms.";
+		mes "Voc? podera falar com Sergio novamente quando encontrar outro album de fotos no Ninho dos Faceworms.";
 		erasequest 12327;
 		close;
 	}
@@ -158,51 +173,51 @@ payon,161,54,3	script	Exotic Merchant#pa0829	4W_M_03,{
 
 // Dol-Seoi's Sorrow
 //============================================================
-payon,161,50,1	script	Strong Looking Man#pa829	4_M_ORIENT01,{
+-	script	Strong Looking Man#pa829	4_M_ORIENT01,{
 	if (!checkweight(1201,1)) {
-		mes "Voce esta com itens de muitos tipos. Tente novamente depois de reduzir a variedade de itens.";
+		mes "Voc? est? com itens de muitos tipos. Tente novamente depois de reduzir a variedade de itens.";
 		close;
 	}
 	if (MaxWeight - Weight < 1000) {
-		mes "Seus pertences estao pesados demais para continuar. Tente novamente depois de reduzir o peso.";
+		mes "Seus pertences est?o pesados demais para continuar. Tente novamente depois de reduzir o peso.";
 		close;
 	}
 	if (BaseLevel < 140) {
 		mes "[Dol-Seoi]";
-		mes "O que posso fazer por voce?";
+		mes "O que posso fazer por voc??";
 		next;
 		mes "[Dol-Seoi]";
-		mes "Voce ja e pelo menos nivel 140?";
+		mes "Voc? j? e pelo menos nivel 140?";
 		close;
 	}
 	switch( checkquest(12328,PLAYTIME) ) {
 	case -1:
 		mes "[Dol-Seoi]";
-		mes "Eu era servo de uma dama muito rica. Ela sempre foi bondosa comigo, mas sofria de uma tosse severa que so melhorava com um remedio especial.";
+		mes "Eu era servo de uma dama muito rica. Ela sempre foi bondosa comigo, mas sofria de uma tosse severa que so melhorava com um rem?dio especial.";
 		next;
 		mes "[Dol-Seoi]";
-		mes "Eu conseguia esse remedio com um grupo de mercadores armados, mas ouvi dizer que foram atacados por uma cobra, e desde entao nao pude mais conseguir o remedio.";
+		mes "Eu conseguia esse rem?dio com um grupo de mercadores armados, mas ouvi dizer que foram atacados por uma cobra, e desde ent?o n?o pude mais conseguir o rem?dio.";
 		next;
 		mes "[Dol-Seoi]";
-		mes "Procurei por toda parte, mas ninguem conseguiu esse remedio para mim, e no fim minha senhora faleceu. Se nao fosse por aquela criatura rastejante...";
+		mes "Procurei por toda parte, mas ninguem conseguiu esse rem?dio para mim, e no fim minha senhora faleceu. Se n?o fosse por aquela criatura rastejante...";
 		next;
-		select("Voce quer se vingar?");
+		select("Voc? quer se vingar?");
 		mes "[Dol-Seoi]";
 		mes "Bem...";
 		next;
 		mes "[Dol-Seoi]";
-		mes "Sim... Mas eu nao tenho como enfrentar aquela cobra. Sou apenas um servo inutil que um dia serviu minha senhora.";
+		mes "Sim... Mas eu n?o tenho como enfrentar aquela cobra. Sou apenas um servo in?til que um dia serviu minha senhora.";
 		next;
 		mes "^0000ffVoce percebe um misto complicado de raiva e tristeza nos olhos dele.^000000";
 		if (countitem(6653)) {
 			next;
 			if (select("Parar de conversar.:Mostrar a ele o Remedio Antigo.") == 2) {
 				mes "[Dol-Seoi]";
-				mes "Espere! Onde voce conseguiu isso?";
+				mes "Espere! Onde voc? conseguiu isso?";
 				next;
 				select("Eu matei uma cobra...");
 				mes "[Dol-Seoi]";
-				mes "Esse remedio... Minha senhora, se eu tivesse tido esse remedio...";
+				mes "Esse rem?dio... Minha senhora, se eu tivesse tido esse rem?dio...";
 				next;
 				mes "^0000ffEle comeca a chorar como um Muka ferido. Ela devia significar muito para ele...^000000";
 				next;
@@ -216,10 +231,10 @@ payon,161,50,1	script	Strong Looking Man#pa829	4_M_ORIENT01,{
 		close;
 	case 0:
 	case 1:
-		mes "Dol-Seoi esta parado, distraido, segurando o Remedio Antigo. Vamos deixa-lo sozinho por enquanto.";
+		mes "Dol-Seoi est? parado, distraido, segurando o Remedio Antigo. Vamos deixa-lo sozinho por enquanto.";
 		close;
 	case 2:
-		mes "Voce podera falar com Dol-Seoi novamente se conseguir outro Remedio Antigo no Ninho dos Faceworms.";
+		mes "Voc? podera falar com Dol-Seoi novamente se conseguir outro Remedio Antigo no Ninho dos Faceworms.";
 		erasequest 12328;
 		close;
 	}
@@ -227,13 +242,13 @@ payon,161,50,1	script	Strong Looking Man#pa829	4_M_ORIENT01,{
 
 // Keaton's Bracelet
 //============================================================
-payon,139,68,4	script	A dreary man#pa0829	4_M_NFDEADMAN,{
+-	script	A dreary man#pa0829	4_M_NFDEADMAN,{
 	if (!checkweight(1201,1)) {
-		mes "Voce esta com itens de muitos tipos. Tente novamente depois de reduzir a variedade de itens.";
+		mes "Voc? est? com itens de muitos tipos. Tente novamente depois de reduzir a variedade de itens.";
 		close;
 	}
 	if (MaxWeight - Weight < 1000) {
-		mes "Seus pertences estao pesados demais para continuar. Tente novamente depois de reduzir o peso.";
+		mes "Seus pertences est?o pesados demais para continuar. Tente novamente depois de reduzir o peso.";
 		close;
 	}
 	if (BaseLevel < 140) {
@@ -241,24 +256,24 @@ payon,139,68,4	script	A dreary man#pa0829	4_M_NFDEADMAN,{
 		mes "...";
 		next;
 		mes "[Keaton]";
-		mes "A menos que voce seja nivel 140, nao vou ter uma conversa de verdade com voce.";
+		mes "A menos que voc? seja nivel 140, n?o vou ter uma conversa de verdade com voc?.";
 		close;
 	}
 	switch( checkquest(12329,PLAYTIME) ) {
 	case -1:
-		mes "^0000ffParece uma alma morta, mas voce nao sente maldade nela. Seus pensamentos chegam em fragmentos, entao nao e facil entende-lo.^000000";
+		mes "^0000ffParece uma alma morta, mas voc? n?o sente maldade nela. Seus pensamentos chegam em fragmentos, ent?o n?o e facil entende-lo.^000000";
 		next;
 		mes "^999999[Keaton]";
-		mes "Keaton... nao fala bem.^000000";
+		mes "Keaton... n?o fala bem.^000000";
 		next;
 		mes "^999999[Keaton]";
-		mes "Keaton morreu ha muito tempo. Keaton nao e mau.^000000";
+		mes "Keaton morreu ha muito tempo. Keaton n?o e mau.^000000";
 		next;
 		mes "^999999[Keaton]";
 		mes "Keaton... precisa de pulseira, muito importante. Amigo de Keaton deu a pulseira.^000000";
 		next;
 		mes "^999999[Keaton]";
-		mes "Keaton foi atras da cobra para achar a pulseira. A cobra ruim matou Keaton.^000000";
+		mes "Keaton foi atr?s da cobra para achar a pulseira. A cobra ruim matou Keaton.^000000";
 		if (countitem(6651)) {
 			next;
 			if (select("Parar de conversar.:Mostrar a ele a Pulseira Enferrujada.") == 2) {
@@ -281,7 +296,7 @@ payon,139,68,4	script	A dreary man#pa0829	4_M_NFDEADMAN,{
 		mes "A alma de Keaton parece estar sorrindo. Melhor deixarmos que ele tenha a paz que puder por enquanto.";
 		close;
 	case 2:
-		mes "Keaton esta muito triste, talvez porque a pulseira estava quebrada. Traga a ele outra Pulseira Enferrujada encontrada no Ninho dos Faceworms.";
+		mes "Keaton est? muito triste, talvez porque a pulseira estava quebrada. Traga a ele outra Pulseira Enferrujada encontrada no Ninho dos Faceworms.";
 		erasequest 12329;
 		close;
 	}
@@ -298,11 +313,11 @@ dali,83,67,5	script	Old Sign#1	4_BOARD3,{
 		close;
 	}
 	if (.@face_timer < 60)
-		.@time_txt$ = callfunc( "F_InsertPlural", .@time_s, "Second" );
+		.@time_txt$ = callfunc( "F_InsertPlural", .@time_s, "Segundo" );
 	else
-		.@time_txt$ = callfunc( "F_InsertPlural", .@time_m, "Minute" ) + " " + callfunc( "F_InsertPlural", .@time_s, "Second" );
+		.@time_txt$ = callfunc( "F_InsertPlural", .@time_m, "Minuto" ) + " " + callfunc( "F_InsertPlural", .@time_s, "Segundo" );
 	if (.@face_member > 0)
-		.@string$ =  " with ^ff0044" + .@face_member + " party " + ( .@face_member > 1 ? "members" : "members" )  + "^000000";
+		.@string$ =  " com ^ff0044" + .@face_member + " membros do grupo^000000";
 	mes "-- Recordes do Ninho dos Faceworms --";
 	mes "O melhor tempo pertence ao aventureiro ^ff0044" + .@face_name$ + "^000000" + .@string$ + ".";
 	mes "O tempo atual do recorde e ^0000ff" + .@time_txt$ + "^000000.";
@@ -320,24 +335,24 @@ OnInit:
 
 dali,80,60,4	script	Magic Scholar	4_M_SAGE_C,{
 	if (BaseLevel < 140) {
-		mes "[Magic Scholar]";
-		mes "Voce ainda nao tem qualificacao suficiente para entrar aqui. Que tal visitar outros lugares ate alcancar o nivel 140?";
+		mes "[Erudito Arcano]";
+		mes "Voc? ainda n?o tem qualifica??o suficiente para entrar aqui. Que tal visitar outros lugares ate alcancar o nivel 140?";
 		close;
 	}
 	.@party_id = getcharid(1);
 	.@md_name$ = "Faceworm's Nest";
 	if (.@party_id < 1) {
-		mes "[Magic Scholar]";
-		mes "Voce nao tem um grupo? Volte depois de criar uma party, mesmo que tenha vindo sozinho.";
+		mes "[Erudito Arcano]";
+		mes "Voc? n?o tem um grupo? Volte depois de criar uma party, mesmo que tenha vindo sozinho.";
 		close;
 	}
 	switch( checkquest(12325,PLAYTIME) ) {
 	case -1:
 		if (is_party_leader() == true) {
-			mes "[Magic Scholar]";
-			mes "O que posso fazer por voce?";
+			mes "[Erudito Arcano]";
+			mes "O que posso fazer por voc??";
 			next;
-			switch( select("Reservar Ninho dos Faceworms:O que voce esta fazendo aqui?:Parar de conversar.") ) {
+			switch( select("Reservar Ninho dos Faceworms:O que voc? est? fazendo aqui?:Parar de conversar.") ) {
 			case 1:
 				switch( instance_create(.@md_name$) ) {
 				case -3:
@@ -346,44 +361,44 @@ dali,80,60,4	script	Magic Scholar	4_M_SAGE_C,{
 				case -4:
 				case -2:
 				case -1:
-					mes "[Magic Scholar]";
+					mes "[Erudito Arcano]";
 					mes "Oops, minhas maos escorregaram. E preciso ativar as fendas novamente.";
 					close;
 				}
-				mes "[Magic Scholar]";
-				mes "Os espacos estao sob controle.";
+				mes "[Erudito Arcano]";
+				mes "Os espacos est?o sob controle.";
 				mes "Por favor, aguarde um instante.";
 				close;
 			case 2:
 				break;
 			case 3:
-				mes "[Magic Scholar]";
+				mes "[Erudito Arcano]";
 				mes "Tudo bem, entendi. Volte se mudar de ideia.";
 				close;
 			}
 		}
-		mes "[Magic Scholar]";
+		mes "[Erudito Arcano]";
 		mes "Estou pesquisando as fendas dimensionais no espaco que existem aqui.";
 		next;
-		mes "[Magic Scholar]";
+		mes "[Erudito Arcano]";
 		mes "Minha pesquisa busca estabilizar este espaco com magia para utiliza-lo em viagens dimensionais.";
 		next;
-		mes "[Magic Scholar]";
-		mes "Esta fenda espacial em particular leva a uma memoria do passado. Muitos aventureiros entraram la, mas ninguem me diz o que ha dentro...";
+		mes "[Erudito Arcano]";
+		mes "Esta fenda espacial em particular leva a uma mem?ria do passado. Muitos aventureiros entraram la, mas ninguem me diz o que ha dentro...";
 		next;
-		mes "[Magic Scholar]";
-		mes "E ha tambem esta placa estranha que registra nomes e tempos, o que me faz pensar que pertence a esses aventureiros.";
+		mes "[Erudito Arcano]";
+		mes "E ha tambem est? placa estranha que registra nomes e tempos, o que me faz pensar que pertence a esses aventureiros.";
 		next;
-		mes "[Magic Scholar]";
-		mes "De qualquer forma, posso ativar a passagem para voce se for o lider da party.";
+		mes "[Erudito Arcano]";
+		mes "De qualquer forma, posso ativar a passagem para voc? se for o l?der da party.";
 		close;
 	case 0:
 	case 1:
-		mes "[Magic Scholar]";
-		mes "A fenda no tempo ainda nao esta segura o bastante para passar de um lado para o outro. Volte quando o tempo de espera acabar.";
+		mes "[Erudito Arcano]";
+		mes "A fenda no tempo ainda n?o est? segura o bastante para passar de um lado para o outro. Volte quando o tempo de espera acabar.";
 		close;
 	case 2:
-		mes "^0000ffOs vestigios da viagem dimensional desapareceram. Agora voce pode se mover entre dimensoes.^000000";
+		mes "^0000ffOs vestigios da viagem dimensional desapareceram. Agora voc? pode se mover entre dimens?es.^000000";
 		erasequest 12325;
 		close;
 	}
@@ -391,14 +406,14 @@ dali,80,60,4	script	Magic Scholar	4_M_SAGE_C,{
 
 dali,72,55,4	script	Interdimensional Device	CLEAR_NPC,{
 	if (BaseLevel < 140) {
-		mes "[Interdimensional Device]";
-		mes "Seu nivel de poder nao e alto o suficiente para viajar pelo espaco. Volte quando alcancar pelo menos o nivel 140.";
+		mes "[Dispositivo Interdimensional]";
+		mes "Seu nivel de poder n?o e alto o suficiente para viajar pelo espaco. Volte quando alcancar pelo menos o nivel 140.";
 		close;
 	}
 	.@party_id = getcharid(1);
 	.@md_name$ = "Faceworm's Nest";
 	if (.@party_id < 1) {
-		mes "[Interdimensional Device]";
+		mes "[Dispositivo Interdimensional]";
 		mes "Sem party? Volte depois de criar uma, mesmo que tenha vindo sozinho.";
 		close;
 	}
@@ -406,30 +421,30 @@ dali,72,55,4	script	Interdimensional Device	CLEAR_NPC,{
 	case -1:
 		switch( instance_enter(.@md_name$) ) {
 		case IE_OTHER:
-			mes "[Interdimensional Device]";
+			mes "[Dispositivo Interdimensional]";
 			mes "Ocorreu um erro desconhecido.";
 			close;
 		case IE_NOINSTANCE:
-			mes "[Interdimensional Device]";
-			mes "A passagem para a viagem espacial ainda nao foi ativada.";
+			mes "[Dispositivo Interdimensional]";
+			mes "A passagem para a viagem espacial ainda n?o foi ativada.";
 			close;
 		case IE_NOMEMBER:// Custom text
-			mes "[Interdimensional Device]";
-			mes "Voce nao tem permissao para acessar este dispositivo.";
+			mes "[Dispositivo Interdimensional]";
+			mes "Voc? n?o tem permiss?o para acessar este dispositivo.";
 			close;
 		case IE_OK:
-			mapannounce "dali", getpartyname(.@party_id) + " party's party member " + strcharinfo(0) + " enters " + .@md_name$ + ".",bc_map,"0x00ff99";
+			mapannounce "dali", getpartyname(.@party_id) + " membro do grupo " + strcharinfo(0) + " entrou em " + .@md_name$ + ".",bc_map,"0x00ff99";
 			setquest 12325;// Faceworm's Nest after-effects
 			//warp "1@face",112,374;
 			end;
 		}
 	case 0:
 	case 1:
-		mes "[Interdimensional Device]";
+		mes "[Dispositivo Interdimensional]";
 		mes "Foram detectados vestigios de uma viagem espacial recente. Acesso negado.";
 		close;
 	case 2:
-		mes "^0000ffOs vestigios da viagem dimensional desapareceram. Agora voce pode se mover entre dimensoes.^000000";
+		mes "^0000ffOs vestigios da viagem dimensional desapareceram. Agora voc? pode se mover entre dimens?es.^000000";
 		erasequest 12325;
 		close;
 	}
@@ -442,7 +457,7 @@ dali,72,55,4	script	Interdimensional Device	CLEAR_NPC,{
 	cutin "h_chaos01",2;
 	if (is_party_leader() == false) {
 		mes "[Chaos]";
-		mes "Nao sei do que se trata isso, mas estou falando com o lider de voces, entao espere um pouco, tudo bem?";
+		mes "Nao sei do que se trata isso, mas estou falando com o l?der de voces, ent?o espere um pouco, tudo bem?";
 		close2;
 		cutin "",255;
 		end;
@@ -450,19 +465,19 @@ dali,72,55,4	script	Interdimensional Device	CLEAR_NPC,{
 	.@account_id = getcharid(3);
 	.@player_name$ = strcharinfo(0);
 	mes "[Chaos]";
-	mes "Serio? Eu nao sabia que um cacador de recompensas viria para ca.";
-	npctalk "Chaos: Serio? Eu nao sabia que um cacador de recompensas viria para ca.";
+	mes "Serio? Eu n?o sabia que um ca?ador de recompensas viria para ca.";
+	npctalk "Chaos: Serio? Eu n?o sabia que um ca?ador de recompensas viria para ca.";
 	next;
 	select("Espere! Isso e um mal-entendido.");
 	cutin "",255;
 	mes "[" + .@player_name$ + "]";
-	mes "Nao! Acho que voce se enganou! Nos nao somos cacadores de recompensas...";
-	unittalk .@account_id, .@player_name$ + ": Nao! Acho que voce se enganou! Nos nao somos cacadores de recompensas...";
+	mes "Nao! Acho que voc? se enganou! Nos n?o somos cacadores de recompensas...";
+	unittalk .@account_id, .@player_name$ + ": Nao! Acho que voc? se enganou! Nos n?o somos cacadores de recompensas...";
 	next;
 	cutin "h_chaos01",2;
 	mes "[Chaos]";
-	mes "Nao, nao precisa inventar desculpas... Os faceworms nao pertencem a ninguem.";
-	npctalk "Chaos: Nao, nao precisa inventar desculpas... Os faceworms nao pertencem a ninguem.";
+	mes "Nao, n?o precisa inventar desculpas... Os faceworms n?o pertencem a ninguem.";
+	npctalk "Chaos: Nao, n?o precisa inventar desculpas... Os faceworms n?o pertencem a ninguem.";
 	next;
 	select("Faceworm?");
 	cutin "",255;
@@ -482,19 +497,19 @@ OnStart:
 	hideoffnpc instance_npcname("Chaos#01");
 	hideonnpc instance_npcname("Chaos#0");
 	sleep 5000;
-	npctalk "Chaos: Hahaha, voce realmente nunca ouviu falar? Faceworm e o nome de um monstro que apareceu recentemente nesta area.";
+	npctalk "Chaos: Hahaha, voc? realmente nunca ouviu falar? Faceworm e o nome de um monstro que apareceu recentemente nesta area.";
 	sleep 5000;
-	npctalk "Chaos: Nao me importo. Pode ser quem for, desde que nao atrapalhe meu caminho.";
+	npctalk "Chaos: Nao me importo. Pode ser quem for, desde que n?o atrapalhe meu caminho.";
 	sleep 5000;
 	npctalk "Iris: Ah~ Uma brisa suave~", .@iris_name$;
 	sleep 3000;
-	npctalk "Iris: Hehe, o clima esta otimo. Estou tao feliz~", .@iris_name$;
+	npctalk "Iris: Hehe, o clima est? ?timo. Estou tao feliz~", .@iris_name$;
 	sleep 3000;
-	npctalk "Iris: E voce, Chaos?", .@iris_name$;
+	npctalk "Iris: E voc?, Chaos?", .@iris_name$;
 	sleep 3000;
-	npctalk "Chaos: Isso nao vai durar por muito tempo.";
+	npctalk "Chaos: Isso n?o vai durar por muito tempo.";
 	sleep 3000;
-	npctalk "Chaos: Um vento sombrio comecou a soprar.";
+	npctalk "Chaos: Um vento sombrio come?ou a soprar.";
 	sleep 4000;
 	npctalk "Chaos: Iris! Sinto que ha faceworms por aqui. Talvez o ninho da rainha esteja na parte mais profunda desta floresta!";
 	sleep 5000;
@@ -505,7 +520,7 @@ OnStart:
 	hideonnpc instance_npcname("Chaos#01");
 	hideonnpc instance_npcname("Iris#0");
 	donpcevent instance_npcname("#fwormcontrol1") + "::OnStart";
-	mapannounce 'map_name$, "Faceworm time attack has started. Faster kill times gives a higher percentage of rewards.",bc_map,"0xffffff";
+	mapannounce 'map_name$, "O cron?metro do Ninho dos Faceworms come?ou. Quanto mais r?pido derrotarem os monstros, maior ser? a porcentagem de recompensas.",bc_map,"0xffffff";
 	donpcevent instance_npcname("#fwormprize1") + "::OnStart";
 	end;
 OnInstanceInit:
@@ -516,7 +531,7 @@ OnInstanceInit:
 1@face,116,346,3	script	Iris#0	4_F_IRIS,{
 	cutin "h_iris02",2;
 	mes "[Iris]";
-	mes "Desculpe~ Eu estou aproveitando esta brisa suave, entao fale comigo outra hora.";
+	mes "Desculpe~ Eu estou aproveitando est? brisa suave, ent?o fale comigo outra hora.";
 	close2;
 	cutin "",255;
 	end;
@@ -534,14 +549,14 @@ OnStart:
 	end;
 OnMyMobDead:
 	.@mob_dead_num = mobcount( 'map_name$, instance_npcname("#fwormcontrol1") +"::OnMyMobDead" );
-	mapannounce 'map_name$, "There " + ( .@mob_dead_num > 1 ? "are" : "is" ) + " " + callfunc( "F_InsertPlural", .@mob_dead_num, "faceworm" ) + " still alive.",bc_map,"0xffffff";
+	mapannounce 'map_name$, "Ainda restam " + .@mob_dead_num + " faceworms vivos.",bc_map,"0xffffff";
 	if (.@mob_dead_num < 3)
 		initnpctimer;
 	end;
 OnTimer1000:
 	killmonster 'map_name$, instance_npcname("#fwormcontrol1") + "::OnMyMobDead";
 	donpcevent instance_npcname("#fwormboss1") + "::OnStart";
-	mapannounce 'map_name$, "A giant faceworm has suddenly appeared.",bc_map,"0xffffff";
+	mapannounce 'map_name$, "Um faceworm gigante apareceu de repente.",bc_map,"0xffffff";
 	stopnpctimer;
 	end;
 OnInstanceInit:
@@ -588,7 +603,7 @@ OnMyMobDead:
 		hideoffnpc instance_npcname("Chaos#1");
 		hideoffnpc instance_npcname("Iris#1");
 		donpcevent instance_npcname("#fwormboss12") + "::OnEnd";
-		mapannounce 'map_name$, "A hole appears after killing the dark faceworm.",bc_map,"0xffffff";
+		mapannounce 'map_name$, "Um buraco apareceu ap?s derrotar o Faceworm Sombrio.",bc_map,"0xffffff";
 		stopnpctimer;
 	}
 	end;
@@ -641,7 +656,7 @@ S_Heal:
 	if (.@dfacehp > .@r_hpp2)
 		.@dfacehp = .@r_hpp2;
 	setunitdata 'BOSS[1], UMOB_HP, .@dfacehp;
-	mapannounce 'map_name$, "Dark faceworm absorbs the energy of " + getarg(0) + " unbroken eggs recovering " + .@r_hpp + " energy.",bc_map,"0xff00ee";
+	mapannounce 'map_name$, "O Faceworm Sombrio absorve a energia de " + getarg(0) + " ovos intactos e recupera " + .@r_hpp + " de energia.",bc_map,"0xff00ee";
 	return;
 
 OnEnd:
@@ -682,14 +697,14 @@ OnInstanceInit:
 	cutin "h_chaos01",2;
 	if (is_party_leader() == false) {
 		mes "[Chaos]";
-		mes "Nao sei do que se trata isso, mas estou falando com o lider de voces, entao espere um pouco, tudo bem?";
+		mes "Nao sei do que se trata isso, mas estou falando com o l?der de voces, ent?o espere um pouco, tudo bem?";
 		close2;
 		cutin "",255;
 		end;
 	}
 	mes "[Chaos]";
-	mes "Uau, voce e rapido o bastante para me acompanhar.";
-	npctalk "Chaos: Uau, voce e rapido o bastante para me acompanhar.";
+	mes "Uau, voc? e r?pido o bastante para me acompanhar.";
+	npctalk "Chaos: Uau, voc? e r?pido o bastante para me acompanhar.";
 	next;
 	select("Aquele grandao, logo antes...");
 	cutin "",255;
@@ -722,20 +737,20 @@ OnStart:
 	sleep 5000;
 	npctalk "Chaos: Espere! A pele deixada por esse faceworm morto pode ser util.";
 	sleep 3000;
-	npctalk "Iris: Mas, se a luta demorar muito, as escamas podem ser danificadas. E nao vao valer nada!", .@iris_name$;
+	npctalk "Iris: Mas, se a luta demorar muito, as escamas podem ser danificadas. E n?o vao valer nada!", .@iris_name$;
 	sleep 5000;
-	npctalk "Iris: Ouvi dizer que cacadores habilidosos conseguem remover as escamas muito rapido.", .@iris_name$;
+	npctalk "Iris: Ouvi dizer que cacadores habilidosos conseguem remover as escamas muito r?pido.", .@iris_name$;
 	sleep 6000;
-	npctalk "Iris: Chaos, voce leva jeito para isso?", .@iris_name$;
+	npctalk "Iris: Chaos, voc? leva jeito para isso?", .@iris_name$;
 	sleep 3000;
-	npctalk "Chaos: Nao... Nem um pouco! Eu so uso Magnum Break, entao as escamas provavelmente queimariam...";
+	npctalk "Chaos: Nao... Nem um pouco! Eu so uso Magnum Break, ent?o as escamas provavelmente queimariam...";
 	sleep 3000;
 	npctalk "Iris: Inutil, Chaos.", .@iris_name$;
 	sleep 3000;
-	npctalk "Chaos: Alem disso, aquilo que procuramos nao esta aqui. Vou voltar primeiro, entao cuidem do resto, certo?";
+	npctalk "Chaos: Alem disso, aquilo que procuramos n?o est? aqui. Vou voltar primeiro, ent?o cuidem do resto, certo?";
 	sleep 5000;
 	hideonnpc instance_npcname("Chaos#11");
-	npctalk "Iris: Chaos! Voce vai me deixar sozinha?", .@iris_name$;
+	npctalk "Iris: Chaos! Voc? vai me deixar sozinha?", .@iris_name$;
 	sleep 3000;
 	hideonnpc .@iris_name$;
 	donpcevent instance_npcname("#fwormcontrol2") + "::OnStart";
@@ -770,14 +785,14 @@ OnStart:
 	end;
 OnMyMobDead:
 	.@mob_dead_num = mobcount( 'map_name$,instance_npcname("#fwormcontrol2") +"::OnMyMobDead" );
-	mapannounce 'map_name$, "There " + ( .@mob_dead_num > 1 ? "are" : "is" ) + " " + callfunc( "F_InsertPlural", .@mob_dead_num, "faceworm" ) + " still alive.",bc_map,"0xffffff";
+	mapannounce 'map_name$, "Ainda restam " + .@mob_dead_num + " faceworms vivos.",bc_map,"0xffffff";
 	if (.@mob_dead_num < 3)
 		initnpctimer;
 	end;
 OnTimer1000:
 	killmonster 'map_name$, instance_npcname("#fwormcontrol2") + "::OnMyMobDead";
 	donpcevent instance_npcname("#fwormboss2") + "::OnStart";
-	mapannounce 'map_name$, "A giant faceworm has suddenly appeared.",bc_map,"0xffffff";
+	mapannounce 'map_name$, "Um faceworm gigante apareceu de repente.",bc_map,"0xffffff";
 	stopnpctimer;
 	end;
 OnInstanceInit:
@@ -824,7 +839,7 @@ OnMyMobDead:
 		hideoffnpc instance_npcname("Chaos#2");
 		hideoffnpc instance_npcname("Iris#2");
 		donpcevent instance_npcname("#fwormboss22") + "::OnEnd";
-		mapannounce 'map_name$, "You hear something loud in the south. It must be the nest of the one we just got rid of.",bc_map,"0xffffff";
+		mapannounce 'map_name$, "Voc? ouve um barulho alto ao sul. Deve ser o ninho daquele que acabamos de derrotar.",bc_map,"0xffffff";
 		stopnpctimer;
 	}
 	end;
@@ -898,14 +913,14 @@ OnInstanceInit:
 	cutin "h_chaos01",2;
 	if (is_party_leader() == false) {
 		mes "[Chaos]";
-		mes "Nao sei do que se trata isso, mas estou falando com o lider de voces, entao espere um pouco, tudo bem?";
+		mes "Nao sei do que se trata isso, mas estou falando com o l?der de voces, ent?o espere um pouco, tudo bem?";
 		close2;
 		cutin "",255;
 		end;
 	}
 	mes "[Chaos]";
-	mes "Voce e muito bom! Mas precisa tomar cuidado daqui para frente. Este desfiladeiro estreito parece estar cheio de perigos.";
-	npctalk "Chaos: Voce e muito bom! Mas precisa tomar cuidado daqui para frente. Este desfiladeiro estreito parece estar cheio de perigos.";
+	mes "Voc? e muito bom! Mas precisa tomar cuidado daqui para frente. Este desfiladeiro estreito parece estar cheio de perigos.";
+	npctalk "Chaos: Voc? e muito bom! Mas precisa tomar cuidado daqui para frente. Este desfiladeiro estreito parece estar cheio de perigos.";
 	close2;
 	donpcevent instance_npcname("Chaos#22") + "::OnStart";
 	cutin "",255;
@@ -957,14 +972,14 @@ OnStart:
 	end;
 OnMyMobDead:
 	.@mob_dead_num = mobcount('map_name$,instance_npcname("#fwormcontrol3") + "::OnMyMobDead");
-	mapannounce 'map_name$, "There " + ( .@mob_dead_num > 1 ? "are" : "is" ) + " " + callfunc( "F_InsertPlural", .@mob_dead_num, "faceworm" ) + " still alive.",bc_map,"0xffffff";
+	mapannounce 'map_name$, "Ainda restam " + .@mob_dead_num + " faceworms vivos.",bc_map,"0xffffff";
 	if (.@mob_dead_num < 3)
 		initnpctimer;
 	end;
 OnTimer1000:
 	killmonster 'map_name$, instance_npcname("#fwormcontrol3") + "::OnMyMobDead";
 	donpcevent instance_npcname("#fwormboss3") + "::OnStart";
-	mapannounce 'map_name$, "A giant faceworm has suddenly appeared.",bc_map,"0xffffff";
+	mapannounce 'map_name$, "Um faceworm gigante apareceu de repente.",bc_map,"0xffffff";
 	stopnpctimer;
 	end;
 OnInstanceInit:
@@ -1008,7 +1023,7 @@ OnMyMobDead:
 		enablenpc instance_npcname("#fwormexit3");
 		enablenpc instance_npcname("#chaoson");
 		donpcevent instance_npcname("#fwormboss32") + "::OnEnd";
-		mapannounce 'map_name$, "You hear the pile of stones collapsing. This might be a gateway to go to other spaces.",bc_map,"0xffffff";
+		mapannounce 'map_name$, "Voc? ouve a pilha de pedras desmoronando. Isso pode ser uma passagem para outra ?rea.",bc_map,"0xffffff";
 		stopnpctimer;
 	}
 	end;
@@ -1021,7 +1036,7 @@ OnHeal01:
 	if (.@dfacehp > .@r_hpp2)
 		.@dfacehp = .@r_hpp2;
 	setunitdata 'BOSS[3], UMOB_HP, .@dfacehp;
-	mapannounce 'map_name$, "Dark faceworm has dropped a sack of fatal poison and recovers " + .@r_hpp + " amount of energy.",bc_map,"0x66ff00";
+	mapannounce 'map_name$, "O Faceworm Sombrio derramou uma bolsa de veneno fatal e recuperou " + .@r_hpp + " de energia.",bc_map,"0x66ff00";
 	end;
 OnInstanceInit:
 	hideonnpc instance_npcname("#fwormboss3");
@@ -1100,7 +1115,7 @@ OnInstanceInit:
 OnStart:
 	mapannounce 'map_name$, "A voz de Chaos: Ei, aventureiros, tomem cuidado! Evitem o veneno!",bc_map,"0xffff00";
 	sleep 6000;
-	mapannounce 'map_name$, "A voz de Chaos: Estamos procurando outro ninho, entao me avisem se encontrarem alguma coisa.",bc_map,"0xffff00";
+	mapannounce 'map_name$, "A voz de Chaos: Estamos procurando outro ninho, ent?o me avisem se encontrarem alguma coisa.",bc_map,"0xffff00";
 	donpcevent instance_npcname("#fwormcontrol4") + "::OnStart";
 	donpcevent instance_npcname("#fwormcontrol42") + "::OnStart";
 	donpcevent instance_npcname("#fwormprize4") + "::OnStart";
@@ -1121,14 +1136,14 @@ OnStart:
 	end;
 OnMyMobDead:
 	.@mob_dead_num = mobcount('map_name$,instance_npcname("#fwormcontrol4") + "::OnMyMobDead");
-	mapannounce 'map_name$, "There " + ( .@mob_dead_num > 1 ? "are" : "is" ) + " " + callfunc( "F_InsertPlural", .@mob_dead_num, "faceworm" ) + " still alive.",bc_map,"0xffffff";
+	mapannounce 'map_name$, "Ainda restam " + .@mob_dead_num + " faceworms vivos.",bc_map,"0xffffff";
 	if (.@mob_dead_num < 3)
 		initnpctimer;
 	end;
 OnTimer1000:
 	killmonster 'map_name$, instance_npcname("#fwormcontrol4") + "::OnMyMobDead";
 	donpcevent instance_npcname("#fwormboss4") + "::OnStart";
-	mapannounce 'map_name$, "You hear something screaming to the west.",bc_map,"0xffffff";
+	mapannounce 'map_name$, "Voc? ouve algo gritando a oeste.",bc_map,"0xffffff";
 	stopnpctimer;
 	end;
 OnInstanceInit:
@@ -1194,7 +1209,7 @@ OnMyMobDead:
 		hideoffnpc instance_npcname("Iris#4");
 		enablenpc instance_npcname("#chaoson2");
 		donpcevent instance_npcname("#fwormboss42") + "::OnEnd";
-		mapannounce 'map_name$, "You hear the pile of stones collapsing. I think another gateway is found.",bc_map,"0xffffff";
+		mapannounce 'map_name$, "Voc? ouve a pilha de pedras desmoronando. Acho que outra passagem foi encontrada.",bc_map,"0xffffff";
 		stopnpctimer;
 	}
 	end;
@@ -1293,7 +1308,7 @@ OnInstanceInit:
 1@face,208,149,7	script	Chaos#4	4_M_CHAOS,{
 	cutin "h_chaos01",2;
 	mes "[Chaos]";
-	mes "Hew. Esta poca esta estranha.";
+	mes "Heh. Esta po?a est? estranha.";
 	close2;
 	cutin "",255;
 	end;
@@ -1302,7 +1317,7 @@ OnStart:
 	.@iris$ = instance_npcname("Iris#4");
 	.@chaos5$ = instance_npcname("Chaos#5");
 	sleep 2000;
-	npctalk "Chaos: Iris, para que serve essa poca?";
+	npctalk "Chaos: Iris, para que serve essa po?a?";
 	sleep 3000;
 	npctalk "Iris: Bem, acho grande demais para ser o ninho de um faceworm.", .@iris$;
 	sleep 4000;
@@ -1310,11 +1325,11 @@ OnStart:
 	sleep 3000;
 	npctalk "Iris: Chaos! Para com isso.", .@iris$;
 	sleep 3000;
-	npctalk "Chaos: Por que nao? Nem parece tao perigoso assim!";
+	npctalk "Chaos: Por que n?o? Nem parece tao perigoso assim!";
 	sleep 5000;
 	hideonnpc instance_npcname("Chaos#4");
 	sleep 3000;
-	npctalk "Iris: Arrghh, Chaos, voce so arruma encrenca.", .@iris$;
+	npctalk "Iris: Arrghh, Chaos, voc? so arruma encrenca.", .@iris$;
 	sleep 6000;
 	npctalk "Chaos: Ugh! Arrgh!! O que e isso?", .@chaos5$;
 	sleep 2000;
@@ -1340,7 +1355,7 @@ OnStart:
 	sleep 3000;
 	npctalk "Iris: Eu perguntei o que aconteceu, seu idiota!", .@iris$;
 	sleep 3000;
-	npctalk "Chaos: Uhh, a Rainha Faceworm esta subindo agora e parece muito furiosa. Entao vamos, ahn, sair daqui.";
+	npctalk "Chaos: Uhh, a Rainha Faceworm est? subindo agora e parece muito furiosa. Ent?o vamos, ahn, sair daqui.";
 	sleep 6000;
 	hideonnpc instance_npcname("Chaos#4");
 	sleep 1000;
@@ -1402,9 +1417,9 @@ S_Heal:
 		.@dfacehp = .@r_hpp2;
 	setunitdata 'BOSS[5], UMOB_HP, .@dfacehp;
 	if (.@type == 5)
-		mapannounce 'map_name$, "The Faceworm Queen has dropped a sack of fatal poison and recovers " + .@r_hpp + " amount of energy.",bc_map,"0x66ff00",FW_NORMAL,14;
+		mapannounce 'map_name$, "A Rainha Faceworm derramou uma bolsa de veneno fatal e recuperou " + .@r_hpp + " de energia.",bc_map,"0x66ff00",FW_NORMAL,14;
 	else
-		mapannounce 'map_name$, "The Faceworm Queen absorbs the energy of " + .@type + " unbroken " + ( .@type > 1 ? "eggs" : "egg" ) + " and recovers " + .@r_hpp + " amount of energy.",bc_map,"0x66ff00",FW_NORMAL,14;
+		mapannounce 'map_name$, "A Rainha Faceworm absorve a energia de " + .@type + " ovos intactos e recupera " + .@r_hpp + " de energia.",bc_map,"0x66ff00",FW_NORMAL,14;
 	end;
 OnDamage:
 	getunitdata 'BOSS[5],.@arr;
@@ -1414,7 +1429,7 @@ OnDamage:
 	if (.@dfacehp < 5000000)
 		.@dfacehp = 5000000;
 	setunitdata 'BOSS[5], UMOB_HP, .@dfacehp;
-	mapannounce 'map_name$, "Chaos deals " + .@dr_hpp + " deadly damage hit points!!",bc_map,"0xffff33",FW_NORMAL,17;
+	mapannounce 'map_name$, "Chaos causou " + .@dr_hpp + " de dano devastador!!",bc_map,"0xffff33",FW_NORMAL,17;
 	end;
 OnBerserk2:
 	getunitdata 'BOSS[5],.@arr;
@@ -1425,7 +1440,7 @@ OnBerserk2:
 	'BOSS[5] = $@mobid[0];
 	setunitdata 'BOSS[5], UMOB_HP, 'BOSS_HP;
 	// monster 'map_name$,1,6,"Faceworm Queen's Life",2915,1,instance_npcname("#fwormboss5") + "::OnMyMobDead";
-	mapannounce 'map_name$, "The faceworm rages recovering " + .@MOB_HP2 + " and its attack power is increased.",bc_map,"0xff8888",FW_NORMAL,13;
+	mapannounce 'map_name$, "O faceworm entrou em f?ria, recuperou " + .@MOB_HP2 + " de HP e teve seu poder de ataque aumentado.",bc_map,"0xff8888",FW_NORMAL,13;
 	end;
 OnBerserk:
 	getunitdata 'BOSS[5],.@arr;
@@ -1437,7 +1452,7 @@ OnBerserk:
 		// monster 'map_name$,1,6,"Faceworm Queen's Life",2915,1,instance_npcname("#fwormboss5") + "::OnMyMobDead";
 		'BOSS_HP = .@arr[UMOB_HP];
 		donpcevent instance_npcname("#fwormboss50") + "::OnCalm";
-		mapannounce 'map_name$, "It is too far away from the nest. The Faceworm Queen begins raging.",bc_map,"0xff3333",FW_NORMAL,15;
+		mapannounce 'map_name$, "Ela est? longe demais do ninho. A Rainha Faceworm come?ou a entrar em f?ria.",bc_map,"0xff3333",FW_NORMAL,15;
 	}
 	end;
 OnCalm:
@@ -1455,22 +1470,22 @@ OnChange:
 	if (.@chan_f >= 10)
 		end;
 	if (.@chan_f > 0 && .@chan_f < 3) {
-		.@element$ = "wind";
+		.@element$ = "vento";
 		.@mob_id = 2535;
 	}
 	else if (.@chan_f > 2 && .@chan_f < 5) {
-		.@element$ = "earth";
+		.@element$ = "terra";
 		.@mob_id = 2533;
 	}
 	else if (.@chan_f > 4 && .@chan_f < 7) {
-		.@element$ = "water";
+		.@element$ = "?gua";
 		.@mob_id = 2534;
 	}
 	else if (.@chan_f > 6 && .@chan_f < 10) {
-		.@element$ = "its original";
+		.@element$ = "original";
 		.@mob_id = 2529;
 	}
-	mapannounce 'map_name$, "Faceworm Queen is trying to shed its skin to " + .@element$ + " attribute.",bc_map,"0xffffff";
+	mapannounce 'map_name$, "A Rainha Faceworm est? tentando trocar de pele para o atributo " + .@element$ + ".",bc_map,"0xffffff";
 	sleep 1000;
 	if (unitexists('BOSS[5]) == false)
 		stopnpctimer;
@@ -1486,7 +1501,7 @@ OnChange:
 OnWarning:
 	getunitdata 'BOSS[5],.@arr;
 	if (.@arr[UMOB_X] < 190 || .@arr[UMOB_X] > 230 || .@arr[UMOB_Y] < 135 || .@arr[UMOB_Y] > 175)
-		mapannounce 'map_name$, "Please do not go farther from the nest. The Faceworm Queen can be violent.",bc_map,"0xff5555",FW_NORMAL,15;
+		mapannounce 'map_name$, "Por favor, n?o se afastem mais do ninho. A Rainha Faceworm pode ficar violenta.",bc_map,"0xff5555",FW_NORMAL,15;
 	end;
 OnEnd:
 	killmonster 'map_name$, instance_npcname("#fwormboss5") + "::OnMyMobDead";
@@ -1637,7 +1652,7 @@ OnTouch_:
 			donpcevent instance_npcname("#fwormboss5") + "::OnDamage";
 		}
 		else
-			npctalk "Chaos: Voce nem consegue atrair a rainha ate mim?";
+			npctalk "Chaos: Voc? nem consegue atrair a rainha ate mim?";
 	}
 	disablenpc instance_npcname("#chaos_north");
 	donpcevent instance_npcname("Chaos#north") + "::OnEnd";
@@ -1668,7 +1683,7 @@ OnTouch_:
 			donpcevent instance_npcname("#fwormboss5") + "::OnDamage";
 		}
 		else
-			npctalk "Chaos: Ei~ Somos parceiros. Voce nao pode simplesmente sair correndo sozinho!";
+			npctalk "Chaos: Ei~ Somos parceiros. Voc? n?o pode simplesmente sair correndo sozinho!";
 	}
 	disablenpc instance_npcname("#chaos_south");
 	donpcevent instance_npcname("Chaos#south") + "::OnEnd";
@@ -1699,7 +1714,7 @@ OnTouch_:
 			donpcevent instance_npcname("#fwormboss5") + "::OnDamage";
 		}
 		else
-			npctalk "Chaos: Atraiam ela e tragam para mim, eu nao consigo vence-la sozinho!";
+			npctalk "Chaos: Atraiam ela e tragam para mim, eu n?o consigo vence-la sozinho!";
 	}
 	disablenpc instance_npcname("#chaos_east");
 	donpcevent instance_npcname("Chaos#east") + "::OnEnd";
@@ -1730,7 +1745,7 @@ OnTouch_:
 			donpcevent instance_npcname("#fwormboss5") + "::OnDamage";
 		}
 		else
-			npctalk "Chaos: Por que voce deixou a rainha para tras? Nossas vidas estao em jogo aqui. Concentre-se!";
+			npctalk "Chaos: Por que voc? deixou a rainha para tras? Nossas vidas est?o em jogo aqui. Concentre-se!";
 	}
 	disablenpc instance_npcname("#chaos_west");
 	donpcevent instance_npcname("Chaos#west") + "::OnEnd";
@@ -1962,7 +1977,7 @@ OnInstanceInit:
 1@face,209,159,6	script	Chaos#6	4_M_CHAOS,{
 	cutin "h_chaos01",2;
 	mes "[Chaos]";
-	mes "Hmm... Voce e muito bom. Estou impressionado.";
+	mes "Hmm... Voc? e muito bom. Estou impressionado.";
 	close2;
 	cutin "",255;
 	end;
@@ -1978,15 +1993,15 @@ OnStart:
 	sleep 2000;
 	npctalk "Chaos: Ufa... Essa foi uma luta bem longa.";
 	sleep 3000;
-	npctalk "Iris: Mas nao era essa a que estavamos procurando.", .@iris$;
+	npctalk "Iris: Mas n?o era essa a que estavamos procurando.", .@iris$;
 	sleep 4000;
-	npctalk "Chaos: Nao tem jeito. Nosso equipamento foi danificado, entao devemos recuar por enquanto.";
+	npctalk "Chaos: Nao tem jeito. Nosso equipamento foi danificado, ent?o devemos recuar por enquanto.";
 	sleep 3000;
-	npctalk "Iris: Sim, e uma pena que nao tenhamos visto o Rei Faceworm. Mas, felizmente, nao nos machucamos.", .@iris$;
+	npctalk "Iris: Sim, e uma pena que n?o tenhamos visto o Rei Faceworm. Mas, felizmente, n?o nos machucamos.", .@iris$;
 	sleep 3000;
-	npctalk "Chaos: Entao... Ei, voce ai! Nao foi nada mal.";
+	npctalk "Chaos: Ent?o... Ei, voc? ai! Nao foi nada mal.";
 	sleep 3000;
-	npctalk "Chaos: A caca de hoje e toda sua, nao vou mexer em nada.";
+	npctalk "Chaos: A caca de hoje e toda sua, n?o vou mexer em nada.";
 	sleep 3000;
 	npctalk "Chaos: Ahah~ Eu esperava que houvesse algum tesouro deixado pelo principe mercador...";
 	sleep 3000;
@@ -2018,10 +2033,20 @@ OnInstanceInit:
 
 1@face,215,159,4	script	Dimensional Device#6	PORTAL,{
 	mes "[Dimensional Device]";
-	mes "Seu tempo aqui terminou. Voce pode olhar ao redor ou ir embora. O que deseja fazer?";
+	mes "Seu tempo aqui terminou. Voc? pode olhar ao redor ou ir embora. O que deseja fazer?";
 	next;
-	if (select("Parar:Retornar para a Fenda Dimensional") == 2)
-		warp "dali",85,62;
+	if (#FacewormsNest_STATUS == 2) {
+		callfunc("F_AddRep", 1, 10, 110002, 3000);
+		set #instancia, 2;
+		callfunc("F_InstanceFinishAnnounce", "Faceworm's Nest");
+		if (#inst175_name$ == "[175+] Ninho dos Faceworms") {
+			set #inst175_status,2;
+		}
+		getitem 9608,10;	// Moeda de Instância
+		set #FacewormsNest_STATUS, 3;
+	}
+	if (select("Parar:Retornar para o Ponto de Retorno") == 2)
+		warp "SavePoint",0,0;
 	end;
 
 OnInstanceInit:
@@ -2172,16 +2197,16 @@ OnT_s2:
 	.@time_m = .@current_timer / 60;
 	.@time_s = .@current_timer % 60;
 	if (.@current_timer < 60)
-		.@time_txt$ = callfunc( "F_InsertPlural", .@time_s, "Second" );
+		.@time_txt$ = callfunc( "F_InsertPlural", .@time_s, "Segundo" );
 	else
-		.@time_txt$ = callfunc( "F_InsertPlural", .@time_m, "Minute" ) + " " + callfunc( "F_InsertPlural", .@time_s, "Second" );
+		.@time_txt$ = callfunc( "F_InsertPlural", .@time_m, "Minuto" ) + " " + callfunc( "F_InsertPlural", .@time_s, "Segundo" );
 	if (.@current_timer >= .@face_timer)
-		mapannounce 'map_name$, "A time of " + .@time_txt$ + " has been recorded on the board. But it did not beat the best record.",bc_map,"0xffff33";
+		mapannounce 'map_name$, "O tempo de " + .@time_txt$ + " foi registrado no quadro, mas n?o superou o recorde atual.",bc_map,"0xffff33";
 	else {
 		if (!.@face_member)
-			announce .@winner_name$ + " beat the best record for completing the Faceworm's Nest (" + .@time_txt$ + ").",bc_all,"0xffff33",FW_NORMAL,15;
+			announce .@winner_name$ + " bateu o recorde ao concluir o Faceworm's Nest (" + .@time_txt$ + ").",bc_all,"0xffff33",FW_NORMAL,15;
 		else
-			announce .@winner_name$ + " with " + .@face_member + " party " + ( .@face_member > 1 ? "members" : "members" ) + " beat the best record for completing the Faceworm's Nest (" + .@time_txt$ + ").",bc_all,"0xffff33",FW_NORMAL,15;
+			announce .@winner_name$ + " com " + .@face_member + " membros do grupo bateu o recorde ao concluir o Faceworm's Nest (" + .@time_txt$ + ").",bc_all,"0xffff33",FW_NORMAL,15;
 		$120719_str_face$ = .@winner_name$;
 		$120719_num_face = .@current_timer;
 		$120903_num_face = .@face_member;
@@ -2210,10 +2235,10 @@ OnInstanceInit:
 	.@time_m = .@current_timer / 60;
 	.@time_s = .@current_timer % 60;
 	if (.@current_timer < 60)
-		.@time_txt$ = callfunc( "F_InsertPlural", .@time_s, "Second" );
+		.@time_txt$ = callfunc( "F_InsertPlural", .@time_s, "Segundo" );
 	else
-		.@time_txt$ = callfunc( "F_InsertPlural", .@time_m, "Minute" ) + " " + callfunc( "F_InsertPlural", .@time_s, "Second" );
-	mapannounce 'map_name$, "The actual time for the battle at this stage remaining is " + .@time_txt$ + ".",bc_map,"0xffff33";
+		.@time_txt$ = callfunc( "F_InsertPlural", .@time_m, "Minuto" ) + " " + callfunc( "F_InsertPlural", .@time_s, "Segundo" );
+	mapannounce 'map_name$, "O tempo atual registrado para est? etapa da batalha ? " + .@time_txt$ + ".",bc_map,"0xffff33";
 
 	getmapxy .@map$, .@x, .@y, BL_NPC;
 	stopnpctimer;
@@ -2740,8 +2765,8 @@ OnInstanceInit:
 //==========================================
 1@face,1,1,3	script	#forestspirit1	CLEAR_NPC,{
 	if (callfunc("F_GM_NPC",1854,0) == 1) {
-		mes "[Time Manager]";
-		mes "What time would you like to return?";
+		mes "[Gerenciador de Tempo]";
+		mes "Para qual momento voc? deseja voltar?";
 		next;
 		switch( select("Cancel:1st Stage Start:2nd Stage Start:3rd Stage Start:4th Stage Start:Boss Start:Treasures")) {
 		case 1:
@@ -2750,7 +2775,7 @@ OnInstanceInit:
 			hideonnpc instance_npcname("Chaos#0");
 			hideonnpc instance_npcname("Iris#0");
 			donpcevent instance_npcname("#fwormcontrol1") + "::OnStart";
-			mapannounce 'map_name$, "Faceworm time attack has started. Faster kill times gives a higher percentage of rewards.",bc_map,"0xffffff";
+			mapannounce 'map_name$, "O cron?metro do Ninho dos Faceworms come?ou. Quanto mais r?pido derrotarem os monstros, maior ser? a porcentagem de recompensas.",bc_map,"0xffffff";
 			donpcevent instance_npcname("#globaltimer22") + "::OnT_s";
 			donpcevent instance_npcname("#fwormprize1") + "::OnStart";
 			warp 'map_name$,110,348;
@@ -2760,7 +2785,7 @@ OnInstanceInit:
 			enablenpc instance_npcname("#fwormexit1");
 			hideoffnpc instance_npcname("Chaos#1");
 			hideoffnpc instance_npcname("Iris#1");
-			mapannounce 'map_name$, "A hole appears after killing the dark faceworm.",bc_map,"0xffffff";
+			mapannounce 'map_name$, "Um buraco apareceu ap?s derrotar o Faceworm Sombrio.",bc_map,"0xffffff";
 			warp 'map_name$,127,95;
 			break;
 		case 4:
@@ -2768,14 +2793,14 @@ OnInstanceInit:
 			enablenpc instance_npcname("#fwormexit2");
 			hideoffnpc instance_npcname("Chaos#2");
 			hideoffnpc instance_npcname("Iris#2");
-			mapannounce 'map_name$, "You hear something loud in the south. It must be the nest of the one we just got rid of.",bc_map,"0xffffff";
+			mapannounce 'map_name$, "Voc? ouve um barulho alto ao sul. Deve ser o ninho daquele que acabamos de derrotar.",bc_map,"0xffffff";
 			warp 'map_name$,156,117;
 			break;
 		case 5:
 			enablenpc instance_npcname("#fwormenter3");
 			enablenpc instance_npcname("#fwormexit3");
 			enablenpc instance_npcname("#chaoson");
-			mapannounce 'map_name$, "You hear the pile of stones collapsing. This might be a gateway to go to other spaces.",bc_map,"0xffffff";
+			mapannounce 'map_name$, "Voc? ouve a pilha de pedras desmoronando. Isso pode ser uma passagem para outra ?rea.",bc_map,"0xffffff";
 			warp 'map_name$,261,170;
 			break;
 		case 6:
@@ -2784,7 +2809,7 @@ OnInstanceInit:
 			hideoffnpc instance_npcname("Chaos#4");
 			hideoffnpc instance_npcname("Iris#4");
 			enablenpc instance_npcname("#chaoson2");
-			mapannounce 'map_name$, "You hear the pile of stones collapsing. I think another gateway is found.",bc_map,"0xffffff";
+			mapannounce 'map_name$, "Voc? ouve a pilha de pedras desmoronando. Acho que outra passagem foi encontrada.",bc_map,"0xffffff";
 			warp 'map_name$,210,145;
 			break;
 		case 7:
@@ -2798,10 +2823,10 @@ OnInstanceInit:
 }
 
 1@face,3,1,3	script	#forestspiritboss1	CLEAR_NPC,{
-	mes "" + getmapusers('map_name$) + " people.";
+	mes "" + getmapusers('map_name$) + " pessoas.";
 	if (callfunc("F_GM_NPC",1854,0) == 1) {
-		mes "[Boss Manager]";
-		mes "What time would you like to return?";
+		mes "[Gerenciador de Chefes]";
+		mes "Para qual momento voc? deseja voltar?";
 		next;
 		switch( select("Cancel:1st Boss:2nd Boss:3rd Boss:4th Boss:Final Boss")) {
 		case 1:
@@ -2845,3 +2870,5 @@ OnInstanceInit:
 	monster 'map_name$,0,0,"Savage",1166,25;
 	end;
 }
+
+

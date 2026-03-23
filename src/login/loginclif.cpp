@@ -423,20 +423,24 @@ static int32 logclif_parse_reqcharconnec(int32 fd, struct login_session_data *sd
 		login_log(session[fd]->client_addr, sd->userid, 100, message);
 
 		result = login_mmo_auth(sd, true);
+		int32 server_slot = -1;
+		if (result == -1 && sd->sex == 'S') {
+			ARR_FIND(0, ARRAYLENGTH(ch_server), server_slot, !session_isValid(ch_server[server_slot].fd));
+		}
 		if( global_core->is_running() &&
 			result == -1 &&
 			sd->sex == 'S' &&
-			sd->account_id < ARRAYLENGTH(ch_server) &&
-			!session_isValid(ch_server[sd->account_id].fd) )
+			server_slot >= 0 &&
+			server_slot < ARRAYLENGTH(ch_server) )
 		{
 			ShowStatus("Connection of the char-server '%s' accepted.\n", server_name);
-			safestrncpy(ch_server[sd->account_id].name, server_name, sizeof(ch_server[sd->account_id].name));
-			ch_server[sd->account_id].fd = fd;
-			ch_server[sd->account_id].ip = server_ip;
-			ch_server[sd->account_id].port = server_port;
-			ch_server[sd->account_id].users = 0;
-			ch_server[sd->account_id].type = type;
-			ch_server[sd->account_id].new_ = new_;
+			safestrncpy(ch_server[server_slot].name, server_name, sizeof(ch_server[server_slot].name));
+			ch_server[server_slot].fd = fd;
+			ch_server[server_slot].ip = server_ip;
+			ch_server[server_slot].port = server_port;
+			ch_server[server_slot].users = 0;
+			ch_server[server_slot].type = type;
+			ch_server[server_slot].new_ = new_;
 
 			session[fd]->func_parse = logchrif_parse;
 			session[fd]->flag.server = 1;
