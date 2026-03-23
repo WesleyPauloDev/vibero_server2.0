@@ -354,7 +354,7 @@ dali,80,60,4	script	Magic Scholar	4_M_SAGE_C,{
 			next;
 			switch( select("Reservar Ninho dos Faceworms:O que você está fazendo aqui?:Parar de conversar.") ) {
 			case 1:
-				switch( instance_creaté(.@md_name$) ) {
+				switch( instance_create(.@md_name$) ) {
 				case -3:
 					dispbottom "Memorial Dungeon, '" + .@md_name$ + "' is already in progress.",0xFFFFFF;
 					break;
@@ -1778,9 +1778,9 @@ OnInstanceInit:
 	hideonnpc instance_npcname(strnpcinfo(0));
 	end;
 }
-1@face,214,143,0	duplicaté(Chaos#north)	Chaos#south	4_M_CHAOS
-1@face,226,158,3	duplicaté(Chaos#north)	Chaos#east	4_M_CHAOS
-1@face,200,158,6	duplicaté(Chaos#north)	Chaos#west	4_M_CHAOS
+1@face,214,143,0	duplicate(Chaos#north)	Chaos#south	4_M_CHAOS
+1@face,226,158,3	duplicate(Chaos#north)	Chaos#east	4_M_CHAOS
+1@face,200,158,6	duplicate(Chaos#north)	Chaos#west	4_M_CHAOS
 
 1@face,1,4,3	script	#fwormboss50	CLEAR_NPC,{
 	end;
@@ -2037,6 +2037,7 @@ OnInstanceInit:
 	next;
 	if (#FacewormsNest_STATUS == 2) {
 		callfunc("F_AddRep", 1, 10, 110002, 3000);
+		callfunc("F_DiaryRefreshDaily");
 		set #instancia, 2;
 		callfunc("F_InstanceFinishAnnounce", "Faceworm's Nest");
 		if (#inst175_name$ == "[175+] Ninho dos Faceworms") {
@@ -2081,59 +2082,59 @@ OnMyMobDead:
 	end;
 }
 
-1@face,62,195,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#2	4_SOIL,5,5
-1@face,66,94,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#3	4_SOIL,5,5
-1@face,68,265,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#4	4_SOIL,5,5
-1@face,68,108,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#5	4_SOIL,5,5
-1@face,72,202,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#6	4_SOIL,5,5
-1@face,75,73,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#7	4_SOIL,5,5
-1@face,76,241,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#8	4_SOIL,5,5
-1@face,79,274,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#9	4_SOIL,5,5
-1@face,79,119,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#10	4_SOIL,5,5
-1@face,97,59,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#11	4_SOIL,5,5
-1@face,99,211,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#12	4_SOIL,5,5
-1@face,100,122,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#13	4_SOIL,5,5
-1@face,105,190,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#14	4_SOIL,5,5
-1@face,108,264,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#15	4_SOIL,5,5
-1@face,108,74,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#16	4_SOIL,5,5
-1@face,111,178,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#17	4_SOIL,5,5
-1@face,112,137,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#18	4_SOIL,5,5
-1@face,112,159,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#19	4_SOIL,5,5
-1@face,112,236,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#20	4_SOIL,5,5
-1@face,118,109,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#21	4_SOIL,5,5
-1@face,119,201,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#22	4_SOIL,5,5
-1@face,123,257,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#23	4_SOIL,5,5
-1@face,124,216,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#24	4_SOIL,5,5
-1@face,125,228,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#25	4_SOIL,5,5
-1@face,126,290,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#26	4_SOIL,5,5
-1@face,128,174,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#27	4_SOIL,5,5
-1@face,133,244,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#28	4_SOIL,5,5
-1@face,139,218,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#29	4_SOIL,5,5
-1@face,140,255,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#30	4_SOIL,5,5
-1@face,148,238,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#31	4_SOIL,5,5
-1@face,157,293,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#32	4_SOIL,5,5
-1@face,158,138,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#33	4_SOIL,5,5
-1@face,158,163,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#34	4_SOIL,5,5
-1@face,167,277,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#35	4_SOIL,5,5
-1@face,168,194,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#36	4_SOIL,5,5
-1@face,170,251,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#37	4_SOIL,5,5
-1@face,171,62,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#38	4_SOIL,5,5
-1@face,171,149,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#39	4_SOIL,5,5
-1@face,172,173,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#40	4_SOIL,5,5
-1@face,175,296,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#41	4_SOIL,5,5
-1@face,178,234,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#42	4_SOIL,5,5
-1@face,183,185,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#43	4_SOIL,5,5
-1@face,191,289,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#44	4_SOIL,5,5
-1@face,194,192,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#45	4_SOIL,5,5
-1@face,196,207,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#46	4_SOIL,5,5
-1@face,198,257,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#47	4_SOIL,5,5
-1@face,199,273,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#48	4_SOIL,5,5
-1@face,211,244,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#49	4_SOIL,5,5
-1@face,229,200,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#50	4_SOIL,5,5
-1@face,232,271,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#51	4_SOIL,5,5
-1@face,250,223,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#52	4_SOIL,5,5
-1@face,254,324,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#53	4_SOIL,5,5
-1@face,255,263,5	duplicaté(Suspicious Mound#1)	Suspicious Mound#54	4_SOIL,5,5
+1@face,62,195,5	duplicate(Suspicious Mound#1)	Suspicious Mound#2	4_SOIL,5,5
+1@face,66,94,5	duplicate(Suspicious Mound#1)	Suspicious Mound#3	4_SOIL,5,5
+1@face,68,265,5	duplicate(Suspicious Mound#1)	Suspicious Mound#4	4_SOIL,5,5
+1@face,68,108,5	duplicate(Suspicious Mound#1)	Suspicious Mound#5	4_SOIL,5,5
+1@face,72,202,5	duplicate(Suspicious Mound#1)	Suspicious Mound#6	4_SOIL,5,5
+1@face,75,73,5	duplicate(Suspicious Mound#1)	Suspicious Mound#7	4_SOIL,5,5
+1@face,76,241,5	duplicate(Suspicious Mound#1)	Suspicious Mound#8	4_SOIL,5,5
+1@face,79,274,5	duplicate(Suspicious Mound#1)	Suspicious Mound#9	4_SOIL,5,5
+1@face,79,119,5	duplicate(Suspicious Mound#1)	Suspicious Mound#10	4_SOIL,5,5
+1@face,97,59,5	duplicate(Suspicious Mound#1)	Suspicious Mound#11	4_SOIL,5,5
+1@face,99,211,5	duplicate(Suspicious Mound#1)	Suspicious Mound#12	4_SOIL,5,5
+1@face,100,122,5	duplicate(Suspicious Mound#1)	Suspicious Mound#13	4_SOIL,5,5
+1@face,105,190,5	duplicate(Suspicious Mound#1)	Suspicious Mound#14	4_SOIL,5,5
+1@face,108,264,5	duplicate(Suspicious Mound#1)	Suspicious Mound#15	4_SOIL,5,5
+1@face,108,74,5	duplicate(Suspicious Mound#1)	Suspicious Mound#16	4_SOIL,5,5
+1@face,111,178,5	duplicate(Suspicious Mound#1)	Suspicious Mound#17	4_SOIL,5,5
+1@face,112,137,5	duplicate(Suspicious Mound#1)	Suspicious Mound#18	4_SOIL,5,5
+1@face,112,159,5	duplicate(Suspicious Mound#1)	Suspicious Mound#19	4_SOIL,5,5
+1@face,112,236,5	duplicate(Suspicious Mound#1)	Suspicious Mound#20	4_SOIL,5,5
+1@face,118,109,5	duplicate(Suspicious Mound#1)	Suspicious Mound#21	4_SOIL,5,5
+1@face,119,201,5	duplicate(Suspicious Mound#1)	Suspicious Mound#22	4_SOIL,5,5
+1@face,123,257,5	duplicate(Suspicious Mound#1)	Suspicious Mound#23	4_SOIL,5,5
+1@face,124,216,5	duplicate(Suspicious Mound#1)	Suspicious Mound#24	4_SOIL,5,5
+1@face,125,228,5	duplicate(Suspicious Mound#1)	Suspicious Mound#25	4_SOIL,5,5
+1@face,126,290,5	duplicate(Suspicious Mound#1)	Suspicious Mound#26	4_SOIL,5,5
+1@face,128,174,5	duplicate(Suspicious Mound#1)	Suspicious Mound#27	4_SOIL,5,5
+1@face,133,244,5	duplicate(Suspicious Mound#1)	Suspicious Mound#28	4_SOIL,5,5
+1@face,139,218,5	duplicate(Suspicious Mound#1)	Suspicious Mound#29	4_SOIL,5,5
+1@face,140,255,5	duplicate(Suspicious Mound#1)	Suspicious Mound#30	4_SOIL,5,5
+1@face,148,238,5	duplicate(Suspicious Mound#1)	Suspicious Mound#31	4_SOIL,5,5
+1@face,157,293,5	duplicate(Suspicious Mound#1)	Suspicious Mound#32	4_SOIL,5,5
+1@face,158,138,5	duplicate(Suspicious Mound#1)	Suspicious Mound#33	4_SOIL,5,5
+1@face,158,163,5	duplicate(Suspicious Mound#1)	Suspicious Mound#34	4_SOIL,5,5
+1@face,167,277,5	duplicate(Suspicious Mound#1)	Suspicious Mound#35	4_SOIL,5,5
+1@face,168,194,5	duplicate(Suspicious Mound#1)	Suspicious Mound#36	4_SOIL,5,5
+1@face,170,251,5	duplicate(Suspicious Mound#1)	Suspicious Mound#37	4_SOIL,5,5
+1@face,171,62,5	duplicate(Suspicious Mound#1)	Suspicious Mound#38	4_SOIL,5,5
+1@face,171,149,5	duplicate(Suspicious Mound#1)	Suspicious Mound#39	4_SOIL,5,5
+1@face,172,173,5	duplicate(Suspicious Mound#1)	Suspicious Mound#40	4_SOIL,5,5
+1@face,175,296,5	duplicate(Suspicious Mound#1)	Suspicious Mound#41	4_SOIL,5,5
+1@face,178,234,5	duplicate(Suspicious Mound#1)	Suspicious Mound#42	4_SOIL,5,5
+1@face,183,185,5	duplicate(Suspicious Mound#1)	Suspicious Mound#43	4_SOIL,5,5
+1@face,191,289,5	duplicate(Suspicious Mound#1)	Suspicious Mound#44	4_SOIL,5,5
+1@face,194,192,5	duplicate(Suspicious Mound#1)	Suspicious Mound#45	4_SOIL,5,5
+1@face,196,207,5	duplicate(Suspicious Mound#1)	Suspicious Mound#46	4_SOIL,5,5
+1@face,198,257,5	duplicate(Suspicious Mound#1)	Suspicious Mound#47	4_SOIL,5,5
+1@face,199,273,5	duplicate(Suspicious Mound#1)	Suspicious Mound#48	4_SOIL,5,5
+1@face,211,244,5	duplicate(Suspicious Mound#1)	Suspicious Mound#49	4_SOIL,5,5
+1@face,229,200,5	duplicate(Suspicious Mound#1)	Suspicious Mound#50	4_SOIL,5,5
+1@face,232,271,5	duplicate(Suspicious Mound#1)	Suspicious Mound#51	4_SOIL,5,5
+1@face,250,223,5	duplicate(Suspicious Mound#1)	Suspicious Mound#52	4_SOIL,5,5
+1@face,254,324,5	duplicate(Suspicious Mound#1)	Suspicious Mound#53	4_SOIL,5,5
+1@face,255,263,5	duplicate(Suspicious Mound#1)	Suspicious Mound#54	4_SOIL,5,5
 
 // Instance Venom Bugs :: in_face_v
 //============================================================
@@ -2169,14 +2170,14 @@ OnMyMobDead:
 	end;
 }
 
-1@face,165,147,0	duplicaté(#toxicarea1)	#toxicarea2	HIDDEN_WARP_NPC,10,10
-1@face,163,166,0	duplicaté(#toxicarea1)	#toxicarea3	HIDDEN_WARP_NPC,10,10
-1@face,183,197,0	duplicaté(#toxicarea1)	#toxicarea4	HIDDEN_WARP_NPC,10,10
-1@face,202,204,0	duplicaté(#toxicarea1)	#toxicarea5	HIDDEN_WARP_NPC,10,10
-1@face,237,220,0	duplicaté(#toxicarea1)	#toxicarea6	HIDDEN_WARP_NPC,10,10
-1@face,245,241,0	duplicaté(#toxicarea1)	#toxicarea7	HIDDEN_WARP_NPC,10,10
-1@face,292,277,0	duplicaté(#toxicarea1)	#toxicarea8	HIDDEN_WARP_NPC,10,10
-1@face,248,322,0	duplicaté(#toxicarea1)	#toxicarea9	HIDDEN_WARP_NPC,10,10
+1@face,165,147,0	duplicate(#toxicarea1)	#toxicarea2	HIDDEN_WARP_NPC,10,10
+1@face,163,166,0	duplicate(#toxicarea1)	#toxicarea3	HIDDEN_WARP_NPC,10,10
+1@face,183,197,0	duplicate(#toxicarea1)	#toxicarea4	HIDDEN_WARP_NPC,10,10
+1@face,202,204,0	duplicate(#toxicarea1)	#toxicarea5	HIDDEN_WARP_NPC,10,10
+1@face,237,220,0	duplicate(#toxicarea1)	#toxicarea6	HIDDEN_WARP_NPC,10,10
+1@face,245,241,0	duplicate(#toxicarea1)	#toxicarea7	HIDDEN_WARP_NPC,10,10
+1@face,292,277,0	duplicate(#toxicarea1)	#toxicarea8	HIDDEN_WARP_NPC,10,10
+1@face,248,322,0	duplicate(#toxicarea1)	#toxicarea9	HIDDEN_WARP_NPC,10,10
 
 // Instance Timer :: in_facetimer
 //============================================================
@@ -2399,9 +2400,9 @@ OnInstanceInit:
 	hideonnpc instance_npcname(strnpcinfo(0));
 	end;
 }
-1@face,162,271,3	duplicaté(#fwormprize1)	#fwormprize2	4_TREASURE_BOX
-1@face,278,308,3	duplicaté(#fwormprize1)	#fwormprize3	4_TREASURE_BOX
-1@face,214,108,3	duplicaté(#fwormprize1)	#fwormprize4	4_TREASURE_BOX
+1@face,162,271,3	duplicate(#fwormprize1)	#fwormprize2	4_TREASURE_BOX
+1@face,278,308,3	duplicate(#fwormprize1)	#fwormprize3	4_TREASURE_BOX
+1@face,214,108,3	duplicate(#fwormprize1)	#fwormprize4	4_TREASURE_BOX
 
 1@face,213,157,3	script	#fwormprize5	4_TREASURE_BOX,{
 	'120903_str_face$ = strcharinfo(0);
@@ -2732,32 +2733,32 @@ OnInstanceInit:
 	hideonnpc instance_npcname(strnpcinfo(0));
 	end;
 }
-1@face,164,343,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#2	4_TREASURE_BOX
-1@face,31,364,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#3	4_TREASURE_BOX
-1@face,26,290,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#4	4_TREASURE_BOX
-1@face,56,269,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#5	4_TREASURE_BOX
-1@face,80,213,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#6	4_TREASURE_BOX
-1@face,51,174,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#7	4_TREASURE_BOX
-1@face,261,62,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#8	4_TREASURE_BOX
-1@face,70,36,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#9	4_TREASURE_BOX
-1@face,182,51,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#10	4_TREASURE_BOX
-1@face,128,139,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#11	4_TREASURE_BOX
-1@face,108,232,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#12	4_TREASURE_BOX
-1@face,117,303,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#13	4_TREASURE_BOX
-1@face,134,294,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#14	4_TREASURE_BOX
-1@face,152,159,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#15	4_TREASURE_BOX
-1@face,177,208,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#16	4_TREASURE_BOX
-1@face,260,220,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#17	4_TREASURE_BOX
-1@face,216,357,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#18	4_TREASURE_BOX
-1@face,310,263,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#19	4_TREASURE_BOX
-1@face,307,158,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#20	4_TREASURE_BOX
-1@face,307,56,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#21	4_TREASURE_BOX
-1@face,240,64,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#22	4_TREASURE_BOX
-1@face,214,90,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#23	4_TREASURE_BOX
-1@face,237,108,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#24	4_TREASURE_BOX
-1@face,284,165,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#25	4_TREASURE_BOX
-1@face,184,363,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#26	4_TREASURE_BOX
-1@face,48,220,3	duplicaté(Merchant Prince's Box#1)	Merchant Prince's Box#27	4_TREASURE_BOX
+1@face,164,343,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#2	4_TREASURE_BOX
+1@face,31,364,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#3	4_TREASURE_BOX
+1@face,26,290,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#4	4_TREASURE_BOX
+1@face,56,269,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#5	4_TREASURE_BOX
+1@face,80,213,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#6	4_TREASURE_BOX
+1@face,51,174,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#7	4_TREASURE_BOX
+1@face,261,62,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#8	4_TREASURE_BOX
+1@face,70,36,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#9	4_TREASURE_BOX
+1@face,182,51,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#10	4_TREASURE_BOX
+1@face,128,139,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#11	4_TREASURE_BOX
+1@face,108,232,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#12	4_TREASURE_BOX
+1@face,117,303,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#13	4_TREASURE_BOX
+1@face,134,294,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#14	4_TREASURE_BOX
+1@face,152,159,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#15	4_TREASURE_BOX
+1@face,177,208,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#16	4_TREASURE_BOX
+1@face,260,220,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#17	4_TREASURE_BOX
+1@face,216,357,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#18	4_TREASURE_BOX
+1@face,310,263,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#19	4_TREASURE_BOX
+1@face,307,158,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#20	4_TREASURE_BOX
+1@face,307,56,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#21	4_TREASURE_BOX
+1@face,240,64,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#22	4_TREASURE_BOX
+1@face,214,90,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#23	4_TREASURE_BOX
+1@face,237,108,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#24	4_TREASURE_BOX
+1@face,284,165,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#25	4_TREASURE_BOX
+1@face,184,363,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#26	4_TREASURE_BOX
+1@face,48,220,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#27	4_TREASURE_BOX
 
 // Instance GM Function :: in_face_ad
 //==========================================
