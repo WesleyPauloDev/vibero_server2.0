@@ -18,14 +18,15 @@
 
 	OnStartInstance:
 		// #WolfchevLaboratory_STATUS = 2;
-		// instance_create("Laboratório Wolfchev");
-		// instance_enter("Laboratório Wolfchev");
+		// instance_create("Laboratorio Wolfchev");
+		// instance_enter("Laboratorio Wolfchev");
 		callfunc("F_InstanceEntry",
-			"Laboratório Wolfchev",        // Nome da instância
+			"Laboratorio Wolfchev",        // Nome da instância
 			"Wolfchev",                 // Nome do NPC
 			"wolfchev_laboratory", // Variável de cooldown da conta
 			"WolfchevLaboratory",        // Variável de status da conta
-			150                      // Level mínimo
+			150,                      // Level mínimo
+			"Laboratório Wolfchev"
 		);
 	end;
 }
@@ -1172,7 +1173,7 @@ OnMyMobDead:
 		callfunc("F_DiaryRefreshDaily");
 		set #instancia, 2;
 		callfunc("F_InstanceFinishAnnounce", "Laboratório Wolfchev");
-		if (#inst175_name$ == "[150+] Laboratório Wolfchev") {
+		if (#inst175_name$ == "Laboratório Wolfchev") {
 			set #inst175_status,2;
 		}
 		getitem 9608,10;	// Moeda de Instância

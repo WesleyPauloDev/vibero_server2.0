@@ -18,7 +18,8 @@ OnStartInstance:
 			"Guarda",           // Nome do NPC
 			"BuwayaCave",       // Variavel de cooldown
 			"BuwayaCave",       // Variavel de status
-			130                 // Level minimo
+			130,                 // Level minimo
+			"Caverna Buwaya"
 		);
 	end;
 }
@@ -307,10 +308,10 @@ OnMyMobDead:
 			callfunc("F_DiaryRefreshDaily");
 			set #instancia, 2;
 			if (!'reward_announced) {
-				callfunc("F_InstanceFinishAnnounce", "Caverna Buwaya");
+				callfunc("F_InstanceFinishAnnounce", "Buwaya Cave");
 				'reward_announced = 1;
 			}
-			if (#inst175_name$ == "[130+] Caverna Buwaya") {
+			if (#inst175_name$ == "Buwaya Cave") {
 				set #inst175_status,2;
 			}
 			getitem 9608,10;	// Moeda de Instancia

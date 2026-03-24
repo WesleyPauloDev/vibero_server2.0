@@ -3,24 +3,25 @@ function	script	F_InstanceEntry	{
 	// ==============================
 	// Par‚metros esperados:
 	// ==============================
-	// getarg(0) -> Nome da inst‚ncia (string)
+	// getarg(0) -> Nome exato da inst‚ncia no DB (string)
 	// getarg(1) -> Nome do NPC (string)
 	// getarg(2) -> Nome da vari·vel de cooldown (string de vari·vel de conta)
 	// getarg(3) -> Nome da vari·vel de status (string de vari·vel de conta)
 	// getarg(4) -> Level mÌnimo (n˙mero)
+	// getarg(5) -> Nome amig·vel da inst‚ncia (string opcional)
 	// ==============================
 
-	.@md_name$ = getarg(0);
+	.@db_name$ = getarg(0);
 	.@npc_name$ = getarg(1);
 	.@cooldown_var$ = getarg(2);
 	.@status_var$ = getarg(3);
 	.@min_level = getarg(4);
-	debugmes "[WG HARD] F_InstanceEntry md=" + .@md_name$ + " status_var=" + .@status_var$;
+	.@display_name$ = getarg(5, .@db_name$);
 
     .@cooldown_name$ = "#cooldown_" + .@cooldown_var$;
     .@status_name$ = "#" + .@status_var$ + "_STATUS";
 
-    // debugmes ".@md_name$: " + .@md_name$;
+    // debugmes ".@db_name$: " + .@db_name$;
     // debugmes ".@npc_name$: " + .@npc_name$;
     // debugmes ".@cooldown_name$: " + getd(.@cooldown_name$);
     // debugmes ".@status_name$: " + getd(.@status_name$);
@@ -84,7 +85,7 @@ function	script	F_InstanceEntry	{
 	// 5. Di·logo inicial
 	// ============================
 	mes "[" + .@npc_name$ + "]";
-	mes "Ol·, aventureiro! Deseja criar ou entrar na inst‚ncia ^0055FF" + .@md_name$ + "^000000?";
+	mes "Ol·, aventureiro! Deseja criar ou entrar na inst‚ncia ^0055FF" + .@display_name$ + "^000000?";
 	next;
 
 	switch(select("Criar inst‚ncia", "Entrar na inst‚ncia", "Cancelar")) {
@@ -98,11 +99,11 @@ function	script	F_InstanceEntry	{
 				close;
 			}
 			if (getd(.@status_name$)) == 0 {
-				if (instance_create(.@md_name$) >= 0) {
+				if (instance_create(.@db_name$) >= 0) {
 					mes "[" + .@npc_name$ + "]";
 					mes "A Inst‚ncia est· se abrindo...";
-					announce "[" + .@md_name$ + "] O jogador " + strcharinfo(0) + " do grupo " + getpartyname(getcharid(1)) + " criou a inst‚ncia.", bc_all, "0xFF9900";
-					callfunc("F_InstanceLogStart", .@md_name$);
+					announce "[Inst‚ncias] " + strcharinfo(0) + " criou " + .@display_name$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
+					callfunc("F_InstanceLogStart", .@display_name$);
 
 					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
 					setd(.@status_name$), 1;
@@ -118,17 +119,14 @@ function	script	F_InstanceEntry	{
 		// 7. Entrar na inst‚ncia
 		// ============================
 		case 2:
-				debugmes "[WG HARD] before instance_enter md=" + .@md_name$ + " status=" + getd(.@status_name$);
-			switch(instance_enter(.@md_name$)) {
+			switch(instance_enter(.@db_name$)) {
 				case IE_OK:
 					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
-					debugmes "[WG HARD] IE_OK before set: " + getd(.@status_name$) + " md=" + .@md_name$;
 					setd(.@status_name$), 2;
-					debugmes "[WG HARD] IE_OK after set: " + getd(.@status_name$) + " md=" + .@md_name$;
 					end;
 				case IE_NOINSTANCE:
                     if(getd(.@status_name$) == 0) {
-				    mes "A inst√¢ncia ainda n√£o foi criada.";
+				    mes "A inst‚ncia ainda n„o foi criada.";
                         close;
                     }
                     mes "VocÍ j· entrou na inst‚ncia hoje.";
@@ -155,7 +153,7 @@ function	script	F_InstanceEntry	{
 }
 
 function	script	F_InstanceLogStart	{
-	.@md_name$ = getarg(0);
+	.@db_name$ = getarg(0);
 	.@party_id = getcharid(1);
 	if (.@party_id < 1)
 		return;
@@ -170,7 +168,7 @@ function	script	F_InstanceLogStart	{
 }
 
 function	script	F_InstanceLogFinish	{
-	.@md_name$ = getarg(0);
+	.@db_name$ = getarg(0);
 	.@party_id = getcharid(1);
 	if (.@party_id < 1)
 		return;
@@ -184,8 +182,8 @@ function	script	F_InstanceLogFinish	{
 }
 
 function	script	F_InstanceFinishAnnounce	{
-	.@md_name$ = getarg(0);
+	.@db_name$ = getarg(0);
 	callfunc("F_InstanceLogFinish", .@md_name$);
-	announce "[" + .@md_name$ + "] O jogador " + strcharinfo(0) + " do grupo " + getpartyname(getcharid(1)) + " finalizou a inst‚ncia.", bc_all, "0xFF9900";
+	announce "[Inst‚ncias] " + strcharinfo(0) + " concluiu " + .@md_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
 	return;
 }
