@@ -6,18 +6,18 @@
 prontera,157,188,4	script	Arena MVP EOM	4_EP19_IWIN,{
 	.@instance_name$ = "Arena MVP EOM";
 
-	mes "[Arena MVP EOM]";
-	mes "Esta arena usa o mapa ^0055FFgs_room^000000 e inicia em ^0055FF50,50^000000.";
+	mes "[Arena MVP]";
+	mes "^0055FFUse esta sala para farmar MVPs com Galho Sagrento^000000.";
 	mes "Somente membros do seu grupo poderão entrar.";
 	next;
 
 	if (getcharid(1) < 1) {
-		mes "[Arena MVP EOM]";
+		mes "[Arena MVP]";
 		mes "Você precisa estar em um grupo.";
 		close;
 	}
 
-	mes "[Arena MVP EOM]";
+	mes "[Arena MVP]";
 	mes "Deseja entrar na sala do seu grupo?";
 	if (select("Entrar agora:Cancelar") == 2)
 		close;
@@ -28,35 +28,34 @@ prontera,157,188,4	script	Arena MVP EOM	4_EP19_IWIN,{
 	case IE_NOINSTANCE:
 		break;
 	default:
-		mes "[Arena MVP EOM]";
+		mes "[Arena MVP]";
 		mes "Não foi possível entrar na sala agora.";
 		mes "Tente novamente em instantes.";
 		close;
 	}
 
 	if (!is_party_leader()) {
-		mes "[Arena MVP EOM]";
+		mes "[Arena MVP]";
 		mes "O líder do grupo ainda não criou a sala.";
 		mes "Peça para ele falar comigo primeiro.";
 		close;
 	}
 
-	mes "[Arena MVP EOM]";
+	mes "[Arena MVP]";
 	mes "Não existe uma sala aberta para o seu grupo.";
 	mes "Deseja criar uma nova agora?";
 	if (select("Criar sala:Cancelar") == 2)
 		close;
 
 	if (instance_create(.@instance_name$) < 0) {
-		mes "[Arena MVP EOM]";
+		mes "[Arena MVP]";
 		mes "Não foi possível criar a instância agora.";
 		mes "Verifique se seu grupo já não possui uma instância ativa.";
-		mes "Se a instância acabou de ser cadastrada, recarregue o instance_db ou reinicie o map-server.";
 		close;
 	}
 
 	if (instance_enter(.@instance_name$) != IE_OK) {
-		mes "[Arena MVP EOM]";
+		mes "[Arena MVP]";
 		mes "A instância foi criada, mas não foi possível entrar agora.";
 		mes "Tente falar comigo novamente.";
 		close;
@@ -80,7 +79,6 @@ L_EnterArena:
 		removemapflag .@map$, MF_FIREWORKS;
 		warp .@map$,50,50;
 	}
-	mapannounce "prontera", "[Arena MVP EOM] O grupo " + getpartyname(getcharid(1)) + " entrou na arena.", bc_map, 0x00FF99;
-	dispbottom "Você entrou na Arena MVP EOM em gs_room.";
+	dispbottom "Você entrou na Arena MVP.";
 	end;
 }
