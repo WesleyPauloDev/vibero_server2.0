@@ -158,7 +158,7 @@ function	script	F_InstanceLogStart	{
 	if (.@party_id < 1)
 		return;
 	query_sql("INSERT INTO `instance_monitor_log` (`instance_name`, `party_id`, `party_name`, `created_by_account_id`, `created_by_char_id`, `created_by_name`, `status`, `started_at`) VALUES ('"
-		+ escape_sql(.@md_name$) + "', "
+		+ escape_sql(.@db_name$) + "', "
 		+ .@party_id + ", '"
 		+ escape_sql(getpartyname(.@party_id)) + "', "
 		+ getcharid(3) + ", "
@@ -176,14 +176,14 @@ function	script	F_InstanceLogFinish	{
 		+ getcharid(3) + ", `finished_by_char_id` = "
 		+ getcharid(0) + ", `finished_by_name` = '"
 		+ escape_sql(strcharinfo(0)) + "' WHERE `id` = (SELECT `id` FROM (SELECT `id` FROM `instance_monitor_log` WHERE `instance_name` = '"
-		+ escape_sql(.@md_name$) + "' AND `party_id` = "
+		+ escape_sql(.@db_name$) + "' AND `party_id` = "
 		+ .@party_id + " AND `status` = 'OPEN' ORDER BY `id` DESC LIMIT 1) AS `open_instance`)");
 	return;
 }
 
 function	script	F_InstanceFinishAnnounce	{
 	.@db_name$ = getarg(0);
-	callfunc("F_InstanceLogFinish", .@md_name$);
-	announce "[Instâncias] " + strcharinfo(0) + " concluiu " + .@md_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
+	callfunc("F_InstanceLogFinish", .@db_name$);
+	announce "[Instâncias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
 	return;
 }
