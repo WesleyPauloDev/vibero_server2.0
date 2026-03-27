@@ -1,10 +1,70 @@
-// // // //============================================================
-// // // // NPC: Controle de Comércio do Mapa
-// // // // Permite ativar/desativar Vending, Buying Store e Autotrade
-// // // //============================================================
-
-// prontera,150,180,4	script	NPC de TESTE	4_F_KAFRA1,{
-// 	mes "Bem-vindo ao NPC de TESTE!";
-// 	set_bonus_allstats(getcharid(0), 500);
+// prontera,155,185,5	script	Guardian of Power#pa082	515,{
+// 	if (checkweight(1201,1) == 0) {
+// 		mes "Reduce the amount of items that you have in your inventory before continuing.";
+// 		close;
+// 	}
+// 	if (MaxWeight - Weight < 1000) {
+// 		mes "You are carrying too much in your inventory.";
+// 		close;
+// 	}
+// 	if (countitem(6380) < 10) {
+// 		mes "[Guardian of Power]";
+// 		mes "I give Rune Knights, Guillotine Crosses, and Rangers ancient artifacts to help them carry out their missions.";
+// 		next;
+// 		mes "[Guardian of Power]";
+// 		mes "There are guardians that give Mora Village coins which you can use to exchange for these artifacts.";
+// 		next;
+// 		mes "[Guardian of Power]";
+// 		mes "If you collect 10 or more Mora coins, then I can trade them for the artifacts.";
+// 		close;
+// 	}
+// 	mes "[Guardian of Power]";
+// 	mes "I think that you're ready to receive the ancient artifacts.";
+// 	next;
+// 	mes "[Guardian of Power]";
+// 	mes "Based on what class you specify, there are various artifacts available.";
+// 	next;
+// 	mes "[Guardian of Power]";
+// 	mes "^ff0000Choose carefully because these artifacts aren't easy to come by^000000. So what class do you want it for?";
+// 	next;
+// 	setarray .@jobs$[0],"Rune Knight","Guillotine Cross","Ranger";
+// 	set .@job, select("Cancel:Rune Knight:Guillotine Cross:Ranger")-2;
+// 	if (.@job == -1) {
+// 		mes "[Guardian of Power]";
+// 		mes "Talk to me later then.";
+// 		close;
+// 	}
+// 	mes "[Guardian of Power]";
+// 	mes .@jobs$[.@job]+"?";
+// 	mes "Which artifact do you want?";
+// 	next;
+// 	switch(.@job) {
+// 	case 0: // Rune Knight
+// 		setarray .@items[0],2475,2476,2574,2575;
+// 		set .@i, select("Cancel:Ur's Greaves (Shoes):Peuz's Greaves (Shoes):Ur's Manteau (Garment):Peuz's Manteau (Garment)")-2;
+// 		break;
+// 	case 1: // Guillotine Cross
+// 		setarray .@items[0],2477,2478,2577,2578;
+// 		set .@i, select("Cancel:Sapha Shoes (Shoes):Nab Shoes (Shoes):Sapha Hood (Garment):Nab Hood (Garment)")-2;
+// 		break;
+// 	case 2: // Ranger
+// 		setarray .@items[0],2479,2480,2580,2581;
+// 		set .@i, select("Cancel:White Wing Boots (Shoes):Black Wing Boots (Shoes):White Wing Manteau (Garment):Black Wing Manteau (Garment)")-2;
+// 		break;
+// 	}
+// 	if (.@i == -1) {
+// 		mes "[Guardian of Power]";
+// 		mes "Talk to me later then.";
+// 		close;
+// 	}
+// 	if (countitem(6380) < 10) {
+// 		mes "[Guardian of Power]";
+// 		mes "Didn't I tell you to bring the correct amount of Mora Coins?";
+// 		close;
+// 	}
+// 	delitem 6380,10; //Mora_Coin
+// 	getitem .@items[.@i],1;
+// 	mes "[Guardian of Power]";
+// 	mes "Thank you for the 10 Mora Coins. Here is your artifact for the "+.@jobs$[.@job]+" job. Come back whenever you get more Mora Coins.";
 // 	close;
 // }
