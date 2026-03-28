@@ -1,0 +1,43 @@
+prontera,164,204,5	script	Alterador de Slot	4_M_01,{
+	mes "[Alterador de Slot]";
+	mes "Eu posso liberar uma alteracao de slot para este personagem.";
+	mes "Depois disso, voce precisa voltar para a selecao de personagens para mover o char de posicao.";
+	next;
+
+	switch (select("Receber alteracao de slot:Como funciona:Cancelar")) {
+	case 2:
+		mes "[Alterador de Slot]";
+		mes "Para mover o slot do personagem, va ate a tela de selecao de personagens.";
+		next;
+		mes "[Alterador de Slot]";
+		mes "Clique com o botao direito no personagem que deseja mover e selecione ^0000FFRealizar Troca de Slot^000000.";
+		next;
+		mes "[Alterador de Slot]";
+		mes "Depois, clique com o botao direito no slot vazio que deseja utilizar.";
+		next;
+		mes "[Alterador de Slot]";
+		mes "Por fim, confirme a alteracao para concluir a troca de slot.";
+		close;
+	case 3:
+		close;
+	}
+
+	if (CharMoves > 0) {
+		mes "[Alterador de Slot]";
+		mes "Voce ja possui ^0000FF" + CharMoves + "^000000 alteracao(oes) de slot disponivel(is).";
+		mes "Basta sair para a tela de personagens e mover seu char.";
+		close;
+	}
+
+	mes "[Alterador de Slot]";
+	mes "Deseja receber ^0000FF1 alteracao de slot^000000 agora?";
+	if (select("Sim:Cancelar") == 2)
+		close;
+
+	CharMoves += 1;
+
+	mes "[Alterador de Slot]";
+	mes "Pronto, sua alteracao de slot foi liberada com sucesso.";
+	mes "Agora desconecte e, na tela de personagens, mova o char para o slot desejado.";
+	close;
+}
