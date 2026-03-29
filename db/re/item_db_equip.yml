@@ -95969,7 +95969,7 @@ Body:
     EquipLevelMin: 30
     View: 856
     Script: |
-      bonus bDelayrate,-5;
+      bonus bDelayrate,-10;
   - Id: 19185
     AegisName: Blackhand_Of_Fate
     Name: Dark Hand
@@ -99437,6 +99437,55 @@ Body:
       bonus2 bSkillAtk,"CR_ACIDDEMONSTRATION",.@dmg;
       bonus2 bSkillAtk,"GN_CRAZYWEED_ATK",.@dmg;
       bonus bDelayrate,.@delay;
+  - Id: 19455
+    AegisName: Protect_Feathers_
+    Name: Protect Feathers
+    Type: Armor
+    Weight: 500
+    Slots: 1
+    Locations:
+      Head_Mid: true
+    ArmorLevel: 1
+    EquipLevelMin: 70
+    View: 1232
+    Script: |
+      bonus2 bSubRace,RC_Player_Doram,2;
+      bonus2 bSubRace,RC_Player_Human,2;
+      bonus bAspdRate,5;
+      .@vit = readparam(bVit);
+      if (.@vit >= 108) {
+         bonus2 bSubRace,RC_Player_Doram,3;
+         bonus2 bSubRace,RC_Player_Human,3;
+         bonus bAspdRate,5;
+         if (.@vit >= 120) {
+            bonus bMaxHPrate,3;
+            bonus bMdef,3;
+         }
+      }
+  - Id: 19456
+    AegisName: Crow_Tengu_Mask_
+    Name: Crow Tengu Mask
+    Type: Armor
+    Buy: 20
+    Weight: 300
+    Slots: 1
+    Locations:
+      Head_Mid: true
+    ArmorLevel: 1
+    EquipLevelMin: 80
+    View: 1287
+    Script: |
+      bonus2 bAddSize,Size_All,1;
+      bonus bLongAtkRate,2;
+      if (readparam(bStr)>=108) {
+         bonus2 bAddSize,Size_All,1;
+         bonus bLongAtkRate,2;
+      }
+      if (readparam(bStr)>=120) {
+         bonus2 bAddSize,Size_All,2;
+         bonus bLongAtkRate,3;
+      }
+  
   - Id: 19459
     AegisName: C_Luna_On_Shoulder
     Name: Costume Lunatic on Shoulder
@@ -164472,9 +164521,9 @@ Body:
       Head_Mid: true
     ArmorLevel: 1
     Script: |
-      bonus bMatk,5;
-      bonus bBaseAtk,5;
-      bonus bDelayrate,-4;
+      bonus bMatk,10;
+      bonus bBaseAtk,10;
+      bonus bDelayrate,-8;
   - Id: 400003
     AegisName: TimeExtensionArmor
     Name: Time Extension (Rented)
@@ -200412,6 +200461,39 @@ Body:
          bonus bPerfectHitAddRate,20;
       if (.@r>=9)
          bonus bPerfectHitAddRate,20;
+  - Id: 470051
+    AegisName: Gray_Wing_Boots_
+    Name: Gray Wing Boots
+    Type: Armor
+    Buy: 20
+    Weight: 500
+    Defense: 15
+    Slots: 1
+    Locations:
+      Shoes: true
+    ArmorLevel: 1
+    EquipLevelMin: 100
+    Refineable: true
+    Script: |
+      .@r = getrefine();
+      bonus bMaxHPrate,3;
+      bonus bMaxSPrate,3;
+      bonus bMdef,15;
+      bonus bLongAtkRate,2;
+      bonus bCritAtkRate,2;
+      skill "TF_HIDING",1;
+      if (.@r>=5) {
+         bonus bMaxHPrate,7;
+         bonus bMaxSPrate,7;
+         bonus bLongAtkRate,3;
+         bonus bCritAtkRate,3;
+      }
+      if (.@r>=7) {
+         bonus bMaxHPrate,10;
+         bonus bMaxSPrate,10;
+         bonus bLongAtkRate,5;
+         bonus bCritAtkRate,5;
+      }
   - Id: 470054
     AegisName: E_Illusion_Leg_A
     Name: Illusion Leg Type A (Bound)

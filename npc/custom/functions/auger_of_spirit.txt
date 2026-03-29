@@ -5,7 +5,7 @@ function	script	F_AugerOfSpirit	{
 	mes "[Desentupidor]";
 	mes "Posso abrir 1 slot em um equipamento compatível que esteja equipado.";
 
-	setarray .@scan_slot[0], EQI_ACC_L, EQI_ACC_R, EQI_SHOES, EQI_ARMOR, EQI_HEAD_TOP;
+	setarray .@scan_slot[0], EQI_ACC_L, EQI_ACC_R, EQI_SHOES, EQI_ARMOR, EQI_HEAD_TOP, EQI_HEAD_MID;
 	for (.@s = 0; .@s < getarraysize(.@scan_slot); .@s++) {
 		.@slot_id = .@scan_slot[.@s];
 		.@item_id = getequipid(.@slot_id);
@@ -77,7 +77,7 @@ function	script	F_AugerOfSpirit	{
 	 || callfunc("F_IsEquipCardHack", .@slot, .@card[0], .@card[1], .@card[2], .@card[3])
 	 || callfunc("F_IsEquipRefineHack", .@slot, .@refine)) {
 		mes "[Desentupidor]";
-		mes "Falha ao validar o acessório equipado.";
+		mes "Falha ao validar o equipamento equipado.";
 		close;
 	}
 
@@ -136,10 +136,8 @@ function	script	F_AugerOfSpirit	{
 	}
 
 	if (.@inv_idx < 0) {
-		equip .@item_id;
 		mes "[Desentupidor]";
 		mes "Não foi possível localizar o equipamento após removê-lo.";
-		mes "O item foi reequipado automaticamente.";
 		close;
 	}
 
@@ -166,11 +164,24 @@ function	script	F_AugerOfSpirit_Target	{
 		case 2605: return 2625; // Brooch -> Brooch_
 		case 2609: return 2715; // Skull Ring -> Skull Ring_
 		case 2619: return 2671; // Bow Thimble -> Bow Thimble_
+
 		case 2409: return 2432; // High Heels -> High Heels_
 		case 2425: return 2434; // Black Leather Boots -> Black Leather Boots_
 		case 15053: return 15056; // Special Ninja Suit -> Special Ninja Suit_
 		case 2256: return 5160; // Majestic Goat -> Majestic Goat_
 		case 5022: return 5353; // Hat of the Sun God -> Hat of the Sun God_
+		
+		case 400001: return 400002; // Victory Wing Ears -> Victory Wing Ears_
+		case 2203: return 2204; // Glasses -> Glasses_
+		case 2286: return 18507; // Elven Ears -> Elven Ears_
+		case 5104: return 18609; // Dark Blinder -> Dark Blinder_
+		case 19451: return 19452; // Heavenly Order -> Heavenly Order_
+		case 5918: return 410004; // Gambler's Seal -> Gambler's Seal_
+		case 19024: return 19455; // Protect Feathers -> Protect Feathers_
+		case 18813: return 19181; // New Wave Sunglasses -> New Wave Sunglasses_
+		case 5933: return 19456; // Crow Tengu Mask -> Crow Tengu Mask_
+		case 22172: return 470051; // Gray Wing Boots -> Gray Wing Boots_
+		case 470084: return 470085; // Rune Greaves -> Rune Greaves_
 	}
 
 	return 0;
@@ -183,6 +194,7 @@ function	script	F_AugerOfSpirit_SlotName	{
 		case EQI_SHOES: return "Sapatos";
 		case EQI_ARMOR: return "Armadura";
 		case EQI_HEAD_TOP: return "Topo";
+		case EQI_HEAD_MID: return "Meio";
 	}
 
 	return "Equipado";
@@ -195,6 +207,7 @@ function	script	F_AugerOfSpirit_EquipPos	{
 		case EQI_SHOES: return EQP_SHOES;
 		case EQI_ARMOR: return EQP_ARMOR;
 		case EQI_HEAD_TOP: return EQP_HEAD_TOP;
+		case EQI_HEAD_MID: return EQP_HEAD_MID;
 	}
 
 	return 0;
