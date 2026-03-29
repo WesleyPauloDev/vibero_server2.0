@@ -1,20 +1,20 @@
 moc_para01,30,10,0	warp	edenwarp01	1,1,prontera,155,188
 
-moc_para01,24,22,5	duplicate(Servico Kafra)	ServiÃ§o Kafra#eden	113
+moc_para01,24,22,5	duplicate(Servico Kafra)	Serviço Kafra#eden	113
 
 moc_para01,37,22,4	shop	Loja de Utilidades#eden	850,643:100,512:100,601:100,602:1000,501:50,502:60,503:70,504:80,505:90,506:100,507:110,508:120,509:130,510:140,511:150,521:1500,522:2000,523:2500
 
-moc_para01,43,22,4	shop	Loja de GrimÃ³rios#eden	620,100065:1000,100066:1000,100067:1000,100068:1000,100069:1000,100070:1000,100071:1000,100072:1000,100073:1000,100074:1000
+moc_para01,43,22,4	shop	Loja de Grimórios#eden	620,100065:1000,100066:1000,100067:1000,100068:1000,100069:1000,100070:1000,100071:1000,100072:1000,100073:1000,100074:1000
 
 moc_para01,24,13,5	duplicate(Healer)	Curandeira#eden	640
 
-// ----------------------- EstÃ¡ em npc/custom/barter.yml -----------------------
+// ----------------------- Está em npc/custom/barter.yml -----------------------
 function	script	F_Loja_Eden_Menu	{
-	mes "[Loja do Ã‰den]";
+	mes "[Loja do Éden]";
 
-	switch(select("ConsumÃ­veis:Armas:Equipamentos:Set Mora:Trocar PoÃ§Ãµes:Sair")) {
+	switch(select("Consumíveis:Armas:Equipamentos:Set Mora:Trocar Poções:Sair")) {
 		case 1:
-			callshop "consumable_eden"; // Loja de ConsumÃ­veis
+			callshop "consumable_eden"; // Loja de Consumíveis
 			end;
 
 		case 2:
@@ -26,8 +26,8 @@ function	script	F_Loja_Eden_Menu	{
 			end;
 		
 		case 4:
-			mes "Aqui vocÃª encontra os equipamentos do Set Mora.";
-			switch(select("FÃ­sico:MÃ¡gico:Voltar")) {
+			mes "Aqui você encontra os equipamentos do Set Mora.";
+			switch(select("Físico:Mágico:Voltar")) {
 				case 1:
 					callshop "mora_set_physical_eden";
 					end;
@@ -40,36 +40,36 @@ function	script	F_Loja_Eden_Menu	{
 			end;
 		
 		case 5:
-			mes "Aqui vocÃª pode trocar suas PoÃ§Ãµes[Iniciante] por outras do mesmo tipo.";
-			switch(select("Trocar PoÃ§Ãµes de HP em PoÃ§Ãµes de SP:Trocar PoÃ§Ãµes de SP em PoÃ§Ãµes de HP")) {
+			mes "Aqui você pode trocar suas Poções[Iniciante] por outras do mesmo tipo.";
+			switch(select("Trocar Poções de HP em Poções de SP:Trocar Poções de SP em Poções de HP")) {
 				case 1:
-					mes "Quantas PoÃ§Ãµes deseja trocar?";
+					mes "Quantas Poções deseja trocar?";
 					input .@amount;
 					if (.@amount <= 0) {
 						mes "Quantidade invalida.";
 						end;
 					}
 					if (countitem(9660) < .@amount) {
-						mes "VocÃª nÃ£o possui PoÃ§Ãµes de HP suficientes.";
+						mes "Você não possui Poções de HP suficientes.";
 						end;
 					}
-					delitem 9660, .@amount; // Remove as poÃ§Ãµes de HP
-					getitem 9661, .@amount; // DÃ¡ as poÃ§Ãµes de SP
+					delitem 9660, .@amount; // Remove as poções de HP
+					getitem 9661, .@amount; // Dá as poções de SP
 					logshop "SCRIPT_EXCHANGE", "eden_potion_swap", 9661, .@amount, 0, 9660, .@amount, "", 0;
 					end;
 				case 2:
-					mes "Quantas PoÃ§Ãµes deseja trocar?";
+					mes "Quantas Poções deseja trocar?";
 					input .@amount;
 					if (.@amount <= 0) {
 						mes "Quantidade invalida.";
 						end;
 					}
 					if (countitem(9661) < .@amount) {
-						mes "VocÃª nÃ£o possui PoÃ§Ãµes de SP suficientes.";
+						mes "Você não possui Poções de SP suficientes.";
 						end;
 					}
-					delitem 9661, .@amount; // Remove as poÃ§Ãµes de SP
-					getitem 9660, .@amount; // DÃ¡ as poÃ§Ãµes de HP
+					delitem 9661, .@amount; // Remove as poções de SP
+					getitem 9660, .@amount; // Dá as poções de HP
 					logshop "SCRIPT_EXCHANGE", "eden_potion_swap", 9660, .@amount, 0, 9661, .@amount, "", 0;
 					end;
 			}
@@ -82,36 +82,36 @@ function	script	F_Loja_Eden_Menu	{
 	end;
 }
 
-moc_para01,24,35,5	script	Loja do Ã‰den	611,{
+moc_para01,24,35,5	script	Loja do Éden	611,{
 	OnTalk:
 		callfunc "F_Loja_Eden_Menu";
 		end;
 }
-// ----------------------- Quests do Ã‰den ---------------------------------------------------------
-// ----------------------- Contador de kill estÃ¡ em npc/custom/quest_eden.txt -----------------------
-moc_para01,27,35,5	script	SecretÃ¡rio do Ã‰den	810,{
+// ----------------------- Quests do Éden ---------------------------------------------------------
+// ----------------------- Contador de kill está em npc/custom/quest_eden.txt -----------------------
+moc_para01,27,35,5	script	Secretário do Éden	810,{
 
 	if (BaseLevel < 20) {
-		mes "[SecretÃ¡rio do Ã‰den]";
-		mes "Volte quando estiver no nÃ­vel 20 ou superior para participar das missÃµes do Ã‰den.";
+		mes "[Secretário do Éden]";
+		mes "Volte quando estiver no nível 20 ou superior para participar das missões do Éden.";
 		close;
 	}
 
-	// Se o jogador jÃ¡ tem missÃ£o ativa, oferece menu de progresso, recompensa ou cancelar
+	// Se o jogador já tem missão ativa, oferece menu de progresso, recompensa ou cancelar
 	if (eden_missao_ativa) {
-		mes "[SecretÃ¡rio do Ã‰den]";
-		mes "VocÃª jÃ¡ estÃ¡ em uma missÃ£o.";
+		mes "[Secretário do Éden]";
+		mes "Você já está em uma missão.";
 		next;
 		.@choice = select("Ver Progresso:Receber Recompensa:Cancelar Missao:Fechar");
 
 		if (.@choice == 1) {
-			mes "[MissÃ£o Ativa]";
+			mes "[Missão Ativa]";
 			mes "Progresso:";
-			mes "MissÃ£o Lvl " +eden_nivel + " Mapa " + eden_mapa  ;
+			mes "Missão Lvl " +eden_nivel + " Mapa " + eden_mapa  ;
 			mes "- Monstro: ^00bb00" + eden_mob1_name$ + " " + eden_mob1_kill + " / " + eden_mob_quant + "^000000";
 			mes "- Monstro: ^00bb00" + eden_mob2_name$ + " " + eden_mob2_kill + " / " + eden_mob_quant + "^000000";
-			mes "Deseja ser teleportado agora para o mapa da missÃ£o?";
-			if (select("Sim:NÃ£o") == 1) {
+			mes "Deseja ser teleportado agora para o mapa da missão?";
+			if (select("Sim:Não") == 1) {
 				if (eden_mapa_quest$ != "") warp eden_mapa_quest$, 0,0;
 			}
 			close;
@@ -119,14 +119,14 @@ moc_para01,27,35,5	script	SecretÃ¡rio do Ã‰den	810,{
 
 		if (.@choice == 2) {
 			if (eden_missao_concluida) {
-				mes "[SecretÃ¡rio do Ã‰den]";
-				mes "ParabÃ©ns por completar a missÃ£o!";
-				mes "Aqui estÃ¡ sua recompensa.";
+				mes "[Secretário do Éden]";
+				mes "Parabéns por completar a missão!";
+				mes "Aqui está sua recompensa.";
 				getexp eden_quest_exp, eden_quest_job_exp;
 				Zeny += eden_quest_zeny;
 				getitem 9607, eden_quest_medals;
 				
-				// Limpa dados da missÃ£o
+				// Limpa dados da missão
 				eden_missao_ativa = 0;
 				eden_quest_count = 0;
 				eden_quant = 0;
@@ -140,14 +140,14 @@ moc_para01,27,35,5	script	SecretÃ¡rio do Ã‰den	810,{
 
 				close;
 			} else {
-				mes "[SecretÃ¡rio do Ã‰den]";
-				mes "VocÃª ainda nÃ£o derrotou todos os monstros necessÃ¡rios.";
+				mes "[Secretário do Éden]";
+				mes "Você ainda não derrotou todos os monstros necessários.";
 				mes "Progresso:";
-				mes "MissÃ£o Lvl " +eden_nivel + " Mapa " + eden_mapa  ;
+				mes "Missão Lvl " +eden_nivel + " Mapa " + eden_mapa  ;
 				mes "- Monstro: ^00bb00" + eden_mob1_name$ + " " + eden_mob1_kill + " / " + eden_mob_quant + "^000000";
 				mes "- Monstro: ^00bb00" + eden_mob2_name$ + " " + eden_mob2_kill + " / " + eden_mob_quant + "^000000";
-				mes "Deseja ser teleportado agora para o mapa da missÃ£o para completÃ¡-la?";
-				if (select("Sim:NÃ£o") == 1) {
+				mes "Deseja ser teleportado agora para o mapa da missão para completá-la?";
+				if (select("Sim:Não") == 1) {
 					if (eden_mapa_quest$ != "") warp eden_mapa_quest$, 0,0;
 				}
 				close;
@@ -155,8 +155,8 @@ moc_para01,27,35,5	script	SecretÃ¡rio do Ã‰den	810,{
 		}
 
 		if (.@choice == 3) {
-			mes "[SecretÃ¡rio do Ã‰den]";
-			mes "Tem certeza que deseja cancelar a missÃ£o atual?";
+			mes "[Secretário do Éden]";
+			mes "Tem certeza que deseja cancelar a missão atual?";
 			if (select("Sim, cancelar missao:Nao, continuar") == 1) {
 				eden_missao_ativa = 0;
 				eden_quest_count = 0;
@@ -168,10 +168,10 @@ moc_para01,27,35,5	script	SecretÃ¡rio do Ã‰den	810,{
 				eden_quest_zeny = 0;
 				eden_quest_exp = 0;
 				eden_quest_job_exp = 0;
-				mes "MissÃ£o cancelada com sucesso.";
+				mes "Missão cancelada com sucesso.";
 				close;
 			} else {
-				mes "MissÃ£o mantida. Boa sorte!";
+				mes "Missão mantida. Boa sorte!";
 				close;
 			}
 		}
@@ -180,24 +180,24 @@ moc_para01,27,35,5	script	SecretÃ¡rio do Ã‰den	810,{
 			close;
 		}
 	}
-	mes "[SecretÃ¡rio do Ã‰den]";
-	mes "Bem-vindo ao Programa de MissÃµes do Ã‰den!";
-	mes "VocÃª pode realizar missÃµes repetÃ­veis que dÃ£o EXP, Zeny e Medalhas do Ã‰den!";
+	mes "[Secretário do Éden]";
+	mes "Bem-vindo ao Programa de Missões do Éden!";
+	mes "Você pode realizar missões repetíveis que dão EXP, Zeny e Medalhas do Éden!";
 	next;
 
 	MainMenu:
-		mes "[SecretÃ¡rio do Ã‰den]";
-		mes "Escolha a faixa de nÃ­vel da missÃ£o:";
+		mes "[Secretário do Éden]";
+		mes "Escolha a faixa de nível da missão:";
 		.@choice = select("Lv. 20~39:Lv. 40~59:Lv. 60~79:Lv. 80+:Cancelar");
 		if (.@choice == 5) {
-			mes "Tudo bem, volte quando quiser realizar uma missÃ£o.";
+			mes "Tudo bem, volte quando quiser realizar uma missão.";
 			close;
 		}	
 
 		.@nivel = ((.@choice - 1) * 20) + 20;
 
 		if (BaseLevel < .@nivel) {
-			mes "VocÃª ainda nÃ£o Ã© forte o bastante para esta missÃ£o.";
+			mes "Você ainda não é forte o bastante para esta missão.";
 			next;
 			goto MainMenu;
 		}
@@ -208,8 +208,8 @@ moc_para01,27,35,5	script	SecretÃ¡rio do Ã‰den	810,{
 	L_MissaoMenu:
 		.@nivel = getarg(0);
 
-		mes "[MissÃµes NÃ­vel " + .@nivel + "+]";
-		mes "Escolha a missÃ£o que deseja:";
+		mes "[Missões Nível " + .@nivel + "+]";
+		mes "Escolha a missão que deseja:";
 		next;
 
 		.@op = select("Mapa 1:Mapa 2:Voltar");
@@ -222,7 +222,7 @@ moc_para01,27,35,5	script	SecretÃ¡rio do Ã‰den	810,{
 		.@nivel = getarg(0);
 		.@mapa  = getarg(1);	
 
-		// Quantidade e recompensas escalam com o nÃ­vel
+		// Quantidade e recompensas escalam com o nível
 		.@quant = .@nivel;
 		.@medalhas = .@nivel / 20;
 		.@zeny = (.@nivel / 20) * 5000;
@@ -247,13 +247,13 @@ moc_para01,27,35,5	script	SecretÃ¡rio do Ã‰den	810,{
 			.@job_exp = 0;
 		}
 
-		// Armazena recompensas nas variÃ¡veis do jogador
+		// Armazena recompensas nas variáveis do jogador
 		eden_quest_medals = .@medalhas;
 		eden_quest_zeny   = .@zeny;
 		eden_quest_exp    = .@exp;
 		eden_quest_job_exp = .@job_exp;
 
-		// Define missÃµes
+		// Define missões
 		if (.@nivel == 20 && .@mapa == 1) {
 			.@mapname$ = "anthell01";
 			.@mob1$ = "Piere"; .@mob1_id = 1160; 
@@ -295,11 +295,11 @@ moc_para01,27,35,5	script	SecretÃ¡rio do Ã‰den	810,{
 			.@mob2$ = "Bode"; .@mob2_id = 1372;
 		}
 		else {
-			mes "MissÃ£o nÃ£o encontrada.";
+			mes "Missão não encontrada.";
 			close;
 		}
 
-		// Armazenar variÃ¡veis da missÃ£o para o sistema de contagem
+		// Armazenar variáveis da missão para o sistema de contagem
 		eden_missao_concluida = 0;
 		eden_nivel = .@nivel;
 		eden_nivel = .@nivel;
@@ -316,24 +316,24 @@ moc_para01,27,35,5	script	SecretÃ¡rio do Ã‰den	810,{
 		eden_mob2_kill = 0;
 
 
-		mes "[MissÃ£o do Ã‰den]";
-		mes "VocÃª escolheu caÃ§ar:";
+		mes "[Missão do Éden]";
+		mes "Você escolheu caçar:";
 		mes "- " + eden_quant + " " + .@mob1$;
 		mes "- " + eden_quant + " " + .@mob2$;	
 		mes "[Recompensas]";
-		mes "- " + .@medalhas + " Medalha(s) do Ã‰den";
+		mes "- " + .@medalhas + " Medalha(s) do Éden";
 		mes "- " + .@zeny + " Zeny";
 		mes "- " + .@exp + " de EXP de Base";
 		mes "- " + .@job_exp + " de EXP de Classe";
 		mes "";
-		mes "VocÃª confirma esta missÃ£o?";
-		if (select("Sim:NÃ£o") == 2) {
+		mes "Você confirma esta missão?";
+		if (select("Sim:Não") == 2) {
 			goto L_MissaoMenu;
 		}
 		eden_missao_ativa = 1;
 		next;
-		mes "Deseja ser teleportado agora para o mapa da missÃ£o?";
-		if (select("Sim:NÃ£o") == 1) {
+		mes "Deseja ser teleportado agora para o mapa da missão?";
+		if (select("Sim:Não") == 1) {
 				if (.@mapname$ != "") warp .@mapname$, 0,0;
 		}
 		close;
