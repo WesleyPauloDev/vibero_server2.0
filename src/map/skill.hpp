@@ -516,6 +516,7 @@ int32 skill_get_range( uint16 skill_id , uint16 skill_lv );
 int32 skill_get_range2(struct block_list *bl, uint16 skill_id, uint16 skill_lv, bool isServer);
 int32 skill_get_splash( uint16 skill_id , uint16 skill_lv );
 int32 skill_get_num( uint16 skill_id ,uint16 skill_lv );
+int32 skill_get_damage_rate( uint16 skill_id );
 int32 skill_get_cast( uint16 skill_id ,uint16 skill_lv );
 int32 skill_get_delay( uint16 skill_id ,uint16 skill_lv );
 int32 skill_get_walkdelay( uint16 skill_id ,uint16 skill_lv );

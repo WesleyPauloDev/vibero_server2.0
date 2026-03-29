@@ -151,6 +151,10 @@ static bool skill_check(uint16 id) {
 	return true;
 }
 
+static int32 skill_scale_by_damage_rate(uint16 skill_id, int32 value) {
+	return value * skill_get_damage_rate(skill_id) / 100;
+}
+
 #define skill_get(id, var) do {\
 	if (!skill_check(id))\
 		return 0;\
@@ -178,6 +182,7 @@ int32 skill_get_max( uint16 skill_id )                               { skill_get
 int32 skill_get_range( uint16 skill_id , uint16 skill_lv )           { skill_get_lv(skill_id, skill_lv, skill_db.find(skill_id)->range); }
 int32 skill_get_splash_( uint16 skill_id , uint16 skill_lv )         { skill_get_lv(skill_id, skill_lv, skill_db.find(skill_id)->splash);  }
 int32 skill_get_num( uint16 skill_id ,uint16 skill_lv )              { skill_get_lv(skill_id, skill_lv, skill_db.find(skill_id)->num); }
+int32 skill_get_damage_rate( uint16 skill_id )                       { skill_get(skill_id, skill_db.find(skill_id)->damage_rate); }
 int32 skill_get_cast( uint16 skill_id ,uint16 skill_lv )             { skill_get_lv(skill_id, skill_lv, skill_db.find(skill_id)->cast); }
 int32 skill_get_delay( uint16 skill_id ,uint16 skill_lv )            { skill_get_lv(skill_id, skill_lv, skill_db.find(skill_id)->delay); }
 int32 skill_get_walkdelay( uint16 skill_id ,uint16 skill_lv )        { skill_get_lv(skill_id, skill_lv, skill_db.find(skill_id)->walkdelay); }
@@ -627,14 +632,14 @@ int32 skill_calc_heal(struct block_list *src, struct block_list *target, uint16 
 
 		if ((skill = pc_checkskill(sd, NV_BREAKTHROUGH)) > 0)
 #ifdef RENEWAL
-			hp_bonus += 2 * skill;
+			hp_bonus += skill_scale_by_damage_rate(NV_BREAKTHROUGH, 3 * skill / 4);
 #else
 			hp += hp * skill * 2 / 100;
 #endif
 
 		if ((skill = pc_checkskill(sd, NV_TRANSCENDENCE)) > 0)
 #ifdef RENEWAL
-			hp_bonus += 3 * skill;
+			hp_bonus += skill_scale_by_damage_rate(NV_TRANSCENDENCE, 3 * skill / 4);
 #else
 			hp += hp * skill * 3 / 100;
 #endif
