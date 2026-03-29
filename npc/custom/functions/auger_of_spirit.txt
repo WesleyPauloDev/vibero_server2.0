@@ -1,0 +1,201 @@
+function	script	F_AugerOfSpirit	{
+	.@count = 0;
+	.@menu$ = "";
+
+	mes "[Desentupidor]";
+	mes "Posso abrir 1 slot em um equipamento compatível que esteja equipado.";
+
+	setarray .@scan_slot[0], EQI_ACC_L, EQI_ACC_R, EQI_SHOES, EQI_ARMOR, EQI_HEAD_TOP;
+	for (.@s = 0; .@s < getarraysize(.@scan_slot); .@s++) {
+		.@slot_id = .@scan_slot[.@s];
+		.@item_id = getequipid(.@slot_id);
+		if (.@item_id <= 0)
+			continue;
+
+		.@target_id = callfunc("F_AugerOfSpirit_Target", .@item_id);
+		if (!.@target_id)
+			continue;
+
+		.@slot[.@count] = .@slot_id;
+		.@item_id_list[.@count] = .@item_id;
+		.@target_id_list[.@count] = .@target_id;
+		.@menu$ += getitemname(.@item_id) + " [" + callfunc("F_AugerOfSpirit_SlotName", .@slot_id) + "]:";
+		.@count++;
+	}
+
+	if (!.@count) {
+		mes "Você não está com nenhum equipamento compatível equipado.";
+		mes "Equipe um item compatível sem slot e tente novamente.";
+		close;
+	}
+
+	mes "Escolha qual equipamento deseja modificar.";
+	next;
+	.@sel = select(.@menu$ + "Cancelar") - 1;
+	if (.@sel >= .@count)
+		close;
+
+	.@slot = .@slot[.@sel];
+	.@item_id = .@item_id_list[.@sel];
+	.@target_id = .@target_id_list[.@sel];
+	.@equip_pos = callfunc("F_AugerOfSpirit_EquipPos", .@slot);
+	setarray .@card[0], getequipcardid(.@slot,0), getequipcardid(.@slot,1), getequipcardid(.@slot,2), getequipcardid(.@slot,3);
+	.@refine = getequiprefinerycnt(.@slot);
+
+	getinventorylist;
+	.@found = 0;
+	for (.@i = 0; .@i < @inventorylist_count; .@i++) {
+		if (@inventorylist_id[.@i] != .@item_id)
+			continue;
+		if ((@inventorylist_equip[.@i] & .@equip_pos) == 0)
+			continue;
+
+		.@identify = @inventorylist_identify[.@i];
+		.@attribute = @inventorylist_attribute[.@i];
+		.@grade = @inventorylist_enchantgrade[.@i];
+		setarray .@opt_id[0], @inventorylist_option_id1[.@i], @inventorylist_option_id2[.@i], @inventorylist_option_id3[.@i], @inventorylist_option_id4[.@i], @inventorylist_option_id5[.@i];
+		setarray .@opt_val[0], @inventorylist_option_value1[.@i], @inventorylist_option_value2[.@i], @inventorylist_option_value3[.@i], @inventorylist_option_value4[.@i], @inventorylist_option_value5[.@i];
+		setarray .@opt_param[0], @inventorylist_option_parameter1[.@i], @inventorylist_option_parameter2[.@i], @inventorylist_option_parameter3[.@i], @inventorylist_option_parameter4[.@i], @inventorylist_option_parameter5[.@i];
+		.@found = 1;
+		break;
+	}
+
+	mes "[Desentupidor]";
+	mes "Você deseja transformar ^0000FF" + getitemname(.@item_id) + "^000000 em sua versão com slot?";
+	mes "O item ^FF0000Desentupidor será consumido^000000 no processo.";
+	next;
+	if (select("Confirmar troca:Cancelar") == 2)
+		close;
+
+	if (countitem(6396) < 1) {
+		mes "[Desentupidor]";
+		mes "Você não possui um Desentupidor para concluir a troca.";
+		close;
+	}
+
+	if (callfunc("F_IsEquipIDHack", .@slot, .@item_id)
+	 || callfunc("F_IsEquipCardHack", .@slot, .@card[0], .@card[1], .@card[2], .@card[3])
+	 || callfunc("F_IsEquipRefineHack", .@slot, .@refine)) {
+		mes "[Desentupidor]";
+		mes "Falha ao validar o acessório equipado.";
+		close;
+	}
+
+	if (!.@found) {
+		mes "[Desentupidor]";
+		mes "Não foi possível localizar o equipamento no inventário.";
+		close;
+	}
+
+	unequip .@slot;
+
+	getinventorylist;
+	.@inv_idx = -1;
+	for (.@i = 0; .@i < @inventorylist_count; .@i++) {
+		if (@inventorylist_id[.@i] != .@item_id)
+			continue;
+		if (@inventorylist_identify[.@i] != .@identify)
+			continue;
+		if (@inventorylist_attribute[.@i] != .@attribute)
+			continue;
+		if (@inventorylist_refine[.@i] != .@refine)
+			continue;
+		if (@inventorylist_enchantgrade[.@i] != .@grade)
+			continue;
+		if (@inventorylist_card1[.@i] != .@card[0] || @inventorylist_card2[.@i] != .@card[1] || @inventorylist_card3[.@i] != .@card[2] || @inventorylist_card4[.@i] != .@card[3])
+			continue;
+		if (@inventorylist_option_id1[.@i] != .@opt_id[0] || @inventorylist_option_id2[.@i] != .@opt_id[1] || @inventorylist_option_id3[.@i] != .@opt_id[2] || @inventorylist_option_id4[.@i] != .@opt_id[3] || @inventorylist_option_id5[.@i] != .@opt_id[4])
+			continue;
+		if (@inventorylist_option_value1[.@i] != .@opt_val[0] || @inventorylist_option_value2[.@i] != .@opt_val[1] || @inventorylist_option_value3[.@i] != .@opt_val[2] || @inventorylist_option_value4[.@i] != .@opt_val[3] || @inventorylist_option_value5[.@i] != .@opt_val[4])
+			continue;
+		if (@inventorylist_option_parameter1[.@i] != .@opt_param[0] || @inventorylist_option_parameter2[.@i] != .@opt_param[1] || @inventorylist_option_parameter3[.@i] != .@opt_param[2] || @inventorylist_option_parameter4[.@i] != .@opt_param[3] || @inventorylist_option_parameter5[.@i] != .@opt_param[4])
+			continue;
+
+		.@inv_idx = @inventorylist_idx[.@i];
+		break;
+	}
+
+	if (.@inv_idx < 0) {
+		for (.@i = 0; .@i < @inventorylist_count; .@i++) {
+			if (@inventorylist_id[.@i] != .@item_id)
+				continue;
+			if (@inventorylist_refine[.@i] != .@refine)
+				continue;
+			if (@inventorylist_card1[.@i] != .@card[0] || @inventorylist_card2[.@i] != .@card[1] || @inventorylist_card3[.@i] != .@card[2] || @inventorylist_card4[.@i] != .@card[3])
+				continue;
+
+			.@inv_idx = @inventorylist_idx[.@i];
+			.@identify = @inventorylist_identify[.@i];
+			.@attribute = @inventorylist_attribute[.@i];
+			.@grade = @inventorylist_enchantgrade[.@i];
+			setarray .@opt_id[0], @inventorylist_option_id1[.@i], @inventorylist_option_id2[.@i], @inventorylist_option_id3[.@i], @inventorylist_option_id4[.@i], @inventorylist_option_id5[.@i];
+			setarray .@opt_val[0], @inventorylist_option_value1[.@i], @inventorylist_option_value2[.@i], @inventorylist_option_value3[.@i], @inventorylist_option_value4[.@i], @inventorylist_option_value5[.@i];
+			setarray .@opt_param[0], @inventorylist_option_parameter1[.@i], @inventorylist_option_parameter2[.@i], @inventorylist_option_parameter3[.@i], @inventorylist_option_parameter4[.@i], @inventorylist_option_parameter5[.@i];
+			break;
+		}
+	}
+
+	if (.@inv_idx < 0) {
+		equip .@item_id;
+		mes "[Desentupidor]";
+		mes "Não foi possível localizar o equipamento após removê-lo.";
+		mes "O item foi reequipado automaticamente.";
+		close;
+	}
+
+	delitem 6396,1;
+	delitemidx .@inv_idx,1;
+	if (.@grade > 0)
+		getitem4 .@target_id,1,.@identify,.@refine,.@attribute,.@card[0],.@card[1],.@card[2],.@card[3],.@grade,.@opt_id,.@opt_val,.@opt_param;
+	else if (.@opt_id[0] || .@opt_id[1] || .@opt_id[2] || .@opt_id[3] || .@opt_id[4])
+		getitem3 .@target_id,1,.@identify,.@refine,.@attribute,.@card[0],.@card[1],.@card[2],.@card[3],.@opt_id,.@opt_val,.@opt_param;
+	else
+		getitem2 .@target_id,1,.@identify,.@refine,.@attribute,.@card[0],.@card[1],.@card[2],.@card[3];
+
+	mes "[Desentupidor]";
+	mes "Pronto! Seu equipamento recebeu 1 slot.";
+	close;
+}
+
+function	script	F_AugerOfSpirit_Target	{
+	switch (getarg(0)) {
+		case 2601: return 2621; // Ring -> Ring_
+		case 2602: return 2622; // Earring -> Earring_
+		case 2603: return 2623; // Necklace -> Necklace_
+		case 2604: return 2624; // Glove -> Glove_
+		case 2605: return 2625; // Brooch -> Brooch_
+		case 2609: return 2715; // Skull Ring -> Skull Ring_
+		case 2619: return 2671; // Bow Thimble -> Bow Thimble_
+		case 2409: return 2432; // High Heels -> High Heels_
+		case 2425: return 2434; // Black Leather Boots -> Black Leather Boots_
+		case 15053: return 15056; // Special Ninja Suit -> Special Ninja Suit_
+		case 2256: return 5160; // Majestic Goat -> Majestic Goat_
+		case 5022: return 5353; // Hat of the Sun God -> Hat of the Sun God_
+	}
+
+	return 0;
+}
+
+function	script	F_AugerOfSpirit_SlotName	{
+	switch (getarg(0)) {
+		case EQI_ACC_L: return "Esquerdo";
+		case EQI_ACC_R: return "Direito";
+		case EQI_SHOES: return "Sapatos";
+		case EQI_ARMOR: return "Armadura";
+		case EQI_HEAD_TOP: return "Topo";
+	}
+
+	return "Equipado";
+}
+
+function	script	F_AugerOfSpirit_EquipPos	{
+	switch (getarg(0)) {
+		case EQI_ACC_L: return EQP_ACC_L;
+		case EQI_ACC_R: return EQP_ACC_R;
+		case EQI_SHOES: return EQP_SHOES;
+		case EQI_ARMOR: return EQP_ARMOR;
+		case EQI_HEAD_TOP: return EQP_HEAD_TOP;
+	}
+
+	return 0;
+}
