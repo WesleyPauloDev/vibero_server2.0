@@ -1,0 +1,50 @@
+prontera,164,204,5	script	Alterador de Slot	4_M_01,{
+	mes "[Alterador de Slot]";
+	mes "Eu posso liberar uma alteração de slot para este personagem.";
+	mes "Depois disso, você precisa voltar para a seleção de personagens para mover o char de posição.";
+	next;
+
+	switch (select("Receber alteração de slot:Como funciona:Cancelar")) {
+	case 1:
+		mes "[Alterador de Slot]";
+		break;
+	case 2:
+		mes "[Alterador de Slot]";
+		mes "Para mover o slot do personagem, vá até a tela de seleção de personagens.";
+		next;
+		mes "[Alterador de Slot]";
+		mes "Clique com o botão direito no personagem que deseja mover e selecione ^0000FFRealizar Troca de Slot^000000.";
+		next;
+		mes "[Alterador de Slot]";
+		mes "Depois, clique com o botão direito no slot vazio que deseja utilizar.";
+		next;
+		mes "[Alterador de Slot]";
+		mes "Por fim, confirme a alteração para concluir a troca de slot.";
+		close;
+	default:
+		close;
+	}
+
+	.@acc = getcharid(3);
+	query_sql "SELECT value FROM `char_reg_num_db` WHERE key='CharMove' AND char_id='" + getcharid(0) + "' LIMIT 1", .@count;
+	if (.@count == 0) .@count = 0;
+
+	if (.@count > 0) {
+		mes "[Alterador de Slot]";
+		mes "Você já possui ^0000FF" + .@count + "^000000 alteração(ões) de slot disponível(is).";
+		close;
+	}
+
+	mes "[Alterador de Slot]";
+	mes "Deseja receber ^0000FF1 alteração de slot^000000 agora?";
+	if (select("Sim:Cancelar") == 2)
+		close;
+
+	setd("#CharMove", 1);
+	query_sql "REPLACE INTO `char_reg_num_db` (`char_id`,`key`,`index`,`value`) VALUES ('" + getcharid(0) + "','CharMove','0','1')";
+
+	mes "[Alterador de Slot]";
+	mes "Pronto, sua alteração de slot foi liberada com sucesso.";
+	mes "Volte para a seleção de personagens para usar a troca.";
+	close;
+}

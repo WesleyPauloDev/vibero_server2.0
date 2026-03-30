@@ -456,13 +456,7 @@ OnTouch_:
 1@eom,100,122,3	script	Garoto Estranho#mockid01	4_F_MOCBOY,{
 	if ('step != 3)
 		end;
-	debugmes "checkquest(7593,HUNTING)" + checkquest(7593,HUNTING);
-	if (checkquest(7593,HUNTING) != -1) {
-			erasequest 7593;
-			setquest 7593;
-	}
-	debugmes "checkquest(7593,HUNTING)" + checkquest(7593,HUNTING);
-	if (is_party_leader() == false || checkquest(7593,HUNTING) != 1) {
+	if (is_party_leader() == false) {
 		mes "[Garoto]";
 		mes "Criatura insignificante.";
 		mes "Como ousa erguer a mão contra um deus em ascensão?!";
@@ -629,7 +623,7 @@ OnTouch_:
 
 OnTouch:
 	if ('step >= 4 && is_party_leader())
-		npctalk "Nidhogg: Wait!";
+		npctalk "Nidhogg: Aguarde!";
 	end;
 }
 
@@ -685,7 +679,7 @@ OnTouch_:
 OnTouch_:
 	if ('step == 4) {
 		'step = 5;
-		npctalk "Brinaranea: Ooh, food walks into my lair.";
+		npctalk "Brinaranea: Ooh, a comida entrou no meu covil.";
 		initnpctimer;
 	}
 	end;
@@ -1017,7 +1011,7 @@ OnTouch_:
 
 // Center to Fire
 1@eom,100,122,3	script	Morroc#mockid02	4_F_MOCBOY,{
-	if ('step != 6 || is_party_leader() == false || checkquest(7593,HUNTING) != 1)
+	if ('step != 6 || is_party_leader() == false)
 		end;
 	cutin "morocc_kid.bmp",2;
 	mes "[Morroc]";
@@ -2297,7 +2291,7 @@ OnTimer8000:
 		cutin "ep14_nyd03.bmp",2;
 	}
 	next;
-	select("Exit.");
+	select("Sair.");
 	mes "[Nidhogg]";
 	mes "Claro. Você deve estar exausto.";
 	mes "Deixe-me enviá-lo aos outros membros da sua Expedição, sem custos.";

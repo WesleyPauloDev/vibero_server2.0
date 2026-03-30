@@ -38,6 +38,10 @@
 
 using namespace rathena;
 
+static int32 status_scale_skill_damage_rate(uint16 skill_id, int32 value) {
+	return value * skill_get_damage_rate(skill_id) / 100;
+}
+
 // Regen related flags.
 enum e_regen {
 	RGN_NONE = 0x00,
@@ -3158,9 +3162,9 @@ static int32 status_get_hpbonus(struct block_list *bl, enum e_status_bonus type)
 					bonus += 3000;
 			}
 			if ((skill_lv = pc_checkskill(sd, NV_BREAKTHROUGH)) > 0)
-				bonus += 350 * skill_lv + (skill_lv > 4 ? 250 : 0);
+				bonus += status_scale_skill_damage_rate(NV_BREAKTHROUGH, 500 * skill_lv + (skill_lv > 4 ? 500 : 0));
 			if ((skill_lv = pc_checkskill(sd, NV_TRANSCENDENCE)) > 0)
-				bonus += 350 * skill_lv + (skill_lv > 4 ? 250 : 0);
+				bonus += status_scale_skill_damage_rate(NV_TRANSCENDENCE, 350 * skill_lv + (skill_lv > 4 ? 250 : 0));
 		}
 
 		//Bonus by SC
@@ -3331,9 +3335,9 @@ static int32 status_get_spbonus(struct block_list *bl, enum e_status_bonus type)
 					bonus += 300;
 			}
 			if ((skill_lv = pc_checkskill(sd, NV_BREAKTHROUGH)) > 0)
-				bonus += 30 * skill_lv + (skill_lv > 4 ? 50 : 0);
+				bonus += status_scale_skill_damage_rate(NV_BREAKTHROUGH, 100 * skill_lv + (skill_lv > 4 ? 200 : 0));
 			if ((skill_lv = pc_checkskill(sd, NV_TRANSCENDENCE)) > 0)
-				bonus += 30 * skill_lv + (skill_lv > 4 ? 50 : 0);
+				bonus += status_scale_skill_damage_rate(NV_TRANSCENDENCE, 60 * skill_lv + (skill_lv > 4 ? 100 : 0));
 		}
 
 		//Bonus by SC
@@ -7372,6 +7376,11 @@ static uint16 status_calc_crt(struct block_list *bl, status_change *sc, int32 cr
  */
 static int32 status_calc_batk(struct block_list *bl, status_change *sc, int32 batk)
 {
+	if (TBL_PC* sd = BL_CAST(BL_PC, bl); sd != nullptr) {
+		if (uint16 skill_lv = pc_checkskill(sd, NV_BREAKTHROUGH); skill_lv > 0)
+			batk += status_scale_skill_damage_rate(NV_BREAKTHROUGH, 15 * skill_lv + (skill_lv > 4 ? 35 : 0));
+	}
+
 	if(sc == nullptr || sc->empty())
 		return batk;
 
@@ -7509,7 +7518,7 @@ static uint16 status_calc_watk(struct block_list *bl, status_change *sc, int32 w
 uint16 status_calc_pseudobuff_matk( map_session_data* sd, status_change *sc, int32 matk ){
 	// Flat MATK bonus from skills without sc
 	if (uint16 skill_lv = pc_checkskill(sd, NV_TRANSCENDENCE); skill_lv > 0) {
-		matk += 15 * skill_lv + (skill_lv > 4 ? 25 : 0);
+		matk += status_scale_skill_damage_rate(NV_TRANSCENDENCE, 15 * skill_lv + (skill_lv > 4 ? 25 : 0));
 	}
 
 	if (sc == nullptr || sc->empty())

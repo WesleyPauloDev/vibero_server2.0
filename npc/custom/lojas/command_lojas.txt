@@ -18,56 +18,8 @@ function	script	Menu_Lojas	{
 
     switch(select("Éden", "Anubis", "Instância", "Loja de Mana", "Cheffenia", "Bio5", "Votos", "Pontos MVP", "Presença", "Pets", "Minérios")) {
         case 1: // Éden
-            mes "[Loja do Éden]";
-            switch(select("Consumíveis:Armas:Equipamentos:Trocar Poções:Sair")) {
-                case 1:
-                    callshop "consumable_eden"; // Loja de Consumíveis
-                    end;
-                case 2:
-                    callshop "weapons_eden"; // Loja de armas
-                    end;
-                case 3:
-                    callshop "equipments_eden"; // Loja de equipamentos
-                    end;
-                case 4:
-                    mes "Aqui você pode trocar suas Poções[Iniciante] por outras do mesmo tipo.";
-                    switch(select("Trocar Poções de HP em Poções de SP:Trocar Poções de SP em Poções de HP")) {
-                        case 1:
-                            mes "Quantas Poções deseja trocar?";
-                            input .@amount;
-                            if (.@amount <= 0) {
-                                mes "Quantidade inválida.";
-                                end;
-                            }
-                            if (countitem(9660) < .@amount) {
-                                mes "Você não possui Poções de HP suficientes.";
-                                end;
-                            }
-                            delitem 9660, .@amount; // Remove as poções de HP
-                            getitem 9661, .@amount; // Dá as poções de SP
-                            logshop "SCRIPT_EXCHANGE", "eden_potion_swap", 9661, .@amount, 0, 9660, .@amount, "", 0;
-                            end;
-                        case 2:
-                            mes "Quantas Poções deseja trocar?";
-                            input .@amount;
-                            if (.@amount <= 0) {
-                                mes "Quantidade inválida.";
-                                end;
-                            }
-                            if (countitem(9661) < .@amount) {
-                                mes "Você não possui Poções de SP suficientes.";
-                                end;
-                            }
-                            delitem 9661, .@amount; // Remove as poções de SP
-                            getitem 9660, .@amount; // Dá as poções de HP
-                            logshop "SCRIPT_EXCHANGE", "eden_potion_swap", 9660, .@amount, 0, 9661, .@amount, "", 0;
-                            end;
-                    }
-                    end;
-                default:
-                    mes "Volte sempre!";
-                    close;
-            }
+            callfunc("F_Loja_Eden_Menu");
+            end;
         case 2:  // Anubis
             switch(select("Encantamentos", "Armas", "Equipamentos")) {
                 case 1:
