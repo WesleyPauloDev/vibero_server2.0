@@ -6,6 +6,10 @@ OnInit:
 
 OnPCLoginEvent:
 	// Reborn por personagem
+	if (reborn_count >= 5 && !achievementexists(110008)) {
+		.@achievemente_reborn = reborn_count * 1000;
+		callfunc("F_AddRep", 7, .@achievemente_reborn, 110008, 5000);
+	}
 	.@reborn_count = reborn_count;
 	if (.@reborn_count <= 0 && get_reputation_points(7) > 0) {
 		.@reborn_count = get_reputation_points(7) / 1000;
