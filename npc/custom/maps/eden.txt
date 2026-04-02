@@ -212,8 +212,11 @@ moc_para01,27,35,5	script	Secretário do Éden	810,{
 		mes "Escolha a missão que deseja:";
 		next;
 
-		.@op = select("Mapa 1:Mapa 2:Voltar");
-		if (.@op == 3) goto MainMenu;
+		if (.@nivel == 20 || .@nivel == 40 || .@nivel == 60)
+			.@op = select("Mapa 1:Mapa 2:Mapa 3:Voltar");
+		else
+			.@op = select("Mapa 1:Mapa 2:Voltar");
+		if (((.@nivel == 20 || .@nivel == 40 || .@nivel == 60) && .@op == 4) || (.@nivel != 20 && .@nivel != 40 && .@nivel != 60 && .@op == 3)) goto MainMenu;
 
 		callsub L_IniciarMissao, .@nivel, .@op;
 		end;
@@ -264,25 +267,40 @@ moc_para01,27,35,5	script	Secretário do Éden	810,{
 			.@mob1$ = "Esporo"; .@mob1_id = 1014;
 			.@mob2$ = "Rabo de Verme"; .@mob2_id = 1024;
 		}
+		else if (.@nivel == 20 && .@mapa == 3) {
+			.@mapname$ = "moc_fild03";
+			.@mob1$ = "Lobo"; .@mob1_id = 1013;
+			.@mob2$ = "Argos"; .@mob2_id = 1100;
+		}
 		else if (.@nivel == 40 && .@mapa == 1) {
 			.@mapname$ = "gef_fild10";
 			.@mob1$ = "Guerreiro Orc"; .@mob1_id = 1023;
-			.@mob2$ = "Orc Lady"; .@mob2_id = 1273;
+			.@mob2$ = "Senhora Orc"; .@mob2_id = 1273;
 		}
 		else if (.@nivel == 40 && .@mapa == 2) {
 			.@mapname$ = "orcsdun02";
-			.@mob1$ = "Orc Skeleton"; .@mob1_id = 1152;
+			.@mob1$ = "Orc Esqueleto"; .@mob1_id = 1152;
 			.@mob2$ = "Zenorc"; .@mob2_id = 1177;
+		}
+		else if (.@nivel == 40 && .@mapa == 3) {
+			.@mapname$ = "moc_pryd02";
+			.@mob1$ = "Mumia"; .@mob1_id = 1041;
+			.@mob2$ = "Esqueleto Soldado"; .@mob2_id = 1028;
 		}
 		else if (.@nivel == 60 && .@mapa == 1) {
 			.@mapname$ = "moc_fild17";
-			.@mob1$ = "Sandman"; .@mob1_id = 1165;
+			.@mob1$ = "Arenoso"; .@mob1_id = 1165;
 			.@mob2$ = "Hode"; .@mob2_id = 1127;
 		}
 		else if (.@nivel == 60 && .@mapa == 2) {
 			.@mapname$ = "gef_fild06";
 			.@mob1$ = "Petite"; .@mob1_id = 1155;
 			.@mob2$ = "Louva-a-Deus"; .@mob2_id = 1139;
+		}
+		else if (.@nivel == 60 && .@mapa == 3) {
+			.@mapname$ = "iz_dun04";
+			.@mob1$ = "Homem Peixe"; .@mob1_id = 1264;
+			.@mob2$ = "Strouf"; .@mob2_id = 1065;
 		}
 		else if (.@nivel == 80 && .@mapa == 1) {
 			.@mapname$ = "gl_church";
