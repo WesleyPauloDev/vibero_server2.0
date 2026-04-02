@@ -12,7 +12,11 @@ function	script	F_AddRep	{
 	.@max_points = getarg(3);
 
 	// adiciona reputação
-	add_reputation_points(.@rep_id, .@add_points);
+	if(.@rep_id == 7) {
+		set_reputation_points(.@rep_id, .@add_points);
+	} else {
+		add_reputation_points(.@rep_id, .@add_points);
+	}
 
 	// pega valor atual
 	.@cur = get_reputation_points(.@rep_id);
