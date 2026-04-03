@@ -212,11 +212,11 @@ moc_para01,27,35,5	script	Secretário do Éden	810,{
 		mes "Escolha a missão que deseja:";
 		next;
 
-		if (.@nivel == 20 || .@nivel == 40 || .@nivel == 60)
+		if (.@nivel == 20 || .@nivel == 40 || .@nivel == 60 || .@nivel == 80)
 			.@op = select("Mapa 1:Mapa 2:Mapa 3:Voltar");
 		else
 			.@op = select("Mapa 1:Mapa 2:Voltar");
-		if (((.@nivel == 20 || .@nivel == 40 || .@nivel == 60) && .@op == 4) || (.@nivel != 20 && .@nivel != 40 && .@nivel != 60 && .@op == 3)) goto MainMenu;
+		if (((.@nivel == 20 || .@nivel == 40 || .@nivel == 60 || .@nivel == 80) && .@op == 4) || (.@nivel != 20 && .@nivel != 40 && .@nivel != 60 && .@nivel != 80 && .@op == 3)) goto MainMenu;
 
 		callsub L_IniciarMissao, .@nivel, .@op;
 		end;
@@ -311,6 +311,11 @@ moc_para01,27,35,5	script	Secretário do Éden	810,{
 			.@mapname$ = "yuno_fild04";
 			.@mob1$ = "Harpia"; .@mob1_id = 1376;
 			.@mob2$ = "Bode"; .@mob2_id = 1372;
+		}
+		else if (.@nivel == 80 && .@mapa == 3) {
+			.@mapname$ = "mal_dun01";
+			.@mob1$ = "Eruma Vermelho"; .@mob1_id = 2197;
+			.@mob2$ = "Siorava"; .@mob2_id = 2199;
 		}
 		else {
 			mes "Missão não encontrada.";
