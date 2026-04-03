@@ -2,14 +2,13 @@ prontera,141,180,0	script	Shadow Master	4_F_EDEN_MASTER,{
 
 	mes "[Shadow Master]";
 
-    .skill_cd = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 2);	
-	
-    if (.skill_cd > 0) {
-        .@name$ = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 1);
-        .@cd_str$ = callfunc("Show_cd_skill", .skill_cd);
-		
+	.skill_cd = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 2);
 
-		mes "Você já possui uma skill configurada.";
+	if (.skill_cd > 0) {
+		.@name$ = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 1);
+		.@cd_str$ = callfunc("Show_cd_skill", .skill_cd);
+
+		mes "Voce ja possui uma skill configurada.";
 		mes "";
 		mes "Classe : ^00FF00" + jobname(SHADOW_CLASS) + "^000000";
 		mes "Skill : ^00FF00" + .@name$ + "^000000";
@@ -18,14 +17,14 @@ prontera,141,180,0	script	Shadow Master	4_F_EDEN_MASTER,{
 		mes "Deseja trocar a skill?";
 		next;
 
-		if (select("Sim, trocar:Não") == 2) {
+		if (select("Sim, trocar:Nao") == 2) {
 			mes "[Shadow Master]";
 			mes "Tudo bem.";
-			mes "Sua configuração foi mantida.";
+			mes "Sua configuracao foi mantida.";
 			close;
 		}
-    }
-    
+	}
+
 	mes "Escolha sua classe.";
 	next;
 
@@ -33,14 +32,14 @@ prontera,141,180,0	script	Shadow Master	4_F_EDEN_MASTER,{
 		"Shura",
 		"Ranger",
 		"Arcano",
-		"Cavaleiro Rúnico",
-		"Mecânico",
+		"Cavaleiro Runico",
+		"Mecanico",
 		"Arcebispo",
-		"Sicário",
-		"Guardião Real",
+		"Sicario",
+		"Guardiao Real",
 		"Feiticeiro",
 		"Trovador/Musa",
-		"Bioquímico",
+		"Bioquimico",
 		// "Renegado",
 		"Star Emperor",
 		"Soul Reaper",
@@ -50,7 +49,7 @@ prontera,141,180,0	script	Shadow Master	4_F_EDEN_MASTER,{
 		"Cancelar"
 	)) {
 
-	case 1: // SURA        
+	case 1: // SURA
 		set SHADOW_CLASS,JOB_SURA;
 		callsub S_SelectSkill;
 		end;
@@ -73,56 +72,68 @@ prontera,141,180,0	script	Shadow Master	4_F_EDEN_MASTER,{
 	case 5: // MECHANIC
 		set SHADOW_CLASS,JOB_MECHANIC;
 		callsub S_SelectSkill;
-		end; 
+		end;
 
 	case 6: // ARCH BISHOP
 		set SHADOW_CLASS,JOB_ARCH_BISHOP;
 		callsub S_SelectSkill;
 		end;
-	case 7: // Sicário
+
+	case 7: // Sicario
 		set SHADOW_CLASS,JOB_GUILLOTINE_CROSS;
 		callsub S_SelectSkill;
 		end;
-	case 8: // Guardião Real
+
+	case 8: // Guardiao Real
 		set SHADOW_CLASS,JOB_ROYAL_GUARD;
 		callsub S_SelectSkill;
 		end;
+
 	case 9: // Feiticeiro
 		set SHADOW_CLASS,JOB_SORCERER;
 		callsub S_SelectSkill;
 		end;
+
 	case 10: // Trovador/Musa
 		set SHADOW_CLASS,JOB_MINSTREL;
 		callsub S_SelectSkill;
 		end;
-	case 11: // Bioquímico
+
+	case 11: // Bioquimico
 		set SHADOW_CLASS,JOB_GENETIC;
 		callsub S_SelectSkill;
 		end;
+
 	// case 12: // Renegado
 	// 	set SHADOW_CLASS,JOB_SHADOW_CHASER;
 	// 	callsub S_SelectSkill;
 	// 	end;
+
 	case 12: // Star Emperor
 		set SHADOW_CLASS,JOB_STAR_EMPEROR;
 		callsub S_SelectSkill;
 		end;
+
 	case 13: // Soul Reaper
 		set SHADOW_CLASS,JOB_SOUL_REAPER;
 		callsub S_SelectSkill;
 		end;
+
 	case 14: // Kagerou / Oboro
 		set SHADOW_CLASS,JOB_KAGEROU;
 		callsub S_SelectSkill;
 		end;
+
 	// case 15: // Oboro
 	// 	set SHADOW_CLASS,JOB_OBORO;
 	// 	callsub S_SelectSkill;
 	// 	end;
+
 	case 15: // Rebellion
 		set SHADOW_CLASS,JOB_REBELLION;
 		callsub S_SelectSkill;
 		end;
+
 	// case 16: // Hyper Novice
 	// 	set SHADOW_CLASS,JOB_HYPER_NOVICE;
 	// 	callsub S_SelectSkill;
@@ -134,30 +145,28 @@ prontera,141,180,0	script	Shadow Master	4_F_EDEN_MASTER,{
 
 S_SelectSkill:
 
-    mes "[Shadow Master]";
-    mes "Escolha a skill principal:";
-    next;
+	mes "[Shadow Master]";
+	mes "Escolha a skill principal:";
+	next;
 
-    // monta menu dinamicamente
-    .@menu$ = "";
-    for (.@i = 0; .@i < 10; .@i++) {
+	// monta menu dinamicamente
+	.@menu$ = "";
+	for (.@i = 0; .@i < 10; .@i++) {
+		.@name$ = callfunc("F_ShadowSkillData", SHADOW_CLASS, .@i, 1);
+		if (.@name$ == "") break;
+		.@menu$ += .@name$ + ":";
+	}
 
-        .@name$ = callfunc("F_ShadowSkillData", SHADOW_CLASS, .@i, 1);
-        if (.@name$ == "") break;
+	.@sel = select(.@menu$) - 1;
 
-        .@menu$ += .@name$ + ":";
-    }
+	// salva dados
+	set SHADOW_SKILL, .@sel;
 
-    .@sel = select(.@menu$) - 1;
-
-    // salva dados
-    set SHADOW_SKILL, .@sel;
-
-    .@name$ = callfunc("F_ShadowSkillData", SHADOW_CLASS, .@sel, 1);
-    .skill_cd = callfunc("F_ShadowSkillData", SHADOW_CLASS, .@sel, 2);
+	.@name$ = callfunc("F_ShadowSkillData", SHADOW_CLASS, .@sel, 1);
+	.skill_cd = callfunc("F_ShadowSkillData", SHADOW_CLASS, .@sel, 2);
 	.@cd_str$ = callfunc("Show_cd_skill", .skill_cd);
 
-    if (getequipid(EQI_SHADOW_ARMOR) > 0)
+	if (getequipid(EQI_SHADOW_ARMOR) > 0)
 		unequip EQI_SHADOW_ARMOR;
 
 	if (getequipid(EQI_SHADOW_WEAPON) > 0)
@@ -169,19 +178,12 @@ S_SelectSkill:
 	if (getequipid(EQI_SHADOW_SHOES) > 0)
 		unequip EQI_SHADOW_SHOES;
 
-	if (getequipid(EQI_SHADOW_RING) > 0)
-		unequip EQI_SHADOW_RING;
-
-	if (getequipid(EQI_SHADOW_PENDANT) > 0)
-		unequip EQI_SHADOW_PENDANT;
-
-
 	mes "[Shadow Master]";
-	mes "Configuração salva!";
+	mes "Configuracao salva!";
 	mes "Classe: ^00FF00" + jobname(SHADOW_CLASS) + "^000000";
 	mes "Skill: ^00FF00" + .@name$ + "^000000";
 	mes "Cooldown base: ^00FF00" + .@cd_str$ + "s^000000";
-    mes "Reequipe seu Shadow";
+	mes "Reequipe seu Shadow principal.";
 	close;
 }
 
@@ -202,7 +204,7 @@ function	script	F_ShadowSkillData	{
 	if (.@class == Job_Sura) {
 
 		setarray .@id[0], 2330, 2332; // Tiger Cannon, Gate of Hell
-		setarray .@name$[0], "Garra do Tigre", "Explosão Espiritual";
+		setarray .@name$[0], "Garra do Tigre", "Explosao Espiritual";
 		setarray .@cd[0], 3000, 10000;
 
 	}
@@ -224,7 +226,7 @@ function	script	F_ShadowSkillData	{
 	else if (.@class == Job_Warlock) {
 
 		setarray .@id[0], 2211, 2217, 2212, 2203, 2213, 2204, 2216, 83, 85, 89; // Crimson Rock, Comet
-		setarray .@name$[0], "Meteoro Escarlate", "Tetra Vortex", "Chamas de Hela", "Zero Absoluto", "Cometa", "Esquife de Gelo", "Abalo Sísmico", "Chuva de Meteoros", "Ira de Thor", "Nevasca";
+		setarray .@name$[0], "Meteoro Escarlate", "Tetra Vortex", "Chamas de Hela", "Zero Absoluto", "Cometa", "Esquife de Gelo", "Abalo Sismico", "Chuva de Meteoros", "Ira de Thor", "Nevasca";
 		setarray .@cd[0], 5000, 15000, 3000, 8000, 20000, 4000, 7000, 7000, 5000, 6000;
 
 	}
@@ -234,22 +236,23 @@ function	script	F_ShadowSkillData	{
 	// =========================
 	else if (.@class == JOB_RUNE_KNIGHT) {
 
-		setarray .@id[0],  2004, 2006, 2005, 2002, 7; // Dragon Breath, Hundred Spears
-		setarray .@name$[0], "Lança das Mil Pontas", "Impacto Flamejante", "Vento Cortante", "Onda de Choque", "Impacto Explosivo";
-		setarray .@cd[0],  3000, 2000, 300, 2000, 2000;
+		setarray .@id[0], 2004, 2006, 2005, 2002, 7; // Dragon Breath, Hundred Spears
+		setarray .@name$[0], "Lanca das Mil Pontas", "Impacto Flamejante", "Vento Cortante", "Onda de Choque", "Impacto Explosivo";
+		setarray .@cd[0], 3000, 2000, 300, 2000, 2000;
 
 	}
 
 	// =========================
-	// Mecânico
+	// Mecanico
 	// =========================
 	else if (.@class == Job_Mechanic) {
 
 		setarray .@id[0], 2278, 2280; // Arm Cannon, Knuckle Boost
-		setarray .@name$[0], "Arremesso de Machado", "Fúria do Furacão";
+		setarray .@name$[0], "Arremesso de Machado", "Furia do Furacao";
 		setarray .@cd[0], 3000, 2000;
 
 	}
+
 	// =========================
 	// Arcebispo
 	// =========================
@@ -260,46 +263,51 @@ function	script	F_ShadowSkillData	{
 		setarray .@cd[0], 2000;
 
 	}
+
 	// =========================
-	// Sicário
+	// Sicario
 	// =========================
 	else if (.@class == JOB_GUILLOTINE_CROSS) {
 
-		setarray .@id[0], 136, 379, 406, 2022; // Lâminas Destruidoras, Destruidor de Almas, Impacto Meteoro
-		setarray .@name$[0], "Lâminas Destruidoras", "Destruidor de Almas", "Impacto Meteoro", "Lâminas Retalhadoras";
+		setarray .@id[0], 136, 379, 406, 2022; // Laminas Destruidoras, Destruidor de Almas, Impacto Meteoro
+		setarray .@name$[0], "Laminas Destruidoras", "Destruidor de Almas", "Impacto Meteoro", "Laminas Retalhadoras";
 		setarray .@cd[0], 1000, 250, 500, 350;
 
 	}
+
 	// =========================
 	// Royal Guard
 	// =========================
 	else if (.@class == JOB_ROYAL_GUARD) {
 
 		setarray .@id[0], 254, 2320, 2307, 2317, 2321, 2310;
-		setarray .@name$[0], "Crux Magnum", "Espiral Lunar", "Disparo Perfurante", "Lança do Destino", "Luz da Criação", "Escudo Compressor";
+		setarray .@name$[0], "Crux Magnum", "Espiral Lunar", "Disparo Perfurante", "Lanca do Destino", "Luz da Criacao", "Escudo Compressor";
 		setarray .@cd[0], 1000, 2000, 1700, 300, 2000, 2000;
 
 	}
+
 	// =========================
 	// Sorcerer
 	// =========================
 	else if (.@class == JOB_SORCERER) {
 
 		setarray .@id[0], 91, 2449, 2447, 2454, 2446, 2448;
-		setarray .@name$[0], "Fúria da Terra", "Onda Psíquica", "Pó de Diamante", "Lanças dos Aesir", "Castigo de Nerthus", "Implosão Tóxica";
+		setarray .@name$[0], "Furia da Terra", "Onda Psiquica", "Po de Diamante", "Lancas dos Aesir", "Castigo de Nerthus", "Implosao Toxica";
 		setarray .@cd[0], 1000, 5000, 5000, 5000, 5000, 2000;
 
 	}
+
 	// =========================
 	// Minstrel/Wanderer
 	// =========================
 	else if (.@class == JOB_WANDERER || .@class == JOB_MINSTREL) {
 
 		setarray .@id[0], 394, 2418, 2413, 2426;
-		setarray .@name$[0], "Vulcão de Flechas", "Temporal de Flechas", "Ruído Estridente", "Brado de Odin";
+		setarray .@name$[0], "Vulcao de Flechas", "Temporal de Flechas", "Ruido Estridente", "Brado de Odin";
 		setarray .@cd[0], 1500, 7000, 2500, 5000;
 
 	}
+
 	// =========================
 	// Genetic
 	// =========================
@@ -310,16 +318,18 @@ function	script	F_ShadowSkillData	{
 		setarray .@cd[0], 5000, 5000;
 
 	}
+
 	// =========================
 	// Shadow Chaser
 	// =========================
 	// else if (.@class == JOB_SHADOW_CHASER) {
-
+	//
 	// 	setarray .@id[0], 2284;
 	// 	setarray .@name$[0], "Ofensiva Fatal";
 	// 	setarray .@cd[0], 1000;
-
+	//
 	// }
+
 	// =========================
 	// Sky Emperor
 	// =========================
@@ -330,67 +340,72 @@ function	script	F_ShadowSkillData	{
 		setarray .@cd[0], 1000, 1000;
 
 	}
+
 	// =========================
 	// Soul Ascetic
 	// =========================
 	else if (.@class == JOB_SOUL_REAPER) {
 
 		setarray .@id[0], 2600, 2604;
-		setarray .@name$[0], "Necroexplosão", "Eswhoo";
+		setarray .@name$[0], "Necroexplosao", "Eswhoo";
 		setarray .@cd[0], 1000, 2000;
 
 	}
+
 	// =========================
 	// Kagerou/Oboro
 	// =========================
 	else if (.@class == JOB_KAGEROU || .@class == JOB_OBORO) {
 
 		setarray .@id[0], 3008, 3009, 3006;
-		setarray .@name$[0], "Explosão de Moedas", "Turbilhão de Pétalas", "Kunai Explosiva";
+		setarray .@name$[0], "Explosao de Moedas", "Turbilhao de Petalas", "Kunai Explosiva";
 		setarray .@cd[0], 10000, 3000, 3000;
 
 	}
+
 	// =========================
 	// Oboro
 	// =========================
 	// else if (.@class == JOB_OBORO) {
-
+	//
 	// 	setarray .@id[0], 136, 379, 406, 2022;
-	// 	setarray .@name$[0], "Lâminas Destruidoras", "Destruidor de Almas", "Impacto Meteoro", "Lâminas Retalhadoras";
+	// 	setarray .@name$[0], "Laminas Destruidoras", "Destruidor de Almas", "Impacto Meteoro", "Laminas Retalhadoras";
 	// 	setarray .@cd[0], 1000, 250, 500, 350;
-
+	//
 	// }
+
 	// =========================
 	// Rebellion
 	// =========================
 	else if (.@class == JOB_REBELLION) {
 
 		setarray .@id[0], 2570, 2571, 2553, 2566, 2565;
-		setarray .@name$[0], "Calibre Letal", "Execução", "Espiral Perfurante", "Lançar Míssil", "Expurgar";
+		setarray .@name$[0], "Calibre Letal", "Execucao", "Espiral Perfurante", "Lancar Missil", "Expurgar";
 		setarray .@cd[0], 5000, 20000, 2000, 3500, 1000;
 
 	}
+
 	// =========================
 	// Hyper Novice
 	// =========================
 	// else if (.@class == JOB_HYPER_NOVICE) {
-
+	//
 	// 	setarray .@id[0], 136, 379, 406, 2022;
-	// 	setarray .@name$[0], "Lâminas Destruidoras", "Destruidor de Almas", "Impacto Meteoro", "Lâminas Retalhadoras";
+	// 	setarray .@name$[0], "Laminas Destruidoras", "Destruidor de Almas", "Impacto Meteoro", "Laminas Retalhadoras";
 	// 	setarray .@cd[0], 1000, 250, 500, 350;
-
+	//
 	// }
+
 	// =========================
 	// Spirit Handler
 	// =========================
 	// else if (.@class == JOB_SPIRIT_HANDLER) {
-
+	//
 	// 	setarray .@id[0], 136, 379, 406, 2022;
-	// 	setarray .@name$[0], "Lâminas Destruidoras", "Destruidor de Almas", "Impacto Meteoro", "Lâminas Retalhadoras";
+	// 	setarray .@name$[0], "Laminas Destruidoras", "Destruidor de Almas", "Impacto Meteoro", "Laminas Retalhadoras";
 	// 	setarray .@cd[0], 1000, 250, 500, 350;
-
+	//
 	// }
-
 
 	else
 		return -1;
@@ -412,7 +427,7 @@ function	script	Show_cd_skill	{
 	.@sec = .@skill_cd / 1000;
 	.@ms  = .@skill_cd % 1000;
 
-	// se não tem parte decimal
+	// se nao tem parte decimal
 	if (.@ms == 0) {
 		return "" + .@sec;
 	}
@@ -422,5 +437,4 @@ function	script	Show_cd_skill	{
 
 	return .@sec + "." + .@dec;
 }
-
 
