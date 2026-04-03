@@ -11,8 +11,8 @@ function	script	F_AddRep	{
 	.@ach_id     = getarg(2);
 	.@max_points = getarg(3);
 
-	// adiciona reputação
-	if(.@rep_id == 7) {
+	// adiciona reputacao
+	if (.@rep_id == 7) {
 		set_reputation_points(.@rep_id, .@add_points);
 	} else {
 		add_reputation_points(.@rep_id, .@add_points);
@@ -21,8 +21,33 @@ function	script	F_AddRep	{
 	// pega valor atual
 	.@cur = get_reputation_points(.@rep_id);
 
-	// se chegou no máximo e ainda não tem o achievement, completa
+	// se chegou no maximo e ainda nao tem o achievement, completa
 	if (.@cur >= .@max_points && !achievementexists(.@ach_id)) {
+		achievementcomplete(.@ach_id);
+	}
+
+	return;
+}
+
+function	script	F_SyncRepAchievement	{
+
+	// args:
+	// 0: rep_id        (Id em reputation.yml)
+	// 1: ach_id        (achievement id)
+	// 2: max_points    (Maximum em reputation.yml)
+	//
+	// Reputacao por conta:
+	// completa o achievement do personagem atual se a conta ja atingiu o maximo.
+	// Excecao: Reborn (rep_id 7) continua sendo exclusivo do personagem.
+
+	.@rep_id     = getarg(0);
+	.@ach_id     = getarg(1);
+	.@max_points = getarg(2);
+
+	if (.@rep_id == 7)
+		return;
+
+	if (get_reputation_points(.@rep_id) >= .@max_points && !achievementexists(.@ach_id)) {
 		achievementcomplete(.@ach_id);
 	}
 
