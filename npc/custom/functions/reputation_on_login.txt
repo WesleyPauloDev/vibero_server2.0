@@ -98,16 +98,19 @@ OnPCLoginEvent:
 		}
 	}
 
+	callfunc("F_SyncRepAchievement", 1, 110002, 3000);
 	#reput_instance = get_reputation_points(1);
 	.@reput_instance = (get_reputation_points(1) / 1000) * 20;
 	set exp_final, exp_final + (exp_base_custom * .@reput_instance / 100);
 	set rep_bonus_instance_exp, .@reput_instance;
 
 	set_reputation_points(2, #reput_votos);
+	callfunc("F_SyncRepAchievement", 2, 110003, 3000);
 	.@reput_votos = (get_reputation_points(2) / 1000) * 5;
 	#allstats_final += .@reput_votos;
 	set rep_bonus_votes_allstats, .@reput_votos;
 
+	callfunc("F_SyncRepAchievement", 3, 110004, 5000);
 	.@reput_cheffenia = (get_reputation_points(3) / 1000) * 10;
 	set #reput_cheffenia, get_reputation_points(3);
 	set #hp_final, #hp_final + .@reput_cheffenia;
@@ -115,11 +118,13 @@ OnPCLoginEvent:
 	set rep_bonus_cheffenia_hp, .@reput_cheffenia;
 	set rep_bonus_cheffenia_sp, .@reput_cheffenia;
 
+	callfunc("F_SyncRepAchievement", 4, 110005, 5000);
 	.@reput_cheffenia_hard = (get_reputation_points(4) / 1000) * 5;
 	set #reput_cheffenia_hard, get_reputation_points(4);
 	#allstats_final += .@reput_cheffenia_hard;
 	set rep_bonus_cheff_h_allstats, .@reput_cheffenia_hard;
 
+	callfunc("F_SyncRepAchievement", 5, 110006, 5000);
 	.@reput_bio5 = (get_reputation_points(5) / 1000) * 10;
 	set #reput_bio5, get_reputation_points(5);
 	set #hp_final, #hp_final + .@reput_bio5;
@@ -127,11 +132,13 @@ OnPCLoginEvent:
 	set rep_bonus_bio5_hp, .@reput_bio5;
 	set rep_bonus_bio5_sp, .@reput_bio5;
 
+	callfunc("F_SyncRepAchievement", 6, 110007, 5000);
 	.@reput_bio5_hard = (get_reputation_points(6) / 1000) * 5;
 	set #reput_bio5_hard, get_reputation_points(6);
 	#allstats_final += .@reput_bio5_hard;
 	set rep_bonus_bio5_hard_allstats, .@reput_bio5_hard;
 
+	callfunc("F_SyncRepAchievement", 8, 110009, 5000);
 	.@reput_class_dominator = (get_reputation_points(8) / 1000) * 20;
 	set #reput_class_dominator, get_reputation_points(8);
 	set drop_final, drop_final + .@reput_class_dominator;
