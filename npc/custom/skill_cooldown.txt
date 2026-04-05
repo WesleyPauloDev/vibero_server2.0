@@ -45,6 +45,7 @@ prontera,141,180,0	script	Shadow Master	4_F_EDEN_MASTER,{
 		"Soul Reaper",
 		"Kagerou/Oboro",
 		"Rebellion",
+		"Doram",
 		// "Hyper Novice",
 		"Cancelar"
 	)) {
@@ -134,7 +135,12 @@ prontera,141,180,0	script	Shadow Master	4_F_EDEN_MASTER,{
 		callsub S_SelectSkill;
 		end;
 
-	// case 16: // Hyper Novice
+	case 16: // Doram
+		set SHADOW_CLASS,JOB_SUMMONER;
+		callsub S_SelectSkill;
+		end;
+
+	// case 17: // Hyper Novice
 	// 	set SHADOW_CLASS,JOB_HYPER_NOVICE;
 	// 	callsub S_SelectSkill;
 	// 	end;
@@ -386,6 +392,17 @@ function	script	F_ShadowSkillData	{
 	}
 
 	// =========================
+	// Doram
+	// =========================
+	else if (.@class == JOB_SUMMONER) {
+
+		setarray .@id[0], 5032, 5033, 5028, 5036, 5046;
+		setarray .@name$[0], "Scar of Tarou", "Picky Peck", "Catnip Meteor 2", "Lunatic Carrot Beat 2", "Spirit of Savage";
+		setarray .@cd[0], 12000, 1000, 5000, 6000, 22000;
+
+	}
+
+	// =========================
 	// Hyper Novice
 	// =========================
 	// else if (.@class == JOB_HYPER_NOVICE) {
@@ -437,4 +454,3 @@ function	script	Show_cd_skill	{
 
 	return .@sec + "." + .@dec;
 }
-
