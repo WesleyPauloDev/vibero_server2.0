@@ -1,0 +1,471 @@
+// NPC de teste defensivo.
+// Fluxo simplificado:
+// - Debuff opcional
+// - Dano fisico ou magico
+// - Fisico usa skill neutra fixa
+// - Magico escolhe a skill pelo elemento
+// - Mantem filtros de tamanho, raca e modo do mob
+
+prontera,156,278,4	script	Resistence Tester	627,{
+	mes "[Skill Tester]";
+	mes "Vamos configurar um atacante para testar sua defesa.";
+	next;
+
+	.@reuse_last = 0;
+	if (SkillTest_Last_Valid) {
+		mes "[Skill Tester]";
+		mes "Deseja reutilizar a ultima configuracao?";
+		next;
+		.@reuse_last = (select("Reutilizar ultima","Configurar de novo") == 1);
+	}
+
+	.@debuff_mode = 0;
+	.@debuff_skill$ = "";
+	.@debuff_label$ = "Nenhum";
+	.@debuff_lv = 0;
+	.@damage_enabled = 1;
+	.@d_idx = 0;
+
+	setarray .@debuff_label_list$[0],
+		"Dispel",
+		"Congelamento",
+		"Stun",
+		"Petrificacao",
+		"Silencio",
+		"Cegueira",
+		"Veneno",
+		"Sangramento",
+		"Confusao",
+		"Sono",
+		"Maldicao";
+
+	setarray .@debuff_skill_list$[0],
+		"SA_DISPELL",
+		"MG_FROSTDIVER",
+		"BS_HAMMERFALL",
+		"MG_STONECURSE",
+		"NPC_WIDESILENCE2",
+		"HT_FLASHER",
+		"NPC_POISON",
+		"NPC_WIDEBLEEDING2",
+		"NPC_WIDECONFUSE2",
+		"HT_SANDMAN",
+		"NPC_WIDECURSE2";
+
+	setarray .@debuff_lv_list[0],
+		5,10,5,10,5,5,5,5,5,5,5;
+
+	.@skill_label$ = "Nenhum";
+	.@skill_name$ = "";
+	.@skill_id = 0;
+	.@skill_lv = 0;
+	.@real_skill_lv = 0;
+	.@skill_cap = 5;
+	.@damage_type = 0;
+	.@mob_ele_name$ = "Neutro";
+	.@mob_ele = ELE_NEUTRAL;
+	.@e_idx = 0;
+
+	setarray .@ele_name$,
+		"Neutro","Agua","Terra","Fogo","Vento",
+		"Veneno","Sombrio","Sagrado","Fantasma","Morto-Vivo";
+	setarray .@ele_value,
+		ELE_NEUTRAL,ELE_WATER,ELE_EARTH,ELE_FIRE,ELE_WIND,
+		ELE_POISON,ELE_DARK,ELE_HOLY,ELE_GHOST,ELE_UNDEAD;
+
+	setarray .@size_name$,
+		"Pequeno","Medio","Grande";
+	setarray .@size_value,
+		0,1,2;
+
+	setarray .@race_name$,
+		"Amorfo","Morto-Vivo","Bruto","Planta","Inseto",
+		"Peixe","Demonio","Humanoide","Anjo","Dragao";
+	setarray .@race_value,
+		RC_FORMLESS,RC_UNDEAD,RC_BRUTE,RC_PLANT,RC_INSECT,
+		RC_FISH,RC_DEMON,RC_DEMIHUMAN,RC_ANGEL,RC_DRAGON;
+
+	if (.@reuse_last) {
+		.@debuff_mode = SkillTest_Last_DebuffMode;
+		.@d_idx = SkillTest_Last_DebuffIdx;
+		.@damage_type = SkillTest_Last_DamageType;
+		.@skill_lv = SkillTest_Last_SkillLv;
+		.@mode_sel = SkillTest_Last_ModeSel;
+		.@s_idx = SkillTest_Last_SizeIdx;
+		.@r_idx = SkillTest_Last_RaceIdx;
+		.@e_idx = SkillTest_Last_EleIdx;
+	} else {
+		.@debuff_mode = select("Dano","Debuff") - 1;
+	}
+
+	if (.@debuff_mode == 1)
+		.@damage_enabled = 0;
+
+	if (.@debuff_mode > 0) {
+		if (!.@reuse_last) {
+			mes "[Skill Tester]";
+			mes "Escolha o debuff.";
+			next;
+
+			.@d_idx = select(
+				"Dispel",
+				"Congelamento",
+				"Stun",
+				"Petrificacao",
+				"Silencio",
+				"Cegueira",
+				"Veneno",
+				"Sangramento",
+				"Confusao",
+				"Sono",
+				"Maldicao"
+			) - 1;
+		}
+
+		.@debuff_label$ = .@debuff_label_list$[.@d_idx];
+		.@debuff_skill$ = .@debuff_skill_list$[.@d_idx];
+		.@debuff_lv = .@debuff_lv_list[.@d_idx];
+	}
+
+	if (.@damage_enabled) {
+		if (!.@reuse_last) {
+			mes "[Skill Tester]";
+			mes "Escolha o tipo de dano.";
+			next;
+
+			.@damage_type = select("Fisico","Magico") - 1;
+		}
+		.@skill_max_lv = 5;
+
+		if (!.@reuse_last) {
+			mes "[Skill Tester]";
+			mes "Escolha a intensidade do teste.";
+			next;
+
+			.@lv_menu$ = "";
+			for (.@i = 1; .@i <= .@skill_max_lv; ++.@i)
+				.@lv_menu$ += "Lv " + .@i + ":";
+
+			.@skill_lv = select(.@lv_menu$);
+		}
+
+		if (.@damage_type == 0) {
+			.@skill_label$ = "Earthquake";
+			.@skill_name$ = "NPC_EARTHQUAKE";
+			.@skill_id = 653;
+			.@skill_cap = 10;
+		} else {
+			.@skill_id = 0;
+			if (!.@reuse_last) {
+				mes "[Skill Tester]";
+				mes "Escolha o elemento da skill magica.";
+				next;
+
+				.@e_idx = select(
+					"Neutro",
+					"Agua",
+					"Terra",
+					"Fogo",
+					"Vento",
+					"Veneno",
+					"Sombrio",
+					"Sagrado",
+					"Fantasma",
+					"Morto-Vivo"
+				) - 1;
+			}
+
+			.@mob_ele_name$ = .@ele_name$[.@e_idx];
+			.@mob_ele = .@ele_value[.@e_idx];
+			.@skill_cap = 5;
+
+			switch (.@mob_ele) {
+				case ELE_NEUTRAL:
+					.@skill_label$ = "Drain Life";
+					.@skill_name$ = "WL_DRAINLIFE";
+					.@skill_cap = 5;
+					break;
+				case ELE_WATER:
+					.@skill_label$ = "Jack Frost";
+					.@skill_name$ = "WL_JACKFROST";
+					.@skill_cap = 5;
+					break;
+				case ELE_EARTH:
+					.@skill_label$ = "Earth Strain";
+					.@skill_name$ = "";
+					.@skill_id = 2216;
+					.@skill_cap = 5;
+					break;
+				case ELE_FIRE:
+					.@skill_label$ = "Crimson Rock";
+					.@skill_name$ = "WL_CRIMSONROCK";
+					.@skill_cap = 5;
+					break;
+				case ELE_WIND:
+					.@skill_label$ = "Chain Lightning";
+					.@skill_name$ = "WL_CHAINLIGHTNING";
+					.@skill_cap = 5;
+					break;
+				case ELE_POISON:
+					.@skill_label$ = "Poison Buster";
+					.@skill_name$ = "SO_POISON_BUSTER";
+					.@skill_cap = 5;
+					break;
+				case ELE_HOLY:
+					.@skill_label$ = "Adoramus";
+					.@skill_name$ = "AB_ADORAMUS";
+					.@skill_cap = 10;
+					break;
+				case ELE_GHOST:
+					.@skill_label$ = "Soul Expansion";
+					.@skill_name$ = "WL_SOULEXPANSION";
+					.@skill_cap = 5;
+					break;
+				case ELE_DARK:
+					.@skill_label$ = "Curse Explosion";
+					.@skill_name$ = "SP_CURSEEXPLOSION";
+					.@skill_id = 0;
+					.@skill_cap = 10;
+					break;
+				case ELE_UNDEAD:
+					.@skill_label$ = "Undead Attack";
+					.@skill_name$ = "NPC_UNDEADATTACK";
+					.@skill_cap = 5;
+					break;
+				default:
+					.@skill_label$ = "Soul Expansion";
+					.@skill_name$ = "WL_SOULEXPANSION";
+					.@skill_cap = 5;
+					break;	
+			}
+		}
+
+		.@real_skill_lv = ((.@skill_lv * .@skill_cap) + 4) / 5;
+		if (.@real_skill_lv < 1)
+			.@real_skill_lv = 1;
+		if (.@real_skill_lv > .@skill_cap)
+			.@real_skill_lv = .@skill_cap;
+	}
+
+	.@mob_mode = MD_NONE;
+	.@mob_mode_name$ = "Mob normal";
+	if (.@damage_enabled) {
+		if (!.@reuse_last) {
+			mes "[Skill Tester]";
+			mes "O atacante sera mob normal ou MVP?";
+			next;
+
+			.@mode_sel = select("Mob normal","MVP") - 1;
+		}
+		if (.@mode_sel) {
+			.@mob_mode |= MD_MVP|MD_STATUSIMMUNE|MD_KNOCKBACKIMMUNE|MD_DETECTOR;
+			.@mob_mode_name$ = "MVP";
+		}
+	}
+
+	if (.@damage_enabled) {
+		if (!.@reuse_last) {
+			mes "[Skill Tester]";
+			mes "Escolha o tamanho do atacante.";
+			next;
+
+			.@s_idx = select("Pequeno","Medio","Grande") - 1;
+		}
+	}
+
+	.@mob_size_name$ = .@size_name$[.@s_idx];
+	.@mob_size = .@size_value[.@s_idx];
+
+	if (.@damage_enabled) {
+		if (!.@reuse_last) {
+			mes "[Skill Tester]";
+			mes "Escolha a raca do atacante.";
+			next;
+
+			.@r_idx = select(
+				"Amorfo",
+				"Morto-Vivo",
+				"Bruto",
+				"Planta",
+				"Inseto",
+				"Peixe",
+				"Demonio",
+				"Humanoide",
+				"Anjo",
+				"Dragao"
+			) - 1;
+		}
+	}
+
+	.@mob_race_name$ = .@race_name$[.@r_idx];
+	.@mob_race = .@race_value[.@r_idx];
+
+	mes "[Resumo]";
+	mes "Debuff   : " + .@debuff_label$;
+	if (.@damage_enabled)
+		mes "Dano     : " + .@skill_label$ + " Lv " + .@real_skill_lv;
+	else
+		mes "Dano     : Nenhum";
+	if (.@damage_enabled) {
+		mes "Tipo     : " + .@mob_mode_name$;
+		mes "Tamanho  : " + .@mob_size_name$;
+		mes "Raca     : " + .@mob_race_name$;
+	}
+	if (.@damage_enabled && .@damage_type == 1)
+		mes "Elemento : " + .@mob_ele_name$ + " 4";
+	else if (.@damage_enabled)
+		mes "Elemento : Neutro";
+	next;
+
+	if (select("Executar teste","Cancelar") == 2)
+		close;
+
+	SkillTest_Last_Valid = 1;
+	SkillTest_Last_DebuffMode = .@debuff_mode;
+	SkillTest_Last_DebuffIdx = .@d_idx;
+	SkillTest_Last_DamageType = .@damage_type;
+	SkillTest_Last_SkillLv = .@skill_lv;
+	if (.@damage_enabled) {
+		SkillTest_Last_ModeSel = .@mode_sel;
+		SkillTest_Last_SizeIdx = .@s_idx;
+		SkillTest_Last_RaceIdx = .@r_idx;
+	} else {
+		SkillTest_Last_ModeSel = 0;
+		SkillTest_Last_SizeIdx = 0;
+		SkillTest_Last_RaceIdx = 0;
+	}
+	SkillTest_Last_EleIdx = .@e_idx;
+
+	getmapxy(.@map$, .@x, .@y, BL_PC);
+	.@target_aid = getcharid(3);
+	.@caster_id = 0;
+	.@need_debuff_mob = 0;
+
+	if (!.@damage_enabled && (.@debuff_skill$ == "NPC_WIDESILENCE2" || .@debuff_skill$ == "NPC_POISON" || .@debuff_skill$ == "NPC_WIDEBLEEDING2" || .@debuff_skill$ == "NPC_WIDECONFUSE2" || .@debuff_skill$ == "HT_SANDMAN" || .@debuff_skill$ == "NPC_WIDECURSE2"))
+		.@need_debuff_mob = 1;
+
+	if (.@damage_enabled || .@need_debuff_mob) {
+		.@spawn_mob_id = .mob_base_id;
+		if (.@need_debuff_mob) {
+			if (.@debuff_skill$ == "NPC_WIDECURSE2")
+				.@spawn_mob_id = .curse_debuff_mob_id;
+			else if (.@debuff_skill$ == "HT_SANDMAN")
+				.@spawn_mob_id = .sleep_debuff_mob_id;
+			else if (.@debuff_skill$ == "NPC_WIDESILENCE2")
+				.@spawn_mob_id = .silence_debuff_mob_id;
+			else if (.@debuff_skill$ == "NPC_POISON")
+				.@spawn_mob_id = .poison_debuff_mob_id;
+			else if (.@debuff_skill$ == "NPC_WIDEBLEEDING2")
+				.@spawn_mob_id = .bleeding_debuff_mob_id;
+			else if (.@debuff_skill$ == "NPC_WIDECONFUSE2")
+				.@spawn_mob_id = .confuse_debuff_mob_id;
+			else
+				.@spawn_mob_id = .debuff_mob_id;
+		}
+
+		monster .@map$, .@x, .@y, "Atacante de Teste", .@spawn_mob_id, 1;
+		.@gid = $@mobid[0];
+
+		if (!.@gid) {
+			dispbottom "Nao foi possivel criar o atacante de teste.";
+			close;
+		}
+
+		setunitdata .@gid, UMOB_DMGIMMUNE, 1;
+		setunitdata .@gid, UMOB_SCOPTION, OPTION_INVISIBLE;
+		setunitdata .@gid, UMOB_LOOKDIR, 5;
+		if (.@need_debuff_mob) {
+			setunitdata .@gid, UMOB_MODE, MD_NONE;
+			setunitdata .@gid, UMOB_ATKMIN, 1;
+			setunitdata .@gid, UMOB_ATKMAX, 1;
+		}
+		if (.@need_debuff_mob && .@debuff_skill$ == "HT_SANDMAN") {
+			setunitdata .@gid, UMOB_DEX, 999;
+			setunitdata .@gid, UMOB_HIT, 9999;
+		}
+		if (.@need_debuff_mob && .@debuff_skill$ == "NPC_WIDESILENCE2") {
+			setunitdata .@gid, UMOB_DEX, 999;
+			setunitdata .@gid, UMOB_HIT, 9999;
+		}
+		if (.@need_debuff_mob && .@debuff_skill$ == "NPC_POISON") {
+			setunitdata .@gid, UMOB_DEX, 999;
+			setunitdata .@gid, UMOB_HIT, 9999;
+		}
+		if (.@need_debuff_mob && .@debuff_skill$ == "NPC_WIDEBLEEDING2") {
+			setunitdata .@gid, UMOB_DEX, 999;
+			setunitdata .@gid, UMOB_HIT, 9999;
+		}
+		if (.@need_debuff_mob && .@debuff_skill$ == "NPC_WIDECONFUSE2") {
+			setunitdata .@gid, UMOB_DEX, 999;
+			setunitdata .@gid, UMOB_HIT, 9999;
+		}
+		if (.@need_debuff_mob && .@debuff_skill$ == "NPC_WIDECURSE2") {
+			setunitdata .@gid, UMOB_DEX, 999;
+			setunitdata .@gid, UMOB_HIT, 9999;
+			setunitdata .@gid, UMOB_LEVEL, 300;
+			setunitdata .@gid, UMOB_LUK, 999;
+		}
+		if (.@damage_enabled) {
+			setunitdata .@gid, UMOB_SIZE, .@mob_size;
+			setunitdata .@gid, UMOB_RACE, .@mob_race;
+			setunitdata .@gid, UMOB_MODE, .@mob_mode;
+			if (.@damage_type == 1) {
+				setunitdata .@gid, UMOB_ELETYPE, .@mob_ele;
+				setunitdata .@gid, UMOB_ELELEVEL, 4;
+			} else {
+				setunitdata .@gid, UMOB_ELETYPE, ELE_NEUTRAL;
+				setunitdata .@gid, UMOB_ELELEVEL, 4;
+			}
+		} else {
+			setunitdata .@gid, UMOB_ELETYPE, ELE_NEUTRAL;
+			setunitdata .@gid, UMOB_ELELEVEL, 4;
+		}
+		.@caster_id = .@gid;
+	} else {
+		.@caster_id = getnpcid(0);
+	}
+
+	close2;
+
+	if (!attachrid(.@target_aid)) {
+		if (.@gid)
+			unitkill .@gid;
+		end;
+	}
+
+	if (.@debuff_skill$ != "") {
+		if (.@debuff_skill$ == "BS_HAMMERFALL" || .@debuff_skill$ == "HT_FLASHER" || .@debuff_skill$ == "HT_SANDMAN")
+			unitskillusepos .@caster_id, .@debuff_skill$, .@debuff_lv, .@x, .@y, -100, 0, 0, 1;
+		else if (.@debuff_skill$ == "NPC_WIDESILENCE2" || .@debuff_skill$ == "NPC_WIDEBLEEDING2" || .@debuff_skill$ == "NPC_WIDECONFUSE2" || .@debuff_skill$ == "NPC_WIDECURSE2")
+			unitskilluseid .@caster_id, .@debuff_skill$, .@debuff_lv, .@caster_id, -100, 0, 0, 1;
+		else
+			unitskilluseid .@caster_id, .@debuff_skill$, .@debuff_lv, .@target_aid, -100, 0, 0, 1;
+		sleep 200;
+	}
+
+	if (.@damage_enabled) {
+		if (.@skill_id == 653 || .@skill_id == 2216)
+			unitskillusepos .@gid, .@skill_id, .@real_skill_lv, .@x, .@y, -100, 0, 0, 1;
+		else if (.@skill_id)
+			unitskilluseid .@gid, .@skill_id, .@real_skill_lv, .@target_aid, -100, 0, 0, 1;
+		else
+			unitskilluseid .@gid, .@skill_name$, .@real_skill_lv, .@target_aid, -100, 0, 0, 1;
+		sleep 1200;
+	}
+
+	if (.@gid)
+		unitkill .@gid;
+	end;
+
+OnInit:
+	.mob_base_id = 2371;
+	// .mob_base_id = 20273;
+	.debuff_mob_id = 1002;
+	.silence_debuff_mob_id = 1002;
+	.poison_debuff_mob_id = 1002;
+	.bleeding_debuff_mob_id = 1002;
+	.confuse_debuff_mob_id = 1002;
+	.sleep_debuff_mob_id = 1002;
+	.curse_debuff_mob_id = 1002;
+	end;
+}

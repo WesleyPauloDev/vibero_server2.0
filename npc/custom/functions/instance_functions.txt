@@ -166,18 +166,21 @@ function	script	F_InstanceLogStart	{
 		+ escape_sql(strcharinfo(0)) + "', 'OPEN', NOW())");
 	return;
 }
-
 function	script	F_InstanceLogFinish	{
 	.@db_name$ = getarg(0);
 	.@party_id = getcharid(1);
+	.@log_id = 0;
 	if (.@party_id < 1)
+		return;
+	query_sql("SELECT `id` FROM `instance_monitor_log` WHERE `party_id` = "
+		+ .@party_id + " AND `status` = 'OPEN' ORDER BY (`instance_name` = '"
+		+ escape_sql(.@db_name$) + "') DESC, `id` DESC LIMIT 1", .@log_id);
+	if (.@log_id < 1)
 		return;
 	query_sql("UPDATE `instance_monitor_log` SET `status` = 'COMPLETED', `completed_at` = NOW(), `finished_by_account_id` = "
 		+ getcharid(3) + ", `finished_by_char_id` = "
 		+ getcharid(0) + ", `finished_by_name` = '"
-		+ escape_sql(strcharinfo(0)) + "' WHERE `id` = (SELECT `id` FROM (SELECT `id` FROM `instance_monitor_log` WHERE `instance_name` = '"
-		+ escape_sql(.@db_name$) + "' AND `party_id` = "
-		+ .@party_id + " AND `status` = 'OPEN' ORDER BY `id` DESC LIMIT 1) AS `open_instance`)");
+		+ escape_sql(strcharinfo(0)) + "' WHERE `id` = " + .@log_id);
 	return;
 }
 
