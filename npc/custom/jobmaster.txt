@@ -24,7 +24,7 @@ function Get_Job_Equip;
 // closes if not, returns if yes
 function	Require_Level	{
 
-	if ( eaclass() & EAJL_THIRD || Class == 4215 ||	Class == 4211 || Class == 4212) {
+	if ( eaclass() & EAJL_THIRD || Class == 4215 || Class == 4211 || Class == 4212 || Class == 4218) {
 		mes "Não há mais classes disponíveis para este tipo.";
 		close;
 		end;
@@ -212,10 +212,7 @@ function	Job_Options	{
 		Job_Options(.@job_opt, roclass(EAJ_HYPER_NOVICE));
 	}
 	
-	if (.FourthExpanded && .@eac == EAJ_SUMMONER) {
-		Require_Level(.Req_SHandler[0], .Req_SHandler[1]);
-		Job_Options(.@job_opt, roclass(EAJ_SPIRIT_HANDLER));
-	}
+
 
 	if (.SecondExpanded && 
 		((.@eac&(~EAJL_BABY)) == EAJ_NINJA || 		// is (Baby) Ninja

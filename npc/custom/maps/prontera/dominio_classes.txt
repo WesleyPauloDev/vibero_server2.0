@@ -14,7 +14,7 @@ OnTalk:
 	next;
 
 	mes "[Domínio das Classes]";
-	mes "Cada classe nova que atingir o nível máximo (175/70) sendo rate 1X, lhe dará ^00FF00pontos de reputação^000000.";
+	mes "Cada classe nova que atingir o nível máximo sendo rate 1X lhe dará ^00FF00pontos de reputação^000000.";
 	mes "Ao alcançar certos níveis de reputação, você ganhará bônus especiais permanentes!";
 	next;
 
@@ -36,6 +36,7 @@ OnTalk:
 		4211, // Kagerou
 		// 4212, // Oboro
 		4215, // Rebellion
+		4218, // Summoner
 		4239, // Star Emperor
 		4240, // Soul Reaper
 		4190; // Super Novice Expandido
@@ -48,9 +49,12 @@ OnTalk:
 				close;
 			}
 
-			if (BaseLevel < 175 || JobLevel < 70) {
+			.@class_id = Class;
+
+			.@required_job = (.@class_id == 4218 ? 60 : 70);
+			if (BaseLevel < 175 || JobLevel < .@required_job) {
 				mes "[Domínio das Classes]";
-			mes "Você ainda não alcançou o nível necessário (175/70).";
+				mes "Você ainda não alcançou o nível necessário (175/" + .@required_job + ").";
 				close;
 			}	
 
@@ -107,7 +111,7 @@ OnTalk:
 
 			mes "[Domínio das Classes]";
 			mes "Parabéns! Você atingiu o nível máximo com uma nova classe!";
-			mes "Total de classes dominadas: ^00FF00" + #classes_mastered + "/17^000000.";
+			mes "Total de classes dominadas: ^00FF00" + #classes_mastered + "/18^000000.";
 
 			// Recompensa
 			// add_reputation_points(8, 300);
@@ -117,7 +121,7 @@ OnTalk:
 
 		case 2:
 			mes "Classes conquistadas: ^00FF00" + #classes_mastered + "^000000";
-			mes "Classes restantes: ^FF0000" + (17 - #classes_mastered) + "^000000";
+			mes "Classes restantes: ^FF0000" + (18 - #classes_mastered) + "^000000";
 			next;
 
 			setarray .@classes_name$[0],
@@ -137,6 +141,7 @@ OnTalk:
 				"Kagerou/Oboro",
 				// "Kagerou/Oboro",
 				"Rebellion",
+				"Doram",
 				"Star Emperor",
 				"Soul Reaper",
 				"Super Aprendiz Expandido";
