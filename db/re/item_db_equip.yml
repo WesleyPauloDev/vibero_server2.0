@@ -15589,13 +15589,38 @@ Body:
       autobonus3 "{ bonus2 bVariableCastrate,\"WL_HELLINFERNO\",-30; }",.@r*40,5000,"WL_HELLINFERNO";
   - Id: 1683
     AegisName: Abundantly_Foxtail
-    Name: Enriched Foxtail Staff
+    Name: Evolved Foxtail Staff
     Type: Weapon
     SubType: Staff
-    Buy: 20
-    Weight: 200
-    Attack: 50
-    MagicAttack: 70
+    Buy: 2000
+    Weight: 1000
+    Attack: 100
+    MagicAttack: 100
+    Range: 1
+    Slots: 1
+    Jobs:
+      Summoner: true
+      Spirit_Handler: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 1
+    EquipLevelMin: 30
+    Refineable: true
+    Script: |
+      bonus bStr,2;
+      bonus bDex,2;
+      bonus bInt,2;
+      bonus bAtk,15;
+      bonus bMatk,15;
+  - Id: 1684
+    AegisName: Long_Foxtail
+    Name: Foxtail de Anubis
+    Type: Weapon
+    SubType: Staff
+    Buy: 4000
+    Weight: 1000
+    Attack: 120
+    MagicAttack: 120
     Range: 1
     Slots: 1
     Jobs:
@@ -15604,33 +15629,21 @@ Body:
     Locations:
       Right_Hand: true
     WeaponLevel: 2
-    EquipLevelMin: 12
+    EquipLevelMin: 99
     Refineable: true
     Script: |
-      bonus bMaxSP,50;
-      bonus bUnbreakableWeapon;
-  - Id: 1684
-    AegisName: Long_Foxtail
-    Name: Long Foxtail Staff
-    Type: Weapon
-    SubType: Staff
-    Buy: 20
-    Weight: 200
-    Attack: 50
-    Range: 2
-    Slots: 1
-    Jobs:
-      Summoner: true
-      Spirit_Handler: true
-    Locations:
-      Right_Hand: true
-    WeaponLevel: 2
-    EquipLevelMin: 12
-    Refineable: true
-    Script: |
-      bonus bLongAtkRate,5;
-      bonus bMaxHP,200;
-      bonus bUnbreakableWeapon;
+      .@r = getrefine();
+      if (.@r > 0) {
+        bonus bShortAtkRate,5 * .@r;
+        bonus bLongAtkRate,5 * .@r;
+        bonus bMatkRate,5 * .@r;
+      }
+      bonus bVariableCastrate,-10;
+      bonus bDelayRate,-15;
+      bonus bAspdRate,10;
+      bonus bShortAtkRate,50;
+      bonus bLongAtkRate,50;
+      bonus bMatkRate,50;
   - Id: 1685
     AegisName: DragonFry_Foxtail
     Name: Dragonfly Sitting Foxtail Staff
@@ -139534,13 +139547,13 @@ Body:
       }
   - Id: 26111
     AegisName: Metal_Foxtail
-    Name: Metal Foxtail
+    Name: Relapse Foxtail
     Type: Weapon
     SubType: Staff
-    Attack: 120
-    MagicAttack: 120
+    Attack: 380
+    MagicAttack: 380
     Range: 1
-    Slots: 1
+    Slots: 2
     Jobs:
       Summoner: true
       Spirit_Handler: true
@@ -139554,19 +139567,24 @@ Body:
       NoGuildStorage: true
       NoMail: true
       NoAuction: true
-    WeaponLevel: 3
-    EquipLevelMin: 1
+    WeaponLevel: 5
+    EquipLevelMin: 175
     Refineable: true
     Script: |
-      .@r = getrefine() * 3;
-      bonus bBaseAtk,.@r;
-      bonus bMatk,.@r;
-      if (BaseLevel >= 20) {
-         .@r = min(BaseLevel,120)/10*3;
-         bonus bBaseAtk,.@r;
-         bonus bMatk,.@r;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bShortAtkRate,15 * .@r;
+        bonus bLongAtkRate,15 * .@r;
+        bonus bMatkRate,15 * .@r;
+        bonus bAtk,15 * .@r;
+        bonus bMatk,15 * .@r;
       }
-      bonus bUnbreakableWeapon;
+      bonus bVariableCastrate,-30;
+      bonus bDelayRate,-30;
+      bonus bShortAtkRate,150;
+      bonus bLongAtkRate,150;
+      bonus bMatkRate,150;
+
   - Id: 26112
     AegisName: Probation_Foxtail
     Name: Trial Summoner's Foxtail
@@ -139661,11 +139679,13 @@ Body:
       }
   - Id: 26120
     AegisName: Rebeginer_DO_Rod
-    Name: Beginner Summoner's Foxtail
+    Name: Invasion Foxtail Staff
     Type: Weapon
     SubType: Staff
-    Attack: 150
-    MagicAttack: 130
+    Buy: 3000
+    Weight: 1100
+    Attack: 180
+    MagicAttack: 180
     Range: 1
     Slots: 1
     Jobs:
@@ -139673,8 +139693,8 @@ Body:
       Spirit_Handler: true
     Locations:
       Right_Hand: true
-    WeaponLevel: 3
-    EquipLevelMin: 100
+    WeaponLevel: 2
+    EquipLevelMin: 70
     Refineable: true
     Trade:
       NoDrop: true
@@ -139685,11 +139705,20 @@ Body:
       NoMail: true
       NoAuction: true
     Script: |
-      bonus bUnbreakableWeapon;
-      bonus bVariableCastrate,-10;
-      if (getrefine()>=7) {
-         bonus2 bSkillAtk,"SU_CN_METEOR",15;
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bShortAtkRate,5 * .@r;
+        bonus bLongAtkRate,5 * .@r;
+        bonus bMatkRate,5 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMatk,10 * .@r;
       }
+      bonus bVariableCastrate,-15;
+      bonus bDelayRate,-20;
+      bonus bShortAtkRate,75;
+      bonus bLongAtkRate,75;
+      bonus bMatkRate,75;
+
   - Id: 26138
     AegisName: Wand_Of_Flame
     Name: Hellfire Staff
@@ -139867,35 +139896,37 @@ Body:
       }
   - Id: 26143
     AegisName: Diva_Foxtail
-    Name: Diva Foxtail
+    Name: Cheffenia Foxtail Staff
     Type: Weapon
     SubType: Staff
     Weight: 400
-    Attack: 150
-    MagicAttack: 180
+    Attack: 250
+    MagicAttack: 250
     Range: 1
-    Slots: 1
+    Slots: 2
     Jobs:
       Summoner: true
       Spirit_Handler: true
     Locations:
       Right_Hand: true
-    WeaponLevel: 4
-    EquipLevelMin: 150
+    WeaponLevel: 3
+    EquipLevelMin: 100
     Refineable: true
     Script: |
       .@r = getrefine();
-      bonus bHealPower,2*.@r;
-      if (.@r>=7) {
-         bonus bBaseAtk,30;
-         bonus bHit,5;
-         bonus bMatkRate,4;
+      if (.@r>0) {
+        bonus bShortAtkRate,10 * .@r;
+        bonus bLongAtkRate,10 * .@r;
+        bonus bMatkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+        bonus bMatk,10 * .@r;
       }
-      if (.@r>=9) {
-         bonus bBaseAtk,30;
-         bonus bHit,5;
-         bonus bMatkRate,4;
-      }
+      bonus bVariableCastrate,-20;
+      bonus bDelayRate,-25;
+      bonus bShortAtkRate,100;
+      bonus bLongAtkRate,100;
+      bonus bMatkRate,100;
+
   - Id: 26144
     AegisName: Mirage_Foxtail
     Name: Mirage Foxtail
@@ -140268,6 +140299,7 @@ Body:
             }
          }
       }
+
   - Id: 26156
     AegisName: Evt_Shadow_Staff_K
     Name: Sealed Shadow Staff
@@ -226387,7 +226419,8 @@ Body:
          bonus2 bMagicAddSize,Size_All,15;
          bonus2 bSkillAtk,"PA_PRESSURE",15;
          bonus2 bSkillAtk,"LG_RAYOFGENESIS",15;
-      }
+      }  
+
   - Id: 500018
     AegisName: Fourth_1h_Sword
     Name: Relapse Blade
@@ -237639,6 +237672,7 @@ Body:
          bonus2 bSkillAtk,"SU_PICKYPECK",25;
          bonus2 bSkillAtk,"SU_CN_METEOR",25;
       }
+
   - Id: 550015
     AegisName: Up_SoulWeight
     Name: Patent Spirit Pendulum
@@ -239980,6 +240014,7 @@ Body:
             }
          }
       }
+
   - Id: 550079
     AegisName: SN_B_Wand
     Name: Super Novice Booster Wand
