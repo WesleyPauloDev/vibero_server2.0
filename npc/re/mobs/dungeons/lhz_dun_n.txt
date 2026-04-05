@@ -45,16 +45,29 @@ OnInit:
 
 					getunitdata .@gid, .@info, 1;
 
-					setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] / 2;
-					setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] / 2;
-					setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] / 2;
-					setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] / 2;
-					setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] / 2;
+					setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP];
+					setunitdata .@gid, UMOB_HP, .@info[UMOB_HP];
+					setunitdata .@gid, UMOB_INT, .@info[UMOB_INT];
+					setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF];
+					setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF];
+				} else if (.@maps$[.@m] == "lhz_dun_n3" || .@maps$[.@m] == "lhz_dun_n4") {
+
+					.@gid = $@mobid[0];
+
+					getunitdata .@gid, .@info, 1;
+
+					setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] * 4;
+					setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] * 4;
+					setunitdata .@gid, UMOB_STR, .@info[UMOB_STR] * 4;
+					setunitdata .@gid, UMOB_DEX, .@info[UMOB_DEX] * 4;
+					setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] * 4;
+					setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] * 4;
+					setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] * 4;
 
 				}
 			}
 			sleep 5;
-		}	
+		}
 	}
 	end;
 
@@ -66,11 +79,24 @@ OnRegularDead:
 
 		getunitdata .@gid, .@info, 1;
 
-		setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] / 2;
-		setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] / 2;
-		setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] / 2;
-		setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] / 2;
-		setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] / 2;
+		setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP];
+		setunitdata .@gid, UMOB_HP, .@info[UMOB_HP];
+		setunitdata .@gid, UMOB_INT, .@info[UMOB_INT];
+		setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF];
+		setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF];
+	} else if (strcharinfo(3) == "lhz_dun_n3" || strcharinfo(3) == "lhz_dun_n4") {
+
+		.@gid = $@mobid[0];
+
+		getunitdata .@gid, .@info, 1;
+
+		setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] * 4;
+		setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] * 4;
+		setunitdata .@gid, UMOB_STR, .@info[UMOB_STR] * 4;
+		setunitdata .@gid, UMOB_DEX, .@info[UMOB_DEX] * 4;
+		setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] * 4;
+		setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] * 4;
+		setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] * 4;
 	}
 	callsub( OnNPCKillEvent, strcharinfo(3) );
 
@@ -111,82 +137,30 @@ S_Regular:
 			monster strcharinfo(3),0,0,"--ja--",.@mini_boss,1,"lhz_dun_n::OnMiniDead";	
 			
 			if (strcharinfo(3) == "lhz_dun_n" || strcharinfo(3) == "lhz_dun_n2") {
-
+		
 				.@gid = $@mobid[0];
-
+		
 				getunitdata .@gid, .@info, 1;
-
-				setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] / 2;
-				setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] / 2;
-				setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] / 2;
-				setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] / 2;
-				setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] / 2;
-			}
-		}
-	}
-	end;
-
-OnMiniDead: callsub( S_Mini, killedrid );
-// OnMiniDead3214: callsub( S_Mini, 3214 );
-// OnMiniDead3215: callsub( S_Mini, 3215 );
-// OnMiniDead3216: callsub( S_Mini, 3216 );
-// OnMiniDead3217: callsub( S_Mini, 3217 );
-// OnMiniDead3218: callsub( S_Mini, 3218 );
-// OnMiniDead3219: callsub( S_Mini, 3219 );
-
-// OnMiniDead3233: callsub( S_Mini, 3233 );
-// OnMiniDead3234: callsub( S_Mini, 3234 );
-// OnMiniDead3235: callsub( S_Mini, 3235 );
-// OnMiniDead3236: callsub( S_Mini, 3236 );
-// OnMiniDead3237: callsub( S_Mini, 3237 );
-// OnMiniDead3238: callsub( S_Mini, 3238 );
-// OnMiniDead3239: callsub( S_Mini, 3239 );
-
-S_Mini:
-	.@mob_id = getarg(0);
-	.@map$ = strcharinfo(3);              // mapa atual
-	.@key1$ = "." + .@map$ + "[" + .@mob_id + "]";
-	.@key2$ = "." + .@map$ + "_boss";
-
-	// checa contador e boss
-	if ( getd(.@key1$) < 4 && getd(.@key2$) == 0 ) { // lhz_dun_n[3214] < 4 && lhz_dun_n_boss == 0
-
-		// incrementa contador dinâmico
-		setd(.@key1$, getd(.@key1$) + 1); // lhz_dun_n[3214]++
-
-		mapannounce .@map$, "O Mini-Boss foi derrotado!", bc_map, 0xFF8000;
-
-		.@regular = .@mob_id - 6 - (.@mob_id > 3219); // 
-
-		if ( getd(.@key1$) < 4 ) { // lhz_dun_n[3214] < 4
-			// zera o índice regular equivalente
-			setd("." + .@map$ + "[" + .@regular + "]", 0);	// note: mini boss version can re-spawn when the count of mini boss dead is reached? (currently they don't)
-		} else {
-			setarray .@mini_boss_list[0], 3214,3215,3216,3217,3218,3219,3233,3234,3235,3236,3237,3238,3239;
-			for ( .@i = 0; .@i < 13; ++.@i ) {	
-				if ( getd("." + .@map$ + "[" + .@mini_boss_list[.@i] + "]") < 4 )
-					end;
-			}
-			// MvP monster seems to only spawn at 12 o'clock
-			// monster "lhz_dun_n",140,230,"--en--", F_Rand(3220,3221,3222,3223,3224,3225,3240,3241,3242,3243,3244,3245,3246),1, "lhz_dun_n::OnMyMVPDead";
-			monster strcharinfo(3),0,0,"--ja--",F_Rand(3220,3221,3222,3223,3224,3225,3240,3241,3242,3243,3244,3245,3246),1,"lhz_dun_n::OnMyMVPDead";
-			// mapannounce "lhz_dun_n", "Voz do Reaper: Já faz um tempo.", bc_map;	// unknown message
-			mapannounce strcharinfo(3), "Um MVP apareceu!", bc_map, 0xFF0000;
-			setd(.@key2$, 1);
-			// deletearray .lhz_dun_n;
-			deletearray getd("." + .@map$);
-
-			if (strcharinfo(3) == "lhz_dun_n" || strcharinfo(3) == "lhz_dun_n2") {
-
+		
+				setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP];
+				setunitdata .@gid, UMOB_HP, .@info[UMOB_HP];
+				setunitdata .@gid, UMOB_INT, .@info[UMOB_INT];
+				setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF];
+				setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF];
+			} else if (strcharinfo(3) == "lhz_dun_n3" || strcharinfo(3) == "lhz_dun_n4") {
+		
 				.@gid = $@mobid[0];
-
+		
 				getunitdata .@gid, .@info, 1;
-
-				setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] / 2;
-				setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] / 2;
-				setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] / 2;
-				setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] / 2;
-				setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] / 2;
+		
+				setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] * 4;
+				setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] * 4;
+				setunitdata .@gid, UMOB_STR, .@info[UMOB_STR] * 4;
+				setunitdata .@gid, UMOB_DEX, .@info[UMOB_DEX] * 4;
+				setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] * 4;
+				setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] * 4;
+				setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] * 4;
+			}
 			}
 		}
 	}
