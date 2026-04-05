@@ -13461,6 +13461,21 @@ int32 status_change_clear(struct block_list* bl, int32 type)
 		if (!sc->getSCE(status))
 			continue;
 		if (type == 0) { // Type 0: PC killed
+			switch (status) {
+				case SC_MILLENNIUMSHIELD:
+				case SC_CRUSHSTRIKE:
+				case SC_REFRESH:
+				case SC_GIANTGROWTH:
+				case SC_STONEHARDSKIN:
+				case SC_VITALITYACTIVATION:
+				case SC_STORMBLAST:
+				case SC_FIGHTINGSPIRIT:
+				case SC_ABUNDANCE:
+				case SC_LUXANIMA:
+				case SC_REUSE_LIMIT_LUXANIMA:
+					continue;
+			}
+
 			if (it.second->flag[SCF_NOREMOVEONDEAD]) {
 				switch (status) {
 					case SC_ELEMENTALCHANGE: // Only when its Holy or Dark that it doesn't dispell on death
