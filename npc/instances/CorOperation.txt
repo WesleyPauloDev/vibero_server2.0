@@ -1,0 +1,1284 @@
+//===== rAthena Script =======================================
+//= Operacao COR
+//===== Description: =========================================
+//= [Walkthrough Conversion + Custom Entry]
+//= Instancia Cor Memorial adaptada ao padrao custom.
+//===== Changelogs: ==========================================
+//= 1.0 Conversao oficial base. [crazyarashi/Everade]
+//= 1.1 Integracao ao sistema custom de instancias. [Codex]
+//============================================================
+
+-	script	CorOperation_Instance#Custom	999,{
+	if (!attachrid(#INSTANCERID)) end;
+	#INSTANCERID = 0;
+
+OnStartInstance:
+		callfunc("F_InstanceEntry",
+			"Cor Memorial",
+			"Elena Volkova",
+			"cor_operation",
+			"CorOperation",
+			170,
+			"Operacao COR"
+		);
+	end;
+}
+
+//===== rAthena Script =======================================
+//= Cor Operation
+//===== Description: =========================================
+//= [Walkthrough Conversion]
+//= Episode 17.1 Securing Elyumina
+//= Episode 17.1 EL1-A17T Suppression (Cor Memorial)
+//===== Changelog: ===========================================
+//= 1.0 Initial release [crazyarashi]
+//= 1.1 Optimizations and cleanup [Everade]
+//============================================================
+
+1@cor,1,1,0	script	#171_cor_control	-1,{
+	end;
+
+OnInstanceInit:
+	'map$ = instance_mapname("1@cor");
+	'step = 0;
+	'mode = 0;
+	'cor = 0;
+	'story_cor = 0;
+	for (.@i = 0; .@i < 4; .@i++)
+		setd("'story_box_" + .@i,0);
+	'boss_summon = 0;
+	'boss_cleared = 0;
+	setcell 'map$,159,216,159,225,CELL_WALKABLE,0;
+	setcell 'map$,159,216,159,225,CELL_SHOOTABLE,0;
+	setcell 'map$,98,216,98,225,CELL_WALKABLE,0;
+	setcell 'map$,98,216,98,225,CELL_SHOOTABLE,0;
+	setcell 'map$,132,240,141,240,CELL_WALKABLE,0;
+	setcell 'map$,132,240,141,240,CELL_SHOOTABLE,0;
+
+	//= Story
+	disablenpc instance_npcname("Reinforced Energy#171_box_0");
+	disablenpc instance_npcname("Biological Battery#171_box_0");
+	disablenpc instance_npcname("Chemical Poison#171_box_1");
+	disablenpc instance_npcname("Rebellion#171_box_4");
+	disablenpc instance_npcname("Elena Volkova#171_cmd_1");
+	disablenpc instance_npcname("Elena Volkova#171_cmd_2");
+	disablenpc instance_npcname("Elyumina#171_cor_end");
+	disablenpc instance_npcname("Rebellion#171_cmd_6");
+	disablenpc instance_npcname("Rebellion#171_cmd_7");
+	disablenpc instance_npcname("#171_cor_warp_0");
+	disablenpc instance_npcname("#171_cor_warp_1");
+	for (.@i = 0; .@i < 6; .@i++)
+		disablenpc instance_npcname("Rebellion#171_cmd_" + .@i);
+	for (.@i = 0; .@i < 4; .@i++) {
+		disablenpc instance_npcname("Rebellion#171_box_" + .@i);
+		disablenpc instance_npcname("Box#171_box_" + .@i);
+	}
+
+	//= Daily
+	for (.@i = 0; .@i < 4; .@i++) {
+		disablenpc instance_npcname("Elyumina#171_box_d" + .@i);
+		disablenpc instance_npcname("Box#171_box_d" + .@i);
+	}
+	disablenpc instance_npcname("Biological Battery#171_box_trap_0");
+	disablenpc instance_npcname("Chemical Poison#171_box_trap_1");
+	disablenpc instance_npcname("Biological Battery#171_box_trap_2");
+	disablenpc instance_npcname("Chemical Poison#171_box_trap_3");
+	disablenpc instance_npcname("Reinforced Energy#171_trap_0");
+	disablenpc instance_npcname("Reinforced Energy#171_trap_2");
+	disablenpc instance_npcname("Elyumina#171_cmd_0");
+	disablenpc instance_npcname("Elyumina#171_cmd_1");
+
+	//= Boss Stage
+	for (.@i = 0; .@i < 11; .@i++) {
+		disablenpc instance_npcname("Biological Battery#171_cor_" + .@i);
+		disablenpc instance_npcname("Chemical Poison#171_cor_" + .@i);
+	}
+	disablenpc instance_npcname("Reinforced Energy#171_cor_0");
+	'reward_announced = 0;
+	end;
+
+OnStory01:
+	disablenpc instance_npcname("Elena Volkova#171_cmd_0");
+	disablenpc instance_npcname("Elyumina#171_cmd_0");
+	'story_cor = 0;
+	for (.@i = 0; .@i < 4; .@i++)
+		setd("'story_box_" + .@i,0);
+	for (.@i = 0; .@i < 6; .@i++)
+		disablenpc instance_npcname("Rebellion#171_cmd_" + .@i);
+	for (.@i = 0; .@i < 4; .@i++) {
+		enablenpc instance_npcname("Rebellion#171_box_" + .@i);
+		enablenpc instance_npcname("Box#171_box_" + .@i);
+	}
+	end;
+
+OnStory02:
+	for (.@i = 0; .@i < 4; .@i++) {
+		disablenpc instance_npcname("Rebellion#171_box_" + .@i);
+		disablenpc instance_npcname("Box#171_box_" + .@i);
+	}
+	disablenpc instance_npcname("Rebellion#171_box_4");
+	enablenpc instance_npcname("Elena Volkova#171_cmd_1");
+	mapannounce 'map$,"Operacao concluida nas 4 caixas. Voltem para a Elena Volkova.",bc_map,0xFFFF99;
+	mapannounce 'map$,"Elena Volkova : Otimo, ela apareceu! Ja enviei o sinal, venham para a minha posicao!",bc_map,0xFFFF99;
+	viewpointmap 'map$,1,172,223,5,0xFFFFFF;
+	viewpointmap 'map$,2,140,79,1,0xFFFFFF;
+	viewpointmap 'map$,2,160,119,2,0xFFFFFF;
+	viewpointmap 'map$,2,220,170,3,0xFFFFFF;
+	viewpointmap 'map$,2,222,236,4,0xFFFFFF;
+	end;
+
+OnStory03:
+	disablenpc instance_npcname("Elena Volkova#171_cmd_1");
+	donpcevent instance_npcname("#171_cor_warp_0") + "::OnActive";
+	end;
+
+OnDaily01:
+	disablenpc instance_npcname("Elena Volkova#171_cmd_0");
+	disablenpc instance_npcname("Elyumina#171_cmd_0");
+	for (.@i = 0; .@i < 4; .@i++) {
+		enablenpc instance_npcname("Elyumina#171_box_d" + .@i);
+		enablenpc instance_npcname("Box#171_box_d" + .@i);
+	}
+	end;
+
+OnDaily02:
+	viewpointmap 'map$,1,172,223,5,0xFFFFFF;
+	mapannounce 'map$,"Elena Volkova : Quando terminarem tudo, venham ao quartel. A Elyumina vai orientar voces!",bc_map,0xFFFF99;
+	enablenpc instance_npcname("Elyumina#171_cmd_1");
+	end;
+
+OnDaily03:
+	disablenpc instance_npcname("Elyumina#171_cmd_1");
+	donpcevent instance_npcname("#171_cor_warp_1") + "::OnActive";
+	end;
+}
+
+1@cor,177,169,0	script	#171_cor_ev	HIDDEN_WARP_NPC,4,4,{
+	end;
+
+OnTouch:
+	if (!is_party_leader())
+		end;
+	if (isbegin_quest(16360) == 2)
+		'mode = 1;
+	disablenpc();
+	end;
+}
+
+1@cor,180,169,3	script	Elena Volkova#171_cmd_0	4_F_ELENA,5,5,{
+	if (!'mode) {
+		cutin "162elena_01",2;
+		mes "[Elena Volkova]";
+		mes "Vou comecar a explicar a operacao. Antes de tudo...";
+		specialeffect EF_TETRA_GROUND;
+		next;
+		for (.@i = 0; .@i < 6; .@i++)
+			enablenpc instance_npcname("Rebellion#171_cmd_" + .@i);
+		next;
+		mes "[Elena Volkova]";
+		mes "Vou comecar a explicar a operacao. Antes de tudo...";
+		mes "...... agora podem cair dentro.";
+		next;
+		cutin "",255;
+		mes "[Rebellion]";
+		mes "Algo explodiu logo adiante. As chamas subiram na frente!";
+		next;
+		mes "[Rebellion]";
+		mes "Encontramos 4 pontos de explosao! Eu os ^FF0000marquei no minimapa.^000000";
+		viewpointmap 'map$,1,140,79,1,0xFFFFFF;
+		viewpointmap 'map$,1,160,119,2,0xFFFFFF;
+		viewpointmap 'map$,1,220,170,3,0xFFFFFF;
+		viewpointmap 'map$,1,222,236,4,0xFFFFFF;
+		next;
+		mes "[Elena Volkova]";
+		mes "Foi repentino, mas vou mudar a operacao.";
+		mes "Nao se preocupem com quem ja esta na linha de frente. Eles sabem se adaptar.";
+		next;
+		mes "[Elena Volkova]";
+		mes "Dividam-se em 4 equipes, cada uma no seu ponto, e comecem a supressao. Se alguma equipe encontrar a Elyumina, avisem imediatamente.";
+		next;
+		mes "[Elena Volkova]";
+		mes "Todos para suas posicoes! Iniciem a operacao!";
+		npctalk "Sim!",instance_npcname("Rebellion#171_cmd_0");
+		npctalk ".....",instance_npcname("Rebellion#171_cmd_1");
+		npctalk "Sim!",instance_npcname("Rebellion#171_cmd_2");
+		npctalk "Sim!",instance_npcname("Rebellion#171_cmd_3");
+		npctalk "Sim!",instance_npcname("Rebellion#171_cmd_4");
+		npctalk "Sim!",instance_npcname("Rebellion#171_cmd_5");
+		next;
+		cutin "162elena_02",2;
+		mes "[Elena Volkova]";
+		mes "Aventureiro, preciso que voce atue separado. Confira o ^0000CDminimapa^000000 e organize a situacao o mais rapido possivel. Apoie a equipe que precisar!";
+		close2;
+		cutin "",255;
+		if ('step == 0) {
+			'step = 1;
+			donpcevent instance_npcname("#171_cor_control") + "::OnStory01";
+		}
+	} else {
+		enablenpc instance_npcname("Elyumina#171_cmd_0");
+		.@elyumina$ = instance_npcname("Elyumina#171_cmd_0");
+		cutin "162elena_01",2;
+		mes "[Elena Volkova]";
+		mes "O briefing... a criminosa aqui vai cuidar disso.";
+		mes "E complicado ficar tomando conta de criminosa.";
+		npctalk "Elena Volkova : O briefing... a criminosa aqui vai cuidar disso. E complicado ficar tomando conta dela.";
+		next;
+		cutin "ep171_elyumina04",0;
+		mes "[Elyumina]";
+		mes "Haha! Esse nao e o seu trabalho? Faca direito. Por que esta deixando o briefing comigo?";
+		npctalk "Elyumina : Haha! Esse nao e o seu trabalho? Faca direito. Por que esta deixando o briefing comigo?",.@elyumina$;
+		next;
+		cutin "162elena_01",2;
+		mes "[Elena Volkova]";
+		mes "Que barulho. Antes de comecarmos... voce faz parte da USU agora?";
+		npctalk "Elena Volkova : Que barulho. Antes de comecarmos... voce faz parte da USU agora?";
+		next;
+		cutin "ep171_elyumina03",0;
+		mes "[Elyumina]";
+		mes "Foi isso que ele disse... esta achando que eu vou ficar com medo?!";
+		mes "Heh, eu mesma vou explicar, porque quero cuidar dos meus filhos!";
+		npctalk "Elyumina : Heh, eu mesma vou explicar, porque quero cuidar dos meus filhos!",.@elyumina$;
+		next;
+		cutin "ep171_elyumina01",0;
+		mes "[Elyumina]";
+		mes "... Certo, ja esta quase na hora.";
+		mes "Meus filhos vao comecar a montar armadilhas em <TIPBOX>[quatro lugares]<INFO>8086</INFO></TIPBOX>.";
+		npctalk "Elyumina : ... Certo, ja esta quase na hora. Meus filhos vao montar armadilhas em quatro lugares.",.@elyumina$;
+		next;
+		mes "[Elyumina]";
+		mes "Aqui, pegue o mapa. As informacoes tambem serao enviadas para os membros do grupo.";
+		mes "Voce nao esta sozinho, esta? Sabe que meus filhos sao fortes, nao sabe?";
+		npctalk "Elyumina : Aqui, pegue o mapa. As informacoes tambem serao enviadas para os membros do grupo.",.@elyumina$;
+		viewpointmap 'map$,1,140,79,1,0xFFFFFF;
+		viewpointmap 'map$,1,160,119,2,0xFFFFFF;
+		viewpointmap 'map$,1,220,170,3,0xFFFFFF;
+		viewpointmap 'map$,1,222,236,4,0xFFFFFF;
+		next;
+		cutin "ep171_elyumina04",0;
+		mes "[Elyumina]";
+		mes "Pode ir e tocar nas armadilhas. Elas vao ativar e meus adoraveis filhos vao aparecer.";
+		mes "Voce lembra como as armadilhas funcionam, nao lembra?";
+		npctalk "Elyumina : Pode ir e tocar nas armadilhas. Elas vao ativar e meus adoraveis filhos vao aparecer.",.@elyumina$;
+		next;
+		cutin "ep171_elyumina03",0;
+		mes "[Elyumina]";
+		mes "Depois que voces limparem as quatro armadilhas, o EL1_A17T vai aparecer, e esta mocinha aqui vai levar voces ao mesmo lugar da outra vez.";
+		npctalk "Elyumina : Depois que voces limparem as quatro armadilhas, o EL1_A17T vai aparecer, e esta mocinha aqui vai levar voces ao mesmo lugar da outra vez.",.@elyumina$;
+		next;
+		cutin "ep171_elyumina04",0;
+		mes "[Elyumina]";
+		mes "Era isso da explicacao. Agora vao trabalhar, seus brutamontes! Ahahaha!";
+		npctalk "Elyumina : Era isso da explicacao. Agora vao trabalhar, seus brutamontes! Ahahaha!",.@elyumina$;
+		emotion ET_SMILE,getnpcid(0,.@elyumina$);
+		next;
+		cutin "162elena_01",2;
+		mes "[Elena Volkova]";
+		mes "... daqui a pouco vou conversar com essa criminosa... Enfim, conto com voces, aventureiros!";
+		npctalk "Elena Volkova : ... daqui a pouco vou conversar com essa criminosa... Enfim, conto com voces, aventureiros!";
+		close2;
+		cutin "",255;
+		if ('step == 0) {
+			'step = 1;
+			donpcevent instance_npcname("#171_cor_control") + "::OnDaily01";
+		}
+	}
+	end;
+
+OnTouch:
+	npctalk "Elena Volkova : Por aqui. Vamos fazer o briefing quando todos estiverem reunidos.";
+	end;
+}
+
+1@cor,178,172,3	duplicate(dummy_npc)	Elyumina#171_cmd_0	4_EP17_ELYUMINA
+
+1@cor,172,223,3	script	Elyumina#171_cmd_1	4_EP17_ELYUMINA,{
+	cutin "ep171_elyumina03",0;
+	mes "[Elyumina]";
+	mes "Foi rapido... embora eu ja esperasse que meus filhos nao fossem vencer.";
+	mes "Ainda tem muito problema la em cima~";
+	npctalk "Elyumina : Foi rapido... embora eu ja esperasse que meus filhos nao fossem vencer. Ainda tem muito problema la em cima~";
+	next;
+	cutin "ep171_elyumina01",0;
+	mes "[Elyumina]";
+	mes "... entao voces vao direto para o meu EL1-A17T?";
+	mapannounce 'map$,"Elena Volkova : Isso mesmo, sua criminosa! Abra logo esse portal!",bc_map,0xFFFF99;
+	npctalk "Elyumina : ... entao voces vao direto para o meu EL1_A17T?";
+	next;
+	if (select("Entrar.:Ainda nao.") == 2) {
+		cutin "ep171_elyumina02",0;
+		mes "[Elyumina]";
+		mes "Ah, qual e? Eu ja estava prestes a abrir.";
+		close3;
+	}
+	cutin "ep171_elyumina04",0;
+	mes "[Elyumina]";
+	mes "Hahaha! Isso mesmo. Trabalhem bastante. Reunam mais dados de combate para mim!";
+	npctalk "Elyumina : Hahaha! Isso mesmo. Trabalhem bastante. Reunam mais dados de combate para mim!";
+	close2;
+	cutin "",255;
+	viewpointmap 'map$,2,172,223,5,0xFFFFFF;
+	if ('step == 1) {
+		'step = 2;
+		donpcevent instance_npcname("#171_cor_control") + "::OnDaily03";
+	}
+	end;
+}
+
+1@cor,177,165,1	duplicate(dummy_npc)	Rebellion#171_cmd_0	4_M_REBELLION3
+1@cor,180,165,1	duplicate(dummy_npc)	Rebellion#171_cmd_1	4_M_GONY
+1@cor,183,165,1	duplicate(dummy_npc)	Rebellion#171_cmd_2	4_F_REBELLION3
+1@cor,177,163,1	duplicate(dummy_npc)	Rebellion#171_cmd_3	4_F_ANYA
+1@cor,180,163,1	duplicate(dummy_npc)	Rebellion#171_cmd_4	4_M_ILYA
+1@cor,183,163,1	duplicate(dummy_npc)	Rebellion#171_cmd_5	4_F_REBELLION2
+
+1@cor,224,238,3	script	Rebellion#171_box_0	4_M_REBELLION3,{
+	.@state = 'story_box_0;
+	.@event$ = instance_npcname("Box#171_box_0") + "::OnMobKill";
+	mes "[Rebellion]";
+	if (.@state == 0) {
+		mes "Ha uma caixa suspeita aqui.";
+		mes "Vou liberar o acesso. Clique na caixa e derrote tudo que sair dela.";
+		'story_box_0 = 1;
+		close;
+	}
+	if (.@state == 1) {
+		mes "Ja liberei esta caixa.";
+		mes "Clique nela para invocar os monstros.";
+		close;
+	}
+	if (mobcount('map$,.@event$)) {
+		mes "Ainda ha monstros vivos nesta area.";
+		mes "Limpe tudo antes de seguir.";
+		close;
+	}
+	mes "Esta area ja foi limpa.";
+	close;
+}
+
+1@cor,222,236,3	script	Box#171_box_0	4_STEELBOX,{
+	.@event$ = instance_npcname(strnpcinfo(0))+"::OnMobKill";
+	if ('story_box_0 == 0) {
+		mes "[Caixa]";
+		mes "Converse primeiro com o Rebellion ao lado.";
+		close;
+	}
+	if ('story_box_0 == 1) {
+		mes "[Caixa]";
+		mes "A caixa foi ativada.";
+		close2;
+		'story_box_0 = 2;
+		specialeffect EF_BAKU;
+		donpcevent instance_npcname(strnpcinfo(0)) + "::OnSpawn";
+		end;
+	}
+	if (mobcount('map$,.@event$)) {
+		mes "[Caixa]";
+		mes "Ainda ha monstros vivos nesta area.";
+		close;
+	}
+	mes "[Caixa]";
+	mes "Esta caixa ja foi resolvida.";
+	close;
+
+OnSpawn:
+	.@event$ = instance_npcname(strnpcinfo(0))+"::OnMobKill";
+	setarray .@xy,229,229,20341,217,235,20341,222,229,20341;
+	for (.@i = 0; .@i < getarraysize(.@xy); .@i += 3)
+		monster 'map$,.@xy[.@i],.@xy[.@i+1],"--ja--",.@xy[.@i+2],1,instance_npcname(strnpcinfo(0))+"::OnMobKill";
+	end;
+
+OnMobKill:
+	.@event$ = instance_npcname(strnpcinfo(0))+"::OnMobKill";
+	if (!mobcount('map$,.@event$)) {
+		'story_box_0 = 3;
+		'story_cor += 1;
+		npctalk "Area limpa! Vamos para o proximo ponto.",instance_npcname("Rebellion#" + strnpcinfo(2));
+		mapannounce 'map$,"Caixas limpas: " + 'story_cor + "/4.",bc_map,0xFFFF99;
+		viewpointmap 'map$,2,224,236,4,0xFFFFFF;
+		if ('story_cor >= 4 && 'step == 1) {
+			'step = 2;
+			doevent instance_npcname("#171_cor_control") + "::OnStory02";
+		}
+	}
+	end;
+}
+
+1@cor,222,235,3	script	Biological Battery#171_box_0	1738,3,3,{
+	end;
+
+OnTouch:
+	disablenpc();
+	stopnpctimer instance_npcname("Box#171_box_0");
+	.@event$ = instance_npcname(strnpcinfo(0)) + "::OnBombKill";
+	if (!mobcount('map$,.@event$)) {
+		getmapxy(.@m$,.@x,.@y,BL_NPC);
+		monster 'map$,.@x,.@y,"",20345,1,.@event$;
+	}
+	initnpctimer;
+OnBombKill:
+	end;
+
+OnTimer7000:
+	.@event$ = instance_npcname("Box#" + strnpcinfo(2))+"::OnMobKill";
+	if (mobcount('map$,.@event$))
+		enablenpc instance_npcname("Reinforced Energy#" + strnpcinfo(2));
+	else
+		stopnpctimer;
+	end;
+
+OnTimer17000:
+	.@event$ = instance_npcname("Box#" + strnpcinfo(2))+"::OnMobKill";
+	.@event2$ = instance_npcname(strnpcinfo(0)) + "::OnBombKill";
+	if (unitexists(getnpcid(0,instance_npcname("Reinforced Energy#" + strnpcinfo(2))))) {
+		disablenpc instance_npcname("Reinforced Energy#" + strnpcinfo(2));
+		if (mobcount('map$,.@event2$))
+			killmonster 'map$,.@event2$;
+		stopnpctimer;
+		if (mobcount('map$,.@event$))
+			initnpctimer instance_npcname("Box#171_box_0");
+	}
+	end;
+}
+
+1@cor,225,232,3	script	Reinforced Energy#171_box_0	4_ENERGY_WHITE,{
+	if (!getd("'rf_" + strnpcinfo(2))) {
+		setd("'rf_" + strnpcinfo(2),1);
+		specialeffect2 EF_ENHANCE;
+		specialeffect2 EF_LIGHTSPHERE_STAR;
+		sc_start SC_GLASTHEIM_STATE,30000,20,10000,SCSTART_NOTICKDEF;
+		npctalk "Poder! Um poder esmagador!";
+		unittalk getcharid(3),strcharinfo(0) + " : Meu corpo inteiro esta cheio de poder!",bc_self;
+		sleep 1500;
+		disablenpc();
+		setd("'rf_" + strnpcinfo(2),0);
+		stopnpctimer instance_npcname("Biological Battery#" + strnpcinfo(2));
+		initnpctimer instance_npcname("Box#" + strnpcinfo(2));
+	}
+	end;
+}
+
+1@cor,218,172,5	script	Rebellion#171_box_1	4_F_REBELLION2,{
+	.@state = 'story_box_1;
+	.@event$ = instance_npcname("Box#171_box_1") + "::OnMobKill";
+	mes "[Rebellion]";
+	if (.@state == 0) {
+		mes "Ha outra caixa suspeita aqui.";
+		mes "Vou liberar esta area. Clique na caixa e limpe os monstros.";
+		'story_box_1 = 1;
+		close;
+	}
+	if (.@state == 1) {
+		mes "Ja deixei a caixa pronta.";
+		mes "Clique nela para comecar.";
+		close;
+	}
+	if (mobcount('map$,.@event$)) {
+		mes "Ainda ha monstros vivos nesta area.";
+		close;
+	}
+	mes "Esta area ja foi limpa.";
+	close;
+}
+
+1@cor,220,170,3	script	Box#171_box_1	4_WOODBOX,{
+	.@event$ = instance_npcname(strnpcinfo(0)) + "::OnMobKill";
+	if ('story_box_1 == 0) {
+		mes "[Caixa]";
+		mes "Converse primeiro com o Rebellion ao lado.";
+		close;
+	}
+	if ('story_box_1 == 1) {
+		mes "[Caixa]";
+		mes "A caixa foi ativada.";
+		close2;
+		'story_box_1 = 2;
+		specialeffect EF_BAKU;
+		donpcevent instance_npcname(strnpcinfo(0)) + "::OnSpawn";
+		end;
+	}
+	if (mobcount('map$,.@event$)) {
+		mes "[Caixa]";
+		mes "Ainda ha monstros vivos nesta area.";
+		close;
+	}
+	mes "[Caixa]";
+	mes "Esta caixa ja foi resolvida.";
+	close;
+
+OnSpawn:
+	setarray .@xy,213,175,20342,216,174,20342,219,167,20342;
+	for (.@i = 0; .@i < getarraysize(.@xy); .@i += 3)
+		monster 'map$,.@xy[.@i],.@xy[.@i+1],"--ja--",.@xy[.@i+2],1,instance_npcname(strnpcinfo(0))+"::OnMobKill";
+	end;
+
+OnMobKill:
+	.@event$ = instance_npcname(strnpcinfo(0)) + "::OnMobKill";
+	if (!mobcount('map$,.@event$)) {
+		'story_box_1 = 3;
+		'story_cor += 1;
+		npctalk "Area limpa! Vamos para o proximo ponto.",instance_npcname("Rebellion#" + strnpcinfo(2));
+		mapannounce 'map$,"Caixas limpas: " + 'story_cor + "/4.",bc_map,0xFFFF99;
+		viewpointmap 'map$,2,220,170,3,0xFFFFFF;
+		if ('story_cor >= 4 && 'step == 1) {
+			'step = 2;
+			doevent instance_npcname("#171_cor_control") + "::OnStory02";
+		}
+	}
+	end;
+}
+
+1@cor,220,169,3	script	Chemical Poison#171_box_1	2531,3,3,{
+	end;
+
+OnTouch:
+	disablenpc();
+	stopnpctimer instance_npcname(strnpcinfo(0));
+	npctalk "Quando voce encosta no Veneno Quimico, o material toxico se espalha. Voce ja pisou nele, saia dai rapido!",instance_npcname("Rebellion#" + strnpcinfo(2));
+	.@event$ = instance_npcname(strnpcinfo(0)) + "::OnPoisonKill";
+	if (!mobcount('map$,.@event$)) {
+		getmapxy(.@m$,.@x,.@y,BL_NPC);
+		monster 'map$,.@x,.@y,"",20344,1,.@event$;
+	}
+	initnpctimer;
+	end;
+
+OnPoisonKill:
+	end;
+
+OnTimer10000:
+	stopnpctimer;
+	initnpctimer instance_npcname("Box#" + strnpcinfo(2));
+	end;
+}
+
+1@cor,162,117,1	script	Rebellion#171_box_2	4_M_GONY,{
+	mes "[Rebellion]";
+	if ('story_box_2 == 0) {
+		mes ".....";
+		next;
+		mes "[Rebellion]";
+		mes "A area esta pronta.";
+		mes "Clique na caixa e elimine os inimigos.";
+		'story_box_2 = 1;
+		close;
+	}
+	if ('story_box_2 == 1) {
+		mes ".....";
+		next;
+		mes "[Rebellion]";
+		mes "Clique na caixa para ativar a armadilha.";
+		close;
+	}
+	if ('story_box_2 == 2) {
+		mes ".....";
+		next;
+		mes "[Rebellion]";
+		mes "Ainda ha monstros vivos aqui.";
+		close;
+	}
+	mes ".....";
+	next;
+	mes "[Rebellion]";
+	mes "Esta area ja foi limpa.";
+	close;
+}
+
+1@cor,160,119,3	script	Box#171_box_2	4_STEELBOX,{
+	.@event$ = instance_npcname(strnpcinfo(0)) + "::OnMobKill";
+	if ('story_box_2 == 0) {
+		mes "[Caixa]";
+		mes "Converse primeiro com o Rebellion ao lado.";
+		close;
+	}
+	if ('story_box_2 == 1) {
+		mes "[Caixa]";
+		mes "A caixa foi ativada.";
+		close2;
+		'story_box_2 = 2;
+		specialeffect EF_BAKU;
+		donpcevent instance_npcname(strnpcinfo(0)) + "::OnSpawn";
+		end;
+	}
+	if (mobcount('map$,.@event$)) {
+		mes "[Caixa]";
+		mes "Ainda ha monstros vivos nesta area.";
+		close;
+	}
+	mes "[Caixa]";
+	mes "Esta caixa ja foi resolvida.";
+	close;
+
+OnSpawn:
+	.@event$ = instance_npcname(strnpcinfo(0))+"::OnMobKill";
+	setarray .@xy,158,119,20341,165,125,20341,160,119,20341,162,119,20341,158,119,20341,165,113,20341,149,117,20343,162,125,20343,149,125,20343,166,113,20355,167,115,20355,166,119,20355;
+	for (.@i = 0; .@i < getarraysize(.@xy); .@i += 3)
+		monster 'map$,.@xy[.@i],.@xy[.@i+1],"--ja--",.@xy[.@i+2],1,.@event$;
+	end;
+
+OnMobKill:
+	.@event$ = instance_npcname(strnpcinfo(0))+"::OnMobKill";
+	if (!mobcount('map$,.@event$)) {
+		'story_box_2 = 3;
+		'story_cor += 1;
+		viewpointmap 'map$,2,160,119,2,0xFFFFFF;
+		npctalk "Area limpa! Vamos para o proximo ponto.",instance_npcname("Rebellion#" + strnpcinfo(2));
+		mapannounce 'map$,"Caixas limpas: " + 'story_cor + "/4.",bc_map,0xFFFF99;
+		if ('story_cor >= 4 && 'step == 1) {
+			'step = 2;
+			doevent instance_npcname("#171_cor_control") + "::OnStory02";
+		}
+	}
+	end;
+}
+
+1@cor,138,82,5	script	Rebellion#171_box_3	4_F_ANYA,{
+	mes "[Rebellion]";
+	if ('story_box_3 == 0) {
+		mes "Ja te contei que fico muito feliz trabalhando com a Ala Secreta? Foi gracas a eles que fui escolhida para esta operacao.";
+		next;
+		mes "[Rebellion]";
+		mes "Vou liberar esta caixa para voce. Clique nela e limpe os monstros.";
+		'story_box_3 = 1;
+		close;
+	}
+	if ('story_box_3 == 1) {
+		mes "Clique na caixa quando quiser comecar.";
+		close;
+	}
+	if ('story_box_3 == 2) {
+		mes "Ainda ha monstros vivos nesta area.";
+		close;
+	}
+	mes "Vamos mostrar do que somos capazes e provar que estamos do lado certo.";
+	close;
+}
+
+1@cor,142,82,3	script	Rebellion#171_box_4	4_M_ILYA,{
+	mes "[Rebellion]";
+	mes "Faz tempo que eu nao te via, aventureiro.";
+	next;
+	mes "[Rebellion]";
+	mes "Eu ja conheco voce, aventureiro, mas tome cuidado.";
+	close;
+}
+
+1@cor,140,79,3	script	Box#171_box_3	4_WOODBOX,{
+	.@event$ = instance_npcname(strnpcinfo(0)) + "::OnMobKill";
+	if ('story_box_3 == 0) {
+		mes "[Caixa]";
+		mes "Converse primeiro com o Rebellion ao lado.";
+		close;
+	}
+	if ('story_box_3 == 1) {
+		mes "[Caixa]";
+		mes "A caixa foi ativada.";
+		close2;
+		'story_box_3 = 2;
+		specialeffect EF_BAKU;
+		donpcevent instance_npcname(strnpcinfo(0)) + "::OnSpawn";
+		end;
+	}
+	if (mobcount('map$,.@event$)) {
+		mes "[Caixa]";
+		mes "Ainda ha monstros vivos nesta area.";
+		close;
+	}
+	mes "[Caixa]";
+	mes "Esta caixa ja foi resolvida.";
+	close;
+
+OnSpawn:
+	.@event$ = instance_npcname(strnpcinfo(0))+"::OnMobKill";
+	setarray .@xy,143,72,20342,141,77,20342,146,84,20342,139,82,20342,138,75,20342,144,82,20342,140,70,20343,140,73,20343,142,72,20343,133,85,20356,140,82,20356,142,76,20356;
+	for (.@i = 0; .@i < getarraysize(.@xy); .@i += 3)
+		monster 'map$,.@xy[.@i],.@xy[.@i+1],"--ja--",.@xy[.@i+2],1,.@event$;
+	end;
+
+OnMobKill:
+	.@event$ = instance_npcname(strnpcinfo(0))+"::OnMobKill";
+	if (!mobcount('map$,.@event$)) {
+		'story_box_3 = 3;
+		'story_cor += 1;
+		viewpointmap 'map$,2,140,79,1,0xFFFFFF;
+		npctalk "Area limpa! Vamos para o proximo ponto.",instance_npcname("Rebellion#171_box_3");
+		mapannounce 'map$,"Caixas limpas: " + 'story_cor + "/4.",bc_map,0xFFFF99;
+		disablenpc instance_npcname("Rebellion#171_box_4");
+		if ('story_cor >= 4 && 'step == 1) {
+			'step = 2;
+			doevent instance_npcname("#171_cor_control") + "::OnStory02";
+		}
+	}
+	end;
+}
+
+1@cor,172,223,3	script	Elena Volkova#171_cmd_1	4_F_ELENA,{
+	cutin "162elena_01",2;
+	mes "[Elena Volkova]";
+	mes "Eu estava esperando por voce. Encontrei a pesquisadora maluca.";
+	mes "O resto do pessoal ja cercou a area.";
+	next;
+	mes "[Elena Volkova]";
+	mes "Para controlar uma maquina dessas com tanta precisao, a Elyumina deve estar por perto.";
+	next;
+	mes "[Elena Volkova]";
+	mes "Eu poderia lidar com essa maquina, mas ai nao conseguiria capturar a Elyumina.";
+	next;
+	mes "[Elena Volkova]";
+	mes "Se voce cuidar da maquina, os outros grupos de busca vao atras da Elyumina.";
+	next;
+	cutin "162elena_02",2;
+	mes "[Elena Volkova]";
+	mes "O esquadrao da Rebellion esta bem coordenado. Esse trabalho combina mais conosco, entao deixe essa parte com a gente.";
+	next;
+	cutin "162elena_01",2;
+	mes "[Elena Volkova]";
+	mes "O ponto de entrada fica na direcao das 9 horas. Confirmei que ninguem estava escondido la e bloqueamos as saidas.";
+	next;
+	mes "[Elena Volkova]";
+	mes "Me de o sinal quando estiver pronto para entrar. Vou avisar o esquadrao para liberar sua passagem.";
+	next;
+	if (select("Dar o sinal.:Ainda nao.") == 2) {
+		mes "[Elena Volkova]";
+		mes "Sim, e um adversario perigoso. Desculpe por te deixar sozinho nessa luta. Avise quando estiver pronto.";
+		close3;
+	}
+	cutin "162elena_02",2;
+	mes "[Elena Volkova]";
+	mes "Certo, cuidado! Abri o portal para voces entrarem. A entrada e sem volta, entao estejam preparados!";
+	close2;
+	cutin "",255;
+	viewpointmap 'map$,2,172,223,5,0xFFFFFF;
+	if ('step == 2) {
+		'step = 3;
+		donpcevent instance_npcname("#171_cor_control") + "::OnStory03";
+	}
+	end;
+}
+
+1@cor,138,221,3	script	Elena Volkova#171_cmd_2	4_F_ELENA,{
+	if ('boss_cleared) {
+		cutin "162elena_02",2;
+		mes "[Elena Volkova]";
+		mes "Muito bem, " + strcharinfo(0) + ". A operacao foi um sucesso!";
+		mes "Ja terminamos por aqui. Se quiser, eu posso te mandar de volta agora.";
+		next;
+		if (select("Vou voltar agora.:Vou ficar aqui mais um pouco") == 2) {
+			mes "[Elena Volkova]";
+			mes "Tudo bem, me avise quando quiser sair.";
+			close3;
+		}
+		mes "[Elena Volkova]";
+		mes "Bom trabalho. Vamos resolver as coisas por aqui enquanto interrogamos a Elyumina.";
+		if (isbegin_quest(16354) == 1)
+			completequest 16354;
+		if (checkquest(16376) > -1)
+			erasequest 16376;
+		if (#CorOperation_STATUS == 2) {
+			callfunc("F_AddRep", 1, 10, 110002, 3000);
+			callfunc("F_DiaryRefreshDaily");
+			set #instancia, 2;
+			if (!'reward_announced) {
+				callfunc("F_InstanceFinishAnnounce", "Operacao COR");
+				'reward_announced = 1;
+			}
+			if (#inst175_name$ == "Operacao COR") {
+				set #inst175_status,2;
+			}
+			getitem 9608,10;
+			getitem 9198,2;
+			set #CorOperation_STATUS, 3;
+		}
+		close2;
+		warp "SavePoint",0,0;
+	}
+	if ('mode) {
+		if (isbegin_quest(16363) == 0) {
+			cutin "162elena_01",2;
+			mes "[Elena Volkova]";
+			mes "Ah, sim. Voce trabalhou duro de novo desta vez. Isso foi puxado! Ate quando vamos ter que lidar com esse monte de sucata?";
+			next;
+			cutin "ep171_elyumina02",0;
+			mes "[Elyumina]";
+			mes "Eu nao falei para nao chamar isso de sucata?! Idiota!";
+			next;
+			cutin "162elena_01",2;
+			mes "[Elena Volkova]";
+			mes "Ta bom, ta bom, no comeco nao era sucata. Mas agora que pegamos, virou sucata. Enfim, voce trabalhou duro. Volte e descanse.";
+			next;
+			cutin "",255;
+			if (select("Voltar.:Ficar mais um pouco.") == 2) {
+				mes "[Elena Volkova]";
+				mes "Tudo bem, me avise quando quiser sair.";
+				close3;
+			}
+			cutin "162elena_02",2;
+			mes "[Elena Volkova]";
+			mes "Bom trabalho. Engracado pensar que talvez tenhamos de repetir isso amanha.";
+			getitem 25723,1;
+			getitem 25669,5;
+			if (#CorOperation_STATUS == 2) {
+				callfunc("F_AddRep", 1, 10, 110002, 3000);
+				callfunc("F_DiaryRefreshDaily");
+				set #instancia, 2;
+				if (!'reward_announced) {
+					callfunc("F_InstanceFinishAnnounce", "Operacao COR");
+					'reward_announced = 1;
+				}
+				if (#inst175_name$ == "Operacao COR") {
+					set #inst175_status,2;
+				}
+				getitem 9608,10;
+				getitem 9198,2;
+				set #CorOperation_STATUS, 3;
+			}
+			close2;
+			warp "SavePoint",0,0;
+		}
+		end;
+	}
+	if (isbegin_quest(16354) == 1 && checkquest(16376,HUNTING) == 2) {
+		cutin "162elena_02",2;
+		mes "[Elena Volkova]";
+		mes "Muito bem, " +strcharinfo(0)+ ". A operacao foi um sucesso!";
+		mes "Eu tambem consegui escapar. Ate e vergonhoso dizer isso depois de voce derrubar aquele monte enorme de sucata, mas tambem capturei algo interessante.";
+		next;
+		cutin "ep171_elyumina02",0;
+		mes "[Elyumina]";
+		mes "Sucata?! Isso e uma obra-prima! Meu grande filho!";
+		mes "Voce! Voce... feriu meu filho! Voce destruiu meu filho!";
+		next;
+		cutin "162elena_02",2;
+		mes "[Elena Volkova]";
+		mes "Voce acabou de chamar aquela sucata de filhos?";
+		mes "Bom, seus filhos ate podem ser bons. Mesmo assim, agora voce vai pagar pelos erros deles.";
+		next;
+		cutin "162elena_01",2;
+		mes "[Elena Volkova]";
+		mes "O que voce vai fazer agora, " + strcharinfo(0) + "?";
+		next;
+		if (select("Vou voltar agora.:Vou ficar aqui mais um pouco") == 2) {
+			mes "[Elena Volkova]";
+			mes "Tudo bem, me avise quando quiser sair.";
+			close3;
+		}
+		mes "[Elena Volkova]";
+		mes "Bom trabalho. Vamos resolver as coisas por aqui enquanto interrogamos a Elyumina.";
+		completequest 16354;
+		if (checkquest(16376) > -1)
+			erasequest 16376;
+		if (#CorOperation_STATUS == 2) {
+			callfunc("F_AddRep", 1, 10, 110002, 3000);
+			callfunc("F_DiaryRefreshDaily");
+			set #instancia, 2;
+			if (!'reward_announced) {
+				callfunc("F_InstanceFinishAnnounce", "Operacao COR");
+				'reward_announced = 1;
+			}
+			if (#inst175_name$ == "Operacao COR") {
+				set #inst175_status,2;
+			}
+			getitem 9608,10;
+			getitem 9198,2;
+			set #CorOperation_STATUS, 3;
+		}
+		close2;
+		warp "SavePoint",0,0;
+	}
+	end;
+}
+
+1@cor,140,221,3	script	Elyumina#171_cor_end	4_EP17_ELYUMINA,{
+	npctalk "Elyumina : Voces... mataram ele?! Assassinos! Carrascos!";
+	end;
+}
+1@cor,141,222,3	script	Rebellion#171_cmd_6	4_M_ILYA,{
+	npctalk "A pesquisadora da Ilusao, Elyumina, foi capturada!";
+	end;
+}
+1@cor,141,220,3	script	Rebellion#171_cmd_7	4_F_ANYA,{
+	npctalk "Capturamos a Elyumina viva com sucesso! A operacao acabou!";
+	end;
+}
+
+1@cor,1,1,0	script	#171_cor_boss	HIDDEN_WARP_NPC,{
+	end;
+
+OnSummonStory:
+	.@event$ = instance_npcname(strnpcinfo(0)) + "::OnBossKill";
+	monster 'map$,137,221,"EL1_A17T",20340,1,.@event$;
+	'boss_gid = $@mobid[0];
+	getunitdata 'boss_gid,.@boss_data;
+	getunitdata $@mobid[0],.@boss_data;
+	.@DAMAGE = (.@boss_data[UMOB_MAXHP]/10) * 9;
+	.@HP = (.@boss_data[UMOB_MAXHP] - .@DAMAGE)/2;
+	setunitdata $@mobid[0],UMOB_HP,.@HP;
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnSummonSkill";
+	initnpctimer;
+	end;
+
+OnSummonDaily:
+	.@event$ = instance_npcname(strnpcinfo(0)) + "::OnBossKill";
+	monster 'map$,137,221,"EL1_A17T",20340,1,.@event$;
+	'boss_gid = $@mobid[0];
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnSummonSkill";
+	initnpctimer;
+	end;
+
+OnBossKill:
+	stopnpctimer;
+	'boss_cleared = 1;
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnClear";
+	enablenpc instance_npcname("Elena Volkova#171_cmd_2");
+	enablenpc instance_npcname("Elyumina#171_cor_end");
+	enablenpc instance_npcname("Rebellion#171_cmd_6");
+	enablenpc instance_npcname("Rebellion#171_cmd_7");
+	end;
+
+OnClear:
+	for (.@i = 0; .@i < 11; .@i++) {
+		disablenpc instance_npcname("Biological Battery#171_cor_" + .@i);
+		disablenpc instance_npcname("Chemical Poison#171_cor_" + .@i);
+	}
+	killmonster 'map$,instance_npcname(strnpcinfo(0)) + "::OnPoisonKill";
+	killmonster 'map$,instance_npcname(strnpcinfo(0)) + "::OnBombKill";
+	killmonster 'map$,instance_npcname(strnpcinfo(0)) + "::OnBossKill";
+	end;
+
+OnBombKill:
+	end;
+
+OnPoisonKill:
+	end;
+
+OnTimer30000:
+	stopnpctimer;
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnSummonSkill";
+	end;
+
+OnSummonSkill:
+	if (unitexists('boss_gid)) {
+		mapannounce 'map$,"Elyumina : Ela comecou a espalhar alguma coisa. Prepare-se!",bc_map,0xFFFF99;
+		if (rand(2)) {
+			.@npc$ = "Chemical Poison#171_cor_";
+			.@type$ = "trap_0_";
+		} else {
+			.@npc$ = "Biological Battery#171_cor_";
+			.@type$ = "trap_1_";
+		}
+		while(true) {
+			.@id = rand(11);
+			if (getd("'" + .@type$ + .@id))
+				continue;
+			if (unitexists('boss_gid)) {
+				enablenpc instance_npcname(.@npc$ + .@id);
+				setd("'" + .@type$ + .@id,1);
+			}
+			break;
+		}
+		initnpctimer;
+	}
+	end;
+}
+
+1@cor,151,221,3	script	Biological Battery#171_cor_0	1738,3,3,{
+	end;
+
+OnTouch:
+	.@id = atoi(replacestr(strnpcinfo(2),"171_cor_",""));
+	disablenpc();
+	setd("'trap_1_" + .@id,0);
+	getmapxy('map$,.@x,.@y,BL_NPC);
+	monster 'map$,.@x,.@y,"",20345,1,instance_npcname("#171_cor_boss") + "::OnBombKill";
+	initnpctimer;
+	end;
+
+OnTimer7000:
+	if (!'rf_171_cor_0)
+		enablenpc instance_npcname("Reinforced Energy#171_cor_0");
+	end;
+
+OnTimer12000:
+	stopnpctimer;
+	if (unitexists(getnpcid(0,instance_npcname("Reinforced Energy#171_cor_0"))))
+		disablenpc instance_npcname("Reinforced Energy#171_cor_0");
+	end;
+}
+
+1@cor,151,221,3	script	Chemical Poison#171_cor_0	2531,3,3,{
+	end;
+
+OnTouch:
+	disablenpc();
+	getmapxy('map$,.@x,.@y,BL_NPC);
+	.@event$ = instance_npcname("#171_cor_boss") + "::OnPoisonKill";
+	if (!mobcount('map$,.@event$))
+		monster 'map$,.@x,.@y,"",20344,1,.@event$;
+	end;
+}
+
+1@cor,137,220,3	script	Reinforced Energy#171_cor_0	4_ENERGY_WHITE,{
+	if (!getd("'rf_" + strnpcinfo(2))) {
+		setd("'rf_" + strnpcinfo(2),1);
+		specialeffect2 EF_ENHANCE;
+		specialeffect2 EF_LIGHTSPHERE_STAR;
+		sc_start SC_GLASTHEIM_STATE,30000,20,10000,SCSTART_NOTICKDEF;
+		npctalk "Poder! Um poder esmagador!";
+		unittalk getcharid(3),strcharinfo(0) + " : Meu corpo inteiro esta cheio de poder!",bc_self;
+		sleep 1500;
+		disablenpc();
+		setd("'rf_" + strnpcinfo(2),0);
+	}
+	end;
+}
+
+1@cor,145,220,3	duplicate(Biological Battery#171_cor_0)	Biological Battery#171_cor_1	1738,3,3
+1@cor,129,220,3	duplicate(Biological Battery#171_cor_0)	Biological Battery#171_cor_2	1738,3,3
+1@cor,138,206,3	duplicate(Biological Battery#171_cor_0)	Biological Battery#171_cor_3	1738,3,3
+1@cor,136,213,3	duplicate(Biological Battery#171_cor_0)	Biological Battery#171_cor_4	1738,3,3
+1@cor,138,228,3	duplicate(Biological Battery#171_cor_0)	Biological Battery#171_cor_5	1738,3,3
+1@cor,138,235,3	duplicate(Biological Battery#171_cor_0)	Biological Battery#171_cor_6	1738,3,3
+1@cor,102,220,3	duplicate(Biological Battery#171_cor_0)	Biological Battery#171_cor_7	1738,3,3
+1@cor,108,221,3	duplicate(Biological Battery#171_cor_0)	Biological Battery#171_cor_8	1738,3,3
+1@cor,115,219,3	duplicate(Biological Battery#171_cor_0)	Biological Battery#171_cor_9	1738,3,3
+1@cor,122,221,3	duplicate(Biological Battery#171_cor_0)	Biological Battery#171_cor_10	1738,3,3
+
+1@cor,145,220,3	duplicate(Chemical Poison#171_cor_0)	Chemical Poison#171_cor_1	2531,3,3
+1@cor,129,220,3	duplicate(Chemical Poison#171_cor_0)	Chemical Poison#171_cor_2	2531,3,3
+1@cor,138,206,3	duplicate(Chemical Poison#171_cor_0)	Chemical Poison#171_cor_3	2531,3,3
+1@cor,136,213,3	duplicate(Chemical Poison#171_cor_0)	Chemical Poison#171_cor_4	2531,3,3
+1@cor,138,228,3	duplicate(Chemical Poison#171_cor_0)	Chemical Poison#171_cor_5	2531,3,3
+1@cor,138,235,3	duplicate(Chemical Poison#171_cor_0)	Chemical Poison#171_cor_6	2531,3,3
+1@cor,102,220,3	duplicate(Chemical Poison#171_cor_0)	Chemical Poison#171_cor_7	2531,3,3
+1@cor,108,221,3	duplicate(Chemical Poison#171_cor_0)	Chemical Poison#171_cor_8	2531,3,3
+1@cor,115,219,3	duplicate(Chemical Poison#171_cor_0)	Chemical Poison#171_cor_9	2531,3,3
+1@cor,122,221,3	duplicate(Chemical Poison#171_cor_0)	Chemical Poison#171_cor_10	2531,3,3
+
+1@cor,161,221,0	script	#171_cor_warp_0	WARPNPC,2,2,{
+	end;
+
+OnActive:
+	enablenpc();
+	specialeffect EF_READYPORTAL2;
+	end;
+
+OnTouch:
+	.@event$ = instance_npcname("#171_cor_boss") + "::OnBossKill";
+	if (!'boss_cleared && !mobcount('map$,.@event$)) {
+		'boss_summon = 1;
+		donpcevent instance_npcname("#171_cor_boss") + "::OnSummonStory";
+	}
+	warp 'map$,151,220;
+	end;
+}
+
+1@cor,161,221,0	script	#171_cor_warp_1	WARPNPC,2,2,{
+	end;
+
+OnActive:
+	enablenpc();
+	specialeffect EF_READYPORTAL2;
+	end;
+
+OnTouch:
+	.@event$ = instance_npcname("#171_cor_boss") + "::OnBossKill";
+	if (!'boss_cleared && !mobcount('map$,.@event$)) {
+		'boss_summon = 1;
+		donpcevent instance_npcname("#171_cor_boss") + "::OnSummonDaily";
+	}
+	warp 'map$,151,220;
+	end;
+}
+
+1@cor,224,238,3	script	Elyumina#171_box_d0	4_EP17_ELYUMINA,{
+	if ('cor == 4) {
+		npctalk "Elyumina : You know where the barrack is? I showed it up on your minimap. I'll head there soon.";
+		end;
+	}
+	.@id = atoi(replacestr(strnpcinfo(2),"171_box_d",""));
+	.@var = getd("'box_" + .@id);
+	switch (.@var) {
+		case 0: .@talk$ = "Here, here! Then please, touch the box and it will activate."; break;
+		case 1: .@talk$ = "Chatting during a battle, quite relaxed aren't you? Hm, that's a bit annoying."; break;
+		case 2: .@talk$ = "That's a very good combat data... Well, go ahead now!";
+	}
+	npctalk "Elyumina : " + .@talk$;
+	end;
+}
+
+1@cor,218,172,5	duplicate(Elyumina#171_box_d0)	Elyumina#171_box_d1	4_EP17_ELYUMINA
+1@cor,162,117,3	duplicate(Elyumina#171_box_d0)	Elyumina#171_box_d2	4_EP17_ELYUMINA
+1@cor,140,82,3	duplicate(Elyumina#171_box_d0)	Elyumina#171_box_d3	4_EP17_ELYUMINA
+
+1@cor,222,236,3	script	Box#171_box_d0	4_STEELBOX,{
+	.@id = atoi(replacestr(strnpcinfo(2),"171_box_d",""));
+	if (!getd("'box_" + .@id)) {
+		setd("'box_" + .@id,1);
+		switch (.@id) {
+			case 0: setarray .@xy,228,232,20341,216,229,20341,223,242,20341,226,239,20341,227,242,20341,229,230,20341,214,241,20343,224,235,20343,219,244,20343,227,230,20355,215,228,20355,221,231,20355,230,227,20355; break;
+			case 1: setarray .@xy,224,164,20342,215,175,20342,220,174,20342,215,170,20342,216,164,20342,217,175,20342,226,164,20343,224,165,20343,215,172,20343,219,170,20356,217,176,20356,213,165,20356; break;
+			case 2: setarray .@xy,158,119,20341,165,125,20341,160,119,20341,162,119,20341,158,119,20341,165,113,20341,149,117,20343,162,125,20343,149,125,20343,166,113,20355,167,115,20355,166,119,20355; break;
+			case 3: setarray .@xy,143,72,20342,141,77,20342,146,84,20342,139,82,20342,138,75,20342,144,82,20342,140,70,20343,140,73,20343,142,72,20343,133,85,20356,140,82,20356,142,76,20356;
+		}
+		specialeffect EF_BAKU;
+		for (.@i = 0; .@i < getarraysize(.@xy); .@i += 3)
+			monster 'map$,.@xy[.@i],.@xy[.@i+1],"--ja--",.@xy[.@i+2],1,instance_npcname(strnpcinfo(0))+"::OnMobKill";
+		initnpctimer;
+	}
+	end;
+
+OnMobKill:
+	.@event$ = instance_npcname(strnpcinfo(0))+"::OnMobKill";
+	if (!mobcount('map$,.@event$)) {
+		.@id = atoi(replacestr(strnpcinfo(2),"171_box_d",""));
+		setd("'box_" + .@id,2);
+		'cor += 1;
+		if (.@id == 0 || .@id == 2) {
+			.@npc$ = "Biological Battery#";
+			disablenpc instance_npcname("Reinforced Energy#171_trap_" + .@id);
+		} else
+			.@npc$ = "Chemical Poison#";
+		switch (.@id) {
+		case 0:
+			viewpointmap 'map$,2,222,236,4,0xFFFFFF;
+			.@npc$ = "Biological Battery#";
+			break;
+		case 1:
+			viewpointmap 'map$,2,220,170,3,0xFFFFFF;
+			.@npc$ = "Chemical Poison#";
+			break;
+		case 2:
+			viewpointmap 'map$,2,160,119,2,0xFFFFFF;
+			.@npc$ = "Biological Battery#";
+			break;
+		case 3:
+			viewpointmap 'map$,2,140,79,1,0xFFFFFF;
+			.@npc$ = "Chemical Poison#";
+		}
+		killmonster 'map$,instance_npcname(.@npc$ + "171_box_trap_" + .@id) + "::OnMobKill";
+		disablenpc instance_npcname(.@npc$ + "171_box_trap_" + .@id);
+		if ('cor == 4)
+			donpcevent instance_npcname("#171_cor_control") + "::OnDaily02";
+	}
+	end;
+
+OnTimer1000:
+	.@event$ = instance_npcname(strnpcinfo(0))+"::OnMobKill";
+	.@id = atoi(replacestr(strnpcinfo(2),"171_box_d",""));
+	if (.@id == 0 || .@id == 2)
+		.@npc$ = "Biological Battery#";
+	else
+		.@npc$ = "Chemical Poison#";
+	if (mobcount('map$,.@event$))
+		enablenpc instance_npcname(.@npc$ + "171_box_trap_" + .@id);
+	else
+		stopnpctimer;
+	end;
+
+OnTimer11000:
+	.@event$ = instance_npcname(strnpcinfo(0))+"::OnMobKill";
+	.@id = atoi(replacestr(strnpcinfo(2),"171_box_d",""));
+	stopnpctimer;
+	if (mobcount('map$,.@event$)) {
+		if (.@id == 0 || .@id == 2)
+			.@npc$ = "Biological Battery#";
+		else
+			.@npc$ = "Chemical Poison#";
+		disablenpc instance_npcname(.@npc$ + "171_box_trap_" + .@id);
+		if (unitexists(getnpcid(0,instance_npcname(.@npc$ + "171_box_trap_" + .@id))))
+			initnpctimer;
+	}
+	end;
+}
+
+1@cor,222,235,3	script	Biological Battery#171_box_trap_0	1738,3,3,{
+	end;
+
+OnTouch:
+	.@id = atoi(replacestr(strnpcinfo(2),"171_box_trap_",""));
+	if (.@id == 0 || .@id == 2)
+		.@mob = 20345;
+	else
+		.@mob = 20344;
+	stopnpctimer instance_npcname("Box#171_box_d" + .@id);
+	.@event$ = instance_npcname("Box#171_box_d" + .@id) + "::OnMobKill";
+	disablenpc();
+	if (mobcount('map$,.@event$)) {
+		.@event2$ = instance_npcname(strnpcinfo(0)) + "::OnMobKill";
+		getmapxy(.@m$,.@x,.@y,BL_NPC);
+		if (!mobcount('map$,.@event2$))
+			monster 'map$,.@x,.@y,"--ja--",.@mob,1,.@event2$;
+		initnpctimer;
+	}
+	end;
+
+OnMobKill:
+	end;
+
+OnTimer7000:
+	.@id = atoi(replacestr(strnpcinfo(2),"171_box_trap_",""));
+	if (.@id == 0 || .@id == 2)
+		.@mob = 20345;
+	else
+		.@mob = 20344;
+	if (.@mob == 20345) {
+		if (unitexists(getnpcid(0,instance_npcname("Reinforced Energy#171_trap_" + .@id)))) {
+			disablenpc instance_npcname("Reinforced Energy#171_trap_" + .@id);
+			enablenpc instance_npcname("Reinforced Energy#171_trap_" + .@id);
+		}
+	}
+	end;
+
+OnTimer10000:
+	.@id = atoi(replacestr(strnpcinfo(2),"171_box_trap_",""));
+	if (.@id == 0 || .@id == 2)
+		.@mob = 20345;
+	else
+		.@mob = 20344;
+	if (.@mob == 20344) {
+		stopnpctimer;
+		initnpctimer instance_npcname("Box#171_box_d" + .@id);
+	}
+	end;
+
+OnTimer17000:
+	stopnpctimer;
+	.@id = atoi(replacestr(strnpcinfo(2),"171_box_trap_",""));
+	.@event$ = instance_npcname("Box#171_box_d" + .@id) + "::OnMobKill";
+	if (unitexists(getnpcid(0,instance_npcname("Reinforced Energy#171_cor_0"))))
+		disablenpc instance_npcname("Reinforced Energy#171_trap_" + .@id);
+	if (mobcount('map$,.@event$))
+		initnpctimer instance_npcname("Box#171_box_d" + .@id);
+	end;
+}
+
+1@cor,220,169,3	duplicate(Biological Battery#171_box_trap_0)	Chemical Poison#171_box_trap_1	2531,3,3
+1@cor,160,118,3	duplicate(Biological Battery#171_box_trap_0)	Biological Battery#171_box_trap_2	1738,3,3
+1@cor,140,78,3	duplicate(Biological Battery#171_box_trap_0)	Chemical Poison#171_box_trap_3	2531,3,3
+
+1@cor,225,232,3	duplicate(Reinforced Energy#171_cor_0)	Reinforced Energy#171_trap_0	4_ENERGY_WHITE
+1@cor,163,115,3	duplicate(Reinforced Energy#171_cor_0)	Reinforced Energy#171_trap_2	4_ENERGY_WHITE
+
+1@cor,220,170,3	duplicate(Box#171_box_d0)	Box#171_box_d1	4_WOODBOX
+1@cor,160,119,3	duplicate(Box#171_box_d0)	Box#171_box_d2	4_STEELBOX
+1@cor,140,79,3	duplicate(Box#171_box_d0)	Box#171_box_d3	4_WOODBOX
+
+1@cor,159,218,0	script	#cor_barricade_0	4_ROPEPILE,{
+	end;
+
+OnTouch:
+	npctalk "The entrance is blocked!";
+	end;
+}
+
+1@cor,159,220,3	duplicate(#cor_barricade_0)	#cor_barricade_1	4_ROPEPILE
+1@cor,159,222,3	duplicate(#cor_barricade_0)	#cor_barricade_2	4_ROPEPILE
+1@cor,159,224,3	duplicate(#cor_barricade_0)	#cor_barricade_3	4_ROPEPILE,2,2
+1@cor,98,218,3	duplicate(#cor_barricade_0)	#cor_barricade_4	4_ROPEPILE
+1@cor,98,220,3	duplicate(#cor_barricade_0)	#cor_barricade_5	4_ROPEPILE
+1@cor,98,222,3	duplicate(#cor_barricade_0)	#cor_barricade_6	4_ROPEPILE
+1@cor,98,224,3	duplicate(#cor_barricade_0)	#cor_barricade_7	4_ROPEPILE,2,2
+1@cor,134,240,3	duplicate(#cor_barricade_0)	#cor_barricade_8	4_ROPEPILE
+1@cor,136,240,3	duplicate(#cor_barricade_0)	#cor_barricade_9	4_ROPEPILE
+1@cor,138,240,3	duplicate(#cor_barricade_0)	#cor_barricade_10	4_ROPEPILE
+1@cor,140,240,3	duplicate(#cor_barricade_0)	#cor_barricade_11	4_ROPEPILE,2,2

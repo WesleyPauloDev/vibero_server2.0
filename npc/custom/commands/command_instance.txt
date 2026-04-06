@@ -5,15 +5,15 @@ OnInit:
 	end;
 
 // =======================================================
-// @instance ? Abre o menu de seleção de instâncias
+// @instance c Abre o menu de selecao de instancias
 // =======================================================
 OnAtcommand:
 
-	// 1. Verifica se o jogador já está vinculado a alguma instância
+	// 1. Verifica se o jogador ja esta vinculado a alguma instancia
 	.@iid = instance_id(IM_PARTY);
 
 	if (.@iid > 0) {
-		// Líder já criou a instância ? entrar
+		// Lider ja criou a instancia c entrar
 		if (getcharid(1) && getpartyleader(getcharid(1), 2) == getcharid(0)) {
 			#INSTANCERID = getcharid(3);
 			debugmes #INSTANCENAME$;
@@ -22,8 +22,8 @@ OnAtcommand:
 		}
 	}
 
-	mes "[Instâncias Disponíveis]";
-	mes "Escolha uma instância para entrar:";
+	mes "[Instancias Disponiveis]";
+	mes "Esaolha uma instancia para entrar:";
 	#INSTANCERID = getcharid(3);
 
 	next;
@@ -32,26 +32,29 @@ OnAtcommand:
 		"[40+] Batalha dos Orcs",
 		"[50+] Torre Sem Fim",
 		"[55+] Ninho de Nidhog",
-		"[60+] Maldição de Glast Heim",
-		"[75+] Santuário Selado",
-		"[90+] Laboratório Werner",
-		"[90+] Torneio Mágico de Geffen(Solo)",
-		"[95+] Memórias de Sara",
-		"[100+] Espaço Infinito",
+		"[60+] Maldicao de Glast Heim",
+		"[75+] Santuario Selado",
+		"[90+] Laboratorio Werner",
+		"[90+] Torneio Magico de Geffen(Solo)",
+		"[95+] Memorias de Sara",
+		"[100+] Espaco Infinito",
 		"[110+] Hospital Bangungot",
 		"[120+] Lago Bakonawa",
-		"[125+] Assalto ao Dirigível",
+		"[125+] Assalto ao Dirigivel",
 		"[130+] Caverna Buwaya",
 		"[130+] Charleston em Crise",
-		"[130+] Torre do Demônio",
-		"[135+] Laboratório Central",
-		"[140+] Fábrica de Brinquedos de Terror",
-		"[140+] Salão de Ymir",
-		"[150+] Laboratório Wolfchev",
-		"[160+] Templo do Rei Demônio",
+		"[130+] Torre do Demonio",
+		"[135+] Laboratorio Central",
+		"[140+] Fabrica de Brinquedos de Terror",
+		"[140+] Salao de Ymir",
+		"[150+] Laboratorio Wolfchev",
+		"[160+] Templo do Rei Demonio",
+		"[170+] Operacao OS",
+		"[170+] Operacao COR",
 		"[170+] WaterGarden",
 		"[175+] Covil da Rainha Verme",
-		"[175+] Pesadelo Musical"
+		"[175+] Pesadelo Musical",
+		"[175+] Floresta Profunda"
 	);
 	close2;
 
@@ -141,6 +144,14 @@ OnAtcommand:
 			doevent "TRG_Instance#Custom::OnStartInstance";
 			end;
 		case 22:
+			#INSTANCENAME$ = "OSOccupation";
+			doevent "OSOccupation_Instance#Custom::OnStartInstance";
+			end;
+		case 23:
+			#INSTANCENAME$ = "CorOperation";
+			doevent "CorOperation_Instance#Custom::OnStartInstance";
+			end;
+		case 24:
 			switch(select("WaterGarden Normal","WaterGarden Hard","Cancelar")) {
 			case 1:
 				#WATERGARDEN_MODE = 0;
@@ -155,13 +166,17 @@ OnAtcommand:
 			case 3:
 				end;
 			}
-		case 23:
+		case 25:
 			#INSTANCENAME$ = "FacewormsNest";
 			doevent "FacewormsNest_Instance#Custom::OnStartInstance";
 			end;
-		case 24:
+		case 26:
 			#INSTANCENAME$ = "NightmarishJitterbug";
 			doevent "NightmarishJitterbug_Instance#Custom::OnStartInstance";
+			end;
+		case 27:
+			#INSTANCENAME$ = "DeepForest";
+			doevent "DeepForest_Instance#Custom::OnStartInstance";
 			end;
 	}
 	end;
