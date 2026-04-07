@@ -15610,8 +15610,6 @@ Body:
       bonus bStr,2;
       bonus bDex,2;
       bonus bInt,2;
-      bonus bAtk,15;
-      bonus bMatk,15;
   - Id: 1684
     AegisName: Long_Foxtail
     Name: Foxtail de Anubis
@@ -15623,6 +15621,9 @@ Body:
     MagicAttack: 120
     Range: 1
     Slots: 1
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       Summoner: true
       Spirit_Handler: true
@@ -139550,8 +139551,9 @@ Body:
     Name: Relapse Foxtail
     Type: Weapon
     SubType: Staff
-    Attack: 380
-    MagicAttack: 380
+    Weight: 2800
+    Attack: 250
+    MagicAttack: 250
     Range: 1
     Slots: 2
     Jobs:
@@ -139561,29 +139563,59 @@ Body:
       Right_Hand: true
     Trade:
       NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+      NoSell: true
     WeaponLevel: 5
     EquipLevelMin: 175
     Refineable: true
     Script: |
       .@r = getrefine();
       if (.@r>0) {
-        bonus bShortAtkRate,15 * .@r;
-        bonus bLongAtkRate,15 * .@r;
-        bonus bMatkRate,15 * .@r;
-        bonus bAtk,15 * .@r;
-        bonus bMatk,15 * .@r;
+        bonus bShortAtkRate,20 * .@r;
+        bonus bLongAtkRate,20 * .@r;
+        bonus bMAtkRate,20 * .@r;
+        bonus bAtk,20 * .@r;
+        bonus bMAtk,20 * .@r;
       }
-      bonus bVariableCastrate,-30;
+      bonus bVariableCastrate,-25;
       bonus bDelayRate,-30;
-      bonus bShortAtkRate,150;
-      bonus bLongAtkRate,150;
-      bonus bMatkRate,150;
+      bonus bAtkRate,150;
+      bonus bMAtkRate,150;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bShortAtkRate,50;
+          bonus bLongAtkRate,50;
+          bonus bMAtkRate,50;
+          bonus bAtk,50;
+          bonus bMAtk,50;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bShortAtkRate,50;
+              bonus bLongAtkRate,50;
+              bonus bMAtkRate,50;
+              bonus bAtk,50;
+              bonus bMAtk,50;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bShortAtkRate,50;
+                  bonus bLongAtkRate,50;
+                  bonus bMAtkRate,50;
+                  bonus bAtk,50;
+                  bonus bMAtk,50;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bShortAtkRate,50;
+                      bonus bLongAtkRate,50;
+                      bonus bMAtkRate,50;
+                      bonus bAtk,50;
+                      bonus bMAtk,50;
+                  }
+              }
+          }
+      }
 
   - Id: 26112
     AegisName: Probation_Foxtail
@@ -139684,8 +139716,8 @@ Body:
     SubType: Staff
     Buy: 3000
     Weight: 1100
-    Attack: 180
-    MagicAttack: 180
+    Attack: 200
+    MagicAttack: 200
     Range: 1
     Slots: 1
     Jobs:
@@ -139693,17 +139725,12 @@ Body:
       Spirit_Handler: true
     Locations:
       Right_Hand: true
-    WeaponLevel: 2
-    EquipLevelMin: 70
+    WeaponLevel: 3
+    EquipLevelMin: 100
     Refineable: true
     Trade:
       NoDrop: true
-      NoTrade: true
-      NoCart: true
-      NoStorage: true
-      NoGuildStorage: true
-      NoMail: true
-      NoAuction: true
+      NoSell: true
     Script: |
       .@r = getrefine();
       if (.@r>0) {
@@ -139900,17 +139927,20 @@ Body:
     Type: Weapon
     SubType: Staff
     Weight: 400
-    Attack: 250
-    MagicAttack: 250
+    Attack: 220
+    MagicAttack: 220
     Range: 1
     Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
     Jobs:
       Summoner: true
       Spirit_Handler: true
     Locations:
       Right_Hand: true
-    WeaponLevel: 3
-    EquipLevelMin: 100
+    WeaponLevel: 4
+    EquipLevelMin: 150
     Refineable: true
     Script: |
       .@r = getrefine();
@@ -252364,7 +252394,8 @@ Body:
     Script: |
       .@r = getrefine();
       if (.@r>0) {
-        bonus bAtkRate,20 * .@r;
+        bonus bShortAtkRate,20 * .@r;
+        bonus bLongAtkRate,20 * .@r;
         bonus bMAtkRate,20 * .@r;
         bonus bAtk,20 * .@r;
         bonus bMAtk,20 * .@r;
@@ -252380,24 +252411,28 @@ Body:
       .@g = getenchantgrade();
 
       if (.@g >= ENCHANTGRADE_D) {
-          bonus bAtkRate,50;
+          bonus bShortAtkRate,50;
+          bonus bLongAtkRate,50;
           bonus bMAtkRate,50;
           bonus bAtk,50;
           bonus bMAtk,50;
           if (.@g >= ENCHANTGRADE_C) {
-              bonus bAtkRate,50;
+              bonus bShortAtkRate,50;
+              bonus bLongAtkRate,50;
               bonus bMAtkRate,50;
               bonus bAtk,50;
               bonus bMAtk,50;
               if (.@g >= ENCHANTGRADE_B) {
                   bonus bCastRate, -.@r;
-                  bonus bAtkRate,50;
+                  bonus bShortAtkRate,50;
+                  bonus bLongAtkRate,50;
                   bonus bMAtkRate,50;
                   bonus bAtk,50;
                   bonus bMAtk,50;
                   if (.@g >= ENCHANTGRADE_A) {
                       bonus bDelayRate, -.@r;
-                      bonus bAtkRate,50;
+                      bonus bShortAtkRate,50;
+                      bonus bLongAtkRate,50;
                       bonus bMAtkRate,50;
                       bonus bAtk,50;
                       bonus bMAtk,50;
