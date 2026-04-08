@@ -1389,24 +1389,71 @@ OnStart:
 }
 
 1@xm_d,218,150,5	script	#exwp1	PORTAL,{
-	// Premiações do Servidor
-	if (#HTF_STATUS == 2) {
-		// add_reputation_points(1, 10);
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		callfunc("F_InstanceFinishAnnounce", "Fábrica de Brinquedos de Terror");
-		if (#inst175_name$ == "Fábrica de Brinquedos de Terror") {
-			set #inst175_status,2;
+	// Premiacao do Servidor
+	if (!'htf_rewarded) {
+		.@origin_aid = getcharid(3);
+		.@party_id = getcharid(1);
+		.@can_finish = 0;
+		if (.@party_id > 0) {
+			getpartymember .@party_id,1;
+			getpartymember .@party_id,2;
+			for ( .@i = 0; .@i < $@partymembercount; .@i++ ) {
+				if (!isloggedin($@partymemberaid[.@i], $@partymembercid[.@i]))
+					continue;
+				attachrid $@partymemberaid[.@i];
+				if (strcharinfo(3) != 'xm_d_map$ || #HTF_STATUS != 2)
+					continue;
+				.@can_finish = 1;
+				break;
+			}
+			attachrid .@origin_aid;
 		}
-		getitem 9608,10;	// Moeda de Instância
-		getitem 9198,2;
-		set #HTF_STATUS, 3;
+		else if (#HTF_STATUS == 2) {
+			.@can_finish = 1;
+		}
+		if (.@can_finish) {
+			'htf_rewarded = 1;
+			callfunc("F_InstanceFinishAnnounce", "Fábrica de Brinquedos de Terror");
+			if (.@party_id > 0) {
+				getpartymember .@party_id,1;
+				getpartymember .@party_id,2;
+				for ( .@i = 0; .@i < $@partymembercount; .@i++ ) {
+					if (!isloggedin($@partymemberaid[.@i], $@partymembercid[.@i]))
+						continue;
+					attachrid $@partymemberaid[.@i];
+					if (strcharinfo(3) != 'xm_d_map$ || #HTF_STATUS != 2)
+						continue;
+					// add_reputation_points(1, 10);
+					callfunc("F_AddRep", 1, 10, 110002, 3000);
+					callfunc("F_DiaryRefreshDaily");
+					set #instancia, 2;
+					if (#inst175_name$ == "Fábrica de Brinquedos de Terror") {
+						set #inst175_status,2;
+					}
+					getitem 9608,10;	// Moeda de Instancia
+					getitem 9198,2;
+					set #HTF_STATUS, 3;
+				}
+				attachrid .@origin_aid;
+			}
+			else {
+				// add_reputation_points(1, 10);
+				callfunc("F_AddRep", 1, 10, 110002, 3000);
+				callfunc("F_DiaryRefreshDaily");
+				set #instancia, 2;
+				if (#inst175_name$ == "Fábrica de Brinquedos de Terror") {
+					set #inst175_status,2;
+				}
+				getitem 9608,10;	// Moeda de Instancia
+				getitem 9198,2;
+				set #HTF_STATUS, 3;
+			}
+		}
 	}
-	mes "Você vai sair?";
+	mes "Voce vai sair?";
 	next;
-	if (select( "Dê uma olhada ao redor", "Vá lá fora" ) == 1) {
-		mes "Pare a máquina.";
+	if (select( "De uma olhada ao redor", "Va la fora" ) == 1) {
+		mes "Pare a maquina.";
 		close;
 	}
 	close2;
@@ -1606,6 +1653,7 @@ OnTimer1000:
 
 OnInstanceInit:
 	'xm_d_map$ = instance_mapname("1@xm_d");
+	'htf_rewarded = 0;
 
 	// Warps
 	disablenpc instance_npcname("#fac3wp");
