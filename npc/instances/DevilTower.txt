@@ -743,24 +743,48 @@ OnTouch:
 1@tnm1,70,108,3	script	Assassino Dewey#tnm01	4_M_ACROSS,{
 	if ('devil_tower < 4)
 		end;
-	if (isbegin_quest(7569) == 0)
-		setquest 7569; // Trate os feridos
-	if (isbegin_quest(7570) == 0)
-		setquest 7570; // Destrua os demônios
 	mes "[Dewey]";
-	mes "Eu vou guiá-los até o andar superior.";
-	mes "Não se esqueça de eliminar todos os demônios que encontrar pelo caminho.";
+	mes "Eu vou guia-los ate o andar superior.";
+	mes "Nao se esqueca de eliminar todos os demonios que encontrar pelo caminho.";
 	next;
 	if (select("Vamos agora.", "Preciso de mais tempo para me preparar.") == 2) {
 		mes "[Dewey]";
 		mes "Prepare-se para qualquer coisa.";
 		close;
 	}
+	.@origin_aid = getcharid(3);
+	.@party_id = getcharid(1);
+	if (.@party_id > 0) {
+		getpartymember .@party_id,1;
+		getpartymember .@party_id,2;
+		for ( .@i = 0; .@i < $@partymembercount; .@i++ ) {
+			if (!isloggedin($@partymemberaid[.@i], $@partymembercid[.@i]))
+				continue;
+			attachrid $@partymemberaid[.@i];
+			if (strcharinfo(3) != 'map_tnm1$ || #DEVILTOWER_STATUS < 2)
+				continue;
+			if (isbegin_quest(7569) == 0)
+				setquest 7569; // Trate os feridos
+			if (isbegin_quest(7570) == 0)
+				setquest 7570; // Destrua os demonios
+			devil_tower_can_reenter = 1; // Obs: diferente do oficial (condicao simplificada)
+		}
+		attachrid .@origin_aid;
+	}
+	else {
+		if (isbegin_quest(7569) == 0)
+			setquest 7569; // Trate os feridos
+		if (isbegin_quest(7570) == 0)
+			setquest 7570; // Destrua os demonios
+		devil_tower_can_reenter = 1; // Obs: diferente do oficial (condicao simplificada)
+	}
 	mes "[Dewey]";
 	mes "Viaje com cuidado.";
 	close2;
-	warp 'map_tnm1$,91,23;
-	devil_tower_can_reenter = 1; // Obs: diferente do oficial (condição simplificada)
+	if (.@party_id > 0)
+		warpparty 'map_tnm1$,91,23, getcharid(1), 'map_tnm1$,70,108;
+	else
+		warp 'map_tnm1$,91,23;
 	end;
 }
 
@@ -826,37 +850,74 @@ OnTimer41000:
 	stopnpctimer;
 	end;
 OnMobDead:
+	switch (killedrid) {
+	case 2939:
+		if ('shadow1_kills < 7)
+			'shadow1_kills++;
+		break;
+	case 2940:
+		if ('shadow2_kills < 7)
+			'shadow2_kills++;
+		break;
+	case 2941:
+		if ('shadow3_kills < 7)
+			'shadow3_kills++;
+		break;
+	}
 	end;
 }
 
 1@tnm1,158,24,3	script	Assassino Louie#tnm02	4_M_ACROSS,{
 	if ('devil_tower < 4)
 		end;
-	if (checkquest(7570,HUNTING) != 2) {
+	if ('shadow1_kills < 7 || 'shadow2_kills < 7 || 'shadow3_kills < 7) {
 		mes "[Louie]";
-		mes "O capitão disse que precisamos eliminar todos os demônios...";
-		mes "É melhor você começar logo.";
+		mes "O capitao disse que precisamos eliminar todos os demonios...";
+		mes "Ainda faltam alguns.";
+		mes sprintf("Sombra 1: %d/7 | Sombra 2: %d/7 | Sombra 3: %d/7", 'shadow1_kills, 'shadow2_kills, 'shadow3_kills);
 		close;
 	}
 	mes "[Louie]";
 	mes "Muitos soldados ainda sobreviveram aos ataques.";
-	mes "Eles conseguiram se livrar de todos os demônios.";
+	mes "Eles conseguiram se livrar de todos os demonios.";
 	next;
 	mes "[Louie]";
-	mes "Eu estava garantindo que ninguém subisse as escadas, com medo de que algo acontecesse novamente.";
+	mes "Eu estava garantindo que ninguem subisse as escadas, com medo de que algo acontecesse novamente.";
 	next;
 	mes "[Louie]";
-	mes "Gostaria que você me ajudasse.";
-	mes "Eu irei guiá-lo.";
-	if (isbegin_quest(7571) == 0) {
+	mes "Gostaria que voce me ajudasse.";
+	mes "Eu irei guia-lo.";
+	.@origin_aid = getcharid(3);
+	.@party_id = getcharid(1);
+	if (.@party_id > 0) {
+		getpartymember .@party_id,1;
+		getpartymember .@party_id,2;
+		for ( .@i = 0; .@i < $@partymembercount; .@i++ ) {
+			if (!isloggedin($@partymemberaid[.@i], $@partymembercid[.@i]))
+				continue;
+			attachrid $@partymemberaid[.@i];
+			if (strcharinfo(3) != 'map_tnm1$ || #DEVILTOWER_STATUS < 2)
+				continue;
+			erasequest 7569; // Tratar os feridos
+			erasequest 7570; // Destruir os demonios
+			if (isbegin_quest(7571) == 0)
+				setquest 7571;   // Expedicao a Torre
+		}
+		attachrid .@origin_aid;
+	}
+	else {
 		erasequest 7569; // Tratar os feridos
-		erasequest 7570; // Destruir os demônios
-		setquest 7571;   // Expedição à Torre
+		erasequest 7570; // Destruir os demonios
+		if (isbegin_quest(7571) == 0)
+			setquest 7571;   // Expedicao a Torre
 	}
 	next;
-	mes "Tenho explorado os corredores desta torre já faz um tempo.";
+	mes "Tenho explorado os corredores desta torre ja faz um tempo.";
 	close2;
-	warp 'map_tnm1$,124,86;
+	if (.@party_id > 0)
+		warpparty 'map_tnm1$,124,86, getcharid(1), 'map_tnm1$,158,24;
+	else
+		warp 'map_tnm1$,124,86;
 	end;
 }
 
@@ -2240,6 +2301,9 @@ OnInstanceInit:
 	'devil_tower = 0;
 	'mob_count = 0;
 	'shade = 0;
+	'shadow1_kills = 0;
+	'shadow2_kills = 0;
+	'shadow3_kills = 0;
 
 	'map_tnm1$ = instance_mapname("1@tnm1");
 	'map_tnm2$ = instance_mapname("1@tnm2");
