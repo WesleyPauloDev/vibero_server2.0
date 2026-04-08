@@ -39,7 +39,6 @@ OnStartInstance:
 		set #ETOWER_STATUS, 3;
 	}
 	
-	set #ETOWER_STATUS, 0;
 	// Cooldown
 	set .@restante, #ETOWER_COOLDOWN - gettimetick(2);
 	if (#ETOWER_STATUS == 3 && .@restante <= 0) {
@@ -192,7 +191,8 @@ OnStartInstance:
 						set #ETOWER_COOLDOWN, gettimetick(2) + .@faltam_reset;
 	
 						addtimer 14400000, strnpcinfo(3)+"::OnTimeout_ET"; // 4h = 14400000 ms					
-					}					
+					}	
+					close2;				
 					
 					end;
 

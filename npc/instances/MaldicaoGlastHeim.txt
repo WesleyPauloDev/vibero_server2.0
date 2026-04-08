@@ -864,13 +864,13 @@ OnMyMobDead:
 	if (.@mob_dead_num > 35) {
 		mapannounce 'map_name$[0], "A maldição de Himelmez está enfraquecendo. Encontre os sobreviventes!", bc_map,0xFFFFFF;
 		killmonster 'map_name$[0], .@label$;
-		enablenpc instance_npcname("Altar boy Domun#1");
+		enablenpc instance_npcname("Coroinha Domun#1");
 		disablenpc instance_npcname("#ghmemorialmob01");
 	}
 	end;
 }
 
-1@gl_k,17,51,3	script	Altar boy Domun#1	4_M_KID1,{
+1@gl_k,17,51,3	script	Coroinha Domun#1	4_M_KID1,{
 	if (is_party_leader() == false || 'step != 2) {
 		mes "[Coroinha Domun]";
 		mes "Me salve, por favor... me salve...";
@@ -878,7 +878,7 @@ OnMyMobDead:
 	}
 	.@account_id = getcharid(3);
 	.@player_name$ = strcharinfo(0);
-	mes "[Altar boy Domun]";
+	mes "[Coroinha Domun]";
 	mes "Me salve! Me salve!!!";
 	npctalk "Me salve! Me salve!!!";
 	next;
@@ -913,7 +913,7 @@ OnMyMobDead:
 	npctalk "Coroinha Domun: Ok, eu... eu vou tentar.";
 	if ('step == 2) {
 		'step = 3;
-		disablenpc instance_npcname("Altar boy Domun#1");
+		disablenpc instance_npcname("Coroinha Domun#1");
 		donpcevent instance_npcname("#ghmemorialmob02") + "::OnStart";
 	}
 	close;
@@ -944,13 +944,13 @@ OnMyMobDead:
 	if (.@mob_dead_num > 56) {
 		mapannounce 'map_name$[0], "A maldição de Himelmez está enfraquecendo. Encontre os sobreviventes!", bc_map,0xFFFFFF;
 		killmonster 'map_name$[0],.@label$;
-		enablenpc instance_npcname("Holgren the Destroyer#1");
+		enablenpc instance_npcname("Holgren, o Destruidor#1");
 		disablenpc instance_npcname("#ghmemorialmob02");
 	}
 	end;
 }
 
-1@gl_k,291,145,3	script	Holgren the Destroyer#1	4_F_JOB_BLACKSMITH,{
+1@gl_k,291,145,3	script	Holgren, o Destruidor#1	4_F_JOB_BLACKSMITH,{
 	if (is_party_leader() == false || 'step != 3) {
 		mes "[Holgren, o Destruidor]";
 		mes "Você... é humano?";
@@ -991,7 +991,7 @@ OnMyMobDead:
 	npctalk "Holgren, o Destruidor: Está tudo bem. Você já fez o suficiente. Eu posso cuidar de mim mesmo. Boa sorte para você também.";
 	if ('step == 3) {
 		'step = 4;
-		disablenpc instance_npcname("Holgren the Destroyer#1");
+		disablenpc instance_npcname("Holgren, o Destruidor#1");
 		donpcevent instance_npcname("#ghmemorialmob03") + "::OnEnable";
 	}
 	close;
@@ -1103,12 +1103,35 @@ OnTimer5000:
 		close3;
 	}
 	erasequest 12318;
-	if (isbegin_quest(12319) == 0)
-		setquest 12319;// Amdarais Hunt
-	if (isbegin_quest(12320) == 0) {
-		setquest 12320;// Time Traveler
-		completequest 12320;
-		getexp 250000,250000;
+	.@origin_aid = getcharid(3);
+	.@party_id = getcharid(1);
+	if (.@party_id > 0) {
+		getpartymember .@party_id,1;
+		getpartymember .@party_id,2;
+		for ( .@i = 0; .@i < $@partymembercount; .@i++ ) {
+			if (!isloggedin($@partymemberaid[.@i], $@partymembercid[.@i]))
+				continue;
+			attachrid $@partymemberaid[.@i];
+			if ((strcharinfo(3) != 'map_name$[0] && strcharinfo(3) != 'map_name$[1]) || #OldGlastHeim_STATUS < 2)
+				continue;
+			if (isbegin_quest(12319) == 0)
+				setquest 12319;// Amdarais Hunt
+			if (isbegin_quest(12320) == 0) {
+				setquest 12320;// Time Traveler
+				completequest 12320;
+				getexp 250000,250000;
+			}
+		}
+		attachrid .@origin_aid;
+	}
+	else {
+		if (isbegin_quest(12319) == 0)
+			setquest 12319;// Amdarais Hunt
+		if (isbegin_quest(12320) == 0) {
+			setquest 12320;// Time Traveler
+			completequest 12320;
+			getexp 250000,250000;
+		}
 	}
 	mes "Este item possui uma aura extraordinária... Pode ser muito útil para alguém especial.";
 	getitem 6607,5;// Temporal_Crystal
@@ -2214,11 +2237,11 @@ OnInstanceInit:
 
 	// Rescue 1
 	disablenpc instance_npcname("#ghmemorialmob01");
-	disablenpc instance_npcname("Altar boy Domun#1");
+	disablenpc instance_npcname("Coroinha Domun#1");
 
 	// Rescue 2
 	disablenpc instance_npcname("#ghmemorialmob02");
-	disablenpc instance_npcname("Holgren the Destroyer#1");
+	disablenpc instance_npcname("Holgren, o Destruidor#1");
 	for ( .@i = 1; .@i <= 26; .@i++ )
 		disablenpc instance_npcname("A dead man#" + .@i);
 
