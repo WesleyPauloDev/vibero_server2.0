@@ -198,28 +198,6 @@
 		cutin "gl_barmund2",2;
 		close3;
 	}
-	// Se a instância já foi concluída antes, o jogador pode pular os setores 1, 2 e 3 e começar direto no primeiro chefe MG_CORRUPTION_ROOT
-	// if (isbegin_quest(12321) == 2) {
-	// 	mes "Você já possui um registro anterior de conclusão. Pode pular o cenário e prosseguir diretamente.";
-	// 	next;
-	// 	if (select("Pular a parte inicial.", "Assistir tudo.") == 1) {
-	// 		cutin "GL_BARMUND1.bmp",2;
-	// 		mes "[Varmundt]";
-	// 		mes "Eu já vi você, " + strcharinfo(0) + ".";
-	// 		mes "Tenho certeza de que posso confiar em você. Vamos partir imediatamente.";
-	// 		close2;
-	// 		cutin "",255;
-	// 		if ('step == 0) {
-	// 			'step = 1;
-	// 			'mode = 2;
-	// 			disablenpc();
-	// 			enablenpc instance_npcname("Heinrich#1");
-	// 			enablenpc instance_npcname("Varmundt#1");
-	// 		}
-	// 		end;
-	// 	}
-	// 	// (Cenário original)
-	// }
 	.@account_id = getcharid(3);
 	.@player_name$ = strcharinfo(0);
 	mes "[Varmundt]";
@@ -2070,6 +2048,19 @@ OnTimer10000:
 		mes "Hm, você está muito bem. Primeiramente, deixe-me dar alguns itens de Amdarais.";
 		erasequest 12319;
 		setquest 12322;// Space Distortion
+		getpartymember getcharid(1),1;
+		getpartymember getcharid(1),2;
+		for (.@i = 0; .@i < $@partymembercount; ++.@i) {
+			if (!$@partymemberaid[.@i])
+				continue;
+			if (!attachrid($@partymemberaid[.@i]))
+				continue;
+			if ((strcharinfo(3) != 'map_name$[0] && strcharinfo(3) != 'map_name$[1]) || #OldGlastHeim_STATUS < 2)
+				continue;
+			if (isbegin_quest(12322) == 0)
+				setquest 12322;// Space Distortion
+		}
+		attachrid(getcharid(3));
 		if (isbegin_quest(12321) == 0) {
 			setquest 12321;// Time Conqueror
 			completequest 12321;
@@ -2142,7 +2133,7 @@ OnTimer10000:
 1@gl_k,165,136,3	script	Rachadura estranha#2	CLEAR_NPC,{
 	if ('step != 9)
 		end;
-	if (isbegin_quest(12322) == 0) {// Space Distortion
+	if (isbegin_quest(12322) == 0 && #OldGlastHeim_STATUS != 3) {// Space Distortion
 		mes "A fenda parece suspeita, mas nada mais a investigar.";
 		close;
 	}
@@ -2215,7 +2206,7 @@ OnTimer10000:
 1@gl_k,129,136,3	duplicate(Rachadura estranha#2)	Rachadura estranha#8	CLEAR_NPC
 
 1@gl_k,269,267,3	script	Rachadura estranha#1	CLEAR_NPC,{
-	if (isbegin_quest(12322) == 0) {// Space Distortion
+	if (isbegin_quest(12322) == 0 && #OldGlastHeim_STATUS != 3) {// Space Distortion
 		mes "A fenda parece suspeita, mas nada mais a investigar.";
 		close;
 	}
