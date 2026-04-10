@@ -114,7 +114,7 @@ OnStartInstance:
 			set #NYD_PARTY, getcharid(1); // salva o id do grupo
 			
 			announce "[Instâncias] " + strcharinfo(0) + " criou Ninho de Nidhog para o grupo " + .@partyName$ + ".", bc_all, 0xFF9900;
-			callfunc("F_InstanceLogStart", "Ninho de Nidhog");
+			callfunc("F_InstanceLogStart", "NYD", "Ninho de Nidhog");
 
 			mes "[Guardião do Portão de Yggdrasil]";
 			mes "Instância criada! Use ^0000FFEntrar na Instância^000000 para começar.";
@@ -126,6 +126,7 @@ OnStartInstance:
 			switch(instance_enter("Nidhoggur's Nest")) {
 				case IE_OK:
 					set #NYD_STATUS, 2;
+					callfunc("F_InstanceLogEnter", "NYD", "Ninho de Nidhog");
 					
 					set etower_timer, gettimetick(2);
 					set .@pid, getcharid(1);
