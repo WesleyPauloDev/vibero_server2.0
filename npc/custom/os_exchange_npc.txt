@@ -1,0 +1,248 @@
+//==================================================
+// Trocas OS / Ilusional / Grace
+// NPC custom em portugues para trabalhar em cima
+//==================================================
+
+moc_para01,42,36,4	script	Operador OS	4_M_REPAIR,{
+	disable_items;
+
+	mes "[Operador OS]";
+	mes "Posso trocar equipamentos e modulos usando Componentes Misteriosos e Cor Cores.";
+	next;
+
+	switch(select("Equipamentos Grace:Modulo de Arma:Modulo de Armadura:Arma OS:Armadura Ilusional:Cancelar")) {
+	case 1:
+		callsub L_Grace;
+		end;
+	case 2:
+		callsub L_WeaponModule;
+		end;
+	case 3:
+		callsub L_ArmorModule;
+		end;
+	case 4:
+		callsub L_OSWeapon;
+		end;
+	case 5:
+		callsub L_IllusionArmor;
+		end;
+	default:
+		close;
+	}
+
+L_Grace:
+	mes "[Operador OS]";
+	mes "Os equipamentos Grace podem ser trocados por " + getitemname(25723) + ".";
+	mes "Vou abrir a lista correspondente a sua classe.";
+	close2;
+
+	switch( eaclass() & EAJ_THIRDMASK ) {
+	case EAJ_RUNE_KNIGHT: .@shop$ = "shop_ext171_JOB_RUNE_KNIGHT"; break;
+	case EAJ_WARLOCK: .@shop$ = "shop_ext171_JOB_WARLOCK"; break;
+	case EAJ_RANGER: .@shop$ = "shop_ext171_JOB_RANGER"; break;
+	case EAJ_ARCH_BISHOP: .@shop$ = "shop_ext171_JOB_ARCH_BISHOP"; break;
+	case EAJ_MECHANIC: .@shop$ = "shop_ext171_JOB_MECHANIC"; break;
+	case EAJ_GUILLOTINE_CROSS: .@shop$ = "shop_ext171_JOB_GUILLOTINE_CROSS"; break;
+	case EAJ_ROYAL_GUARD: .@shop$ = "shop_ext171_JOB_ROYAL_GUARD"; break;
+	case EAJ_SORCERER: .@shop$ = "shop_ext171_JOB_SORCERER"; break;
+	case EAJ_MINSTRELWANDERER: .@shop$ = "shop_ext171_JOB_MINSTREL"; break;
+	case EAJ_SURA: .@shop$ = "shop_ext171_JOB_SURA"; break;
+	case EAJ_GENETIC: .@shop$ = "shop_ext171_JOB_GENETIC"; break;
+	case EAJ_SHADOW_CHASER: .@shop$ = "shop_ext171_JOB_SHADOW_CHASER"; break;
+	default:
+		switch( Class ) {
+		case JOB_SUPER_NOVICE_E:
+		case JOB_SUPER_BABY_E:
+		case JOB_HYPER_NOVICE:
+			.@shop$ = "shop_ext171_JOB_SUPER_NOVICE_E";
+			break;
+		case JOB_KAGEROU:
+		case JOB_OBORO:
+		case JOB_BABY_KAGEROU:
+		case JOB_BABY_OBORO:
+		case JOB_SHINKIRO:
+		case JOB_SHIRANUI:
+			.@shop$ = "shop_ext171_JOB_KAGEROU";
+			break;
+		case JOB_REBELLION:
+		case JOB_BABY_REBELLION:
+		case JOB_NIGHT_WATCH:
+			.@shop$ = "shop_ext171_JOB_REBELLION";
+			break;
+		case JOB_SUMMONER:
+		case JOB_BABY_SUMMONER:
+		case JOB_SPIRIT_HANDLER:
+			.@shop$ = "shop_ext171_JOB_SUMMONER";
+			break;
+		case JOB_STAR_EMPEROR:
+		case JOB_BABY_STAR_EMPEROR:
+		case JOB_STAR_EMPEROR2:
+		case JOB_BABY_STAR_EMPEROR2:
+		case JOB_SKY_EMPEROR:
+		case JOB_SKY_EMPEROR2:
+			.@shop$ = "shop_ext171_JOB_STAR_EMPEROR";
+			break;
+		case JOB_SOUL_REAPER:
+		case JOB_BABY_SOUL_REAPER:
+		case JOB_SOUL_ASCETIC:
+			.@shop$ = "shop_ext171_JOB_SOUL_REAPER";
+			break;
+		default:
+			mes "[Operador OS]";
+			mes "Nao encontrei uma loja Grace para a sua classe.";
+			close;
+		}
+		break;
+	}
+
+	callshop .@shop$;
+	end;
+
+L_WeaponModule:
+	mes "[Operador OS]";
+	mes "Posso trocar 5 " + getitemname(25723) + " por um Modulo de Modificacao de Arma.";
+	mes "Tambem aceito 1.000.000 de zenys.";
+	next;
+
+	if (select("Fisico:Magico:Cancelar") == 3)
+		close;
+
+	.@type = @menu;
+	if (.@type == 1) {
+		.@group = IG_EP17_1_SPC02;
+		setarray .@ids[0],23776,23777,23778;
+	} else {
+		.@group = IG_EP17_1_SPC03;
+		setarray .@ids[0],23779,23780,23781;
+	}
+
+	mes "[Operador OS]";
+	mes "Voce pode receber aleatoriamente:";
+	mes getitemname(.@ids[0]) + ",";
+	mes getitemname(.@ids[1]) + " ou";
+	mes getitemname(.@ids[2]) + ".";
+	next;
+
+	switch(select("Pagar com 5 Cor Cores:Pagar com 1.000.000z:Cancelar")) {
+	case 1:
+		if (countitem(25723) < 5) {
+			mes "[Operador OS]";
+			mes "Voce nao possui Cor Cores suficientes.";
+			close;
+		}
+		delitem 25723,5;
+		break;
+	case 2:
+		if (Zeny < 1000000) {
+			mes "[Operador OS]";
+			mes "Voce nao possui zenys suficientes.";
+			close;
+		}
+		Zeny -= 1000000;
+		break;
+	default:
+		close;
+	}
+
+	getgroupitem(.@group);
+	mes "[Operador OS]";
+	mes "Modulo entregue com sucesso.";
+	close;
+
+L_ArmorModule:
+	mes "[Operador OS]";
+	mes "O Modulo de Modificacao de Armadura custa 30 " + getitemname(25669) + " e 5 " + getitemname(25723) + ".";
+	next;
+
+	if (select("Trocar:Cancelar") == 2)
+		close;
+
+	if (countitem(25669) < 30 || countitem(25723) < 5) {
+		mes "[Operador OS]";
+		mes "Voce nao possui os materiais necessarios.";
+		close;
+	}
+
+	delitem 25669,30;
+	delitem 25723,5;
+	getgroupitem(IG_EP17_1_SPC04);
+	mes "[Operador OS]";
+	mes "Modulo entregue com sucesso.";
+	close;
+
+L_OSWeapon:
+	mes "[Operador OS]";
+	mes "Posso trocar 1 " + getitemname(25668) + " e 50 " + getitemname(25669) + " por uma Arma OS aleatoria.";
+	next;
+
+	if (select("Trocar:Ver lista:Cancelar") == 2) {
+		mes "[Operador OS]";
+		mes "Lista de armas OS possiveis:";
+		mes getitemname(13493) + ", " + getitemname(21047) + ", " + getitemname(26151) + ", " + getitemname(28629) + ".";
+		mes getitemname(28136) + ", " + getitemname(16088) + ", " + getitemname(18178) + ", " + getitemname(18179) + ".";
+		mes getitemname(28038) + ", " + getitemname(1862) + ", " + getitemname(28253) + ", " + getitemname(28755) + ".";
+		mes getitemname(18180) + ", " + getitemname(32019) + ", " + getitemname(16089) + ".";
+		close;
+	}
+	if (@menu == 3)
+		close;
+
+	if (countitem(25668) < 1 || countitem(25669) < 50) {
+		mes "[Operador OS]";
+		mes "Voce precisa de 1 " + getitemname(25668) + " e 50 " + getitemname(25669) + ".";
+		close;
+	}
+
+	delitem 25668,1;
+	delitem 25669,50;
+	getgroupitem(IG_EP17_1_SPC01);
+	mes "[Operador OS]";
+	mes "Arma OS entregue com sucesso.";
+	close;
+
+L_IllusionArmor:
+	mes "[Operador OS]";
+	mes "Cada equipamento ilusional custa 50 " + getitemname(25723) + ".";
+	next;
+
+	switch(select("Armadura Ilusional:Asas Ilusionais:Pernas Ilusionais:Booster Ilusional:Battle Chip Ilusional:Cancelar")) {
+	case 1:
+		setarray .@item[0],15376,15377;
+		break;
+	case 2:
+		setarray .@item[0],20933,20934;
+		break;
+	case 3:
+		setarray .@item[0],22196,22197;
+		break;
+	case 4:
+		setarray .@item[0],32207,32208;
+		break;
+	case 5:
+		setarray .@item[0],32209,32210;
+		break;
+	default:
+		close;
+	}
+
+	.@id = .@item[ select(getitemname(.@item[0]), getitemname(.@item[1])) - 1 ];
+
+	if (countitem(25723) < 50) {
+		mes "[Operador OS]";
+		mes "Voce nao possui Cor Cores suficientes.";
+		close;
+	}
+
+	mes "[Operador OS]";
+	mes "Deseja trocar 50 " + getitemname(25723) + " por " + getitemname(.@id) + "?";
+	next;
+	if (select("Sim:Cancelar") == 2)
+		close;
+
+	delitem 25723,50;
+	getitem .@id,1;
+	mes "[Operador OS]";
+	mes "Equipamento entregue com sucesso.";
+	close;
+}
+
