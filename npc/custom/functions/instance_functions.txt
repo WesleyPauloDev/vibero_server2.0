@@ -156,7 +156,7 @@ function	script	F_InstanceEntry	{
 
 function	script	F_InstanceProgressTouch	{
 	.@instance_code$ = getarg(0);
-	.@instance_name$ = callfunc("F_InstanceMonitorSafeName", getarg(1, .@instance_code$));
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(1, .@instance_code$));
 	query_sql("INSERT INTO `instance_monitor_member_state` (`account_id`, `instance_code`, `instance_name`, `tried_count`, `completed_count`, `last_try_at`) VALUES ("
 		+ getcharid(3) + ", '"
 		+ escape_sql(.@instance_code$) + "', '"
@@ -167,7 +167,7 @@ function	script	F_InstanceProgressTouch	{
 function	script	F_InstanceProgressComplete	{
 	.@account_id = getarg(0);
 	.@instance_code$ = getarg(1);
-	.@instance_name$ = callfunc("F_InstanceMonitorSafeName", getarg(2, .@instance_code$));
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(2, .@instance_code$));
 	query_sql("INSERT INTO `instance_monitor_member_state` (`account_id`, `instance_code`, `instance_name`, `tried_count`, `completed_count`, `last_try_at`, `last_completed_at`) VALUES ("
 		+ .@account_id + ", '"
 		+ escape_sql(.@instance_code$) + "', '"
@@ -177,7 +177,7 @@ function	script	F_InstanceProgressComplete	{
 
 function	script	F_InstanceEnsureAttemptState	{
 	.@instance_code$ = getarg(0);
-	.@instance_name$ = callfunc("F_InstanceMonitorSafeName", getarg(1, .@instance_code$));
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(1, .@instance_code$));
 	.@tried = 0;
 	query_sql("SELECT COUNT(*) FROM `instance_monitor_member_state` WHERE `account_id` = "
 		+ getcharid(3) + " AND `instance_code` = '" + escape_sql(.@instance_code$) + "'", .@tried);
@@ -255,7 +255,7 @@ function	script	F_InstanceHistoryCode	{
 	return .@key$;
 }
 function	script	F_InstanceGetOpenLogId	{
-	.@instance_name$ = callfunc("F_InstanceMonitorSafeName", getarg(0, ""));
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(0, ""));
 	.@party_id = getcharid(1);
 	.@log_id = 0;
 	if (.@party_id < 1)
@@ -266,38 +266,9 @@ function	script	F_InstanceGetOpenLogId	{
 	return .@log_id;
 }
 
-function	script	F_InstanceMonitorSafeName	{
-	.@instance_name$ = getarg(0, "");
-	.@instance_code$ = callfunc("F_InstanceHistoryCode", .@instance_name$);
-
-	switch (.@instance_code$) {
-		case "PORING": return "Vila dos Porings";
-		case "ORCMEMORY": return "Batalha dos Orcs";
-		case "ETOWER": return "Torre Sem Fim";
-		case "NYD": return "Ninho de Nidhog";
-		case "OldGlastHeim": return "Maldicao de Glast Heim";
-		case "SANTUARIOSELADO": return "Santuario Selado";
-		case "WLCR": return "Laboratorio Werner";
-		case "GMT": return "Torneio Magico de Geffen";
-		case "SaraMemory": return "Memorias de Sara";
-		case "InfiniteSpace": return "Espaco Infinito";
-		case "DEVILTOWER": return "Torre do Demonio";
-		case "LaboratorioCentral": return "Laboratorio Central";
-		case "HTF": return "Fabrica de Brinquedos de Terror";
-		case "RoomConsciousness": return "Salao de Ymir";
-		case "WolfchevLaboratory": return "Laboratorio Wolfchev";
-		case "TRG": return "Templo do Rei Demonio";
-		case "OSOccupation": return "Operacao OS";
-		case "CorOperation": return "Operacao COR";
-		case "WATERGARDEN": return "Jardim Aquatico";
-	}
-
-	return .@instance_name$;
-}
-
 function	script	F_InstanceLogStart	{
 	.@instance_code$ = getarg(0);
-	.@instance_name$ = callfunc("F_InstanceMonitorSafeName", getarg(1, .@instance_code$));
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(1, .@instance_code$));
 	.@party_id = getcharid(1);
 	if (.@party_id < 1)
 		return;
@@ -322,7 +293,7 @@ function	script	F_InstanceLogStart	{
 
 function	script	F_InstanceLogEnter	{
 	.@instance_code$ = getarg(0);
-	.@instance_name$ = callfunc("F_InstanceMonitorSafeName", getarg(1, .@instance_code$));
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(1, .@instance_code$));
 	.@party_id = getcharid(1);
 	.@log_id = callfunc("F_InstanceGetOpenLogId", .@instance_name$);
 	if (.@party_id < 1 || .@log_id < 1)
@@ -340,7 +311,7 @@ function	script	F_InstanceLogEnter	{
 }
 
 function	script	F_InstanceLogFinish	{
-	.@instance_name$ = callfunc("F_InstanceMonitorSafeName", getarg(0));
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(0));
 	.@instance_code$ = callfunc("F_InstanceHistoryCode", .@instance_name$);
 	.@party_id = getcharid(1);
 	.@log_id = 0;
