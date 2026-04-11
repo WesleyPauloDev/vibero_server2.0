@@ -339,6 +339,8 @@ function	script	F_InstanceLogFinish	{
 function	script	F_InstanceFinishAnnounce	{
 	.@db_name$ = getarg(0);
 	callfunc("F_InstanceLogFinish", .@db_name$);
+	if (#instancia == 1)
+		#instancia = 2;
 	announce "[Instâncias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
 	return;
 }
