@@ -32,69 +32,77 @@ moc_para01,42,36,4	script	Operador OS	4_M_REPAIR,{
 
 L_Grace:
 	mes "[Operador OS]";
-	mes "Os equipamentos Grace podem ser trocados por " + getitemname(25723) + ".";
-	mes "Vou abrir a lista correspondente a sua classe.";
-	close2;
+	mes "As lojas Grace daqui mostram os conjuntos completos por classe.";
+	mes "Escolha a classe para abrir a loja.";
+	next;
 
-	switch( eaclass() & EAJ_THIRDMASK ) {
-	case EAJ_RUNE_KNIGHT: .@shop$ = "shop_ext171_JOB_RUNE_KNIGHT"; break;
-	case EAJ_WARLOCK: .@shop$ = "shop_ext171_JOB_WARLOCK"; break;
-	case EAJ_RANGER: .@shop$ = "shop_ext171_JOB_RANGER"; break;
-	case EAJ_ARCH_BISHOP: .@shop$ = "shop_ext171_JOB_ARCH_BISHOP"; break;
-	case EAJ_MECHANIC: .@shop$ = "shop_ext171_JOB_MECHANIC"; break;
-	case EAJ_GUILLOTINE_CROSS: .@shop$ = "shop_ext171_JOB_GUILLOTINE_CROSS"; break;
-	case EAJ_ROYAL_GUARD: .@shop$ = "shop_ext171_JOB_ROYAL_GUARD"; break;
-	case EAJ_SORCERER: .@shop$ = "shop_ext171_JOB_SORCERER"; break;
-	case EAJ_MINSTRELWANDERER: .@shop$ = "shop_ext171_JOB_MINSTREL"; break;
-	case EAJ_SURA: .@shop$ = "shop_ext171_JOB_SURA"; break;
-	case EAJ_GENETIC: .@shop$ = "shop_ext171_JOB_GENETIC"; break;
-	case EAJ_SHADOW_CHASER: .@shop$ = "shop_ext171_JOB_SHADOW_CHASER"; break;
-	default:
-		switch( Class ) {
-		case JOB_SUPER_NOVICE_E:
-		case JOB_SUPER_BABY_E:
-		case JOB_HYPER_NOVICE:
-			.@shop$ = "shop_ext171_JOB_SUPER_NOVICE_E";
-			break;
-		case JOB_KAGEROU:
-		case JOB_OBORO:
-		case JOB_BABY_KAGEROU:
-		case JOB_BABY_OBORO:
-		case JOB_SHINKIRO:
-		case JOB_SHIRANUI:
-			.@shop$ = "shop_ext171_JOB_KAGEROU";
-			break;
-		case JOB_REBELLION:
-		case JOB_BABY_REBELLION:
-		case JOB_NIGHT_WATCH:
-			.@shop$ = "shop_ext171_JOB_REBELLION";
-			break;
-		case JOB_SUMMONER:
-		case JOB_BABY_SUMMONER:
-		case JOB_SPIRIT_HANDLER:
-			.@shop$ = "shop_ext171_JOB_SUMMONER";
-			break;
-		case JOB_STAR_EMPEROR:
-		case JOB_BABY_STAR_EMPEROR:
-		case JOB_STAR_EMPEROR2:
-		case JOB_BABY_STAR_EMPEROR2:
-		case JOB_SKY_EMPEROR:
-		case JOB_SKY_EMPEROR2:
-			.@shop$ = "shop_ext171_JOB_STAR_EMPEROR";
-			break;
-		case JOB_SOUL_REAPER:
-		case JOB_BABY_SOUL_REAPER:
-		case JOB_SOUL_ASCETIC:
-			.@shop$ = "shop_ext171_JOB_SOUL_REAPER";
-			break;
-		default:
-			mes "[Operador OS]";
-			mes "Nao encontrei uma loja Grace para a sua classe.";
-			close;
-		}
+	switch(select(
+		"Rune Knight:Ranger:Shadow Chaser:Royal Guard:Sura:" +
+		"Warlock:Sorcerer:Arch Bishop:Mechanic:Genetic:" +
+		"Guillotine Cross:Minstrel e Wanderer:Rebellion:Kagerou e Oboro:" +
+		"Summoner:Star Emperor:Soul Reaper:Superaprendiz:Cancelar"
+	)) {
+	case 1:
+		.@shop$ = "barter_grace_JOB_RUNE_KNIGHT";
 		break;
+	case 2:
+		.@shop$ = "barter_grace_JOB_RANGER";
+		break;
+	case 3:
+		.@shop$ = "barter_grace_JOB_SHADOW_CHASER";
+		break;
+	case 4:
+		.@shop$ = "barter_grace_JOB_ROYAL_GUARD";
+		break;
+	case 5:
+		.@shop$ = "barter_grace_JOB_SURA";
+		break;
+	case 6:
+		.@shop$ = "barter_grace_JOB_WARLOCK";
+		break;
+	case 7:
+		.@shop$ = "barter_grace_JOB_SORCERER";
+		break;
+	case 8:
+		.@shop$ = "barter_grace_JOB_ARCH_BISHOP";
+		break;
+	case 9:
+		.@shop$ = "barter_grace_JOB_MECHANIC";
+		break;
+	case 10:
+		.@shop$ = "barter_grace_JOB_GENETIC";
+		break;
+	case 11:
+		.@shop$ = "barter_grace_JOB_GUILLOTINE_CROSS";
+		break;
+	case 12:
+		.@shop$ = "barter_grace_JOB_MINSTREL";
+		break;
+	case 13:
+		.@shop$ = "barter_grace_JOB_REBELLION";
+		break;
+	case 14:
+		.@shop$ = "barter_grace_JOB_KAGEROU";
+		break;
+	case 15:
+		.@shop$ = "barter_grace_JOB_SUMMONER";
+		break;
+	case 16:
+		.@shop$ = "barter_grace_JOB_STAR_EMPEROR";
+		break;
+	case 17:
+		.@shop$ = "barter_grace_JOB_SOUL_REAPER";
+		break;
+	case 18:
+		.@shop$ = "barter_grace_JOB_SUPER_NOVICE_E";
+		break;
+	default:
+		close;
 	}
 
+	mes "[Operador OS]";
+	mes "Abrindo a loja Grace completa da classe escolhida.";
+	close2;
 	callshop .@shop$;
 	end;
 
