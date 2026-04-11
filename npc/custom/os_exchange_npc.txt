@@ -193,46 +193,10 @@ L_OSWeapon:
 
 L_IllusionArmor:
 	mes "[Operador OS]";
-	mes "Cada equipamento ilusional custa 50 " + getitemname(25723) + ".";
+	mes "Todos os equipamentos ilusionais estao reunidos em uma unica loja.";
+	mes "Cada item custa 50 " + getitemname(25723) + ".";
 	next;
-
-	switch(select("Armadura Ilusional:Asas Ilusionais:Pernas Ilusionais:Booster Ilusional:Battle Chip Ilusional:Cancelar")) {
-	case 1:
-		setarray .@item[0],15376,15377;
-		break;
-	case 2:
-		setarray .@item[0],20933,20934;
-		break;
-	case 3:
-		setarray .@item[0],22196,22197;
-		break;
-	case 4:
-		setarray .@item[0],32207,32208;
-		break;
-	case 5:
-		setarray .@item[0],32209,32210;
-		break;
-	default:
-		close;
-	}
-
-	.@id = .@item[ select(getitemname(.@item[0]), getitemname(.@item[1])) - 1 ];
-
-	if (countitem(25723) < 50) {
-		mes "[Operador OS]";
-		mes "Voce nao possui Cor Cores suficientes.";
-		close;
-	}
-
-	mes "[Operador OS]";
-	mes "Deseja trocar 50 " + getitemname(25723) + " por " + getitemname(.@id) + "?";
-	next;
-	if (select("Sim:Cancelar") == 2)
-		close;
-
-	delitem 25723,50;
-	getitem .@id,1;
-	mes "[Operador OS]";
-	mes "Equipamento entregue com sucesso.";
-	close;
+	close2;
+	callshop "barter_illusion_armor";
+	end;
 }
