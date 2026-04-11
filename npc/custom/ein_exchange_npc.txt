@@ -1,0 +1,107 @@
+//==================================================
+// Trocas de Einbroch / Dynite
+// Baseado em npc/re/merchants/quests_exp_175.txt
+//==================================================
+
+moc_para01,46,36,4	script	Operador Dynite	4_TOWER_16,{
+	disable_items;
+
+	if (checkweight(25814,100) == 0 || checkweight(1201,1) == 0 || (MaxWeight - Weight) < 10000) {
+		mes "[Operador Dynite]";
+		mes "Voce esta com peso demais para continuar.";
+		close;
+	}
+
+	mes "[Operador Dynite]";
+	mes "Eu trabalho com os minerios de Einbroch.";
+	mes "Posso Sintetizar Dynite, abrir a loja de troca comum e mostrar a loja de armas de Einbroch.";
+	next;
+
+	switch(select("Sintetizar Dynite:Loja Dynite:Loja de armas de Einbroch:Explicar materiais:Sair")) {
+	case 1:
+		callsub L_RefineDynite;
+		end;
+	case 2:
+		callsub L_BarterDynite;
+		end;
+	case 3:
+		callsub L_WeaponShop;
+		end;
+	case 4:
+		callsub L_Info;
+		end;
+	default:
+		close;
+	}
+
+L_RefineDynite:
+	mes "[Operador Dynite]";
+	mes "Para criar " + mesitemlink(25814) + ", voce precisa de 1 unidade de cada um destes minerios:";
+	mes mesitemlink(25809) + " ^777777(atual: " + countitem(25809) + ")^000000";
+	mes mesitemlink(25810) + " ^777777(atual: " + countitem(25810) + ")^000000";
+	mes mesitemlink(25811) + " ^777777(atual: " + countitem(25811) + ")^000000";
+	mes mesitemlink(25812) + " ^777777(atual: " + countitem(25812) + ")^000000";
+	mes mesitemlink(25813) + " ^777777(atual: " + countitem(25813) + ")^000000";
+	next;
+	mes "[Operador Dynite]";
+	mes "Quantos " + getitemname(25814) + " voce quer Sintetizar?";
+	mes "Limite por vez: 100.";
+	input .@amount;
+
+	if (.@amount <= 0) {
+		mes "[Operador Dynite]";
+		mes "Operacao cancelada.";
+		close;
+	}
+
+	if (.@amount > 100) {
+		mes "[Operador Dynite]";
+		mes "Eu so consigo Sintetizar ate 100 por vez.";
+		close;
+	}
+
+	if (countitem(25809) < .@amount || countitem(25810) < .@amount || countitem(25811) < .@amount || countitem(25812) < .@amount || countitem(25813) < .@amount) {
+		mes "[Operador Dynite]";
+		mes "Voce nao possui todos os materiais necessarios.";
+		close;
+	}
+
+	progressbar "ffff00",1;
+	specialeffect EF_REPAIRWEAPON;
+	delitem 25809,.@amount;
+	delitem 25810,.@amount;
+	delitem 25811,.@amount;
+	delitem 25812,.@amount;
+	delitem 25813,.@amount;
+	getitem 25814,.@amount;
+
+	mes "[Operador Dynite]";
+	mes "Refinei " + .@amount + " " + getitemname(25814) + ".";
+	close;
+
+L_BarterDynite:
+	mes "[Operador Dynite]";
+	mes "Vou abrir a loja de troca com os itens de Dynite.";
+	next;
+	close2;
+	callshop "barter_ein_dun03";
+	end;
+
+L_WeaponShop:
+	mes "[Operador Dynite]";
+	mes "Vou abrir minha loja especial de armas de Einbroch.";
+	mes "Cada arma custa ^0055FF50 " + getitemname(25814) + "^000000.";
+	next;
+	close2;
+	callshop "barter_ein_weapon_custom";
+	end;
+
+L_Info:
+	mes "[Operador Dynite]";
+	mes "Resumo rapido:";
+	mes "- " + getitemname(25809) + " + " + getitemname(25810) + " + " + getitemname(25811);
+	mes "- " + getitemname(25812) + " + " + getitemname(25813) + " -> " + getitemname(25814);
+	mes "- A loja usa " + getitemname(25814) + " como moeda.";
+	mes "- A loja especial vende cada arma de Einbroch por 50 " + getitemname(25814) + ".";
+	close;
+}
