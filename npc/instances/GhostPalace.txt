@@ -1,5 +1,5 @@
 //===== rAthena Script =======================================
-//= Palacio Fantasma
+//= Palacio das Magoas
 //===== Description: =========================================
 //= [Walkthrough Conversion + Custom Entry]
 //= Instancia Ghost Palace adaptada ao padrao custom.
@@ -20,7 +20,7 @@ OnStartInstance:
 			"ghost_palace",
 			"GhostPalace",
 			120,
-			"Palacio Fantasma"
+			"Palacio das Magoas"
 		);
 	end;
 }
@@ -84,7 +84,7 @@ dali02,43,129,5	script	Guarda Real Desagradavel#	4_M_SAKRAYROYAL,{
 	instance_create("Ghost Palace");
 	mes "[Guarda Real Desagradavel]";
 	mes "Obrigado..";
-	mes "Vou abrir a passagem secreta para o ^0000ffPalacio Fantasma^000000.";
+	mes "Vou abrir a passagem secreta para o ^0000ffPalacio das Magoas^000000.";
 	mes "Esteja pronto!";
 	close;
 }
@@ -144,7 +144,7 @@ dali02,40,134,5	script	Interdimensional Device#dk	PORTAL,{
 		mes "Somente membros registrados podem entrar na instancia " + .@md_name$ + ".";
 		close;
 	case IE_OK:
-		mapannounce "dali", strcharinfo(0) + " do grupo " + getpartyname(.@party_id) + " esta entrando no Palacio Fantasma.", bc_map, 0x00ff99;
+		mapannounce "dali", strcharinfo(0) + " do grupo " + getpartyname(.@party_id) + " esta entrando no Palacio das Magoas.", bc_map, 0x00ff99;
 		// warp "1@spa",42,196;
 		setquest 1261;// Cursed Swordman
 		end;
@@ -280,7 +280,7 @@ OnSpawn2:
 	end;
 OnMyMobDead3:
 	if (mobcount('map_spa$, instance_npcname("#gp_control_1") + "::OnMyMobDead3") < 1) {
-		mapannounce 'map_spa$, "A passagem para o 2 andar do Palacio Fantasma foi aberta.", bc_map,0xFFFF00;
+		mapannounce 'map_spa$, "A passagem para o 2 andar do Palacio das Magoas foi aberta.", bc_map,0xFFFF00;
 		enablenpc instance_npcname("The second floor of Palace");
 		enablenpc instance_npcname("Lurid Royal Guard#dk1");
 		enablenpc instance_npcname("Princess Tiara#dk");
@@ -895,7 +895,7 @@ OnTimer28500:
 	disablenpc instance_npcname("#tb");
 	disablenpc instance_npcname("#sv");
 	disablenpc instance_npcname("#tv");
-	mapannounce 'map_spa$, "Esta na hora de deixar o Palacio Fantasma.", bc_map,0xFFFF00;
+	mapannounce 'map_spa$, "Esta na hora de deixar o Palacio das Magoas.", bc_map,0xFFFF00;
 	enablenpc instance_npcname("Way out of Palace");
 	enablenpc instance_npcname("King#dk11");
 	end;
@@ -922,7 +922,7 @@ OnTimer28500:
 	mes "[Rei]";
 	mes "Voce vai me entregar ^006400" + .@item_name_req$ + "^000000?";
 	mes "A culpa esta consumindo minha alma.";
-	mes "Minha alma esta presa dentro do Palacio Fantasma.";
+	mes "Minha alma esta presa dentro do Palacio das Magoas.";
 	next;
 	mes "[Rei]";
 	mes "Estou reunindo as memorias abandonadas de Sakray nesses fragmentos.";
@@ -999,7 +999,7 @@ OnTimer28500:
 1@spa,210,28,0	script	Way out of Palace	WARPNPC,2,2,{
 	end;
 OnTouch_:
-	mes "Esta na hora de deixar o Palacio Fantasma.";
+	mes "Esta na hora de deixar o Palacio das Magoas.";
 	mes "Tudo agora esta completo";
 	mes "e vai desaparecer..";
 	close2;
@@ -1016,7 +1016,7 @@ OnTouch_:
 		callfunc("F_DiaryRefreshDaily");
 		set #instancia, 2;
 		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Palacio Fantasma");
+			callfunc("F_InstanceFinishAnnounce", "Palacio das Magoas");
 			'reward_announced = 1;
 		}
 		getitem 9608,10;
@@ -1032,12 +1032,12 @@ OnTouch_:
 1@spa,54,28,0	warp	4th floor in the palace	2,2,1@spa,218,186
 1@spa,178,186,0	warp	5th floor of Palace	2,2,1@spa,186,57
 
-moc_para01,50,36,4	script	Rei do Palacio Fantasma#exchange	4_M_RUSKING,{
+moc_para01,50,36,4	script	Rei do Palacio das Magoas#exchange	4_M_RUSKING,{
 	disable_items;
-	mes "[Rei do Palacio Fantasma]";
+	mes "[Rei do Palacio das Magoas]";
 	mes "Se voce me der fragmentos cinzentos, eu posso forjar os equipamentos de Sakray para voce.";
 	next;
-	mes "[Rei do Palacio Fantasma]";
+	mes "[Rei do Palacio das Magoas]";
 	mes "As armas custam 200 " + getitemname(6672) + ".";
 	mes "As armaduras custam 100 " + getitemname(6672) + ".";
 	next;

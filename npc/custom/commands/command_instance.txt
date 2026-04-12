@@ -30,6 +30,7 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatusRaw", "#ETOWER_COOLDOWN", "#ETOWER_STATUS", "ETOWER");
 		callfunc("F_InstanceMenuResetStatusRaw", "#NYD_COOLDOWN", "#NYD_STATUS", "NYD");
 		callfunc("F_InstanceMenuResetStatus", "glastHeim", "OldGlastHeim");
+		callfunc("F_InstanceMenuResetStatus", "glastHeimHard", "OldGlastHeimHard");
 		callfunc("F_InstanceMenuResetStatus", "santuario_selado", "SANTUARIOSELADO");
 		callfunc("F_InstanceMenuResetStatus", "wlcr", "WLCR");
 		callfunc("F_InstanceMenuResetStatus", "gmt", "GMT");
@@ -69,7 +70,7 @@ OnAtcommand:
 	.@opt2$ = callfunc("F_InstanceMenuOption", "[40+] Batalha dos Orcs", "orcMemory", "ORCMEMORY");
 	.@opt3$ = callfunc("F_InstanceMenuOptionRaw", "[50+] Torre Sem Fim", "#ETOWER_COOLDOWN", "#ETOWER_STATUS", 3, 4, "ETOWER");
 	.@opt4$ = callfunc("F_InstanceMenuOptionRaw", "[55+] Ninho de Nidhog", "#NYD_COOLDOWN", "#NYD_STATUS", 3, 4, "NYD");
-	.@opt5$ = callfunc("F_InstanceMenuOption", "[60+] Maldicao de Glast Heim", "glastHeim", "OldGlastHeim");
+	.@opt5$ = "[60+] Maldicao de Glast Heim";
 	.@opt6$ = callfunc("F_InstanceMenuOption", "[75+] Santuario Selado", "santuario_selado", "SANTUARIOSELADO");
 	.@opt7$ = callfunc("F_InstanceMenuOption", "[90+] Laboratorio Werner", "wlcr", "WLCR");
 	.@opt8$ = callfunc("F_InstanceMenuOption", "[90+] Torneio Magico de Geffen(Solo)", "gmt", "GMT");
@@ -77,7 +78,7 @@ OnAtcommand:
 	.@opt10$ = callfunc("F_InstanceMenuOption", "[100+] Espaco Infinito", "infinite_space", "InfiniteSpace");
 	.@opt11$ = callfunc("F_InstanceMenuOption", "[110+] Hospital Bangungot", "BangungotHospital", "BangungotHospital");
 	.@opt12$ = callfunc("F_InstanceMenuOption", "[120+] Lago Bakonawa", "BakonawaLake", "BakonawaLake");
-	.@opt13$ = callfunc("F_InstanceMenuOption", "[120+] Palacio Fantasma", "ghost_palace", "GhostPalace");
+	.@opt13$ = callfunc("F_InstanceMenuOption", "[120+] Palacio das Magoas", "ghost_palace", "GhostPalace");
 	.@opt14$ = callfunc("F_InstanceMenuOption", "[125+] Assalto ao Dirigivel", "airship_assault", "AirshipAssault");
 	.@opt15$ = callfunc("F_InstanceMenuOption", "[130+] Caverna Buwaya", "BuwayaCave", "BuwayaCave");
 	.@opt16$ = callfunc("F_InstanceMenuOption", "[130+] Charleston em Crise", "CharlestonCrisis", "CharlestonCrisis");
@@ -150,9 +151,20 @@ OnAtcommand:
 			doevent "Nyd_Instance#Custom::OnStartInstance";
 			end;
 		case 5:
-			#INSTANCENAME$ = "MGH";
-			doevent "MGH_Instance#Custom::OnStartInstance";
-			end;
+			.@ogh_n$ = callfunc("F_InstanceMenuOption", "Normal", "glastHeim", "OldGlastHeim");
+			.@ogh_h$ = callfunc("F_InstanceMenuOption", "Hard", "glastHeimHard", "OldGlastHeimHard");
+			switch(select(.@ogh_n$, .@ogh_h$, "Cancelar")) {
+			case 1:
+				#INSTANCENAME$ = "MGH";
+				doevent "MGH_Instance#Custom::OnStartInstance";
+				end;
+			case 2:
+				#INSTANCENAME$ = "MGH_Hard";
+				doevent "MGH_Hard_Instance#Custom::OnStartInstance";
+				end;
+			case 3:
+				end;
+			}
 		case 6:
 			#INSTANCENAME$ = "SantuarioSelado";
 			doevent "SantuarioSelado_Instance#Custom::OnStartInstance";
