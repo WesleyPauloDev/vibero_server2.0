@@ -1031,3 +1031,19 @@ OnTouch_:
 1@spa,117,137,0	warp	3rd floor in the palace	2,2,1@spa,60,43
 1@spa,54,28,0	warp	4th floor in the palace	2,2,1@spa,218,186
 1@spa,178,186,0	warp	5th floor of Palace	2,2,1@spa,186,57
+
+moc_para01,50,36,4	script	Rei do Palacio Fantasma#exchange	4_M_RUSKING,{
+	disable_items;
+	mes "[Rei do Palacio Fantasma]";
+	mes "Se voce me der fragmentos cinzentos, eu posso forjar os equipamentos de Sakray para voce.";
+	next;
+	mes "[Rei do Palacio Fantasma]";
+	mes "As armas custam 200 " + getitemname(6672) + ".";
+	mes "As armaduras custam 100 " + getitemname(6672) + ".";
+	next;
+	if (select("Abrir troca:Cancelar") == 2)
+		close;
+	close2;
+	callshop "barter_eden_ghostpalace";
+	end;
+}
