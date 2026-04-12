@@ -1,0 +1,1405 @@
+//===== rAthena Script =======================================
+//= Tumba do Remorso
+//===== Description: =========================================
+//= Integracao custom da Tomb of Remorse
+//============================================================
+
+-	script	TombOfRemorse_Instance#Custom	999,{
+	if (!attachrid(#INSTANCERID)) end;
+	#INSTANCERID = 0;
+
+OnStartInstance:
+	callfunc("F_InstanceEntry",
+		"Tomb of Remorse",
+		"Princess of Remorse",
+		"tomb_remorse",
+		"TombRemorse",
+		175,
+		"Tumba do Remorso"
+	);
+	end;
+}
+
+//===== Crazyarashi Services =====================================|
+//= Tomb of Remorse                                              =|
+//===== By: ======================================================|
+//= crazyarashi                                                  =|
+//===== Current Version: =========================================|
+//= 1.0 Initial Version                                          =|
+//================================================================|
+
+dali,123,88,0	script	#remorse_ev_0	HIDDEN_WARP_NPC,3,3,{
+	end;
+
+OnTouch:
+	if(BaseLevel < 175) end;
+	if(isbegin_quest(16461) == 0 || isbegin_quest(16461) == 1)
+		hideoffnpc("Princess of Remorse#remorse");
+end;
+}
+
+dali,80,112,0	script	#remorse_ev_1	HIDDEN_WARP_NPC,3,3,{
+	end;
+
+OnTouch:
+	if(isbegin_quest(16462) == 1)
+		hideoffnpc("Princess of Remorse#remorse2");
+end;
+}
+
+dali02,77,114,0	script	#remorse_ev_2	HIDDEN_WARP_NPC,5,5,{
+	end;
+
+OnTouch:
+	if(isbegin_quest(16463) > 0){
+		hideoffnpc("Princess of Remorse#remorse3");
+		hideoffnpc("Marquis of Remorse#remorse");
+	}
+end;
+}
+
+dali,124,88,3	script	Princess of Remorse#remorse	4_F_MAYSEL,{
+	if(isbegin_quest(16461) == 0){
+		mes "[ Princess of Remorse ]";
+		mes "......";
+		next;
+		mes "[ Princess of Remorse ]";
+		mes "Ah, enfim voce chegou, heroi.";
+		mes "Os sinais dos seus feitos aparecem em cada passo seu.";
+		next;
+		mes "[ Princess of Remorse ]";
+		mes "Quero te pedir um favor.";
+		mes "Voce pode dar descanso aos mortos que vagam pelo velho mundo?";
+		next;
+		if(select("Ouvir com atencao.:Recusar.") == 2){
+			mes "[ Princess of Remorse ]";
+			mes "......";
+			close;
+		}
+		mes "[ Princess of Remorse ]";
+		mes "Obrigada.";
+		mes "Entao, por favor, ouca... a minha historia.";
+		setquest 16461;
+		questinfo_refresh();
+		close;
+	}
+	if(isbegin_quest(16461) == 1){
+		mes "[ Princess of Remorse ]";
+		mes "Eu era a princesa da antiga tumba.";
+		next;
+		mes "[ Princess of Remorse ]";
+		mes "Estou aqui para pedir ajuda por aqueles que nao conseguem descansar nem depois da morte.";
+		next;
+		mes "[ Princess of Remorse ]";
+		mes "Voce vem comigo? Para a Tumba do Remorso, por favor...";
+		completequest 16461;
+		setquest 16462;
+		navigateto("dali",79,112);
+		close2;
+		hideonnpc(strnpcinfo(0));
+	}
+	end;
+	
+OnInit:
+	hideonnpc(strnpcinfo(0));
+	questinfo QTYPE_QUEST,QMARK_YELLOW,"isbegin_quest(16461) == 1";
+end;
+}
+
+dali,79,112,3	script	Princess of Remorse#remorse2	4_F_MAYSEL,{
+	if(isbegin_quest(16462) == 1){
+		mes "[ Princess of Remorse ]";
+		mes "Isso aconteceu ha muito tempo.";
+		next;
+		mes "[ Princess of Remorse ]";
+		mes "Eu cai na tentacao do mal, e eu e todo o antigo reino perdemos a vida em vao.";
+		next;
+		mes "[ Princess of Remorse ]";
+		mes "Eu queria que tivesse acabado ali, mas nao encontramos paz nem depois da morte.";
+		next;
+		mes "[ Princess of Remorse ]";
+		mes "Isso aconteceu por causa de alguem que perdeu a alma e virou um corpo errante.";
+		next;
+		mes "[ Princess of Remorse ]";
+		mes "No fim tivemos o mesmo destino. Vagamos pelo castelo vazio como espiritos, procurando alguem que nos traga descanso.";
+		next;
+		mes "[ Princess of Remorse ]";
+		mes "Se voce acha que pode nos ajudar, por favor, siga-me.";
+		completequest 16462;
+		setquest 16463;
+		navigateto("dali02",78,116);
+		close2;
+		hideonnpc(strnpcinfo(0));
+	}
+	end;
+	
+OnInit:
+	hideonnpc(strnpcinfo(0));
+end;
+}
+
+dali02,78,116,3	script	Princess of Remorse#remorse3	4_F_MAYSEL,{
+	if(isbegin_quest(16463) == 1){
+		mes "[ Princess of Remorse ]";
+		mes "Minha familia e todo o meu povo viraram mortos-vivos.";
+		next;
+		mes "[ Princess of Remorse ]";
+		mes "Nao importa quantas vezes morremos ou matamos. Sempre nos erguemos de novo, cambaleando entre pilares caidos e brasoes rasgados.";
+		next;
+		mes "[ Princess of Remorse ]";
+		mes "Agora eu ja me cansei de querer saber o motivo. Eu so quero encontrar paz.";
+		mes "Mas nem isso e possivel...";
+		next;
+		mes "[ Princess of Remorse ]";
+		mes "Heroi, por favor, ajude-nos.";
+		npctalk "Marques do Remorso : Entao voce e a pessoa reconhecida pela princesa? Venha aqui um instante.","Marquis of Remorse#remorse",bc_self;
+		completequest 16463;
+		close;
+	}
+	switch(checkquest(16464,PLAYTIME)){
+		case -1:
+			break;
+			
+		case 0:
+		case 1:
+			mes "[ Princess of Remorse ]";
+			mes "Obrigada pela sua ajuda, heroi.";
+			mes "Isso vai continuar se repetindo sem fim. Espero que voce possa me ajudar de novo.";
+			next;
+			mes "[ Princess of Remorse ]";
+			mes "Pelo bem das pessoas do Palacio Real, eu quero que elas encontrem paz.";
+			close;
+			
+		case 2:
+			erasequest 16464;
+			break;
+	}
+	.@party_id = getcharid(1);
+	if(!.@party_id){
+		mes "[ Princess of Remorse ]";
+		mes "Voce precisa estar em um grupo para entrar na Tumba do Remorso.";
+		close;
+	}
+	mes "[ Princess of Remorse ]";
+	mes "Voce vem comigo?";
+	mes "Ao palacio onde os espectros vagam em corpos cansados, para a Tumba do Remorso...";
+	next;
+	.@md_name$ = "Tomb of Remorse";
+	if(select((is_party_leader()?"Criar Tumba do Remorso":""),"Entrar na Tumba do Remorso") == 1){
+		if(instance_create(.@md_name$) == -3){
+			mes "[ Princess of Remorse ]";
+			mes "Somente o lider do grupo pode criar a instancia.";
+			close;
+		}
+		mes "[ Princess of Remorse ]";
+		mes "Depois que a instancia for criada, fale comigo de novo para entrar na ^0000CDTumba do Remorso^000000.";
+	} else {
+		if(instance_enter(.@md_name$) == IE_OK){
+			.@party_name$ = getpartyname(.@party_id);
+			setquest 16464;
+			mapannounce "dali02", strcharinfo(0) + " do grupo " + .@party_name$ + " esta entrando em " + .@md_name$ + ".", bc_map, "0x00FF99";
+		} else
+			mes "^0000FFA instancia ainda nao foi criada ou voce esta tentando entrar em uma instancia diferente da criada.^000000";
+	}
+	end;
+	
+OnInit:
+	hideonnpc(strnpcinfo(0));
+end;
+}
+
+dali02,78,112,3	script	Marquis of Remorse#remorse	4_M_SAKRAY,{
+	if(isbegin_quest(16463) < 2) end;
+	function cd_check;
+	mes "[ Marquis of Remorse ]";
+	mes "Entendo, entao voce e a pessoa em quem a princesa acredita.";
+	mes "Se for mesmo assim, eu tambem vou confiar em voce.";
+	next;
+	switch(select("Fios quebrados do destino.:Derramando lagrimas.:Fragmentos de memoria.:Fragmentos do passado.:Troca de Mineas.:Cancelar.")){
+		case 1:
+			.@qid = 16465;
+			.@cid = 16466;
+			cd_check(.@cid);
+			if(isbegin_quest(.@qid) == 0){
+				mes "[ Marquis of Remorse ]";
+				mes "Voce conhece aquelas pessoas que vagam pela Tumba do Remorso?";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Aqueles corpos amaldicoados que nao conseguem dormir para sempre, apodrecendo sem parar...";
+				mes "Enquanto isso, existe um homem cuja alma esta presa a uma espada. Nem vivo nem morto, ele tambem vaga por aqui.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Foi a propria princesa quem chamou voce, nao ele.";
+				mes "Tenho certeza de que em algum momento a princesa tambem vai entrar no caminho do que ela mesma te pediu.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "A princesa sente muita falta dele... Faz muito tempo desde que o destino separou os dois.";
+				mes "A unica misericordia que podemos oferecer agora e tira-lo deste mundo.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Voce vai ajudar a princesa?";
+				next;
+				if(select("Oferecer ajuda.:Nao ajudar.") == 2) goto OnDecline;
+				mes "[ Marquis of Remorse ]";
+				mes "Obrigado por emprestar sua forca.";
+				mes "No ponto final do castelo, estara aquele que carrega a espada.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Por favor, de descanso ao ^0000CDEspadachim Magico Sakray^000000.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Vou esperar por voce la.";
+				mes "Nos vemos la, heroi.";
+				setquest .@qid;
+			} else {
+				mes "[ Marquis of Remorse ]";
+				mes "Acho que voce ainda nao resolveu isso com o ^0000CDEspadachim Magico Sakray^000000.";
+				mes "Pela princesa, peco sua cooperacao.";
+			}
+			close;
+		
+		case 2:
+			.@qid = 16467;
+			.@cid = 16468;
+			cd_check(.@cid);
+			if(isbegin_quest(.@qid) == 0){
+				mes "[ Marquis of Remorse ]";
+				mes "As vezes ha coisas que precisam ser feitas, mesmo que partam o coracao.";
+				mes "No fim, essa e a melhor escolha. Eu nao tenho outra opcao, mesmo sendo doloroso.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "A princesa ainda consegue falar com voce agora, mas isso nao vai durar.";
+				mes "O motivo e a maldicao.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Quando a maldicao voltar, como acontece com os outros mortos-vivos da tumba, ela so tera instinto de sangue.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "A princesa quer ser detida antes de ferir alguem.";
+				mes "Ela quer que voce, heroi, faca isso.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Se a Princesa Tiara atacar voce na ^0000CDTumba do Remorso^000000, voce vai ouvir o que ela pedir?";
+				next;
+				if(select("Vou ouvir.:Nao vou ouvir.") == 2) goto OnDecline;
+				mes "[ Marquis of Remorse ]";
+				mes "Eu respeito essa escolha.";
+				mes "A Princesa Tiara estara vagando pela tumba.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Se ainda restar nela ao menos um pequeno traco de razao,";
+				mes "ela vai impedir que os mortos-vivos da tumba avancem.";
+				setquest .@qid;
+			} else {
+				mes "[ Marquis of Remorse ]";
+				mes "Se a Princesa Tiara atacar voce na ^0000CDTumba do Remorso^000000, voce vai derruba-la?";
+				mes "Mesmo sendo doloroso, peco sua cooperacao.";
+			}
+			close;
+		
+		case 3:
+			.@qid = 16469;
+			.@cid = 16470;
+			cd_check(.@cid);
+			if(isbegin_quest(.@qid) == 0){
+				mes "[ Marquis of Remorse ]";
+				mes "Em algum lugar da tumba, fragmentos de memorias antigas estao adormecidos.";
+				mes "Eu so sei que eles existem, mas nao sei o que sao.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Com este corpo, eu nao consigo encontra-los por mais que tente.";
+				mes "Se voce os achar, talvez descubra mais sobre o que aconteceu no castelo...";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Talvez eu nao consiga acha-los porque estou preso a este lugar.";
+				mes "Voce pode encontrar esses fragmentos de memoria?";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "E a memoria do palacio antes de virar uma tumba, ou talvez um rastro do que aconteceu.";
+				mes "Dizem que existem tres fragmentos adormecidos.";
+				next;
+				if(select("Vou procurar.:Nao vou procurar.") == 2) goto OnDecline;
+				mes "[ Marquis of Remorse ]";
+				mes "Esses fragmentos nao podem sair daqui. Eu vou ficar dentro do antigo palacio.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Se voce terminar tudo, eu vou esperar por voce dentro do palacio.";
+				setquest .@qid;
+			} else {
+				mes "[ Marquis of Remorse ]";
+				mes "Eu preciso que voce encontre pelo menos tres fragmentos adormecidos dentro da tumba.";
+				mes "Vou esperar por voce dentro do palacio.";
+			}
+			close;	
+		
+		case 4:
+			.@qid = 16471;
+			.@cid = 16472;
+			cd_check(.@cid);
+			if(isbegin_quest(.@qid) == 0){
+				mes "[ Marquis of Remorse ]";
+				mes "Existem ^0000CDFragmentos do Passado^000000 espalhados por todo o castelo.";
+				mes "Eu quero que voce os colete.";
+				next;
+				select("Fragmento do passado?");
+				mes "[ Marquis of Remorse ]";
+				mes "E o rastro do que aquele homem viveu no passado.";
+				mes "Sao fragmentos que se formaram depois que as pessoas do castelo se dispersaram.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Mesmo depois que os humanos esqueceram as memorias do castelo, o proprio castelo nao deixou suas memorias desaparecerem...";
+				mes "Elas estao escondidas por ai. Eu agradeceria se voce encontrasse as dez.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Isso guarda as conviccoes dele. Quero que voce colete tudo isso e mostre ao mundo que este castelo existiu.";
+				mes "Mesmo que restem so fragmentos.";
+				next;
+				if(select("Vou coletar.:Recusar coleta.") == 2) goto OnDecline;
+				mes "[ Marquis of Remorse ]";
+				mes "Desejo boa sorte a voce.";
+				mes "Voce nao pode levar esses fragmentos para fora, entao vou esperar la dentro.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Se voce terminar tudo, vou esperar por voce dentro do palacio.";
+				setquest .@qid;
+			} else {
+				mes "[ Marquis of Remorse ]";
+				mes "Eu quero que voce encontre os dez fragmentos do passado.";
+				mes "Vou esperar por voce dentro do palacio.";
+			}
+			close;
+		
+		case 5:
+			mes "[ Marquis of Remorse ]";
+			mes "Se voce tiver uma joia dada pela princesa, uma pedra onde o remorso dela se reuniu,";
+			mes "isso nao tera utilidade para voce, heroi. Se precisar de algo, posso trocar por ela.";
+			next;
+			switch(select("Troca de Joias.:Troca de Armas.:Cancelar")){
+				case 1:
+					callshop "remorse_item",1;
+					break;
+					
+				case 2:
+					callshop "remorse_weapon",1;
+					break;
+					
+				case 3:
+					break;
+			}
+			end;
+		
+		case 6:
+			mes "[ Marquis of Remorse ]";
+			mes "Ainda preciso ver com meus proprios olhos.";
+			mes "Mesmo que a propria princesa tenha trazido voce, so vou reconhece-lo depois de ver do que voce e capaz.";
+			close;
+	}
+	end;
+	
+function	cd_check	{
+	switch(checkquest(getarg(0),PLAYTIME)){
+		case -1: 
+			return;
+		case 0:
+		case 1:
+			mes "[ Marquis of Remorse ]";
+			mes "Por mais que eu agradeca sua boa vontade, heroi, ainda vejo marcas do pedido anterior.";
+			mes "Por favor, volte novamente ao amanhecer.";
+			close;
+			
+		case 2:
+			erasequest getarg(0);
+			return;
+	}
+}
+	
+OnDecline:
+	mes "[ Marquis of Remorse ]";
+	mes "Se eu lhe dever algo, talvez nunca consiga pagar. Entao talvez essa seja a escolha mais sensata.";
+	close;
+	
+OnInit:
+	hideonnpc(strnpcinfo(0));
+end;
+}
+
+moc_para01,52,33,4	script	Marques do Remorso#eden	4_M_SAKRAY,{
+	mes "[ Marques do Remorso ]";
+	mes "Se voce trouxe Mineas, eu posso troca-las por itens ou armas da Tumba do Remorso.";
+	next;
+	switch(select("Troca de Itens.:Troca de Armas.:Cancelar.")){
+		case 1:
+			callshop "remorse_item",1;
+			end;
+		case 2:
+			callshop "remorse_weapon",1;
+			end;
+		default:
+			close;
+	}
+}
+
+1@spa2,1,1,0	script	#remorse_control	-1,{
+	end;
+	
+OnInstanceInit:
+	'map$ = instance_mapname("1@spa2");
+	'reward_announced = 0;
+	'final_ready = 0;
+	disablenpc instance_npcname("#rms_warp_0");
+	disablenpc instance_npcname("#rms_warp_1");
+	disablenpc instance_npcname("#rms_warp_2");
+	disablenpc instance_npcname("#rms_warp_3");
+	disablenpc instance_npcname("Princess#rms_shard_0");
+	disablenpc instance_npcname("Knight#rms_shard_0");
+	disablenpc instance_npcname("Magic Swordsman#rms_shard_0");
+	disablenpc instance_npcname("???#rms_shard_0");
+	disablenpc instance_npcname("Sakray#rms_0");
+	disablenpc instance_npcname("Marquis of Remorse#rms_0");
+	disablenpc instance_npcname("Memory Piece#rms_1");
+	disablenpc instance_npcname("Memory Piece#rms_2");
+	disablenpc instance_npcname("Princess#rms_shard_1");
+	disablenpc instance_npcname("Marquis#rms_shard_0");
+	for(.@i = 0; .@i < 3; .@i++)
+		disablenpc instance_npcname("#rms_stone_" + .@i);
+end;
+}
+
+1@spa2,51,198,0	script	#rms_ev_0	HIDDEN_WARP_NPC,2,2,{
+	end;
+	
+OnTouch:
+	'rms = 0;
+	if(!is_party_leader() || 'rms) end;
+	'rms = 1;
+	disablenpc instance_npcname(strnpcinfo(0));
+	sleep 2000;
+	.@map$ = 'map$;
+	mapannounce .@map$,"Princesa do Remorso : Este lugar dorme ha muito tempo desde aquele incidente.",bc_map,0x00FF99;
+	sleep 3000;
+	mapannounce .@map$,"Princesa do Remorso : Mas por causa do poder de alguem, aqueles que descansavam foram forcados a se levantar.",bc_map,0x00FF99;
+	sleep 3000;
+	mapannounce .@map$,"Princesa do Remorso : E vergonhoso dizer isso, mas eu sou uma delas.",bc_map,0x00FF99;
+	sleep 3000;
+	mapannounce .@map$,"Princesa do Remorso : Estamos perdendo a razao e a humanidade, presos em batalhas sem sentido.",bc_map,0x00FF99;
+	sleep 3000;
+	mapannounce .@map$,"Princesa do Remorso : Todos nos desejamos nosso descanso eterno.",bc_map,0x00FF99;
+	sleep 3000;
+	mapannounce .@map$,"Princesa do Remorso : Heroi, por favor, ajude-nos.",bc_map,0x00FF99;
+	donpcevent instance_npcname("#rms_mob") + "::OnSummon_F1";
+end;
+}
+
+1@spa2,215,202,0	script	#rms_ev_1	HIDDEN_WARP_NPC,2,2,{
+	end;
+	
+OnTouch:
+	if(!is_party_leader()) end;
+	if('rms > 1) end;
+	'rms = 2;
+	disablenpc instance_npcname(strnpcinfo(0));
+	donpcevent instance_npcname("#rms_mob") + "::OnSummon_F2";
+	.@map$ = 'map$;
+	mapannounce .@map$,"Marques do Remorso : A princesa desapareceu. Ela nao quer se mostrar enquanto perde a propria mente.",bc_map,0x00FF99;
+	sleep 3000;
+	mapannounce .@map$,"Marques do Remorso : Mas logo ela sera atraida pelos vivos que estao neste lugar.",bc_map,0x00FF99;
+	sleep 3000;
+	mapannounce .@map$,"Marques do Remorso : Por favor, cuidem dos mortos-vivos e da princesa.",bc_map,0x00FF99;
+end;
+}
+
+1@spa2,57,23,0	script	#rms_ev_2	HIDDEN_WARP_NPC,2,2,{
+	end;
+	
+OnTouch:
+	if(!is_party_leader()) end;
+	if('rms > 2) end;
+	'rms = 3;
+	disablenpc instance_npcname(strnpcinfo(0));
+	donpcevent instance_npcname("#rms_mob") + "::OnSummon_F3";
+	.@map$ = 'map$;
+	mapannounce .@map$,"Marques do Remorso : Esta e a tumba da familia real. Ja foi um lugar de paz, onde varias geracoes descansavam.",bc_map,0x00FF99;
+	sleep 3000;
+	mapannounce .@map$,"Marques do Remorso : O guardiao da tumba nao perdeu apenas a vida. Os corpos que descansavam aqui tambem foram lancados ao caos.",bc_map,0x00FF99;
+	sleep 3000;
+	mapannounce .@map$,"Marques do Remorso : Deem descanso aos mortos-vivos que estao aqui.",bc_map,0x00FF99;
+end;
+}
+
+1@spa2,212,55,0	script	#rms_ev_3	HIDDEN_WARP_NPC,2,2,{
+OnTouch:
+	if(!is_party_leader()) end;
+	if('rms > 3) end;
+	'rms = 4;
+	disablenpc instance_npcname(strnpcinfo(0));
+	sleep 1000;
+	enablenpc instance_npcname("Sakray#rms_0");
+	.@sak$ = instance_npcname("Sakray#rms_0");
+	npctalk "Espadachim Magico Sakray : Por que... por que voce esta aqui?",.@sak$;
+	sleep 3000;
+	npctalk "Espadachim Magico Sakray : Eu vim ver a princesa mais uma vez. Por que voce esta neste lugar?",.@sak$;
+	sleep 3000;
+	npctalk "Espada Magica Tartanos : Oh! Nao e a mesma pessoa de antes...? Voce amadureceu muito bem.",.@sak$;
+	sleep 3000;
+	npctalk "Espada Magica Tartanos : Sakray, rapido, ofereca o sangue dessa pessoa para mim! Deixe-me banquetear com esse sangue!",.@sak$;
+	sleep 3000;
+	npctalk "Espadachim Magico Sakray : Antes disso... eu preciso encontrar a princesa...",.@sak$;
+	sleep 3000;
+	npctalk "Espada Magica Tartanos : Voce nao ve por que essa pessoa esta aqui? Tudo ao seu redor e culpa dela. Agora cumpra o contrato, Sakray!",.@sak$;
+	sleep 3000;
+	npctalk "Espadachim Magico Sakray : Entao e isso... Talvez Tartanos esteja certo. De qualquer forma, eu nao consigo escapar desta espada demoniaca.",.@sak$;
+	sleep 3000;
+	npctalk "Espadachim Magico Sakray : Nao precisamos de mais palavras. Venha. Torne-se presa da espada demoniaca!",.@sak$;
+	sleep 3000;
+	disablenpc instance_npcname("Sakray#rms_0");
+	monster 'map$,211,67,"--ja--",20892,1,instance_npcname("#rms_boss") + "::OnSakrayDead";
+	'boss_gid = $@mobid[0];
+	donpcevent instance_npcname("#rms_boss") + "::OnBossSkill";
+end;
+}
+
+1@spa2,211,67,3	duplicate(dummy_npc)	Sakray#rms_0	4_M_SAKRAY
+
+1@spa2,28,226,3	script	Memory Piece#rms_0	CLEAR_NPC,{
+	.@id = atoi(replacestr(strnpcinfo(2),"rms_",""));
+	if(!is_party_leader() || getd("'memory_" + .@id)){
+		switch(.@id){
+			case 0:
+				mes "O piano antigo e quebrado soltou um som abafado quando apertei uma tecla.";
+				close;
+				
+			case 1:
+				mes "Ha uma quantidade enorme de poeira nesta area.";
+				close;
+				
+			case 2:
+				mes "A antiga tumba foi aberta.";
+				close;			
+		}
+	}
+	switch(.@id){
+		case 0:
+			.@princess$ = instance_npcname("Princess#rms_shard_0");
+			.@knight$ = instance_npcname("Knight#rms_shard_0");
+			enablenpc instance_npcname("Princess#rms_shard_0");
+			enablenpc instance_npcname("Knight#rms_shard_0");
+			specialeffect EF_DA_SPACE,AREA,.@princess$;
+			specialeffect EF_DA_SPACE,AREA,.@knight$;
+			mes "[ Knight ]";
+			mes "A senhora sempre toca a mesma musica, princesa.";
+			npctalk "Knight : A senhora sempre toca a mesma musica, princesa.",.@knight$;
+			next;
+			mes "[ Princess ]";
+			mes "Eu nao sabia que voce estava ouvindo.";
+			npctalk "Knight : Eu nao sabia que voce estava ouvindo.",.@knight$;
+			next;
+			mes "[ Knight ]";
+			mes "Eu sempre estive ao seu lado.";
+			npctalk "Knight : Eu sempre estive ao seu lado.",.@knight$;
+			next;
+			mes "[ Princess ]";
+			mes "Entendo. E continuara assim mesmo depois que eu me casar com o principe do reino vizinho?";
+			npctalk "Princess : Entendo. E continuara assim mesmo depois que eu me casar com o principe do reino vizinho?",.@princess$;
+			next;
+			mes "[ Knight ]";
+			mes "Eu... eu sempre vou servi-la ao seu lado.";
+			npctalk "Knight : Eu... eu sempre vou servi-la ao seu lado.",.@knight$;
+			next;
+			mes "[ Princess ]";
+			mes "E mesmo? Entao voce sempre estara ao meu lado.";
+			npctalk "Princess : E mesmo? Entao voce sempre estara ao meu lado.",.@princess$;
+			next;
+			mes "[ Knight ]";
+			mes "......";
+			npctalk "Knight : ......",.@knight$;
+			next;
+			mes "[ Princess ]";
+			mes "Sakray, agora vou falar um pouco comigo mesma.";
+			npctalk "Princess : Sakray, agora vou falar um pouco comigo mesma.",.@princess$;
+			next;
+			mes "[ Knight ]";
+			mes "Eu nao ouvi nada.";
+			npctalk "Knight : Eu nao ouvi nada.",.@knight$;
+			next;
+			mes "[ Princess ]";
+			mes "Eu sou uma princesa. Nao e digno de uma princesa fazer uma escolha tola levada pelas emocoes.";
+			npctalk "Princess : Eu sou uma princesa. Nao e digno de uma princesa fazer uma escolha tola levada pelas emocoes.",.@princess$;
+			next;
+			mes "[ Princess ]";
+			mes "O casamento e um dever de uma princesa. Nao ha necessidade de afeicao nem de amor.";
+			npctalk "Princess : O casamento e um dever de uma princesa. Nao ha necessidade de afeicao nem de amor.",.@princess$;
+			next;
+			mes "[ Princess ]";
+			mes "Mas, pela primeira vez na vida, eu sinto revolta contra meu dever.";
+			npctalk "Princess : Mas, pela primeira vez na vida, eu sinto revolta contra meu dever.",.@princess$;
+			next;
+			mes "[ Princess ]";
+			mes "Eu invejo aquelas que nasceram como garotas comuns, podendo cuidar com todo o coracao do rapaz que amam ao seu lado.";
+			npctalk "Princess : Eu invejo aquelas que nasceram como garotas comuns, podendo cuidar com todo o coracao do rapaz que amam ao seu lado.",.@princess$;
+			next;
+			mes "[ Princess ]";
+			mes "Como devem ser felizes por crescer juntos, virar adultos e dividir carinho como um casal.";
+			npctalk "Princess : Como devem ser felizes por crescer juntos, virar adultos e dividir carinho como um casal.",.@princess$;
+			next;
+			mes "[ Princess ]";
+			mes "Se ao menos eu pudesse confiar em voce e ama-lo por toda a vida.";
+			npctalk "Princess : Se ao menos eu pudesse confiar em voce e ama-lo por toda a vida.",.@princess$;
+			next;
+			mes "[ Knight ]";
+			mes "......";
+			npctalk "Knight : ......",.@knight$;
+			next;
+			mes "[ Princess ]";
+			mes "Nao devo falar sozinha por tanto tempo.";
+			mes "Sakray.";
+			npctalk "Princess : Nao devo falar sozinha por tanto tempo. Sakray.",.@princess$;
+			next;
+			mes "[ Knight ]";
+			mes "Sim, princesa.";
+			npctalk "Knight : Sim, princesa.",.@knight$;
+			next;
+			mes "[ Princess ]";
+			mes "Estou cansada. Escolte-me de volta ao meu quarto.";
+			npctalk "Princess : Estou cansada. Escolte-me de volta ao meu quarto.",.@princess$;
+			next;
+			mes "[ Knight ]";
+			mes "Entao eu a levarei, princesa.";
+			npctalk "Knight : Entao eu a levarei, princesa.",.@knight$;
+			next;
+			disablenpc instance_npcname("Knight#rms_shard_0");
+			mes "[ Princess ]";
+			mes "Sakray......";
+			npctalk "Princess : Sakray......",.@princess$;
+			setd("'memory_" + .@id,1);
+			close2;
+			disablenpc instance_npcname("Princess#rms_shard_0");
+			break;
+			
+		case 1:
+			.@knight$ = instance_npcname("Magic Swordsman#rms_shard_0");
+			.@mage$ = instance_npcname("???#rms_shard_0");
+			enablenpc instance_npcname("Magic Swordsman#rms_shard_0");
+			specialeffect EF_DA_SPACE,AREA,.@knight$;
+			mes "[ Magic Sword ]";
+			mes "Kekeke, Sakray, por que voce voltou aqui de novo?";
+			npctalk "Magic Sword : Kekeke, Sakray, por que voce voltou aqui de novo?",.@knight$;
+			next;
+			mes "[ Magic Swordsman ]";
+			mes "Eu vou para onde quero. Cuide da sua propria vida.";
+			npctalk "Magic Swordsman : Eu vou para onde quero. Cuide da sua propria vida.",.@knight$;
+			next;
+			mes "[ Magic Sword ]";
+			mes "Onde esta aquela pessoa que disse que queria se livrar das ultimas migalhas de humanidade?";
+			npctalk "Magic Sword : Onde esta aquela pessoa que disse que queria se livrar das ultimas migalhas de humanidade?",.@knight$;
+			next;
+			mes "[ Magic Sword ]";
+			mes "No fim, voce continua preso ao passado e sempre volta ao mesmo lugar.";
+			npctalk "Magic Sword : No fim, voce continua preso ao passado e sempre volta ao mesmo lugar.",.@knight$;
+			next;
+			mes "[ Magic Swordsman ]";
+			mes "Que barulho. Nao me diga o que fazer, Espada Magica.";
+			npctalk "Magic Swordsman : Que barulho. Nao me diga o que fazer, Espada Magica.",.@knight$;
+			next;
+			mes "[ Magic Sword ]";
+			mes "Lembre-se, nos temos um contrato.";
+			npctalk "Magic Sword : Lembre-se, nos temos um contrato.",.@knight$;
+			next;
+			mes "[ Magic Sword ]";
+			mes "Sua alma e minha, ate voce me entregar o sangue que eu quero.";
+			npctalk "Magic Sword : Sua alma e minha, ate voce me entregar o sangue que eu quero.",.@knight$;
+			next;
+			mes "[ Magic Sword ]";
+			mes "Nao acho que voce tenha tempo para ficar passeando num lugar como este, nao e?";
+			npctalk "Magic Sword : Nao acho que voce tenha tempo para ficar passeando num lugar como este, nao e?",.@knight$;
+			next;
+			mes "[ Magic Sword ]";
+			mes "Espero que aquela pessoa esteja madura o bastante.";
+			npctalk "Magic Sword : Espero que aquela pessoa esteja madura o bastante.",.@knight$;
+			next;
+			mes "[ Magic Sword ]";
+			mes "Naquela vez eu nao fiquei satisfeita. Sera que o sangue dele pode me satisfazer agora?";
+			npctalk "Magic Sword : Naquela vez eu nao fiquei satisfeita. Sera que o sangue dele pode me satisfazer agora?",.@knight$;
+			next;
+			mes "[ Magic Sword ]";
+			mes "Tch, eu nao aguento mais. Anda logo, encontre essa pessoa e me de o sangue dela!";
+			npctalk "Magic Sword : Tch, eu nao aguento mais. Anda logo, encontre essa pessoa e me de o sangue dela!",.@knight$;
+			next;
+			mes "[ Magic Swordsman ]";
+			mes "..... barulhenta demais. Vou cuidar disso.";
+			npctalk "Magic Swordsman : ..... barulhenta demais. Vou cuidar disso.",.@knight$;
+			next;
+			disablenpc instance_npcname("Magic Swordsman#rms_shard_0");
+			enablenpc instance_npcname("???#rms_shard_0");
+			specialeffect EF_DA_SPACE,AREA,.@mage$;
+			mes "[ ??? ]";
+			mes "Hm~ Eu vi o contratante da Espada Magica Tartanos e o segui ate aqui. Por que ele se interessou por este lugar?";
+			next;
+			mes "[ ??? ]";
+			mes "Hohoho. Eu consigo sentir a energia dos mortos e da tumba.";
+			next;
+			mes "[ ??? ]";
+			mes "Usar essa energia para criar um novo Amdarais... nao parece uma boa ideia.";
+			next;
+			mes "[ ??? ]";
+			mes "Mas, como Valkiria dos Mortos, nao seria divertido apenas deixar isso quieto. Talvez eu devesse dar um presente aos mortos~";
+			next;
+			mes "[ ??? ]";
+			mes "Ha! Agora levantem-se e lutem! Rasguem os corpos uns dos outros e espalhem a semente do veneno!";
+			next;
+			mes "[ ??? ]";
+			mes "Que pena, nao poderei observar o contratante de Tartanos quando ele voltar!";
+			setd("'memory_" + .@id,1);
+			close2;
+			disablenpc instance_npcname("???#rms_shard_0");
+			break;
+			
+		case 2:
+			.@princess$ = instance_npcname("Princess#rms_shard_1");
+			.@marquis$ = instance_npcname("Marquis#rms_shard_0");
+			enablenpc instance_npcname("Princess#rms_shard_1");
+			enablenpc instance_npcname("Marquis#rms_shard_0");
+			specialeffect EF_DA_SPACE,AREA,.@princess$;
+			specialeffect EF_DA_SPACE,AREA,.@marquis$;
+			mes "[ Princess ]";
+			mes "......Este lugar, sao as catacumbas do palacio real? Meu corpo... como...? Ugh. Eu nao me lembro...";
+			npctalk "......Este lugar, sao as catacumbas do palacio real? Meu corpo... como...? Ugh. Eu nao me lembro...",.@princess$;
+			next;
+			mes "[ Marquis ]";
+			mes "Princesa? Oh. Voce recuperou a consciencia de novo.";
+			npctalk "Marquis : Princesa? Oh. Voce recuperou a consciencia de novo.",.@marquis$;
+			next;
+			mes "[ Marquis ]";
+			mes "Ha pouco tempo, a senhora estava tentando me matar, princesa.";
+			npctalk "Marquis : Ha pouco tempo, a senhora estava tentando me matar, princesa.",.@marquis$;
+			next;
+			mes "[ Princess ]";
+			mes "O que esta acontecendo? Ugh, tem algo muito errado.";
+			npctalk "Princess : O que esta acontecendo? Ugh, tem algo muito errado.",.@princess$;
+			next;
+			mes "[ Marquis ]";
+			mes "Sim. Estamos todos mortos. Parece que alguem nos transformou em mortos-vivos.";
+			npctalk "Marquis : Sim. Estamos todos mortos. Parece que alguem nos transformou em mortos-vivos.",.@marquis$;
+			next;
+			mes "[ Marquis ]";
+			mes "A maior parte de... nao. Princesa, tirando voce e eu, todos perderam a razao e estao se atacando.";
+			npctalk "Marquis : A maior parte de... nao. Princesa, tirando voce e eu, todos perderam a razao e estao se atacando.",.@marquis$;
+			next;
+			mes "[ Princess ]";
+			mes "Por que isso esta acontecendo? Ja estamos mortos e nem assim conseguimos descansar.";
+			npctalk "Princess : Por que isso esta acontecendo? Ja estamos mortos e nem assim conseguimos descansar.",.@princess$;
+			next;
+			mes "[ Marquis ]";
+			mes "E o mesmo para mim. Eu nao sei de nada. Acho que precisamos procurar respostas.";
+			npctalk "Marquis : E o mesmo para mim. Eu nao sei de nada. Acho que precisamos procurar respostas.",.@marquis$;
+			next;
+			mes "[ Marquis ]";
+			mes "Voce e a unica pessoa com quem consegui conversar desde aquele cavaleiro, quando a Espada Magica e o cavaleiro que a carregava massacraram todos.";
+			npctalk "Marquis : Voce e a unica pessoa com quem consegui conversar desde aquele cavaleiro, quando a Espada Magica e o cavaleiro que a carregava massacraram todos.",.@marquis$;
+			next;
+			mes "[ Princess ]";
+			mes "......Sakray...... A culpa nao e dele.";
+			npctalk "Princess : ......Sakray...... A culpa nao e dele.",.@princess$;
+			next;
+			mes "[ Marquis ]";
+			mes "Haha, acho que a senhora esta brincando. ...Bem, eu entendo seus sentimentos, princesa.";
+			npctalk "Marquis : Haha, acho que a senhora esta brincando. ...Bem, eu entendo seus sentimentos, princesa.",.@marquis$;
+			next;
+			mes "[ Princess ]";
+			mes "Marques, eu vou pedir ajuda a alguem.";
+			npctalk "Princess : Marques, eu vou pedir ajuda a alguem.",.@princess$;
+			next;
+			mes "[ Princess ]";
+			mes "Como princesa, eu nao posso deixar as pessoas daqui permanecerem assim para sempre.";
+			npctalk "Princess : Como princesa, eu nao posso deixar as pessoas daqui permanecerem assim para sempre.",.@princess$;
+			next;
+			mes "[ Princess ]";
+			mes "Mesmo que isso se repita sem fim... entao eu vou buscar ajuda sem fim.";
+			npctalk "Princess : Mesmo que isso se repita sem fim... entao eu vou buscar ajuda sem fim.",.@princess$;
+			next;
+			mes "[ Marquis ]";
+			mes "A princesa ja disse a mesma coisa antes. Parece que essa busca nao tera fim.";
+			npctalk "Marquis : A princesa ja disse a mesma coisa antes. Parece que essa busca nao tera fim.",.@marquis$;
+			next;
+			mes "[ Princess ]";
+			mes "Escute, Marques. Se eu voltar a feri-lo... voce entende, nao entende?";
+			npctalk "Princess : Escute, Marques. Se eu voltar a feri-lo... voce entende, nao entende?",.@princess$;
+			next;
+			mes "[ Marquis ]";
+			mes "Eu vou ajuda-la a encontrar paz o mais rapido possivel.";
+			npctalk "Marquis : Eu vou ajuda-la a encontrar paz o mais rapido possivel.",.@marquis$;
+			next;
+			mes "[ Princess ]";
+			mes "Obrigada, Marques.";
+			npctalk "Princess : Obrigada, Marques.",.@princess$;		
+			setd("'memory_" + .@id,1);
+			close2;
+			disablenpc instance_npcname("Princess#rms_shard_1");
+			disablenpc instance_npcname("Marquis#rms_shard_0");
+			break;
+	}
+	end;
+}
+
+1@spa2,224,245,3	duplicate(Memory Piece#rms_0)	Memory Piece#rms_1	CLEAR_NPC
+1@spa2,84,52,3	duplicate(Memory Piece#rms_0)	Memory Piece#rms_2	CLEAR_NPC
+1@spa2,27,225,1	duplicate(dummy_npc)	Princess#rms_shard_0	4_F_MAYSEL
+1@spa2,25,222,7	duplicate(dummy_npc)	Knight#rms_shard_0	4_M_SAKRAYROYAL
+1@spa2,221,235,1	duplicate(dummy_npc)	Magic Swordsman#rms_shard_0	4_M_SAKRAY
+1@spa2,225,233,1	duplicate(dummy_npc)	???#rms_shard_0	4_F_HIMEL
+1@spa2,80,57,6	duplicate(dummy_npc)	Princess#rms_shard_1	4_F_MAYSEL
+1@spa2,85,57,2	duplicate(dummy_npc)	Marquis#rms_shard_0	4_M_SAKRAY
+
+1@spa2,75,211,3	script	Past Fragment#rms_0	CLEAR_NPC,{
+	.@id = atoi(replacestr(strnpcinfo(2),"rms_",""));
+	.@qid = 16473 + .@id;
+	mes "[ ??? ]";
+	if(isbegin_quest(16471)){
+		switch(.@id){
+			case 0: .@order$ = "3rd"; break;
+			case 1: .@order$ = "1st"; break;
+			case 2: .@order$ = "6th"; break;
+			case 3: .@order$ = "4th"; break;
+			case 4: .@order$ = "8th"; break;
+			case 5: .@order$ = "5th"; break;
+			case 6: .@order$ = "2nd"; break;
+			case 7: .@order$ = "7th"; break;
+			case 8: .@order$ = "9th"; break;
+			case 9: .@order$ = "10th"; break;
+		}	
+		mes "Encontrei o " + .@order$ + " fragmento do passado.";
+	}
+	switch(.@id){
+		case 0:
+			.@memory$ = "A happy moment between a princess and a knight.";
+			break;
+		case 1:
+			.@memory$ = "Memory of the time when the knight was raising his successors.";
+			break;
+		case 2:
+			.@memory$ = "A princess in tears who was proposed to by a prince of a neighboring country.";
+			break;
+		case 3:
+			.@memory$ = "The anger of the knight who witnessed the prince of the neighboring country's plot.";
+			break;
+		case 4:
+			.@memory$ = "A knight biting his lips in anger while grasping the princess in his arms.";
+			break;
+		case 5:
+			.@memory$ = "The knight with hollow eyes, framed and locked up.";
+			break;
+		case 6:
+			.@memory$ = "Give me strength, answered by the knight with a weakened heart from the temptation of the magic sword.";
+			break;
+		case 7:
+			.@memory$ = "The faint smile of the late knight, and the captured princess.";
+			break;
+		case 8:
+			.@memory$ = "As ultimas palavras da princesa: eu amo voce.";
+			break;
+		case 9:
+			.@memory$ = "Everything was in ruin. Everyone has arised from their slumber.";
+			break;
+	}
+	mes "Esta e uma memoria do palacio real. " + .@memory$;
+	if(isbegin_quest(16471) && !isbegin_quest(.@qid)){
+		setquest .@qid;
+		completequest .@qid;
+	}
+	close2;
+	hideonnpc instance_npcname(strnpcinfo(0));
+	end;
+}
+
+1@spa2,25,207,3	duplicate(Past Fragment#rms_0)	Past Fragment#rms_1	CLEAR_NPC
+1@spa2,82,256,3	duplicate(Past Fragment#rms_0)	Past Fragment#rms_2	CLEAR_NPC
+1@spa2,215,245,3	duplicate(Past Fragment#rms_0)	Past Fragment#rms_3	CLEAR_NPC
+1@spa2,230,252,3	duplicate(Past Fragment#rms_0)	Past Fragment#rms_4	CLEAR_NPC
+1@spa2,201,254,3	duplicate(Past Fragment#rms_0)	Past Fragment#rms_5	CLEAR_NPC
+1@spa2,82,29,3	duplicate(Past Fragment#rms_0)	Past Fragment#rms_6	CLEAR_NPC
+1@spa2,26,63,3	duplicate(Past Fragment#rms_0)	Past Fragment#rms_7	CLEAR_NPC
+1@spa2,64,61,3	duplicate(Past Fragment#rms_0)	Past Fragment#rms_8	CLEAR_NPC
+1@spa2,203,77,3	duplicate(Past Fragment#rms_0)	Past Fragment#rms_9	CLEAR_NPC
+
+1@spa2,1,1,0	script	#rms_mob	-1,{
+	end;
+
+//= Floor 1 Summons	
+OnSummon_F1:
+	.@map$ = 'map$;
+	setarray .@mob$,
+	//Bottom Left
+	30,206,20895,"OnKillF1_1",
+	29,206,20895,"OnKillF1_1",
+	29,206,20895,"OnKillF1_1",
+	26,204,20895,"OnKillF1_1",
+	22,205,20896,"OnKillF1_1",
+	//Bottom Mid
+	48,215,20899,"OnKillF1_2",
+	50,216,20900,"OnKillF1_2",
+	50,217,20900,"OnKillF1_2",
+	51,217,20900,"OnKillF1_2",
+	50,218,20900,"OnKillF1_2",
+	//Center Mid
+	52,237,20900,"OnKillF1_3",
+	54,238,20900,"OnKillF1_3",
+	50,238,20900,"OnKillF1_3",
+	54,239,20900,"OnKillF1_3",
+	52,244,20899,"OnKillF1_3",
+	//Center Right
+	76,226,20895,"OnKillF1_4",
+	77,226,20895,"OnKillF1_4",
+	79,225,20895,"OnKillF1_4",
+	82,236,20898,"OnKillF1_4",
+	83,232,20898,"OnKillF1_4",
+	//Top Left
+	32,249,20895,"OnKillF1_5",
+	32,249,20895,"OnKillF1_5",
+	32,251,20895,"OnKillF1_5",
+	23,250,20898,"OnKillF1_5",
+	21,248,20898,"OnKillF1_5";
+	for(.@i = 0; .@i < getarraysize(.@mob$); .@i += 4)
+		monster .@map$,atoi(.@mob$[.@i]),atoi(.@mob$[.@i+1]),"--ja--",atoi(.@mob$[.@i+2]),1,instance_npcname(strnpcinfo(0)) + "::" + .@mob$[.@i+3];
+end;
+
+OnCheck_F1:
+	'floor_1 = 'floor_1 + 1;
+	if('floor_1 == 5){
+		mapannounce 'map$,"Marques do Remorso : Um fluxo de mana ligado a princesa apareceu na direcao norte.",bc_map,0x00FFFF;
+		enablenpc instance_npcname("#rms_warp_0");
+	}
+end;
+
+OnMobKill_F1:
+	.@id = getarg(0);
+	.@map$ = 'map$;
+	if(mobcount(.@map$,instance_npcname(strnpcinfo(0)) + "::OnKillF1_" + .@id)) end;
+	if(getd("'F1_" + .@id))
+		donpcevent instance_npcname(strnpcinfo(0)) + "::OnCheck_F1";
+	else {
+		setd("'F1_" + .@id,1);
+		switch(.@id){
+			case 1: setarray .@mob,30,205,20895,28,204,20895,28,206,20895,19,206,20896,22,208,20896; break;
+			case 2: setarray .@mob,49,218,20900,51,220,20900,49,218,20900,51,218,20899,51,216,20899; break;
+			case 3: setarray .@mob,54,243,20900,54,243,20900,55,244,20900,50,239,20899,54,240,20899; break;
+			case 4: setarray .@mob,82,224,20898,82,226,20898,82,222,20898,70,230,20895,72,228,20895; break;
+			case 5: setarray .@mob,20,249,20898,23,249,20898,22,248,20898,31,249,20895,33,249,20895; break;
+		}
+		for(.@i = 0; .@i < getarraysize(.@mob); .@i += 3)
+			monster .@map$,.@mob[.@i],.@mob[.@i+1],"--ja--",.@mob[.@i+2],1,instance_npcname(strnpcinfo(0)) + "::" + "OnKillF1_" + .@id;
+	}
+end;
+
+OnKillF1_1: callsub OnMobKill_F1,1;
+OnKillF1_2: callsub OnMobKill_F1,2;
+OnKillF1_3: callsub OnMobKill_F1,3;
+OnKillF1_4: callsub OnMobKill_F1,4;
+OnKillF1_5: callsub OnMobKill_F1,5;
+
+//= Floor 2 Summons	
+OnSummon_F2:
+	.@map$ = 'map$;
+	setarray .@mob$,
+	//Mid
+	214,215,20897,"OnKillF2_1",
+	216,216,20897,"OnKillF2_1",
+	216,218,20898,"OnKillF2_1",
+	216,220,20898,"OnKillF2_1",
+	218,221,20898,"OnKillF2_1",
+	//Left
+	205,217,20896,"OnKillF2_2",
+	202,218,20896,"OnKillF2_2",
+	204,221,20896,"OnKillF2_2",
+	205,221,20894,"OnKillF2_2",
+	206,221,20894,"OnKillF2_2",
+	//Right
+	231,222,20896,"OnKillF2_3",
+	227,221,20896,"OnKillF2_3",
+	229,222,20896,"OnKillF2_3",
+	229,218,20898,"OnKillF2_3",
+	231,219,20898,"OnKillF2_3";
+	for(.@i = 0; .@i < getarraysize(.@mob$); .@i += 4)
+		monster .@map$,atoi(.@mob$[.@i]),atoi(.@mob$[.@i+1]),"--ja--",atoi(.@mob$[.@i+2]),1,instance_npcname(strnpcinfo(0)) + "::" + .@mob$[.@i+3];
+end;
+
+OnCheck_F2:
+	'floor_2 = 'floor_2 + 1;
+	if('floor_2 == 3){
+		mapannounce 'map$,"Marques do Remorso : Por favor, cuidem da princesa.",bc_map,0x00FFFF;
+		sleep 2000;
+		monster 'map$,215,232,"--ja--",20893,1,instance_npcname("#rms_boss") + "::OnTiaraDead";
+	}
+end;
+
+OnMobKill_F2:
+	.@id = getarg(0);
+	.@map$ = 'map$;
+	if(mobcount(.@map$,instance_npcname(strnpcinfo(0)) + "::OnKillF2_" + .@id)) end;
+	if(getd("'F2_" + .@id))
+		donpcevent instance_npcname(strnpcinfo(0)) + "::OnCheck_F2";
+	else {
+		setd("'F2_" + .@id,1);
+		switch(.@id){
+			case 1: setarray .@mob,218,221,20898,214,220,20898,216,222,20898,215,214,20897,216,214,20897; break;
+			case 2: setarray .@mob,204,218,20896,202,217,20896,204,221,20896,205,221,20894,206,221,20894; break;
+			case 3: setarray .@mob,228,218,20898,213,217,20898,229,220,20898,229,220,20896,231,221,20896; break;
+		}
+		for(.@i = 0; .@i < getarraysize(.@mob); .@i += 3)
+			monster .@map$,.@mob[.@i],.@mob[.@i+1],"--ja--",.@mob[.@i+2],1,instance_npcname(strnpcinfo(0)) + "::" + "OnKillF2_" + .@id;
+	}
+end;
+
+OnKillF2_1: callsub OnMobKill_F2,1;
+OnKillF2_2: callsub OnMobKill_F2,2;
+OnKillF2_3: callsub OnMobKill_F2,3;
+
+//= Floor 3 Summon
+OnSummon_F3:
+	.@map$ = 'map$;
+	setarray .@mob$,
+	//Bottom Center
+	61,28,20894,"OnKillF3_1",
+	61,31,20894,"OnKillF3_1",
+	59,29,20894,"OnKillF3_1",
+	54,29,20897,"OnKillF3_1",
+	54,30,20897,"OnKillF3_1",
+	//Bottom Left
+	34,24,20895,"OnKillF3_3",
+	34,24,20895,"OnKillF3_3",
+	35,26,20895,"OnKillF3_3",
+	30,20,20896,"OnKillF3_3",
+	28,21,20896,"OnKillF3_3",
+	29,31,20898,"OnKillF3_3",
+	27,30,20898,"OnKillF3_3",
+	//Bottom Right
+	80,27,20895,"OnKillF3_2",
+	81,28,20895,"OnKillF3_2",
+	85,30,20898,"OnKillF3_2",
+	87,30,20898,"OnKillF3_2",
+	88,20,20896,"OnKillF3_2",
+	88,21,20896,"OnKillF3_2",
+	//Center
+	57,50,20895,"OnKillF3_4",
+	57,52,20895,"OnKillF3_4",
+	57,54,20895,"OnKillF3_4",
+	56,59,20896,"OnKillF3_4",
+	58,60,20896,"OnKillF3_4",
+	//Center Left
+	33,57,20897,"OnKillF3_5",
+	34,57,20897,"OnKillF3_5",
+	35,50,20896,"OnKillF3_5",
+	34,50,20895,"OnKillF3_5",
+	32,50,20895,"OnKillF3_5",
+	30,49,20895,"OnKillF3_5",
+	28,51,20895,"OnKillF3_5",
+	//Top Center
+	53,75,20894,"OnKillF3_6",
+	49,76,20894,"OnKillF3_6",
+	52,77,20894,"OnKillF3_6",
+	63,76,20897,"OnKillF3_6",
+	65,77,20897,"OnKillF3_6";
+	for(.@i = 0; .@i < getarraysize(.@mob$); .@i += 4)
+		monster .@map$,atoi(.@mob$[.@i]),atoi(.@mob$[.@i+1]),"--ja--",atoi(.@mob$[.@i+2]),1,instance_npcname(strnpcinfo(0)) + "::" + .@mob$[.@i+3];
+end;
+
+OnCheck_F3:
+	'floor_3 = 'floor_3 + 1;
+	if('floor_3 == 6){
+		mapannounce 'map$,"Marques do Remorso : Um fluxo de mana apareceu no centro. Ha alguem esperando la dentro.",bc_map,0x00FFFF;
+		enablenpc instance_npcname("Memory Piece#rms_2");
+		enablenpc instance_npcname("#rms_warp_2");
+	}
+end;
+
+OnMobKill_F3:
+	.@id = getarg(0);
+	.@map$ = 'map$;
+	if(mobcount(.@map$,instance_npcname(strnpcinfo(0)) + "::OnKillF3_" + .@id)) end;
+	if(getd("'F3_" + .@id))
+		donpcevent instance_npcname(strnpcinfo(0)) + "::OnCheck_F3";
+	else {
+		setd("'F3_" + .@id,1);
+		switch(.@id){
+			case 1: setarray .@mob,61,30,20897,62,29,20897,55,30,20894,52,30,20894,54,28,20894; break;
+			case 2: setarray .@mob,87,22,20898,87,24,20898,85,29,20896,85,30,20896,81,28,20895,80,26,20895; break;
+			case 3: setarray .@mob,26,30,20896,28,31,20896,28,32,20896,35,27,20895,35,25,20895,29,22,20898,29,24,20898; break;
+			case 4: setarray .@mob,56,51,20895,58,51,20895,56,57,20896,57,57,20895,56,59,20895; break;
+			case 5: setarray .@mob,31,51,20895,33,50,20895,35,52,20895,36,51,20897,36,52,20897,34,58,20896,35,58,20895,33,59,20895; break;
+			case 6: setarray .@mob,64,78,20894,64,75,20894,53,75,20897,50,78,20897,52,78,20897; break;
+		}
+		for(.@i = 0; .@i < getarraysize(.@mob); .@i += 3)
+			monster .@map$,.@mob[.@i],.@mob[.@i+1],"--ja--",.@mob[.@i+2],1,instance_npcname(strnpcinfo(0)) + "::" + "OnKillF3_" + .@id;
+	}
+end;
+
+OnKillF3_1: callsub OnMobKill_F3,1;
+OnKillF3_2: callsub OnMobKill_F3,2;
+OnKillF3_3: callsub OnMobKill_F3,3;
+OnKillF3_4: callsub OnMobKill_F3,4;
+OnKillF3_5: callsub OnMobKill_F3,5;
+OnKillF3_6: callsub OnMobKill_F3,6;
+}
+
+1@spa2,1,1,0	script	#rms_boss	-1,{
+	end;
+	
+OnTiaraDead:
+	mapannounce 'map$,"Marques do Remorso : Se voce for para o lado esquerdo do trono, ha uma passagem secreta para a tumba subterranea.",bc_map,0x00FFFF;
+	enablenpc instance_npcname("#rms_warp_1");
+	enablenpc instance_npcname("Memory Piece#rms_1");
+end;
+
+OnBossSkill:
+	sleep 10000;
+	mapannounce 'map$,"Marques do Remorso : Pilares magicos surgiram nos 3 corredores e estao absorvendo os ataques feitos em Sakray.",bc_map,0x00FFFF;
+	'pillar = 3;
+	for(.@i = 0; .@i < 3; .@i++)
+		enablenpc instance_npcname("#rms_stone_" + .@i);
+	monster 'map$,195,61,"",20562,1,instance_npcname(strnpcinfo(0)) + "::OnSkillDead";
+	'gid_0 = $@mobid[0];
+	monster 'map$,228,61,"",20562,1,instance_npcname(strnpcinfo(0)) + "::OnSkillDead";
+	'gid_1 = $@mobid[0];
+	monster 'map$,212,78,"",20562,1,instance_npcname(strnpcinfo(0)) + "::OnSkillDead";
+	'gid_2 = $@mobid[0];
+	for(.@i = 0; .@i < 3; .@i++)
+		setunitdata getd("'gid_" + .@i),UMOB_DMGIMMUNE,true;
+	donpcevent instance_npcname("#rms_boss") + "::OnEnableShield";
+OnSkillDead:
+end;
+
+OnEnableShield:
+	.@gid = 'boss_gid;
+	if(!unitexists(.@gid)) end;
+	setunitdata .@gid,UMOB_DMGIMMUNE,true;
+end;
+
+OnDisableShield:
+	.@gid = 'boss_gid;
+	if(!unitexists(.@gid)) end;
+	setunitdata .@gid,UMOB_DMGIMMUNE,false;
+	initnpctimer instance_npcname("#rms_boss");
+end;
+
+OnSakrayDead:
+	'final_ready = 1;
+	enablenpc instance_npcname("Sakray#rms_0");
+	stopnpctimer instance_npcname(strnpcinfo(0));
+	.@sak$ = instance_npcname("Sakray#rms_0");
+	.@map$ = 'map$;
+	killmonster .@map$,instance_npcname(strnpcinfo(0)) + "::OnSkillDead";
+	npctalk "Espadachim Magico Sakray : Este lugar... Eu jurei que nunca voltaria aqui...",.@sak$;
+	sleep 2000;
+	npctalk "Espadachim Magico Sakray : Eu nao sabia que tinha ficado assim... Eu descobri agora e vim correndo para ca.",.@sak$;
+	sleep 2000;
+	npctalk "Espadachim Magico Sakray : Se nao foi voce... entao... quem... quem fez isso?",.@sak$;
+	sleep 2000;
+	disablenpc instance_npcname("Sakray#rms_0");
+	enablenpc instance_npcname("Marquis of Remorse#rms_0");
+	enablenpc instance_npcname("#rms_warp_3");
+end;
+
+OnTimer50000:
+	stopnpctimer;
+	donpcevent instance_npcname("#rms_boss") + "::OnBossSkill";
+end;
+}
+
+1@spa2,186,61,3	script	#rms_stone_0	1908,{
+	.@id = atoi(replacestr(strnpcinfo(2),"rms_stone_",""));
+	progressbar_npc "00FF00",10;
+	.@v = 'pillar;
+	switch(.@v){
+		case 3:	.@mes$ = "The first magic pillar has been destroyed."; break;
+		case 2: .@mes$ = "The second magic pillar has been destroyed."; break;
+		case 1: .@mes$ = "The third magic pillar has been destroyed, the pillars damage absorbtion has now been completely nullified."; break;
+	}
+	'pillar = .@v - 1;
+	if(unitexists(getd("'gid_" + .@id)))
+		unitskilluseid getd("'gid_" + .@id),"NPC_EARTHQUAKE",10;
+	disablenpc instance_npcname(strnpcinfo(0));
+	if(!'pillar)
+		donpcevent instance_npcname("#rms_boss") + "::OnDisableShield";
+	end;
+}
+
+1@spa2,237,61,3	duplicate(#rms_stone_0)	#rms_stone_1	1908
+1@spa2,212,88,3	duplicate(#rms_stone_0)	#rms_stone_2	1908
+
+
+1@spa2,52,258,0	script	#rms_warp_0	WARPNPC,2,2,{
+	end;
+	
+OnTouch:
+	switch(atoi(replacestr(strnpcinfo(2),"rms_warp_",""))){
+		case 0: .@x = 215; .@y = 201; break;
+		case 1: .@x = 57; .@y = 22; break;
+		case 2: .@x = 212; .@y = 54; break;
+		case 3:
+			if(isbegin_quest(16469) || isbegin_quest(16471)){
+				mes "[ Marquis of Remorse ]";
+				mes "Espere, voce nao tem algo para resolver comigo?";
+				mes "Eu vou guardar as memorias quebradas e os fragmentos que voce coletou. Eles nao podem sair daqui, entao ficarao comigo.";
+				next;
+				if(select("Nao falta mais nada, vou sair.:Ainda me lembro de algo.") == 2){
+					mes "[ Marquis of Remorse ]";
+					mes "Venha falar comigo quando quiser resolver isso.";
+					close;
+				}
+				warp "SavePoint",0,0;
+				end;
+			}
+			if(select("Sair deste lugar.:Ficar mais um pouco.") == 2)
+				end;
+			warp "SavePoint",0,0;
+			end;
+	}
+	warp 'map$,.@x,.@y;
+end;
+}
+
+1@spa2,211,253,0	duplicate(#rms_warp_0)	#rms_warp_1	WARPNPC,2,2
+1@spa2,58,42,0	duplicate(#rms_warp_0)	#rms_warp_2	WARPNPC,2,2
+1@spa2,212,87,0	duplicate(#rms_warp_0)	#rms_warp_3	WARPNPC,2,2
+
+1@spa2,214,64,3	script	Marquis of Remorse#rms_0	4_M_SAKRAY,{
+	if('final_ready && #TombRemorse_STATUS == 2){
+		if(checkweight(9608,10,9198,2) == 0){
+			mes "^FF0000Voce esta com muitos itens ou peso demais. Organize seu inventario.^000000";
+			close;
+		}
+		callfunc("F_AddRep", 1, 10, 110002, 3000);
+		callfunc("F_DiaryRefreshDaily");
+		set #instancia, 2;
+		if (!'reward_announced) {
+			callfunc("F_InstanceFinishAnnounce", "Tumba do Remorso");
+			'reward_announced = 1;
+		}
+		getitem 9608,10;
+		getitem 9198,2;
+		set #TombRemorse_STATUS, 3;
+	}
+	mes "[ Marquis of Remorse ]";
+	mes "Eu estava esperando por voce, como prometi.";
+	mes "Heroi, voce e mesmo alguem em quem podemos confiar?";
+	next;
+	switch(select("Fios quebrados do destino.:Derramando lagrimas.:Fragmentos de memoria.:Fragmentos do passado.")){
+		case 1:
+			.@qid = 16465;
+			if(checkquest(.@qid,HUNTING) < 2){
+				mes "[ Marquis of Remorse ]";
+				mes "Ainda nao acho que haja nada para esclarecer sobre o Espadachim Magico.";
+				mes "Por favor, cuide bem da princesa.";
+			} else {
+				mes "[ Marquis of Remorse ]";
+				mes "A princesa pode ficar triste.";
+				mes "Mas agora que esse vinculo foi perdido e apagado, nao restara mais nada.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Desde o inicio ja nao havia lugar para ele neste mundo.";
+				mes "Obrigado por afasta-lo daqui.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Se nao resolvermos a origem disso, as pobres pessoas desta tumba continuarao se levantando outra e outra vez.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "E uma recompensa pequena, mas e tudo o que posso dar agora. Foi uma decisao da Princesa do Remorso.";
+				erasequest .@qid;
+				getitem 1000367,10;
+			}
+			close;
+		
+		case 2:
+			.@qid = 16467;
+			if(checkquest(.@qid,HUNTING) < 2){
+				mes "[ Marquis of Remorse ]";
+				mes "Ainda nao acho que haja nada para esclarecer sobre a Princesa.";
+			} else {
+				mes "[ Marquis of Remorse ]";
+				mes "Voce conseguiu dar descanso a princesa.";
+				mes "Oh, nao e bom ser um aventureiro? Em tese isso deveria ser trabalho de um principe.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Estou apenas brincando. Voce foi um verdadeiro heroi para a princesa.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Se nao resolvermos a origem disso, as pobres pessoas desta tumba continuarao se levantando outra e outra vez.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "E uma recompensa pequena, mas e tudo o que posso dar agora. Foi uma decisao da Princesa do Remorso.";
+				erasequest .@qid;
+				getitem 1000367,8;
+			}
+			close;
+		
+		case 3:
+			.@qid = 16469;
+			if(isbegin_quest(.@qid) == 0){
+				mes "[ Marquis of Remorse ]";
+				mes "Se nao resolvermos a origem disso, as pobres pessoas desta tumba continuarao se levantando outra e outra vez.";
+				close;
+			} else {
+				if(!'memory_0 || !'memory_1 || !'memory_2){
+					mes "[ Marquis of Remorse ]";
+					mes "Heroi, eu agradeco a intencao.";
+					mes "Mas acho que voce deixou passar um fragmento de memoria em algum ponto daqui.";
+					next;
+					mes "[ Marquis of Remorse ]";
+					mes "Talvez possamos pega-lo da proxima vez que voltarmos aqui.";
+					next;
+					mes "[ Marquis of Remorse ]";
+					mes "Afinal, se nao resolvermos a origem disso, as pobres pessoas desta tumba continuarao se levantando outra e outra vez.";
+				} else {
+					mes "[ Marquis of Remorse ]";
+					mes "...esses fragmentos de memoria nao podem sair deste lugar.";
+					mes "Eu nao sei o motivo.";
+					next;
+					mes "[ Marquis of Remorse ]";
+					mes "Quando tento tirar isso daqui, comeca a derreter como vidro e nao deixa nenhum rastro. Entao vou guarda-lo aqui por enquanto.";
+					next;
+					mes "[ Marquis of Remorse ]";
+					mes "E uma recompensa pequena, mas e tudo o que posso dar agora. Foi uma decisao da Princesa do Remorso.";
+					erasequest .@qid;
+					getitem 1000367,1;
+				}
+			}
+			close;	
+		
+		case 4:
+			.@qid = 16471;
+			if(isbegin_quest(.@qid) == 0){
+				mes "[ Marquis of Remorse ]";
+				mes "Se nao resolvermos a origem disso, as pobres pessoas desta tumba continuarao se levantando outra e outra vez.";
+				close;
+			} else {
+				for(.@i = 16473; .@i < 16483; .@i++){
+					if(!isbegin_quest(.@i)){
+						mes "[ Marquis of Remorse ]";
+						mes "Heroi, eu agradeco a intencao.";
+						mes "Mas acho que voce deixou passar uma memoria do passado em algum lugar daqui.";
+						next;
+						mes "[ Marquis of Remorse ]";
+						mes "Talvez possamos pega-la da proxima vez que voltarmos aqui.";
+						next;
+						mes "[ Marquis of Remorse ]";
+						mes "Afinal, se nao resolvermos a origem disso, as pobres pessoas desta tumba continuarao se levantando outra e outra vez.";
+						close;
+					}
+				}
+				mes "[ Marquis of Remorse ]";
+				mes "...essas memorias do passado nao podem sair deste lugar.";
+				mes "Eu nao sei o motivo.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "Essa e a historia de um antigo vinculo, de memorias e de tudo se perdendo no vazio. E triste ver isso de novo.";
+				mes "Mas eu quero reunir esses fragmentos para que este lugar nao seja esquecido.";
+				next;
+				mes "[ Marquis of Remorse ]";
+				mes "E uma recompensa pequena, mas e tudo o que posso dar agora. Foi uma decisao da Princesa do Remorso.";
+				erasequest .@qid;
+				for(.@i = 16473; .@i < 16483; .@i++)
+					erasequest .@i;
+				getitem 1000367,1;
+			}
+			close;
+	}
+	end;
+}

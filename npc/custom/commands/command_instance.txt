@@ -58,6 +58,7 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatus", "faceworms_nest", "FacewormsNest");
 		callfunc("F_InstanceMenuResetStatus", "nightmarish_jitterbug", "NightmarishJitterbug");
 		callfunc("F_InstanceMenuResetStatus", "deep_forest", "DeepForest");
+		callfunc("F_InstanceMenuResetStatus", "tomb_remorse", "TombRemorse");
 		#INSTANCE_MENU_RESET_TICK = .@now + callfunc("get_daily_reset");
 		#INSTANCE_MENU_RESET_VER = .@reset_ver;
 	}
@@ -98,6 +99,7 @@ OnAtcommand:
 	.@opt30$ = callfunc("F_InstanceMenuOption", "[175+] Covil da Rainha Verme", "faceworms_nest", "FacewormsNest");
 	.@opt31$ = callfunc("F_InstanceMenuOption", "[175+] Pesadelo Musical", "nightmarish_jitterbug", "NightmarishJitterbug");
 	.@opt32$ = callfunc("F_InstanceMenuOption", "[175+] Floresta Profunda", "deep_forest", "DeepForest");
+	.@opt33$ = callfunc("F_InstanceMenuOption", "[175+] Tumba do Remorso", "tomb_remorse", "TombRemorse");
 	.@s = select(
 		.@opt1$,
 		.@opt2$,
@@ -130,7 +132,8 @@ OnAtcommand:
 		.@opt29$,
 		.@opt30$,
 		.@opt31$,
-		.@opt32$
+		.@opt32$,
+		.@opt33$
 	);	close2;
 
 	switch(.@s) {
@@ -283,6 +286,10 @@ OnAtcommand:
 		case 32:
 			#INSTANCENAME$ = "DeepForest";
 			doevent "DeepForest_Instance#Custom::OnStartInstance";
+			end;
+		case 33:
+			#INSTANCENAME$ = "TombOfRemorse";
+			doevent "TombOfRemorse_Instance#Custom::OnStartInstance";
 			end;
 	}
 	end;
