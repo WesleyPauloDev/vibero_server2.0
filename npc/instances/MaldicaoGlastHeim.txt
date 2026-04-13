@@ -1071,6 +1071,17 @@ OnTimer5000:
 
 	mes "[Varmundt]";
 	.@cid = getcharid(3);
+	.@status_name$ = callfunc("F_OGH_StatusVar$");
+
+	if (getd(.@status_name$) != 2) {
+
+		mes "Ainda nao posso lhe entregar esta recompensa.";
+
+		mes "Conclua a etapa atual da instancia e volte a falar comigo.";
+
+		close3;
+
+	}
 
 	if ('first_reward_claimed[.@cid]) {
 
@@ -2074,7 +2085,7 @@ OnTimer10000:
 	.@quest_reward = (checkquest(12319,HUNTING) == 2 || 'final_reward_ready);
 	.@status_name$ = callfunc("F_OGH_StatusVar$");
 	.@is_hard = callfunc("F_OGH_IsHardMode");
-	.@give_custom_reward = (getd(.@status_name$) != 3);
+	.@give_custom_reward = (getd(.@status_name$) == 2);
 	if (.@quest_reward) {
 		.@crystal_amt = callfunc("F_OGH_FinalCrystalReward");
 		.@spell_amt = callfunc("F_OGH_FinalSpellReward");
