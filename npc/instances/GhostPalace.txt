@@ -911,89 +911,18 @@ OnTimer28500:
 	mes "Ei, voce esta vivo?";
 	mes "Eu nao esperava encontrar alguem que ainda estivesse vivo.";
 	next;
-	.@item_name_req$ = getitemname(6672);// Gray_Shard
 	mes "[Rei]";
-	mes "Voce por acaso tem ^006400" + .@item_name_req$ + "^000000?";
-	mes "Pode me entregar?";
-	mes "As memorias do fiel guarda real";
-	mes "e as memorias de todos que ele amava";
-	mes "estao guardadas nesses fragmentos.";
+	mes "Se voce me der fragmentos cinzentos, eu posso forjar os equipamentos de Sakray para voce.";
 	next;
 	mes "[Rei]";
-	mes "Voce vai me entregar ^006400" + .@item_name_req$ + "^000000?";
-	mes "A culpa esta consumindo minha alma.";
-	mes "Minha alma esta presa dentro do Palacio das Magoas.";
+	mes "As armas custam 200 " + getitemname(6672) + ".";
+	mes "As armaduras custam 100 " + getitemname(6672) + ".";
 	next;
-	mes "[Rei]";
-	mes "Estou reunindo as memorias abandonadas de Sakray nesses fragmentos.";
-	next;
-	mes "[Rei]";
-	mes "Se voce me der ^006400" + .@item_name_req$ + "^000000, eu posso fazer equipamentos para voce.";
-	next;
-	mes "[Rei]";
-	mes "O cavaleiro amaldicoado...";
-	mes "Por favor, me ajude a salvar a alma de Sakray.";
-	next;
-	setarray .@item_name$[0],
-		"Thanos Sword", "Thanos Broadsword", "Thanos Spear", "Thanos Two-Handed Spear", "Thanos Staff",
-		"Thanos Two-handed Staff", "Thanos Bow", "Thanos Dagger", "Thanos Katar", "Thanos Knuckle",
-		"Thanos Hammer", "Thanos Axe", "Thanos Violin", "Thanos Whip",
-		"Gray Shield", "Gray Armor", "Gray Robe", "Gray Cloak", "Gray Shoes", "Gray Helmet";
-	setarray .@items_list[0],13441,21009,1438,1496,1669,2023,18119,13093,28000,1836,16028,28100,1933,1988,2187,15090,15091,20721,22033,18820;
-
-	for ( .@i = 0; .@i < 20; .@i++ )
-		.@menu$ += .@item_name$[.@i] + ":";
-		.@menu$ += "Cancelar";
-
-	while(true) {
-		.@s = select(.@menu$) - 1;
-		if (.@s == 20) {
-			mes "[Rei]";
-			mes "Um dia, Sakray vai";
-			mes "se libertar dessa maldicao.";
-			mes "Eu acredito que";
-			mes "^006400" + .@item_name_req$ + "^000000 e o unico jeito";
-			mes "de salva-lo....";
-			close;
-		}
-		.@cost = ( .@s > 13 ? 100 : 200 );
-		mes "[Rei]";
-		mes "Para fazer ^FF0000" + .@item_name$[.@s] + "^000000";
-		mes "eu preciso de " + .@cost + " ^006400" + .@item_name_req$ + "^000000.";
-		next;
-		if (select( "Cancelar", "Entregar " + .@cost + " " + .@item_name_req$ + "." ) == 1) {
-			mes "[Rei]";
-			mes "Um dia, Sakray vai";
-			mes "se libertar dessa maldicao.";
-			next;
-			continue;
-		}
-	if (countitem(6672) < .@cost) {
-		mes "[Rei]";
-		mes "Voce nao tem ^006400" + .@item_name_req$ + "^000000 suficiente";
-		mes "para fazer ^FF0000" + .@item_name$[.@s] + "^000000.";
-		mes "Eu preciso de " + .@cost + " ^006400" + .@item_name_req$ + "^000000.";
-			next;
-			continue;
-		}
-	mes "[Rei]";
-	mes "Eu vou fazer ^FF0000" + .@item_name$[.@s] + "^000000";
-	mes "usando " + .@cost + " ^006400" + .@item_name_req$ + "^000000.";
-		next;
-	mes "Voce ve uma luz surgindo entre as maos do rei, e ela vai tomando forma aos poucos.";
-		next;
-	mes "[Rei]";
-	mes "Pronto, esta feito.";
-	mes "Pegue ^FF0000" + .@item_name$[.@s] + "^000000";
-	mes "para enfrentar Sakray e Tartanos.";
-		next;
-	mes "[Rei]";
-	mes "Esse poder exige um sacrificio.";
-	mes "Por favor, tome cuidado...";
-		delitem 6672,.@cost;// Gray Shard
-		getitem .@items_list[.@s],1;
+	if (select("Abrir troca:Cancelar") == 2)
 		close;
-	}
+	close2;
+	callshop "barter_eden_ghostpalace";
+	end;
 }
 
 1@spa,210,28,0	script	Way out of Palace	WARPNPC,2,2,{
@@ -1047,3 +976,4 @@ moc_para01,50,36,4	script	Rei do Palacio das Magoas#exchange	4_M_RUSKING,{
 	callshop "barter_eden_ghostpalace";
 	end;
 }
+

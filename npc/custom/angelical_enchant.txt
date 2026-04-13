@@ -181,6 +181,20 @@ function	script	F_Angelical_ShowPoolInfo	{
 	close;
 }
 
+function	script	F_Angelical_IsRareBlessing	{
+	.@item_id = getarg(0);
+	switch (.@item_id) {
+		case 310076:
+		case 310077:
+		case 310078:
+		case 310079:
+		case 310080:
+		case 310081:
+			return 1;
+	}
+	return 0;
+}
+
 moc_para01,18,22,5	script	Susan Gray#Angelical	421,{
 OnTalk:
 	disable_items;
@@ -189,8 +203,101 @@ OnTalk:
 	mes "Equipe a armadura, o manto ou as botas angelicais e eu posso trabalhar neles.";
 	next;
 
-	.@main = select("Encantar equipamento:Ver informacoes dos encantamentos:Sair");
+	.@main = select("Encantar equipamento:Inserir encantamento raro no 2o slot:Ver informacoes dos encantamentos:Sair");
 	if (.@main == 2) {
+		set .@menu$, "";
+		set .@count, 0;
+		setarray .@parts[0], EQI_ARMOR;
+		for (.@i = 0; .@i < getarraysize(.@parts); .@i++) {
+			.@item_id = getequipid(.@parts[.@i]);
+			if (!callfunc("F_Angelical_IsTarget", .@item_id))
+				continue;
+			if (callfunc("F_Angelical_ItemGroup", .@item_id) != 1)
+				continue;
+
+			.@refine = getequiprefinerycnt(.@parts[.@i]);
+			.@slot2 = getequipcardid(.@parts[.@i],1);
+			.@slot3 = getequipcardid(.@parts[.@i],2);
+			.@slot4 = getequipcardid(.@parts[.@i],3);
+			if (.@refine < 9 || .@slot2 || !.@slot3 || !.@slot4)
+				continue;
+
+			.@menu$ += getitemname(.@item_id) + " [Armadura]:";
+			.@valid_parts[.@count] = .@parts[.@i];
+			.@count++;
+		}
+
+		if (.@count == 0) {
+			mes "[Susan Gray]";
+			mes "Voce precisa equipar uma Armadura Angelical +9 ou mais com o 3o e 4o slots preenchidos e o 2o slot livre.";
+			close;
+		}
+
+		setarray .@rare_ids[0],310076,310077,310078,310079,310080,310081;
+		.@rare_menu$ = "";
+		.@rare_count = 0;
+		for (.@i = 0; .@i < getarraysize(.@rare_ids); .@i++) {
+			if (countitem(.@rare_ids[.@i]) < 1)
+				continue;
+			.@rare_menu$ += getitemname(.@rare_ids[.@i]) + ":";
+			.@owned_rare[.@rare_count] = .@rare_ids[.@i];
+			.@rare_count++;
+		}
+
+		if (.@rare_count == 0) {
+			mes "[Susan Gray]";
+			mes "Voce nao possui nenhum encantamento raro elegivel no inventario.";
+			mes "Eu consigo inserir apenas as bencaos raras 310076~310081 no 2o slot.";
+			close;
+		}
+
+		.@menu$ += "Cancelar";
+		mes "[Susan Gray]";
+		mes "Escolha a Armadura Angelical que recebera o encantamento raro no 2o slot:";
+		next;
+		.@sel = select(.@menu$);
+		if (.@sel > .@count)
+			close;
+		.@part = .@valid_parts[.@sel - 1];
+
+		.@rare_menu$ += "Cancelar";
+		mes "[Susan Gray]";
+		mes "Escolha qual encantamento raro do seu inventario deseja inserir:";
+		next;
+		.@pick = select(.@rare_menu$);
+		if (.@pick > .@rare_count)
+			close;
+		.@enchant_id = .@owned_rare[.@pick - 1];
+
+		if (Zeny < 500000) {
+			mes "[Susan Gray]";
+			mes "Voce precisa de ^FF0000500.000 Zeny^000000 para inserir este encantamento raro.";
+			close;
+		}
+
+		mes "[Susan Gray]";
+		mes "Vou inserir ^0055FF" + getitemname(.@enchant_id) + "^000000 no 2o slot de ^0055FF" + getequipname(.@part) + "^000000.";
+		mes "Taxa: ^0055FF500.000 Zeny^000000.";
+		next;
+		if (select("Confirmar insercao:Cancelar") == 2)
+			close;
+
+		if (countitem(.@enchant_id) < 1) {
+			mes "[Susan Gray]";
+			mes "Voce nao possui mais este encantamento raro no inventario.";
+			close;
+		}
+
+		Zeny -= 500000;
+		delitem .@enchant_id,1;
+		progressbar "66ccff",3;
+		specialeffect2 EF_ENHANCE;
+		setitemcard(.@part,1,.@enchant_id);
+
+		mes "[Susan Gray]";
+		mes "Encantamento raro inserido com sucesso no 2o slot.";
+		close;
+	} else if (.@main == 3) {
 		mes "[Susan Gray]";
 		mes "Eu encanto estes slots:";
 		mes "- 3o slot";
@@ -210,7 +317,7 @@ OnTalk:
 			close;
 		callfunc("F_Angelical_ShowPoolInfo", .@info);
 		close;
-	} else if (.@main == 3) {
+	} else if (.@main == 4) {
 		close;
 	}
 
@@ -449,3 +556,4 @@ OnTalk:
 			close;
 	}
 }
+
