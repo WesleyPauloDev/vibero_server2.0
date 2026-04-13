@@ -251,6 +251,10 @@ function	script	F_InstanceHistoryCode	{
 		return "NightmarishJitterbug";
 	if (.@key$ == "DeepForest" || .@key$ == "Floresta Profunda")
 		return "DeepForest";
+	if (.@key$ == "GhostPalace" || .@key$ == "Ghost Palace" || .@key$ == "Palacio das Magoas")
+		return "GhostPalace";
+	if (.@key$ == "TombRemorse" || .@key$ == "Tomb of Remorse" || .@key$ == "Tumba do Remorso")
+		return "TombRemorse";
 
 	return .@key$;
 }
@@ -349,8 +353,13 @@ function	script	F_InstanceMenuHistoryState	{
 	.@instance_code$ = getarg(0);
 	.@completed = 0;
 	.@entries = 0;
+	.@where$ = "`instance_code` = '" + escape_sql(.@instance_code$) + "'";
+	if (.@instance_code$ == "GhostPalace")
+		.@where$ = .@where$ + " OR `instance_code` IN ('Ghost Palace','Palacio das Magoas') OR `instance_name` IN ('Ghost Palace','Palacio das Magoas')";
+	else if (.@instance_code$ == "TombRemorse")
+		.@where$ = .@where$ + " OR `instance_code` IN ('Tomb of Remorse','Tumba do Remorso') OR `instance_name` IN ('Tomb of Remorse','Tumba do Remorso')";
 	query_sql("SELECT COALESCE(MAX(`completed_count`), 0), COALESCE(MAX(`tried_count`), 0) FROM `instance_monitor_member_state` WHERE `account_id` = "
-		+ getcharid(3) + " AND `instance_code` = '" + escape_sql(.@instance_code$) + "'", .@completed, .@entries);
+		+ getcharid(3) + " AND (" + .@where$ + ")", .@completed, .@entries);
 	if (.@completed > 0)
 		return 2;
 	if (.@entries > 0)
@@ -361,8 +370,13 @@ function	script	F_InstanceMenuHistoryState	{
 function	script	F_InstanceMenuCompletedToday	{
 	.@instance_code$ = getarg(0);
 	.@completed_today = 0;
+	.@where$ = "`instance_code` = '" + escape_sql(.@instance_code$) + "'";
+	if (.@instance_code$ == "GhostPalace")
+		.@where$ = .@where$ + " OR `instance_code` IN ('Ghost Palace','Palacio das Magoas') OR `instance_name` IN ('Ghost Palace','Palacio das Magoas')";
+	else if (.@instance_code$ == "TombRemorse")
+		.@where$ = .@where$ + " OR `instance_code` IN ('Tomb of Remorse','Tumba do Remorso') OR `instance_name` IN ('Tomb of Remorse','Tumba do Remorso')";
 	query_sql("SELECT COUNT(*) FROM `instance_monitor_member_state` WHERE `account_id` = "
-		+ getcharid(3) + " AND `instance_code` = '" + escape_sql(.@instance_code$) + "' AND `completed_count` > 0 AND DATE(`last_completed_at`) = CURDATE()", .@completed_today);
+		+ getcharid(3) + " AND (" + .@where$ + ") AND `completed_count` > 0 AND DATE(`last_completed_at`) = CURDATE()", .@completed_today);
 	return (.@completed_today > 0);
 }
 
@@ -432,3 +446,4 @@ function	script	F_InstanceMenuResetStatusRaw	{
 	}
 	return;
 }
+
