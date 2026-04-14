@@ -23,7 +23,7 @@ OnAtcommand:
 	}
 
 	.@now = gettimetick(2);
-	.@reset_ver = 4;
+	.@reset_ver = 5;
 	if (#INSTANCE_MENU_RESET_VER != .@reset_ver || #INSTANCE_MENU_RESET_TICK <= .@now) {
 		callfunc("F_InstanceMenuResetStatus", "poringvillage", "PORING");
 		callfunc("F_InstanceMenuResetStatus", "orcMemory", "ORCMEMORY");
@@ -50,6 +50,7 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatus", "htf", "HTF");
 		callfunc("F_InstanceMenuResetStatus", "room_consciousness", "RoomConsciousness");
 		callfunc("F_InstanceMenuResetStatus", "wolfchev_laboratory", "WolfchevLaboratory");
+		callfunc("F_InstanceMenuResetStatus", "hidden_garden", "HiddenGarden");
 		callfunc("F_InstanceMenuResetStatus", "trg", "TRG");
 		callfunc("F_InstanceMenuResetStatus", "isle_bios", "IsleOfBios");
 		callfunc("F_InstanceMenuResetStatus", "morse_cave", "MorseCave");
@@ -94,7 +95,8 @@ OnAtcommand:
 	.@opt21$ = callfunc("F_InstanceMenuOption", "[140+] Fabrica de Brinquedos de Terror", "htf", "HTF");
 	.@opt22$ = callfunc("F_InstanceMenuOption", "[140+] Salao de Ymir", "room_consciousness", "RoomConsciousness");
 	.@opt23$ = callfunc("F_InstanceMenuOption", "[140+] Base da Guerra Heart Hunter", "heart_hunter_war_base", "HeartHunterWarBase");
-	.@opt24$ = callfunc("F_InstanceMenuOption", "[150+] Laboratorio Wolfchev", "wolfchev_laboratory", "WolfchevLaboratory");
+	.@opt24$ = callfunc("F_InstanceMenuOption", "[150+] Jardim de Vermuth", "hidden_garden", "HiddenGarden");
+	.@opt37$ = callfunc("F_InstanceMenuOption", "[150+] Laboratorio Wolfchev", "wolfchev_laboratory", "WolfchevLaboratory");
 	.@opt25$ = callfunc("F_InstanceMenuOption", "[160+] Templo do Rei Demonio", "trg", "TRG");
 	.@opt26$ = callfunc("F_InstanceMenuOption", "[160+] Ilha de Bios", "isle_bios", "IsleOfBios");
 	.@opt27$ = callfunc("F_InstanceMenuOption", "[160+] Caverna do Morse", "morse_cave", "MorseCave");
@@ -132,6 +134,7 @@ OnAtcommand:
 		.@opt22$,
 		.@opt23$,
 		.@opt24$,
+		.@opt37$,
 		.@opt25$,
 		.@opt26$,
 		.@opt27$,
@@ -254,34 +257,38 @@ OnAtcommand:
 			doevent "HeartHunterWarBase_Instance#Custom::OnStartInstance";
 			end;
 		case 25:
+			#INSTANCENAME$ = "HiddenGarden";
+			doevent "HiddenGarden_Instance#Custom::OnStartInstance";
+			end;
+		case 26:
 			#INSTANCENAME$ = "WolfchevLaboratory";
 			doevent "WolfchevLaboratory_Instance#Custom::OnStartInstance";
 			end;
-		case 26:
+		case 27:
 			#INSTANCENAME$ = "TRG";
 			doevent "TRG_Instance#Custom::OnStartInstance";
 			end;
-		case 27:
+		case 28:
 			#INSTANCENAME$ = "IsleOfBios";
 			doevent "IsleOfBios_Instance#Custom::OnStartInstance";
 			end;
-		case 28:
+		case 29:
 			#INSTANCENAME$ = "MorseCave";
 			doevent "MorseCave_Instance#Custom::OnStartInstance";
 			end;
-		case 29:
+		case 30:
 			#INSTANCENAME$ = "OSOccupation";
 			doevent "OSOccupation_Instance#Custom::OnStartInstance";
 			end;
-		case 30:
+		case 31:
 			#INSTANCENAME$ = "CorOperation";
 			doevent "CorOperation_Instance#Custom::OnStartInstance";
 			end;
-		case 31:
+		case 32:
 			#INSTANCENAME$ = "ThorGunsuBase";
 			doevent "ThorGunsuBase_Instance#Custom::OnStartInstance";
 			end;
-		case 32:
+		case 33:
 			switch(select("WaterGarden Normal","WaterGarden Hard","Cancelar")) {
 			case 1:
 				#WATERGARDEN_MODE = 0;
@@ -296,19 +303,19 @@ OnAtcommand:
 			case 3:
 				end;
 			}
-		case 33:
+		case 34:
 			#INSTANCENAME$ = "FacewormsNest";
 			doevent "FacewormsNest_Instance#Custom::OnStartInstance";
 			end;
-		case 34:
+		case 35:
 			#INSTANCENAME$ = "NightmarishJitterbug";
 			doevent "NightmarishJitterbug_Instance#Custom::OnStartInstance";
 			end;
-		case 35:
+		case 36:
 			#INSTANCENAME$ = "DeepForest";
 			doevent "DeepForest_Instance#Custom::OnStartInstance";
 			end;
-		case 36:
+		case 37:
 			#INSTANCENAME$ = "TombOfRemorse";
 			doevent "TombOfRemorse_Instance#Custom::OnStartInstance";
 			end;
