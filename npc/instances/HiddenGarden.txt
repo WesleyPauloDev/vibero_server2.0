@@ -1325,6 +1325,20 @@ OnTouch:
 		mes "Ha aproximadamente 82% de chance de voce perder a vida diante da repressao radical dela antes de contarmos que o Mestre Varmundt esta vivo.";
 		next;
 		mes "[Sigma]";
+		if (!'finish_announced) {
+			callfunc("F_InstanceFinishAnnounce", "Jardim de Vermuth");
+			'finish_announced = 1;
+		}
+		if (#HG_REWARD_INSTANCE != instance_id()) {
+			if (checkweight(9608,20) == 0 || checkweight(9198,2) == 0) {
+				mes "^008800Espere um pouco!!";
+				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
+				close;
+			}
+			getitem 9608,20;
+			getitem 9198,2;
+			#HG_REWARD_INSTANCE = instance_id();
+		}
 		mes "Vamos evitar este lugar por hoje e prometer voltar numa proxima vez. Na proxima voce estara livre para ir a outra area.";
 		next;
 		mes "[Sigma]";
@@ -1646,7 +1660,7 @@ OnEvent01:
 	unitwalk 'guide_id,53,207, instance_npcname("#BMD_a") + "::OnStart";
 	end;
 OnStart:
-\tnpctalk "[" + 'admin$ + "]! Sigma me pediu para lhe entregar uma mensagem.";
+	npctalk "[" + 'admin$ + "]! Sigma me pediu para lhe entregar uma mensagem.";
 	sleep 3000;
 	npctalk "A situacao atual nao esta boa. Acho melhor voce voltar...";
 	sleep 3000;
@@ -2159,9 +2173,24 @@ OnTouch:	// unknown effect
 	}
 	mes "[Sigma]";
 	mes "Vou mostrar o caminho de saida. O que voce vai fazer?";
+	if (!'finish_announced) {
+		callfunc("F_InstanceFinishAnnounce", "Jardim de Vermuth");
+		'finish_announced = 1;
+	}
 	next;
-	if (select( "Vou olhar mais um pouco.", "Vou sair." ) == 2)
+	if (select( "Vou olhar mais um pouco.", "Vou sair." ) == 2) {
+		if (#HG_REWARD_INSTANCE != instance_id()) {
+			if (checkweight(9608,20) == 0 || checkweight(9198,2) == 0) {
+				mes "^008800Espere um pouco!!";
+				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
+				close;
+			}
+			getitem 9608,20;
+			getitem 9198,2;
+			#HG_REWARD_INSTANCE = instance_id();
+		}
 		warp "SavePoint",0,0;
+	}
 	end;
 }
 
