@@ -12,17 +12,23 @@ moc_para01,38,36,4	script	Reactor Master	4_SCR_AT_ROBOTS,{
 
 	mes "[Reactor Master]";
 	mes "Eu trabalho com reactors para alguns equipamentos especificos.";
-	mes "Tambem posso montar reactors e fabricar equipamentos Excelion.";
+	mes "Tambem posso montar reactors e vender equipamentos Excelion.";
 	next;
 
-	switch(select("Criar Encanto:Colocar Encanto:Criar Equipamento Excelion:Cancelar")) {
+	switch(select("Criar Encanto:Colocar Encanto:Comprar Equipamento Excelion:Cancelar")) {
 	case 1:
 		callsub L_RandomReactor;
 		end;
 	case 2:
 		break;
 	case 3:
-		callsub L_CreateEquip;
+		mes "[Reactor Master]";
+		mes "Cada equipamento custa 5 " + getitemname(6962) + " e 10 " + getitemname(6961) + ".";
+		next;
+		if (select("Abrir troca:Cancelar") == 2)
+			close;
+		close2;
+		callshop "barter_eden_excelion";
 		end;
 	default:
 		close;
@@ -465,56 +471,4 @@ L_RandomReactor:
 		mes "Voce recebeu " + getitemname(.@item) + ".";
 	close;
 
-L_CreateEquip:
-	mes "[Reactor Master]";
-	mes "Eu posso fabricar um equipamento Excelion.";
-	mes "Preciso de 5 " + getitemname(6962) + " e 10 " + getitemname(6961) + ".";
-	next;
-
-	.@sel = select(
-		getitemname(15128) + ":" +
-		getitemname(20773) + ":" +
-		getitemname(28941) + ":" +
-		getitemname(22103) + ":" +
-		"Cancelar"
-	) - 1;
-
-	if (.@sel >= 4)
-		close;
-
-	switch (.@sel) {
-	case 0:
-		.@item_id = 15128;
-		break;
-	case 1:
-		.@item_id = 20773;
-		break;
-	case 2:
-		.@item_id = 28941;
-		break;
-	case 3:
-		.@item_id = 22103;
-		break;
-	}
-
-	if (countitem(6962) < 5 || countitem(6961) < 10) {
-		mes "[Reactor Master]";
-		mes "Voce nao possui os materiais necessarios.";
-		close;
-	}
-
-	mes "[Reactor Master]";
-	mes "Deseja fabricar " + getitemname(.@item_id) + "?";
-	next;
-	if (select("Sim:Cancelar") == 2)
-		close;
-
-	delitem 6962,5;
-	delitem 6961,10;
-	getitem .@item_id,1;
-	specialeffect EF_SPELLBREAKER;
-
-	mes "[Reactor Master]";
-	mes "Aqui esta seu equipamento: " + getitemname(.@item_id) + ".";
-	close;
 }
