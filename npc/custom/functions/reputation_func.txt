@@ -21,12 +21,22 @@ function	script	F_AddRep	{
 	// pega valor atual
 	.@cur = get_reputation_points(.@rep_id);
 
+	// Espelha reputacoes compartilhadas em variaveis de conta para leitura imediata.
+	switch (.@rep_id) {
+		case 1: set #reput_instance, .@cur; break;
+		case 3: set #reput_cheffenia, .@cur; break;
+		case 4: set #reput_cheffenia_hard, .@cur; break;
+		case 5: set #reput_bio5, .@cur; break;
+		case 6: set #reput_bio5_hard, .@cur; break;
+		case 8: set #reput_class_dominator, .@cur; break;
+	}
+
 	// se chegou no maximo e ainda nao tem o achievement, completa
 	if (.@cur >= .@max_points && !achievementexists(.@ach_id)) {
 		achievementcomplete(.@ach_id);
 	}
 
-	return;
+	return .@cur;
 }
 
 function	script	F_SyncRepAchievement	{

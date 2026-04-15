@@ -73,20 +73,53 @@ dali02,43,129,5	script	Guarda Real Desagradavel#	4_M_SAKRAYROYAL,{
 	mes "[Guarda Real Desagradavel]";
 	mes "Vá na frente e eu alcanco voce. Precisamos salva-la.";
 	next;
-	if (select( "Eu vou ajudar.", "Agora nao e uma boa hora." ) == 2) {
-		mes "[Guarda Real Desagradavel]";
-		mes "Mesmo agora, todos os guardas reais estao lutando e morrendo para esses monstros.";
-		next;
-		mes "[Guarda Real Desagradavel]";
-		mes "Nao importa o medo em nossos coracoes, precisamos salvar a princesa!";
-		close;
+	while (true) {
+		switch(select( "Eu vou ajudar.", "Guia resumido", "Agora nao e uma boa hora." )) {
+		case 1:
+			instance_create("Ghost Palace");
+			mes "[Guarda Real Desagradavel]";
+			mes "Obrigado..";
+			mes "Vou abrir a passagem secreta para o ^0000ffPalacio das Magoas^000000.";
+			mes "Esteja pronto!";
+			close;
+		case 2:
+			mes "[Guarda Real Desagradavel]";
+			mes "Guia resumido do Palacio das Magoas:";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "Nivel minimo: ^0055FF120^000000.";
+			mes "E preciso estar em ^0055FFgrupo^000000, e apenas o lider cria a instancia.";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "1. Limpe os monstros de cada andar e siga pelas passagens que forem abrindo.";
+			mes "2. Fale com os NPCs principais quando aparecerem, principalmente a ^0055FFPrincesa Tiara^000000 e o ^0055FFGuarda Real^000000.";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "3. Continue subindo: 2o andar, 3o andar, 4o andar e depois 5o andar.";
+			mes "4. No fim, conclua a sequencia de dialogos com ^0055FFSakray^000000 para liberar a saida.";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "5. Para concluir, entre na saida ^0055FFWay out of Palace^000000.";
+			mes "A recompensa e entregue quando voce sai.";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "Recompensas:";
+			mes "^0055FFPrimeira conclusao da quest^000000: 900.000 EXP base, 500.000 EXP job e ^0055FF2 Fragmentos Cinzentos^000000.";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "^0055FFConclusoes seguintes^000000: ^0055FF1 Fragmento Cinzento^000000.";
+			mes "^0055FFRecompensa custom da instancia^000000: ^0055FF10x item 9608^000000 e ^0055FF2x item 9198^000000.";
+			next;
+			break;
+		case 3:
+			mes "[Guarda Real Desagradavel]";
+			mes "Mesmo agora, todos os guardas reais estao lutando e morrendo para esses monstros.";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "Nao importa o medo em nossos coracoes, precisamos salvar a princesa!";
+			close;
+		}
 	}
-	instance_create("Ghost Palace");
-	mes "[Guarda Real Desagradavel]";
-	mes "Obrigado..";
-	mes "Vou abrir a passagem secreta para o ^0000ffPalacio das Magoas^000000.";
-	mes "Esteja pronto!";
-	close;
 }
 
 dali02,40,134,5	script	Interdimensional Device#dk	PORTAL,{

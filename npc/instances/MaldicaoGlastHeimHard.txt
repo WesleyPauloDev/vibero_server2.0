@@ -172,60 +172,83 @@ function	script	F_OGH_HardManaDrop	{
 			mes "Jogadores com mesmo IP so podem participar de mais de uma instancia ao mesmo tempo se estiverem em grupos diferentes.";
 			close;
 		}
-		mes "[Hugin]";
-		mes "Deseja criar ou entrar na instancia ^0055FF" + .@display_name$ + "^000000?";
-		next;
-		switch(select("Criar instancia", "Entrar na instancia", "Cancelar")) {
-		case 1:
-			if (!is_party_leader()) {
-				mes "Somente o lider do grupo pode criar a instancia.";
-				close;
-			}
-			if (getd(.@status_name$) != 0) {
-				mes "A instancia ja foi criada. Use ^0000FFEntrar na instancia^000000 para continuar.";
-				close;
-			}
-			.@iid = instance_create(.@db_name$);
-			if (.@iid >= 0) {
-				mes "[Hugin]";
-				mes "A versao hard esta se abrindo...";
-				announce "[Instancias] " + strcharinfo(0) + " criou " + .@display_name$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
-				callfunc("F_InstanceLogStart", .@status_var$, .@display_name$);
-				setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
-				setd(.@status_name$), 1;
-				$OGH_HARD_PENDING[getcharid(1)] = 1;
-			} else
-				mes "Falha ao criar a instancia.";
-			close;
-		case 2:
-			switch(instance_enter(.@db_name$)) {
-			case IE_OK:
-				setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
-				setd(.@status_name$), 2;
-				$OGH_HARD_PENDING[getcharid(1)] = 0;
-				$OGH_HARD_MODE[instance_id(IM_PARTY)] = 1;
-				callfunc("F_InstanceLogEnter", .@status_var$, .@display_name$);
-				close2;
-				end;
-			case IE_NOINSTANCE:
-				if (getd(.@status_name$) == 0) {
-					mes "A instancia ainda nao foi criada.";
+		while (true) {
+			mes "[Hugin]";
+			mes "Deseja criar ou entrar na instancia ^0055FF" + .@display_name$ + "^000000?";
+			next;
+			switch(select("Criar instancia", "Entrar na instancia", "Guia resumido", "Cancelar")) {
+			case 1:
+				if (!is_party_leader()) {
+					mes "Somente o lider do grupo pode criar a instancia.";
 					close;
 				}
-				mes "Voce ja entrou nesta instancia hoje.";
-				setd(.@status_name$), 3;
+				if (getd(.@status_name$) != 0) {
+					mes "A instancia ja foi criada. Use ^0000FFEntrar na instancia^000000 para continuar.";
+					close;
+				}
+				.@iid = instance_create(.@db_name$);
+				if (.@iid >= 0) {
+					mes "[Hugin]";
+					mes "A versao hard esta se abrindo...";
+					announce "[Instancias] " + strcharinfo(0) + " criou " + .@display_name$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
+					callfunc("F_InstanceLogStart", .@status_var$, .@display_name$);
+					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
+					setd(.@status_name$), 1;
+					$OGH_HARD_PENDING[getcharid(1)] = 1;
+				} else
+					mes "Falha ao criar a instancia.";
 				close;
-			case IE_NOMEMBER:
-				mes "Voce nao faz parte de um grupo valido para esta instancia.";
-				close;
-			default:
-				mes "Ocorreu um erro ao tentar entrar na instancia.";
+			case 2:
+				switch(instance_enter(.@db_name$)) {
+				case IE_OK:
+					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
+					setd(.@status_name$), 2;
+					$OGH_HARD_PENDING[getcharid(1)] = 0;
+					$OGH_HARD_MODE[instance_id(IM_PARTY)] = 1;
+					callfunc("F_InstanceLogEnter", .@status_var$, .@display_name$);
+					close2;
+					end;
+				case IE_NOINSTANCE:
+					if (getd(.@status_name$) == 0) {
+						mes "A instancia ainda nao foi criada.";
+						close;
+					}
+					mes "Voce ja entrou nesta instancia hoje.";
+					setd(.@status_name$), 3;
+					close;
+				case IE_NOMEMBER:
+					mes "Voce nao faz parte de um grupo valido para esta instancia.";
+					close;
+				default:
+					mes "Ocorreu um erro ao tentar entrar na instancia.";
+					close;
+				}
+			case 3:
+				mes "[Hugin]";
+				mes "Guia resumido da Maldicao de Glast Heim Hard:";
+				next;
+				mes "[Hugin]";
+				mes "1. Fale com ^0055FFVarmundt^000000 e depois com ^0055FFHeinrich^000000 para iniciar a historia.";
+				mes "2. Limpe os monstros e siga os ^0055FFportais^000000 que forem abrindo no mapa.";
+				next;
+				mes "[Hugin]";
+				mes "3. Quando a maldicao enfraquecer, procure os ^0055FFsobreviventes^000000 e continue avancando.";
+				mes "4. Derrote a ^0055FFAlma Corrompida^000000 para liberar o acesso ao segundo andar.";
+				next;
+				mes "[Hugin]";
+				mes "5. No segundo andar, limpe os corredores e derrote os ^0055FFComandantes da Destruicao^000000.";
+				mes "6. Siga para o norte ate a sala final e enfrente ^0055FFAmdarais^000000.";
+				next;
+				mes "[Hugin]";
+				mes "7. Depois de derrotar Amdarais, ^0055FFfale comigo dentro da instancia^000000 para receber a recompensa final.";
+				mes "Sem falar comigo no final, a conclusao nao conta corretamente.";
+				next;
+				break;
+			case 4:
+				mes "[Hugin]";
+				mes "Tudo bem. Volte quando quiser desafiar a versao hard.";
 				close;
 			}
-		case 3:
-			mes "[Hugin]";
-			mes "Tudo bem. Volte quando quiser desafiar a versao hard.";
-			close;
 		}
 		end;
 }

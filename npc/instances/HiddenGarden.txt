@@ -736,7 +736,7 @@ OnTouch:
 		sleep2 5000;
 		npctalk "Pimp. Quando estiver relatando ao administrador, voce deve informar o tempo exato registrado.", instance_npcname("#BMD000003");
 		sleep2 3000;
-		npctalk "E mesmo? Mas a Pimp nao pode se dar ao luxo de registrar mais de um milhao de horas. Isso desperdiça recursos de memoria! Varmundt ficaria zangado!";
+		npctalk "E mesmo? Mas a Pimp nao pode se dar ao luxo de registrar mais de um milhao de horas. Isso desperdiï¿½a recursos de memoria! Varmundt ficaria zangado!";
 		sleep2 1000;
 		setpcblock PCBLOCK_NPC, false;
 		select("Como esta sua pesquisa sobre o cultivo de Pumpkin?");
@@ -1445,7 +1445,7 @@ OnEvent01:
 	end;
 
 OnEvent02:
-	npctalk "Cheguei ate a imaginar que Varmundt pudesse ter voltado aqui disfarçado depois de centenas de anos.";
+	npctalk "Cheguei ate a imaginar que Varmundt pudesse ter voltado aqui disfarï¿½ado depois de centenas de anos.";
 	unitwalk 'guide_id,62,98, instance_npcname("#sigma") + "::OnEvent03";
 	end;
 
@@ -2200,11 +2200,17 @@ OnTouch:	// unknown effect
 OnSummon:
 	monster 'map_herbs$,169,79,"Kappa",20620,1, instance_npcname("#172_sec_boss") + "::OnBossKill";
 	'boss_gid = $@mobid[0];
+	getunitdata 'boss_gid, .@data;
+	'boss_base_def = .@data[UMOB_DEF];
+	'boss_base_mdef = .@data[UMOB_MDEF];
 	donpcevent instance_npcname("#172_sec_boss") + "::OnShield";
 	end;
 OnSummonHard:
 	monster 'map_herbs$,275,80,"Lambda",20621,1, instance_npcname("#172_sec_boss") + "::OnBossKill";
 	'boss_gid = $@mobid[0];
+	getunitdata 'boss_gid, .@data;
+	'boss_base_def = .@data[UMOB_DEF];
+	'boss_base_mdef = .@data[UMOB_MDEF];
 	donpcevent instance_npcname("#172_sec_boss") + "::OnShield";
 	end;
 
@@ -2229,10 +2235,17 @@ OnShield:
 	else
 		setarray .@xy[0],171,94,171,65,200,65,200,94;
 
-	for ( .@i = 0; .@i < 8; .@i += 2 )
+	for ( .@i = 0; .@i < 8; .@i += 2 ) {
 		monster 'map_herbs$,.@xy[.@i],.@xy[.@i+1],"Guardian Part",20679,1, .@event$;
+		.@gid = $@mobid[0];
+		getunitdata .@gid, .@guardian_data;
+		setunitdata .@gid, UMOB_MODE, .@guardian_data[UMOB_MODE] | MD_NORANDOMWALK;
+		setunitdata .@gid, UMOB_IGNORE_CELL_STACK_LIMIT, true;
+	}
 	unitskilluseid 'boss_gid,"NPC_RELIEVE_OFF",1;
 	unitskilluseid 'boss_gid,"NPC_RELIEVE_ON",10;
+	setunitdata 'boss_gid, UMOB_DEF, 'boss_base_def;
+	setunitdata 'boss_gid, UMOB_MDEF, 'boss_base_mdef;
 	mapannounce 'map_herbs$, "SISTEMA : O gerente invocou Guardian Parts e vai recupera-las como material para seu escudo de energia.", bc_map, 0xFFFF00;
 	initnpctimer;
 	end;
@@ -2248,6 +2261,8 @@ OnBreakShield:
 	case 0:
 		stopnpctimer;
 		unitskilluseid 'boss_gid,"NPC_RELIEVE_OFF",1;
+		setunitdata 'boss_gid, UMOB_DEF, 0;
+		setunitdata 'boss_gid, UMOB_MDEF, 0;
 		mapannounce 'map_herbs$, "SISTEMA : Todas as Guardian Parts foram destruidas. Nenhum escudo de energia foi recuperado.", bc_map, 0xFFFF00;
 		donpcevent instance_npcname("#172_sec_boss_shield") + "::OnStart";
 		end;
@@ -2265,6 +2280,8 @@ OnBreakShield:
 	}
 	unitskilluseid 'boss_gid,"NPC_RELIEVE_OFF",1;
 	unitskilluseid 'boss_gid,"NPC_RELIEVE_ON",.@val;
+	setunitdata 'boss_gid, UMOB_DEF, ('boss_base_def * .@val) / 10;
+	setunitdata 'boss_gid, UMOB_MDEF, ('boss_base_mdef * .@val) / 10;
 	mapannounce 'map_herbs$, "SISTEMA : O dano causado nas Guardian Parts enfraqueceu o escudo de energia.", bc_map, 0xFFFF00;
 	end;
 }
