@@ -10,23 +10,43 @@
 	#INSTANCERID = 0;
 
 OnStartInstance:
-	if (BaseLevel >= 180) {
-		switch(select("Zona de Seguranca 1 [150+]", "Zona de Seguranca 2 [180+]", "Cancelar")) {
-		case 1:
-			.@md_name$ = "Security Area 1";
-			.@min_level = 150;
-			break;
-		case 2:
-			.@md_name$ = "Security Area 2";
-			.@min_level = 180;
-			break;
-		case 3:
-			end;
+	.@cooldown_name$ = "#cooldown_hidden_garden";
+	.@status_name$ = "#HiddenGarden_STATUS";
+
+	if (getd(.@cooldown_name$) < gettimetick(2) && getd(.@status_name$) != 0) {
+		setd(.@status_name$, 0);
+		#HiddenGarden_MODE = 0;
+	}
+
+	if (getd(.@status_name$) == 0 || #HiddenGarden_MODE == 0) {
+		if (BaseLevel >= 175) {
+			switch(select("Modo Normal [150+]", "Modo Hard [175+]", "Cancelar")) {
+			case 1:
+				#HiddenGarden_MODE = 1;
+				break;
+			case 2:
+				#HiddenGarden_MODE = 2;
+				break;
+			case 3:
+				end;
+			}
+		}
+		else {
+			#HiddenGarden_MODE = 1;
 		}
 	}
-	else {
+
+	switch (#HiddenGarden_MODE) {
+	case 2:
+		.@md_name$ = "Security Area 2";
+		.@min_level = 175;
+		.@display_name$ = "Jardim de Vermuth - Hard";
+		break;
+	default:
 		.@md_name$ = "Security Area 1";
 		.@min_level = 150;
+		.@display_name$ = "Jardim de Vermuth - Normal";
+		break;
 	}
 	callfunc("F_InstanceEntry",
 		.@md_name$,
@@ -34,7 +54,7 @@ OnStartInstance:
 		"hidden_garden",
 		"HiddenGarden",
 		.@min_level,
-		"Jardim de Vermuth"
+		.@display_name$
 	);
 	end;
 }
@@ -139,7 +159,7 @@ ba_maison,120,321,5	script(CLOAKED)	#he_admin2	MD_ASSISTANT,{
 	next;
 	if (BaseLevel >= 150)
 		.@menu$[0] = "Zona de Seguranca 1.";
-	if (BaseLevel >= 180)
+	if (BaseLevel >= 175)
 		.@menu$[1] = "^FF0000Zona de Seguranca 2.^000000";
 
 	switch( select( "Recuar.", "Autenticar identidade", "Entrar na zona" ) ) {
@@ -1304,15 +1324,20 @@ OnTouch:
 				callfunc("F_InstanceFinishAnnounce", "Jardim de Vermuth");
 				'finish_announced = 1;
 			}
-			if (#HG_REWARD_INSTANCE != instance_id()) {
-				if (checkweight(9608,20) == 0 || checkweight(9198,2) == 0) {
+			if (#HiddenGarden_STATUS == 2) {
+				.@coin = (#HiddenGarden_MODE == 2) ? 30 : 20;
+				.@ticket = (#HiddenGarden_MODE == 2) ? 3 : 2;
+				if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0) {
 					mes "^008800Espere um pouco!!";
 					mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 					close;
 				}
-				getitem 9608,20;
-				getitem 9198,2;
-				#HG_REWARD_INSTANCE = instance_id();
+				callfunc("F_AddRep", 1, 10, 110002, 3000);
+				callfunc("F_DiaryRefreshDaily");
+				set #instancia, 2;
+				getitem 9608,.@coin;
+				getitem 9198,.@ticket;
+				set #HiddenGarden_STATUS, 3;
 			}
 			close2;
 			setquest 12497;
@@ -1329,15 +1354,20 @@ OnTouch:
 			callfunc("F_InstanceFinishAnnounce", "Jardim de Vermuth");
 			'finish_announced = 1;
 		}
-		if (#HG_REWARD_INSTANCE != instance_id()) {
-			if (checkweight(9608,20) == 0 || checkweight(9198,2) == 0) {
+		if (#HiddenGarden_STATUS == 2) {
+			.@coin = (#HiddenGarden_MODE == 2) ? 30 : 20;
+			.@ticket = (#HiddenGarden_MODE == 2) ? 3 : 2;
+			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0) {
 				mes "^008800Espere um pouco!!";
 				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 				close;
 			}
-			getitem 9608,20;
-			getitem 9198,2;
-			#HG_REWARD_INSTANCE = instance_id();
+			callfunc("F_AddRep", 1, 10, 110002, 3000);
+			callfunc("F_DiaryRefreshDaily");
+			set #instancia, 2;
+			getitem 9608,.@coin;
+			getitem 9198,.@ticket;
+			set #HiddenGarden_STATUS, 3;
 		}
 		mes "Vamos evitar este lugar por hoje e prometer voltar numa proxima vez. Na proxima voce estara livre para ir a outra area.";
 		next;
@@ -2150,15 +2180,20 @@ OnTouch:	// unknown effect
 			callfunc("F_InstanceFinishAnnounce", "Jardim de Vermuth");
 			'finish_announced = 1;
 		}
-		if (#HG_REWARD_INSTANCE != instance_id()) {
-			if (checkweight(9608,20) == 0 || checkweight(9198,2) == 0) {
+		if (#HiddenGarden_STATUS == 2) {
+			.@coin = (#HiddenGarden_MODE == 2) ? 30 : 20;
+			.@ticket = (#HiddenGarden_MODE == 2) ? 3 : 2;
+			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0) {
 				mes "^008800Espere um pouco!!";
 				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 				close;
 			}
-			getitem 9608,20;
-			getitem 9198,2;
-			#HG_REWARD_INSTANCE = instance_id();
+			callfunc("F_AddRep", 1, 10, 110002, 3000);
+			callfunc("F_DiaryRefreshDaily");
+			set #instancia, 2;
+			getitem 9608,.@coin;
+			getitem 9198,.@ticket;
+			set #HiddenGarden_STATUS, 3;
 		}
 		close2;
 		erasequest .@qid;
@@ -2179,15 +2214,20 @@ OnTouch:	// unknown effect
 	}
 	next;
 	if (select( "Vou olhar mais um pouco.", "Vou sair." ) == 2) {
-		if (#HG_REWARD_INSTANCE != instance_id()) {
-			if (checkweight(9608,20) == 0 || checkweight(9198,2) == 0) {
+		if (#HiddenGarden_STATUS == 2) {
+			.@coin = (#HiddenGarden_MODE == 2) ? 30 : 20;
+			.@ticket = (#HiddenGarden_MODE == 2) ? 3 : 2;
+			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0) {
 				mes "^008800Espere um pouco!!";
 				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 				close;
 			}
-			getitem 9608,20;
-			getitem 9198,2;
-			#HG_REWARD_INSTANCE = instance_id();
+			callfunc("F_AddRep", 1, 10, 110002, 3000);
+			callfunc("F_DiaryRefreshDaily");
+			set #instancia, 2;
+			getitem 9608,.@coin;
+			getitem 9198,.@ticket;
+			set #HiddenGarden_STATUS, 3;
 		}
 		warp "SavePoint",0,0;
 	}
