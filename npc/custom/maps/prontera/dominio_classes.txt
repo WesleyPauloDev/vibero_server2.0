@@ -5,17 +5,19 @@ OnTalk:
 	// sleep 1000;
 	// end;
 	// #classes_mastered = 4;
+	// set_reputation_points(8, 0);
+	// set #reput_class_dominator, 0;
 
-	mes "[Domínio das Classes]";
-	mes "Saudações, guerreiro.";
-	mes "Eu sou o guardião do ^FFCC00Domínio das Classes^000000.";
-	mes "Aqui, cada vez que você atingir o nível máximo com uma classe diferente sendo rate 1X,";
-	mes "sua reputação perante os deuses aumentará!";
+	mes "[Dominio das Classes]";
+	mes "Saudacoes, guerreiro.";
+	mes "Eu sou o guardiao do ^FFCC00Dominio das Classes^000000.";
+	mes "Aqui, cada vez que voce atingir o nivel maximo com uma classe diferente sendo rate 1X,";
+	mes "sua reputacao perante os deuses aumentara!";
 	next;
 
-	mes "[Domínio das Classes]";
-	mes "Cada classe nova que atingir o nível máximo sendo rate 1X lhe dará ^00FF00pontos de reputação^000000.";
-	mes "Ao alcançar certos níveis de reputação, você ganhará bônus especiais permanentes!";
+	mes "[Dominio das Classes]";
+	mes "Cada classe nova que atingir o nivel maximo sendo rate 1X lhe dara ^00FF00pontos de reputacao^000000.";
+	mes "Ao alcancar certos niveis de reputacao, voce ganhara bonus especiais permanentes!";
 	next;
 
 	// Tabela de classes (3rd e transclasses)
@@ -44,31 +46,35 @@ OnTalk:
 	switch(select("Registrar minha classe:Ver progresso das classes:Sair")) {
 		case 1:
 			if (exp_base_custom > 100) {
-				mes "[Domínio das Classes]";
-				mes "Somente Rate 1X serão reconhecidos pelos deuses.";
+				mes "[Dominio das Classes]";
+				mes "Somente Rate 1X serao reconhecidos pelos deuses.";
 				close;
 			}
 
 			.@class_id = Class;
+			if (BaseClass == Job_Summoner)
+				.@class_id = Job_Summoner;
 
-			.@required_job = (.@class_id == 4218 ? 60 : 70);
+			.@required_job = (.@class_id == Job_Summoner ? 60 : 70);
 			if (BaseLevel < 175 || JobLevel < .@required_job) {
-				mes "[Domínio das Classes]";
-				mes "Você ainda não alcançou o nível necessário (175/" + .@required_job + ").";
+				mes "[Dominio das Classes]";
+				mes "Voce ainda nao alcancou o nivel necessario (175/" + .@required_job + ").";
 				close;
-			}	
+			}
 
 			.@class_id = Class;
+			if (BaseClass == Job_Summoner)
+				.@class_id = Job_Summoner;
 
 			if (getd("#class_mastered_" + .@class_id)) {
-				mes "[Domínio das Classes]";
-				mes "Você já alcançou o domínio desta classe.";
+				mes "[Dominio das Classes]";
+				mes "Voce ja alcancou o dominio desta classe.";
 				close;
 			}
 
-			// Tabela de equivalncia entre classes masculino/feminino
+			// Tabela de equivalencia entre classes masculino/feminino
 			switch (.@class_id) {
-				// ?? Minstrel <-> Wanderer
+				// Minstrel <-> Wanderer
 				case 4075: // Minstrel
 					setd("#class_mastered_4076", 1);
 					break;
@@ -76,7 +82,7 @@ OnTalk:
 					setd("#class_mastered_4075", 1);
 					break;
 
-				// ?? Ninja <-> Kunoichi (Kagerou / Oboro)
+				// Ninja <-> Kunoichi (Kagerou / Oboro)
 				case 4211: // Kagerou
 					setd("#class_mastered_4212", 1);
 					break;
@@ -84,7 +90,7 @@ OnTalk:
 					setd("#class_mastered_4211", 1);
 					break;
 			}
-			
+
 			switch (.@class_id) {
 				// Minstrel/Wanderer -> 4075
 				case 4076: .@class_id = 4075; break;
@@ -93,24 +99,24 @@ OnTalk:
 				case 4212: .@class_id = 4211; break;
 			}
 
-			// --- Verifica se a classe atual  elegvel (pertence  lista) ---
+			// Verifica se a classe atual e elegivel
 			.@eligible = 0;
 			for (.@i = 0; .@i < getarraysize(.@classes_id); .@i++) {
 				if (.@class_id == .@classes_id[.@i]) { .@eligible = 1; break; }
 			}
 			if (!.@eligible) {
-				mes "[Domínio das Classes]";
-				mes "Você não pode receber esta conquista com a classe atual.";
+				mes "[Dominio das Classes]";
+				mes "Voce nao pode receber esta conquista com a classe atual.";
 				close;
 				end;
 			}
 
 			setd("#class_mastered_" + .@class_id, 1);
 			#classes_mastered++;
-			specialeffect2 EF_JOBLVUP50;			
+			specialeffect2 EF_JOBLVUP50;
 
-			mes "[Domínio das Classes]";
-			mes "Parabéns! Você atingiu o nível máximo com uma nova classe!";
+			mes "[Dominio das Classes]";
+			mes "Parabens! Voce atingiu o nivel maximo com uma nova classe!";
 			mes "Total de classes dominadas: ^00FF00" + #classes_mastered + "/18^000000.";
 
 			// Recompensa
@@ -149,15 +155,12 @@ OnTalk:
 			// Listar progresso
 			mes "==== ^00FF00Classes Conquistadas^000000 ====";
 			for (.@i = 0; .@i < getarraysize(.@classes_id); .@i++) {
-				// setd("#class_mastered_" + .@classes_id[.@i], 0);
 				switch (.@classes_id[.@i]) {
 					case 4211: // Kagerou/Oboro
-						// setd("#class_mastered_4212", 0);
 						if (getd("#class_mastered_4211") || getd("#class_mastered_4212"))
 							mes "^00FF00- " + .@classes_name$[.@i] + "^000000";
 						break;
 					case 4075: // Minstrel/Wanderer
-						// setd("#class_mastered_4076", 0);
 						if (getd("#class_mastered_4075") || getd("#class_mastered_4076"))
 							mes "^00FF00- " + .@classes_name$[.@i] + "^000000";
 						break;
@@ -188,8 +191,8 @@ OnTalk:
 			close;
 
 		case 3:
-			mes "[Domínio das Classes]";
-			mes "Retorne quando estiver pronto para provar seu domínio.";
+			mes "[Dominio das Classes]";
+			mes "Retorne quando estiver pronto para provar seu dominio.";
 			close;
 	}
 	end;

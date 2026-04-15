@@ -1205,21 +1205,34 @@ OnTimer6000:
 	if ('airship_status == 10 || #AirshipAssault_STATUS == 2){
 		'airship_status = 11;
 		enablenpc instance_npcname("warp5a#air2");
-		cutin "",255;
-		getexp 100000,65000;
-		// Premiações do Servidor
-		if (#AirshipAssault_STATUS == 2) {
-			// add_reputation_points(1, 10);
-			callfunc("F_AddRep", 1, 10, 110002, 3000);
-			callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-			callfunc("F_InstanceFinishAnnounce", "Assalto ao Dirigível");
-			if (#inst175_name$ == "Assalto ao Dirigível") {
-				set #inst175_status,2;
+		if (!'airship_rewarded) {
+			.@origin_aid = getcharid(3);
+			.@party_id = getcharid(1);
+			'airship_rewarded = 1;
+			cutin "",255;
+			callfunc("F_InstanceFinishAnnounce", "Assalto ao Dirigivel");
+			if (.@party_id > 0) {
+				getpartymember .@party_id, 1;
+				getpartymember .@party_id, 2;
+				for ( .@i = 0; .@i < $@partymembercount; .@i++ ) {
+					if (!isloggedin($@partymemberaid[.@i], $@partymembercid[.@i]))
+						continue;
+					attachrid $@partymemberaid[.@i];
+					if ((strcharinfo(3) != 'map_air1$ && strcharinfo(3) != 'map_air2$) || #AirshipAssault_STATUS != 2)
+						continue;
+					getexp 100000,65000;
+					callfunc("F_AddRep", 1, 10, 110002, 3000);
+					callfunc("F_DiaryRefreshDaily");
+					set #instancia, 2;
+					if (#inst175_name$ == "Assalto ao Dirigivel") {
+						set #inst175_status,2;
+					}
+					getitem 9608,10;	// Moeda de Instancia
+					getitem 9198,2;
+					set #AirshipAssault_STATUS, 3;
+				}
+				attachrid .@origin_aid;
 			}
-			getitem 9608,10;	// Moeda de Instância
-			getitem 9198,2;
-			set #AirshipAssault_STATUS, 3;
 		}
 	}
 	end;

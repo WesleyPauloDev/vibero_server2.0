@@ -1,0 +1,202 @@
+//==================================================
+// Trocas OS / Ilusional / Grace
+// NPC custom em portugues para trabalhar em cima
+//==================================================
+
+moc_para01,42,36,4	script	Operador OS	4_M_REPAIR,{
+	disable_items;
+
+	mes "[Operador OS]";
+	mes "Posso trocar equipamentos e modulos usando Componentes Misteriosos e Cor Cores.";
+	next;
+
+	switch(select("Equipamentos Grace:Modulo de Arma:Modulo de Armadura:Arma OS:Armadura Ilusional:Cancelar")) {
+	case 1:
+		callsub L_Grace;
+		end;
+	case 2:
+		callsub L_WeaponModule;
+		end;
+	case 3:
+		callsub L_ArmorModule;
+		end;
+	case 4:
+		callsub L_OSWeapon;
+		end;
+	case 5:
+		callsub L_IllusionArmor;
+		end;
+	default:
+		close;
+	}
+
+L_Grace:
+	mes "[Operador OS]";
+	mes "As lojas Grace daqui mostram os conjuntos completos por classe.";
+	mes "Escolha a classe para abrir a loja.";
+	next;
+
+	switch(select(
+		"Rune Knight:Ranger:Shadow Chaser:Royal Guard:Sura:" +
+		"Warlock:Sorcerer:Arch Bishop:Mechanic:Genetic:" +
+		"Guillotine Cross:Minstrel e Wanderer:Rebellion:Kagerou e Oboro:" +
+		"Summoner:Star Emperor:Soul Reaper:Superaprendiz:Cancelar"
+	)) {
+	case 1:
+		.@shop$ = "barter_grace_JOB_RUNE_KNIGHT";
+		break;
+	case 2:
+		.@shop$ = "barter_grace_JOB_RANGER";
+		break;
+	case 3:
+		.@shop$ = "barter_grace_JOB_SHADOW_CHASER";
+		break;
+	case 4:
+		.@shop$ = "barter_grace_JOB_ROYAL_GUARD";
+		break;
+	case 5:
+		.@shop$ = "barter_grace_JOB_SURA";
+		break;
+	case 6:
+		.@shop$ = "barter_grace_JOB_WARLOCK";
+		break;
+	case 7:
+		.@shop$ = "barter_grace_JOB_SORCERER";
+		break;
+	case 8:
+		.@shop$ = "barter_grace_JOB_ARCH_BISHOP";
+		break;
+	case 9:
+		.@shop$ = "barter_grace_JOB_MECHANIC";
+		break;
+	case 10:
+		.@shop$ = "barter_grace_JOB_GENETIC";
+		break;
+	case 11:
+		.@shop$ = "barter_grace_JOB_GUILLOTINE_CROSS";
+		break;
+	case 12:
+		.@shop$ = "barter_grace_JOB_MINSTREL";
+		break;
+	case 13:
+		.@shop$ = "barter_grace_JOB_REBELLION";
+		break;
+	case 14:
+		.@shop$ = "barter_grace_JOB_KAGEROU";
+		break;
+	case 15:
+		.@shop$ = "barter_grace_JOB_SUMMONER";
+		break;
+	case 16:
+		.@shop$ = "barter_grace_JOB_STAR_EMPEROR";
+		break;
+	case 17:
+		.@shop$ = "barter_grace_JOB_SOUL_REAPER";
+		break;
+	case 18:
+		.@shop$ = "barter_grace_JOB_SUPER_NOVICE_E";
+		break;
+	default:
+		close;
+	}
+
+	mes "[Operador OS]";
+	mes "Abrindo a loja Grace completa da classe escolhida.";
+	close2;
+	callshop .@shop$;
+	end;
+
+L_WeaponModule:
+	mes "[Operador OS]";
+	mes "Posso trocar 5 " + getitemname(25723) + " por um Modulo de Modificacao de Arma.";
+	mes "Tambem aceito 1.000.000 de zenys.";
+	next;
+
+	if (select("Fisico:Magico:Cancelar") == 3)
+		close;
+
+	.@type = @menu;
+	if (.@type == 1) {
+		.@group = IG_EP17_1_SPC02;
+		setarray .@ids[0],23776,23777,23778;
+	} else {
+		.@group = IG_EP17_1_SPC03;
+		setarray .@ids[0],23779,23780,23781;
+	}
+
+	mes "[Operador OS]";
+	mes "Voce pode receber aleatoriamente:";
+	mes getitemname(.@ids[0]) + ",";
+	mes getitemname(.@ids[1]) + " ou";
+	mes getitemname(.@ids[2]) + ".";
+	next;
+
+	switch(select("Pagar com 5 Cor Cores:Pagar com 1.000.000z:Cancelar")) {
+	case 1:
+		if (countitem(25723) < 5) {
+			mes "[Operador OS]";
+			mes "Voce nao possui Cor Cores suficientes.";
+			close;
+		}
+		delitem 25723,5;
+		break;
+	case 2:
+		if (Zeny < 1000000) {
+			mes "[Operador OS]";
+			mes "Voce nao possui zenys suficientes.";
+			close;
+		}
+		Zeny -= 1000000;
+		break;
+	default:
+		close;
+	}
+
+	getgroupitem(.@group);
+	mes "[Operador OS]";
+	mes "Modulo entregue com sucesso.";
+	close;
+
+L_ArmorModule:
+	mes "[Operador OS]";
+	mes "O Modulo de Modificacao de Armadura custa 30 " + getitemname(25669) + " e 5 " + getitemname(25723) + ".";
+	next;
+
+	if (select("Trocar:Cancelar") == 2)
+		close;
+
+	if (countitem(25669) < 30 || countitem(25723) < 5) {
+		mes "[Operador OS]";
+		mes "Voce nao possui os materiais necessarios.";
+		close;
+	}
+
+	delitem 25669,30;
+	delitem 25723,5;
+	getgroupitem(IG_EP17_1_SPC04);
+	mes "[Operador OS]";
+	mes "Modulo entregue com sucesso.";
+	close;
+
+L_OSWeapon:
+	mes "[Operador OS]";
+	mes "Entao, voce se interessou pelas armas OS.";
+	next;
+	mes "[Operador OS]";
+	mes "Estas sao as armas OS que eu posso montar.";
+	next;
+	mes "Escolha na janela de troca a arma que deseja.";
+	mes "La voce vera todos os materiais exigidos visualmente.";
+	close2;
+	callshop "barter_os_weapon";
+	end;
+
+L_IllusionArmor:
+	mes "[Operador OS]";
+	mes "Todos os equipamentos ilusionais estao reunidos em uma unica loja.";
+	mes "Cada item custa 50 " + getitemname(25723) + ".";
+	next;
+	close2;
+	callshop "barter_illusion_armor";
+	end;
+}

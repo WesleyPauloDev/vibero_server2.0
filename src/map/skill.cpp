@@ -3778,10 +3778,10 @@ int64 skill_attack (int32 attack_type, struct block_list* src, struct block_list
 		auto * sce = tsc->getSCE(SC_MAXPAIN);
 		sce->val3 = (int32)damage;
 		sce->val2 = 0;
-		if (!tsc->getSCE(SC_KYOMU)) //SC_KYOMU invalidates reflecting ability.
+		status_change *ssc = status_get_sc(src);
+		if (!tsc->getSCE(SC_KYOMU) && !(ssc && ssc->getSCE(SC_REF_T_POTION))) // SC_KYOMU invalidates reflecting ability. Ref T Potion blocks Max Pain's reflected magic hit.
 			skill_castend_damage_id(bl, src, NPC_MAXPAIN_ATK, sce->val1, tick, flag);
 	}
-
 	if( (skill_id == AL_INCAGI || skill_id == AL_BLESSING ||
 		skill_id == CASH_BLESSING || skill_id == CASH_INCAGI ||
 		skill_id == MER_INCAGI || skill_id == MER_BLESSING) && tsc && tsc->getSCE(SC_CHANGEUNDEAD) )

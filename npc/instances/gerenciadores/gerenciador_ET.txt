@@ -39,7 +39,6 @@ OnStartInstance:
 		set #ETOWER_STATUS, 3;
 	}
 	
-	set #ETOWER_STATUS, 0;
 	// Cooldown
 	set .@restante, #ETOWER_COOLDOWN - gettimetick(2);
 	if (#ETOWER_STATUS == 3 && .@restante <= 0) {
@@ -159,7 +158,7 @@ OnStartInstance:
 			set #ETOWER_PARTY, getcharid(1); // salva o id do grupo
 			
 			announce "[Instâncias] " + strcharinfo(0) + " criou Torre Sem Fim para o grupo " + .@partyName$ + ".", bc_all, 0xFF9900;
-			callfunc("F_InstanceLogStart", "Torre Sem Fim");
+			callfunc("F_InstanceLogStart", "ETOWER", "Torre Sem Fim");
 
 			mes "[Captain Janssen]";
 			mes "Instância criada! Use '^0000FFEntrar na Instância^000000' para começar.";
@@ -171,6 +170,7 @@ OnStartInstance:
 			switch(instance_enter("Endless Tower")) {
 				case IE_OK:					
 					set #ETOWER_STATUS, 2;
+					callfunc("F_InstanceLogEnter", "ETOWER", "Torre Sem Fim");
 					
 					set etower_timer, gettimetick(2);
 					set .@pid, getcharid(1);
@@ -192,7 +192,8 @@ OnStartInstance:
 						set #ETOWER_COOLDOWN, gettimetick(2) + .@faltam_reset;
 	
 						addtimer 14400000, strnpcinfo(3)+"::OnTimeout_ET"; // 4h = 14400000 ms					
-					}					
+					}	
+					close2;				
 					
 					end;
 

@@ -1,0 +1,559 @@
+//==================================================
+//= Encantamento Angelical Custom
+//==================================================
+
+function	script	F_Angelical_IsTarget	{
+	.@item_id = getarg(0);
+	if (.@item_id >= 15397 && .@item_id <= 15402) return 1;
+	if (.@item_id == 20947 || .@item_id == 22209) return 1;
+	return 0;
+}
+
+function	script	F_Angelical_ItemGroup	{
+	.@item_id = getarg(0);
+	if (.@item_id >= 15397 && .@item_id <= 15402) return 1;
+	if (.@item_id == 20947 || .@item_id == 22209) return 2;
+	return 0;
+}
+
+function	script	F_Angelical_Roll	{
+	.@pool = getarg(0);
+	deletearray .@item_ids[0], getarraysize(.@item_ids);
+	deletearray .@rates[0], getarraysize(.@rates);
+
+	switch (.@pool) {
+		case 1:
+			setarray .@item_ids[0],4705,4706,4707,4764,4765,29241,4762,29238,4794,4902,4786,4787,4867,4900,4801,4802;
+			for (.@i = 0; .@i < getarraysize(.@item_ids); .@i++)
+				.@rates[.@i] = 100;
+			break;
+
+		case 2:
+			setarray .@item_ids[0],4706,4820,4812,4835,4843,4802,29238,29241,4903,4790,4900,4873,4707,4821,4826,4836,4844,4881,310076,310077,310078,310080,310079,310081;
+			setarray .@rates[0],952,595,595,595,595,202,178,142,119,119,119,119,95,59,59,59,59,23,11,11,11,11,11,11;
+			break;
+
+		case 3:
+			setarray .@item_ids[0],4707,4900,4802,29238,29241,4903,4790,4820,4812,4835,4873,4843,4821,4826,4836,4844,4881,310076,310077,310078,310080,310079,310081;
+			setarray .@rates[0],692,461,461,461,415,346,346,300,300,300,300,300,230,230,230,230,230,115,115,115,115,115,115;
+			break;
+
+		case 4:
+			setarray .@item_ids[0],4706,4707,4765,29241,4762,29238,4902,29026,4788,4789,4867,4900,4801,4802;
+			for (.@i = 0; .@i < getarraysize(.@item_ids); .@i++)
+				.@rates[.@i] = 100;
+			break;
+
+		case 5:
+			setarray .@item_ids[0],4707,4765,29241,4762,29238,4902,29026,4788,4789,4867,4900,4801,4802;
+			for (.@i = 0; .@i < getarraysize(.@item_ids); .@i++)
+				.@rates[.@i] = 100;
+			break;
+
+		default:
+			return 0;
+	}
+
+	.@total = 0;
+	for (.@i = 0; .@i < getarraysize(.@item_ids); .@i++)
+		.@total += .@rates[.@i];
+
+	.@roll = rand(.@total);
+	.@acc = 0;
+	for (.@i = 0; .@i < getarraysize(.@item_ids); .@i++) {
+		.@acc += .@rates[.@i];
+		if (.@roll < .@acc)
+			return .@item_ids[.@i];
+	}
+
+	return .@item_ids[0];
+}
+
+function	script	F_Angelical_ShowPoolInfo	{
+	.@pool = getarg(0);
+	mes "[Susan Gray]";
+
+	switch (.@pool) {
+		case 1:
+			mes "Encantos possiveis:";
+			mes "- STR+6 / STR+7 / STR+8";
+			mes "- CRI+5 / CRI+7 / CRI+10";
+			mes "- FLEE+6 / FLEE+10";
+			mes "- DEF+12 / DEF+18";
+			mes "- DEFM+2 / DEFM+4";
+			mes "- HP+3% / HP+5%";
+			mes "- SP+100 / SP+150";
+			mes "Chance:";
+			mes "- Distribuicao uniforme no NPC.";
+			mes "- Cada encantamento da lista tem a mesma chance.";
+			close;
+
+		case 2:
+			mes "2o slot de Armaduras Angelicais em +9 ou mais.";
+			mes "Metodo comum: 50.000 zeny + 3 Sonhos Angelicais.";
+			next;
+			mes "[Susan Gray]";
+			mes "Encantos e chances:";
+			mes "- STR+7: 9,52%";
+			mes "- Espirito do Lutador 5: 5,95%";
+			mes "- Pedra de Encantamento 4: 5,95%";
+			mes "- Pedra da Mira Apurada 4: 5,95%";
+			mes "- Pedra de Critico 4: 5,95%";
+			mes "- SP+150: 2,02%";
+			mes "- FLEE+10: 1,78%";
+			mes "- CRI+10: 1,42%";
+			mes "- DEF+21: 1,19%";
+			mes "- DEFM+10: 1,19%";
+			mes "- HP+5%: 1,19%";
+			mes "- Anti-Atraso 3: 1,19%";
+			mes "- STR+8: 0,95%";
+			mes "- Espirito do Lutador 6: 0,59%";
+			mes "- Pedra de Encantamento 5: 0,59%";
+			mes "- Pedra da Mira Apurada 5: 0,59%";
+			mes "- Pedra de Critico 5: 0,59%";
+			mes "- Anti-Atraso 4: 0,23%";
+			mes "- Bencaos 310076~310081: 0,11% cada";
+			close;
+
+		case 3:
+			mes "2o slot de Armaduras Angelicais em +9 ou mais.";
+			mes "Metodo MiauMiau: 50.000 zeny + 3 MiauMiau.";
+			next;
+			mes "[Susan Gray]";
+			mes "Encantos e chances:";
+			mes "- STR+8: 6,92%";
+			mes "- HP+5%: 4,61%";
+			mes "- SP+150: 4,61%";
+			mes "- FLEE+10: 4,61%";
+			mes "- CRI+10: 4,15%";
+			mes "- DEF+21: 3,46%";
+			mes "- DEFM+10: 3,46%";
+			mes "- Espirito do Lutador 5: 3,00%";
+			mes "- Pedra de Encantamento 4: 3,00%";
+			mes "- Pedra da Mira Apurada 4: 3,00%";
+			mes "- Anti-Atraso 3: 3,00%";
+			mes "- Pedra de Critico 4: 3,00%";
+			mes "- Espirito do Lutador 6: 2,30%";
+			mes "- Pedra de Encantamento 5: 2,30%";
+			mes "- Pedra da Mira Apurada 5: 2,30%";
+			mes "- Pedra de Critico 5: 2,30%";
+			mes "- Anti-Atraso 4: 2,30%";
+			mes "- Bencaos 310076~310081: 1,15% cada";
+			close;
+
+		case 4:
+			mes "2o slot de Manto/Botas Angelicais em +9 ou mais.";
+			mes "Metodo comum: 50.000 zeny + 3 Sonhos Angelicais.";
+			next;
+			mes "[Susan Gray]";
+			mes "Encantos possiveis:";
+			mes "- STR+7 / STR+8";
+			mes "- CRI+7 / CRI+10";
+			mes "- FLEE+6 / FLEE+10";
+			mes "- DEF+18 / DEF+20";
+			mes "- DEFM+6 / DEFM+8";
+			mes "- HP+3% / HP+5%";
+			mes "- SP+100 / SP+150";
+			mes "Chance:";
+			mes "- Distribuicao uniforme no NPC.";
+			mes "- Cada encantamento da lista tem a mesma chance.";
+			close;
+
+		case 5:
+			mes "2o slot de Manto/Botas Angelicais em +9 ou mais.";
+			mes "Metodo MiauMiau: 50.000 zeny + 3 MiauMiau.";
+			next;
+			mes "[Susan Gray]";
+			mes "Encantos possiveis:";
+			mes "- STR+8";
+			mes "- CRI+7 / CRI+10";
+			mes "- FLEE+6 / FLEE+10";
+			mes "- DEF+18 / DEF+20";
+			mes "- DEFM+6 / DEFM+8";
+			mes "- HP+3% / HP+5%";
+			mes "- SP+100 / SP+150";
+			mes "Chance:";
+			mes "- Distribuicao uniforme no NPC.";
+			mes "- Cada encantamento da lista tem a mesma chance.";
+			close;
+	}
+
+	close;
+}
+
+function	script	F_Angelical_IsRareBlessing	{
+	.@item_id = getarg(0);
+	switch (.@item_id) {
+		case 310076:
+		case 310077:
+		case 310078:
+		case 310079:
+		case 310080:
+		case 310081:
+			return 1;
+	}
+	return 0;
+}
+
+moc_para01,18,22,5	script	Susan Gray#Angelical	421,{
+OnTalk:
+	disable_items;
+	mes "[Susan Gray]";
+	mes "Eu cuido do encantamento dos equipamentos angelicais.";
+	mes "Equipe a armadura, o manto ou as botas angelicais e eu posso trabalhar neles.";
+	next;
+
+	.@main = select("Encantar equipamento:Inserir encantamento raro no 2o slot:Ver informacoes dos encantamentos:Sair");
+	if (.@main == 2) {
+		set .@menu$, "";
+		set .@count, 0;
+		setarray .@parts[0], EQI_ARMOR;
+		for (.@i = 0; .@i < getarraysize(.@parts); .@i++) {
+			.@item_id = getequipid(.@parts[.@i]);
+			if (!callfunc("F_Angelical_IsTarget", .@item_id))
+				continue;
+			if (callfunc("F_Angelical_ItemGroup", .@item_id) != 1)
+				continue;
+
+			.@refine = getequiprefinerycnt(.@parts[.@i]);
+			.@slot2 = getequipcardid(.@parts[.@i],1);
+			.@slot3 = getequipcardid(.@parts[.@i],2);
+			.@slot4 = getequipcardid(.@parts[.@i],3);
+			if (.@refine < 9 || .@slot2 || !.@slot3 || !.@slot4)
+				continue;
+
+			.@menu$ += getitemname(.@item_id) + " [Armadura]:";
+			.@valid_parts[.@count] = .@parts[.@i];
+			.@count++;
+		}
+
+		if (.@count == 0) {
+			mes "[Susan Gray]";
+			mes "Voce precisa equipar uma Armadura Angelical +9 ou mais com o 3o e 4o slots preenchidos e o 2o slot livre.";
+			close;
+		}
+
+		setarray .@rare_ids[0],310076,310077,310078,310079,310080,310081;
+		.@rare_menu$ = "";
+		.@rare_count = 0;
+		for (.@i = 0; .@i < getarraysize(.@rare_ids); .@i++) {
+			if (countitem(.@rare_ids[.@i]) < 1)
+				continue;
+			.@rare_menu$ += getitemname(.@rare_ids[.@i]) + ":";
+			.@owned_rare[.@rare_count] = .@rare_ids[.@i];
+			.@rare_count++;
+		}
+
+		if (.@rare_count == 0) {
+			mes "[Susan Gray]";
+			mes "Voce nao possui nenhum encantamento raro elegivel no inventario.";
+			mes "Eu consigo inserir apenas as bencaos raras 310076~310081 no 2o slot.";
+			close;
+		}
+
+		.@menu$ += "Cancelar";
+		mes "[Susan Gray]";
+		mes "Escolha a Armadura Angelical que recebera o encantamento raro no 2o slot:";
+		next;
+		.@sel = select(.@menu$);
+		if (.@sel > .@count)
+			close;
+		.@part = .@valid_parts[.@sel - 1];
+
+		.@rare_menu$ += "Cancelar";
+		mes "[Susan Gray]";
+		mes "Escolha qual encantamento raro do seu inventario deseja inserir:";
+		next;
+		.@pick = select(.@rare_menu$);
+		if (.@pick > .@rare_count)
+			close;
+		.@enchant_id = .@owned_rare[.@pick - 1];
+
+		if (Zeny < 500000) {
+			mes "[Susan Gray]";
+			mes "Voce precisa de ^FF0000500.000 Zeny^000000 para inserir este encantamento raro.";
+			close;
+		}
+
+		mes "[Susan Gray]";
+		mes "Vou inserir ^0055FF" + getitemname(.@enchant_id) + "^000000 no 2o slot de ^0055FF" + getequipname(.@part) + "^000000.";
+		mes "Taxa: ^0055FF500.000 Zeny^000000.";
+		next;
+		if (select("Confirmar insercao:Cancelar") == 2)
+			close;
+
+		if (countitem(.@enchant_id) < 1) {
+			mes "[Susan Gray]";
+			mes "Voce nao possui mais este encantamento raro no inventario.";
+			close;
+		}
+
+		Zeny -= 500000;
+		delitem .@enchant_id,1;
+		progressbar "66ccff",3;
+		specialeffect2 EF_ENHANCE;
+		setitemcard(.@part,1,.@enchant_id);
+
+		mes "[Susan Gray]";
+		mes "Encantamento raro inserido com sucesso no 2o slot.";
+		close;
+	} else if (.@main == 3) {
+		mes "[Susan Gray]";
+		mes "Eu encanto estes slots:";
+		mes "- 3o slot";
+		mes "- 4o slot";
+		mes "- 2o slot por ultimo";
+		mes "";
+		mes "Custo padrao:";
+		mes "- 50.000 zeny";
+		mes "- 3x Sonho Angelical";
+		mes "";
+		mes "Regra especial do 2o slot:";
+		mes "- Em +9 ou mais, eu libero tabelas melhores.";
+		mes "- Em +9 ou mais, voce pode usar 3x MiauMiau no lugar do Sonho Angelical.";
+		next;
+		.@info = select("3o e 4o slot - todos os itens:2o slot +9 Armadura - metodo comum:2o slot +9 Armadura - metodo MiauMiau:2o slot +9 Manto/Botas - metodo comum:2o slot +9 Manto/Botas - metodo MiauMiau:Fechar");
+		if (.@info == 6)
+			close;
+		callfunc("F_Angelical_ShowPoolInfo", .@info);
+		close;
+	} else if (.@main == 4) {
+		close;
+	}
+
+	set .@menu$, "";
+	set .@count, 0;
+	setarray .@parts[0], EQI_ARMOR, EQI_GARMENT, EQI_SHOES;
+	for (.@i = 0; .@i < getarraysize(.@parts); .@i++) {
+		.@item_id = getequipid(.@parts[.@i]);
+		if (!callfunc("F_Angelical_IsTarget", .@item_id))
+			continue;
+
+		switch (.@parts[.@i]) {
+			case EQI_ARMOR: .@slot_name$ = "Armadura"; break;
+			case EQI_GARMENT: .@slot_name$ = "Manto"; break;
+			case EQI_SHOES: .@slot_name$ = "Botas"; break;
+		}
+
+		.@menu$ += getitemname(.@item_id) + " [" + .@slot_name$ + "]:";
+		.@valid_parts[.@count] = .@parts[.@i];
+		.@count++;
+	}
+
+	if (.@count == 0) {
+		mes "Voce nao esta com nenhum equipamento angelical elegivel equipado.";
+		close;
+	}
+
+	.@menu$ += "Cancelar";
+	mes "Escolha o equipamento angelical:";
+	.@sel = select(.@menu$);
+	if (.@sel > .@count)
+		close;
+
+	.@part = .@valid_parts[.@sel - 1];
+	.@item_id = getequipid(.@part);
+	.@refine = getequiprefinerycnt(.@part);
+	.@slot2 = getequipcardid(.@part,1);
+	.@slot3 = getequipcardid(.@part,2);
+	.@slot4 = getequipcardid(.@part,3);
+	.@group = callfunc("F_Angelical_ItemGroup", .@item_id);
+
+	mes "[Susan Gray]";
+	mes "Item selecionado: ^0055FF" + getequipname(.@part) + "^000000";
+	mes "Refino atual: ^0055FF+" + .@refine + "^000000";
+	next;
+
+	switch (select("Encantar proximo slot:Remover encantamentos:Sair")) {
+		case 1:
+			if (!.@slot3) {
+				.@real_slot = 2;
+				.@slot_label$ = "3o Slot";
+				.@pool = 1;
+				.@mat_id = 25767;
+				.@mat_amount = 3;
+			} else if (!.@slot4) {
+				.@real_slot = 3;
+				.@slot_label$ = "4o Slot";
+				.@pool = 1;
+				.@mat_id = 25767;
+				.@mat_amount = 3;
+			} else if (!.@slot2) {
+				.@real_slot = 1;
+				.@slot_label$ = "2o Slot";
+				.@mat_id = 25767;
+				.@mat_amount = 3;
+				.@pool = 1;
+
+				if (.@refine >= 9) {
+					mes "[Susan Gray]";
+					mes "Seu equipamento esta +9 ou mais.";
+					mes "Posso usar o metodo comum com ^0055FF3 Sonhos Angelicais^000000 ou o metodo especial com ^0055FF3 MiauMiau^000000.";
+					next;
+					.@route = select("Metodo comum:Metodo MiauMiau:Cancelar");
+					if (.@route == 3)
+						close;
+
+					if (.@route == 2) {
+						.@mat_id = 6909;
+						.@mat_amount = 3;
+						.@pool = (.@group == 1 ? 3 : 5);
+					} else {
+						.@pool = (.@group == 1 ? 2 : 4);
+					}
+				}
+			} else {
+				mes "[Susan Gray]";
+				mes "Este equipamento ja possui os 3 slots angelicais encantados.";
+				close;
+			}
+
+			if (Zeny < 50000) {
+				mes "[Susan Gray]";
+				mes "Voce precisa de ^FF000050.000 Zeny^000000.";
+				close;
+			}
+
+			if (countitem(.@mat_id) < .@mat_amount) {
+				mes "[Susan Gray]";
+				mes "Voce precisa de ^FF0000" + .@mat_amount + "x " + getitemname(.@mat_id) + "^000000.";
+				close;
+			}
+
+			.@enchant_id = callfunc("F_Angelical_Roll", .@pool);
+			if (!.@enchant_id) {
+				mes "[Susan Gray]";
+				mes "Nao consegui definir um encantamento para este item.";
+				close;
+			}
+
+			mes "[Susan Gray]";
+			mes "Vou encantar o ^0055FF" + .@slot_label$ + "^000000.";
+			mes "Custo: ^0055FF50.000 Zeny^000000 + ^0055FF" + .@mat_amount + "x " + getitemname(.@mat_id) + "^000000.";
+			next;
+			if (select("Confirmar:Cancelar") == 2)
+				close;
+
+			Zeny -= 50000;
+			delitem .@mat_id, .@mat_amount;
+			progressbar "ffff00",3;
+			specialeffect2 EF_ENHANCE;
+			setitemcard(.@part, .@real_slot, .@enchant_id);
+
+			mes "[Susan Gray]";
+			mes "O item recebeu: ^0055FF" + getitemname(.@enchant_id) + "^000000";
+			close;
+
+		case 2:
+			if (!.@slot2 && !.@slot3 && !.@slot4) {
+				mes "[Susan Gray]";
+				mes "Este equipamento nao possui encantamentos angelicais para remover.";
+				close;
+			}
+
+			mes "[Susan Gray]";
+			mes "Deseja remover apenas um encantamento ou todos?";
+			next;
+			.@remove_mode = select("Remover apenas 1:Remover todos:Cancelar");
+			if (.@remove_mode == 3)
+				close;
+
+			if (.@remove_mode == 1) {
+				if (Zeny < 20000) {
+					mes "[Susan Gray]";
+					mes "Voce precisa de ^FF000020.000 Zeny^000000.";
+					close;
+				}
+
+				.@menu$ = "";
+				.@slot_count = 0;
+				if (.@slot2) {
+					.@menu$ += "2o Slot (" + getitemname(.@slot2) + "):";
+					.@slot_map[.@slot_count] = 1;
+					.@slot_count++;
+				}
+				if (.@slot3) {
+					.@menu$ += "3o Slot (" + getitemname(.@slot3) + "):";
+					.@slot_map[.@slot_count] = 2;
+					.@slot_count++;
+				}
+				if (.@slot4) {
+					.@menu$ += "4o Slot (" + getitemname(.@slot4) + "):";
+					.@slot_map[.@slot_count] = 3;
+					.@slot_count++;
+				}
+				.@menu$ += "Cancelar";
+
+				mes "[Susan Gray]";
+				mes "Qual encantamento deseja remover?";
+				next;
+				.@pick = select(.@menu$);
+				if (.@pick > .@slot_count)
+					close;
+
+				.@real_slot = .@slot_map[.@pick - 1];
+				switch (.@real_slot) {
+					case 1: .@removed_id = .@slot2; break;
+					case 2: .@removed_id = .@slot3; break;
+					case 3: .@removed_id = .@slot4; break;
+				}
+
+				mes "[Susan Gray]";
+				mes "Vou remover ^0055FF" + getitemname(.@removed_id) + "^000000.";
+				mes "Custo: ^0055FF20.000 Zeny^000000.";
+				next;
+				if (select("Confirmar:Cancelar") == 2)
+					close;
+
+				Zeny -= 20000;
+				progressbar "ffcc66",2;
+				setitemcard(.@part,.@real_slot,0);
+				specialeffect2 EF_REPAIRWEAPON;
+
+				mes "[Susan Gray]";
+				mes "Encantamento removido com sucesso.";
+				close;
+			}
+
+			if (!.@slot2 || !.@slot3 || !.@slot4) {
+				mes "[Susan Gray]";
+				mes "So posso remover todos quando os 3 slots angelicais estiverem preenchidos.";
+				close;
+			}
+
+			if (Zeny < 50000) {
+				mes "[Susan Gray]";
+				mes "Voce precisa de ^FF000050.000 Zeny^000000.";
+				close;
+			}
+
+			if (countitem(25767) < 3) {
+				mes "[Susan Gray]";
+				mes "Voce precisa de ^FF00003x " + getitemname(25767) + "^000000.";
+				close;
+			}
+
+			mes "[Susan Gray]";
+			mes "O reset remove todos os encantamentos do item.";
+			mes "Custo: ^0055FF50.000 Zeny^000000 + ^0055FF3x " + getitemname(25767) + "^000000.";
+			next;
+			if (select("Confirmar:Cancelar") == 2)
+				close;
+
+			Zeny -= 50000;
+			delitem 25767,3;
+			progressbar "ff8080",3;
+			setitemcard(.@part,1,0);
+			setitemcard(.@part,2,0);
+			setitemcard(.@part,3,0);
+			specialeffect2 EF_REPAIRWEAPON;
+
+			mes "[Susan Gray]";
+			mes "Todos os encantamentos angelicais foram removidos.";
+			close;
+
+		default:
+			close;
+	}
+}
+

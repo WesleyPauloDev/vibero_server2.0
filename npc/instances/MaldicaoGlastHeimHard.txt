@@ -1,0 +1,254 @@
+//===== rAthena Script =======================================
+//= Old Glast Heim Hard Helpers
+//===== Description: =========================================
+//= Wrapper e configuracoes do modo hard custom da OGH
+//============================================================
+
+function	script	F_OGH_IsHardMode	{
+	.@iid = instance_id(IM_PARTY);
+	if (.@iid > 0 && $OGH_HARD_MODE[.@iid])
+		return 1;
+	if (getattachedrid()) {
+		.@party_id = getcharid(1);
+		if (.@party_id > 0 && $OGH_HARD_PENDING[.@party_id])
+			return 1;
+	}
+	return 0;
+}
+
+function	script	F_OGH_StatusVar$	{
+	if (callfunc("F_OGH_IsHardMode"))
+		return "#OldGlastHeimHard_STATUS";
+	return "#OldGlastHeim_STATUS";
+}
+
+function	script	F_OGH_FinalAnnounceName$	{
+	if (callfunc("F_OGH_IsHardMode"))
+		return "Maldicao de Glast Heim Hard";
+	return "Maldicao de Glast Heim";
+}
+
+function	script	F_OGH_FirstCrystalReward	{
+	if (callfunc("F_OGH_IsHardMode"))
+		return 2;
+	return 1;
+}
+
+function	script	F_OGH_FirstSpellReward	{
+	if (callfunc("F_OGH_IsHardMode"))
+		return 10;
+	return 5;
+}
+
+function	script	F_OGH_FinalCrystalReward	{
+	if (callfunc("F_OGH_IsHardMode"))
+		return 10;
+	return 5;
+}
+
+function	script	F_OGH_FinalSpellReward	{
+	if (callfunc("F_OGH_IsHardMode"))
+		return 20;
+	return 10;
+}
+
+function	script	F_OGH_ApplyHardStats	{
+	if (!callfunc("F_OGH_IsHardMode"))
+		return;
+	.@gid = getarg(0);
+	.@kind = getarg(1,0);
+	if (.@gid <= 0)
+		return;
+	getunitdata .@gid, .@mob;
+	if (!getarraysize(.@mob))
+		return;
+	.@hp_mul = 200;
+	.@atk_mul = 180;
+	.@stat_mul = 150;
+	.@def_mul = 150;
+	if (.@kind == 1) {
+		.@hp_mul = 300;
+		.@atk_mul = 230;
+		.@stat_mul = 180;
+		.@def_mul = 180;
+	} else if (.@kind == 2) {
+		.@hp_mul = 400;
+		.@atk_mul = 300;
+		.@stat_mul = 200;
+		.@def_mul = 200;
+	}
+	.@maxhp = (.@mob[UMOB_MAXHP] * .@hp_mul) / 100;
+	.@atkmin = (.@mob[UMOB_ATKMIN] * .@atk_mul) / 100;
+	.@atkmax = (.@mob[UMOB_ATKMAX] * .@atk_mul) / 100;
+	.@str = (.@mob[UMOB_STR] * .@stat_mul) / 100;
+	.@agi = (.@mob[UMOB_AGI] * .@stat_mul) / 100;
+	.@vit = (.@mob[UMOB_VIT] * .@stat_mul) / 100;
+	.@int = (.@mob[UMOB_INT] * .@stat_mul) / 100;
+	.@dex = (.@mob[UMOB_DEX] * .@stat_mul) / 100;
+	.@luk = (.@mob[UMOB_LUK] * .@stat_mul) / 100;
+	.@def = (.@mob[UMOB_DEF] * .@def_mul) / 100;
+	.@mdef = (.@mob[UMOB_MDEF] * .@def_mul) / 100;
+	if (.@maxhp < 1) .@maxhp = 1;
+	if (.@atkmin < 1) .@atkmin = 1;
+	if (.@atkmax < .@atkmin) .@atkmax = .@atkmin;
+	if (.@str < 1) .@str = 1;
+	if (.@agi < 1) .@agi = 1;
+	if (.@vit < 1) .@vit = 1;
+	if (.@int < 1) .@int = 1;
+	if (.@dex < 1) .@dex = 1;
+	if (.@luk < 1) .@luk = 1;
+	setunitdata .@gid, UMOB_MAXHP, .@maxhp;
+	setunitdata .@gid, UMOB_HP, .@maxhp;
+	setunitdata .@gid, UMOB_ATKMIN, .@atkmin;
+	setunitdata .@gid, UMOB_ATKMAX, .@atkmax;
+	setunitdata .@gid, UMOB_STR, .@str;
+	setunitdata .@gid, UMOB_AGI, .@agi;
+	setunitdata .@gid, UMOB_VIT, .@vit;
+	setunitdata .@gid, UMOB_INT, .@int;
+	setunitdata .@gid, UMOB_DEX, .@dex;
+	setunitdata .@gid, UMOB_LUK, .@luk;
+	setunitdata .@gid, UMOB_DEF, .@def;
+	setunitdata .@gid, UMOB_MDEF, .@mdef;
+	return;
+}
+
+function	script	F_OGH_ApplyHardGroup	{
+	if (!callfunc("F_OGH_IsHardMode"))
+		return;
+	.@count = getarg(0);
+	.@kind = getarg(1,0);
+	for (.@i = 0; .@i < .@count; ++.@i) {
+		if ($@mobid[.@i] > 0)
+			callfunc("F_OGH_ApplyHardStats", $@mobid[.@i], .@kind);
+	}
+	return;
+}
+
+function	script	F_OGH_ApplyLastMobHard	{
+	if ($@mobid[0] > 0)
+		callfunc("F_OGH_ApplyHardStats", $@mobid[0], getarg(0,0));
+	return;
+}
+
+function	script	F_OGH_HardManaDrop	{
+	if (!callfunc("F_OGH_IsHardMode"))
+		return;
+	if (!getattachedrid())
+		return;
+	callfunc("CustomMapDrop", "1@gl_k", 6608, 2);
+	callfunc("CustomMapDrop", "2@gl_k", 6608, 2);
+	return;
+}
+
+-	script	MGH_Hard_Instance#Custom	709,{
+	OnStartInstance:
+		.@db_name$ = "Maldicao de Glast Heim";
+		.@display_name$ = "Maldicao de Glast Heim Hard";
+		.@cooldown_name$ = "#cooldown_glastHeimHard";
+		.@status_name$ = "#OldGlastHeimHard_STATUS";
+		.@status_var$ = "OldGlastHeimHard";
+		if (!isloggedin(getcharid(3)))
+			end;
+		if (BaseLevel < 60) {
+			mes "[Hugin]";
+			mes "Voce ainda nao esta pronto para esta distorcao.";
+			mes "Volte quando atingir o nivel base ^FF555560^000000.";
+			close;
+		}
+		if (getcharid(1) < 1) {
+			mes "[Hugin]";
+			mes "Voce precisa estar em um grupo para entrar na instancia.";
+			close;
+		}
+		if (getd(.@cooldown_name$) < gettimetick(2) && getd(.@status_name$) != 0)
+			setd(.@status_name$, 0);
+		if (getd(.@status_name$) == 3) {
+			mes "[Hugin]";
+			mes "Voce ja concluiu esta versao hoje.";
+			close;
+		}
+		if (!callfunc("F_CheckInstanceIPPermission")) {
+			mes "[Hugin]";
+			mes "Jogadores com mesmo IP so podem participar de mais de uma instancia ao mesmo tempo se estiverem em grupos diferentes.";
+			close;
+		}
+		while (true) {
+			mes "[Hugin]";
+			mes "Deseja criar ou entrar na instancia ^0055FF" + .@display_name$ + "^000000?";
+			next;
+			switch(select("Criar instancia", "Entrar na instancia", "Guia resumido", "Cancelar")) {
+			case 1:
+				if (!is_party_leader()) {
+					mes "Somente o lider do grupo pode criar a instancia.";
+					close;
+				}
+				if (getd(.@status_name$) != 0) {
+					mes "A instancia ja foi criada. Use ^0000FFEntrar na instancia^000000 para continuar.";
+					close;
+				}
+				.@iid = instance_create(.@db_name$);
+				if (.@iid >= 0) {
+					mes "[Hugin]";
+					mes "A versao hard esta se abrindo...";
+					announce "[Instancias] " + strcharinfo(0) + " criou " + .@display_name$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
+					callfunc("F_InstanceLogStart", .@status_var$, .@display_name$);
+					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
+					setd(.@status_name$), 1;
+					$OGH_HARD_PENDING[getcharid(1)] = 1;
+				} else
+					mes "Falha ao criar a instancia.";
+				close;
+			case 2:
+				switch(instance_enter(.@db_name$)) {
+				case IE_OK:
+					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
+					setd(.@status_name$), 2;
+					$OGH_HARD_PENDING[getcharid(1)] = 0;
+					$OGH_HARD_MODE[instance_id(IM_PARTY)] = 1;
+					callfunc("F_InstanceLogEnter", .@status_var$, .@display_name$);
+					close2;
+					end;
+				case IE_NOINSTANCE:
+					if (getd(.@status_name$) == 0) {
+						mes "A instancia ainda nao foi criada.";
+						close;
+					}
+					mes "Voce ja entrou nesta instancia hoje.";
+					setd(.@status_name$), 3;
+					close;
+				case IE_NOMEMBER:
+					mes "Voce nao faz parte de um grupo valido para esta instancia.";
+					close;
+				default:
+					mes "Ocorreu um erro ao tentar entrar na instancia.";
+					close;
+				}
+			case 3:
+				mes "[Hugin]";
+				mes "Guia resumido da Maldicao de Glast Heim Hard:";
+				next;
+				mes "[Hugin]";
+				mes "1. Fale com ^0055FFVarmundt^000000 e depois com ^0055FFHeinrich^000000 para iniciar a historia.";
+				mes "2. Limpe os monstros e siga os ^0055FFportais^000000 que forem abrindo no mapa.";
+				next;
+				mes "[Hugin]";
+				mes "3. Quando a maldicao enfraquecer, procure os ^0055FFsobreviventes^000000 e continue avancando.";
+				mes "4. Derrote a ^0055FFAlma Corrompida^000000 para liberar o acesso ao segundo andar.";
+				next;
+				mes "[Hugin]";
+				mes "5. No segundo andar, limpe os corredores e derrote os ^0055FFComandantes da Destruicao^000000.";
+				mes "6. Siga para o norte ate a sala final e enfrente ^0055FFAmdarais^000000.";
+				next;
+				mes "[Hugin]";
+				mes "7. Depois de derrotar Amdarais, ^0055FFfale comigo dentro da instancia^000000 para receber a recompensa final.";
+				mes "Sem falar comigo no final, a conclusao nao conta corretamente.";
+				next;
+				break;
+			case 4:
+				mes "[Hugin]";
+				mes "Tudo bem. Volte quando quiser desafiar a versao hard.";
+				close;
+			}
+		}
+		end;
+}

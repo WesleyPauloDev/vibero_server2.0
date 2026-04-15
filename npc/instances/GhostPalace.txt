@@ -1,0 +1,1012 @@
+//===== rAthena Script =======================================
+//= Palacio das Magoas
+//===== Description: =========================================
+//= [Walkthrough Conversion + Custom Entry]
+//= Instancia Ghost Palace adaptada ao padrao custom.
+//===== Changelogs: ==========================================
+//= 1.0 Conversao oficial base. [Capuche]
+//= 1.1 Ajuste de nomes de NPC. [zackdreaver]
+//= 1.2 Integracao ao sistema custom de instancias. [Codex]
+//============================================================
+
+-	script	GhostPalace_Instance#Custom	999,{
+	if (!attachrid(#INSTANCERID)) end;
+	#INSTANCERID = 0;
+
+OnStartInstance:
+		callfunc("F_InstanceEntry",
+			"Ghost Palace",
+			"Guarda Real Desagradavel",
+			"ghost_palace",
+			"GhostPalace",
+			120,
+			"Palacio das Magoas"
+		);
+	end;
+}
+
+//===== rAthena Script =======================================
+//= Ghost Palace
+//===== Description: =========================================
+//= [Walkthrough Conversion]
+//= Ghost Palace Instance
+//===== Changelogs: ==========================================
+//= 1.0 First version. [Capuche]
+//= 1.1 Fixed NPC names. [zackdreaver]
+//============================================================
+
+dali02,43,129,5	script	Guarda Real Desagradavel#	4_M_SAKRAYROYAL,{
+	if (BaseLevel < 120) {
+		mes "[Guarda Real Desagradavel]";
+		mes "Eu preciso de ajuda, mas voce ainda nao e forte o bastante para isso.";
+		next;
+		mes "[Guarda Real Desagradavel]";
+		mes "Volte depois, quando tiver treinado mais e alcancado o nivel 120!";
+		close;
+	}
+	.@party_id = getcharid(1);
+	if (is_party_leader() == false || .@party_id < 1) {
+		mes "[Guarda Real Desagradavel]";
+		mes "Eu so posso abrir a passagem secreta para o lider do grupo. Peca para o lider falar comigo.";
+		close;
+	}
+	switch( checkquest(1261,PLAYTIME) ) {
+	case -1:
+		break;
+	case 0:
+	case 1:
+		mes "[Guarda Real Desagradavel]";
+		mes "Voce ja encontrou a princesa?! Ela esta segura?";
+		close;
+	case 2:
+		mes "[Guarda Real Desagradavel]";
+		mes "Os monstros perto da passagem secreta sumiram. Agora e nossa chance de salvar a princesa!";
+		erasequest 1261;// Cursed Swordman
+		close;
+	}
+	mes "[Guarda Real Desagradavel]";
+	mes "Eu preciso de ajuda, ate mesmo da sua.";
+	next;
+	mes "[Guarda Real Desagradavel]";
+	mes "No meio da batalha, a princesa desapareceu enquanto eu guardava o palacio.";
+	next;
+	mes "[Guarda Real Desagradavel]";
+	mes "Vá na frente e eu alcanco voce. Precisamos salva-la.";
+	next;
+	while (true) {
+		switch(select( "Eu vou ajudar.", "Guia resumido", "Agora nao e uma boa hora." )) {
+		case 1:
+			instance_create("Ghost Palace");
+			mes "[Guarda Real Desagradavel]";
+			mes "Obrigado..";
+			mes "Vou abrir a passagem secreta para o ^0000ffPalacio das Magoas^000000.";
+			mes "Esteja pronto!";
+			close;
+		case 2:
+			mes "[Guarda Real Desagradavel]";
+			mes "Guia resumido do Palacio das Magoas:";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "Nivel minimo: ^0055FF120^000000.";
+			mes "E preciso estar em ^0055FFgrupo^000000, e apenas o lider cria a instancia.";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "1. Limpe os monstros de cada andar e siga pelas passagens que forem abrindo.";
+			mes "2. Fale com os NPCs principais quando aparecerem, principalmente a ^0055FFPrincesa Tiara^000000 e o ^0055FFGuarda Real^000000.";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "3. Continue subindo: 2o andar, 3o andar, 4o andar e depois 5o andar.";
+			mes "4. No fim, conclua a sequencia de dialogos com ^0055FFSakray^000000 para liberar a saida.";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "5. Para concluir, entre na saida ^0055FFWay out of Palace^000000.";
+			mes "A recompensa e entregue quando voce sai.";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "Recompensas:";
+			mes "^0055FFPrimeira conclusao da quest^000000: 900.000 EXP base, 500.000 EXP job e ^0055FF2 Fragmentos Cinzentos^000000.";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "^0055FFConclusoes seguintes^000000: ^0055FF1 Fragmento Cinzento^000000.";
+			mes "^0055FFRecompensa custom da instancia^000000: ^0055FF10x item 9608^000000 e ^0055FF2x item 9198^000000.";
+			next;
+			break;
+		case 3:
+			mes "[Guarda Real Desagradavel]";
+			mes "Mesmo agora, todos os guardas reais estao lutando e morrendo para esses monstros.";
+			next;
+			mes "[Guarda Real Desagradavel]";
+			mes "Nao importa o medo em nossos coracoes, precisamos salvar a princesa!";
+			close;
+		}
+	}
+}
+
+dali02,40,134,5	script	Interdimensional Device#dk	PORTAL,{
+	if (BaseLevel < 120) {
+		mes "[Guarda Real Desagradavel]";
+		mes "Eu preciso de ajuda, mas voce ainda nao e forte o bastante para isso.";
+		next;
+		mes "[Guarda Real Desagradavel]";
+		mes "Volte depois, quando tiver treinado mais e alcancado o nivel 120!";
+		close;
+	}
+	mes "[Guarda Real Desagradavel]";
+	mes "Consigo ver a passagem secreta para dentro do palacio. Esta pronto para salvar a princesa?!";
+	next;
+	if (select( "Entrar", "Parar" ) == 2) {
+		mes "[Guarda Real Desagradavel]";
+		mes "Mesmo agora, todos os guardas reais estao lutando e morrendo para esses monstros.";
+		next;
+		mes "[Guarda Real Desagradavel]";
+		mes "Nao importa o medo em nossos coracoes, precisamos salvar a princesa!";
+		close;
+	}
+	switch( checkquest(1261,PLAYTIME) ) {
+	case -1:
+		break;
+	case 0:
+	case 1:
+		mes "[Guarda Real Desagradavel]";
+		mes "Os monstros que atacaram o palacio estao rondando a entrada secreta. Seria ruim se nos vissem... Espere.";
+		next;
+		mes "Quando o tempo de entrada acabar,";
+		mes "vamos tentar entrar de novo.";
+		close;
+	case 2:
+		mes "^0000ffO tempo para entrar na Maldicao do Espadachim terminou. Tente falar com o Guarda Real Desagradavel de novo.^000000";
+		erasequest 1261;// Cursed Swordman
+		close;
+	}
+	.@party_id = getcharid(1);
+	if (is_party_leader() == false || .@party_id < 1) {
+		mes "[Guarda Real Desagradavel]";
+		mes "Eu so posso abrir a passagem secreta para o lider do grupo. Peca para o lider falar comigo.";
+		close;
+	}
+
+	.@md_name$ = "Ghost Palace";
+	switch( instance_enter(.@md_name$) ) {
+	case IE_OTHER:
+		mes "Ocorreu um erro desconhecido.";
+		close;
+	case IE_NOINSTANCE:
+		mes "^ff0000Dentro do dispositivo ha um buraco escuro. Se quiser entrar, fale primeiro com o Guarda Real Desagradavel.^000000";
+		close;
+	case IE_NOMEMBER:
+		mes "Somente membros registrados podem entrar na instancia " + .@md_name$ + ".";
+		close;
+	case IE_OK:
+		mapannounce "dali", strcharinfo(0) + " do grupo " + getpartyname(.@party_id) + " esta entrando no Palacio das Magoas.", bc_map, 0x00ff99;
+		// warp "1@spa",42,196;
+		setquest 1261;// Cursed Swordman
+		end;
+	}
+}
+
+// 1st floor
+1@spa,41,204,5	script	King#dk	4_M_RUSKING,{
+	mes "[Rei]";
+	mes "A partir de agora, voce sera o guarda pessoal da Princesa Tiara. Eu confio em sua lealdade acima de tudo.";
+	npctalk "Rei: A partir de agora, voce sera o guarda pessoal da Princesa Tiara. Eu confio em sua lealdade acima de tudo.";
+	next;
+	mes "[Guarda Real Sombrio]";
+	mes "Eu vou proteger a princesa com a minha vida.";
+	npctalk "Guarda Real Sombrio: Eu vou proteger a princesa com a minha vida.", instance_npcname("Lurid Royal Guard#dk");
+	next;
+	mes "[Rei]";
+	mes "Os preparativos do casamento seguem como planejado. O principe esta aqui para se encontrar com a princesa.";
+	npctalk "Rei: Os preparativos do casamento seguem como planejado. O principe esta aqui para se encontrar com a princesa.";
+	next;
+	mes "[Guarda Real Sombrio]";
+	mes "...Sim, Vossa Majestade.";
+	npctalk "Guarda Real Sombrio: ...Sim, Vossa Majestade.", instance_npcname("Lurid Royal Guard#dk");
+	next;
+	mes "[Rei]";
+	mes "Pelos deuses, ha monstros no castelo! Acabem com eles agora!";
+	npctalk "Rei: Pelos deuses, ha monstros no castelo! Acabem com eles agora!";
+	close2;
+	donpcevent instance_npcname("#gp_control_1") + "::OnStart";
+	end;
+
+OnInstanceInit:
+	// 1: enabled potential double spawn (official), 0: disabled
+	'bool_double_spawn = 1;
+	'reward_announced = 0;
+
+	'map_spa$ = instance_mapname("1@spa");
+
+	// warps
+	disablenpc instance_npcname("The second floor of Palace");
+	disablenpc instance_npcname("3rd floor in the palace");
+	disablenpc instance_npcname("4th floor in the palace");
+	disablenpc instance_npcname("5th floor of Palace");
+	disablenpc instance_npcname("Way out of Palace");
+
+	// first floor
+	disablenpc instance_npcname("#gp_control_1");
+
+	// second floor
+	disablenpc instance_npcname("Lurid Royal Guard#dk1");
+	disablenpc instance_npcname("Princess Tiara#dk");
+	disablenpc instance_npcname("#gp_control_2");
+
+	// 3rd floor
+	disablenpc instance_npcname("King#dk1");
+	disablenpc instance_npcname("Lurid Royal Guard#dk2");
+	disablenpc instance_npcname("Captain of the Guard#dk");
+	disablenpc instance_npcname("Soldier#dk1");
+	disablenpc instance_npcname("Soldier#dk2");
+	disablenpc instance_npcname("Soldier#dk3");
+	disablenpc instance_npcname("Lurid Royal Guard#dk3");
+	disablenpc instance_npcname("Magic Sword Tartanos#dk1");
+	disablenpc instance_npcname("#gp_control_3");
+
+	// 4th floor
+	disablenpc instance_npcname("#gp_control_4");
+	disablenpc instance_npcname("#gp_control_5");
+	disablenpc instance_npcname("Magic Sword Tartanos#dk2");
+	disablenpc instance_npcname("Visiting Prince#dk");
+	disablenpc instance_npcname("Lurid Royal Guard#dk4");
+	disablenpc instance_npcname("King's Corpse#dk");
+	disablenpc instance_npcname("Captain's Corpse#dk");
+	disablenpc instance_npcname("Soldier's Corpse#dk");
+	disablenpc instance_npcname("Soldier's Corpse#dk1");
+	disablenpc instance_npcname("Soldier's Corpse#dk2");
+	disablenpc instance_npcname("Soldier's Corpse#dk3");
+	disablenpc instance_npcname("Soldier's Corpse#dk4");
+
+	// 5th floor
+	disablenpc instance_npcname("#gp_control_6");
+	disablenpc instance_npcname("Princess Tiara#dk1");
+	disablenpc instance_npcname("Lurid Royal Guard#dk5");
+	disablenpc instance_npcname("King#dk11");
+	disablenpc instance_npcname("Sakray#dk");
+	disablenpc instance_npcname("Magic Sword Tartanos#dk3");
+	disablenpc instance_npcname("#tb");
+	disablenpc instance_npcname("#sv");
+	disablenpc instance_npcname("#tv");
+	end;
+}
+
+1@spa,42,201,1	script	Lurid Royal Guard#dk	4_M_SAKRAYROYAL,{ end; }
+
+1@spa,1,1,1	script	#gp_control_1	HIDDEN_WARP_NPC,{
+	end;
+OnStart:
+	enablenpc instance_npcname("#gp_control_1");
+	disablenpc instance_npcname("King#dk");
+	disablenpc instance_npcname("Lurid Royal Guard#dk");
+	initnpctimer;
+	end;
+OnTimer2000:
+	.@label$ = instance_npcname("#gp_control_1") + "::OnMyMobDead1";
+	monster 'map_spa$,50,194,"Cursed Soldier",2948,1, .@label$;		// CURSED_SOLDIER
+	monster 'map_spa$,34,208,"Cursed Soldier",2948,1, .@label$;		// CURSED_SOLDIER
+	monster 'map_spa$,32,194,"Cursed Gatekeeper",2949,1, .@label$;	// CURSED_SENTINEL
+	monster 'map_spa$,52,209,"Cursed Gatekeeper",2949,1, .@label$;	// CURSED_SENTINEL
+	stopnpctimer;
+	end;
+OnMyMobDead1:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_1") + "::OnMyMobDead1") < (1 + 'bool_double_spawn)) {
+		deltimer instance_npcname("#gp_control_1") + "::OnSpawn1";	// stop double spawn if timer is running
+		addtimer 2000, instance_npcname("#gp_control_1") + "::OnSpawn1";
+	}
+	end;
+OnSpawn1:
+	.@label$ = instance_npcname("#gp_control_1") + "::OnMyMobDead2";
+	monster 'map_spa$,37,182,"Cursed Soldier",2948,1, .@label$;		// CURSED_SOLDIER
+	monster 'map_spa$,46,182,"Cursed Gatekeeper",2949,1, .@label$;	// CURSED_SENTINEL
+	end;
+OnMyMobDead2:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_1") + "::OnMyMobDead2") < 1) {
+		deltimer instance_npcname("#gp_control_1") + "::OnSpawn1";	// stop double spawn if timer is running
+		deltimer instance_npcname("#gp_control_1") + "::OnSpawn2";
+		addtimer 2000, instance_npcname("#gp_control_1") + "::OnSpawn2";
+	}
+	end;
+OnSpawn2:
+	.@label$ = instance_npcname("#gp_control_1") + "::OnMyMobDead3";
+	monster 'map_spa$,30,200,"Cursed Soldier",2948,1, .@label$;		// CURSED_SOLDIER
+	monster 'map_spa$,51,200,"Cursed Gatekeeper",2949,1, .@label$;	// CURSED_SENTINEL
+	monster 'map_spa$,53,199,"Cursed Gatekeeper",2949,1, .@label$;	// CURSED_SENTINEL
+	end;
+OnMyMobDead3:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_1") + "::OnMyMobDead3") < 1) {
+		mapannounce 'map_spa$, "A passagem para o 2 andar do Palacio das Magoas foi aberta.", bc_map,0xFFFF00;
+		enablenpc instance_npcname("The second floor of Palace");
+		enablenpc instance_npcname("Lurid Royal Guard#dk1");
+		enablenpc instance_npcname("Princess Tiara#dk");
+	}
+	end;
+}
+
+// 2nd floor
+1@spa,132,122,7	script	Lurid Royal Guard#dk1	4_M_SAKRAYROYAL,{
+	.@tiara$ = instance_npcname("Princess Tiara#dk");
+	cutin "npc-tiara.bmp",3;
+	mes "[Guarda Real Sombrio]";
+	mes "Sua Alteza, o rei convidou um principe de um pais vizinho para ser seu noivo. Esteja pronta para encontra-lo...";
+	npctalk "Guarda Real Sombrio: Sua Alteza, o rei convidou um principe de um pais vizinho para ser seu noivo. Esteja pronta para encontra-lo...";
+	next;
+	mes "[Princesa Tiara]";
+	mes "Se... se esse casamento foi decidido, o que eu devo fazer?";
+	npctalk "Princesa Tiara: Se... se esse casamento foi decidido, o que eu devo fazer?", .@tiara$;
+	next;
+	mes "[Guarda Real Sombrio]";
+	mes "A unica coisa que posso fazer e proteger voce de qualquer dano fisico.";
+	npctalk "Guarda Real Sombrio: A unica coisa que posso fazer e proteger voce de qualquer dano fisico.";
+	next;
+	mes "[Princesa Tiara]";
+	mes "Entao, o que eu posso fazer?";
+	npctalk "Princesa Tiara: Entao, o que eu posso fazer?", .@tiara$;
+	next;
+	mes "[Guarda Real Sombrio]";
+	mes "Isso e algo que so a senhora pode decidir, Sua Alteza...";
+	npctalk "Guarda Real Sombrio: Isso e algo que so a senhora pode decidir, Sua Alteza...";
+	next;
+	mes "[Princesa Tiara]";
+	mes "Seria mais facil para voce se eu me casasse e fosse enviada para outro pais?";
+	npctalk "Princesa Tiara: Seria mais facil para voce se eu me casasse e fosse enviada para outro pais?", .@tiara$;
+	next;
+	mes "[Guarda Real Sombrio]";
+	mes "Eu sempre ficarei ao seu lado e vou proteger voce para sempre.";
+	npctalk "Guarda Real Sombrio: Eu sempre ficarei ao seu lado e vou proteger voce para sempre.";
+	cutin "npc-tiara.bmp",255;
+	next;
+	mes "[Princesa Tiara]";
+	mes "Monstros entraram no castelo? Por favor, me proteja!";
+	npctalk "Princesa Tiara: Monstros entraram no castelo? Por favor, me proteja!", .@tiara$;
+	next;
+	mes "[Guarda Real Sombrio]";
+	mes "Fique atras de mim. Vamos!";
+	npctalk "Guarda Real Sombrio: Fique atras de mim. Vamos!";
+	close2;
+	donpcevent instance_npcname("#gp_control_2") + "::OnStart";
+	end;
+}
+
+1@spa,135,125,3	duplicate(Lurid Royal Guard#dk)	Princess Tiara#dk	4_F_MAYSEL
+
+1@spa,1,1,1	script	#gp_control_2	HIDDEN_WARP_NPC,{
+	end;
+OnStart:
+	enablenpc instance_npcname("#gp_control_2");
+	disablenpc instance_npcname("Lurid Royal Guard#dk1");
+	disablenpc instance_npcname("Princess Tiara#dk");
+	disablenpc instance_npcname("The second floor of Palace");
+
+	killmonster 'map_spa$, instance_npcname("#gp_control_1") + "::OnMyMobDead1";
+	killmonster 'map_spa$, instance_npcname("#gp_control_1") + "::OnMyMobDead2";
+	killmonster 'map_spa$, instance_npcname("#gp_control_1") + "::OnMyMobDead3";
+	disablenpc instance_npcname("#gp_control_1");
+	initnpctimer;
+	end;
+OnTimer2000:
+	.@label$ = instance_npcname("#gp_control_2") + "::OnMyMobDead1";
+	monster 'map_spa$,135,116,"Broken Promise",2950,1, .@label$;	// BROKEN_MIND
+	monster 'map_spa$,110,120,"Broken Promise",2950,1, .@label$;	// BROKEN_MIND
+	monster 'map_spa$,122,112,"Floating Sorrow",2951,1, .@label$;	// FLOATING_WORD
+	monster 'map_spa$,121,129,"Unfulfilled Love",2952,1, .@label$;	// LIKE_LOVE
+	stopnpctimer;
+	end;
+OnMyMobDead1:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_2") + "::OnMyMobDead1") < 1) {
+		sleep 2000;
+		.@label$ = instance_npcname("#gp_control_2") + "::OnMyMobDead2";
+		monster 'map_spa$,120,103,"Broken Promise",2950,1, .@label$;	// BROKEN_MIND
+		monster 'map_spa$,115,137,"Floating Sorrow",2951,1, .@label$;	// FLOATING_WORD
+		monster 'map_spa$,103,130,"Unfulfilled Love",2952,1, .@label$;	// LIKE_LOVE
+	}
+	end;
+OnMyMobDead2:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_2") + "::OnMyMobDead2") < 1) {
+		sleep 2000;
+		.@label$ = instance_npcname("#gp_control_2") + "::OnMyMobDead3";
+		monster 'map_spa$,98,119,"Floating Sorrow",2951,1, .@label$;	// FLOATING_WORD
+		monster 'map_spa$,98,120,"Floating Sorrow",2951,1, .@label$;	// FLOATING_WORD
+		monster 'map_spa$,103,109,"Unfulfilled Love",2952,1, .@label$;	// LIKE_LOVE
+	}
+	end;
+OnMyMobDead3:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_2") + "::OnMyMobDead3") < 1) {
+		mapannounce 'map_spa$, "A passagem para o 3 andar do palacio foi aberta.", bc_map,0xFFFF00;
+		enablenpc instance_npcname("3rd floor in the palace");
+		enablenpc instance_npcname("King#dk1");
+		enablenpc instance_npcname("Lurid Royal Guard#dk2");
+		enablenpc instance_npcname("Captain of the Guard#dk");
+		enablenpc instance_npcname("Soldier#dk1");
+		enablenpc instance_npcname("Soldier#dk2");
+		enablenpc instance_npcname("Soldier#dk3");
+		disablenpc instance_npcname("#gp_control_2");
+	}
+	end;
+}
+
+// 3rd floor
+1@spa,32,54,1	script	King#dk1	4_M_RUSKING,{
+	mes "[Rei]";
+	mes "Foi voce quem trouxe os monstros para ca! Quer se livrar de mim e ficar com a princesa?";
+	npctalk "Rei: Foi voce quem trouxe os monstros para ca! Quer se livrar de mim e ficar com a princesa?";
+	next;
+	mes "[Guarda Real Sombrio]";
+	mes "E uma armadilha, Vossa Majestade! O senhor precisa confiar em mim!";
+	npctalk "Guarda Real Sombrio: E uma armadilha, Vossa Majestade! O senhor precisa confiar em mim!", instance_npcname("Lurid Royal Guard#dk2");
+	next;
+	mes "[Rei]";
+	mes "Cale-se! Voce me traiu! Eu confiei em voce... vai pagar por sua desonra.";
+	npctalk "Rei: Cale-se! Voce me traiu! Eu confiei em voce... vai pagar por sua desonra.";
+	next;
+	mes "[Rei]";
+	mes "Voce vai sofrer pelo resto da sua vida.";
+	npctalk "Rei: Voce vai sofrer pelo resto da sua vida.";
+	close2;
+	disablenpc instance_npcname("3rd floor in the palace");
+	disablenpc instance_npcname("King#dk1");
+	disablenpc instance_npcname("Captain of the Guard#dk");
+	disablenpc instance_npcname("Soldier#dk1");
+	disablenpc instance_npcname("Soldier#dk2");
+	disablenpc instance_npcname("Soldier#dk3");
+	disablenpc instance_npcname("Lurid Royal Guard#dk2");
+	donpcevent instance_npcname("Magic Sword Tartanos#dk1") + "::OnStart";
+	end;
+}
+
+1@spa,35,56,5	script	Magic Sword Tartanos#dk1	4_TRACE,{
+	end;
+OnStart:
+	enablenpc instance_npcname("Magic Sword Tartanos#dk1");
+	enablenpc instance_npcname("Lurid Royal Guard#dk3");
+	initnpctimer;
+	end;
+OnTimer5000:
+	npctalk "Voz Sombria: Oh, fiel guarda real, voce esta preso.";
+	end;
+OnTimer8000:
+	npctalk "Voz Sombria: A conspiracao no palacio colocou sua princesa em grande perigo...";
+	end;
+OnTimer12000:
+	npctalk "Guarda Real Sombrio: Quem e voce? Mostre-se!", instance_npcname("Lurid Royal Guard#dk3");
+	end;
+OnTimer15000:
+	npctalk "Voz Sombria: Ah... entao voce consegue me ouvir?";
+	end;
+OnTimer20000:
+	npctalk "Guarda Real Sombrio: ...?", instance_npcname("Lurid Royal Guard#dk3");
+	end;
+OnTimer23000:
+	npctalk "Voz Sombria: Eu posso lhe dar poder ilimitado. Se fizer um pacto comigo.";
+	end;
+OnTimer28000:
+	npctalk "Guarda Real Sombrio: E..eu...", instance_npcname("Lurid Royal Guard#dk3");
+	end;
+OnTimer33000:
+	npctalk "Espada Magica Tartanos: Kukuku... O que voce quer, garoto?";
+	end;
+OnTimer34000:
+	stopnpctimer;
+	disablenpc instance_npcname("Magic Sword Tartanos#dk1");
+	disablenpc instance_npcname("Lurid Royal Guard#dk3");
+	donpcevent instance_npcname("#gp_control_3") + "::OnStart";
+	end;
+}
+
+1@spa,28,52,7	duplicate(Lurid Royal Guard#dk)	Captain of the Guard#dk	4_M_KY_KNT
+1@spa,25,53,7	duplicate(Lurid Royal Guard#dk)	Soldier#dk1	4_M_CRU_SOLD
+1@spa,34,53,1	duplicate(Lurid Royal Guard#dk)	Soldier#dk2	4_M_CRU_SOLD
+1@spa,30,52,7	duplicate(Lurid Royal Guard#dk)	Soldier#dk3	4_M_KY_SOLD
+1@spa,30,58,5	duplicate(Lurid Royal Guard#dk)	Lurid Royal Guard#dk2	4_M_SAKRAY_TIED
+1@spa,31,57,5	duplicate(Lurid Royal Guard#dk)	Lurid Royal Guard#dk3	4_M_SAKRAY_TIED
+
+1@spa,1,1,1	script	#gp_control_3	HIDDEN_WARP_NPC,{
+	end;
+OnStart:
+	enablenpc instance_npcname("#gp_control_3");
+	initnpctimer;
+	end;
+OnTimer2000:
+	.@label$ = instance_npcname("#gp_control_3") + "::OnMyMobDead1";
+	monster 'map_spa$,31,57, "Regretful Memory",2953,1, .@label$; 	// CURSED_MEMORY
+	monster 'map_spa$,59,24, "Regretful Memory",2953,1, .@label$; 	// CURSED_MEMORY
+	monster 'map_spa$,23,40, "Wasted Friendship",2955,1, .@label$; 	// OLD_FRIENDSHIP
+	monster 'map_spa$,54,45, "Tarnished Oath",2954,1, .@label$; 	// COLORLESS_VOW
+	monster 'map_spa$,26,20, "Tarnished Oath",2954,1, .@label$; 	// COLORLESS_VOW
+	stopnpctimer;
+	end;
+OnMyMobDead1:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_3") + "::OnMyMobDead1") < 1)
+		addtimer 2000, instance_npcname("#gp_control_3") + "::OnSpawn1";
+	end;
+OnSpawn1:
+	.@label$ = instance_npcname("#gp_control_3") + "::OnMyMobDead2";
+	monster 'map_spa$,30,52, "Tarnished Oath",2954,1, .@label$; 	// COLORLESS_VOW
+	monster 'map_spa$,58,58, "Wasted Friendship",2955,1, .@label$; 	// OLD_FRIENDSHIP
+	monster 'map_spa$,54,24, "Regretful Memory",2953,1, .@label$; 	// CURSED_MEMORY
+	end;
+OnMyMobDead2:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_3") + "::OnMyMobDead2") < (1 + 'bool_double_spawn)) {
+		deltimer instance_npcname("#gp_control_3") + "::OnAnnounce";
+		addtimer 500, instance_npcname("#gp_control_3") + "::OnAnnounce";
+	}
+	end;
+OnAnnounce:
+	mapannounce 'map_spa$, "A passagem para o 4 andar do palacio foi aberta.", bc_map,0xFFFF00;
+	enablenpc instance_npcname("4th floor in the palace");
+	deltimer instance_npcname("#gp_control_3") + "::OnSpawn2";	// stop double spawn if timer is running
+	addtimer 2000, instance_npcname("#gp_control_3") + "::OnSpawn2";
+	end;
+OnSpawn2:
+	donpcevent instance_npcname("#gp_control_4") + "::OnStart";
+	// 35 mobs
+	.@label$ = instance_npcname("#gp_control_3") + "::OnMyMobDead3";
+	monster 'map_spa$,67,46, "Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	unittalk $@mobid[0], "Voce esta preso...";
+	monster 'map_spa$,62,48, "Tarnished Oath",2954,1, .@label$;		// COLORLESS_VOW
+	unittalk $@mobid[0], "Fuja!";
+	monster 'map_spa$,57,46, "Wasted Friendship",2955,1, .@label$;	// OLD_FRIENDSHIP
+	unittalk $@mobid[0], "Fuja rapido!";
+	monster 'map_spa$,51,48, "Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	unittalk $@mobid[0], "Fiel guarda real...";
+	monster 'map_spa$,56,55, "Tarnished Oath",2954,1, .@label$;		// COLORLESS_VOW
+	unittalk $@mobid[0], "Fuja!";
+	monster 'map_spa$,62,56, "Wasted Friendship",2955,1, .@label$;	// OLD_FRIENDSHIP
+	unittalk $@mobid[0], "Voce esta preso...";
+	monster 'map_spa$,66,58, "Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	unittalk $@mobid[0], "Voce colocou sua princesa em grande perigo...";
+	monster 'map_spa$,66,64, "Tarnished Oath",2954,1, .@label$;		// COLORLESS_VOW
+	unittalk $@mobid[0], "Fiel guarda real...";
+	monster 'map_spa$,62,65, "Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	unittalk $@mobid[0], "Fuja rapido!";
+	monster 'map_spa$,57,67, "Tarnished Oath",2954,1, .@label$;		// COLORLESS_VOW
+	unittalk $@mobid[0], "Voce esta preso...";
+	monster 'map_spa$,49,66, "Wasted Friendship",2955,1, .@label$;	// OLD_FRIENDSHIP
+	unittalk $@mobid[0], "Fuja!";
+	monster 'map_spa$,44,66, "Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	unittalk $@mobid[0], "Fuja rapido!";
+	monster 'map_spa$,45,20, "Tarnished Oath",2954,1, .@label$;		// COLORLESS_VOW
+	unittalk $@mobid[0], "Fuja!";
+	monster 'map_spa$,38,20, "Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	unittalk $@mobid[0], "Voce esta preso...";
+	monster 'map_spa$,32,20, "Wasted Friendship",2955,1, .@label$;	// OLD_FRIENDSHIP
+	unittalk $@mobid[0], "Fuja rapido!";
+	monster 'map_spa$,51,22, "Wasted Friendship",2955,1, .@label$;	// OLD_FRIENDSHIP
+	unittalk $@mobid[0], "Fuja rapido!";
+	monster 'map_spa$,26,34,"Wasted Friendship",2955,1, .@label$;	// OLD_FRIENDSHIP
+	unittalk $@mobid[0], "Fuja!";
+	monster 'map_spa$,21,37,"Tarnished Oath",2954,1, .@label$;		// COLORLESS_VOW
+	unittalk $@mobid[0], "Fiel guarda real...";
+	monster 'map_spa$,18,39,"Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	unittalk $@mobid[0], "Fuja rapido!";
+	monster 'map_spa$,21,45,"Tarnished Oath",2954,1, .@label$;		// COLORLESS_VOW
+	unittalk $@mobid[0], "Fuja!";
+	monster 'map_spa$,23,49,"Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	unittalk $@mobid[0], "Voce esta preso...";
+	monster 'map_spa$,25,54,"Wasted Friendship",2955,1, .@label$;	// OLD_FRIENDSHIP
+	unittalk $@mobid[0], "Fuja rapido!";
+	monster 'map_spa$,29,54,"Tarnished Oath",2954,1, .@label$;		// COLORLESS_VOW
+	unittalk $@mobid[0], "Voce colocou sua princesa em grande perigo...";
+	monster 'map_spa$,56,39,"Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	unittalk $@mobid[0], "Fuja!";
+	monster 'map_spa$,61,36,"Tarnished Oath",2954,1, .@label$;		// COLORLESS_VOW
+	unittalk $@mobid[0], "Fiel guarda real...";
+	monster 'map_spa$,66,38,"Wasted Friendship",2955,1, .@label$;	// OLD_FRIENDSHIP
+	unittalk $@mobid[0], "Fuja rapido!";
+	monster 'map_spa$,42,54,"Wasted Friendship",2955,1, .@label$;	// OLD_FRIENDSHIP
+	unittalk $@mobid[0], "Fuja!";
+	monster 'map_spa$,35,54,"Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	unittalk $@mobid[0], "Voce esta preso...";
+	monster 'map_spa$,43,60,"Tarnished Oath",2954,1, .@label$;		// COLORLESS_VOW
+	unittalk $@mobid[0], "Fiel guarda real...";
+	monster 'map_spa$,30,25,"Tarnished Oath",2954,1, .@label$;		// COLORLESS_VOW
+	unittalk $@mobid[0], "Voce colocou sua princesa em grande perigo...";
+	monster 'map_spa$,30,31,"Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	unittalk $@mobid[0], "Voce esta preso...";
+	monster 'map_spa$,65,64, "Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	monster 'map_spa$,65,67, "Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	monster 'map_spa$,18,43,"Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	monster 'map_spa$,21,43,"Regretful Memory",2953,1, .@label$;	// CURSED_MEMORY
+	end;
+OnMyMobDead3:
+	end;
+}
+
+// 4th floor
+1@spa,1,1,1	script	#gp_control_4	HIDDEN_WARP_NPC,{
+	end;
+OnStart:
+	enablenpc instance_npcname("#gp_control_4");
+	.@label$ = instance_npcname("#gp_control_4") + "::OnMyMobDead1";
+	monster 'map_spa$,215,194, "Sweet Slaughter",2956,1, .@label$;		// SWEET_SLAUGHTER
+	monster 'map_spa$,194,178, "Sweet Slaughter",2956,1, .@label$;		// SWEET_SLAUGHTER
+	monster 'map_spa$,191,211, "Sweet Slaughter",2956,1, .@label$;		// SWEET_SLAUGHTER
+	monster 'map_spa$,185,203, "Cursed Gatekeeper",2949,1, .@label$;	// CURSED_SENTINEL
+	monster 'map_spa$,209,218, "Cursed Gatekeeper",2949,1, .@label$;	// CURSED_SENTINEL
+	end;
+OnMyMobDead1:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_4") + "::OnMyMobDead1") < (1 + 'bool_double_spawn)) {
+		deltimer instance_npcname("#gp_control_4") + "::OnSpawn1";
+		addtimer 2000, instance_npcname("#gp_control_4") + "::OnSpawn1";
+	}
+	end;
+OnSpawn1:
+	.@label$ = instance_npcname("#gp_control_4") + "::OnMyMobDead2";
+	monster 'map_spa$,189,192, "Cursed Gatekeeper",2949,1, .@label$;	// CURSED_SENTINEL
+	monster 'map_spa$,211,209, "Sweet Slaughter",2956,1, .@label$;		// SWEET_SLAUGHTER
+	end;
+OnMyMobDead2:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_4") + "::OnMyMobDead2") < 1) {
+		enablenpc instance_npcname("Magic Sword Tartanos#dk2");
+		enablenpc instance_npcname("Visiting Prince#dk");
+		enablenpc instance_npcname("Lurid Royal Guard#dk4");
+		enablenpc instance_npcname("King's Corpse#dk");
+		enablenpc instance_npcname("Captain's Corpse#dk");
+		enablenpc instance_npcname("Soldier's Corpse#dk");
+		enablenpc instance_npcname("Soldier's Corpse#dk1");
+		enablenpc instance_npcname("Soldier's Corpse#dk2");
+		enablenpc instance_npcname("Soldier's Corpse#dk3");
+		enablenpc instance_npcname("Soldier's Corpse#dk4");
+	}
+	end;
+}
+
+1@spa,199,214,1	script	Lurid Royal Guard#dk4	4_M_SAKRAYROYAL,{
+	.@prince$ = instance_npcname("Visiting Prince#dk");
+	mes "[Guarda Real Sombrio]";
+	mes "Onde esta a Princesa Tiara?";
+	npctalk "Guarda Real Sombrio: Onde esta a Princesa Tiara?";
+	next;
+	mes "[Visiting Prince]";
+	mes "Voce chegou tarde demais... mas trouxe o que eu estava procurando. Obrigado pela ajuda.";
+	npctalk "Visiting Prince: Voce chegou tarde demais... mas trouxe o que eu estava procurando. Obrigado pela ajuda.", .@prince$;
+	next;
+	mes "[Visiting Prince]";
+	mes "Espada Magica Amaldicoada Tartanos! Esta pronta para ter um novo mestre?";
+	npctalk "Visiting Prince: Espada Magica Amaldicoada Tartanos! Esta pronta para ter um novo mestre?", .@prince$;
+	next;
+	cutin "tartanos.bmp",3;
+	mes "[Espada Magica Tartanos]";
+	mes "Como ousa!";
+	npctalk "Espada Magica Tartanos: Como ousa!", instance_npcname("Magic Sword Tartanos#dk2");
+	next;
+	mes "[Visiting Prince]";
+	mes "aah, aah !!!";
+	npctalk "Visiting Prince: Aah, aah!!!", .@prince$;
+	donpcevent instance_npcname("#gp_control_5") + "::OnStart";
+	close2;
+	cutin "",255;
+	end;
+}
+1@spa,201,214,1	duplicate(Lurid Royal Guard#dk)	Magic Sword Tartanos#dk2	CLEAR_NPC
+1@spa,197,218,5	duplicate(Lurid Royal Guard#dk)	Visiting Prince#dk	4_M_KNIGHT_SILVER
+1@spa,194,214,5	duplicate(Lurid Royal Guard#dk)	King's Corpse#dk	4_M_TRISTAN
+1@spa,211,194,3	duplicate(Lurid Royal Guard#dk)	Captain's Corpse#dk	4_M_LIEMAN
+1@spa,201,198,1	duplicate(Lurid Royal Guard#dk)	Soldier's Corpse#dk	4_M_DIEMAN
+1@spa,197,190,1	duplicate(Lurid Royal Guard#dk)	Soldier's Corpse#dk1	4_M_DIEMAN
+1@spa,191,207,7	duplicate(Lurid Royal Guard#dk)	Soldier's Corpse#dk2	4_M_DIEMAN
+1@spa,206,209,7	duplicate(Lurid Royal Guard#dk)	Soldier's Corpse#dk3	4_M_DIEMAN
+1@spa,189,195,1	duplicate(Lurid Royal Guard#dk)	Soldier's Corpse#dk4	4_M_DIEMAN
+
+1@spa,1,1,1	script	#gp_control_5	HIDDEN_WARP_NPC,{
+	end;
+OnStart:
+	enablenpc instance_npcname("#gp_control_5");
+	disablenpc instance_npcname("Magic Sword Tartanos#dk2");
+	disablenpc instance_npcname("Visiting Prince#dk");
+	disablenpc instance_npcname("Lurid Royal Guard#dk4");
+	disablenpc instance_npcname("King's Corpse#dk");
+	disablenpc instance_npcname("Captain's Corpse#dk");
+	disablenpc instance_npcname("Soldier's Corpse#dk");
+	disablenpc instance_npcname("Soldier's Corpse#dk1");
+	disablenpc instance_npcname("Soldier's Corpse#dk2");
+	disablenpc instance_npcname("Soldier's Corpse#dk3");
+	disablenpc instance_npcname("Soldier's Corpse#dk4");
+	sleep 1000;
+	.@label$ = instance_npcname("#gp_control_5") + "::OnMyMobDead";
+	monster 'map_spa$,198,218, "Torturous Redeemer",2959,1, .@label$;	// TORTUROUS_REDEEMER
+	monster 'map_spa$,198,182, "Sweet Slaughter",2956,1, .@label$;		// SWEET_SLAUGHTER
+	end;
+OnMyMobDead:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_5") + "::OnMyMobDead") < 1) {
+		deltimer instance_npcname("#gp_control_4") + "::OnSpawn1";	// stop double spawn if timer is running
+		mapannounce 'map_spa$, "A passagem para o 5 andar do palacio foi aberta.", bc_map,0xFFFF00;
+		disablenpc instance_npcname("4th floor in the palace");
+		enablenpc instance_npcname("5th floor of Palace");
+		enablenpc instance_npcname("Princess Tiara#dk1");
+		enablenpc instance_npcname("Lurid Royal Guard#dk5");
+
+		killmonster 'map_spa$, instance_npcname("#gp_control_3") + "::OnMyMobDead2";
+		killmonster 'map_spa$, instance_npcname("#gp_control_3") + "::OnMyMobDead3";
+		disablenpc instance_npcname("#gp_control_3");
+	}
+	end;
+}
+
+// 5th floor
+1@spa,216,43,3	script	Princess Tiara#dk1	4_F_MAYSEL,{
+	.@guard$ = instance_npcname("Lurid Royal Guard#dk5");
+	mes "[Princesa Tiara]";
+	mes "Voce cumpriu sua promessa.";
+	npctalk "Princesa Tiara: Voce cumpriu sua promessa.";
+	next;
+	mes "[Guarda Real Sombrio]";
+	mes "princesa!";
+	npctalk "Guarda Real Sombrio: Princesa!", .@guard$;
+	next;
+	cutin "npc-tiara.bmp",3;
+	mes "[Princesa Tiara]";
+	mes "Obrigada... agora posso descansar ao seu lado...";
+	npctalk "Princesa Tiara: Obrigada... agora posso descansar ao seu lado...";
+	next;
+	mes "[Guarda Real Sombrio]";
+	mes "Nao..Nao!!!!!";
+	npctalk "Guarda Real Sombrio: Nao..Nao!!!!!", .@guard$;
+	next;
+	mes "[A voz da Princesa Tiara]";
+	mes "Eu quero ficar com voce para sempre em paz... para sempre...";
+	npctalk "Princesa Tiara: Eu quero ficar com voce para sempre em paz... para sempre...";
+	next;
+	cutin "b-tiara.BMP",3;
+	mes "[Guarda Real Sombrio]";
+	mes "nao.....Ahh ahh ahh!!!!~!";
+	npctalk "Guarda Real Sombrio: nao.....Ahh ahh ahh!!!!~!", .@guard$;
+	next;
+	mes "[A voz da Princesa Tiara]";
+	mes "Eu amo voce...";
+	npctalk "Princesa Tiara: Eu amo voce...";
+	cutin "",255;
+	close2;
+	donpcevent instance_npcname("#gp_control_6") + "::OnStart";
+	end;
+}
+
+1@spa,213,42,7	duplicate(Lurid Royal Guard#dk)	Lurid Royal Guard#dk5	4_M_SAKRAYROYAL
+
+1@spa,1,1,1	script	#gp_control_6	HIDDEN_WARP_NPC,{
+	end;
+OnStart:
+	enablenpc instance_npcname("#gp_control_6");
+	disablenpc instance_npcname("Princess Tiara#dk1");
+	disablenpc instance_npcname("Lurid Royal Guard#dk5");
+
+	killmonster 'map_spa$, instance_npcname("#gp_control_4") + "::OnMyMobDead1";
+	killmonster 'map_spa$, instance_npcname("#gp_control_4") + "::OnMyMobDead2";
+	killmonster 'map_spa$, instance_npcname("#gp_control_5") + "::OnMyMobDead";
+	disablenpc instance_npcname("#gp_control_4");
+	disablenpc instance_npcname("#gp_control_5");
+	disablenpc instance_npcname("5th floor of Palace");
+	sleep 2000;
+	.@label$ = instance_npcname("#gp_control_6") + "::OnMyMobDead1";
+	monster 'map_spa$,217,52, "Forgotten Name" ,2957,1, .@label$;	// FORGOTTEN_NAME
+	unittalk $@mobid[0], "Acorde! Olhe para nos... Somos monstros?";
+	monster 'map_spa$,190,21, "Tarnished Oath" ,2954,1, .@label$;	// COLORLESS_VOW
+	unittalk $@mobid[0], "Sakray matou o Rei e tentou nos matar!";
+	monster 'map_spa$,198,49, "Tarnished Oath" ,2954,1, .@label$;	// COLORLESS_VOW
+	unittalk $@mobid[0], "O que e isso..??";
+	monster 'map_spa$,212,28, "Fatal Days" ,2958,1, .@label$;		// FATAL_DAYS
+	unittalk $@mobid[0], "Sakray matou uma princesa!";
+	end;
+OnMyMobDead1:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_6") + "::OnMyMobDead1") < 1) {
+		sleep 2000;
+		.@label$ = instance_npcname("#gp_control_6") + "::OnMyMobDead2";
+		monster 'map_spa$,217,43, "Forgotten Name" ,2957,1, .@label$;	// FORGOTTEN_NAME
+		unittalk $@mobid[0], "Acorde! Olhe para nos... Somos monstros?";
+		monster 'map_spa$,193,24, "Forgotten Name" ,2957,1, .@label$;	// FORGOTTEN_NAME
+	unittalk $@mobid[0], "Sakray..?? por que.....Sakray!";
+		monster 'map_spa$,216,59, "Tarnished Oath" ,2954,1, .@label$;	// COLORLESS_VOW
+		unittalk $@mobid[0], "Sakray matou o Rei e tentou nos matar!";
+		monster 'map_spa$,197,57, "Fatal Days" ,2958,1, .@label$;		// FATAL_DAYS
+		unittalk $@mobid[0], "Sakray matou uma princesa!";
+	}
+	end;
+OnMyMobDead2:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_6") + "::OnMyMobDead2") < 1) {
+		sleep 2000;
+		.@label$ = instance_npcname("#gp_control_6") + "::OnMyMobDead3";
+		monster 'map_spa$,193,39, "Forgotten Name" ,2957,1, .@label$;	// FORGOTTEN_NAME
+		unittalk $@mobid[0], "Acorde! Olhe para nos... Somos monstros?";
+		monster 'map_spa$,212,34, "Forgotten Name" ,2957,1, .@label$;	// FORGOTTEN_NAME
+		unittalk $@mobid[0], "Sakray..?? por que.....Sakray!";
+		monster 'map_spa$,201,64, "Tarnished Oath" ,2954,1, .@label$;	// COLORLESS_VOW
+		unittalk $@mobid[0], "Sakray matou o Rei e tentou nos matar!";
+		monster 'map_spa$,175,44, "Fatal Days" ,2958,1, .@label$;		// FATAL_DAYS
+		unittalk $@mobid[0], "Sakray matou uma princesa!";
+	}
+	end;
+OnMyMobDead3:
+	if (mobcount('map_spa$, instance_npcname("#gp_control_6") + "::OnMyMobDead3") < 1) {
+		sleep 2000;
+		monster 'map_spa$,200,45, "Torturous Redeemer" ,2961,1, instance_npcname("#gp_control_6") + "::OnMyMobDead4";	// E_TORTUROUS_REDEEMER
+	unittalk $@mobid[0], "Espada Magica Tartanos! Eu vou destruir voce se nao puder te possuir... Oh nao! Como isso pode ser?";
+		sleep 5000;
+		killmonster 'map_spa$, instance_npcname("#gp_control_6") + "::OnMyMobDead4";
+		enablenpc instance_npcname("Sakray#dk");
+		enablenpc instance_npcname("Magic Sword Tartanos#dk3");
+		disablenpc instance_npcname("#gp_control_6");
+	}
+	end;
+OnMyMobDead4:
+	end;
+}
+
+1@spa,196,44,5	script	Sakray#dk	4_M_SAKRAY,{
+	mes "[Guarda Real Sombrio]";
+	mes "Voce esta satisfeito..? Espada Magica Tartanos?";
+	npctalk "Guarda Real Sombrio: Voce esta satisfeito..? Espada Magica Tartanos?";
+	next;
+	mes "[Espada Magica Tartanos]";
+	mes "Eu preciso de mais sangue.. Sakray, ofereca o sangue dele.";
+	npctalk "Espada Magica Tartanos: Eu preciso de mais sangue.. Sakray, ofereca o sangue dele.", instance_npcname("Magic Sword Tartanos#dk3");
+	next;
+	mes "[Sakray]";
+	mes "Certo, isso e bom. Um viajante. Voce viu?";
+	npctalk "Sakray: Certo, isso e bom. Um viajante. Voce viu?";
+	next;
+	mes "[" + strcharinfo(0) + "]";
+	mes "Sakray, o que voce quer? Compaixao? Ou isso e uma armadilha?";
+	unittalk getcharid(3), "" + strcharinfo(0) + " : Sakray, o que voce quer? Compaixao? Ou isso e uma armadilha?";
+	next;
+	mes "[Sakray]";
+	mes "Nao... eu nao preciso fazer esforco algum para pegar um novato.";
+	npctalk "Sakray: Nao... eu nao preciso fazer esforco algum para pegar um novato.";
+	next;
+	mes "[" + strcharinfo(0) + "]";
+	mes "Se e assim... entao por que...?"; 
+	unittalk getcharid(3), "" + strcharinfo(0) + " : Se e assim... entao por que...?"; 
+	next;
+	cutin "cry-b.bmp",2;
+	mes "[Sakray]";
+	mes "Eu queria me livrar de uma parte da minha humanidade atraves de voce.";
+	npctalk "Sakray: Eu queria me livrar de uma parte da minha humanidade atraves de voce.";
+	next;
+	mes "[Sakray]";
+	mes "Estou bastante satisfeito com o resultado.";
+	npctalk "Sakray: Estou bastante satisfeito com o resultado.";
+	next;
+	mes "[Espada Magica Tartanos]";
+	mes "Sakray, ofereca o sangue para mim agora!";
+	npctalk "Espada Magica Tartanos: Sakray, ofereca o sangue para mim agora!", instance_npcname("Magic Sword Tartanos#dk3");
+	next;
+	mes "[Sakray]";
+	mes "Se voce estivesse no meu lugar, o que faria?";
+	npctalk "Sakray: Se voce estivesse no meu lugar, o que faria?";
+	next;
+	mes "[Sakray]";
+	mes "Voce conseguiria se libertar dessa maldicao?";
+	npctalk "Sakray: Voce conseguiria se libertar dessa maldicao?";
+	next;
+	mes "[" + strcharinfo(0) + "]";
+	mes "...";
+	unittalk getcharid(3), "" + strcharinfo(0) + " : ...";
+	next;
+	mes "[Sakray]";
+	mes "Heh heh... Eu vou continuar observando voce ate chegar o dia em que estara maduro o bastante.";
+	npctalk "Sakray: Heh heh... Eu vou continuar observando voce ate chegar o dia em que estara maduro o bastante.";
+	next;
+	mes "[Sakray]";
+	mes "Mais tarde, eu estarei disposto a cacar voce por Tartanos.";
+	npctalk "Sakray: Mais tarde, eu estarei disposto a cacar voce por Tartanos.";
+	cutin "",255;
+	next;
+	mes "[Sakray]";
+	mes "Entao, adeus.";
+	npctalk "Sakray: Entao, adeus.";
+	close2;
+	donpcevent instance_npcname("#tb") + "::OnStart";
+	end;
+}
+
+1@spa,196,46,1	script	#tb	CLEAR_NPC,{
+	end;
+OnStart:
+	disablenpc instance_npcname("Sakray#dk");
+	disablenpc instance_npcname("Magic Sword Tartanos#dk3");
+	enablenpc instance_npcname("#tb");
+	enablenpc instance_npcname("#sv");
+	enablenpc instance_npcname("#tv");
+	initnpctimer;
+	end;
+OnTimer3000:
+	npctalk "Voz da Princesa Tiara : O que posso fazer por voce?";
+	end;
+OnTimer8000:
+	npctalk "Voz de Sakray : Eu sempre ficarei ao seu lado. Descanse ao meu lado.", instance_npcname("#sv");
+	end;
+OnTimer13000:
+	npctalk "Espada Magica Tartanos: Sakray, nao se esqueca do pacto de sangue entre nos.", instance_npcname("#tv");
+	end;
+OnTimer17000:
+	npctalk "Espada Magica Tartanos: Sua alma e minha ate voce encontrar o sangue que me satisfaca...", instance_npcname("#tv");
+	end;
+OnTimer22000:
+	npctalk "Voz de Sakray : Descanse nas sombras comigo.", instance_npcname("#sv");
+	end;
+OnTimer25000:
+	npctalk "Voz de Sakray : Na escuridao para sempre...", instance_npcname("#sv");
+	end;
+OnTimer28500:
+	disablenpc instance_npcname("#tb");
+	disablenpc instance_npcname("#sv");
+	disablenpc instance_npcname("#tv");
+	mapannounce 'map_spa$, "Esta na hora de deixar o Palacio das Magoas.", bc_map,0xFFFF00;
+	enablenpc instance_npcname("Way out of Palace");
+	enablenpc instance_npcname("King#dk11");
+	end;
+}
+
+1@spa,195,41,1	duplicate(Lurid Royal Guard#dk)	Magic Sword Tartanos#dk3	CLEAR_NPC
+1@spa,198,43,1	duplicate(Lurid Royal Guard#dk)	#sv	CLEAR_NPC
+1@spa,196,41,1	duplicate(Lurid Royal Guard#dk)	#tv	CLEAR_NPC
+
+1@spa,204,29,1	script	King#dk11	4_M_RUSKING,{
+	disable_items;
+	mes "[Rei]";
+	mes "Ei, voce esta vivo?";
+	mes "Eu nao esperava encontrar alguem que ainda estivesse vivo.";
+	next;
+	mes "[Rei]";
+	mes "Se voce me der fragmentos cinzentos, eu posso forjar os equipamentos de Sakray para voce.";
+	next;
+	mes "[Rei]";
+	mes "As armas custam 200 " + getitemname(6672) + ".";
+	mes "As armaduras custam 100 " + getitemname(6672) + ".";
+	next;
+	if (select("Abrir troca:Cancelar") == 2)
+		close;
+	close2;
+	callshop "barter_eden_ghostpalace";
+	end;
+}
+
+1@spa,210,28,0	script	Way out of Palace	WARPNPC,2,2,{
+	end;
+OnTouch_:
+	mes "Esta na hora de deixar o Palacio das Magoas.";
+	mes "Tudo agora esta completo";
+	mes "e vai desaparecer..";
+	close2;
+	if (isbegin_quest(1263) == 2)
+		getitem 6672,1;// Gray Shard
+	else {
+		setquest 1263;// Cursed Swordman
+		completequest 1263;
+		getexp 900000,500000;
+		getitem 6672,2;// Gray Shard
+	}
+	if (#GhostPalace_STATUS == 2) {
+		callfunc("F_AddRep", 1, 10, 110002, 3000);
+		callfunc("F_DiaryRefreshDaily");
+		set #instancia, 2;
+		if (!'reward_announced) {
+			callfunc("F_InstanceFinishAnnounce", "Palacio das Magoas");
+			'reward_announced = 1;
+		}
+		getitem 9608,10;
+		getitem 9198,2;
+		set #GhostPalace_STATUS, 3;
+	}
+	warp "SavePoint",0,0;
+	end;
+}
+
+1@spa,41,217,0	warp	The second floor of Palace	2,2,1@spa,114,120
+1@spa,117,137,0	warp	3rd floor in the palace	2,2,1@spa,60,43
+1@spa,54,28,0	warp	4th floor in the palace	2,2,1@spa,218,186
+1@spa,178,186,0	warp	5th floor of Palace	2,2,1@spa,186,57
+
+moc_para01,50,36,4	script	Rei do Palacio das Magoas#exchange	4_M_RUSKING,{
+	disable_items;
+	mes "[Rei do Palacio das Magoas]";
+	mes "Se voce me der fragmentos cinzentos, eu posso forjar os equipamentos de Sakray para voce.";
+	next;
+	mes "[Rei do Palacio das Magoas]";
+	mes "As armas custam 200 " + getitemname(6672) + ".";
+	mes "As armaduras custam 100 " + getitemname(6672) + ".";
+	next;
+	if (select("Abrir troca:Cancelar") == 2)
+		close;
+	close2;
+	callshop "barter_eden_ghostpalace";
+	end;
+}
+

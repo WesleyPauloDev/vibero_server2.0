@@ -103,7 +103,7 @@ function	script	F_InstanceEntry	{
 					mes "[" + .@npc_name$ + "]";
 					mes "A Instância está se abrindo...";
 					announce "[Instâncias] " + strcharinfo(0) + " criou " + .@display_name$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
-					callfunc("F_InstanceLogStart", .@display_name$);
+					callfunc("F_InstanceLogStart", .@status_var$, .@display_name$);
 
 					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
 					setd(.@status_name$), 1;
@@ -123,6 +123,8 @@ function	script	F_InstanceEntry	{
 				case IE_OK:
 					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
 					setd(.@status_name$), 2;
+					callfunc("F_InstanceLogEnter", .@status_var$, .@display_name$);
+					close2;
 					end;
 				case IE_NOINSTANCE:
                     if(getd(.@status_name$) == 0) {
@@ -152,31 +154,193 @@ function	script	F_InstanceEntry	{
 	return;
 }
 
+function	script	F_InstanceProgressTouch	{
+	.@instance_code$ = getarg(0);
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(1, .@instance_code$));
+	query_sql("INSERT INTO `instance_monitor_member_state` (`account_id`, `instance_code`, `instance_name`, `tried_count`, `completed_count`, `last_try_at`) VALUES ("
+		+ getcharid(3) + ", '"
+		+ escape_sql(.@instance_code$) + "', '"
+		+ escape_sql(.@instance_name$) + "', 1, 0, NOW()) ON DUPLICATE KEY UPDATE `instance_name` = VALUES(`instance_name`), `tried_count` = `tried_count` + 1, `last_try_at` = NOW()");
+	return;
+}
+
+function	script	F_InstanceProgressComplete	{
+	.@account_id = getarg(0);
+	.@instance_code$ = getarg(1);
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(2, .@instance_code$));
+	query_sql("INSERT INTO `instance_monitor_member_state` (`account_id`, `instance_code`, `instance_name`, `tried_count`, `completed_count`, `last_try_at`, `last_completed_at`) VALUES ("
+		+ .@account_id + ", '"
+		+ escape_sql(.@instance_code$) + "', '"
+		+ escape_sql(.@instance_name$) + "', 1, 1, NOW(), NOW()) ON DUPLICATE KEY UPDATE `instance_name` = VALUES(`instance_name`), `tried_count` = IF(`tried_count` < 1, 1, `tried_count`), `completed_count` = `completed_count` + 1, `last_completed_at` = NOW(), `last_try_at` = COALESCE(`last_try_at`, NOW())");
+	return;
+}
+
+function	script	F_InstanceEnsureAttemptState	{
+	.@instance_code$ = getarg(0);
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(1, .@instance_code$));
+	.@tried = 0;
+	query_sql("SELECT COUNT(*) FROM `instance_monitor_member_state` WHERE `account_id` = "
+		+ getcharid(3) + " AND `instance_code` = '" + escape_sql(.@instance_code$) + "'", .@tried);
+	if (.@tried < 1)
+		callfunc("F_InstanceProgressTouch", .@instance_code$, .@instance_name$);
+	return;
+}
+
+function	script	F_InstanceHistoryCode	{
+	.@key$ = getarg(0, "");
+
+	if (.@key$ == "PORING" || .@key$ == "Vila dos Porings" || .@key$ == "Poring Village")
+		return "PORING";
+	if (.@key$ == "ORCMEMORY" || .@key$ == "Batalha dos Orcs" || .@key$ == "Orc's Memory")
+		return "ORCMEMORY";
+	if (.@key$ == "ETOWER" || .@key$ == "Torre Sem Fim")
+		return "ETOWER";
+	if (.@key$ == "NYD" || .@key$ == "Ninho de Nidhog")
+		return "NYD";
+	if (.@key$ == "OldGlastHeim" || .@key$ == "Maldição de Glast Heim" || .@key$ == "Maldicao de Glast Heim")
+		return "OldGlastHeim";
+	if (.@key$ == "SANTUARIOSELADO" || .@key$ == "Santuario Selado")
+		return "SANTUARIOSELADO";
+	if (.@key$ == "WLCR" || .@key$ == "Laboratório Werner" || .@key$ == "Laboratorio Werner")
+		return "WLCR";
+	if (.@key$ == "GMT" || .@key$ == "Torneio Mágico de Geffen" || .@key$ == "Torneio Magico de Geffen")
+		return "GMT";
+	if (.@key$ == "SaraMemory" || .@key$ == "Memórias de Sara" || .@key$ == "Memorias de Sara")
+		return "SaraMemory";
+	if (.@key$ == "InfiniteSpace" || .@key$ == "Espaço Infinito" || .@key$ == "Espaco Infinito")
+		return "InfiniteSpace";
+	if (.@key$ == "BangungotHospital" || .@key$ == "Hospital Bangungot")
+		return "BangungotHospital";
+	if (.@key$ == "BakonawaLake" || .@key$ == "Lago Bakonawa")
+		return "BakonawaLake";
+	if (.@key$ == "AirshipAssault" || .@key$ == "Assalto ao Dirigivel")
+		return "AirshipAssault";
+	if (.@key$ == "BuwayaCave" || .@key$ == "Caverna Buwaya")
+		return "BuwayaCave";
+	if (.@key$ == "CharlestonCrisis" || .@key$ == "Charleston em Crise")
+		return "CharlestonCrisis";
+	if (.@key$ == "EddaHalfMoon" || .@key$ == "Quarto Crescente")
+		return "EddaHalfMoon";
+	if (.@key$ == "DEVILTOWER" || .@key$ == "Torre do Demônio" || .@key$ == "Torre do Demonio")
+		return "DEVILTOWER";
+	if (.@key$ == "LaboratorioCentral" || .@key$ == "Laboratório Central" || .@key$ == "Laboratorio Central")
+		return "LaboratorioCentral";
+	if (.@key$ == "EclageInterior" || .@key$ == "Interior de Eclage")
+		return "EclageInterior";
+	if (.@key$ == "HTF" || .@key$ == "Fábrica de Brinquedos de Terror" || .@key$ == "Fabrica de Brinquedos de Terror")
+		return "HTF";
+	if (.@key$ == "RoomConsciousness" || .@key$ == "Salão de Ymir" || .@key$ == "Salao de Ymir")
+		return "RoomConsciousness";
+	if (.@key$ == "WolfchevLaboratory" || .@key$ == "Laboratório Wolfchev" || .@key$ == "Laboratorio Wolfchev")
+		return "WolfchevLaboratory";
+	if (.@key$ == "TRG" || .@key$ == "Templo do Rei Demônio" || .@key$ == "Templo do Rei Demonio")
+		return "TRG";
+	if (.@key$ == "IsleOfBios" || .@key$ == "Ilha de Bios")
+		return "IsleOfBios";
+	if (.@key$ == "MorseCave" || .@key$ == "Caverna do Morse")
+		return "MorseCave";
+	if (.@key$ == "OSOccupation" || .@key$ == "Operacao OS")
+		return "OSOccupation";
+	if (.@key$ == "CorOperation" || .@key$ == "Operacao COR")
+		return "CorOperation";
+	if (.@key$ == "WATERGARDEN" || .@key$ == "Jardim Aquatico" || .@key$ == "Water Garden Hard" || .@key$ == "Water Garden")
+		return "WATERGARDEN";
+	if (.@key$ == "FacewormsNest" || .@key$ == "Covil da Rainha Verme")
+		return "FacewormsNest";
+	if (.@key$ == "NightmarishJitterbug" || .@key$ == "Pesadelo Musical")
+		return "NightmarishJitterbug";
+	if (.@key$ == "DeepForest" || .@key$ == "Floresta Profunda")
+		return "DeepForest";
+	if (.@key$ == "GhostPalace" || .@key$ == "Ghost Palace" || .@key$ == "Palacio das Magoas")
+		return "GhostPalace";
+	if (.@key$ == "TombRemorse" || .@key$ == "Tomb of Remorse" || .@key$ == "Tumba do Remorso")
+		return "TombRemorse";
+	if (.@key$ == "HeartHunterWarBase" || .@key$ == "Heart Hunter War Base 1" || .@key$ == "Heart Hunter War Base 2" || .@key$ == "Base da Guerra Heart Hunter")
+		return "HeartHunterWarBase";
+	if (.@key$ == "FridayDungeon" || .@key$ == "Friday Dungeon" || .@key$ == "Dungeon da Sexta" || .@key$ == "Dungeon da Sexta-Feira" || .@key$ == "Midnight Arena")
+		return "FridayDungeon";
+	if (.@key$ == "HiddenGarden" || .@key$ == "Hidden Flower Garden" || .@key$ == "Security Area 1" || .@key$ == "Security Area 2" || .@key$ == "Jardim de Vermuth")
+		return "HiddenGarden";
+	if (.@key$ == "ThorGunsuBase" || .@key$ == "Thor Military Base" || .@key$ == "Base Militar de Thor")
+		return "ThorGunsuBase";
+
+	return .@key$;
+}
+function	script	F_InstanceGetOpenLogId	{
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(0, ""));
+	.@party_id = getcharid(1);
+	.@log_id = 0;
+	if (.@party_id < 1)
+		return 0;
+	query_sql("SELECT `id` FROM `instance_monitor_log` WHERE `party_id` = "
+		+ .@party_id + " AND `status` = 'OPEN' ORDER BY (`instance_name` = '"
+		+ escape_sql(.@instance_name$) + "') DESC, `id` DESC LIMIT 1", .@log_id);
+	return .@log_id;
+}
+
 function	script	F_InstanceLogStart	{
-	.@db_name$ = getarg(0);
+	.@instance_code$ = getarg(0);
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(1, .@instance_code$));
 	.@party_id = getcharid(1);
 	if (.@party_id < 1)
 		return;
 	query_sql("INSERT INTO `instance_monitor_log` (`instance_name`, `party_id`, `party_name`, `created_by_account_id`, `created_by_char_id`, `created_by_name`, `status`, `started_at`) VALUES ('"
-		+ escape_sql(.@db_name$) + "', "
+		+ escape_sql(.@instance_name$) + "', "
 		+ .@party_id + ", '"
 		+ escape_sql(getpartyname(.@party_id)) + "', "
 		+ getcharid(3) + ", "
 		+ getcharid(0) + ", '"
 		+ escape_sql(strcharinfo(0)) + "', 'OPEN', NOW())");
+	callfunc("F_InstanceProgressTouch", .@instance_code$, .@instance_name$);
+	query_sql("INSERT INTO `instance_monitor_member_log` (`instance_log_id`, `instance_code`, `instance_name`, `party_id`, `account_id`, `char_id`, `char_name`, `entered_at`, `completed`) VALUES ("
+		+ callfunc("F_InstanceGetOpenLogId", .@instance_name$) + ", '"
+		+ escape_sql(.@instance_code$) + "', '"
+		+ escape_sql(.@instance_name$) + "', "
+		+ .@party_id + ", "
+		+ getcharid(3) + ", "
+		+ getcharid(0) + ", '"
+		+ escape_sql(strcharinfo(0)) + "', NOW(), 0) ON DUPLICATE KEY UPDATE `char_name` = VALUES(`char_name`), `entered_at` = COALESCE(`entered_at`, VALUES(`entered_at`))");
 	return;
 }
+
+function	script	F_InstanceLogEnter	{
+	.@instance_code$ = getarg(0);
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(1, .@instance_code$));
+	.@party_id = getcharid(1);
+	.@log_id = callfunc("F_InstanceGetOpenLogId", .@instance_name$);
+	if (.@party_id < 1 || .@log_id < 1)
+		return;
+	callfunc("F_InstanceProgressTouch", .@instance_code$, .@instance_name$);
+	query_sql("INSERT INTO `instance_monitor_member_log` (`instance_log_id`, `instance_code`, `instance_name`, `party_id`, `account_id`, `char_id`, `char_name`, `entered_at`, `completed`) VALUES ("
+		+ .@log_id + ", '"
+		+ escape_sql(.@instance_code$) + "', '"
+		+ escape_sql(.@instance_name$) + "', "
+		+ .@party_id + ", "
+		+ getcharid(3) + ", "
+		+ getcharid(0) + ", '"
+		+ escape_sql(strcharinfo(0)) + "', NOW(), 0) ON DUPLICATE KEY UPDATE `char_name` = VALUES(`char_name`), `entered_at` = COALESCE(`entered_at`, VALUES(`entered_at`))");
+	return;
+}
+
 function	script	F_InstanceLogFinish	{
-	.@db_name$ = getarg(0);
+	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(0));
+	.@instance_code$ = callfunc("F_InstanceHistoryCode", .@instance_name$);
 	.@party_id = getcharid(1);
 	.@log_id = 0;
 	if (.@party_id < 1)
 		return;
-	query_sql("SELECT `id` FROM `instance_monitor_log` WHERE `party_id` = "
-		+ .@party_id + " AND `status` = 'OPEN' ORDER BY (`instance_name` = '"
-		+ escape_sql(.@db_name$) + "') DESC, `id` DESC LIMIT 1", .@log_id);
+	.@log_id = callfunc("F_InstanceGetOpenLogId", .@instance_name$);
 	if (.@log_id < 1)
 		return;
+	getpartymember(.@party_id, 1);
+	getpartymember(.@party_id, 2);
+	for (.@i = 0; .@i < $@partymembercount; .@i++) {
+		if (!isloggedin($@partymemberaid[.@i], $@partymembercid[.@i]))
+			continue;
+		query_sql("UPDATE `instance_monitor_member_log` SET `completed` = 1, `completed_at` = NOW() WHERE `instance_log_id` = "
+			+ .@log_id + " AND `account_id` = " + $@partymemberaid[.@i] + " AND `entered_at` IS NOT NULL");
+		callfunc("F_InstanceProgressComplete", $@partymemberaid[.@i], .@instance_code$, .@instance_name$);
+	}
 	query_sql("UPDATE `instance_monitor_log` SET `status` = 'COMPLETED', `completed_at` = NOW(), `finished_by_account_id` = "
 		+ getcharid(3) + ", `finished_by_char_id` = "
 		+ getcharid(0) + ", `finished_by_name` = '"
@@ -187,6 +351,113 @@ function	script	F_InstanceLogFinish	{
 function	script	F_InstanceFinishAnnounce	{
 	.@db_name$ = getarg(0);
 	callfunc("F_InstanceLogFinish", .@db_name$);
+	if (#instancia == 1)
+		#instancia = 2;
 	announce "[Instâncias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
 	return;
 }
+
+function	script	F_InstanceMenuHistoryState	{
+	.@instance_code$ = getarg(0);
+	.@completed = 0;
+	.@entries = 0;
+	.@where$ = "`instance_code` = '" + escape_sql(.@instance_code$) + "'";
+	if (.@instance_code$ == "GhostPalace")
+		.@where$ = .@where$ + " OR `instance_code` IN ('Ghost Palace','Palacio das Magoas') OR `instance_name` IN ('Ghost Palace','Palacio das Magoas')";
+	else if (.@instance_code$ == "TombRemorse")
+		.@where$ = .@where$ + " OR `instance_code` IN ('Tomb of Remorse','Tumba do Remorso') OR `instance_name` IN ('Tomb of Remorse','Tumba do Remorso')";
+	query_sql("SELECT COALESCE(MAX(`completed_count`), 0), COALESCE(MAX(`tried_count`), 0) FROM `instance_monitor_member_state` WHERE `account_id` = "
+		+ getcharid(3) + " AND (" + .@where$ + ")", .@completed, .@entries);
+	if (.@completed > 0)
+		return 2;
+	if (.@entries > 0)
+		return 1;
+	return 0;
+}
+
+function	script	F_InstanceMenuCompletedToday	{
+	.@instance_code$ = getarg(0);
+	.@completed_today = 0;
+	.@where$ = "`instance_code` = '" + escape_sql(.@instance_code$) + "'";
+	if (.@instance_code$ == "GhostPalace")
+		.@where$ = .@where$ + " OR `instance_code` IN ('Ghost Palace','Palacio das Magoas') OR `instance_name` IN ('Ghost Palace','Palacio das Magoas')";
+	else if (.@instance_code$ == "TombRemorse")
+		.@where$ = .@where$ + " OR `instance_code` IN ('Tomb of Remorse','Tumba do Remorso') OR `instance_name` IN ('Tomb of Remorse','Tumba do Remorso')";
+	query_sql("SELECT COUNT(*) FROM `instance_monitor_member_state` WHERE `account_id` = "
+		+ getcharid(3) + " AND (" + .@where$ + ") AND `completed_count` > 0 AND DATE(`last_completed_at`) = CURDATE()", .@completed_today);
+	return (.@completed_today > 0);
+}
+
+function	script	F_InstanceMenuOption	{
+	.@label$ = getarg(0);
+	.@cooldown_var$ = getarg(1);
+	.@status_var$ = getarg(2);
+	.@status_name$ = "#" + .@status_var$ + "_STATUS";
+	.@status = getd(.@status_name$);
+	.@history = callfunc("F_InstanceMenuHistoryState", .@status_var$);
+
+	if (.@history == 2 && .@status > 0)
+		return "^6CFF6C" + .@label$ + "^000000";
+
+	if (.@history == 2)
+		return "^FFD166" + .@label$ + "^000000";
+
+	if (.@history == 1)
+		return "^FF5A5A" + .@label$ + "^000000";
+
+	if (.@status > 0)
+		return "^FF5A5A" + .@label$ + "^000000";
+
+	return "^777777" + .@label$ + "^000000";
+}
+
+function	script	F_InstanceMenuResetStatus	{
+	.@cooldown_name$ = "#cooldown_" + getarg(0);
+	.@status_name$ = "#" + getarg(1) + "_STATUS";
+	if (getd(.@cooldown_name$) > 0 && getd(.@cooldown_name$) <= gettimetick(2) && getd(.@status_name$) > 0) {
+		callfunc("F_InstanceEnsureAttemptState", getarg(1), getarg(1));
+		setd(.@status_name$, 0);
+	}
+	return;
+}
+
+function	script	F_InstanceMenuOptionRaw	{
+	.@label$ = getarg(0);
+	.@status_name$ = getarg(2);
+	.@status_complete_1 = getarg(3, 3);
+	.@status_complete_2 = getarg(4, 4);
+	.@history_code$ = getarg(5, "");
+	.@status = getd(.@status_name$);
+	.@history = callfunc("F_InstanceMenuHistoryState", .@history_code$);
+
+	if (.@history == 2 && .@status > 0)
+		return "^6CFF6C" + .@label$ + "^000000";
+
+	if (.@history == 2)
+		return "^FFD166" + .@label$ + "^000000";
+
+	if (.@history == 1)
+		return "^FF5A5A" + .@label$ + "^000000";
+
+	if (.@status == .@status_complete_1 || .@status == .@status_complete_2 || .@status > 0)
+		return "^FF5A5A" + .@label$ + "^000000";
+
+	return "^777777" + .@label$ + "^000000";
+}
+
+function	script	F_InstanceMenuResetStatusRaw	{
+	.@cooldown_name$ = getarg(0);
+	.@status_name$ = getarg(1);
+	if (getd(.@cooldown_name$) > 0 && getd(.@cooldown_name$) <= gettimetick(2) && getd(.@status_name$) > 0) {
+		callfunc("F_InstanceEnsureAttemptState", getarg(2), getarg(2));
+		setd(.@status_name$, 0);
+	}
+	return;
+}
+
+
+
+
+
+
+

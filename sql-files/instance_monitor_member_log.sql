@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS `instance_monitor_member_log` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `instance_log_id` BIGINT UNSIGNED NOT NULL,
+  `instance_code` VARCHAR(100) NOT NULL,
+  `instance_name` VARCHAR(100) NOT NULL,
+  `party_id` INT UNSIGNED NOT NULL,
+  `account_id` INT UNSIGNED NOT NULL,
+  `char_id` INT UNSIGNED NOT NULL,
+  `char_name` VARCHAR(100) NOT NULL,
+  `entered_at` DATETIME DEFAULT NULL,
+  `completed_at` DATETIME DEFAULT NULL,
+  `completed` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_log_char` (`instance_log_id`,`char_id`),
+  KEY `idx_account_code_completed` (`account_id`,`instance_code`,`completed`),
+  KEY `idx_account_code_entered` (`account_id`,`instance_code`,`entered_at`),
+  KEY `idx_instance_log_id` (`instance_log_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
