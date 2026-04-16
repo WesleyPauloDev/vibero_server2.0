@@ -1221,15 +1221,9 @@ OnTimer6000:
 					if ((strcharinfo(3) != 'map_air1$ && strcharinfo(3) != 'map_air2$) || #AirshipAssault_STATUS != 2)
 						continue;
 					getexp 100000,65000;
-					callfunc("F_AddRep", 1, 10, 110002, 3000);
-					callfunc("F_DiaryRefreshDaily");
-					set #instancia, 2;
-					if (#inst175_name$ == "Assalto ao Dirigivel") {
-						set #inst175_status,2;
-					}
-					getitem 9608,10;	// Moeda de Instancia
-					getitem 9198,2;
-					set #AirshipAssault_STATUS, 3;
+					.@finish_result = callfunc("F_InstanceFinishBase", "Assalto ao Dirigivel", "#AirshipAssault_STATUS", 10, 2, "#inst175_name$", "#inst175_status");
+					if (.@finish_result == -1)
+						continue;
 				}
 				attachrid .@origin_aid;
 			}
@@ -1439,4 +1433,5 @@ OnInstanceInit:
 	disablenpc instance_npcname("fogo30#air2");
 	end;
 }
+
 

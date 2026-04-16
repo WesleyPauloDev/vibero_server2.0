@@ -357,6 +357,44 @@ function	script	F_InstanceFinishAnnounce	{
 	return;
 }
 
+function	script	F_InstanceFinishBase	{
+	.@instance_name$ = getarg(0);
+	.@status_var$ = getarg(1);
+	.@coin_amount = getarg(2, 10);
+	.@ticket_amount = getarg(3, 2);
+	.@roulette_name_var$ = getarg(4, "");
+	.@roulette_status_var$ = getarg(5, "");
+	.@rep_id = getarg(6, 1);
+	.@rep_amount = getarg(7, 10);
+	.@rep_achievement = getarg(8, 110002);
+	.@rep_cap = getarg(9, 3000);
+	.@final_status = getarg(10, 3);
+	.@refresh_weekly = getarg(11, 0);
+	.@roulette_match_name$ = getarg(12, .@instance_name$);
+	.@announce_finish = getarg(13, 1);
+
+	if (.@status_var$ == "")
+		return 0;
+	if (getd(.@status_var$) != 2)
+		return 0;
+	if ((.@coin_amount > 0 && checkweight(9608, .@coin_amount) == 0) || (.@ticket_amount > 0 && checkweight(9198, .@ticket_amount) == 0))
+		return -1;
+	if (.@rep_amount > 0)
+		callfunc("F_AddRep", .@rep_id, .@rep_amount, .@rep_achievement, .@rep_cap);
+	callfunc("F_DiaryRefreshDaily");
+	if (.@refresh_weekly)
+		callfunc("F_DiaryRefreshWeekly");
+	if (.@announce_finish)
+		callfunc("F_InstanceFinishAnnounce", .@instance_name$);
+	if (.@roulette_name_var$ != "" && .@roulette_status_var$ != "" && getd(.@roulette_name_var$) == .@roulette_match_name$)
+		setd(.@roulette_status_var$, 2);
+	if (.@coin_amount > 0)
+		getitem 9608, .@coin_amount;
+	if (.@ticket_amount > 0)
+		getitem 9198, .@ticket_amount;
+	setd(.@status_var$, .@final_status);
+	return 1;
+}
 function	script	F_InstanceMenuHistoryState	{
 	.@instance_code$ = getarg(0);
 	.@completed = 0;
@@ -454,6 +492,10 @@ function	script	F_InstanceMenuResetStatusRaw	{
 	}
 	return;
 }
+
+
+
+
 
 
 

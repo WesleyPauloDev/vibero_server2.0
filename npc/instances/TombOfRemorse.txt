@@ -1266,16 +1266,11 @@ end;
 			mes "^FF0000Voce esta com muitos itens ou peso demais. Organize seu inventario.^000000";
 			close;
 		}
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Tumba do Remorso");
-			'reward_announced = 1;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Tumba do Remorso", "#TombRemorse_STATUS", 30, 3);
+		if (.@finish_result == -1) {
+			mes "^FF0000Voce esta com muitos itens ou peso demais. Organize seu inventario.^000000";
+			close;
 		}
-		getitem 9608,30;
-		getitem 9198,3;
-		set #TombRemorse_STATUS, 3;
 	}
 	mes "[ Marquis of Remorse ]";
 	mes "Eu estava esperando por voce, como prometi.";
@@ -1403,3 +1398,4 @@ end;
 	}
 	end;
 }
+

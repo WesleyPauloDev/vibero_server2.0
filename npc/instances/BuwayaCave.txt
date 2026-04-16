@@ -304,19 +304,11 @@ OnMyMobDead:
 	next;
 	if (select("Sim:Não, vou ficar mais um pouco.") == 1) {
 		if (#BuwayaCave_STATUS == 2) {
-			callfunc("F_AddRep", 1, 10, 110002, 3000);
-			callfunc("F_DiaryRefreshDaily");
-			set #instancia, 2;
-			if (!'reward_announced) {
-				callfunc("F_InstanceFinishAnnounce", "Caverna Buwaya");
-				'reward_announced = 1;
+			.@finish_result = callfunc("F_InstanceFinishBase", "Caverna Buwaya", "#BuwayaCave_STATUS", 10, 2, "#inst175_name$", "#inst175_status", 1, 10, 110002, 3000, 3, 0, "Buwaya Cave");
+			if (.@finish_result == -1) {
+				mes "Voce esta com peso demais para receber as recompensas.";
+				close;
 			}
-			if (#inst175_name$ == "Buwaya Cave") {
-				set #inst175_status,2;
-			}
-			getitem 9608,10;	// Moeda de Instancia
-			getitem 9198,2;
-			set #BuwayaCave_STATUS, 3;
 		}
 		warp "SavePoint",0,0;
 		end;
@@ -353,3 +345,5 @@ OnInstanceInit:
 	monster .@map$,0,0,"Buwaya's Slave",2330,5;
 	end;
 }
+
+

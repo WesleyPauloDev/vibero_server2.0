@@ -1190,17 +1190,11 @@ OnInstanceInit:
 
 		// Premiações do Servidor
 		if (#SANTUARIOSELADO_STATUS == 2) {
-			// add_reputation_points(1, 20);
-			callfunc("F_AddRep", 1, 20, 110002, 3000);
-			callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-			callfunc("F_InstanceFinishAnnounce", "Santuario Selado");
-			if (#inst120_name$ == "Santuario Selado") {
-				set #inst120_status,2;
+			.@finish_result = callfunc("F_InstanceFinishBase", "Santuario Selado", "#SANTUARIOSELADO_STATUS", 20, 2, "#inst120_name$", "#inst120_status", 1, 20);
+			if (.@finish_result == -1) {
+				mes "Voce esta com peso demais para receber as recompensas.";
+				close;
 			}
-			getitem 9608,20;	// Moeda de Instância
-			getitem 9198,2;
-			set #SANTUARIOSELADO_STATUS, 3;
 		}
 
 		warp "SavePoint",0,0;
@@ -1525,3 +1519,4 @@ OnInstanceInit:
 	disablenpc instance_npcname("ins_1f_spawn_mobs");
 	end;
 }
+

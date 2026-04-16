@@ -975,17 +975,11 @@ OnStart3:
 
 	// Premiações do Servidor
 	if (#LaboratorioCentral_STATUS == 2) {
-		// add_reputation_points(1, 20);
-		callfunc("F_AddRep", 1, 20, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		callfunc("F_InstanceFinishAnnounce", "Laboratório Central");
-		if (#inst175_name$ == "Laboratório Central") {
-			set #inst175_status,2;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Laboratório Central", "#LaboratorioCentral_STATUS", 20, 2, "#inst175_name$", "#inst175_status", 1, 20);
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
 		}
-		getitem 9608,20;	// Moeda de Instância
-		getitem 9198,2;
-		set #LaboratorioCentral_STATUS, 3;
 	}
 
 	// Teleporta o jogador para fora
@@ -1034,4 +1028,5 @@ OnStart3:
 // 		erasequest 12347;
 // 	end;
 // }
+
 

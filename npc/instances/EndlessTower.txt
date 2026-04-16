@@ -1783,19 +1783,8 @@ OnTouch_:
 			
 			// Premiações do Servidor
 			if (#ETOWER_STATUS == 2) {
-				callfunc("F_DiaryRefreshDaily");
-				callfunc("F_DiaryRefreshWeekly");
-				set #instancia, 2;
-				callfunc("F_InstanceFinishAnnounce", "Torre Sem Fim");
+				.@finish_result = callfunc("F_InstanceFinishBase", "Torre Sem Fim", "#ETOWER_STATUS", 30, 3, "#inst60_name$", "#inst60_status", 1, 50, 110002, 3000, 4, 1);
 				set #torre, 2;
-				if (#inst60_name$ == "Torre Sem Fim") {
-					set #inst60_status,2;
-				}
-				// add_reputation_points(1, 50);
-				callfunc("F_AddRep", 1, 50, 110002, 3000);
-				getitem 9608,30; //Moeda de Instância
-				getitem 9198,3;
-				set #ETOWER_STATUS, 4;
 			}
 
 			// // anuncia globalmente
@@ -2239,19 +2228,8 @@ OnMyMobDead:
 
 		// Premiações do Servidor
 		if (#ETOWER_STATUS == 2) {
-			callfunc("F_DiaryRefreshDaily");
-			callfunc("F_DiaryRefreshWeekly");
-			set #instancia, 2;
-			callfunc("F_InstanceFinishAnnounce", "Torre Sem Fim");
-			set #torre, 2;
-			if (#inst60_name$ == "Torre Sem Fim") {
-				set #inst60_status,2;
-			}
-			// add_reputation_points(1, 50);
-			callfunc("F_AddRep", 1, 50, 110002, 3000);
-			getitem 9608,30; //Moeda de Instância
-			getitem 9198,3;
-			set #ETOWER_STATUS, 4;
+			.@finish_result = callfunc("F_InstanceFinishBase", "Torre Sem Fim", "#ETOWER_STATUS", 30, 3, "#inst60_name$", "#inst60_status", 1, 50, 110002, 3000, 4, 1);
+				set #torre, 2;
 			erasequest 60201;
 		}
 
@@ -2322,3 +2300,4 @@ OnTimer1000:
 	donpcevent instance_npcname("#Effect30")+"::OnEnable";
 	end;
 }
+

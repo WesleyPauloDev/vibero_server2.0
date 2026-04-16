@@ -388,16 +388,11 @@ OnMyMobDead:
 				ep14_3_isle = 1;
 			if (checkquest(15007,PLAYTIME) == 0 || checkquest(15007,PLAYTIME) == 1)
 				setquest 15008;// Memorial Dungeon: Isle of Bios
-			callfunc("F_AddRep", 1, 10, 110002, 3000);
-			callfunc("F_DiaryRefreshDaily");
-			set #instancia, 2;
-			if (!'reward_announced) {
-				callfunc("F_InstanceFinishAnnounce", "Ilha de Bios");
-				'reward_announced = 1;
+			.@finish_result = callfunc("F_InstanceFinishBase", "Ilha de Bios", "#IsleOfBios_STATUS");
+			if (.@finish_result == -1) {
+				mes "Voce esta com peso demais para receber as recompensas.";
+				close;
 			}
-			getitem 9608,10;
-			getitem 9198,2;
-			set #IsleOfBios_STATUS, 3;
 		}
 		close2;
 		warp "SavePoint",0,0;
@@ -825,3 +820,4 @@ OnInstanceInit:
 1@dth3,74,92,3	duplicate(Grim Reaper Ankou#bios1)	Corrupt Orc Zombie#6bio3	3016
 1@dth3,76,92,3	duplicate(Grim Reaper Ankou#bios1)	Corrupt Orc Zombie#7bio3	3016
 1@dth3,78,92,3	duplicate(Grim Reaper Ankou#bios1)	Corrupt Orc Zombie#8bio3	3016
+

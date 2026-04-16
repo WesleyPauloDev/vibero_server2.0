@@ -2209,17 +2209,11 @@ OnTimer8000:
 	
 	// Premiações do Servidor
 	if (#TRG_STATUS == 2) {
-		// add_reputation_points(1, 10);
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		callfunc("F_InstanceFinishAnnounce", "Templo do Rei Demônio");
-		if (#inst175_name$ == "Templo do Rei Demônio") {
-			set #inst175_status,2;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Templo do Rei Demônio", "#TRG_STATUS", 10, 2, "#inst175_name$", "#inst175_status");
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
 		}
-		getitem 9608,10;	// Moeda de Instância
-		getitem 9198,2;
-		set #TRG_STATUS, 3;
 	}
 	if ('step < 11)
 		end;
@@ -2332,3 +2326,4 @@ OnTimer8000:
 	}
 	end;
 }
+

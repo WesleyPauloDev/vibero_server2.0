@@ -2135,16 +2135,7 @@ OnTimer10000:
 		close;
 	}
 	if (.@give_custom_reward) {
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		callfunc("F_InstanceFinishAnnounce", callfunc("F_OGH_FinalAnnounceName$"));
-		if (!.@is_hard && #inst60_name$ == "Maldicao de Glast Heim") {
-			set #inst60_status,2;
-		}
-		getitem 9608,10;	// Moeda de Instencia
-		getitem 9198,2;
-		setd(.@status_name$, 3);
+		.@finish_result = callfunc("F_InstanceFinishBase", callfunc("F_OGH_FinalAnnounceName$"), .@status_name$, 10, 2, "#inst60_name$", "#inst60_status", 1, 10, 110002, 3000, 3, 0, "Maldicao de Glast Heim");
 		'final_reward_claimed[.@cid] = 1;
 	}
 	if (.@quest_reward) {
@@ -2345,3 +2336,4 @@ OnInstanceInit:
 	disablenpc instance_npcname("#cut01");
 	end;
 }
+

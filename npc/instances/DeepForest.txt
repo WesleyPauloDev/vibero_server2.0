@@ -558,16 +558,11 @@ OnMobDead:
 		setquest 11769;
 	}
 	if (#DeepForest_STATUS == 2) {
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Floresta Profunda");
-			'reward_announced = 1;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Floresta Profunda", "#DeepForest_STATUS");
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
 		}
-		getitem 9608,10;
-		getitem 9198,2;
-		set #DeepForest_STATUS, 3;
 	}
 	if ('step == 8)
 		'step = 9;
@@ -577,3 +572,4 @@ OnMobDead:
 	warp "SavePoint",0,0;
 	end;
 }
+

@@ -57,6 +57,7 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatus", "os_occupation", "OSOccupation");
 		callfunc("F_InstanceMenuResetStatus", "cor_operation", "CorOperation");
 		callfunc("F_InstanceMenuResetStatus", "thor_gunsu_base", "ThorGunsuBase");
+		callfunc("F_InstanceMenuResetStatus", "twilight_garden", "TwilightGarden");
 		callfunc("F_InstanceMenuResetStatus", "water_garden", "WATERGARDEN");
 		callfunc("F_InstanceMenuResetStatus", "faceworms_nest", "FacewormsNest");
 		callfunc("F_InstanceMenuResetStatus", "nightmarish_jitterbug", "NightmarishJitterbug");
@@ -103,11 +104,12 @@ OnAtcommand:
 	.@opt28$ = callfunc("F_InstanceMenuOption", "[170+] Operacao OS", "os_occupation", "OSOccupation");
 	.@opt29$ = callfunc("F_InstanceMenuOption", "[170+] Operacao COR", "cor_operation", "CorOperation");
 	.@opt30$ = callfunc("F_InstanceMenuOption", "[170+] Base Militar de Thor", "thor_gunsu_base", "ThorGunsuBase");
-	.@opt31$ = callfunc("F_InstanceMenuOption", "[170+] WaterGarden", "water_garden", "WATERGARDEN");
-	.@opt32$ = callfunc("F_InstanceMenuOption", "[175+] Covil da Rainha Verme", "faceworms_nest", "FacewormsNest");
-	.@opt33$ = callfunc("F_InstanceMenuOption", "[175+] Pesadelo Musical", "nightmarish_jitterbug", "NightmarishJitterbug");
-	.@opt34$ = callfunc("F_InstanceMenuOption", "[175+] Floresta Profunda", "deep_forest", "DeepForest");
-	.@opt35$ = callfunc("F_InstanceMenuOption", "[175+] Tumba do Remorso", "tomb_remorse", "TombRemorse");
+	.@opt31$ = callfunc("F_InstanceMenuOption", "[170+] Jardim do Crepusculo", "twilight_garden", "TwilightGarden");
+	.@opt32$ = callfunc("F_InstanceMenuOption", "[170+] WaterGarden", "water_garden", "WATERGARDEN");
+	.@opt33$ = callfunc("F_InstanceMenuOption", "[175+] Covil da Rainha Verme", "faceworms_nest", "FacewormsNest");
+	.@opt34$ = callfunc("F_InstanceMenuOption", "[175+] Pesadelo Musical", "nightmarish_jitterbug", "NightmarishJitterbug");
+	.@opt35$ = callfunc("F_InstanceMenuOption", "[175+] Floresta Profunda", "deep_forest", "DeepForest");
+	.@opt38$ = callfunc("F_InstanceMenuOption", "[175+] Tumba do Remorso", "tomb_remorse", "TombRemorse");
 	.@s = select(
 		.@opt1$,
 		.@opt2$,
@@ -145,7 +147,8 @@ OnAtcommand:
 		.@opt32$,
 		.@opt33$,
 		.@opt34$,
-		.@opt35$
+		.@opt35$,
+		.@opt38$
 	);	close2;
 
 	switch(.@s) {
@@ -289,6 +292,10 @@ OnAtcommand:
 			doevent "ThorGunsuBase_Instance#Custom::OnStartInstance";
 			end;
 		case 33:
+			#INSTANCENAME$ = "TwilightGarden";
+			doevent "TwilightGarden_Instance#Custom::OnStartInstance";
+			end;
+		case 34:
 			switch(select("WaterGarden Normal","WaterGarden Hard","Cancelar")) {
 			case 1:
 				#WATERGARDEN_MODE = 0;
@@ -303,19 +310,19 @@ OnAtcommand:
 			case 3:
 				end;
 			}
-		case 34:
+		case 35:
 			#INSTANCENAME$ = "FacewormsNest";
 			doevent "FacewormsNest_Instance#Custom::OnStartInstance";
 			end;
-		case 35:
+		case 36:
 			#INSTANCENAME$ = "NightmarishJitterbug";
 			doevent "NightmarishJitterbug_Instance#Custom::OnStartInstance";
 			end;
-		case 36:
+		case 37:
 			#INSTANCENAME$ = "DeepForest";
 			doevent "DeepForest_Instance#Custom::OnStartInstance";
 			end;
-		case 37:
+		case 38:
 			#INSTANCENAME$ = "TombOfRemorse";
 			doevent "TombOfRemorse_Instance#Custom::OnStartInstance";
 			end;

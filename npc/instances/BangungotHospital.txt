@@ -713,16 +713,13 @@ OnTimer30000:
 		else
 			getitem 6499,5;	// Ancient_Grudge
 
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		callfunc("F_InstanceFinishAnnounce", "Hospital Bangungot");
-		if (#inst120_name$ == "Bangungot Hospital 2F") {
-			set #inst120_status,2;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Hospital Bangungot", "#BangungotHospital_STATUS", 10, 2, "#inst120_name$", "#inst120_status", 1, 10, 110002, 3000, 3, 0, "Bangungot Hospital 2F");
+		if (.@finish_result == -1) {
+			mes "[Enfermeira Maenne]";
+			mes "Voce esta com peso demais para receber as recompensas.";
+			mes "Libere espaco e fale comigo novamente.";
+			close;
 		}
-		getitem 9608,10;	// Moeda de Instância
-		getitem 9198,2;
-		set #BangungotHospital_STATUS, 3;
 	}
 	next;
 	mes "[Enfermeira Maenne]";
@@ -803,3 +800,5 @@ OnInstanceInit:
 	disablenpc instance_npcname("#ma_hos_warp_init");
 	end;
 }
+
+

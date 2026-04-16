@@ -494,16 +494,15 @@ OnMyMobDead:
 	if (checkquest(7450, PLAYTIME) > -1 || checkquest(7450, HUNTING) > -1)
 		changequest 7450,7451;
 	if (#EclageInterior_STATUS == 2) {
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		callfunc("F_InstanceFinishAnnounce", "Interior de Eclage");
-		getitem 9608,10;
-		getitem 9198,2;
-		set #EclageInterior_STATUS, 3;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Interior de Eclage", "#EclageInterior_STATUS");
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
+		}
 	}
 	close2;
 	cutin "",255;
 	warp "SavePoint",0,0;
 	end;
 }
+

@@ -1332,12 +1332,12 @@ OnTouch:
 					mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 					close;
 				}
-				callfunc("F_AddRep", 1, 10, 110002, 3000);
-				callfunc("F_DiaryRefreshDaily");
-				set #instancia, 2;
-				getitem 9608,.@coin;
-				getitem 9198,.@ticket;
-				set #HiddenGarden_STATUS, 3;
+				.@finish_result = callfunc("F_InstanceFinishBase", "Jardim de Vermuth", "#HiddenGarden_STATUS", .@coin, .@ticket, "", "", 1, 10, 110002, 3000, 3, 0, "Jardim de Vermuth", 0);
+			if (.@finish_result == -1) {
+				mes "^008800Espere um pouco!!";
+				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
+				close;
+			}
 			}
 			close2;
 			setquest 12497;
@@ -1362,12 +1362,12 @@ OnTouch:
 				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 				close;
 			}
-			callfunc("F_AddRep", 1, 10, 110002, 3000);
-			callfunc("F_DiaryRefreshDaily");
-			set #instancia, 2;
-			getitem 9608,.@coin;
-			getitem 9198,.@ticket;
-			set #HiddenGarden_STATUS, 3;
+			.@finish_result = callfunc("F_InstanceFinishBase", "Jardim de Vermuth", "#HiddenGarden_STATUS", .@coin, .@ticket, "", "", 1, 10, 110002, 3000, 3, 0, "Jardim de Vermuth", 0);
+			if (.@finish_result == -1) {
+				mes "^008800Espere um pouco!!";
+				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
+				close;
+			}
 		}
 		mes "Vamos evitar este lugar por hoje e prometer voltar numa proxima vez. Na proxima voce estara livre para ir a outra area.";
 		next;
@@ -2188,12 +2188,12 @@ OnTouch:	// unknown effect
 				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 				close;
 			}
-			callfunc("F_AddRep", 1, 10, 110002, 3000);
-			callfunc("F_DiaryRefreshDaily");
-			set #instancia, 2;
-			getitem 9608,.@coin;
-			getitem 9198,.@ticket;
-			set #HiddenGarden_STATUS, 3;
+			.@finish_result = callfunc("F_InstanceFinishBase", "Jardim de Vermuth", "#HiddenGarden_STATUS", .@coin, .@ticket, "", "", 1, 10, 110002, 3000, 3, 0, "Jardim de Vermuth", 0);
+			if (.@finish_result == -1) {
+				mes "^008800Espere um pouco!!";
+				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
+				close;
+			}
 		}
 		close2;
 		erasequest .@qid;
@@ -2222,12 +2222,12 @@ OnTouch:	// unknown effect
 				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 				close;
 			}
-			callfunc("F_AddRep", 1, 10, 110002, 3000);
-			callfunc("F_DiaryRefreshDaily");
-			set #instancia, 2;
-			getitem 9608,.@coin;
-			getitem 9198,.@ticket;
-			set #HiddenGarden_STATUS, 3;
+			.@finish_result = callfunc("F_InstanceFinishBase", "Jardim de Vermuth", "#HiddenGarden_STATUS", .@coin, .@ticket, "", "", 1, 10, 110002, 3000, 3, 0, "Jardim de Vermuth", 0);
+			if (.@finish_result == -1) {
+				mes "^008800Espere um pouco!!";
+				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
+				close;
+			}
 		}
 		warp "SavePoint",0,0;
 	}
@@ -2363,6 +2363,9 @@ OnStop:
 	stopnpctimer;
 	end;
 }
+
+
+
 
 
 

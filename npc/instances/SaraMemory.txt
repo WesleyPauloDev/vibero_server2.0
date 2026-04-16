@@ -1557,17 +1557,11 @@ OnTouch:
 
 	// Premiações do Servidor
 	if (#SaraMemory_STATUS == 2) {
-		// add_reputation_points(1, 10);
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		callfunc("F_InstanceFinishAnnounce", "Memórias de Sara");
-		if (#inst120_name$ == "Memórias de Sara") {
-			set #inst120_status,2;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Memórias de Sara", "#SaraMemory_STATUS", 10, 2, "#inst120_name$", "#inst120_status");
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
 		}
-		getitem 9608,10;	// Moeda de Instância
-		getitem 9198,2;
-		set #SaraMemory_STATUS, 3;
 	}
 
 	if (saramemory == 1) {
@@ -1593,3 +1587,4 @@ OnEnable:
 	enablenpc instance_npcname("#sara_warp07");
 	end;
 }
+

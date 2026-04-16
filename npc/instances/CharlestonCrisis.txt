@@ -1492,16 +1492,11 @@ OnTimer300:
 			close2;
 			getitem 6752,3;	// Charleston_Parts
 			if (#CharlestonCrisis_STATUS == 2) {
-				callfunc("F_AddRep", 1, 20, 110002, 3000);
-				callfunc("F_DiaryRefreshDaily");
-				set #instancia, 2;
-				callfunc("F_InstanceFinishAnnounce", "Charleston em Crise");
-				if (#inst175_name$ == "Charleston em Crise") {
-					set #inst175_status,2;
+				.@finish_result = callfunc("F_InstanceFinishBase", "Charleston em Crise", "#CharlestonCrisis_STATUS", 30, 3, "#inst175_name$", "#inst175_status", 1, 20);
+				if (.@finish_result == -1) {
+					mes "Voce esta com peso demais para receber as recompensas.";
+					close;
 				}
-				getitem 9608,30;	// Moeda de Instancia
-				getitem 9198,3;
-				set #CharlestonCrisis_STATUS, 3;
 			}
 			cutin "",255;
 			warp "SavePoint",0,0;
@@ -1999,4 +1994,5 @@ OnMyMobDead:
 	monster 'map_name$,0,0,"--ja--", .@mob_id,1, instance_npcname("Charleston Assistant#1") + "::OnMyMobDead";
 	end;
 }
+
 
