@@ -386,8 +386,11 @@ function	script	F_InstanceFinishBase	{
 		callfunc("F_DiaryRefreshWeekly");
 	if (.@announce_finish)
 		callfunc("F_InstanceFinishAnnounce", .@instance_name$);
-	if (.@roulette_name_var$ != "" && .@roulette_status_var$ != "" && getd(.@roulette_name_var$) == .@roulette_match_name$)
-		setd(.@roulette_status_var$, 2);
+	if (.@roulette_name_var$ != "" && .@roulette_status_var$ != "") {
+		.@roulette_name_value$ = getd(.@roulette_name_var$);
+		if (.@roulette_name_value$ == .@roulette_match_name$)
+			setd(.@roulette_status_var$, 2);
+	}
 	if (.@coin_amount > 0)
 		getitem 9608, .@coin_amount;
 	if (.@ticket_amount > 0)

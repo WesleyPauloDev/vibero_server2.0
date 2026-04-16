@@ -23,14 +23,13 @@ OnAtcommand:
 	}
 
 	.@now = gettimetick(2);
-	.@reset_ver = 5;
+	.@reset_ver = 6;
 	if (#INSTANCE_MENU_RESET_VER != .@reset_ver || #INSTANCE_MENU_RESET_TICK <= .@now) {
 		callfunc("F_InstanceMenuResetStatus", "poringvillage", "PORING");
 		callfunc("F_InstanceMenuResetStatus", "orcMemory", "ORCMEMORY");
 		callfunc("F_InstanceMenuResetStatusRaw", "#ETOWER_COOLDOWN", "#ETOWER_STATUS", "ETOWER");
 		callfunc("F_InstanceMenuResetStatusRaw", "#NYD_COOLDOWN", "#NYD_STATUS", "NYD");
 		callfunc("F_InstanceMenuResetStatus", "glastHeim", "OldGlastHeim");
-		callfunc("F_InstanceMenuResetStatus", "glastHeimHard", "OldGlastHeimHard");
 		callfunc("F_InstanceMenuResetStatus", "santuario_selado", "SANTUARIOSELADO");
 		callfunc("F_InstanceMenuResetStatus", "wlcr", "WLCR");
 		callfunc("F_InstanceMenuResetStatus", "gmt", "GMT");
@@ -170,7 +169,7 @@ OnAtcommand:
 			end;
 		case 5:
 			.@ogh_n$ = callfunc("F_InstanceMenuOption", "[60] Normal", "glastHeim", "OldGlastHeim");
-			.@ogh_h$ = callfunc("F_InstanceMenuOption", "[120] Hard", "glastHeimHard", "OldGlastHeimHard");
+			.@ogh_h$ = callfunc("F_InstanceMenuOption", "[120] Hard", "glastHeim", "OldGlastHeim");
 			switch(select(.@ogh_n$, .@ogh_h$, "Cancelar")) {
 			case 1:
 				#INSTANCENAME$ = "MGH";

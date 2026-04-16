@@ -69,6 +69,80 @@ function	script	F_Angelical_Roll	{
 	return .@item_ids[0];
 }
 
+function	script	F_Angelical_IsInPool	{
+	.@pool = getarg(0);
+	.@item_id = getarg(1);
+
+	switch (.@pool) {
+		case 1:
+			setarray .@item_ids[0],4705,4706,4707,4764,4765,29241,4762,29238,4794,4902,4786,4787,4867,4900,4801,4802;
+			break;
+		case 2:
+			setarray .@item_ids[0],4706,4820,4812,4835,4843,4802,29238,29241,4903,4790,4900,4873,4707,4821,4826,4836,4844,4881,310076,310077,310078,310080,310079,310081;
+			break;
+		case 3:
+			setarray .@item_ids[0],4707,4900,4802,29238,29241,4903,4790,4820,4812,4835,4873,4843,4821,4826,4836,4844,4881,310076,310077,310078,310080,310079,310081;
+			break;
+		case 4:
+			setarray .@item_ids[0],4706,4707,4765,29241,4762,29238,4902,29026,4788,4789,4867,4900,4801,4802;
+			break;
+		case 5:
+			setarray .@item_ids[0],4707,4765,29241,4762,29238,4902,29026,4788,4789,4867,4900,4801,4802;
+			break;
+		default:
+			return 0;
+	}
+
+	for (.@i = 0; .@i < getarraysize(.@item_ids); .@i++) {
+		if (.@item_ids[.@i] == .@item_id)
+			return 1;
+	}
+	return 0;
+}
+
+function	script	F_Angelical_IsSlot2Exclusive	{
+	.@item_id = getarg(0);
+	switch (.@item_id) {
+		case 4812:
+		case 4826:
+		case 4835:
+		case 4836:
+		case 4873:
+		case 4881:
+		case 310076:
+		case 310077:
+		case 310078:
+		case 310079:
+		case 310080:
+		case 310081:
+			return 1;
+	}
+	return 0;
+}
+
+function	script	F_Angelical_CanInsertEnchant	{
+	.@item_id = getarg(0);
+	.@real_slot = getarg(1);
+	.@group = getarg(2);
+	.@refine = getarg(3);
+
+	// 3o e 4o slots aceitam tudo, exceto os encantos exclusivos do 2o slot.
+	if (.@real_slot == 2 || .@real_slot == 3)
+		return !callfunc("F_Angelical_IsSlot2Exclusive", .@item_id);
+
+	// O 2o slot continua sendo o unico que aceita os encantos exclusivos.
+	if (.@real_slot != 1)
+		return 0;
+	if (callfunc("F_Angelical_IsSlot2Exclusive", .@item_id)) {
+		if (.@refine < 9)
+			return 0;
+		if (.@group == 1)
+			return (callfunc("F_Angelical_IsInPool", 2, .@item_id) || callfunc("F_Angelical_IsInPool", 3, .@item_id));
+		return 0;
+	}
+	return 1;
+}
+
 function	script	F_Angelical_ShowPoolInfo	{
 	.@pool = getarg(0);
 	mes "[Susan Gray]";
@@ -203,8 +277,134 @@ OnTalk:
 	mes "Equipe a armadura, o manto ou as botas angelicais e eu posso trabalhar neles.";
 	next;
 
-	.@main = select("Encantar equipamento:Inserir encantamento raro no 2o slot:Ver informacoes dos encantamentos:Sair");
+	.@main = select("Encantar equipamento:Inserir encantamento do inventario:Inserir encantamento raro no 2o slot:Ver informacoes dos encantamentos:Sair");
 	if (.@main == 2) {
+		set .@menu$, "";
+		set .@count, 0;
+		setarray .@parts[0], EQI_ARMOR, EQI_GARMENT, EQI_SHOES;
+		for (.@i = 0; .@i < getarraysize(.@parts); .@i++) {
+			.@item_id = getequipid(.@parts[.@i]);
+			if (!callfunc("F_Angelical_IsTarget", .@item_id))
+				continue;
+
+			switch (.@parts[.@i]) {
+				case EQI_ARMOR: .@slot_name$ = "Armadura"; break;
+				case EQI_GARMENT: .@slot_name$ = "Manto"; break;
+				case EQI_SHOES: .@slot_name$ = "Botas"; break;
+			}
+
+			.@menu$ += getitemname(.@item_id) + " [" + .@slot_name$ + "]:";
+			.@valid_parts[.@count] = .@parts[.@i];
+			.@count++;
+		}
+
+		if (.@count == 0) {
+			mes "[Susan Gray]";
+			mes "Voce nao esta com nenhum equipamento angelical elegivel equipado.";
+			close;
+		}
+
+		.@menu$ += "Cancelar";
+		mes "[Susan Gray]";
+		mes "Escolha o equipamento angelical que recebera um encantamento do inventario:";
+		next;
+		.@sel = select(.@menu$);
+		if (.@sel > .@count)
+			close;
+
+		.@part = .@valid_parts[.@sel - 1];
+		.@item_id = getequipid(.@part);
+		.@refine = getequiprefinerycnt(.@part);
+		.@slot2 = getequipcardid(.@part,1);
+		.@slot3 = getequipcardid(.@part,2);
+		.@slot4 = getequipcardid(.@part,3);
+		.@group = callfunc("F_Angelical_ItemGroup", .@item_id);
+
+		if (!.@slot3) {
+			.@real_slot = 2;
+			.@slot_label$ = "3o Slot";
+		} else if (!.@slot4) {
+			.@real_slot = 3;
+			.@slot_label$ = "4o Slot";
+		} else if (!.@slot2) {
+			.@real_slot = 1;
+			.@slot_label$ = "2o Slot";
+		} else {
+			mes "[Susan Gray]";
+			mes "Este equipamento ja possui os 3 slots angelicais preenchidos.";
+			close;
+		}
+
+		// A sequencia 3o -> 4o -> 2o impede empilhar encantos fortes fora do slot final.
+		setarray .@candidate_ids[0],4705,4706,4707,4764,4765,29241,4762,29238,4794,4902,4786,4787,4867,4900,4801,4802,4820,4812,4835,4843,4903,4790,4873,4821,4826,4836,4844,4881,29026,4788,4789,310076,310077,310078,310079,310080,310081;
+		.@insert_menu$ = "";
+		.@insert_count = 0;
+		for (.@i = 0; .@i < getarraysize(.@candidate_ids); .@i++) {
+			.@enchant_id = .@candidate_ids[.@i];
+			if (countitem(.@enchant_id) < 1)
+				continue;
+			if (!callfunc("F_Angelical_CanInsertEnchant", .@enchant_id, .@real_slot, .@group, .@refine))
+				continue;
+
+			.@insert_menu$ += getitemname(.@enchant_id) + " (" + countitem(.@enchant_id) + "):";
+			.@owned_insert[.@insert_count] = .@enchant_id;
+			.@insert_count++;
+		}
+
+		if (.@insert_count == 0) {
+			mes "[Susan Gray]";
+			mes "Voce nao possui no inventario nenhum encantamento valido para o ^0055FF" + .@slot_label$ + "^000000 deste item.";
+			if (.@real_slot == 1)
+				mes "Os encantamentos superiores ficam restritos ao 2o slot.";
+			else
+				mes "No 3o e 4o slots eu aceito apenas a lista basica.";
+			close;
+		}
+
+		.@insert_zeny = (.@real_slot == 1 ? 500000 : 100000);
+
+		if (Zeny < .@insert_zeny) {
+			mes "[Susan Gray]";
+			mes "Voce precisa de ^FF0000" + F_InsertComma(.@insert_zeny) + " Zeny^000000 para inserir um encantamento manualmente.";
+			close;
+		}
+
+		.@insert_menu$ += "Cancelar";
+		mes "[Susan Gray]";
+		mes "Escolha qual encantamento deseja inserir no ^0055FF" + .@slot_label$ + "^000000.";
+		if (.@real_slot != 1)
+			mes "Aqui eu oculto as bencaos e os encantamentos exclusivos do 2o slot.";
+		else if (.@refine >= 9)
+			mes "Como este e o 2o slot, as bencaos e os encantamentos exclusivos podem aparecer no menu.";
+		next;
+		.@pick = select(.@insert_menu$);
+		if (.@pick > .@insert_count)
+			close;
+		.@enchant_id = .@owned_insert[.@pick - 1];
+
+		mes "[Susan Gray]";
+		mes "Vou inserir ^0055FF" + getitemname(.@enchant_id) + "^000000 no ^0055FF" + .@slot_label$ + "^000000 de ^0055FF" + getequipname(.@part) + "^000000.";
+		mes "Taxa: ^0055FF" + F_InsertComma(.@insert_zeny) + " Zeny^000000.";
+		next;
+		if (select("Confirmar insercao:Cancelar") == 2)
+			close;
+
+		if (countitem(.@enchant_id) < 1) {
+			mes "[Susan Gray]";
+			mes "Voce nao possui mais este encantamento no inventario.";
+			close;
+		}
+
+		Zeny -= .@insert_zeny;
+		delitem .@enchant_id,1;
+		progressbar "66ccff",3;
+		specialeffect2 EF_ENHANCE;
+		setitemcard(.@part,.@real_slot,.@enchant_id);
+
+		mes "[Susan Gray]";
+		mes "Encantamento inserido com sucesso no " + .@slot_label$ + ".";
+		close;
+	} else if (.@main == 3) {
 		set .@menu$, "";
 		set .@count, 0;
 		setarray .@parts[0], EQI_ARMOR;
@@ -297,7 +497,7 @@ OnTalk:
 		mes "[Susan Gray]";
 		mes "Encantamento raro inserido com sucesso no 2o slot.";
 		close;
-	} else if (.@main == 3) {
+	} else if (.@main == 4) {
 		mes "[Susan Gray]";
 		mes "Eu encanto estes slots:";
 		mes "- 3o slot";
@@ -317,7 +517,7 @@ OnTalk:
 			close;
 		callfunc("F_Angelical_ShowPoolInfo", .@info);
 		close;
-	} else if (.@main == 4) {
+	} else if (.@main == 5) {
 		close;
 	}
 
