@@ -138,7 +138,15 @@ OnPCLoginEvent:
 	#allstats_final += .@reput_bio5_hard;
 	set rep_bonus_bio5_hard_allstats, .@reput_bio5_hard;
 
-	// set #reput_class_dominator, 0;
+	// Dominio de Classes:
+	// sincroniza a reputacao compartilhada com o total salvo em #classes_mastered.
+	// Isso corrige casos antigos em que o contador de classes ficou acima da reputacao.
+	.@class_rep_expected = #classes_mastered * 300;
+	if (.@class_rep_expected > 5000)
+		.@class_rep_expected = 5000;
+	if (.@class_rep_expected > get_reputation_points(8))
+		set_reputation_points(8, .@class_rep_expected);
+
 	callfunc("F_SyncRepAchievement", 8, 110009, 5000);
 	.@reput_class_dominator = (get_reputation_points(8) / 1000) * 20;
 	set #reput_class_dominator, get_reputation_points(8);
