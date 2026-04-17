@@ -100,15 +100,16 @@ function	script	F_InstanceEntry	{
 				mes "Somente o lider do grupo pode criar a instancia.";
 				close;
 			}
-			if (getd(.@status_name$)) == 0 {
-				if (instance_create(.@db_name$) >= 0) {
+			if (getd(.@status_name$) == 0) {
+				.@iid = instance_create(.@db_name$);
+				if (.@iid >= 0) {
 					mes "[" + .@npc_name$ + "]";
 					mes "A instancia esta se abrindo...";
 					announce "[Instancias] " + strcharinfo(0) + " criou " + .@display_name$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
 					callfunc("F_InstanceLogStart", .@status_var$, .@display_name$);
 
-					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
-					setd(.@status_name$), 1;
+					setd(.@cooldown_name$, gettimetick(2) + callfunc("get_daily_reset"));
+					setd(.@status_name$, 1);
 				} else {
 					mes "Falha ao criar a instancia.";
 				}
@@ -123,8 +124,8 @@ function	script	F_InstanceEntry	{
 		case 2:
 			switch(instance_enter(.@db_name$)) {
 				case IE_OK:
-					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
-					setd(.@status_name$), 2;
+					setd(.@cooldown_name$, gettimetick(2) + callfunc("get_daily_reset"));
+					setd(.@status_name$, 2);
 					if (.@hunt_quest > 0) {
 						if (isbegin_quest(.@hunt_quest))
 							erasequest .@hunt_quest;
@@ -134,12 +135,13 @@ function	script	F_InstanceEntry	{
 					close2;
 					end;
 				case IE_NOINSTANCE:
-                    if(getd(.@status_name$) == 0) {
-				    mes "A instancia ainda nao foi criada.";
-                        close;
-                    }
-                    mes "Voce ja entrou na instancia hoje.";
-                    setd(.@status_name$), 3;
+					if (getd(.@status_name$) == 0) {
+						mes "A instancia ainda nao foi criada.";
+						close;
+					}
+					setd(.@status_name$, 0);
+					mes "A instancia nao esta disponivel no momento.";
+					mes "Tente criar novamente.";
 					close;
 				case IE_NOMEMBER:
 					mes "Voce nao faz parte de um grupo valido para esta instancia.";
