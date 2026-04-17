@@ -1,15 +1,15 @@
 function	script	F_InstanceEntry	{
 
 	// ==============================
-	// Parâmetros esperados:
+	// Parametros esperados:
 	// ==============================
-	// getarg(0) -> Nome exato da instância no DB (string)
+	// getarg(0) -> Nome exato da instancia no DB (string)
 	// getarg(1) -> Nome do NPC (string)
-	// getarg(2) -> Nome da variável de cooldown (string de variável de conta)
-	// getarg(3) -> Nome da variável de status (string de variável de conta)
-	// getarg(4) -> Level mínimo (número)
-	// getarg(5) -> Nome amigável da instância (string opcional)
-	// getarg(6) -> Quest de caça iniciada ao entrar (número opcional)
+	// getarg(2) -> Nome da variavel de cooldown (string de variavel de conta)
+	// getarg(3) -> Nome da variavel de status (string de variavel de conta)
+	// getarg(4) -> Level minimo (numero)
+	// getarg(5) -> Nome amigavel da instancia (string opcional)
+	// getarg(6) -> Quest de caca iniciada ao entrar (numero opcional)
 	// ==============================
 
 	.@db_name$ = getarg(0);
@@ -38,7 +38,7 @@ function	script	F_InstanceEntry	{
 	sleep2 100;
     
 	// ============================
-	// 1. Checa Level mínimo
+	// 1. Checa Level minimo
 	// ============================
 	if (BaseLevel < .@min_level) {
 		mes "[" + .@npc_name$ + "]";
@@ -48,7 +48,7 @@ function	script	F_InstanceEntry	{
 	}
 
 	// ============================
-	// 2. Checa se está em grupo
+	// 2. Checa se esta em grupo
 	// ============================
 	if (getcharid(1) < 1) {
 		mes "[" + .@npc_name$ + "]";
@@ -64,7 +64,7 @@ function	script	F_InstanceEntry	{
     }
 
 	// ============================
-	// 4. Se já completou hoje
+	// 4. Se ja completou hoje
 	// ============================
 	if (getd(.@status_name$) == 3) {
 		mes "[" + .@npc_name$ + "]";
@@ -84,7 +84,7 @@ function	script	F_InstanceEntry	{
 	}
 
 	// ============================
-	// 5. Diálogo inicial
+	// 5. Dialogo inicial
 	// ============================
 	mes "[" + .@npc_name$ + "]";
 	mes "Ola, aventureiro! Deseja criar ou entrar na instancia ^0055FF" + .@display_name$ + "^000000?";
@@ -93,7 +93,7 @@ function	script	F_InstanceEntry	{
 	switch(select("Criar instancia", "Entrar na instancia", "Cancelar")) {
 
 		// ============================
-		// 6. Criar instância
+		// 6. Criar instancia
 		// ============================
 		case 1:
 			if (!is_party_leader()) {
@@ -118,7 +118,7 @@ function	script	F_InstanceEntry	{
 			close;
 
 		// ============================
-		// 7. Entrar na instância
+		// 7. Entrar na instancia
 		// ============================
 		case 2:
 			switch(instance_enter(.@db_name$)) {
@@ -138,11 +138,11 @@ function	script	F_InstanceEntry	{
 				    mes "A instancia ainda nao foi criada.";
                         close;
                     }
-                    mes "Você já entrou na instância hoje.";
+                    mes "Voce ja entrou na instancia hoje.";
                     setd(.@status_name$), 3;
 					close;
 				case IE_NOMEMBER:
-					mes "Você não faz parte de um grupo válido para esta instância.";
+					mes "Voce nao faz parte de um grupo valido para esta instancia.";
 					close;
 				default:
 					mes "Ocorreu um erro desconhecido ao tentar entrar.";
@@ -204,17 +204,17 @@ function	script	F_InstanceHistoryCode	{
 		return "ETOWER";
 	if (.@key$ == "NYD" || .@key$ == "Ninho de Nidhog")
 		return "NYD";
-	if (.@key$ == "OldGlastHeim" || .@key$ == "Maldição de Glast Heim" || .@key$ == "Maldicao de Glast Heim")
+	if (.@key$ == "OldGlastHeim" || .@key$ == "Maldicao de Glast Heim" || .@key$ == "Maldicao de Glast Heim")
 		return "OldGlastHeim";
 	if (.@key$ == "SANTUARIOSELADO" || .@key$ == "Santuario Selado")
 		return "SANTUARIOSELADO";
-	if (.@key$ == "WLCR" || .@key$ == "Laboratório Werner" || .@key$ == "Laboratorio Werner")
+	if (.@key$ == "WLCR" || .@key$ == "Laboratorio Werner" || .@key$ == "Laboratorio Werner")
 		return "WLCR";
-	if (.@key$ == "GMT" || .@key$ == "Torneio Mágico de Geffen" || .@key$ == "Torneio Magico de Geffen")
+	if (.@key$ == "GMT" || .@key$ == "Torneio Magico de Geffen" || .@key$ == "Torneio Magico de Geffen")
 		return "GMT";
-	if (.@key$ == "SaraMemory" || .@key$ == "Memórias de Sara" || .@key$ == "Memorias de Sara")
+	if (.@key$ == "SaraMemory" || .@key$ == "Memorias de Sara" || .@key$ == "Memorias de Sara")
 		return "SaraMemory";
-	if (.@key$ == "InfiniteSpace" || .@key$ == "Espaço Infinito" || .@key$ == "Espaco Infinito")
+	if (.@key$ == "InfiniteSpace" || .@key$ == "Espaco Infinito" || .@key$ == "Espaco Infinito")
 		return "InfiniteSpace";
 	if (.@key$ == "BangungotHospital" || .@key$ == "Hospital Bangungot")
 		return "BangungotHospital";
@@ -234,19 +234,19 @@ function	script	F_InstanceHistoryCode	{
 		return "EddaGHPur";
 	if (.@key$ == "EddaGHPurH" || .@key$ == "EddaGlastheimPurificationHard" || .@key$ == "Purificacao de Glast Heim Hard")
 		return "EddaGHPurH";
-	if (.@key$ == "DEVILTOWER" || .@key$ == "Torre do Demônio" || .@key$ == "Torre do Demonio")
+	if (.@key$ == "DEVILTOWER" || .@key$ == "Torre do Demonio" || .@key$ == "Torre do Demonio")
 		return "DEVILTOWER";
-	if (.@key$ == "LaboratorioCentral" || .@key$ == "Laboratório Central" || .@key$ == "Laboratorio Central")
+	if (.@key$ == "LaboratorioCentral" || .@key$ == "Laboratorio Central" || .@key$ == "Laboratorio Central")
 		return "LaboratorioCentral";
 	if (.@key$ == "EclageInterior" || .@key$ == "Interior de Eclage")
 		return "EclageInterior";
-	if (.@key$ == "HTF" || .@key$ == "Fábrica de Brinquedos de Terror" || .@key$ == "Fabrica de Brinquedos de Terror")
+	if (.@key$ == "HTF" || .@key$ == "Fabrica de Brinquedos de Terror" || .@key$ == "Fabrica de Brinquedos de Terror")
 		return "HTF";
-	if (.@key$ == "RoomConsciousness" || .@key$ == "Salão de Ymir" || .@key$ == "Salao de Ymir")
+	if (.@key$ == "RoomConsciousness" || .@key$ == "Salao de Ymir" || .@key$ == "Salao de Ymir")
 		return "RoomConsciousness";
-	if (.@key$ == "WolfchevLaboratory" || .@key$ == "Laboratório Wolfchev" || .@key$ == "Laboratorio Wolfchev")
+	if (.@key$ == "WolfchevLaboratory" || .@key$ == "Laboratorio Wolfchev" || .@key$ == "Laboratorio Wolfchev")
 		return "WolfchevLaboratory";
-	if (.@key$ == "TRG" || .@key$ == "Templo do Rei Demônio" || .@key$ == "Templo do Rei Demonio")
+	if (.@key$ == "TRG" || .@key$ == "Templo do Rei Demonio" || .@key$ == "Templo do Rei Demonio")
 		return "TRG";
 	if (.@key$ == "IsleOfBios" || .@key$ == "Ilha de Bios")
 		return "IsleOfBios";
@@ -366,7 +366,7 @@ function	script	F_InstanceFinishAnnounce	{
 	callfunc("F_InstanceLogFinish", .@db_name$);
 	if (#instancia == 1)
 		#instancia = 2;
-	announce "[Instâncias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
+	announce "[Instancias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
 	return;
 }
 
