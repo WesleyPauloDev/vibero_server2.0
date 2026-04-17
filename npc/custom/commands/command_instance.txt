@@ -42,6 +42,7 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatus", "BuwayaCave", "BuwayaCave");
 		callfunc("F_InstanceMenuResetStatus", "friday_dungeon", "FridayDungeon");
 		callfunc("F_InstanceMenuResetStatus", "CharlestonCrisis", "CharlestonCrisis");
+		callfunc("F_InstanceMenuResetStatus", "edda_biolab", "EddaBiolab");
 		callfunc("F_InstanceMenuResetStatus", "edda_hmoon", "EddaHalfMoon");
 		callfunc("F_InstanceMenuResetStatus", "edda_glast_fall", "EddaGlastheimFall");
 		callfunc("F_InstanceMenuResetStatus", "edda_glast_pur", "EddaGHPur");
@@ -113,6 +114,7 @@ OnAtcommand:
 	.@opt34$ = callfunc("F_InstanceMenuOption", "[175+] Pesadelo Musical", "nightmarish_jitterbug", "NightmarishJitterbug");
 	.@opt35$ = callfunc("F_InstanceMenuOption", "[175+] Floresta Profunda", "deep_forest", "DeepForest");
 	.@opt38$ = callfunc("F_InstanceMenuOption", "[175+] Tumba do Remorso", "tomb_remorse", "TombRemorse");
+	.@opt40$ = callfunc("F_InstanceMenuOption", "[175+] Edda Biolabs", "edda_biolab", "EddaBiolab");
 	.@s = select(
 		.@opt1$,
 		.@opt2$,
@@ -152,7 +154,8 @@ OnAtcommand:
 		.@opt33$,
 		.@opt34$,
 		.@opt35$,
-		.@opt38$
+		.@opt38$,
+		.@opt40$
 	);	close2;
 
 	switch(.@s) {
@@ -349,6 +352,10 @@ OnAtcommand:
 		case 39:
 			#INSTANCENAME$ = "TombOfRemorse";
 			doevent "TombOfRemorse_Instance#Custom::OnStartInstance";
+			end;
+		case 40:
+			#INSTANCENAME$ = "EddaBiolabs";
+			doevent "EddaBiolabs_Instance#Custom::OnStartInstance";
 			end;
 	}
 	end;

@@ -1,0 +1,225 @@
+//============================================================
+//====== start npc
+//============================================================
+yuno,210,340,3	script	Encantadora Biolab	105,{
+	setArray .@weapons[0],21051,21052,32023,1333,16092,28138,28765,28766,28044,28042,26158,2055,2056,26161,16095,18185,18187,18186,32350,32024,32025,32351,16093,16094,28767,28768,18184,28633,26159,26160,1865,1866,16096,18188,26212,26213,32107,32108;
+	setArray .@enchant1[0],4832,4833,4834,4808,4820,4821,4818,4817,4816,4863,4864,4865,4815,4814,4813;
+	setArray .@enchant2[0],29594,29595,29596,29598,29599,29600,29601,29602,29603,29604,29605,29606,29607;
+	
+	.@isEdda = 0;
+	
+	mes "[Encantadora Biolab]";
+	.@weap = getequipid(EQI_HAND_R);
+	.@refine = getequiprefinerycnt(EQI_HAND_R);
+	.@card0 = getequipcardid(EQI_HAND_R,0);
+	.@card1 = getequipcardid(EQI_HAND_R,1);
+	.@card2 = getequipcardid(EQI_HAND_R,2);
+	.@card3 = getequipcardid(EQI_HAND_R,3);
+	
+	
+	
+	for(.@i = 0; .@i < 38; .@i++) {
+		if(.@weapons[.@i] == .@weap){
+			.@isEdda = 1;
+		} 
+	}
+	if(.@isEdda == 0) {
+		mes "Voce precisa equipar uma arma da Edda Biolabs.";
+	
+		end;
+	}
+
+	if(.@card2 != 0 && .@card3 != 0){
+		mes "Voce quer trocar um dos encantamentos atuais?";
+		
+		switch(select("Sim, o 3 slot.:Sim, o 4 slot.:Nao.")){
+			case 1:
+				mes "O modo normal custa 500 Documentos de Pesquisa Biologica e 500 Fragmentos de Experimento Biologico.";
+				mes "Existe 5% de chance de destruir a arma.";
+				next;
+				mes "O modo seguro custa 2000 Documentos de Pesquisa Biologica e 2000 Fragmentos de Experimento Biologico.";
+				mes "No modo seguro nao existe chance de destruir a arma.";
+				
+				switch(select("Normal:Seguro")){
+					case 1:
+						if(countitem(25786) < 500 && countitem(25787) < 500) {
+							mes "Voce nao tem os itens necessarios.";
+							end;
+						}
+					
+						delitem 25786,500;
+						delitem 25787,500;
+						if(rand(5) == 1){
+							delequip EQI_HAND_R;
+							mes "Que pena... sua arma foi destruida.";
+							end;
+						}
+						delequip EQI_HAND_R;
+						getitem2 .@weap,1,1,.@refine,0,.@card0,.@card1,.@card2,.@card3;
+						end;
+					case 2:
+						if(countitem(25786) < 2000 && countitem(25787) < 2000) {
+							mes "Voce nao tem os itens necessarios.";
+							end;
+						}
+						.@card2 = .@enchant2[rand(13)];
+						delitem 25786,2000;
+						delitem 25787,2000;
+						delequip EQI_HAND_R;
+						getitem2 .@weap,1,1,.@refine,0,.@card0,.@card1,.@card2,.@card3;
+						end;
+				}
+			break;
+			case 2:
+				mes "O modo normal custa 200 Documentos de Pesquisa Biologica e 200 Fragmentos de Experimento Biologico.";
+				mes "Existe 5% de chance de destruir a arma.";
+				next;
+				mes "O modo seguro custa 1000 Documentos de Pesquisa Biologica e 1000 Fragmentos de Experimento Biologico.";
+				mes "No modo seguro nao existe chance de destruir a arma.";
+				
+				switch(select("Normal:Seguro")){
+					case 1:
+						delitem 25786,200;
+						delitem 25787,200;
+						if(rand(5) == 1){
+							delequip EQI_HAND_R;
+							mes "Que pena... sua arma foi destruida.";
+							end;
+						}
+						delequip EQI_HAND_R;
+						getitem2 .@weap,1,1,.@refine,0,.@card0,.@card1,.@card2,.@card3;
+						end;
+					case 2:
+						.@card3 = .@enchant1[rand(15)];
+						delitem 25786,1000;
+						delitem 25787,1000;
+						delequip EQI_HAND_R;
+						getitem2 .@weap,1,1,.@refine,0,.@card0,.@card1,.@card2,.@card3;
+						end;
+				}
+			break;
+			
+			case 3:end;
+		}
+		
+		end;
+	}
+	//@item 2056
+
+	switch(select("Sim:Nao")){
+		case 1:
+			switch(select("Modo normal:Modo seguro:Cancelar")){
+				case 1:
+					.@safe = 0;
+					break;
+				case 2:
+					.@safe = 1;
+					break;
+				case 3: end;
+			}
+		
+		
+			if(.@card3 == 0) {
+				if(.@safe == 0) mes "Isso vai custar 50 Documentos de Pesquisa Biologica e 50 Fragmentos de Experimento Biologico.";
+				else {
+					mes "Isso vai custar 500 Documentos de Pesquisa Biologica e 500 Fragmentos de Experimento Biologico.";
+					next;
+					mes "Ainda existe uma pequena chance de quebrar sua arma. Deseja continuar?";
+				}
+				next;
+				switch(select("Sim:Nao")){
+					case 1:
+						// 30% of the player loses the weapon;
+						if(rand(10) <= 3 && .@safe == 0){
+							delequip EQI_HAND_R;
+							mes "Que pena... sua arma foi destruida.";
+							end;
+							
+						}
+						break;
+					
+					case 2: 
+						mes "Tudo bem.";
+						end;
+				}
+				
+				if(countitem(25786) < 50 && countitem(25787) < 50){
+					mes "Voce nao tem materiais suficientes.";
+					end;
+				}
+				if(.@safe == 1){
+					delitem 25786,500;
+					delitem 25787,500;
+				}
+				else {
+					delitem 25786,50;
+					delitem 25787,50;
+				}
+				.@card3 = .@enchant1[rand(15)];
+				break;
+			}
+			
+			if(.@card2 == 0) {
+				if(.@safe == 0) mes "Isso vai custar 50 Documentos de Pesquisa Biologica e 50 Fragmentos de Experimento Biologico.";
+				else {
+					mes "Isso vai custar 500 Documentos de Pesquisa Biologica e 500 Fragmentos de Experimento Biologico.";
+					next;
+					mes "Ainda existe uma pequena chance de quebrar sua arma. Deseja continuar?";
+				}
+				next;
+				switch(select("Sim:Nao")){
+					// 30% of the player loses the weapon;
+					case 1:
+						if(rand(10) <= 3 && .@safe == 0){
+							delequip EQI_HAND_R;
+							mes "Que pena... sua arma foi destruida.";
+							end;
+						}
+						break;
+					case 2: 
+						mes "Tudo bem.";
+						end;
+				}
+				
+				if(countitem(25786) < 50 && countitem(25787) < 50){
+					mes "Voce nao tem materiais suficientes.";
+					end;
+				}
+				if(.@safe == 1){
+					delitem 25786,500;
+					delitem 25787,500;
+				}
+				else {
+					delitem 25786,50;
+					delitem 25787,50;
+				}
+				
+				.@card2 = .@enchant2[rand(13)];
+				break;
+			}
+			end;
+		case 2:
+			mes "Tudo bem.";
+			end;
+	}
+	delequip EQI_HAND_R;
+	getitem2 .@weap,1,1,.@refine,0,.@card0,.@card1,.@card2,.@card3;
+	end;
+	
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
