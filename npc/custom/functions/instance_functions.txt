@@ -1,14 +1,15 @@
 function	script	F_InstanceEntry	{
 
 	// ==============================
-	// Par‚metros esperados:
+	// Par√¢metros esperados:
 	// ==============================
-	// getarg(0) -> Nome exato da inst‚ncia no DB (string)
+	// getarg(0) -> Nome exato da inst√¢ncia no DB (string)
 	// getarg(1) -> Nome do NPC (string)
-	// getarg(2) -> Nome da vari·vel de cooldown (string de vari·vel de conta)
-	// getarg(3) -> Nome da vari·vel de status (string de vari·vel de conta)
-	// getarg(4) -> Level mÌnimo (n˙mero)
-	// getarg(5) -> Nome amig·vel da inst‚ncia (string opcional)
+	// getarg(2) -> Nome da vari√°vel de cooldown (string de vari√°vel de conta)
+	// getarg(3) -> Nome da vari√°vel de status (string de vari√°vel de conta)
+	// getarg(4) -> Level m√≠nimo (n√∫mero)
+	// getarg(5) -> Nome amig√°vel da inst√¢ncia (string opcional)
+	// getarg(6) -> Quest de ca√ßa iniciada ao entrar (n√∫mero opcional)
 	// ==============================
 
 	.@db_name$ = getarg(0);
@@ -17,6 +18,7 @@ function	script	F_InstanceEntry	{
 	.@status_var$ = getarg(3);
 	.@min_level = getarg(4);
 	.@display_name$ = getarg(5, .@db_name$);
+	.@hunt_quest = getarg(6, 0);
 
     .@cooldown_name$ = "#cooldown_" + .@cooldown_var$;
     .@status_name$ = "#" + .@status_var$ + "_STATUS";
@@ -36,21 +38,21 @@ function	script	F_InstanceEntry	{
 	sleep2 100;
     
 	// ============================
-	// 1. Checa Level mÌnimo
+	// 1. Checa Level m√≠nimo
 	// ============================
 	if (BaseLevel < .@min_level) {
 		mes "[" + .@npc_name$ + "]";
-		mes "Uau~ VocÍ ainda È muito inexperiente!";
-		mes "Volte quando atingir o nÌvel base ^FF5555" + .@min_level + "^000000.";
+		mes "Uau~ Voce ainda e muito inexperiente!";
+		mes "Volte quando atingir o nivel base ^FF5555" + .@min_level + "^000000.";
 		close;
 	}
 
 	// ============================
-	// 2. Checa se est· em grupo
+	// 2. Checa se est√° em grupo
 	// ============================
 	if (getcharid(1) < 1) {
 		mes "[" + .@npc_name$ + "]";
-		mes "VocÍ precisa estar em um grupo para entrar na inst‚ncia.";
+		mes "Voce precisa estar em um grupo para entrar na instancia.";
 		close;
 	}
 
@@ -62,12 +64,12 @@ function	script	F_InstanceEntry	{
     }
 
 	// ============================
-	// 4. Se j· completou hoje
+	// 4. Se j√° completou hoje
 	// ============================
 	if (getd(.@status_name$) == 3) {
 		mes "[" + .@npc_name$ + "]";
-		mes "VocÍ j· fez esta inst‚ncia hoje.";
-		mes "Volte amanh„ apÛs o descanso.";
+		mes "Voce ja fez esta instancia hoje.";
+		mes "Volte amanha apos o descanso.";
 		close;
 	}
 
@@ -76,66 +78,71 @@ function	script	F_InstanceEntry	{
 	// =========================
 	if (!callfunc("F_CheckInstanceIPPermission")) {
 		mes "[" + .@npc_name$ + "]";
-		mes "Jogadores com mesmo IP sÛ podem participar de mais de uma ";
-		mes "Inst‚ncia simultaneamente , se estiverem em grupos diferentes.";
+		mes "Jogadores com mesmo IP so podem participar de mais de uma ";
+		mes "instancia simultaneamente, se estiverem em grupos diferentes.";
 		close;
 	}
 
 	// ============================
-	// 5. Di·logo inicial
+	// 5. Di√°logo inicial
 	// ============================
 	mes "[" + .@npc_name$ + "]";
-	mes "Ol·, aventureiro! Deseja criar ou entrar na inst‚ncia ^0055FF" + .@display_name$ + "^000000?";
+	mes "Ola, aventureiro! Deseja criar ou entrar na instancia ^0055FF" + .@display_name$ + "^000000?";
 	next;
 
-	switch(select("Criar inst‚ncia", "Entrar na inst‚ncia", "Cancelar")) {
+	switch(select("Criar instancia", "Entrar na instancia", "Cancelar")) {
 
 		// ============================
-		// 6. Criar inst‚ncia
+		// 6. Criar inst√¢ncia
 		// ============================
 		case 1:
 			if (!is_party_leader()) {
-				mes "Somente o lÌder do grupo pode criar a inst‚ncia.";
+				mes "Somente o lider do grupo pode criar a instancia.";
 				close;
 			}
 			if (getd(.@status_name$)) == 0 {
 				if (instance_create(.@db_name$) >= 0) {
 					mes "[" + .@npc_name$ + "]";
-					mes "A Inst‚ncia est· se abrindo...";
-					announce "[Inst‚ncias] " + strcharinfo(0) + " criou " + .@display_name$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
+					mes "A instancia esta se abrindo...";
+					announce "[Instancias] " + strcharinfo(0) + " criou " + .@display_name$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
 					callfunc("F_InstanceLogStart", .@status_var$, .@display_name$);
 
 					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
 					setd(.@status_name$), 1;
 				} else {
-					mes "Falha ao criar a inst‚ncia.";
+					mes "Falha ao criar a instancia.";
 				}
 			} else {
-				mes "A inst‚ncia j· foi criada. Use ^0000FF'Entrar na inst‚ncia'^000000 para entrar.";
+				mes "A instancia ja foi criada. Use ^0000FF'Entrar na instancia'^000000 para entrar.";
 			}
 			close;
 
 		// ============================
-		// 7. Entrar na inst‚ncia
+		// 7. Entrar na inst√¢ncia
 		// ============================
 		case 2:
 			switch(instance_enter(.@db_name$)) {
 				case IE_OK:
 					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
 					setd(.@status_name$), 2;
+					if (.@hunt_quest > 0) {
+						if (isbegin_quest(.@hunt_quest))
+							erasequest .@hunt_quest;
+						setquest .@hunt_quest;
+					}
 					callfunc("F_InstanceLogEnter", .@status_var$, .@display_name$);
 					close2;
 					end;
 				case IE_NOINSTANCE:
                     if(getd(.@status_name$) == 0) {
-				    mes "A inst‚ncia ainda n„o foi criada.";
+				    mes "A instancia ainda nao foi criada.";
                         close;
                     }
-                    mes "VocÍ j· entrou na inst‚ncia hoje.";
+                    mes "Voc√™ j√° entrou na inst√¢ncia hoje.";
                     setd(.@status_name$), 3;
 					close;
 				case IE_NOMEMBER:
-					mes "VocÍ n„o faz parte de um grupo v·lido para esta inst‚ncia.";
+					mes "Voc√™ n√£o faz parte de um grupo v√°lido para esta inst√¢ncia.";
 					close;
 				default:
 					mes "Ocorreu um erro desconhecido ao tentar entrar.";
@@ -197,17 +204,17 @@ function	script	F_InstanceHistoryCode	{
 		return "ETOWER";
 	if (.@key$ == "NYD" || .@key$ == "Ninho de Nidhog")
 		return "NYD";
-	if (.@key$ == "OldGlastHeim" || .@key$ == "MaldiÁ„o de Glast Heim" || .@key$ == "Maldicao de Glast Heim")
+	if (.@key$ == "OldGlastHeim" || .@key$ == "Maldi√ß√£o de Glast Heim" || .@key$ == "Maldicao de Glast Heim")
 		return "OldGlastHeim";
 	if (.@key$ == "SANTUARIOSELADO" || .@key$ == "Santuario Selado")
 		return "SANTUARIOSELADO";
-	if (.@key$ == "WLCR" || .@key$ == "LaboratÛrio Werner" || .@key$ == "Laboratorio Werner")
+	if (.@key$ == "WLCR" || .@key$ == "Laborat√≥rio Werner" || .@key$ == "Laboratorio Werner")
 		return "WLCR";
-	if (.@key$ == "GMT" || .@key$ == "Torneio M·gico de Geffen" || .@key$ == "Torneio Magico de Geffen")
+	if (.@key$ == "GMT" || .@key$ == "Torneio M√°gico de Geffen" || .@key$ == "Torneio Magico de Geffen")
 		return "GMT";
-	if (.@key$ == "SaraMemory" || .@key$ == "MemÛrias de Sara" || .@key$ == "Memorias de Sara")
+	if (.@key$ == "SaraMemory" || .@key$ == "Mem√≥rias de Sara" || .@key$ == "Memorias de Sara")
 		return "SaraMemory";
-	if (.@key$ == "InfiniteSpace" || .@key$ == "EspaÁo Infinito" || .@key$ == "Espaco Infinito")
+	if (.@key$ == "InfiniteSpace" || .@key$ == "Espa√ßo Infinito" || .@key$ == "Espaco Infinito")
 		return "InfiniteSpace";
 	if (.@key$ == "BangungotHospital" || .@key$ == "Hospital Bangungot")
 		return "BangungotHospital";
@@ -221,19 +228,25 @@ function	script	F_InstanceHistoryCode	{
 		return "CharlestonCrisis";
 	if (.@key$ == "EddaHalfMoon" || .@key$ == "Quarto Crescente")
 		return "EddaHalfMoon";
-	if (.@key$ == "DEVILTOWER" || .@key$ == "Torre do DemÙnio" || .@key$ == "Torre do Demonio")
+	if (.@key$ == "EddaGlastheimFall" || .@key$ == "Queda de Glast Heim")
+		return "EddaGlastheimFall";
+	if (.@key$ == "EddaGHPur" || .@key$ == "EddaGlastheimPurification" || .@key$ == "Purificacao de Glast Heim")
+		return "EddaGHPur";
+	if (.@key$ == "EddaGHPurH" || .@key$ == "EddaGlastheimPurificationHard" || .@key$ == "Purificacao de Glast Heim Hard")
+		return "EddaGHPurH";
+	if (.@key$ == "DEVILTOWER" || .@key$ == "Torre do Dem√¥nio" || .@key$ == "Torre do Demonio")
 		return "DEVILTOWER";
-	if (.@key$ == "LaboratorioCentral" || .@key$ == "LaboratÛrio Central" || .@key$ == "Laboratorio Central")
+	if (.@key$ == "LaboratorioCentral" || .@key$ == "Laborat√≥rio Central" || .@key$ == "Laboratorio Central")
 		return "LaboratorioCentral";
 	if (.@key$ == "EclageInterior" || .@key$ == "Interior de Eclage")
 		return "EclageInterior";
-	if (.@key$ == "HTF" || .@key$ == "F·brica de Brinquedos de Terror" || .@key$ == "Fabrica de Brinquedos de Terror")
+	if (.@key$ == "HTF" || .@key$ == "F√°brica de Brinquedos de Terror" || .@key$ == "Fabrica de Brinquedos de Terror")
 		return "HTF";
-	if (.@key$ == "RoomConsciousness" || .@key$ == "Sal„o de Ymir" || .@key$ == "Salao de Ymir")
+	if (.@key$ == "RoomConsciousness" || .@key$ == "Sal√£o de Ymir" || .@key$ == "Salao de Ymir")
 		return "RoomConsciousness";
-	if (.@key$ == "WolfchevLaboratory" || .@key$ == "LaboratÛrio Wolfchev" || .@key$ == "Laboratorio Wolfchev")
+	if (.@key$ == "WolfchevLaboratory" || .@key$ == "Laborat√≥rio Wolfchev" || .@key$ == "Laboratorio Wolfchev")
 		return "WolfchevLaboratory";
-	if (.@key$ == "TRG" || .@key$ == "Templo do Rei DemÙnio" || .@key$ == "Templo do Rei Demonio")
+	if (.@key$ == "TRG" || .@key$ == "Templo do Rei Dem√¥nio" || .@key$ == "Templo do Rei Demonio")
 		return "TRG";
 	if (.@key$ == "IsleOfBios" || .@key$ == "Ilha de Bios")
 		return "IsleOfBios";
@@ -353,7 +366,7 @@ function	script	F_InstanceFinishAnnounce	{
 	callfunc("F_InstanceLogFinish", .@db_name$);
 	if (#instancia == 1)
 		#instancia = 2;
-	announce "[Inst‚ncias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
+	announce "[Inst√¢ncias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
 	return;
 }
 

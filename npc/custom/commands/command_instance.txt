@@ -23,7 +23,7 @@ OnAtcommand:
 	}
 
 	.@now = gettimetick(2);
-	.@reset_ver = 6;
+	.@reset_ver = 7;
 	if (#INSTANCE_MENU_RESET_VER != .@reset_ver || #INSTANCE_MENU_RESET_TICK <= .@now) {
 		callfunc("F_InstanceMenuResetStatus", "poringvillage", "PORING");
 		callfunc("F_InstanceMenuResetStatus", "orcMemory", "ORCMEMORY");
@@ -43,6 +43,9 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatus", "friday_dungeon", "FridayDungeon");
 		callfunc("F_InstanceMenuResetStatus", "CharlestonCrisis", "CharlestonCrisis");
 		callfunc("F_InstanceMenuResetStatus", "edda_hmoon", "EddaHalfMoon");
+		callfunc("F_InstanceMenuResetStatus", "edda_glast_fall", "EddaGlastheimFall");
+		callfunc("F_InstanceMenuResetStatus", "edda_glast_pur", "EddaGHPur");
+		callfunc("F_InstanceMenuResetStatus", "edda_glast_pur_h", "EddaGHPurH");
 		callfunc("F_InstanceMenuResetStatus", "devil_tower", "DEVILTOWER");
 		callfunc("F_InstanceMenuResetStatus", "laboratorio_central", "LaboratorioCentral");
 		callfunc("F_InstanceMenuResetStatus", "eclage_interior", "EclageInterior");
@@ -89,6 +92,7 @@ OnAtcommand:
 	.@opt36$ = callfunc("F_InstanceMenuOption", "[130+] Dungeon da Sexta-Feira", "friday_dungeon", "FridayDungeon");
 	.@opt16$ = callfunc("F_InstanceMenuOption", "[130+] Charleston em Crise", "CharlestonCrisis", "CharlestonCrisis");
 	.@opt17$ = callfunc("F_InstanceMenuOption", "[130+] Quarto Crescente", "edda_hmoon", "EddaHalfMoon");
+	.@opt39$ = "[130/175] Edda Glast Heim";
 	.@opt18$ = callfunc("F_InstanceMenuOption", "[130+] Torre do Demonio", "devil_tower", "DEVILTOWER");
 	.@opt19$ = callfunc("F_InstanceMenuOption", "[135+] Laboratorio Central", "laboratorio_central", "LaboratorioCentral");
 	.@opt20$ = callfunc("F_InstanceMenuOption", "[140+] Interior de Eclage", "eclage_interior", "EclageInterior");
@@ -128,6 +132,7 @@ OnAtcommand:
 		.@opt36$,
 		.@opt16$,
 		.@opt17$,
+		.@opt39$,
 		.@opt18$,
 		.@opt19$,
 		.@opt20$,
@@ -235,66 +240,86 @@ OnAtcommand:
 			doevent "EddaHalfMoonInTheDaylight_Instance#Custom::OnStartInstance";
 			end;
 		case 19:
+			.@edda_fall$ = callfunc("F_InstanceMenuOption", "[130] Queda", "edda_glast_fall", "EddaGlastheimFall");
+			.@edda_pur$ = callfunc("F_InstanceMenuOption", "[130] Purificacao", "edda_glast_pur", "EddaGHPur");
+			.@edda_hard$ = callfunc("F_InstanceMenuOption", "[175] Purificacao Hard", "edda_glast_pur_h", "EddaGHPurH");
+			switch(select(.@edda_fall$, .@edda_pur$, .@edda_hard$, "Cancelar")) {
+			case 1:
+				#INSTANCENAME$ = "EddaGlastheimFall";
+				doevent "EddaGlastheimFall_Instance#Custom::OnStartInstance";
+				end;
+			case 2:
+				#INSTANCENAME$ = "EddaGlastheimPurification";
+				doevent "EddaGlastheimPurification_Instance#Custom::OnStartInstance";
+				end;
+			case 3:
+				#INSTANCENAME$ = "EddaGlastheimPurificationHard";
+				doevent "EddaGlastheimPurificationHard_Instance#Custom::OnStartInstance";
+				end;
+			case 4:
+				end;
+			}
+		case 20:
 			#INSTANCENAME$ = "DevilTower";
 			doevent "DevilTower_Instance#Custom::OnStartInstance";
 			end;
-		case 20:
+		case 21:
 			#INSTANCENAME$ = "LaboratorioCentral";
 			doevent "LaboratorioCentral_Instance#Custom::OnStartInstance";
 			end;
-		case 21:
+		case 22:
 			#INSTANCENAME$ = "EclageInterior";
 			doevent "EclageInterior_Instance#Custom::OnStartInstance";
 			end;
-		case 22:
+		case 23:
 			#INSTANCENAME$ = "HTF";
 			doevent "HTF_Instance#Custom::OnStartInstance";
 			end;
-		case 23:
+		case 24:
 			#INSTANCENAME$ = "RoomOfConsciousness";
 			doevent "RoomOfConsciousness_Instance#Custom::OnStartInstance";
 			end;
-		case 24:
+		case 25:
 			#INSTANCENAME$ = "HeartHunterWarBase";
 			doevent "HeartHunterWarBase_Instance#Custom::OnStartInstance";
 			end;
-		case 25:
+		case 26:
 			#INSTANCENAME$ = "HiddenGarden";
 			doevent "HiddenGarden_Instance#Custom::OnStartInstance";
 			end;
-		case 26:
+		case 27:
 			#INSTANCENAME$ = "WolfchevLaboratory";
 			doevent "WolfchevLaboratory_Instance#Custom::OnStartInstance";
 			end;
-		case 27:
+		case 28:
 			#INSTANCENAME$ = "TRG";
 			doevent "TRG_Instance#Custom::OnStartInstance";
 			end;
-		case 28:
+		case 29:
 			#INSTANCENAME$ = "IsleOfBios";
 			doevent "IsleOfBios_Instance#Custom::OnStartInstance";
 			end;
-		case 29:
+		case 30:
 			#INSTANCENAME$ = "MorseCave";
 			doevent "MorseCave_Instance#Custom::OnStartInstance";
 			end;
-		case 30:
+		case 31:
 			#INSTANCENAME$ = "OSOccupation";
 			doevent "OSOccupation_Instance#Custom::OnStartInstance";
 			end;
-		case 31:
+		case 32:
 			#INSTANCENAME$ = "CorOperation";
 			doevent "CorOperation_Instance#Custom::OnStartInstance";
 			end;
-		case 32:
+		case 33:
 			#INSTANCENAME$ = "ThorGunsuBase";
 			doevent "ThorGunsuBase_Instance#Custom::OnStartInstance";
 			end;
-		case 33:
+		case 34:
 			#INSTANCENAME$ = "TwilightGarden";
 			doevent "TwilightGarden_Instance#Custom::OnStartInstance";
 			end;
-		case 34:
+		case 35:
 			switch(select("WaterGarden Normal","WaterGarden Hard","Cancelar")) {
 			case 1:
 				#WATERGARDEN_MODE = 0;
@@ -309,19 +334,19 @@ OnAtcommand:
 			case 3:
 				end;
 			}
-		case 35:
+		case 36:
 			#INSTANCENAME$ = "FacewormsNest";
 			doevent "FacewormsNest_Instance#Custom::OnStartInstance";
 			end;
-		case 36:
+		case 37:
 			#INSTANCENAME$ = "NightmarishJitterbug";
 			doevent "NightmarishJitterbug_Instance#Custom::OnStartInstance";
 			end;
-		case 37:
+		case 38:
 			#INSTANCENAME$ = "DeepForest";
 			doevent "DeepForest_Instance#Custom::OnStartInstance";
 			end;
-		case 38:
+		case 39:
 			#INSTANCENAME$ = "TombOfRemorse";
 			doevent "TombOfRemorse_Instance#Custom::OnStartInstance";
 			end;
