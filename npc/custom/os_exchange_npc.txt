@@ -10,7 +10,7 @@ moc_para01,42,36,4	script	Operador OS	4_M_REPAIR,{
 	mes "Posso trocar equipamentos e modulos usando Componentes Misteriosos e Cor Cores.";
 	next;
 
-	switch(select("Equipamentos Grace:Modulo de Arma:Modulo de Armadura:Arma OS:Armadura Ilusional:Cancelar")) {
+	switch(select("Equipamentos Grace:Modulo de Arma:Modulo de Armadura:Arma OS:Armadura Ilusional:Automatic:Cancelar")) {
 	case 1:
 		callsub L_Grace;
 		end;
@@ -25,6 +25,9 @@ moc_para01,42,36,4	script	Operador OS	4_M_REPAIR,{
 		end;
 	case 5:
 		callsub L_IllusionArmor;
+		end;
+	case 6:
+		callsub L_Automatic;
 		end;
 	default:
 		close;
@@ -199,4 +202,29 @@ L_IllusionArmor:
 	close2;
 	callshop "barter_illusion_armor";
 	end;
+
+L_Automatic:
+	mes "[Operador OS]";
+	mes "Posso abrir as lojas de troca para os equipamentos Automatic.";
+	mes "Voce escolhe se quer ver equipamentos ou acessorios.";
+	next;
+
+	switch(select("Equipamentos Automatic:Acessorios Automatic:Cancelar")) {
+	case 1:
+		mes "[Operador OS]";
+		mes "Essas trocas usam os equipamentos Illusion correspondentes e Barmil Ticket.";
+		next;
+		close2;
+		callshop "barter_auto_equip_1";
+		end;
+	case 2:
+		mes "[Operador OS]";
+		mes "Essas trocas usam os acessorios Illusion correspondentes e Barmil Ticket.";
+		next;
+		close2;
+		callshop "barter_auto_equip_2";
+		end;
+	default:
+		close;
+	}
 }

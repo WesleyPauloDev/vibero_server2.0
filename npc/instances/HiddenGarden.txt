@@ -1357,7 +1357,8 @@ OnTouch:
 		if (#HiddenGarden_STATUS == 2) {
 			.@coin = (#HiddenGarden_MODE == 2) ? 30 : 20;
 			.@ticket = (#HiddenGarden_MODE == 2) ? 3 : 2;
-			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0) {
+			.@barmeal = (#HiddenGarden_MODE == 2) ? 100 : 50;
+			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0 || checkweight(1000103,.@barmeal) == 0) {
 				mes "^008800Espere um pouco!!";
 				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 				close;
@@ -2194,6 +2195,7 @@ OnTouch:	// unknown effect
 				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 				close;
 			}
+			getitem 1000103,.@barmeal;
 		}
 		close2;
 		erasequest .@qid;
@@ -2217,7 +2219,8 @@ OnTouch:	// unknown effect
 		if (#HiddenGarden_STATUS == 2) {
 			.@coin = (#HiddenGarden_MODE == 2) ? 30 : 20;
 			.@ticket = (#HiddenGarden_MODE == 2) ? 3 : 2;
-			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0) {
+			.@barmeal = (#HiddenGarden_MODE == 2) ? 100 : 50;
+			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0 || checkweight(1000103,.@barmeal) == 0) {
 				mes "^008800Espere um pouco!!";
 				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 				close;
@@ -2228,6 +2231,7 @@ OnTouch:	// unknown effect
 				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 				close;
 			}
+			getitem 1000103,.@barmeal;
 		}
 		warp "SavePoint",0,0;
 	}
