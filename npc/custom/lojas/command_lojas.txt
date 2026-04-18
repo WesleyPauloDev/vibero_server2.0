@@ -9,8 +9,8 @@ OnAtcommand:
 
 function	script	Menu_Lojas	{
 	mes "[Menu de Lojas]";
-    switch(select("Éden", "Anubis", "Instância", "Loja de Mana", "Cheffenia", "Bio5", "Votos", "Pontos MVP", "Presença", "Pets", "Minérios")) {
-        case 1: // Éden
+    switch(select("Eden", "Anubis", "Instancia", "Loja de Mana", "Cheffenia", "Bio5", "Votos", "Pontos MVP", "Presenca", "Pets", "Minerios")) {
+        case 1: // Eden
             callfunc("F_Loja_Eden_Menu");
             end;
         case 2:  // Anubis
@@ -25,7 +25,7 @@ function	script	Menu_Lojas	{
                     callshop "equipments_anubis",1;
                     end;
             }
-        case 3:  // Instância
+        case 3:  // Instancia
             switch(select("Equipamentos", "Armas", "Itens", "Grades", "Armas Ancestrais", "Armas Patent", "Encantamento Ancestral")) {
                 case 1:
                     callshop "instancia_barter",1;
@@ -79,8 +79,44 @@ function	script	Menu_Lojas	{
                             callshop "items_cheffeniaH_barter",1;
                             end;
                         case 4:
-                            callshop "shadows_cheffeniaH_barter",1;
-                            end;
+                            switch(select("Reducao de CD", "Classes")) {
+                                case 1:
+                                    callshop "shadows_cheffeniaH_barter",1;
+                                    end;
+                                case 2:
+                                    switch(select("Rune Knight", "Royal Guard", "Mechanic", "Genetic", "Archbishop", "Sura", "Guillotine Cross", "Shadow Chaser", "Warlock", "Sorcerer")) {
+                                        case 1:
+                                            callshop "shadow_class_rk_cheffeniaH_barter",1;
+                                            end;
+                                        case 2:
+                                            callshop "shadow_class_rg_cheffeniaH_barter",1;
+                                            end;
+                                        case 3:
+                                            callshop "shadow_class_mechanic_cheffeniaH_barter",1;
+                                            end;
+                                        case 4:
+                                            callshop "shadow_class_genetic_cheffeniaH_barter",1;
+                                            end;
+                                        case 5:
+                                            callshop "shadow_class_ab_cheffeniaH_barter",1;
+                                            end;
+                                        case 6:
+                                            callshop "shadow_class_sura_cheffeniaH_barter",1;
+                                            end;
+                                        case 7:
+                                            callshop "shadow_class_gc_cheffeniaH_barter",1;
+                                            end;
+                                        case 8:
+                                            callshop "shadow_class_sc_cheffeniaH_barter",1;
+                                            end;
+                                        case 9:
+                                            callshop "shadow_class_wl_cheffeniaH_barter",1;
+                                            end;
+                                        case 10:
+                                            callshop "shadow_class_so_cheffeniaH_barter",1;
+                                            end;
+                                    }
+                            }
                     }
             }
         case 6:  // Bio5
@@ -109,8 +145,44 @@ function	script	Menu_Lojas	{
                             callshop "items_bio5H_barter",1;
                             end;
                         case 4:
-                            callshop "shadows_bio5H_barter",1;
-                            end;
+                            switch(select("Reducao de CD", "Classes")) {
+                                case 1:
+                                    callshop "shadows_bio5H_barter",1;
+                                    end;
+                                case 2:
+                                    switch(select("Ranger", "Minstrel", "Wanderer", "Rebellion", "Kagerou", "Oboro", "Star Emperor", "Soul Reaper", "Doram Fisico", "Doram Magico")) {
+                                        case 1:
+                                            callshop "shadow_class_ranger_bio5H_barter",1;
+                                            end;
+                                        case 2:
+                                            callshop "shadow_class_minstrel_bio5H_barter",1;
+                                            end;
+                                        case 3:
+                                            callshop "shadow_class_wanderer_bio5H_barter",1;
+                                            end;
+                                        case 4:
+                                            callshop "shadow_class_rebellion_bio5H_barter",1;
+                                            end;
+                                        case 5:
+                                            callshop "shadow_class_kagerou_bio5H_barter",1;
+                                            end;
+                                        case 6:
+                                            callshop "shadow_class_oboro_bio5H_barter",1;
+                                            end;
+                                        case 7:
+                                            callshop "shadow_class_star_emperor_bio5H_barter",1;
+                                            end;
+                                        case 8:
+                                            callshop "shadow_class_soul_reaper_bio5H_barter",1;
+                                            end;
+                                        case 9:
+                                            callshop "shadow_class_doram_physical_bio5H_barter",1;
+                                            end;
+                                        case 10:
+                                            callshop "shadow_class_doram_magical_bio5H_barter",1;
+                                            end;
+                                    }
+                            }
                     }
             }
         case 7:  // Votos
@@ -121,9 +193,9 @@ function	script	Menu_Lojas	{
             next;
             doEvent "Loja de Pontos MVP::OnTalk";
             end;
-        case 9:  // Pontos de Presença
+        case 9:  // Pontos de Presenca
             next;
-            doEvent "Loja de Presença::OnTalk";
+            doEvent "Loja de Presenca::OnTalk";
             end;
         case 10:  // Pets
             switch(select("Comprar Pet:Vender Pet")) {
@@ -134,7 +206,7 @@ function	script	Menu_Lojas	{
                     callfunc("PetEggSellMenu");
                     end;
             }
-        case 11:  // Minérios
+        case 11:  // Minerios
             callshop "ore_barter_shop",1;
             end;
     }
@@ -185,7 +257,7 @@ function	script	PetEggSellMenu	{
 	}
 	mes "[Loja de Pets]";
 	if (!.@total) {
-		mes "Você não possui nenhum ovo de pet desta loja no inventário.";
+		mes "Voce nao possui nenhum ovo de pet desta loja no inventario.";
 		close;
 	}
 	.@choice = select(.@menu$) - 1;
@@ -193,17 +265,18 @@ function	script	PetEggSellMenu	{
 	.@egg = .@egg_id[.@selected];
 	.@tickets = .@ticket_value[.@selected];
 	if (countitem(.@egg) < 1) {
-		mes "Esse ovo não está mais no seu inventário.";
+		mes "Esse ovo nao esta mais no seu inventario.";
 		close;
 	}
 	if (!checkweight(.@pet_ticket_id, .@tickets)) {
-		mes "Você está com peso alto. Libere peso e tente novamente.";
+		mes "Voce esta com peso alto. Libere peso e tente novamente.";
 		close;
 	}
 	delitem .@egg, 1;
 	getitem .@pet_ticket_id, .@tickets;
 	logshop "SCRIPT_EXCHANGE", "PetEggSellMenu", .@pet_ticket_id, .@tickets, 0, .@egg, 1, "", 0;
-	mes "Você vendeu 1x " + getitemname(.@egg) + ".";
+	mes "Voce vendeu 1x " + getitemname(.@egg) + ".";
 	mes "Recebeu " + .@tickets + "x " + getitemname(.@pet_ticket_id) + ".";
 	close;
 }
+
