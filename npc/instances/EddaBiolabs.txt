@@ -60,6 +60,7 @@ yuno,216,345,3	script	Sierra#yuno	4_F_SCIENCE,{
 OnInstanceInit:
 	'map1$ = instance_mapname("1@gol1");
 	'map2$ = instance_mapname("1@gol2");
+	deletearray 'weapon_claimed;
 	
 	
 	hideonnpc instance_npcname("Sierra#mvp");
@@ -695,7 +696,6 @@ end;
 end;
 
 OnMyMobDead:
-	@weapon = 0;
 	'mvpAlive = 0;
 	'canLeave = 1;
 	hideoffnpc instance_npcname("Sierra#mvp");
@@ -712,12 +712,15 @@ OnTele:
 		close;
 	}
 	
-	if(@weapon == 0) {
-		@weapon = 1;
+	if(!'weapon_claimed[getcharid(3)]) {
+		'weapon_claimed[getcharid(3)] = 1;
 		setArray .@weapons[0],21051,21052,32023,1333,16092,28138,28765,28766,28044,28042,26158,2055,2056,26161,16095,18185,18187,18186,32350,32024,32025,32351,16093,16094,28767,28768,18184,28633,26159,26160,1865,1866,16096,18188,26212,26213,32107,32108;
 		getitem .@weapons[rand(38)],1;
-		
+		mes "Voce recebeu uma arma do bau.";
+		close;
 	}
+	mes "Voce ja retirou sua arma deste bau.";
+	close;
 }
 // ==============================
 // ===== warpers
