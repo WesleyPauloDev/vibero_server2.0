@@ -1154,14 +1154,6 @@ OnBossSkill:
 	'pillar = 3;
 	for(.@i = 0; .@i < 3; .@i++)
 		enablenpc instance_npcname("#rms_stone_" + .@i);
-	monster 'map$,195,61,"",20562,1,instance_npcname(strnpcinfo(0)) + "::OnSkillDead";
-	'gid_0 = $@mobid[0];
-	monster 'map$,228,61,"",20562,1,instance_npcname(strnpcinfo(0)) + "::OnSkillDead";
-	'gid_1 = $@mobid[0];
-	monster 'map$,212,78,"",20562,1,instance_npcname(strnpcinfo(0)) + "::OnSkillDead";
-	'gid_2 = $@mobid[0];
-	for(.@i = 0; .@i < 3; .@i++)
-		setunitdata getd("'gid_" + .@i),UMOB_DMGIMMUNE,true;
 	donpcevent instance_npcname("#rms_boss") + "::OnEnableShield";
 OnSkillDead:
 end;
@@ -1185,7 +1177,6 @@ OnSakrayDead:
 	stopnpctimer instance_npcname(strnpcinfo(0));
 	.@sak$ = instance_npcname("Sakray#rms_0");
 	.@map$ = 'map$;
-	killmonster .@map$,instance_npcname(strnpcinfo(0)) + "::OnSkillDead";
 	npctalk "Espadachim Magico Sakray : Este lugar... Eu jurei que nunca voltaria aqui...",.@sak$;
 	sleep 2000;
 	npctalk "Espadachim Magico Sakray : Eu nao sabia que tinha ficado assim... Eu descobri agora e vim correndo para ca.",.@sak$;

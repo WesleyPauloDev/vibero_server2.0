@@ -196,31 +196,12 @@ OnTimer60000: // a cada 60 segundos
 	OnNPCKillEvent:
 		.@map$ = strcharinfo(3);
 		// Só processa mobs
-		if (.@map$ == "lhz_dun_n" || .@map$ == "lhz_dun_n2") {				
-
-			#bio_kills++;
-
-			if ( #bio_kills >= 5 ) {
-				#bio_kills = 0; // zera contador
-				// add_reputation_points(5, 1); // dá 1 ponto no grupo 7
-				callfunc("F_AddRep", 5, 1, 110006, 5000);
-				dispbottom "[Reputação] Você recebeu +1 ponto de reputação Bio5 Normal!";
-			}
-			callfunc("CustomMapDrop", strcharinfo(3), 9648, 20);			
+		if (.@map$ == "lhz_dun_n" || .@map$ == "lhz_dun_n2") {
+			callfunc("F_PartyNearbyKillReward", .@map$, 9648, 20, "#bio_kills", 5, 5, 1, 110006, 5000, "[Reputa??o] Voc? recebeu +1 ponto de reputa??o Bio5 Normal!", 30);
 		}
 
 		if (.@map$ == "lhz_dun_n3" || .@map$ == "lhz_dun_n4") {
-			
-			#bio_hardkills++;
-
-			if ( #bio_hardkills >= 5 ) {
-				#bio_hardkills = 0; // zera contador
-				// add_reputation_points(6, 1); // dá 1 ponto no grupo 7
-				callfunc("F_AddRep", 6, 1, 110007, 5000);
-				dispbottom "[Reputação] Você recebeu +1 ponto de reputação Bio5 Hard!";
-				
-			}
-			callfunc("CustomMapDrop", strcharinfo(3), 9649, 20);			
+			callfunc("F_PartyNearbyKillReward", .@map$, 9649, 20, "#bio_hardkills", 5, 6, 1, 110007, 5000, "[Reputa??o] Voc? recebeu +1 ponto de reputa??o Bio5 Hard!", 30);
 		}
 		callsub( S_Regular, killedrid );
 

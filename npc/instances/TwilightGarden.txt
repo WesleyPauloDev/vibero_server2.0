@@ -46,6 +46,9 @@ OnInstanceInit:
 	'reward_announced = 0;
 	'map_bamn$ = instance_mapname("1@bamn");
 	'map_bamq$ = instance_mapname("1@bamq");
+	viewpointmap 'map_bamn$,2,199,275,1,0xFFFFFF;
+	viewpointmap 'map_bamn$,2,33,224,2,0xFFFFFF;
+	viewpointmap 'map_bamq$,2,125,39,2,0xFFFFFF;
 
 	// npcs from story
 	//----------------------------
@@ -178,6 +181,7 @@ OnMobDead:
 		next;
 		mes "[Est]";
 		mes "Logo eu me junto a voce.";
+		viewpointmap 'map_bamn$,1,206,273,1,0xFFFFFF;
 		close2;
 		if ('twilight_story == 3) {
 			'twilight_story = 4;
@@ -233,6 +237,7 @@ OnMobDead:
 		mes "[Almond]";
 		mes "Vamos juntas quando voce estiver pronto.";
 		navigateto("1@bamn",199,275);
+		viewpointmap 'map_bamn$,1,199,275,1,0xFFFFFF;
 		close2;
 		cutin "",255;
 		if ('twilight_story == 5)
@@ -257,6 +262,7 @@ OnMobDead:
 		close3;
 	}
 	if ('twilight_story == 6) {
+		viewpointmap 'map_bamn$,2,199,275,1,0xFFFFFF;
 		'guide = getnpcid(0);
 		'twilight_story = 7;
 		npcspeed 200;
@@ -626,6 +632,7 @@ OnTouch:
 			enablenpc instance_npcname("#to_swty01");
 			enablenpc instance_npcname("#to_swty02");
 			navigateto("1@bamn",67,173);
+			viewpointmap 'map_bamn$,1,33,224,2,0xFFFFFF;
 		}
 		close3;
 	}
@@ -715,6 +722,7 @@ OnTouch:
 	end;
 OnTouch:
 	if ('twilight_story == 21) {
+		viewpointmap 'map_bamq$,2,125,39,2,0xFFFFFF;
 		setpcblock PCBLOCK_NPC, true;
 		'twilight_story = 22;
 		npctalk "Voces chegaram tarde demais. Idiotas!";
@@ -783,8 +791,11 @@ OnMobDead:
 1@bamn,33,224,0	script(DISABLED)	#to_bamq	WARPNPC,1,1,{
 	end;
 OnTouch_:
-	if ('twilight_story == 21)
+	if ('twilight_story == 21) {
+		viewpointmap 'map_bamn$,2,33,224,2,0xFFFFFF;
+		viewpointmap 'map_bamq$,1,125,39,2,0xFFFFFF;
 		warp 'map_bamq$,103,39;
+	}
 	end;
 }
 

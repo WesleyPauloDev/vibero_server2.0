@@ -460,6 +460,19 @@ OnInstanceInit:
 OnEnable:
 	for(set .@i,1; .@i<=12; set .@i,.@i+1)
 		enablenpc instance_npcname("Bobbing Torch#"+.@i);
+	set .@map$, instance_mapname("1@cata");
+	viewpointmap .@map$,1,267,210,1,0xFFFFFF;
+	viewpointmap .@map$,1,85,182,2,0xFFFFFF;
+	viewpointmap .@map$,1,267,154,3,0xFFFFFF;
+	viewpointmap .@map$,1,157,139,4,0xFFFFFF;
+	viewpointmap .@map$,1,193,138,5,0xFFFFFF;
+	viewpointmap .@map$,1,193,102,6,0xFFFFFF;
+	viewpointmap .@map$,1,157,102,7,0xFFFFFF;
+	viewpointmap .@map$,1,113,112,8,0xFFFFFF;
+	viewpointmap .@map$,1,253,56,9,0xFFFFFF;
+	viewpointmap .@map$,1,239,56,10,0xFFFFFF;
+	viewpointmap .@map$,1,71,42,11,0xFFFFFF;
+	viewpointmap .@map$,1,155,14,12,0xFFFFFF;
 	end;
 }
 
@@ -774,6 +787,19 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 		specialeffect EF_TELEPORTATION;
 		enablenpc instance_npcname("ins_bapho_to_2f");
 		donpcevent instance_npcname("ins_baphomet_1f_timer")+"::OnDisable";
+		viewpointmap instance_mapname("1@cata"),2,267,210,1,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,85,182,2,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,267,154,3,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,157,139,4,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,193,138,5,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,193,102,6,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,157,102,7,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,113,112,8,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,253,56,9,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,239,56,10,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,71,42,11,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,155,14,12,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),1,281,12,13,0xFFFFFF;
 		mes "[Alma do Herói Antigo]";
 		mes "Agora você pode ir até o altar principal. Ele fica no canto inferior direito deste andar.";
 		next;
@@ -821,6 +847,7 @@ OnInstanceInit:
 1@cata,281,12,0	script	ins_bapho_to_2f	45,1,1,{
 OnTouch:
 	if (countitem(6002) > 0) {
+		viewpointmap instance_mapname("1@cata"),2,281,12,13,0xFFFFFF;
 		delitem 6002,countitem(6002); //Token_Of_Apostle
 		set 'ins_baphomet,5;
 		warp instance_mapname("2@cata"),80,144;
@@ -899,6 +926,21 @@ OnInstanceInit:
 			next;
 			specialeffect2 EF_HOLYHIT;
 			getitem 6001,1; //Essence_Of_Fire
+			getmapxy(.@map$,.@x,.@y,BL_NPC);
+			if (.@x == 267 && .@y == 210) .@marker_id = 1;
+			else if (.@x == 85 && .@y == 182) .@marker_id = 2;
+			else if (.@x == 267 && .@y == 154) .@marker_id = 3;
+			else if (.@x == 157 && .@y == 139) .@marker_id = 4;
+			else if (.@x == 193 && .@y == 138) .@marker_id = 5;
+			else if (.@x == 193 && .@y == 102) .@marker_id = 6;
+			else if (.@x == 157 && .@y == 102) .@marker_id = 7;
+			else if (.@x == 113 && .@y == 112) .@marker_id = 8;
+			else if (.@x == 253 && .@y == 56) .@marker_id = 9;
+			else if (.@x == 239 && .@y == 56) .@marker_id = 10;
+			else if (.@x == 71 && .@y == 42) .@marker_id = 11;
+			else if (.@x == 155 && .@y == 14) .@marker_id = 12;
+			if (.@marker_id)
+				viewpointmap .@map$,2,.@x,.@y,.@marker_id,0xFFFFFF;
 			mes "O símbolo do herdeiro brilha. Então, um pequeno cristal da tocha cai na minha mão.";
 			disablenpc();
 			close;

@@ -4,7 +4,10 @@ function	script	CustomMapDrop	{
     .@rates = getarg(2); 
     
     if (strcharinfo(3) == .@map$ || strcharinfo(3) == instance_mapname(.@map$)) { // se o player estiver no mapa certo
-        .@bonus = get_drop_bonus(1018, 518);
+        // Usa o drop final do Honey no MI como referência de bônus.
+        // Dividido por 2 para que o valor base sem bônus resulte em 100,
+        // mantendo uma taxa enviada como 20 = 20% real.
+        .@bonus = max(get_drop_bonus(1018, 518) / 2, 100);
 
         .@drop_final = .@rates * .@bonus;        
         if (rand(10000) < .@drop_final) {
