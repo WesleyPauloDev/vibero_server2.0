@@ -46,8 +46,8 @@ OnStartInstance:
 	callfunc("F_InstanceEntry",
 		"Glastheim Purification Hard",
 		"Oscar",
-		"edda_glast_pur_h",
-		"EddaGHPurH",
+		"edda_glast_pur",
+		"EddaGHPur",
 		175,
 		"Purificacao de Glast Heim Hard"
 	);
@@ -130,8 +130,8 @@ glast_01,241,290,5	script	Oscar#gh_fall	4_ED_OSCAR,{
 		callfunc("F_InstanceEntry",
 			"Glastheim Purification Hard",
 			"Oscar",
-			"edda_glast_pur_h",
-			"EddaGHPurH",
+			"edda_glast_pur",
+			"EddaGHPur",
 			175,
 			"Purificacao de Glast Heim Hard"
 		);
@@ -1923,7 +1923,7 @@ end;
 	.@var = getinstancevar('hunt,instance_id());
 	.@mode = getinstancevar('mode,instance_id());
 	.@finish_name$ = (.@mode ? "Purificacao de Glast Heim Hard" : "Purificacao de Glast Heim");
-	.@finish_status$ = (.@mode ? "#EddaGHPurH_STATUS" : "#EddaGHPur_STATUS");
+	.@finish_status$ = "#EddaGHPur_STATUS";
 	cutin "oscar01",2;
 	mes "[Oscar]";
 	mes "Viajar por essas memorias e lutar aqui gasta muita energia.";
@@ -1943,15 +1943,15 @@ end;
 		erasequest .@var;
 	}
 	if (!.@mode)
-		.@finish_result = callfunc("F_InstanceFinishBase", .@finish_name$, "#EddaGHPur_STATUS");
+		.@finish_result = callfunc("F_InstanceFinishBase", .@finish_name$, .@finish_status$);
 	else
-		.@finish_result = callfunc("F_InstanceFinishBase", .@finish_name$, "#EddaGHPurH_STATUS", 20, 3);
+		.@finish_result = callfunc("F_InstanceFinishBase", .@finish_name$, .@finish_status$, 20, 3);
 	if (.@finish_result == -1) {
 		mes "Voce esta com peso demais para receber as recompensas.";
 		close;
 	}
 	if (.@finish_result == 0) {
-		if ((!.@mode && #EddaGHPur_STATUS == 2) || (.@mode && #EddaGHPurH_STATUS == 2)) {
+		if (#EddaGHPur_STATUS == 2) {
 			.@coin = (.@mode ? 20 : 10);
 			.@ticket = (.@mode ? 3 : 2);
 			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0) {
@@ -1961,10 +1961,7 @@ end;
 			callfunc("F_InstanceFinishAnnounce", .@finish_name$);
 			getitem 9608,.@coin;
 			getitem 9198,.@ticket;
-			if (!.@mode)
-				#EddaGHPur_STATUS = 3;
-			else
-				#EddaGHPurH_STATUS = 3;
+			#EddaGHPur_STATUS = 3;
 		}
 	}
 	close2;

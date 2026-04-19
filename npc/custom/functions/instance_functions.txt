@@ -68,8 +68,17 @@ function	script	F_InstanceEntry	{
 	// ============================
 	if (getd(.@status_name$) == 3) {
 		mes "[" + .@npc_name$ + "]";
-		mes "Voce ja fez esta instancia hoje.";
-		mes "Volte amanha apos o descanso.";
+		mes "Voce nao pode mais entrar nesta instancia hoje.";
+		mes "Volte amanha apos o reset diario.";
+		close;
+	}
+
+	.@live_iid = instance_id(IM_PARTY);
+	.@same_live_instance = (.@live_iid > 0 && instance_live_info(ILI_NAME, .@live_iid) == .@db_name$);
+	if (getd(.@status_name$) > 0 && !.@same_live_instance) {
+		mes "[" + .@npc_name$ + "]";
+		mes "Voce nao pode mais entrar nesta instancia hoje.";
+		mes "Volte amanha apos o reset diario.";
 		close;
 	}
 
@@ -90,7 +99,12 @@ function	script	F_InstanceEntry	{
 	mes "Ola, aventureiro! Deseja criar ou entrar na instancia ^0055FF" + .@display_name$ + "^000000?";
 	next;
 
-	switch(select("Criar instancia", "Entrar na instancia", "Cancelar")) {
+	if (getd(.@status_name$) > 0)
+		.@menu = select("Entrar na instancia", "Cancelar") + 1;
+	else
+		.@menu = select("Criar instancia", "Entrar na instancia", "Cancelar");
+
+	switch(.@menu) {
 
 		// ============================
 		// 6. Criar instancia
@@ -139,9 +153,8 @@ function	script	F_InstanceEntry	{
 						mes "A instancia ainda nao foi criada.";
 						close;
 					}
-					setd(.@status_name$, 0);
 					mes "A instancia nao esta disponivel no momento.";
-					mes "Tente criar novamente.";
+					mes "Sua tentativa de hoje ja foi registrada, entao sera preciso aguardar o proximo reset.";
 					close;
 				case IE_NOMEMBER:
 					mes "Voce nao faz parte de um grupo valido para esta instancia.";
