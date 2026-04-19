@@ -203,7 +203,7 @@ ba_maison,311,206,3	script	Luina#greeen	4_EP17_BASIC_B,{
 		mes "Tome... isso e um sinal da promessa.";
 		completequest 8589;
 		getitem 1000103,20;
-		getexp 3094009,0;
+		getexp 3000000,0;
 		next;
 		mes "[Luina]";
 		mes "Talvez.";
@@ -1364,7 +1364,7 @@ OnMobDead:
 		next;
 	}
 	if (!'finish_announced) {
-		callfunc("F_InstanceFinishAnnounce", "Lost Farm in Time");
+		callfunc("F_InstanceFinishAnnounce", "Fazenda de Pitayas");
 		'finish_announced = 1;
 	}
 	mes "[Silk]";
@@ -1388,14 +1388,14 @@ OnMobDead:
 			mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 			close;
 		}
-		.@finish_result = callfunc("F_InstanceFinishBase", "Lost Farm in Time", "#LostFarm_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Lost Farm in Time", 0);
+		.@finish_result = callfunc("F_InstanceFinishBase", "Fazenda de Pitayas", "#LostFarm_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Fazenda de Pitayas", 0);
 		if (.@finish_result == -1) {
 			mes "^008800Espere um pouco!!";
 			mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 			close;
 		}
-		getitem 1000103,100;
-		getitem 1000104,50;
+		getitem 1000103,100;  // Bilhete Barmeal
+		getitem 1000104,50;   // Esteatico Magico
 	}
 	mes "Ate a proxima!";
 	close2;

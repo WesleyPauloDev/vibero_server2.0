@@ -632,7 +632,7 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 				mes "Você pode ver as tochas aqui e ali. Essas tochas são a essência de Thor, o deus do Trovão. Elas foram herdadas de nossos predecessores para deter a escuridão de Baphomet...";
 				next;
 				mes "[Alma do Herói Antigo]";
-				mes "Para abrir o portão subterrâneo selado, preciso ser purificado pela ^0000FFEssência do Fogo^000000, que tem o poder de Thor. Colete ^0000FF10 Essência do Fogo^000000 das tochas.";
+				mes "Para abrir o portão subterrâneo selado, preciso ser purificado pela ^0000FFEssência do Fogo^000000, que tem o poder de Thor. Colete ^0000FF8 Essência do Fogo^000000 das tochas.";
 				next;
 				mes "[Alma do Herói Antigo]";
 				mes "Uma coisa que você deve lembrar é... ^0000FFEssência do Fogo^000000 só pode ser coletada pelo Herdeiro da Fé.";
@@ -672,7 +672,7 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 				set .@ins_baphomet_1f_3,.@ins_baphomet_1f_3+1;
 				if (is_party_leader(.@party_id) == true) {
 					mes "[Alma do Herói Antigo]";
-					mes "Você parece o líder deste grupo. Precisa ir buscar ^0000FF10 Essência de Fogo^000000 das tochas.";
+					mes "Você parece o líder deste grupo. Precisa ir buscar ^0000FF8 Essência de Fogo^000000 das tochas.";
 					next;
 					mes "[Alma do Herói Antigo]";
 					mes "Agora, vou esculpir o símbolo que mostra que você é um herdeiro da fé. Esteja ciente de que ninguém no seu grupo, exceto você, pode coletar a Essência do Fogo.";
@@ -702,22 +702,11 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 				}
 				break;
 			case 4:
-				if ((.@ins_baphomet_1f_1 > 0) && (.@ins_baphomet_1f_2 > 0) && (.@ins_baphomet_1f_3 > 0)) {
-					cutin "ins_cata_champ_n",2;
-					mes "[Alma do Herói Antigo]";
-					mes "Você está pronto para ir? Então vou abrir este portão selado agora.";
-					next;
-					set .@exitloop,1;
-				}
-				else {
-					cutin "ins_cata_champ_a",2;
-					mes "[Alma do Herói Antigo]";
-					mes "Pode ser difícil, mas desejo-lhe sorte ao enfrentar os perigos desta catacumba.";
-					next;
-					mes "[Alma do Herói Antigo]";
-					mes "Lembre-se, você precisa coletar ^0000FF10 Essência de Fogo^000000 das tochas e o ^0000FFToken do Apóstolo^000000 dos Apóstolos de Baphomet.";
-					next;
-				}
+				cutin "ins_cata_champ_n",2;
+				mes "[Alma do Her?i Antigo]";
+				mes "Voc? est? pronto para ir? Ent?o vou abrir este port?o selado agora.";
+				next;
+				set .@exitloop,1;
 				break;
 			}
 			if (.@exitloop) break;
@@ -742,9 +731,9 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 	else if (('ins_baphomet == 3) && is_party_leader(.@party_id) == true) {
 		cutin "ins_cata_champ_n",2;
 		mes "[Alma do Herói Antigo]";
-		mes "Você conseguiu 10 ^0000FF Essência de Fogo^000000 e ^0000FF Ficha de Apóstolo^000000?";
+		mes "Você conseguiu 8 ^0000FF Essência de Fogo^000000 e ^0000FF Ficha de Apóstolo^000000?";
 		next;
-		if ((countitem(6001) > 9) && (countitem(6002) > 0)) {
+		if ((countitem(6001) > 7) && (countitem(6002) > 0)) {
 			delitem 6001,countitem(6001); //Essence_Of_Fire
 			set 'ins_baphomet,4;
 			mes "[Alma do Herói Antigo]";
@@ -752,7 +741,7 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 		}
 		else {
 			mes "[Alma do Herói Antigo]";
-			mes "Ainda não está pronto? Prepare 10 ^0000FFEssência do Fogo^000000 e ^0000FFFicha do Apóstolo^000000.";
+			mes "Ainda não está pronto? Prepare 8 ^0000FFEssência do Fogo^000000 e ^0000FFFicha do Apóstolo^000000.";
 		}
 		close2;
 		cutin "",255;
@@ -903,7 +892,7 @@ OnInstanceInit:
 //============================================================
 -	script	Bobbing Torch#SS	-1,{
 	if (is_party_leader() == true) {
-		if (('ins_baphomet == 3) && (countitem(6001) < 11)) {
+		if (('ins_baphomet == 3) && (countitem(6001) < 8)) {
 			mes "Uma enorme tocha, que parece poder queimar tudo, está subindo e descendo na minha frente.";
 			next;
 			mes "A grande aparência e o calor do fogo me fazem recuar... Mas crio coragem e estendo a mão para pegar a tocha.";
@@ -914,8 +903,8 @@ OnInstanceInit:
 			disablenpc();
 			close;
 		}
-		else if (('ins_baphomet == 3) && (countitem(6001) > 10)) {
-			mes "Você já tem 10 Essências de Fogo, então não precisa coletar mais nenhuma.";
+		else if (('ins_baphomet == 3) && (countitem(6001) > 7)) {
+			mes "Você já tem 8 Essências de Fogo, então não precisa coletar mais nenhuma.";
 			close;
 		}
 		else {

@@ -2082,10 +2082,11 @@ OnTimer10000:
 	if ('step != 9)
 		end;
 	.@cid = getcharid(3);
-	.@quest_reward = (checkquest(12319,HUNTING) == 2 || 'final_reward_ready);
+	.@already_claimed = 'final_reward_claimed[.@cid];
+	.@quest_reward = ((checkquest(12319,HUNTING) == 2 || 'final_reward_ready) && !.@already_claimed);
 	.@status_name$ = callfunc("F_OGH_StatusVar$");
 	.@is_hard = callfunc("F_OGH_IsHardMode");
-	.@give_custom_reward = (getd(.@status_name$) == 2);
+	.@give_custom_reward = (getd(.@status_name$) == 2 && !.@already_claimed);
 	if (.@quest_reward) {
 		.@crystal_amt = callfunc("F_OGH_FinalCrystalReward");
 		.@spell_amt = callfunc("F_OGH_FinalSpellReward");
