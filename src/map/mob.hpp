@@ -399,6 +399,11 @@ struct mob_data : public block_list {
 	 * MvP Tombstone NPC ID
 	 **/
 	int32 tomb_nid;
+	/**
+	 * Stable slot index inside a scripted spawn group.
+	 * Used to persist boss_monster respawns across reloadscript.
+	 **/
+	uint16 spawn_idx;
 	uint16 damagetaken;
 
 	int damage_cap;
@@ -537,6 +542,7 @@ int32 mob_spawn(struct mob_data *md);
 TIMER_FUNC(mob_delayspawn);
 int32 mob_setdelayspawn(struct mob_data *md);
 int32 mob_parse_dataset(struct spawn_data *data);
+bool mob_restore_bossspawn(struct mob_data *md);
 void mob_log_damage(mob_data* md, block_list* src, int64 damage, int64 damage_tanked = 0);
 void mob_damage(struct mob_data *md, struct block_list *src, int32 damage);
 int32 mob_dead(struct mob_data *md, struct block_list *src, int32 type);
@@ -580,9 +586,9 @@ bool mob_has_spawn(uint16 mob_id);
 int32 mob_getdroprate(struct block_list *src, std::shared_ptr<s_mob_db> mob, int32 base_rate, int32 drop_modifier, mob_data* md = nullptr);
 
 // MvP Tomb System
-int32 mvptomb_setdelayspawn(struct npc_data *nd);
+int32 mvptomb_setdelayspawn(struct npc_data *nd, int64 delay);
 TIMER_FUNC(mvptomb_delayspawn);
-void mvptomb_create(struct mob_data *md, char *killer, time_t time);
+void mvptomb_create(struct mob_data *md, const char *killer, time_t time, int64 tomb_delay, uint16 tomb_x, uint16 tomb_y);
 void mvptomb_destroy(struct mob_data *md);
 
 void mob_setdropitem_option( item& itm, const std::shared_ptr<s_mob_drop>& mobdrop );

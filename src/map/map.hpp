@@ -478,6 +478,7 @@ struct spawn_data {
 	} state;
 	char name[NAME_LENGTH], eventname[EVENT_NAME_LENGTH]; //Name/event
 	char filepath[256];
+	uint32 source_line;
 };
 
 struct flooritem_data : public block_list {

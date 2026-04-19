@@ -4,9 +4,11 @@
 #include "mob.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <map>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -78,6 +80,162 @@ struct s_mob_skill_db {
 	std::vector<std::shared_ptr<s_mob_skill>> skill; ///< Skills
 };
 
+static constexpr const char* MVP_RESPAWN_TABLE = "mvp_respawn";
+
+struct s_mvp_respawn_state {
+	uint64 kill_time = 0;
+	uint64 respawn_time = 0;
+	std::string killer_name;
+	uint16 tomb_x = 0;
+	uint16 tomb_y = 0;
+};
+
+static std::unordered_map<std::string, s_mvp_respawn_state> mvp_respawn_cache;
+
+static uint64 mvp_respawn_now() {
+	return static_cast<uint64>(std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::system_clock::now().time_since_epoch()
+	).count());
+}
+
+static bool mvp_respawn_should_track(const mob_data* md) {
+	return md != nullptr
+		&& md->spawn != nullptr
+		&& md->spawn->state.boss
+		&& battle_config.mvp_tomb_enabled
+		&& map_getmapflag(md->spawn->m, MF_NOTOMB) != 1;
+}
+
+static uint64 mvp_respawn_hash_fnv1a(const std::string& value) {
+	uint64 hash = 1469598103934665603ULL;
+
+	for (unsigned char c : value) {
+		hash ^= c;
+		hash *= 1099511628211ULL;
+	}
+
+	return hash;
+}
+
+static std::string mvp_respawn_make_key(const spawn_data& spawn, uint16 spawn_idx) {
+	char buffer[32];
+	std::string source = std::string(spawn.filepath) + ":" + std::to_string(spawn.source_line) + ":" + std::to_string(spawn_idx);
+	snprintf(buffer, sizeof(buffer), "%016" PRIx64, mvp_respawn_hash_fnv1a(source));
+	return std::string(buffer);
+}
+
+static void mvp_respawn_sql_init() {
+	if (SQL_ERROR == Sql_Query(mmysql_handle,
+		"CREATE TABLE IF NOT EXISTS `%s` ("
+		"`spawn_key` varchar(16) NOT NULL,"
+		"`mob_id` int(11) unsigned NOT NULL DEFAULT '0',"
+		"`map` varchar(16) NOT NULL DEFAULT '',"
+		"`source_file` varchar(255) NOT NULL DEFAULT '',"
+		"`source_line` int(11) unsigned NOT NULL DEFAULT '0',"
+		"`spawn_idx` smallint(5) unsigned NOT NULL DEFAULT '0',"
+		"`kill_time` bigint(20) unsigned NOT NULL DEFAULT '0',"
+		"`respawn_time` bigint(20) unsigned NOT NULL DEFAULT '0',"
+		"`killer_name` varchar(24) NOT NULL DEFAULT '',"
+		"`tomb_x` smallint(5) unsigned NOT NULL DEFAULT '0',"
+		"`tomb_y` smallint(5) unsigned NOT NULL DEFAULT '0',"
+		"PRIMARY KEY (`spawn_key`),"
+		"KEY `idx_respawn_time` (`respawn_time`)"
+		") ENGINE=MyISAM",
+		MVP_RESPAWN_TABLE)) {
+		Sql_ShowDebug(mmysql_handle);
+		return;
+	}
+
+	if (SQL_ERROR == Sql_Query(mmysql_handle,
+		"DELETE FROM `%s` WHERE `respawn_time` <= %" PRIu64,
+		MVP_RESPAWN_TABLE, mvp_respawn_now())) {
+		Sql_ShowDebug(mmysql_handle);
+		return;
+	}
+
+	Sql_Query(mmysql_handle,
+		"ALTER TABLE `%s` ADD COLUMN `tomb_x` smallint(5) unsigned NOT NULL DEFAULT '0'",
+		MVP_RESPAWN_TABLE);
+	Sql_Query(mmysql_handle,
+		"ALTER TABLE `%s` ADD COLUMN `tomb_y` smallint(5) unsigned NOT NULL DEFAULT '0'",
+		MVP_RESPAWN_TABLE);
+
+	if (SQL_ERROR == Sql_Query(mmysql_handle,
+		"SELECT `spawn_key`, `kill_time`, `respawn_time`, `killer_name`, `tomb_x`, `tomb_y` FROM `%s`",
+		MVP_RESPAWN_TABLE)) {
+		Sql_ShowDebug(mmysql_handle);
+		return;
+	}
+
+	while (SQL_SUCCESS == Sql_NextRow(mmysql_handle)) {
+		char* data = nullptr;
+		s_mvp_respawn_state state;
+
+		Sql_GetData(mmysql_handle, 0, &data, nullptr);
+		std::string key = data ? data : "";
+		Sql_GetData(mmysql_handle, 1, &data, nullptr);
+		state.kill_time = data ? strtoull(data, nullptr, 10) : 0;
+		Sql_GetData(mmysql_handle, 2, &data, nullptr);
+		state.respawn_time = data ? strtoull(data, nullptr, 10) : 0;
+		Sql_GetData(mmysql_handle, 3, &data, nullptr);
+		state.killer_name = data ? data : "";
+		Sql_GetData(mmysql_handle, 4, &data, nullptr);
+		state.tomb_x = data ? static_cast<uint16>(strtoul(data, nullptr, 10)) : 0;
+		Sql_GetData(mmysql_handle, 5, &data, nullptr);
+		state.tomb_y = data ? static_cast<uint16>(strtoul(data, nullptr, 10)) : 0;
+
+		if (!key.empty() && state.respawn_time > mvp_respawn_now())
+			mvp_respawn_cache[key] = state;
+	}
+
+	Sql_FreeResult(mmysql_handle);
+}
+
+static void mvp_respawn_delete(const std::string& key) {
+	if (key.empty())
+		return;
+
+	mvp_respawn_cache.erase(key);
+
+	char escaped_key[64];
+	Sql_EscapeString(mmysql_handle, escaped_key, key.c_str());
+	if (SQL_ERROR == Sql_Query(mmysql_handle, "DELETE FROM `%s` WHERE `spawn_key` = '%s'", MVP_RESPAWN_TABLE, escaped_key))
+		Sql_ShowDebug(mmysql_handle);
+}
+
+static void mvp_respawn_delete(const mob_data* md) {
+	if (md == nullptr || md->spawn == nullptr)
+		return;
+
+	mvp_respawn_delete(mvp_respawn_make_key(*md->spawn, md->spawn_idx));
+}
+
+static void mvp_respawn_save(const mob_data* md, uint64 kill_time, uint64 respawn_time, const char* killer_name) {
+	if (!mvp_respawn_should_track(md))
+		return;
+
+	std::string key = mvp_respawn_make_key(*md->spawn, md->spawn_idx);
+	s_mvp_respawn_state& state = mvp_respawn_cache[key];
+	state.kill_time = kill_time;
+	state.respawn_time = respawn_time;
+	state.killer_name = killer_name ? killer_name : "";
+	state.tomb_x = md->x;
+	state.tomb_y = md->y;
+
+	char escaped_key[64], escaped_map[MAP_NAME_LENGTH_EXT * 2 + 1], escaped_file[512], escaped_killer[NAME_LENGTH * 2 + 1];
+	Sql_EscapeString(mmysql_handle, escaped_key, key.c_str());
+	Sql_EscapeString(mmysql_handle, escaped_map, map_getmapdata(md->spawn->m)->name);
+	Sql_EscapeString(mmysql_handle, escaped_file, md->spawn->filepath);
+	Sql_EscapeString(mmysql_handle, escaped_killer, state.killer_name.c_str());
+
+	if (SQL_ERROR == Sql_Query(mmysql_handle,
+		"REPLACE INTO `%s` (`spawn_key`, `mob_id`, `map`, `source_file`, `source_line`, `spawn_idx`, `kill_time`, `respawn_time`, `killer_name`, `tomb_x`, `tomb_y`) "
+		"VALUES ('%s', '%d', '%s', '%s', '%u', '%u', %" PRIu64 ", %" PRIu64 ", '%s', '%u', '%u')",
+		MVP_RESPAWN_TABLE, escaped_key, md->spawn->id, escaped_map, escaped_file, md->spawn->source_line, md->spawn_idx, kill_time, respawn_time, escaped_killer, state.tomb_x, state.tomb_y)) {
+		Sql_ShowDebug(mmysql_handle);
+	}
+}
+
 std::unordered_map<int32, std::shared_ptr<s_mob_skill_db>> mob_skill_db; /// Monster skill temporary db. s_mob_skill_db -> mobid
 
 std::unordered_map<uint32, std::shared_ptr<s_item_drop_list>> mob_delayed_drops;
@@ -148,10 +306,17 @@ bool mob_is_spotted(struct mob_data* md) {
  * Tomb spawn time calculations
  * @param nd: NPC data
  */
-int32 mvptomb_setdelayspawn(struct npc_data* nd) {
+int32 mvptomb_setdelayspawn(struct npc_data* nd, int64 delay) {
 	if (nd->u.tomb.spawn_timer != INVALID_TIMER)
 		delete_timer(nd->u.tomb.spawn_timer, mvptomb_delayspawn);
-	nd->u.tomb.spawn_timer = add_timer(gettick() + battle_config.mvp_tomb_delay, mvptomb_delayspawn, nd->id, 0);
+
+	if (delay <= 0) {
+		nd->u.tomb.spawn_timer = INVALID_TIMER;
+		clif_spawn(nd);
+		return 0;
+	}
+
+	nd->u.tomb.spawn_timer = add_timer(gettick() + static_cast<t_tick>(delay), mvptomb_delayspawn, nd->id, 0);
 	return 0;
 }
 
@@ -183,7 +348,7 @@ TIMER_FUNC(mvptomb_delayspawn) {
  * @param time: time of mob's death
  * @author [GreenBox]
  */
-void mvptomb_create(struct mob_data* md, char* killer, time_t time)
+void mvptomb_create(struct mob_data* md, const char* killer, time_t time, int64 tomb_delay, uint16 tomb_x, uint16 tomb_y)
 {
 	struct npc_data* nd;
 
@@ -197,8 +362,8 @@ void mvptomb_create(struct mob_data* md, char* killer, time_t time)
 
 	nd->ud.dir = md->ud.dir;
 	nd->m = md->m;
-	nd->x = md->x;
-	nd->y = md->y;
+	nd->x = tomb_x;
+	nd->y = tomb_y;
 	nd->type = BL_NPC;
 
 	safestrncpy(nd->name, msg_txt(nullptr, 656), sizeof(nd->name));
@@ -227,7 +392,7 @@ void mvptomb_create(struct mob_data* md, char* killer, time_t time)
 	status_change_init(nd);
 	unit_dataset(nd);
 
-	mvptomb_setdelayspawn(nd);
+	mvptomb_setdelayspawn(nd, tomb_delay);
 }
 
 /**
@@ -1062,6 +1227,8 @@ TIMER_FUNC(mob_delayspawn) {
 			return 0;
 		}
 		md->spawn_timer = INVALID_TIMER;
+		if (md->spawn && md->spawn->state.boss)
+			mvp_respawn_delete(md);
 		mob_spawn(md);
 	}
 	return 0;
@@ -1070,12 +1237,9 @@ TIMER_FUNC(mob_delayspawn) {
 /*==========================================
  * spawn timing calculation
  *------------------------------------------*/
-int32 mob_setdelayspawn(struct mob_data* md)
+static uint32 mob_getspawntime(struct mob_data* md)
 {
 	uint32 spawntime;
-
-	if (!md->spawn) //Doesn't has respawn data!
-		return unit_free(md, CLR_DEAD);
 
 	spawntime = md->spawn->delay1; //Base respawn time
 	if (md->spawn->delay2) //random variance
@@ -1100,12 +1264,53 @@ int32 mob_setdelayspawn(struct mob_data* md)
 		spawntime = spawntime / 100 * battle_config.mob_spawn_delay;
 	}
 
-	spawntime = u32max(1000, spawntime); //Monsters should never respawn faster than 1 second
+	return u32max(1000, spawntime); //Monsters should never respawn faster than 1 second
+}
 
+static int32 mob_setdelayspawn_sub(struct mob_data* md, uint32 spawntime)
+{
 	if (md->spawn_timer != INVALID_TIMER)
 		delete_timer(md->spawn_timer, mob_delayspawn);
 	md->spawn_timer = add_timer(gettick() + spawntime, mob_delayspawn, md->id, 0);
 	return 0;
+}
+
+int32 mob_setdelayspawn(struct mob_data* md)
+{
+	if (!md->spawn) //Doesn't has respawn data!
+		return unit_free(md, CLR_DEAD);
+
+	return mob_setdelayspawn_sub(md, mob_getspawntime(md));
+}
+
+bool mob_restore_bossspawn(struct mob_data* md)
+{
+	if (!mvp_respawn_should_track(md))
+		return false;
+
+	std::string key = mvp_respawn_make_key(*md->spawn, md->spawn_idx);
+	auto it = mvp_respawn_cache.find(key);
+	if (it == mvp_respawn_cache.end())
+		return false;
+
+	uint64 now = mvp_respawn_now();
+	if (it->second.respawn_time <= now) {
+		mvp_respawn_delete(key);
+		return false;
+	}
+
+	int64 tomb_delay = battle_config.mvp_tomb_delay - static_cast<int64>(now - it->second.kill_time);
+	if (tomb_delay < 0)
+		tomb_delay = 0;
+
+	mvptomb_create(md,
+		it->second.killer_name.empty() ? nullptr : it->second.killer_name.c_str(),
+		static_cast<time_t>(it->second.kill_time / 1000),
+		tomb_delay,
+		it->second.tomb_x,
+		it->second.tomb_y);
+
+	return mob_setdelayspawn_sub(md, static_cast<uint32>(it->second.respawn_time - now)) == 0;
 }
 
 int32 mob_count_sub(struct block_list* bl, va_list ap) {
@@ -1151,6 +1356,9 @@ int32 mob_spawn(struct mob_data* md)
 			memcpy(md->name, md->spawn->name, NAME_LENGTH);
 		}
 	}
+
+	if (md->spawn && md->spawn->state.boss)
+		mvp_respawn_delete(md);
 
 	if (md->spawn) { //Respawn data
 		md->m = md->spawn->m;
@@ -3660,12 +3868,20 @@ int32 mob_dead(struct mob_data* md, struct block_list* src, int32 type)
 		return ud->state.walk_script ? 3 : 5; // Note: Actually, it's 4. Oh well...
 	}
 
+	uint32 spawntime = 0;
+	const char* killer_name = mvp_sd != nullptr ? mvp_sd->status.name : (first_sd != nullptr ? first_sd->status.name : nullptr);
+	if (!rebirth && md->spawn)
+		spawntime = mob_getspawntime(md);
+
 	// MvP tomb [GreenBox]
-	if (battle_config.mvp_tomb_enabled && md->spawn->state.boss && map_getmapflag(md->m, MF_NOTOMB) != 1)
-		mvptomb_create(md, mvp_sd != nullptr ? mvp_sd->status.name : (first_sd != nullptr ? first_sd->status.name : nullptr), time(nullptr));
+	if (mvp_respawn_should_track(md)) {
+		uint64 kill_time = mvp_respawn_now();
+		mvp_respawn_save(md, kill_time, kill_time + spawntime, killer_name);
+		mvptomb_create(md, killer_name, static_cast<time_t>(kill_time / 1000), battle_config.mvp_tomb_delay, md->x, md->y);
+	}
 
 	if (!rebirth)
-		mob_setdelayspawn(md); //Set respawning.
+		mob_setdelayspawn_sub(md, spawntime); //Set respawning.
 	return 3; //Remove from map.
 }
 
@@ -7439,6 +7655,7 @@ void mob_clear_spawninfo()
  *------------------------------------------*/
 void do_init_mob(void) {
 	mob_db_load(false);
+	mvp_respawn_sql_init();
 
 	add_timer_func_list(mob_delayspawn, "mob_delayspawn");
 	add_timer_func_list(mob_delay_item_drop, "mob_delay_item_drop");
@@ -7466,5 +7683,6 @@ void do_final_mob(bool is_reload) {
 	map_drop_db.clear();
 	if (!is_reload) {
 		mob_delayed_drops.clear();
+		mvp_respawn_cache.clear();
 	}
 }
