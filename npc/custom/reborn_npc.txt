@@ -52,12 +52,7 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 		.@achievemente_reborn = reborn_count * 1000;
 		callfunc("F_AddRep", 7, .@achievemente_reborn, 110008, 5000);
 
-		set exp_final, exp_final - (exp_base_custom * .@exp_penalty / 100);
-
-		set drop_final, drop_final + .@drop_bonus;
-
-		set_reborn_exp(exp_final);
-		set_reborn_drop(drop_final);
+		donpcevent "Reputation_Login::OnPCLoginEvent";
 
 		specialeffect2 EF_ANGEL2;
 		specialeffect2 EF_ELECTRIC;

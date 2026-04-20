@@ -23,7 +23,7 @@ OnAtcommand:
 	}
 
 	.@now = gettimetick(2);
-	.@reset_ver = 8;
+	.@reset_ver = 9;
 	if (#INSTANCE_MENU_RESET_VER != .@reset_ver || #INSTANCE_MENU_RESET_TICK <= .@now) {
 		callfunc("F_InstanceMenuResetStatus", "poringvillage", "PORING");
 		callfunc("F_InstanceMenuResetStatus", "orcMemory", "ORCMEMORY");
@@ -65,6 +65,7 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatus", "water_garden", "WATERGARDEN");
 		callfunc("F_InstanceMenuResetStatus", "faceworms_nest", "FacewormsNest");
 		callfunc("F_InstanceMenuResetStatus", "nightmarish_jitterbug", "NightmarishJitterbug");
+		callfunc("F_InstanceMenuResetStatus", "hazy_forest", "HazyForest");
 		callfunc("F_InstanceMenuResetStatus", "deep_forest", "DeepForest");
 		callfunc("F_InstanceMenuResetStatus", "tomb_remorse", "TombRemorse");
 		callfunc("F_InstanceMenuResetStatus", "heart_hunter_war_base", "HeartHunterWarBase");
@@ -118,6 +119,7 @@ OnAtcommand:
 	.@opt35$ = callfunc("F_InstanceMenuOption", "[175+] Floresta Profunda", "deep_forest", "DeepForest");
 	.@opt38$ = callfunc("F_InstanceMenuOption", "[175+] Tumba do Remorso", "tomb_remorse", "TombRemorse");
 	.@opt40$ = callfunc("F_InstanceMenuOption", "[175+] Edda do Laboratorio", "edda_biolab", "EddaBiolab");
+	.@opt43$ = callfunc("F_InstanceMenuOption", "[100+] Floresta Nebulosa", "hazy_forest", "HazyForest");
 	.@s = select(
 		.@opt1$,
 		.@opt2$,
@@ -160,7 +162,8 @@ OnAtcommand:
 		.@opt34$,
 		.@opt35$,
 		.@opt38$,
-		.@opt40$
+		.@opt40$,
+		.@opt43$
 	);	close2;
 
 	switch(.@s) {
@@ -369,6 +372,10 @@ OnAtcommand:
 		case 42:
 			#INSTANCENAME$ = "EddaBiolabs";
 			doevent "EddaBiolabs_Instance#Custom::OnStartInstance";
+			end;
+		case 43:
+			#INSTANCENAME$ = "HazyForest";
+			doevent "HazyForest_Instance#Custom::OnStartInstance";
 			end;
 	}
 	end;
