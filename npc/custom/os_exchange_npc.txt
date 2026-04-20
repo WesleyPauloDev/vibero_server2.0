@@ -22,7 +22,7 @@ moc_para01,42,36,3	script	Operador OS	4_M_REPAIR,{
 	mes "Posso trocar equipamentos e modulos usando Componentes Misteriosos e Cor Cores.";
 	next;
 
-	switch(select("Equipamentos Grace:Modulo de Arma:Modulo de Armadura:Arma OS:Armadura Ilusional:Automatic:Cancelar")) {
+	switch(select("Equipamentos Grace:Modulo de Arma:Modulo de Armadura:Arma OS:Equipamentos OS:Armadura Ilusional:Automatic:Cancelar")) {
 	case 1:
 		callsub L_Grace;
 		end;
@@ -36,9 +36,12 @@ moc_para01,42,36,3	script	Operador OS	4_M_REPAIR,{
 		callsub L_OSWeapon;
 		end;
 	case 5:
-		callsub L_IllusionArmor;
+		callsub L_OSEquip;
 		end;
 	case 6:
+		callsub L_IllusionArmor;
+		end;
+	case 7:
 		callsub L_Automatic;
 		end;
 	default:
@@ -204,6 +207,19 @@ L_OSWeapon:
 	mes "La voce vera todos os materiais exigidos visualmente.";
 	close2;
 	callshop "barter_os_weapon";
+	end;
+
+L_OSEquip:
+	mes "[Operador OS]";
+	mes "Aqui ficam reunidos os equipamentos OS que nao sao armas.";
+	mes "Os itens de shadow continuam separados, como voce pediu.";
+	next;
+	mes "[Operador OS]";
+	mes "Itens sem sprite tambem ficaram de fora desta loja.";
+	mes "O preco esta proximo do usado nas armas OS.";
+	next;
+	close2;
+	callshop "barter_os_equip";
 	end;
 
 L_IllusionArmor:
