@@ -153,13 +153,6 @@ static void mvp_respawn_sql_init() {
 		return;
 	}
 
-	Sql_Query(mmysql_handle,
-		"ALTER TABLE `%s` ADD COLUMN `tomb_x` smallint(5) unsigned NOT NULL DEFAULT '0'",
-		MVP_RESPAWN_TABLE);
-	Sql_Query(mmysql_handle,
-		"ALTER TABLE `%s` ADD COLUMN `tomb_y` smallint(5) unsigned NOT NULL DEFAULT '0'",
-		MVP_RESPAWN_TABLE);
-
 	if (SQL_ERROR == Sql_Query(mmysql_handle,
 		"SELECT `spawn_key`, `kill_time`, `respawn_time`, `killer_name`, `tomb_x`, `tomb_y` FROM `%s`",
 		MVP_RESPAWN_TABLE)) {
@@ -190,6 +183,7 @@ static void mvp_respawn_sql_init() {
 
 	Sql_FreeResult(mmysql_handle);
 }
+
 
 static void mvp_respawn_delete(const std::string& key) {
 	if (key.empty())
