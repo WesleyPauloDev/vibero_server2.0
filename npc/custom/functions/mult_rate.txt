@@ -9,8 +9,10 @@ OnPCLoginEvent:
     end;
 
 OnStartRate:
-    // Se ja escolheu a taxa, apenas aplica os bonus no login
+	// Se ja escolheu a taxa, reaplica a base e deixa a reputacao recalcular o total.
 	if (rate_escolhido > 0) {
+		callsub S_ApplyRateBase;
+		donpcevent "Reputation_Login::OnPCLoginEvent";
 		end;
 	}
 
@@ -84,28 +86,21 @@ OnStartRate:
 			achievementcomplete 110013;
 	}
 
-    // Definir rates baseadas na escolha
-	if (!.@rate_bonus) {
-		switch(.@rate_escolhida) {
-			case 1: .@rate_xp = 1; .@drop_bonus = 100; break;
-			case 2: .@rate_xp = 2; .@drop_bonus = 50; break;
-			case 5: .@rate_xp = 5; .@drop_bonus = 20; break;
-			case 10: .@rate_xp = 10; .@drop_bonus = 0; break;
-			default: .@rate_xp = 1; .@drop_bonus = 100;
-		}
-		.@rate_bonus = 1;
+	callsub S_ApplyRateBase;
+	donpcevent "Reputation_Login::OnPCLoginEvent";
+
+	end;
+
+S_ApplyRateBase:
+	switch(rate_escolhido) {
+		case 1: .@rate_xp = 1; .@drop_bonus = 100; break;
+		case 2: .@rate_xp = 2; .@drop_bonus = 50; break;
+		case 5: .@rate_xp = 5; .@drop_bonus = 20; break;
+		case 10: .@rate_xp = 10; .@drop_bonus = 0; break;
+		default: .@rate_xp = 1; .@drop_bonus = 100;
 	}
 
 	exp_base_custom = .@rate_xp * 100;
 	drop_base = .@drop_bonus;
-
-	// XP base para o sistema = (rate_xp - 1) * 100
-	.@xp_base = (.@rate_xp - 1) * 100;
-	exp_final = .@xp_base;
-	drop_final = .@drop_bonus;
-
-	set_reborn_exp(exp_final);
-	set_reborn_drop(drop_final);
-
-	end;
+	return;
 }
