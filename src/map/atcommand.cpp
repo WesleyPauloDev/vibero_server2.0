@@ -12214,8 +12214,10 @@ bool is_atcommand(const int32 fd, map_session_data* sd, const char* message, int
 
 	// type == 1 : player invoked
 	if (type == 1) {
-		if ((is_atcommand && info->at_groups[sd->group->index] == 0) ||
-			(!is_atcommand && info->char_groups[sd->group->index] == 0) )
+		bool public_hidepet = is_atcommand && strcmpi(info->command, "hidepet") == 0;
+
+		if (!public_hidepet && ((is_atcommand && info->at_groups[sd->group->index] == 0) ||
+			(!is_atcommand && info->char_groups[sd->group->index] == 0) ))
 			return false;
 
 		if( pc_isdead(sd) && pc_has_permission(sd,PC_PERM_DISABLE_CMD_DEAD) ) {

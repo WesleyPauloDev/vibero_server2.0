@@ -8,7 +8,7 @@
 #define PACKETVER 20250528
 // #define PACKETVER 20250319
 //#define PACKETVER 20250716
-#define MAX_CHARS 30
+#define MAX_CHARS 36
 /**
  * rAthena configuration file (http://rathena.org)
  * For detailed guidance on these check http://rathena.org/wiki/SRC/config/
