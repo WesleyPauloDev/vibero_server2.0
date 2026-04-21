@@ -2090,11 +2090,12 @@ OnTimer10000:
 	if (.@quest_reward) {
 		.@crystal_amt = callfunc("F_OGH_FinalCrystalReward");
 		.@spell_amt = callfunc("F_OGH_FinalSpellReward");
-		if (.@give_custom_reward && checkweight(6607,.@crystal_amt, 6608,.@spell_amt, 9608,10, 9198,2) == 0) {
+		.@polluted_amt = callfunc("F_OGH_FinalPollutedReward");
+		if (.@give_custom_reward && checkweight(6607,.@crystal_amt, 6608,.@spell_amt, 6755,.@polluted_amt, 9608,10, 9198,2) == 0) {
 			mes "^ff0000Parece que voce possui muitos tipos ou peso de itens. Organize seu inventario.^000000";
 			close;
 		}
-		if (.@give_custom_reward == 0 && checkweight(6607,.@crystal_amt, 6608,.@spell_amt) == 0) {
+		if (.@give_custom_reward == 0 && checkweight(6607,.@crystal_amt, 6608,.@spell_amt, 6755,.@polluted_amt) == 0) {
 			mes "^ff0000Parece que voce possui muitos tipos ou peso de itens. Organize seu inventario.^000000";
 			close;
 		}
@@ -2123,11 +2124,15 @@ OnTimer10000:
 			completequest 12321;
 			getitem 6607,.@crystal_amt;// Temporal_Crystal
 			getitem 6608,.@spell_amt;// Coagulated_Spell
+			if (.@polluted_amt > 0)
+				getitem 6755,.@polluted_amt;// Polluted_Spell
 			getexp 350000,350000;
 		}
 		else {
 			getitem 6607,.@crystal_amt;// Temporal_Crystal
 			getitem 6608,.@spell_amt;// Coagulated_Spell
+			if (.@polluted_amt > 0)
+				getitem 6755,.@polluted_amt;// Polluted_Spell
 		}
 		'final_reward_claimed[.@cid] = 1;
 	}
