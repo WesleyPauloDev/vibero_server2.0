@@ -1623,7 +1623,7 @@ OnBossDead:
 OnTimer1000:
 	if ('boss_id < 1 || mobcount( 'sthd_map$, instance_npcname("#Last_Boss") + "::OnBossDead" ) < 1) {
 		'boss_id = 0;
-		#SkyFortress_STATUS = 2;
+		'skyfortress_status = 2;
 		'pantheon_event[0] = 1;
 		'pantheon_event[1] = 1;
 		donpcevent instance_npcname("#Last_Boss") + "::OnLastWord";
@@ -1914,6 +1914,8 @@ OnTimer1000:
 	}
 	end;
 OnTimer1500:
+	if ('boss_id < 1 || mobcount( 'sthd_map$, instance_npcname("#Last_Boss") + "::OnBossDead" ) < 1)
+		end;
 	.@r = rand(1,30);
 	if (.@r == 1)
 		unittalk 'boss_id, "Wolf: Nao fuja... chegue mais perto... eu vou matar voce...";
@@ -1928,7 +1930,7 @@ OnTimer3000:
 OnTimer4500:
 	if ('boss_id < 1 || mobcount( 'sthd_map$, instance_npcname("#Last_Boss") + "::OnBossDead" ) < 1) {
 		'boss_id = 0;
-		#SkyFortress_STATUS = 2;
+		'skyfortress_status = 2;
 		'pantheon_event[0] = 1;
 		'pantheon_event[1] = 1;
 		donpcevent instance_npcname("#Last_Boss") + "::OnLastWord";
@@ -2052,6 +2054,8 @@ OnTimer2000:
 			mes "- para receber as recompensas da instancia. -";
 			close;
 		}
+		if ('skyfortress_status == 2)
+			#SkyFortress_STATUS = 2;
 		if (#SkyFortress_STATUS == 2) {
 			.@finish_result = callfunc("F_InstanceFinishBase", "Fortaleza Celeste", "#SkyFortress_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Fortaleza Celeste", 0);
 			if (.@finish_result == -1) {

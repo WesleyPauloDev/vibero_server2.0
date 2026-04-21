@@ -217,21 +217,29 @@ OnTimer180000:
 function	script	F_Mora_Mist	{
 	set .@map$, instance_mapname("1@mist");
 	set .@mob_left, mobcount(.@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead");
-	set .@mob_limit, getarg(5,0);
+	set .@end_flag, 0;
+	set .@timer_flag, 0;
+	set .@mob_limit, 0;
+	if (getargcount() > 3)
+		set .@end_flag, getarg(3);
+	if (getargcount() > 4)
+		set .@timer_flag, getarg(4);
+	if (getargcount() > 5)
+		set .@mob_limit, getarg(5);
 	if (.@mob_left <= .@mob_limit) {
 		mes "Obviamente ninguem esta cuidando dela.";
 		mes "Parece que voce pode cortar a arvore do jardim.";
 		next;
 		if(select("Cortar a arvore do jardim.:Desistir.") == 2)
 			close;
-		mes "Voce corta a arvore que bloqueava o caminho do labirinto, "+((getarg(3,0))?"abrindo o caminho para fora da floresta.":"entao agora voce pode continuar.");
+		mes "Voce corta a arvore que bloqueava o caminho do labirinto, "+((.@end_flag)?"abrindo o caminho para fora da floresta.":"entao agora voce pode continuar.");
 		mapannounce .@map$,getarg(1),bc_map,"0xccffcc"; //FW_NORMAL 12 0 0
 		if (getarg(0) != "#to_bif02")
 			enablenpc instance_npcname(getarg(0));
 		.@summoned_dragon = callfunc("F_HazyForest_TreeProgress");
 		for (.@i = 6; .@i < getargcount(); .@i++)
 			enablenpc instance_npcname(getarg(.@i));
-		if (getarg(4,0))
+		if (.@timer_flag)
 			initnpctimer;
 		if (.@summoned_dragon) {
 			next;
@@ -247,33 +255,33 @@ function	script	F_Mora_Mist	{
 	} else {
 		mes "Ainda ha "+(.@mob_left - .@mob_limit)+" monstro(s) protegendo esta arvore.";
 		mes "Derrote mais alguns para conseguir corta-la.";
-		mapannounce .@map$,((getarg(3,0))?getarg(2):getarg(2)+" grita: Ha? Quem esta fazendo coisas ruins com minha arvore?!"),bc_map,"0xccffcc"; //FW_NORMAL 12 0 0
+		mapannounce .@map$,((.@end_flag)?getarg(2):getarg(2)+" grita: Ha? Quem esta fazendo coisas ruins com minha arvore?!"),bc_map,"0xccffcc"; //FW_NORMAL 12 0 0
 	}
 	end;
 }
 
 function	script	F_HazyForest_TreeProgress	{
 	set .@map$, instance_mapname("1@mist");
-	set .@tree_count, getinstancevar('hazy_tree_count,instance_id()) + 1;
-	setinstancevar('hazy_tree_count,.@tree_count,instance_id());
+	'hazy_tree_count++;
+	set .@tree_count, 'hazy_tree_count;
 
-	if (getinstancevar('hazy_dragon_summoned,instance_id()))
-		return;
+	if ('hazy_dragon_summoned)
+		return 0;
 
 	set .@left, 4 - .@tree_count;
 	if (.@left > 0) {
 		mapannounce .@map$,"Objetivo da Floresta Nebulosa: "+.@tree_count+"/4 arvores cortadas. Faltam "+.@left+" para atrair o Dragao Roxo Errante.",bc_map,"0x99ff66";
-		return;
+		return 0;
 	}
 
-	setinstancevar('hazy_dragon_summoned,1,instance_id());
+	'hazy_dragon_summoned = 1;
 	mapannounce .@map$,"Objetivo da Floresta Nebulosa: as arvores suficientes foram cortadas. O grupo foi levado ao centro. Preparem-se e enfrentem o Dragao Roxo Errante ao norte!",bc_map,"0xffff00";
 	donpcevent instance_npcname("#Dragon Herder")+"::OnSummon";
 	return 1;
 }
 
 function	script	F_HazyForest_FinishPlayer	{
-	if (!getinstancevar('hazy_finished,instance_id()))
+	if (!'hazy_finished)
 		return 0;
 
 	mes "[Floresta Nebulosa]";
@@ -605,7 +613,7 @@ OnSummon:
 OnMyMobDead:
 	set .@map$, instance_mapname("1@mist");
 	if (mobcount(.@map$,instance_npcname("#Dragon Herder")+"::OnMyMobDead") == 0) {
-		setinstancevar('hazy_finished,1,instance_id());
+		'hazy_finished = 1;
 		#HazyForest_STATUS = 2;
 		donpcevent instance_npcname("Garota Desmaiada#mist")+"::OnEnable";
 		donpcevent instance_npcname("Jovem Misterioso#mis")+"::OnDisable";
@@ -1210,6 +1218,9 @@ OnTouch_:
 1@mist,1,1,0	script	#mist_warp_init	844,{
 	end;
 OnInstanceInit:
+	'hazy_tree_count = 0;
+	'hazy_dragon_summoned = 0;
+	'hazy_finished = 0;
 	disablenpc instance_npcname("a25_a18-1");
 	disablenpc instance_npcname("a27-2_af1-2");
 	disablenpc instance_npcname("a15-2_a4-1");
@@ -1244,7 +1255,7 @@ OnInstanceInit:
 	end;
 
 OnTouch:
-	if (getinstancevar('hazy_finished,instance_id()))
+	if ('hazy_finished)
 		#HazyForest_STATUS = 2;
 	if (#HazyForest_STATUS == 2) {
 		.@finish_result = callfunc("F_InstanceFinishBase", "Floresta Nebulosa", "#HazyForest_STATUS", 10, 2, "#inst175_name$", "#inst175_status", 1, 10, 110002, 3000, 3, 0, "Mistwood Maze");
