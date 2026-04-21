@@ -34,6 +34,8 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 		mes "Tem certeza? Isso não pode ser desfeito.";
 		if (select("Sim, estou pronto","Não, cancelar") == 2) close;
 
+		.@was_second_visual = (getlook(LOOK_BODY2) >= 4332 && getlook(LOOK_BODY2) <= 4344);
+
 		// ===== Aplicar renascimento =====
 		// Mesmo fluxo do Job Master:
 		// salva a linha de classe base para manter progressão no Job Master.
@@ -60,6 +62,9 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 		setpcblock(0,0);
 
 		getitem 9616, 1; // item de renascimento, pode ser usado para futuras quests ou eventos
+		if (.@was_second_visual) {
+			getitem 6959, 1; // devolve ticket caso o jogador estivesse usando visual 2ND
+		}
 
 		mes "[Reborn Master]";
 		mes "Parabéns, você renasceu!";
