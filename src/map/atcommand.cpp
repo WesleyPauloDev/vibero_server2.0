@@ -9193,6 +9193,32 @@ ACMD_FUNC(showdelay)
 	return 0;
 }
 
+static int32 atcommand_hidepet_clear_sub( block_list* bl, va_list ap ){
+	map_session_data* sd = va_arg( ap, map_session_data* );
+
+	if( bl == nullptr || sd == nullptr ){
+		return 0;
+	}
+
+	clif_clearunit_single( bl->id, CLR_OUTSIGHT, *sd );
+	return 0;
+}
+
+ACMD_FUNC(hidepet)
+{
+	if( sd->state.hidepet ){
+		sd->state.hidepet = 0;
+		clif_displaymessage(fd, "Pets voltaram a ser exibidos.");
+		clif_refresh(sd);
+		return 0;
+	}
+
+	sd->state.hidepet = 1;
+	clif_displaymessage(fd, "Pets ocultados na sua tela.");
+	map_foreachinallrange(atcommand_hidepet_clear_sub, sd, AREA_SIZE, BL_PET, sd);
+	return 0;
+}
+
 /*==========================================
  * Duel organizing functions [LuzZza]
  *
@@ -11820,6 +11846,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(showexp),
 		ACMD_DEF(showzeny),
 		ACMD_DEF(showdelay),
+		ACMD_DEF(hidepet),
 		ACMD_DEF(autotrade),
 		ACMD_DEF(changegm),
 		ACMD_DEF(changeleader),

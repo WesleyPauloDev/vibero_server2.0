@@ -1803,6 +1803,7 @@
 
 #if PACKETVER >= 20151104
 	parseable_packet( HEADER_CZ_REQ_STYLE_CHANGE, sizeof( PACKET_CZ_REQ_STYLE_CHANGE ), clif_parse_stylist_buy, 0 );
+	parseable_packet( 0x0bf7, sizeof( PACKET_CZ_REQ_STYLE_CHANGE ), clif_parse_stylist_buy, 0 );
 	parseable_packet( HEADER_CZ_REQ_STYLE_CLOSE, sizeof( PACKET_CZ_REQ_STYLE_CLOSE ), clif_parse_stylist_close, 0 );
 #endif
 

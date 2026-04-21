@@ -396,6 +396,14 @@ static bool clif_session_isValid(map_session_data *sd) {
 	return ( sd != nullptr && session_isActive(sd->fd) );
 }
 
+static bool clif_bl_is_hidden_for_target( block_list& src_bl, map_session_data& sd ){
+	if( src_bl.type == BL_PET && sd.state.hidepet ){
+		return true;
+	}
+
+	return false;
+}
+
 /*==========================================
  * sub process of clif_send
  * Called from a map_foreachinallarea (grabs all players in specific area and subjects them to this function)
@@ -453,6 +461,10 @@ static int32 clif_send_sub(struct block_list *bl, va_list ap)
 
 	if( src_bl->type == BL_NPC && npc_is_hidden_dynamicnpc( *( (struct npc_data*)src_bl ), *sd ) ){
 		// Do not send anything
+		return 0;
+	}
+
+	if( clif_bl_is_hidden_for_target( *src_bl, *sd ) ){
 		return 0;
 	}
 
@@ -5022,6 +5034,10 @@ void clif_getareachar_unit( map_session_data* sd,struct block_list *bl ){
 
 	if( bl->type == BL_NPC && npc_is_hidden_dynamicnpc( *( (struct npc_data*)bl ), *sd ) ){
 		// Do not send anything
+		return;
+	}
+
+	if( clif_bl_is_hidden_for_target( *bl, *sd ) ){
 		return;
 	}
 
@@ -22898,6 +22914,107 @@ void clif_parse_unequipall( int32 fd, map_session_data* sd ){
 #endif
 }
 
+static bool clif_stylist_can_change_body_style( map_session_data* sd ){
+	if( sd == nullptr ){
+		return false;
+	}
+
+	if( !( sd->class_ & JOBL_THIRD ) ){
+		return false;
+	}
+
+	uint64 third_class = sd->class_ & MAPID_THIRDMASK;
+
+	return third_class != MAPID_SUPER_NOVICE_E && third_class != MAPID_STAR_EMPEROR && third_class != MAPID_SOUL_REAPER;
+}
+
+static int16 clif_stylist_body_style_index( int32 value ){
+	if( value <= 0 ){
+		return 0;
+	}
+
+	if( value >= 100 && value < JOB_RUNE_KNIGHT_2ND ){
+		value -= 99;
+	}
+
+	return value <= 1 ? 1 : 2;
+}
+
+static int16 clif_stylist_body_style_value( map_session_data* sd, int16 index ){
+	if( sd == nullptr ){
+		return 0;
+	}
+
+#if PACKETVER >= 20231220
+	if( index <= 1 ){
+		return sd->status.class_;
+	}
+
+	switch( sd->status.class_ ){
+		case JOB_RUNE_KNIGHT:
+		case JOB_RUNE_KNIGHT_T:
+		case JOB_DRAGON_KNIGHT:
+			return JOB_RUNE_KNIGHT_2ND;
+		case JOB_MECHANIC:
+		case JOB_MECHANIC_T:
+		case JOB_MEISTER:
+			return JOB_MECHANIC_2ND;
+		case JOB_GUILLOTINE_CROSS:
+		case JOB_GUILLOTINE_CROSS_T:
+		case JOB_SHADOW_CROSS:
+			return JOB_GUILLOTINE_CROSS_2ND;
+		case JOB_WARLOCK:
+		case JOB_WARLOCK_T:
+		case JOB_ARCH_MAGE:
+			return JOB_WARLOCK_2ND;
+		case JOB_ARCH_BISHOP:
+		case JOB_ARCH_BISHOP_T:
+		case JOB_CARDINAL:
+			return JOB_ARCHBISHOP_2ND;
+		case JOB_RANGER:
+		case JOB_RANGER_T:
+		case JOB_WINDHAWK:
+			return JOB_RANGER_2ND;
+		case JOB_ROYAL_GUARD:
+		case JOB_ROYAL_GUARD_T:
+		case JOB_IMPERIAL_GUARD:
+			return JOB_ROYAL_GUARD_2ND;
+		case JOB_GENETIC:
+		case JOB_GENETIC_T:
+		case JOB_BIOLO:
+			return JOB_GENETIC_2ND;
+		case JOB_SHADOW_CHASER:
+		case JOB_SHADOW_CHASER_T:
+		case JOB_ABYSS_CHASER:
+			return JOB_SHADOW_CHASER_2ND;
+		case JOB_SORCERER:
+		case JOB_SORCERER_T:
+		case JOB_ELEMENTAL_MASTER:
+			return JOB_SORCERER_2ND;
+		case JOB_SURA:
+		case JOB_SURA_T:
+		case JOB_INQUISITOR:
+			return JOB_SURA_2ND;
+		case JOB_MINSTREL:
+		case JOB_MINSTREL_T:
+		case JOB_TROUBADOUR:
+			return JOB_MINSTREL_2ND;
+		case JOB_WANDERER:
+		case JOB_WANDERER_T:
+		case JOB_TROUVERE:
+			return JOB_WANDERER_2ND;
+		default:
+			return 0;
+	}
+#else
+	if( index <= 1 ){
+		return 0;
+	}
+
+	return 1;
+#endif
+}
+
 void clif_stylist_response( map_session_data* sd, bool failed ){
 #if PACKETVER >= 20151104
 	PACKET_ZC_STYLE_CHANGE_RES p = {};
@@ -22913,7 +23030,7 @@ void clif_stylist_response( map_session_data* sd, bool failed ){
 #endif
 }
 
-bool clif_parse_stylist_buy_sub( map_session_data* sd, _look look, int16 index ){
+bool clif_parse_stylist_buy_sub( map_session_data* sd, _look look, int16 index, int16 value_override = -1 ){
 	std::shared_ptr<s_stylist_list> list = stylist_db.find( look );
 
 	if( list == nullptr ){
@@ -22924,6 +23041,28 @@ bool clif_parse_stylist_buy_sub( map_session_data* sd, _look look, int16 index )
 
 	if( entry == nullptr ){
 		return false;
+	}
+
+	int16 value = value_override >= 0 ? value_override : entry->value;
+
+	if( look == LOOK_BODY2 ){
+		if( !clif_stylist_can_change_body_style( sd ) ){
+			return false;
+		}
+
+#if PACKETVER >= 20231220
+		if( value_override < 0 ){
+			value = clif_stylist_body_style_value( sd, index );
+		}
+#endif
+
+		if( index > 1 && value == 0 ){
+			return false;
+		}
+
+		if( sd->status.body == cap_value( value, MIN_BODY_STYLE, MAX_BODY_STYLE ) ){
+			return true;
+		}
 	}
 
 	std::shared_ptr<s_stylist_costs> costs;
@@ -22982,7 +23121,7 @@ bool clif_parse_stylist_buy_sub( map_session_data* sd, _look look, int16 index )
 		case LOOK_HAIR_COLOR:
 		case LOOK_CLOTHES_COLOR:
 		case LOOK_BODY2:
-			pc_changelook( sd, look, entry->value );
+			pc_changelook( sd, look, value );
 			break;
 		case LOOK_HEAD_BOTTOM:
 		case LOOK_HEAD_MID:
@@ -23012,47 +23151,71 @@ bool clif_parse_stylist_buy_sub( map_session_data* sd, _look look, int16 index )
 
 void clif_parse_stylist_buy( int32 fd, map_session_data* sd ){
 #if PACKETVER >= 20151104
-#if PACKETVER >= 20180516
-	const PACKET_CZ_REQ_STYLE_CHANGE2* p = reinterpret_cast<PACKET_CZ_REQ_STYLE_CHANGE2*>( RFIFOP( fd, 0 ) );
-#else
 	const PACKET_CZ_REQ_STYLE_CHANGE* p = reinterpret_cast<PACKET_CZ_REQ_STYLE_CHANGE*>( RFIFOP( fd, 0 ) );
-#endif
-	if( p->HeadPalette != 0 && !clif_parse_stylist_buy_sub( sd, LOOK_HAIR_COLOR, p->HeadPalette ) ){
-		clif_stylist_response( sd, true );
-		return;
-	}
+	const int16 packetType = RFIFOW( fd, 0 );
+	const bool bodyStyle2025 = packetType == 0x0bf7;
+	int16 bodyStyle = 0;
 
-	if( p->HeadStyle != 0 && !clif_parse_stylist_buy_sub( sd, LOOK_HAIR, p->HeadStyle ) ){
-		clif_stylist_response( sd, true );
-		return;
-	}
+	if( bodyStyle2025 ){
+		if( p->MidAccessory <= 0 ){
+			clif_stylist_response( sd, true );
+			return;
+		}
 
-	if( p->BodyPalette != 0 && !clif_parse_stylist_buy_sub( sd, LOOK_CLOTHES_COLOR, p->BodyPalette ) ){
-		clif_stylist_response( sd, true );
-		return;
-	}
+		int16 bodyIndex = clif_stylist_body_style_index( p->MidAccessory );
+		int16 bodyValue = clif_stylist_body_style_value( sd, bodyIndex );
 
-	if( p->TopAccessory != 0 && !clif_parse_stylist_buy_sub( sd, LOOK_HEAD_TOP, p->TopAccessory ) ){
-		clif_stylist_response( sd, true );
-		return;
-	}
+		if( bodyIndex <= 0 || !clif_parse_stylist_buy_sub( sd, LOOK_BODY2, bodyIndex, bodyValue ) ){
+			clif_stylist_response( sd, true );
+			return;
+		}
 
-	if( p->MidAccessory != 0 && !clif_parse_stylist_buy_sub( sd, LOOK_HEAD_MID, p->MidAccessory ) ){
-		clif_stylist_response( sd, true );
-		return;
-	}
-
-	if( p->BottomAccessory != 0 && !clif_parse_stylist_buy_sub( sd, LOOK_HEAD_BOTTOM, p->BottomAccessory ) ){
-		clif_stylist_response( sd, true );
+		clif_stylist_response( sd, false );
 		return;
 	}
 
 #if PACKETVER >= 20180516
-	if( p->BodyStyle != 0 && ( sd->class_ & JOBL_THIRD ) != 0 && ( sd->class_ & JOBL_FOURTH ) == 0 && !clif_parse_stylist_buy_sub( sd, LOOK_BODY2, p->BodyStyle ) ){
+	if( !bodyStyle2025 && RFIFOREST( fd ) >= sizeof( PACKET_CZ_REQ_STYLE_CHANGE2 ) ){
+		const PACKET_CZ_REQ_STYLE_CHANGE2* p2 = reinterpret_cast<PACKET_CZ_REQ_STYLE_CHANGE2*>( RFIFOP( fd, 0 ) );
+
+		bodyStyle = clif_stylist_body_style_index( p2->BodyStyle );
+	}
+#endif
+
+	if( !bodyStyle2025 && p->HeadPalette != 0 && !clif_parse_stylist_buy_sub( sd, LOOK_HAIR_COLOR, p->HeadPalette ) ){
 		clif_stylist_response( sd, true );
 		return;
 	}
-#endif
+
+	if( !bodyStyle2025 && p->HeadStyle != 0 && !clif_parse_stylist_buy_sub( sd, LOOK_HAIR, p->HeadStyle ) ){
+		clif_stylist_response( sd, true );
+		return;
+	}
+
+	if( !bodyStyle2025 && p->BodyPalette != 0 && !clif_parse_stylist_buy_sub( sd, LOOK_CLOTHES_COLOR, p->BodyPalette ) ){
+		clif_stylist_response( sd, true );
+		return;
+	}
+
+	if( !bodyStyle2025 && p->TopAccessory != 0 && !clif_parse_stylist_buy_sub( sd, LOOK_HEAD_TOP, p->TopAccessory ) ){
+		clif_stylist_response( sd, true );
+		return;
+	}
+
+	if( !bodyStyle2025 && p->MidAccessory != 0 && !clif_parse_stylist_buy_sub( sd, LOOK_HEAD_MID, p->MidAccessory ) ){
+		clif_stylist_response( sd, true );
+		return;
+	}
+
+	if( !bodyStyle2025 && p->BottomAccessory != 0 && !clif_parse_stylist_buy_sub( sd, LOOK_HEAD_BOTTOM, p->BottomAccessory ) ){
+		clif_stylist_response( sd, true );
+		return;
+	}
+
+	if( bodyStyle != 0 && ( !clif_stylist_can_change_body_style( sd ) || !clif_parse_stylist_buy_sub( sd, LOOK_BODY2, bodyStyle ) ) ){
+		clif_stylist_response( sd, true );
+		return;
+	}
 
 	clif_stylist_response( sd, false );
 #endif

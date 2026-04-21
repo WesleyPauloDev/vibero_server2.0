@@ -407,6 +407,7 @@ public:
 		uint32 showdelay :1;
 		uint32 showexp :1;
 		uint32 showzeny :1;
+		uint32 hidepet :1;
 		uint32 noask :1; // [LuzZza]
 		uint32 trading :1; //[Skotlex] is 1 only after a trade has started.
 		uint32 deal_locked :2; //1: Clicked on OK. 2: Clicked on TRADE
