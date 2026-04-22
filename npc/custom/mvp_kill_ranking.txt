@@ -7,6 +7,7 @@
 //   MVP_Kills_Week[week_id]   (ranking semanal, por indice)
 //   MVP_Kills_Month[month_id] (ranking mensal, por indice)
 // - Premios semanais: definidos no controlador e resgatados pelo NPC.
+// - Log SQL de cada kill em `mvp_kill_log`, incluindo qual MVP foi morto.
 //
 // OBS: Foi criado em UTF-8 para evitar edicao de scripts legados em ISO-8859-1.
 //
@@ -27,6 +28,28 @@ function	script	F_MVP_MonthId	{
 // Contador de MVP kills (roda em paralelo ao sistema de pontos)
 // ------------------------------------------------------------
 -	script	MVP_Kills_Counter	-1,{
+OnInit:
+	query_sql(
+		"CREATE TABLE IF NOT EXISTS `mvp_kill_log` (" +
+		"`id` INT UNSIGNED NOT NULL AUTO_INCREMENT, " +
+		"`account_id` INT UNSIGNED NOT NULL DEFAULT 0, " +
+		"`char_id` INT UNSIGNED NOT NULL DEFAULT 0, " +
+		"`char_name` VARCHAR(30) NOT NULL DEFAULT '', " +
+		"`mob_id` INT UNSIGNED NOT NULL DEFAULT 0, " +
+		"`mob_name` VARCHAR(50) NOT NULL DEFAULT '', " +
+		"`map` VARCHAR(24) NOT NULL DEFAULT '', " +
+		"`week_id` INT UNSIGNED NOT NULL DEFAULT 0, " +
+		"`month_id` INT UNSIGNED NOT NULL DEFAULT 0, " +
+		"`killed_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
+		"PRIMARY KEY (`id`), " +
+		"KEY `idx_mob_id` (`mob_id`), " +
+		"KEY `idx_week_mob` (`week_id`,`mob_id`), " +
+		"KEY `idx_month_mob` (`month_id`,`mob_id`), " +
+		"KEY `idx_char_id` (`char_id`) " +
+		") ENGINE=InnoDB DEFAULT CHARSET=utf8"
+	);
+	end;
+
 OnNPCKillEvent:
 	.@mob_id = killedrid;
 
@@ -49,6 +72,19 @@ OnNPCKillEvent:
 	if (.@month_id == 0)
 		.@month_id = callfunc("F_MVP_MonthId");
 	MVP_Kills_Month[.@month_id] += 1;
+
+	query_sql(
+		"INSERT INTO `mvp_kill_log` " +
+		"(`account_id`, `char_id`, `char_name`, `mob_id`, `mob_name`, `map`, `week_id`, `month_id`, `killed_at`) VALUES (" +
+		getcharid(3) + ", " +
+		getcharid(0) + ", '" +
+		escape_sql(strcharinfo(0)) + "', " +
+		.@mob_id + ", '" +
+		escape_sql(getmonsterinfo(.@mob_id, MOB_NAME)) + "', '" +
+		escape_sql(strcharinfo(3)) + "', " +
+		.@week_id + ", " +
+		.@month_id + ", NOW())"
+	);
 	end;
 }
 
@@ -137,7 +173,7 @@ prontera,140,175,5	script	Ranking MVP	615,{
 	next;
 
 	while (true) {
-		.@opt = select("Ranking semanal:Ranking mensal:Ranking global:Prêmio semanal:Fechar");
+		.@opt = select("Ranking semanal:Ranking mensal:Ranking global:MVPs mais caçados:Prêmio semanal:Fechar");
 		switch (.@opt) {
 			case 1:
 				callsub S_ShowWeekly;
@@ -149,6 +185,9 @@ prontera,140,175,5	script	Ranking MVP	615,{
 				callsub S_ShowGlobal;
 				break;
 			case 4:
+				callsub S_ShowMostHunted;
+				break;
+			case 5:
 				callsub S_WeeklyReward;
 				break;
 			default:
@@ -284,6 +323,56 @@ if (.@rows <= 0) {
 	}
 	for (.@i = 0; .@i < .@rows; .@i++) {
 		mes (.@i + 1) + ". " + .@name$[.@i] + " [" + jobname(.@class[.@i]) + "] : " + .@kills[.@i];
+	}
+	return;
+
+S_ShowMostHunted:
+	.@now_week = $MVP_Kills_CurrentWeekId;
+	if (.@now_week == 0)
+		.@now_week = callfunc("F_MVP_WeekId");
+
+	.@now_month = $MVP_Kills_CurrentMonthId;
+	if (.@now_month == 0)
+		.@now_month = callfunc("F_MVP_MonthId");
+
+	mes "[Ranking MVP]";
+	mes "MVPs mais caçados";
+	.@sel = select("Semana atual:Mês atual:Global:Voltar");
+	if (.@sel == 4)
+		return;
+
+	if (.@sel == 1) {
+		.@title$ = "Semana atual";
+		.@where$ = "WHERE `week_id` = " + .@now_week + " ";
+	}
+	else if (.@sel == 2) {
+		.@title$ = "Mês atual";
+		.@where$ = "WHERE `month_id` = " + .@now_month + " ";
+	}
+	else {
+		.@title$ = "Global";
+		.@where$ = "";
+	}
+
+	mes .@title$;
+	.@rows = query_sql(
+		"SELECT `mob_id`, MAX(`mob_name`), COUNT(*) " +
+		"FROM `mvp_kill_log` " +
+		.@where$ +
+		"GROUP BY `mob_id` " +
+		"ORDER BY COUNT(*) DESC, `mob_id` ASC " +
+		"LIMIT 20",
+		.@mob_id, .@mob_name$, .@kills
+	);
+
+	if (.@rows <= 0) {
+		mes "Sem registros de MVP neste período.";
+		mes "Obs: este histórico começa a contar a partir da atualização do log.";
+		return;
+	}
+
+	for (.@i = 0; .@i < .@rows; .@i++) {
+		mes (.@i + 1) + ". " + .@mob_name$[.@i] + " [" + .@mob_id[.@i] + "] : " + .@kills[.@i];
 	}
 	return;
 
