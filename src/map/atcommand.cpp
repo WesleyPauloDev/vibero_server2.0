@@ -4,8 +4,10 @@
 #include "atcommand.hpp"
 
 #include <cmath>
+#include <cstdarg>
 #include <cstdlib>
 #include <set>
+#include <string>
 #include <unordered_map>
 
 #include <common/cbasetypes.hpp>
@@ -11603,6 +11605,225 @@ ACMD_FUNC(brazil)
 	return 0;
 }
 
+ACMD_FUNC(battlestats)
+{
+	nullpo_retr(-1, sd);
+
+	const char* ele_names[ELE_ALL + 1] = {
+		"Neutro", "Agua", "Terra", "Fogo", "Vento", "Veneno", "Sagrado", "Sombrio", "Fantasma", "Morto-vivo", "Todos"
+	};
+	const char* race_names[RC_ALL + 1] = {
+		"Amorfo", "Morto-vivo", "Bruto", "Planta", "Inseto", "Peixe", "Demonio", "Humanoide", "Anjo", "Dragao",
+		"Jogador humano", "Jogador doram", "Todos"
+	};
+	const char* size_names[SZ_ALL + 1] = {
+		"Pequeno", "Medio", "Grande", "Todos"
+	};
+	const char* class_names[CLASS_MAX] = {
+		"Normal", "Boss/MVP", "Guardiao", "Classe 3", "Battlefield", "Evento", "Todos"
+	};
+
+	auto out = [&](const char* fmt, ...) {
+		va_list ap;
+
+		va_start(ap, fmt);
+		vsnprintf(atcmd_output, sizeof(atcmd_output), fmt, ap);
+		va_end(ap);
+		clif_messagecolor(sd, color_table[COLOR_LIGHT_GREEN], atcmd_output, false, SELF);
+	};
+
+	auto out_list = [&](const char* label, const char* const* names, int32 start, int32 end, auto value) -> bool {
+		std::string line = std::string(label) + ": ";
+		bool listed = false;
+
+		for (int32 i = start; i <= end; i++) {
+			const int32 val = value(i);
+
+			if (val == 0)
+				continue;
+
+			char part[96];
+			snprintf(part, sizeof(part), "%s %+d%%", names[i], val);
+
+			if (line.size() + strlen(part) + 2 >= 180) {
+				out("%s", line.c_str());
+				line = "  ";
+			}
+
+			if (listed && line != "  ")
+				line += ", ";
+
+			line += part;
+			listed = true;
+		}
+
+		if (!listed)
+			return false;
+
+		out("%s", line.c_str());
+		return true;
+	};
+
+	auto out_pen_full = [&](const char* label, const char* const* names, int32 start, int32 end, int32 def_mask, int32 mdef_mask) -> bool {
+		std::string line = std::string(label) + ": ";
+		bool listed = false;
+
+		for (int32 i = start; i <= end; i++) {
+			const bool def = (def_mask & (1 << i)) != 0;
+			const bool mdef = (mdef_mask & (1 << i)) != 0;
+
+			if (!def && !mdef)
+				continue;
+
+			char part[96];
+			snprintf(part, sizeof(part), "%s %s", names[i], def && mdef ? "DEF/MDEF" : def ? "DEF" : "MDEF");
+
+			if (line.size() + strlen(part) + 2 >= 180) {
+				out("%s", line.c_str());
+				line = "  ";
+			}
+
+			if (listed && line != "  ")
+				line += ", ";
+
+			line += part;
+			listed = true;
+		}
+
+		if (!listed)
+			return false;
+
+		out("%s", line.c_str());
+		return true;
+	};
+
+	auto phys_ele = [&](int32 i) { return sd->right_weapon.addele[i] + sd->left_weapon.addele[i] + sd->indexed_bonus.arrow_addele[i]; };
+	auto phys_race = [&](int32 i) { return sd->right_weapon.addrace[i] + sd->left_weapon.addrace[i] + sd->indexed_bonus.arrow_addrace[i]; };
+	auto phys_size = [&](int32 i) { return sd->right_weapon.addsize[i] + sd->left_weapon.addsize[i] + sd->indexed_bonus.arrow_addsize[i]; };
+	auto phys_class = [&](int32 i) { return sd->right_weapon.addclass[i] + sd->left_weapon.addclass[i] + sd->indexed_bonus.arrow_addclass[i]; };
+	auto magic_ele = [&](int32 i) { return sd->indexed_bonus.magic_addele[i] + sd->indexed_bonus.magic_addele_script[i]; };
+	auto magic_skill_ele = [&](int32 i) { return sd->indexed_bonus.magic_atk_ele[i]; };
+	auto magic_race = [&](int32 i) { return sd->indexed_bonus.magic_addrace[i]; };
+	auto magic_size = [&](int32 i) { return sd->indexed_bonus.magic_addsize[i]; };
+	auto magic_class = [&](int32 i) { return sd->indexed_bonus.magic_addclass[i]; };
+	auto res_ele = [&](int32 i) { return sd->indexed_bonus.subele[i] + sd->indexed_bonus.subele_script[i]; };
+	auto res_race = [&](int32 i) { return sd->indexed_bonus.subrace[i]; };
+	auto res_size = [&](int32 i) { return sd->indexed_bonus.subsize[i] + sd->indexed_bonus.weapon_subsize[i] + sd->indexed_bonus.magic_subsize[i]; };
+	auto res_class = [&](int32 i) { return sd->indexed_bonus.subclass[i]; };
+
+	const int32 aspd_flat = -(sd->bonus.aspd_add / 10);
+	const int32 ignore_def_ele = sd->right_weapon.ignore_def_ele | sd->left_weapon.ignore_def_ele;
+	const int32 ignore_def_race = sd->right_weapon.ignore_def_race | sd->left_weapon.ignore_def_race;
+	const int32 ignore_def_class = sd->right_weapon.ignore_def_class | sd->left_weapon.ignore_def_class;
+
+	out("=== BATTLESTATS ===");
+	out("-- DANOS --");
+	out("ATK/MATK: ATK %+d%% | MATK %+d%%", sd->bonus.atk_rate, sd->matk_rate - 100);
+	out("Dano por tipo: melee %+d%% | distancia %+d%% | matk arma %+d%%", sd->bonus.short_attack_atk_rate, sd->bonus.long_attack_atk_rate, sd->bonus.weapon_matk_rate);
+	out("Trait: P.ATK %+d%% | S.MATK %+d%%", sd->patk_rate, sd->smatk_rate);
+	out("Vel ATQ bonus: rate %+d%% | flat %+d", sd->battle_status.aspd_rate2, aspd_flat);
+	out("Critico: dano %+d%% | res dano %+d%% | res chance %+d%%", sd->bonus.crit_atk_rate, sd->bonus.crit_def_rate, sd->bonus.critical_def);
+
+	out("-- HP/SP --");
+	out("HP: max %+d%% | flat %+d | regen %+d%%", sd->hprate - 100, sd->bonus.hp, sd->hprecov_rate - 100);
+	out("SP: max %+d%% | flat %+d | regen %+d%%", sd->sprate - 100, sd->bonus.sp, sd->sprecov_rate - 100);
+
+	bool any = false;
+	if (phys_race(RC_PLAYER_HUMAN) || magic_race(RC_PLAYER_HUMAN) || phys_race(RC_PLAYER_DORAM) || magic_race(RC_PLAYER_DORAM)) {
+		out("Dano contra jogadores:");
+		if (phys_race(RC_PLAYER_HUMAN) || magic_race(RC_PLAYER_HUMAN))
+			out("  Humano: fis %+d%% | mag %+d%%", phys_race(RC_PLAYER_HUMAN), magic_race(RC_PLAYER_HUMAN));
+		if (phys_race(RC_PLAYER_DORAM) || magic_race(RC_PLAYER_DORAM))
+			out("  Doram: fis %+d%% | mag %+d%%", phys_race(RC_PLAYER_DORAM), magic_race(RC_PLAYER_DORAM));
+	}
+
+	if (phys_class(CLASS_BOSS) || magic_class(CLASS_BOSS) || phys_class(CLASS_ALL) || magic_class(CLASS_ALL))
+		out("Boss/MVP: fis %+d%% | mag %+d%%", phys_class(CLASS_BOSS) + phys_class(CLASS_ALL), magic_class(CLASS_BOSS) + magic_class(CLASS_ALL));
+
+	if (!sd->skillatk.empty()) {
+		out("Dano de skill:");
+		for (const auto &it : sd->skillatk) {
+			if (it.val)
+				out("  %s %+d%%", skill_get_desc(it.id), it.val);
+		}
+	}
+
+	out_list("Dano fisico contra atributo", ele_names, ELE_NEUTRAL, ELE_ALL, phys_ele);
+	out_list("Dano magico contra atributo", ele_names, ELE_NEUTRAL, ELE_ALL, magic_ele);
+	out_list("Dano magico por atributo da skill", ele_names, ELE_NEUTRAL, ELE_ALL, magic_skill_ele);
+	out_list("Dano fisico contra tamanho", size_names, SZ_SMALL, SZ_ALL, phys_size);
+	out_list("Dano magico contra tamanho", size_names, SZ_SMALL, SZ_ALL, magic_size);
+	out_list("Dano fisico contra raca", race_names, RC_FORMLESS, RC_ALL, phys_race);
+	out_list("Dano magico contra raca", race_names, RC_FORMLESS, RC_ALL, magic_race);
+	out_list("Dano fisico contra classe", class_names, CLASS_NORMAL, CLASS_MAX - 1, phys_class);
+	out_list("Dano magico contra classe", class_names, CLASS_NORMAL, CLASS_MAX - 1, magic_class);
+
+	out("-- RESISTENCIAS --");
+	out("Geral: melee %+d%% | distancia %+d%% | magica %+d%% | misc %+d%%", sd->bonus.near_attack_def_rate, sd->bonus.long_attack_def_rate, sd->bonus.magic_def_rate, sd->bonus.misc_def_rate);
+	if (sd->def_rate != 100 || sd->mdef_rate != 100)
+		out("DEF/MDEF: DEF %+d%% | MDEF %+d%%", sd->def_rate - 100, sd->mdef_rate - 100);
+	out("Trait: RES %+d%% | MRES %+d%%", sd->res_rate, sd->mres_rate);
+
+	if (res_race(RC_PLAYER_HUMAN) || res_race(RC_PLAYER_DORAM)) {
+		out("Res contra jogadores:");
+		if (res_race(RC_PLAYER_HUMAN))
+			out("  Humano %+d%%", res_race(RC_PLAYER_HUMAN));
+		if (res_race(RC_PLAYER_DORAM))
+			out("  Doram %+d%%", res_race(RC_PLAYER_DORAM));
+	}
+
+	if (res_class(CLASS_BOSS) || res_class(CLASS_ALL))
+		out("Boss/MVP: resistencia %+d%%", res_class(CLASS_BOSS) + res_class(CLASS_ALL));
+
+	if (!sd->subskill.empty()) {
+		out("Resistencia a skill:");
+		for (const auto &it : sd->subskill) {
+			if (it.val)
+				out("  %s %+d%%", skill_get_desc(it.id), it.val);
+		}
+	}
+
+	out_list("Res elemento", ele_names, ELE_NEUTRAL, ELE_ALL, res_ele);
+	out_list("Res tamanho", size_names, SZ_SMALL, SZ_ALL, res_size);
+	out_list("Res raca", race_names, RC_FORMLESS, RC_ALL, res_race);
+	out_list("Res classe", class_names, CLASS_NORMAL, CLASS_MAX - 1, res_class);
+
+	out("-- ESPECIFICOS --");
+	out("Cast: fix rate %+d%%, fix %+.2fs | var rate %+d%%, var %+.2fs", sd->bonus.fixcastrate, sd->bonus.add_fixcast / 1000.0, sd->bonus.varcastrate, sd->bonus.add_varcast / 1000.0);
+	out("Pos conjuracao: %+d%%", sd->bonus.delayrate);
+	out_pen_full("Pen full atributo", ele_names, ELE_NEUTRAL, ELE_ALL, ignore_def_ele, sd->bonus.ignore_mdef_ele);
+	out_pen_full("Pen full raca", race_names, RC_FORMLESS, RC_ALL, ignore_def_race, sd->bonus.ignore_mdef_race);
+	out_pen_full("Pen full classe", class_names, CLASS_NORMAL, CLASS_MAX - 1, ignore_def_class, sd->bonus.ignore_mdef_class);
+	if (sd->indexed_bonus.ignore_res_by_race[RC_ALL] || sd->indexed_bonus.ignore_mres_by_race[RC_ALL])
+		out("Pen 4th: RES all %+d%% | MRES all %+d%%", sd->indexed_bonus.ignore_res_by_race[RC_ALL], sd->indexed_bonus.ignore_mres_by_race[RC_ALL]);
+
+	any = false;
+	for (int32 i = RC_FORMLESS; i <= RC_ALL; i++) {
+		if (sd->indexed_bonus.ignore_def_by_race[i] || sd->indexed_bonus.ignore_mdef_by_race[i] || sd->indexed_bonus.ignore_res_by_race[i] || sd->indexed_bonus.ignore_mres_by_race[i]) {
+			if (!any)
+				out("Pen por raca:");
+			out("  %s: DEF %+d%% | MDEF %+d%% | RES %+d%% | MRES %+d%%",
+				race_names[i], sd->indexed_bonus.ignore_def_by_race[i], sd->indexed_bonus.ignore_mdef_by_race[i],
+				sd->indexed_bonus.ignore_res_by_race[i], sd->indexed_bonus.ignore_mres_by_race[i]);
+			any = true;
+		}
+	}
+
+	any = false;
+	for (int32 i = CLASS_NORMAL; i < CLASS_MAX; i++) {
+		if (sd->indexed_bonus.ignore_def_by_class[i] || sd->indexed_bonus.ignore_mdef_by_class[i]) {
+			if (!any)
+				out("Pen por classe:");
+			out("  %s: DEF %+d%% | MDEF %+d%%", class_names[i], sd->indexed_bonus.ignore_def_by_class[i], sd->indexed_bonus.ignore_mdef_by_class[i]);
+			any = true;
+		}
+	}
+
+	if (!sd->skillcastrate.empty() || !sd->skillfixcastrate.empty() || !sd->skillvarcast.empty() || !sd->skilldelay.empty())
+		out("Bonus por skill: cast %zu | fix %zu | var %zu | pos %zu", sd->skillcastrate.size(), sd->skillfixcastrate.size(), sd->skillvarcast.size(), sd->skilldelay.size());
+
+	return 0;
+}
 #include <custom/atcommand.inc>
 
 /**
@@ -11620,6 +11841,7 @@ void atcommand_basecommands(void) {
 	 **/
 	AtCommandInfo atcommand_base[] = {
 #include <custom/atcommand_def.inc>
+		ACMD_DEF(battlestats),
 		ACMD_DEF(mapmove),
 		ACMD_DEF(where),
 		ACMD_DEF(jumpto),
