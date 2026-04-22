@@ -14796,6 +14796,7 @@ int32 skill_castend_pos2(struct block_list* src, int32 x, int32 y, uint16 skill_
 			clif_skill_poseffect( *src, skill_id, skill_lv, x, y, tick );
 		break;
 	case RG_GRAFFITI:			/* Graffiti [Valaris] */
+	case RG_FLAGGRAFFITI:
 		skill_unitsetting(src,skill_id,skill_lv,x,y,0);
 		flag|=1;
 		break;
@@ -16458,7 +16459,7 @@ std::shared_ptr<s_skill_unit_group> skill_unitsetting(struct block_list *src, ui
 		active_flag = 0;
 
 	// Put message for Talkie Box & Graffiti
-	if (skill_id == HT_TALKIEBOX || skill_id == RG_GRAFFITI) {
+	if (skill_id == HT_TALKIEBOX || skill_id == RG_GRAFFITI || skill_id == RG_FLAGGRAFFITI) {
 		group->valstr=(char *) aMalloc(MESSAGE_SIZE*sizeof(char));
 		if (sd)
 			safestrncpy(group->valstr, sd->message, MESSAGE_SIZE);
@@ -18631,6 +18632,12 @@ bool skill_check_condition_castbegin( map_session_data& sd, uint16 skill_id, uin
 	switch( skill_id ) {
 		case RG_GRAFFITI:
 			if (map_foreachinmap(skill_graffitiremover,sd.m,BL_SKILL,0)) { // If a previous Graffiti exists skill fails to cast.
+				clif_skill_fail( sd, skill_id );
+				return false;
+			}
+			break;
+		case RG_FLAGGRAFFITI:
+			if (map_foreachinmap(skill_graffitiremover,sd.m,BL_SKILL,2) >= 5) {
 				clif_skill_fail( sd, skill_id );
 				return false;
 			}
@@ -21335,6 +21342,8 @@ int32 skill_graffitiremover(struct block_list *bl, va_list ap)
 		return 0;
 
 	if ((unit->group) && (unit->group->unit_id == UNT_GRAFFITI)) {
+		if (remove == 2 && unit->group->skill_id != RG_FLAGGRAFFITI)
+			return 0;
 		if (remove == 1)
 			skill_delunit(unit);
 		return 1;
