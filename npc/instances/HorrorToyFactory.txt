@@ -1424,29 +1424,19 @@ OnStart:
 					if (strcharinfo(3) != 'xm_d_map$ || #HTF_STATUS != 2)
 						continue;
 					// add_reputation_points(1, 10);
-					callfunc("F_AddRep", 1, 10, 110002, 3000);
-					callfunc("F_DiaryRefreshDaily");
-					set #instancia, 2;
-					if (#inst175_name$ == "Fábrica de Brinquedos de Terror") {
-						set #inst175_status,2;
-					}
-					getitem 9608,10;	// Moeda de Instancia
-					getitem 9198,2;
-					set #HTF_STATUS, 3;
+					.@finish_result = callfunc("F_InstanceFinishBase", "Fábrica de Brinquedos de Terror", "#HTF_STATUS", 10, 2, "#inst175_name$", "#inst175_status");
+					if (.@finish_result == -1)
+						continue;
 				}
 				attachrid .@origin_aid;
 			}
 			else {
 				// add_reputation_points(1, 10);
-				callfunc("F_AddRep", 1, 10, 110002, 3000);
-				callfunc("F_DiaryRefreshDaily");
-				set #instancia, 2;
-				if (#inst175_name$ == "Fábrica de Brinquedos de Terror") {
-					set #inst175_status,2;
+				.@finish_result = callfunc("F_InstanceFinishBase", "Fábrica de Brinquedos de Terror", "#HTF_STATUS", 10, 2, "#inst175_name$", "#inst175_status");
+				if (.@finish_result == -1) {
+					mes "Voce esta com peso demais para receber as recompensas.";
+					close;
 				}
-				getitem 9608,10;	// Moeda de Instancia
-				getitem 9198,2;
-				set #HTF_STATUS, 3;
 			}
 		}
 	}
@@ -1721,3 +1711,6 @@ OnInstanceInit:
 		disablenpc instance_npcname("Presente Embalado#" + .@i);
 	end;
 }
+
+
+

@@ -1,8 +1,11 @@
 //===== rAthena Script =======================================
 //= Base Militar de Thor
-//= Description: =========================================
+//===== Description: =========================================
 //= [Walkthrough Conversion + Custom Entry]
 //= Instancia Thor Military Base adaptada ao padrao custom.
+//===== Changelogs: ==========================================
+//= 1.0 Conversao oficial base. [Capuche]
+//= 1.1 Integracao ao sistema custom de instancias. [Codex]
 //============================================================
 
 -	script	ThorGunsuBase_Instance#Custom	999,{
@@ -13,16 +16,15 @@ OnStartInstance:
 	if (isbegin_quest(16578) == 0 && isbegin_quest(16579) == 0 && isbegin_quest(16580) == 0)
 		setquest 16578;
 	callfunc("F_InstanceEntry",
-		"Thor Military Base",
+		"Base Militar",
 		"Maram",
 		"thor_gunsu_base",
 		"ThorGunsuBase",
 		170,
-		"Base Militar de Thor"
+		"Base Militar"
 	);
 	end;
 }
-
 
 //===== rAthena Script =======================================
 //= Instance: Thor Gunsu Base.
@@ -71,7 +73,7 @@ que_thr,133,53,5	script	Maram#Armybase1	4_EP18_MARAM,{
 	// player has party
 	if (is_party_leader())
 		// player is leader of the party
-		.@create$ = "Apply for entry to " + .@md_name$ + "";
+		.@create$ = "Solicitar entrada em " + .@md_name$ + "";
 
 	switch( select( .@create$, "Entrar em " + .@md_name$ + "" ) ) {
 	case 1:
@@ -488,7 +490,7 @@ OnInstanceInit:
 			getitem 1000405,50;	// Ep18_Amethyst_Fragment
 		}
 		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Base Militar de Thor");
+			callfunc("F_InstanceFinishAnnounce", "Base Militar");
 			'reward_announced = 1;
 		}
 		if (.@party_id > 0) {
@@ -503,6 +505,9 @@ OnInstanceInit:
 					continue;
 				getitem 9608,20;	// Moeda de Instancia
 				getitem 9198,2;	// Ticket de Instancia
+				getitem 25669,5;
+				getitem 25723,5;
+				getitem 25668,1;
 				#TGB_REWARD_INSTANCE = .@instance_id;
 			}
 			attachrid(.@speaker_aid);

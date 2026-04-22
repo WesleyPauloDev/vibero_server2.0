@@ -3,14 +3,27 @@
 // NPC custom em portugues para trabalhar em cima
 //==================================================
 
-moc_para01,42,36,4	script	Operador OS	4_M_REPAIR,{
+moc_para01,52,30,3	script	Oscar de Glast Heim	4_ED_OSCAR,{
+	disable_items;
+
+	mes "[Oscar de Glast Heim]";
+	mes "Posso trocar materiais da Edda Glast Heim pelos equipamentos e Insignias do Rei Schmidt.";
+	mes "Armadura e capa custam 5 " + getitemname(25739) + " e 10 " + getitemname(6607) + ".";
+	mes "Cada insignia custa 5 " + getitemname(25740) + " e 5 " + getitemname(6755) + ".";
+	next;
+	close2;
+	callshop "barter_edda_glastheim_insignia";
+	end;
+}
+
+moc_para01,42,36,3	script	Operador OS	4_M_REPAIR,{
 	disable_items;
 
 	mes "[Operador OS]";
 	mes "Posso trocar equipamentos e modulos usando Componentes Misteriosos e Cor Cores.";
 	next;
 
-	switch(select("Equipamentos Grace:Modulo de Arma:Modulo de Armadura:Arma OS:Armadura Ilusional:Cancelar")) {
+	switch(select("Equipamentos Grace:Modulo de Arma:Modulo de Armadura:Arma OS:Equipamentos OS:Armadura Ilusional:Automatic:Cancelar")) {
 	case 1:
 		callsub L_Grace;
 		end;
@@ -24,7 +37,13 @@ moc_para01,42,36,4	script	Operador OS	4_M_REPAIR,{
 		callsub L_OSWeapon;
 		end;
 	case 5:
+		callsub L_OSEquip;
+		end;
+	case 6:
 		callsub L_IllusionArmor;
+		end;
+	case 7:
+		callsub L_Automatic;
 		end;
 	default:
 		close;
@@ -191,6 +210,11 @@ L_OSWeapon:
 	callshop "barter_os_weapon";
 	end;
 
+L_OSEquip:
+	close2;
+	callshop "barter_os_equip";
+	end;
+
 L_IllusionArmor:
 	mes "[Operador OS]";
 	mes "Todos os equipamentos ilusionais estao reunidos em uma unica loja.";
@@ -199,4 +223,274 @@ L_IllusionArmor:
 	close2;
 	callshop "barter_illusion_armor";
 	end;
+
+L_Automatic:
+	mes "[Operador OS]";
+	mes "Aqui voce consegue cuidar de todo o sistema Automatic.";
+	mes "Posso abrir trocas, vender modulos, inserir modulo e explicar os requisitos.";
+	next;
+
+	switch(select("Equipamentos Automatic:Acessorios Automatic:Modulos por BarMeal Ticket:Modulos Epic:Inserir Modulo:Informacoes:Cancelar")) {
+	case 1:
+		mes "[Operador OS]";
+		mes "Essas trocas usam os equipamentos Illusion correspondentes e Barmil Ticket.";
+		next;
+		close2;
+		callshop "barter_auto_equip_1";
+		end;
+	case 2:
+		mes "[Operador OS]";
+		mes "Essas trocas usam os acessorios Illusion correspondentes e Barmil Ticket.";
+		next;
+		close2;
+		callshop "barter_auto_equip_2";
+		end;
+	case 3:
+		callsub L_AutomaticTicketModules;
+		end;
+	case 4:
+		callsub L_AutomaticEpicModules;
+		end;
+	case 5:
+		callsub L_AutomaticInsert;
+		end;
+	case 6:
+		callsub L_AutomaticInfo;
+		end;
+	default:
+		close;
+	}
+
+L_AutomaticTicketModules:
+	mes "[Operador OS]";
+	mes "Posso vender individualmente todos os modulos que saem da Automatic Module Box.";
+	mes "Cada modulo custa 200 " + getitemname(1000103) + ".";
+	next;
+	close2;
+	callshop "barter_auto_module_box_all";
+	end;
+
+L_AutomaticEpicModules:
+	mes "[Operador OS]";
+	mes "Os modulos Epic sao comprados individualmente.";
+	mes "Cada um custa 300 " + getitemname(1000104) + ".";
+	next;
+	close2;
+	callshop "barter_EP17_2_EP";
+	end;
+
+L_AutomaticInsert:
+	mes "[Operador OS]";
+	mes "Posso inserir modulos nos equipamentos Automatic equipados.";
+	next;
+	switch(select("Engine Wing:Armor:Leg:Accessorio Direito:Accessorio Esquerdo:Cancelar")) {
+	case 1:
+		.@part = EQI_GARMENT;
+		setarray .@equip_required[0],480020,480021;
+		break;
+	case 2:
+		.@part = EQI_ARMOR;
+		setarray .@equip_required[0],450127,450128;
+		break;
+	case 3:
+		.@part = EQI_SHOES;
+		setarray .@equip_required[0],470022,470023;
+		break;
+	case 4:
+		.@part = EQI_ACC_R;
+		setarray .@equip_required[0],490024,490026;
+		break;
+	case 5:
+		.@part = EQI_ACC_L;
+		setarray .@equip_required[0],490025,490027;
+		break;
+	default:
+		close;
+	}
+
+	.@equip_id = getequipid(.@part);
+	.@equip_name$ = getequipname(.@part);
+	.@refine = getequiprefinerycnt(.@part);
+	for (.@i = 0; .@i < 4; ++.@i)
+		.@card[.@i] = getequipcardid(.@part,.@i);
+
+	mes "[Operador OS]";
+	mes "Selecione o grau do modulo que deseja inserir.";
+	next;
+	switch(select("Cancelar:Normal:Rare:Unique:Legendary:Epic 1:Epic 2:Epic 3")) {
+	case 1:
+		close;
+	case 2:
+		setarray .@module_etc[0],1000105,1000106,1000107,1000108,1000109,1000110,1000111,1000112;
+		break;
+	case 3:
+		setarray .@module_etc[0],1000113,1000114,1000115,1000116,1000117,1000118,1000119,1000120,1000121,1000122,1000123,1000124,1000125,1000126,1000127;
+		break;
+	case 4:
+		setarray .@module_etc[0],1000128,1000129,1000130,1000131,1000132,1000133,1000134,1000135,1000136,1000137,1000138,1000139,1000140,1000141,1000142,1000143,1000207,1000208;
+		break;
+	case 5:
+		setarray .@module_etc[0],1000144,1000145,1000146,1000147,1000148,1000149;
+		break;
+	case 6:
+		setarray .@module_etc[0],1000152,1000153,1000154,1000155,1000156,1000157,1000158,1000159,1000160,1000161,1000162,1000163,1000164,1000165,1000166,1000167,1000168;
+		break;
+	case 7:
+		setarray .@module_etc[0],1000169,1000170,1000171,1000172,1000173,1000174,1000175,1000176,1000177,1000178,1000179,1000180,1000181,1000182,1000183,1000184,1000185;
+		break;
+	case 8:
+		setarray .@module_etc[0],1000186,1000187,1000188,1000189,1000190,1000191,1000192,1000193,1000194,1000195,1000196,1000197,1000198,1000199,1000200,1000201,1000202;
+		break;
+	}
+
+	.@size = getarraysize(.@module_etc);
+	.@menu$ = "Cancelar:";
+	for (.@i = 0; .@i < .@size; ++.@i) {
+		if (countitem(.@module_etc[.@i]) < 1)
+			.@menu$ += "^808080" + getitemname(.@module_etc[.@i]) + " (0)^000000:";
+		else
+			.@menu$ += getitemname(.@module_etc[.@i]) + " (" + countitem(.@module_etc[.@i]) + "):";
+	}
+	.@s = select(.@menu$) - 2;
+	if (.@s < 0)
+		close;
+	.@module_id = .@module_etc[.@s];
+
+	if (countitem(.@module_id) < 1) {
+		mes "[Operador OS]";
+		mes "Voce precisa ter o modulo escolhido no inventario.";
+		close;
+	}
+	if (.@equip_required[0] != .@equip_id && .@equip_required[1] != .@equip_id) {
+		mes "[Operador OS]";
+		mes "Equipe primeiro o equipamento Automatic correto para esse slot.";
+		close;
+	}
+	if (.@card[1] > 0) {
+		mes "[Operador OS]";
+		mes "Esse equipamento Automatic ja esta com a capacidade maxima de modulos.";
+		close;
+	}
+	if (.@module_id < 1000105 || .@module_id == 1000150 || .@module_id == 1000151 || (.@module_id >= 1000203 && .@module_id != 1000207 && .@module_id != 1000208)) {
+		mes "[Operador OS]";
+		mes "O modulo selecionado nao e valido para esse sistema.";
+		close;
+	}
+
+	switch(.@part) {
+	case EQI_GARMENT:
+		setarray .@module_etc_data[0],1000105,3,1000106,3,1000125,2,1000126,2,1000127,2,1000135,1,1000142,1,1000208,1;
+		break;
+	case EQI_ARMOR:
+		setarray .@module_etc_data[0],1000105,3,1000106,3,1000122,2,1000123,2,1000124,2,1000128,1,1000129,1,1000130,1,1000131,1,1000132,1,1000133,1,1000207,1,1000140,1;
+		.@size = getarraysize(.@module_etc_data);
+		for (.@i = 1000152; .@i < 1000203; .@i++) {
+			setarray .@module_etc_data[.@size], .@i, 2;
+			.@size += 2;
+		}
+		break;
+	case EQI_SHOES:
+		setarray .@module_etc_data[0],1000105,3,1000106,3,1000119,2,1000120,2,1000121,2,1000134,1,1000141,1,1000144,1,1000145,1,1000146,1,1000147,1,1000148,1,1000149,1;
+		break;
+	case EQI_ACC_L:
+	case EQI_ACC_R:
+		setarray .@module_etc_data[0],1000107,3,1000108,3,1000109,3,1000110,3,1000111,3,1000112,3,1000113,2,1000114,2,1000115,1,1000116,1,1000117,1,1000118,1,1000136,1,1000137,1,1000138,1,1000139,1,1000143,1;
+		break;
+	}
+
+	.@data_index = inarray(.@module_etc_data, .@module_id);
+	if (.@data_index == -1) {
+		mes "[Operador OS]";
+		mes "Esse modulo nao pode ser inserido nesse equipamento.";
+		close;
+	}
+	.@max_module = .@module_etc_data[.@data_index + 1];
+
+	for (.@i = 1000105; .@i < 1000203; ++.@i) {
+		if (.@i == 1000150 || .@i == 1000151)
+			continue;
+		.@auto_module[.@i] = 310082 + .@size_auto_module;
+		.@size_auto_module++;
+	}
+	.@auto_module[1000207] = 310178;
+	.@auto_module[1000208] = 310179;
+	.@enchant_id = .@auto_module[.@module_id];
+
+	if (.@enchant_id == 0) {
+		mes "[Operador OS]";
+		mes "Nao foi possivel converter o modulo selecionado em encantamento.";
+		close;
+	}
+	if (countinarray(.@card[0], .@enchant_id) >= .@max_module) {
+		mes "[Operador OS]";
+		mes "Esse equipamento ja atingiu o limite desse mesmo modulo.";
+		close;
+	}
+
+	mes "[Operador OS]";
+	mes "Vou inserir " + getitemname(.@module_id) + " em " + .@equip_name$ + ".";
+	mes "Esse processo consome o modulo e nao pode ser desfeito por este menu.";
+	next;
+	if (select("Confirmar insercao:Cancelar") == 2)
+		close;
+
+	delitem .@module_id,1;
+	if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipRefineHack", .@part, .@refine) || callfunc("F_IsEquipCardHack", .@part, .@card[0], .@card[1], .@card[2], .@card[3]))
+		end;
+
+	for (.@i = 3; .@i > 0; .@i--) {
+		if (.@card[.@i] == 0) {
+			.@card[.@i] = .@enchant_id;
+			break;
+		}
+	}
+	delequip .@part;
+	getitem2 .@equip_id,1,1,.@refine,0,.@card[0],.@card[1],.@card[2],.@card[3];
+	mes "[Operador OS]";
+	mes "Modulo inserido com sucesso.";
+	close;
+
+L_AutomaticInfo:
+	mes "[Operador OS]";
+	mes "O sistema Automatic usa equipamentos da linha Illusion, Barmil Ticket e modulos.";
+	next;
+	switch(select("Como adquirir equipamentos:Como adquirir modulos:Como inserir modulo:Requisitos e limites:Voltar")) {
+	case 1:
+		mes "[Operador OS]";
+		mes "1. Pegue o equipamento Illusion correspondente.";
+		mes "2. Refine para +9 no caso de Armor, Engine e Leg.";
+		mes "3. Troque por Automatic usando Barmil Ticket.";
+		mes "As trocas estao nos menus de Equipamentos Automatic e Acessorios Automatic.";
+		next;
+		mes "[Operador OS]";
+		mes "As Illusion Armors tambem estao reunidas aqui no menu Armadura Ilusional.";
+		close;
+	case 2:
+		mes "[Operador OS]";
+		mes "Todos os modulos da Automatic Module Box podem ser comprados individualmente por 200 Barmil Ticket cada.";
+		mes "Modulo Epic: compre individualmente por 300 Magical Soapstone cada.";
+		next;
+		mes "[Operador OS]";
+		mes "Barmil Ticket vem principalmente do episodio 17.2 e das instancias Hidden Garden e Lost Farm.";
+		mes "Magical Soapstone sai principalmente do Hidden Garden Hard e do Epic Module Box.";
+		close;
+	case 3:
+		mes "[Operador OS]";
+		mes "Equipe o item Automatic na posicao correta.";
+		mes "Tenha o modulo no inventario.";
+		mes "Entre no menu Inserir Modulo e escolha o slot do equipamento.";
+		close;
+	case 4:
+		mes "[Operador OS]";
+		mes "Armor, Engine Wing, Leg e Accessories aceitam listas diferentes de modulos.";
+		mes "O sistema tambem limita quantas vezes o mesmo modulo pode repetir no mesmo equipamento.";
+		next;
+		mes "[Operador OS]";
+		mes "Armor aceita modulos Epic.";
+		mes "Shoes aceitam ate Legendary.";
+		mes "Accessories e Engine seguem as listas proprias do sistema oficial.";
+		close;
+	default:
+		close;
+	}
 }

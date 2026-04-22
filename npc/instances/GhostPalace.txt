@@ -974,16 +974,11 @@ OnTouch_:
 		getitem 6672,2;// Gray Shard
 	}
 	if (#GhostPalace_STATUS == 2) {
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Palacio das Magoas");
-			'reward_announced = 1;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Palacio das Magoas", "#GhostPalace_STATUS");
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
 		}
-		getitem 9608,10;
-		getitem 9198,2;
-		set #GhostPalace_STATUS, 3;
 	}
 	warp "SavePoint",0,0;
 	end;
@@ -1009,4 +1004,5 @@ moc_para01,50,36,4	script	Rei do Palacio das Magoas#exchange	4_M_RUSKING,{
 	callshop "barter_eden_ghostpalace";
 	end;
 }
+
 

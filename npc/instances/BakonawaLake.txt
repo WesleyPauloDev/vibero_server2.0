@@ -488,18 +488,11 @@ OnMobSpawn:
 
 	// Premiações do Servidor
 	if (#BakonawaLake_STATUS == 2) {
-		// add_reputation_points(1, 10);
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		callfunc("F_InstanceFinishAnnounce", "Lago Bakonawa");
-		debugmes "#inst120_name$" + #inst120_name$;			
-		if (#inst120_name$ == "Lago Bakonawa") {
-			set #inst120_status,2;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Lago Bakonawa", "#BakonawaLake_STATUS", 10, 2, "#inst120_name$", "#inst120_status");
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
 		}
-		getitem 9608,10;	// Moeda de Instância
-		getitem 9198,2;
-		set #BakonawaLake_STATUS, 3;
 	}
 	
 	disable_items;
@@ -583,3 +576,4 @@ OnStart:
 	enablenpc instance_npcname("Taho#Fail");
 	end;
 }
+

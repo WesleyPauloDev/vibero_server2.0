@@ -3,27 +3,33 @@ OnTalk:
 	mes "[Artesão de Hugin]";
 	mes "Escolha o que deseja fazer:";
 	next;
-	switch(select("Abrir Loja GlastHeim:Encantar Botas Temporais:Slotar Botas Temporais:Sair")) {
+	switch(select("Abrir Loja GlastHeim:Mantos Temporais:Encantar Botas Temporais:Slotar Botas Temporais:Sair")) {
 
 		case 1:
 			close2;
-			// Chama a loja configurada (substitua o nome abaixo pela sua loja real)
+			// Abre a loja de botas temporais.
 			callshop "boots_temporal_barter",1;
 			end;
 
 		case 2:
 			close2;
-			// Executa o script do encantador (como se falasse com ele)
-			doevent "Mago de Hugin#pa0829::OnTalk";
+			// Abre a loja de mantos temporais.
+			callshop "temporal_manteau_barter",1;
 			end;
 
 		case 3:
 			close2;
-			// Executa o script do NPC que faz slot (Hugins Craftsman)
-			doevent "Hugins Craftsman#pa0829::OnTalk";
+			// Executa o script do encantador.
+			doevent "Mago de Hugin#pa0829::OnTalk";
 			end;
 
 		case 4:
+			close2;
+			// Executa o script do NPC que faz slot.
+			doevent "Hugins Craftsman#pa0829::OnTalk";
+			end;
+
+		case 5:
 			mes "[Artesão de Hugin]";
 			mes "Volte sempre!";
 			close;

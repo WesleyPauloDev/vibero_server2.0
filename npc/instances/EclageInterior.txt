@@ -108,7 +108,7 @@ ecl_hub01,130,15,0	script	Esta bem fechado.	844,{
 				mes "Esta bem fechado.";
 				close;
 			case IE_OK:
-				mapannounce "ecl_hub01",getpartyname(.@party_id) + " Party leader " + strcharinfo(0) + " is entering " + .@md_name$,bc_map,"0x00ff99";
+				mapannounce "ecl_hub01","O lider da party " + getpartyname(.@party_id) + ", " + strcharinfo(0) + ", esta entrando em " + .@md_name$ + ".",bc_map,"0x00ff99";
 				end;
 			default:
 			}
@@ -268,10 +268,10 @@ OnTouch:
 	disablenpc instance_npcname("Criatura Suspeita#2");
 	disablenpc instance_npcname("Criatura Suspeita#3");
 	disablenpc instance_npcname("Criatura Suspeita#4");
-	monster .@eclmap$,51,64,"Suspicious Creature",2375,1,.@eventname$+"::OnMyMobDead";
-	monster .@eclmap$,43,67,"Suspicious Creature",2375,1,.@eventname$+"::OnMyMobDead";
-	monster .@eclmap$,55,80,"Suspicious Creature",2375,1,.@eventname$+"::OnMyMobDead";
-	monster .@eclmap$,60,75,"Suspicious Creature",2375,1,.@eventname$+"::OnMyMobDead";
+	monster .@eclmap$,51,64,"Criatura Suspeita",2375,1,.@eventname$+"::OnMyMobDead";
+	monster .@eclmap$,43,67,"Criatura Suspeita",2375,1,.@eventname$+"::OnMyMobDead";
+	monster .@eclmap$,55,80,"Criatura Suspeita",2375,1,.@eventname$+"::OnMyMobDead";
+	monster .@eclmap$,60,75,"Criatura Suspeita",2375,1,.@eventname$+"::OnMyMobDead";
 	'mob_summoned = 1;
 	end;
 
@@ -374,7 +374,7 @@ OnMyMobDead:
 	
 1@ecl,148,29,3	script	Loki#ecl01	512,{
 	mes "[Loki]";
-	mes "It seems like this guy next to me has a lot more to say than I do.";
+	mes "Parece que esse sujeito ao meu lado tem muito mais a dizer do que eu.";
 	mes "Por que voce nao explica tudo para ele primeiro?";
 	close;
 }	
@@ -401,7 +401,7 @@ OnMyMobDead:
 	cutin "",255;
 	mes "[Loki]";
 	mes "Foi por causa disto.";
-	mes "" + strcharinfo(0) + "It was inside the body of -";
+	mes "" + strcharinfo(0) + "Isso estava dentro do corpo de um deles.";
 	mes "Esse e o tamanho do poder de Shenime.";
 	next;
 	mes "Na palma de Loki havia um pequeno espinho fino e seco.";
@@ -494,16 +494,15 @@ OnMyMobDead:
 	if (checkquest(7450, PLAYTIME) > -1 || checkquest(7450, HUNTING) > -1)
 		changequest 7450,7451;
 	if (#EclageInterior_STATUS == 2) {
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		callfunc("F_InstanceFinishAnnounce", "Interior de Eclage");
-		getitem 9608,10;
-		getitem 9198,2;
-		set #EclageInterior_STATUS, 3;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Interior de Eclage", "#EclageInterior_STATUS");
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
+		}
 	}
 	close2;
 	cutin "",255;
 	warp "SavePoint",0,0;
 	end;
 }
+

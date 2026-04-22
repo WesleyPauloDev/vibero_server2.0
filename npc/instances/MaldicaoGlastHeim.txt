@@ -2082,18 +2082,20 @@ OnTimer10000:
 	if ('step != 9)
 		end;
 	.@cid = getcharid(3);
-	.@quest_reward = (checkquest(12319,HUNTING) == 2 || 'final_reward_ready);
+	.@already_claimed = 'final_reward_claimed[.@cid];
+	.@quest_reward = ((checkquest(12319,HUNTING) == 2 || 'final_reward_ready) && !.@already_claimed);
 	.@status_name$ = callfunc("F_OGH_StatusVar$");
 	.@is_hard = callfunc("F_OGH_IsHardMode");
-	.@give_custom_reward = (getd(.@status_name$) == 2);
+	.@give_custom_reward = (getd(.@status_name$) == 2 && !.@already_claimed);
 	if (.@quest_reward) {
 		.@crystal_amt = callfunc("F_OGH_FinalCrystalReward");
 		.@spell_amt = callfunc("F_OGH_FinalSpellReward");
-		if (.@give_custom_reward && checkweight(6607,.@crystal_amt, 6608,.@spell_amt, 9608,10, 9198,2) == 0) {
+		.@polluted_amt = callfunc("F_OGH_FinalPollutedReward");
+		if (.@give_custom_reward && checkweight(6607,.@crystal_amt, 6608,.@spell_amt, 6755,.@polluted_amt, 9608,10, 9198,2) == 0) {
 			mes "^ff0000Parece que voce possui muitos tipos ou peso de itens. Organize seu inventario.^000000";
 			close;
 		}
-		if (.@give_custom_reward == 0 && checkweight(6607,.@crystal_amt, 6608,.@spell_amt) == 0) {
+		if (.@give_custom_reward == 0 && checkweight(6607,.@crystal_amt, 6608,.@spell_amt, 6755,.@polluted_amt) == 0) {
 			mes "^ff0000Parece que voce possui muitos tipos ou peso de itens. Organize seu inventario.^000000";
 			close;
 		}
@@ -2122,11 +2124,15 @@ OnTimer10000:
 			completequest 12321;
 			getitem 6607,.@crystal_amt;// Temporal_Crystal
 			getitem 6608,.@spell_amt;// Coagulated_Spell
+			if (.@polluted_amt > 0)
+				getitem 6755,.@polluted_amt;// Polluted_Spell
 			getexp 350000,350000;
 		}
 		else {
 			getitem 6607,.@crystal_amt;// Temporal_Crystal
 			getitem 6608,.@spell_amt;// Coagulated_Spell
+			if (.@polluted_amt > 0)
+				getitem 6755,.@polluted_amt;// Polluted_Spell
 		}
 		'final_reward_claimed[.@cid] = 1;
 	}
@@ -2135,16 +2141,7 @@ OnTimer10000:
 		close;
 	}
 	if (.@give_custom_reward) {
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		callfunc("F_InstanceFinishAnnounce", callfunc("F_OGH_FinalAnnounceName$"));
-		if (!.@is_hard && #inst60_name$ == "Maldicao de Glast Heim") {
-			set #inst60_status,2;
-		}
-		getitem 9608,10;	// Moeda de Instencia
-		getitem 9198,2;
-		setd(.@status_name$, 3);
+		.@finish_result = callfunc("F_InstanceFinishBase", callfunc("F_OGH_FinalAnnounceName$"), .@status_name$, 10, 2, "#inst60_name$", "#inst60_status", 1, 10, 110002, 3000, 3, 0, "Maldicao de Glast Heim");
 		'final_reward_claimed[.@cid] = 1;
 	}
 	if (.@quest_reward) {
@@ -2345,3 +2342,4 @@ OnInstanceInit:
 	disablenpc instance_npcname("#cut01");
 	end;
 }
+

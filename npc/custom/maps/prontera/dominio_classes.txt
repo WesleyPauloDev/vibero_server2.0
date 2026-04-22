@@ -55,6 +55,12 @@ OnTalk:
 			if (BaseClass == Job_Summoner)
 				.@class_id = Job_Summoner;
 
+			// Normaliza variantes masculino/feminino para um unico ID canonico.
+			switch (.@class_id) {
+				case 4076: .@class_id = 4075; break; // Wanderer -> Minstrel/Trovador
+				case 4212: .@class_id = 4211; break; // Oboro -> Kagerou
+			}
+
 			.@required_job = (.@class_id == Job_Summoner ? 60 : 70);
 			if (BaseLevel < 175 || JobLevel < .@required_job) {
 				mes "[Dominio das Classes]";
@@ -62,41 +68,10 @@ OnTalk:
 				close;
 			}
 
-			.@class_id = Class;
-			if (BaseClass == Job_Summoner)
-				.@class_id = Job_Summoner;
-
 			if (getd("#class_mastered_" + .@class_id)) {
 				mes "[Dominio das Classes]";
 				mes "Voce ja alcancou o dominio desta classe.";
 				close;
-			}
-
-			// Tabela de equivalencia entre classes masculino/feminino
-			switch (.@class_id) {
-				// Minstrel <-> Wanderer
-				case 4075: // Minstrel
-					setd("#class_mastered_4076", 1);
-					break;
-				case 4076: // Wanderer
-					setd("#class_mastered_4075", 1);
-					break;
-
-				// Ninja <-> Kunoichi (Kagerou / Oboro)
-				case 4211: // Kagerou
-					setd("#class_mastered_4212", 1);
-					break;
-				case 4212: // Oboro
-					setd("#class_mastered_4211", 1);
-					break;
-			}
-
-			switch (.@class_id) {
-				// Minstrel/Wanderer -> 4075
-				case 4076: .@class_id = 4075; break;
-
-				// Kagerou/Oboro -> 4211
-				case 4212: .@class_id = 4211; break;
 			}
 
 			// Verifica se a classe atual e elegivel
@@ -112,6 +87,14 @@ OnTalk:
 			}
 
 			setd("#class_mastered_" + .@class_id, 1);
+			switch (.@class_id) {
+				case 4075:
+					setd("#class_mastered_4076", 1);
+					break;
+				case 4211:
+					setd("#class_mastered_4212", 1);
+					break;
+			}
 			#classes_mastered++;
 			specialeffect2 EF_JOBLVUP50;
 

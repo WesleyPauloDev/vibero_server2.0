@@ -535,19 +535,15 @@ OnTimer10000:
 		close;
 	}
 	if (#OSOccupation_STATUS == 2) {
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Operacao OS");
-			'reward_announced = 1;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Operacao OS", "#OSOccupation_STATUS", 10, 2, "#inst175_name$", "#inst175_status");
+		if (.@finish_result == -1) {
+			mes "[Oficial da Operacao]";
+			mes "Voce esta com peso demais para receber as recompensas.";
+			mes "Libere espaco e fale comigo novamente.";
+			close;
 		}
-		if (#inst175_name$ == "Operacao OS") {
-			set #inst175_status,2;
-		}
-		getitem 9608,10;
-		getitem 9198,2;
-		set #OSOccupation_STATUS, 3;
+		getitem 25669,5;
+		getitem 25723,5;
 	}
 	warp "SavePoint",0,0;
 	end;
@@ -781,3 +777,4 @@ OnPoisonKill:
 1@os_a,38,354,1	duplicate(dummy_npc)	#ocp_rebel_23	4_F_GUNSLINGER3
 1@os_a,38,345,1	duplicate(dummy_npc)	#ocp_rebel_24	4_F_GUNSLINGER3
 1@os_a,32,357,7	duplicate(dummy_npc)	#ocp_rebel_25	4_M_REBELLION3
+

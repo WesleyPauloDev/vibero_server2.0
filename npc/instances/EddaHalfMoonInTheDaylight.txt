@@ -15,12 +15,12 @@
 
 OnStartInstance:
 		callfunc("F_InstanceEntry",
-			"Half Moon In The Daylight",
+			"Edda do Quarto Crescente",
 			"Niren",
 			"edda_hmoon",
 			"EddaHalfMoon",
 			130,
-			"Quarto Crescente"
+			"Edda do Quarto Crescente"
 		);
 	end;
 }
@@ -3304,16 +3304,11 @@ OnTouch:
 		getitem 25088,2; //Dream_Piece
 	}
 	if (#EddaHalfMoon_STATUS == 2) {
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Quarto Crescente");
-			'reward_announced = 1;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Edda do Quarto Crescente", "#EddaHalfMoon_STATUS", 30, 3);
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
 		}
-		getitem 9608,30;
-		getitem 9198,3;
-		set #EddaHalfMoon_STATUS, 3;
 	}
 	if ('progress == 18)
 		'progress = 19;
@@ -3404,3 +3399,4 @@ OnMyMobDead:
 		end;
 	}
 }
+

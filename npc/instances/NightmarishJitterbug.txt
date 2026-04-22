@@ -3854,13 +3854,11 @@ OnStop:
 	npctalk "Roter: Silêncio! Já chega por hoje. Todos dispensados! Está encerrada a aventura da Guilda Super Crítica do Roter!", .@roter$;
 	completequest 13181;
 	if (#NightmarishJitterbug_STATUS == 2) {
-		callfunc("F_AddRep", 1, 20, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		callfunc("F_InstanceFinishAnnounce", "Pesadelo Musical");
-		getitem 9608,20;	// Moeda de Instância
-		getitem 9198,2;
-		set #NightmarishJitterbug_STATUS, 3;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Pesadelo Musical", "#NightmarishJitterbug_STATUS", 20, 2);
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
+		}
 	}
 	if ('room == 25) {
 		'room = 26;
@@ -4633,3 +4631,4 @@ OnInstanceInit:
 	disablenpc instance_npcname("Mingmin#05");
 	end;
 }
+

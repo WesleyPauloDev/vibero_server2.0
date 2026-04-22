@@ -212,17 +212,11 @@
 
 	// Premiações do Servidor
 	if (#WLCR_STATUS == 2) {
-		// add_reputation_points(1, 10);
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		callfunc("F_InstanceFinishAnnounce", "Laboratório Werner");
-		if (#inst120_name$ == "Laboratório Werner") {
-			set #inst120_status,2;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Laboratório Werner", "#WLCR_STATUS", 10, 2, "#inst120_name$", "#inst120_status");
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
 		}
-		getitem 9608,10;	// Moeda de Instância
-		getitem 9198,2;
-		set #WLCR_STATUS, 3;
 	}
 
 	// Teleporta o jogador para fora
@@ -1122,4 +1116,5 @@ OnMobDead:
 	}
 	end;
 }
+
 

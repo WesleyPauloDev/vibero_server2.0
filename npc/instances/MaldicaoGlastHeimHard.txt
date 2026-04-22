@@ -17,8 +17,7 @@ function	script	F_OGH_IsHardMode	{
 }
 
 function	script	F_OGH_StatusVar$	{
-	if (callfunc("F_OGH_IsHardMode"))
-		return "#OldGlastHeimHard_STATUS";
+	// Normal e Hard compartilham a mesma trava diaria.
 	return "#OldGlastHeim_STATUS";
 }
 
@@ -50,6 +49,12 @@ function	script	F_OGH_FinalSpellReward	{
 	if (callfunc("F_OGH_IsHardMode"))
 		return 20;
 	return 10;
+}
+
+function	script	F_OGH_FinalPollutedReward	{
+	if (callfunc("F_OGH_IsHardMode"))
+		return 2;
+	return 0;
 }
 
 function	script	F_OGH_ApplyHardStats	{
@@ -144,8 +149,8 @@ function	script	F_OGH_HardManaDrop	{
 	OnStartInstance:
 		.@db_name$ = "Maldicao de Glast Heim";
 		.@display_name$ = "Maldicao de Glast Heim Hard";
-		.@cooldown_name$ = "#cooldown_glastHeimHard";
-		.@status_name$ = "#OldGlastHeimHard_STATUS";
+		.@cooldown_name$ = "#cooldown_glastHeim";
+		.@status_name$ = "#OldGlastHeim_STATUS";
 		.@status_var$ = "OldGlastHeimHard";
 		if (!isloggedin(getcharid(3)))
 			end;

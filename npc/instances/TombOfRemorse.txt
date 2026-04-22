@@ -1154,14 +1154,6 @@ OnBossSkill:
 	'pillar = 3;
 	for(.@i = 0; .@i < 3; .@i++)
 		enablenpc instance_npcname("#rms_stone_" + .@i);
-	monster 'map$,195,61,"",20562,1,instance_npcname(strnpcinfo(0)) + "::OnSkillDead";
-	'gid_0 = $@mobid[0];
-	monster 'map$,228,61,"",20562,1,instance_npcname(strnpcinfo(0)) + "::OnSkillDead";
-	'gid_1 = $@mobid[0];
-	monster 'map$,212,78,"",20562,1,instance_npcname(strnpcinfo(0)) + "::OnSkillDead";
-	'gid_2 = $@mobid[0];
-	for(.@i = 0; .@i < 3; .@i++)
-		setunitdata getd("'gid_" + .@i),UMOB_DMGIMMUNE,true;
 	donpcevent instance_npcname("#rms_boss") + "::OnEnableShield";
 OnSkillDead:
 end;
@@ -1185,7 +1177,6 @@ OnSakrayDead:
 	stopnpctimer instance_npcname(strnpcinfo(0));
 	.@sak$ = instance_npcname("Sakray#rms_0");
 	.@map$ = 'map$;
-	killmonster .@map$,instance_npcname(strnpcinfo(0)) + "::OnSkillDead";
 	npctalk "Espadachim Magico Sakray : Este lugar... Eu jurei que nunca voltaria aqui...",.@sak$;
 	sleep 2000;
 	npctalk "Espadachim Magico Sakray : Eu nao sabia que tinha ficado assim... Eu descobri agora e vim correndo para ca.",.@sak$;
@@ -1266,16 +1257,11 @@ end;
 			mes "^FF0000Voce esta com muitos itens ou peso demais. Organize seu inventario.^000000";
 			close;
 		}
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Tumba do Remorso");
-			'reward_announced = 1;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Tumba do Remorso", "#TombRemorse_STATUS", 30, 3);
+		if (.@finish_result == -1) {
+			mes "^FF0000Voce esta com muitos itens ou peso demais. Organize seu inventario.^000000";
+			close;
 		}
-		getitem 9608,30;
-		getitem 9198,3;
-		set #TombRemorse_STATUS, 3;
 	}
 	mes "[ Marquis of Remorse ]";
 	mes "Eu estava esperando por voce, como prometi.";
@@ -1403,3 +1389,4 @@ end;
 	}
 	end;
 }
+

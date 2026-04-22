@@ -10431,6 +10431,34 @@ BUILDIN_FUNC(getskilllv)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/// Returns the current cooldown of a player skill after item bonuses.
+///
+/// getskillcooldown(<skill id>{,<skill level>}) -> <cooldown in milliseconds>
+/// getskillcooldown("<skill name>"{,<skill level>}) -> <cooldown in milliseconds>
+BUILDIN_FUNC(getskillcooldown)
+{
+	int32 id;
+	int32 level;
+	TBL_PC* sd;
+
+	if( !script_rid2sd(sd) )
+		return SCRIPT_CMD_SUCCESS;// no player attached, report source
+
+	id = ( script_isstring(st, 2) ? skill_name2id(script_getstr(st,2)) : script_getnum(st,2) );
+	if( id <= 0 || !skill_get_index(id) ){
+		script_pushint(st, -1);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	level = script_hasdata(st, 3) ? script_getnum(st,3) : pc_checkskill(sd,id);
+	if( level < 1 )
+		level = 1;
+
+	script_pushint(st, pc_get_skillcooldown(sd, id, level));
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
 /// Returns the level of the guild skill.
 ///
 /// getgdskilllv(<guild id>,<skill id>) -> <level>
@@ -28276,6 +28304,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF2(skill,"addtoskill","vi?"), // [Valaris]
 	BUILDIN_DEF(guildskill,"vi"),
 	BUILDIN_DEF(getskilllv,"v"),
+	BUILDIN_DEF(getskillcooldown,"v?"),
 	BUILDIN_DEF(getgdskilllv,"iv"),
 	BUILDIN_DEF(basicskillcheck,""),
 	BUILDIN_DEF(getgmlevel,"?"),

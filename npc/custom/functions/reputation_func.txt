@@ -63,3 +63,82 @@ function	script	F_SyncRepAchievement	{
 
 	return;
 }
+
+function	script	F_PartyNearbyKillReward	{
+
+	// 0: map$               mapa valido para a recompensa
+	// 1: item_id            item/moeda
+	// 2: item_rate          chance em base 10000
+	// 3: counter_var$       nome da variavel de contador por personagem
+	// 4: threshold          qtd de kills para premio de reputacao
+	// 5: rep_id             id da reputacao
+	// 6: rep_amount         pontos por ciclo
+	// 7: ach_id             achievement da reputacao
+	// 8: rep_cap            limite maximo
+	// 9: rep_message$       mensagem ao ganhar reputacao
+	// 10: radius            distancia maxima entre killer e membro
+
+	.@map$ = getarg(0);
+	.@item_id = getarg(1, 0);
+	.@item_rate = getarg(2, 0);
+	.@counter_var$ = getarg(3, "");
+	.@threshold = getarg(4, 5);
+	.@rep_id = getarg(5, 0);
+	.@rep_amount = getarg(6, 0);
+	.@ach_id = getarg(7, 0);
+	.@rep_cap = getarg(8, 0);
+	.@rep_message$ = getarg(9, "");
+	.@radius = getarg(10, 30);
+
+	.@killer_aid = getcharid(3);
+	.@party_id = getcharid(1);
+	getmapxy(.@killer_map$,.@killer_x,.@killer_y,BL_PC);
+
+	if (.@killer_map$ != .@map$)
+		return 0;
+
+	if (.@party_id < 1) {
+		if (.@counter_var$ != "")
+			setd(.@counter_var$, getd(.@counter_var$) + 1);
+		if (.@counter_var$ != "" && getd(.@counter_var$) >= .@threshold) {
+			setd(.@counter_var$, 0);
+			if (.@rep_id > 0 && .@rep_amount > 0)
+				callfunc("F_AddRep", .@rep_id, .@rep_amount, .@ach_id, .@rep_cap);
+			if (.@rep_message$ != "")
+				dispbottom .@rep_message$;
+		}
+		if (.@item_id > 0 && .@item_rate > 0)
+			callfunc("CustomMapDrop", .@map$, .@item_id, .@item_rate);
+		return 1;
+	}
+
+	getpartymember(.@party_id,1);
+	getpartymember(.@party_id,2);
+	for (.@i = 0; .@i < $@partymembercount; .@i++) {
+		if (!isloggedin($@partymemberaid[.@i], $@partymembercid[.@i]))
+			continue;
+		if (!attachrid($@partymemberaid[.@i]))
+			continue;
+
+		getmapxy(.@member_map$,.@member_x,.@member_y,BL_PC);
+		if (.@member_map$ != .@map$)
+			continue;
+		if (distance(.@killer_x,.@killer_y,.@member_x,.@member_y) > .@radius)
+			continue;
+
+		if (.@counter_var$ != "")
+			setd(.@counter_var$, getd(.@counter_var$) + 1);
+		if (.@counter_var$ != "" && getd(.@counter_var$) >= .@threshold) {
+			setd(.@counter_var$, 0);
+			if (.@rep_id > 0 && .@rep_amount > 0)
+				callfunc("F_AddRep", .@rep_id, .@rep_amount, .@ach_id, .@rep_cap);
+			if (.@rep_message$ != "")
+				dispbottom .@rep_message$;
+		}
+		if (.@item_id > 0 && .@item_rate > 0)
+			callfunc("CustomMapDrop", .@map$, .@item_id, .@item_rate);
+	}
+
+	attachrid(.@killer_aid);
+	return 1;
+}

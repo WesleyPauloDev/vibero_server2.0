@@ -2037,16 +2037,11 @@ OnInstanceInit:
 	mes "Seu tempo aqui terminou. Você pode olhar ao redor ou ir embora. O que deseja fazer?";
 	next;
 	if (#FacewormsNest_STATUS == 2) {
-		callfunc("F_AddRep", 1, 20, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		callfunc("F_InstanceFinishAnnounce", "Covil da Rainha Verme");
-		if (#inst175_name$ == "Faceworm's Nest") {
-			set #inst175_status,2;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Covil da Rainha Verme", "#FacewormsNest_STATUS", 20, 2, "#inst175_name$", "#inst175_status", 1, 20, 110002, 3000, 3, 0, "Faceworm's Nest");
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
 		}
-		getitem 9608,20;	// Moeda de Instância
-		getitem 9198,2;
-		set #FacewormsNest_STATUS, 3;
 	}
 	if (select("Parar:Retornar para o Ponto de Retorno") == 2)
 		warp "SavePoint",0,0;
@@ -2871,5 +2866,7 @@ OnInstanceInit:
 	monster 'map_name$,0,0,"Savage",1166,25;
 	end;
 }
+
+
 
 

@@ -1075,30 +1075,20 @@ OnTouchNPC:
 		// Premia??es do Servidor
 		if ('mode == 1) {
 			if (#WATERGARDEN_HARD_STATUS == 2) {
-				callfunc("F_AddRep", 1, 20, 110002, 3000);
-				callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-				callfunc("F_InstanceFinishAnnounce", "Water Garden Hard");
-				if (#inst175_name$ == "Jardim Aquatico") {
-					set #inst175_status,2;
+				.@finish_result = callfunc("F_InstanceFinishBase", "Water Garden Hard", "#WATERGARDEN_HARD_STATUS", 20, 2, "#inst175_name$", "#inst175_status", 1, 20, 110002, 3000, 3, 0, "Jardim Aquatico");
+				if (.@finish_result == -1) {
+					mes "Voce esta com peso demais para receber as recompensas.";
+					close;
 				}
-				getitem 9608,20;	// Moeda de Inst.ncia
-				getitem 9198,2;
-				set #WATERGARDEN_HARD_STATUS, 3;
 			}
 		}
 		else {
 			if (#WATERGARDEN_STATUS == 2) {
-				callfunc("F_AddRep", 1, 10, 110002, 3000);
-				callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-				callfunc("F_InstanceFinishAnnounce", "Jardim Aquatico");
-				if (#inst175_name$ == "Jardim Aquatico") {
-					set #inst175_status,2;
+				.@finish_result = callfunc("F_InstanceFinishBase", "Jardim Aquatico", "#WATERGARDEN_STATUS", 10, 2, "#inst175_name$", "#inst175_status");
+				if (.@finish_result == -1) {
+					mes "Voce esta com peso demais para receber as recompensas.";
+					close;
 				}
-				getitem 9608,10;	// Moeda de Inst.ncia
-				getitem 9198,2;
-				set #WATERGARDEN_STATUS, 3;
 			}
 		}
 		close2;
@@ -1109,3 +1099,5 @@ OnTouchNPC:
 OnTouch_:	// unknown effect
 	end;
 }
+
+

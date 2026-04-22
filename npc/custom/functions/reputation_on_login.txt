@@ -5,11 +5,23 @@ OnInit:
 	end;
 
 OnPCLoginEvent:
+	callsub S_UpdateBonus;
+	end;
+
+S_UpdateBonus:
+	if (!getattachedrid())
+		return;
+	if (exp_base_custom <= 0)
+		set exp_base_custom, 100;
+	if (drop_base < 0)
+		set drop_base, 0;
+
 	// Reborn por personagem
 	if (reborn_count >= 0 && !achievementexists(110008)) {
 		.@achievemente_reborn = reborn_count * 1000;
 		callfunc("F_AddRep", 7, .@achievemente_reborn, 110008, 5000);
 	}
+	// Se reborn estiver 0
 	.@reborn_count = reborn_count;
 	if (.@reborn_count <= 0 && get_reputation_points(7) > 0) {
 		.@reborn_count = get_reputation_points(7) / 1000;
@@ -25,19 +37,18 @@ OnPCLoginEvent:
 
 	set_reputation_points(7, .@reborn_count * 1000);
 
+	.@base_exp_bonus = exp_base_custom - 100;
+	if (.@base_exp_bonus < 0)
+		.@base_exp_bonus = 0;
+
 	if (.@reborn_count > 0) {
 		.@reborn_exp = .@reborn_count * 10;
 		.@reborn_drop = .@reborn_count * 20;
 
-		.@exp = (exp_base_custom * .@reborn_exp / 100) + 100;
-		set exp_final, exp_base_custom - .@exp;
+		set exp_final, .@base_exp_bonus - .@reborn_exp;
 		set drop_final, drop_base + .@reborn_drop;
 	} else {
-		if (exp_base_custom == 100) {
-			set exp_final, 0;
-		} else {
-			set exp_final, exp_base_custom - 100;
-		}
+		set exp_final, .@base_exp_bonus;
 		set drop_final, drop_base;
 	}
 
@@ -138,7 +149,15 @@ OnPCLoginEvent:
 	#allstats_final += .@reput_bio5_hard;
 	set rep_bonus_bio5_hard_allstats, .@reput_bio5_hard;
 
-	// set #reput_class_dominator, 0;
+	// Dominio de Classes:
+	// sincroniza a reputacao compartilhada com o total salvo em #classes_mastered.
+	// Isso corrige casos antigos em que o contador de classes ficou acima da reputacao.
+	.@class_rep_expected = #classes_mastered * 300;
+	if (.@class_rep_expected > 5000)
+		.@class_rep_expected = 5000;
+	if (.@class_rep_expected > get_reputation_points(8))
+		set_reputation_points(8, .@class_rep_expected);
+
 	callfunc("F_SyncRepAchievement", 8, 110009, 5000);
 	.@reput_class_dominator = (get_reputation_points(8) / 1000) * 20;
 	set #reput_class_dominator, get_reputation_points(8);
@@ -172,9 +191,10 @@ OnPCLoginEvent:
 
 	set_bonus_hpsp(getcharid(0), #hp_final, #sp_final);
 	set_bonus_allstats(getcharid(0), #allstats_final);
-	end;
+	return;
 
 OnAtcommand:
+	callsub S_UpdateBonus;
 	mes "[Bonus de Reputacao]";
 	mes "Votos: " + sprintf("%+d", rep_bonus_votes_allstats) + " AllStats";
 	mes "Reborn: " + sprintf("%+d", rep_bonus_reborn_drop) + "% Drop / " + sprintf("%+d", rep_bonus_reborn_exp) + "% XP";

@@ -5287,6 +5287,7 @@ void npc_parse_mob2(struct spawn_data* mob)
 	{
 		struct mob_data* md = mob_spawn_dataset(mob);
 		md->spawn = mob;
+		md->spawn_idx = i;
 		// Determine center cell for each mob in the spawn line
 		if (battle_config.randomize_center_cell) {
 			if (mob->xs > 1)
@@ -5295,7 +5296,8 @@ void npc_parse_mob2(struct spawn_data* mob)
 				md->centerY = rnd_value(mob->y - mob->ys + 1, mob->y + mob->ys - 1);
 		}
 		md->spawn->active++;
-		mob_spawn(md);
+		if (!md->spawn->state.boss || !mob_restore_bossspawn(md))
+			mob_spawn(md);
 	}
 }
 
@@ -5463,6 +5465,7 @@ static const char* npc_parse_mob(char* w1, char* w2, char* w3, char* w4, const c
 
 	// Store filepath for possible unloading
 	strcpy( mob.filepath, filepath );
+	mob.source_line = strline(buffer, start - buffer);
 
 	//Update mob spawn lookup database
 	struct spawn_info spawn = { mapdata->index, mob.num };

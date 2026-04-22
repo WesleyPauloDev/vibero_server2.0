@@ -33,15 +33,15 @@
 
 	OnStartInstance:
 		// #SANTUARIOSELADO_STATUS = 2;
-		// instance_create("Santuario Selado");
+		// instance_create("Altar do Selo");
 		// instance_enter("Santuario Selado");
 		callfunc("F_InstanceEntry",
-			"Santuario Selado",        // Nome da instância
+			"Altar do Selo",        // Nome da inst?ncia
 			"Friar Patrick",                 // Nome do NPC
 			"santuario_selado", // Variável de cooldown da conta
 			"SANTUARIOSELADO",        // Variável de status da conta
 			75,                       // Level mínimo
-			"Santuario Selado"
+			"Altar do Selo"
 		);
 	end;
 }
@@ -460,6 +460,19 @@ OnInstanceInit:
 OnEnable:
 	for(set .@i,1; .@i<=12; set .@i,.@i+1)
 		enablenpc instance_npcname("Bobbing Torch#"+.@i);
+	set .@map$, instance_mapname("1@cata");
+	viewpointmap .@map$,1,267,210,1,0xFFFFFF;
+	viewpointmap .@map$,1,85,182,2,0xFFFFFF;
+	viewpointmap .@map$,1,267,154,3,0xFFFFFF;
+	viewpointmap .@map$,1,157,139,4,0xFFFFFF;
+	viewpointmap .@map$,1,193,138,5,0xFFFFFF;
+	viewpointmap .@map$,1,193,102,6,0xFFFFFF;
+	viewpointmap .@map$,1,157,102,7,0xFFFFFF;
+	viewpointmap .@map$,1,113,112,8,0xFFFFFF;
+	viewpointmap .@map$,1,253,56,9,0xFFFFFF;
+	viewpointmap .@map$,1,239,56,10,0xFFFFFF;
+	viewpointmap .@map$,1,71,42,11,0xFFFFFF;
+	viewpointmap .@map$,1,155,14,12,0xFFFFFF;
 	end;
 }
 
@@ -632,7 +645,7 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 				mes "Você pode ver as tochas aqui e ali. Essas tochas são a essência de Thor, o deus do Trovão. Elas foram herdadas de nossos predecessores para deter a escuridão de Baphomet...";
 				next;
 				mes "[Alma do Herói Antigo]";
-				mes "Para abrir o portão subterrâneo selado, preciso ser purificado pela ^0000FFEssência do Fogo^000000, que tem o poder de Thor. Colete ^0000FF10 Essência do Fogo^000000 das tochas.";
+				mes "Para abrir o portão subterrâneo selado, preciso ser purificado pela ^0000FFEssência do Fogo^000000, que tem o poder de Thor. Colete ^0000FF8 Essência do Fogo^000000 das tochas.";
 				next;
 				mes "[Alma do Herói Antigo]";
 				mes "Uma coisa que você deve lembrar é... ^0000FFEssência do Fogo^000000 só pode ser coletada pelo Herdeiro da Fé.";
@@ -672,7 +685,7 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 				set .@ins_baphomet_1f_3,.@ins_baphomet_1f_3+1;
 				if (is_party_leader(.@party_id) == true) {
 					mes "[Alma do Herói Antigo]";
-					mes "Você parece o líder deste grupo. Precisa ir buscar ^0000FF10 Essência de Fogo^000000 das tochas.";
+					mes "Você parece o líder deste grupo. Precisa ir buscar ^0000FF8 Essência de Fogo^000000 das tochas.";
 					next;
 					mes "[Alma do Herói Antigo]";
 					mes "Agora, vou esculpir o símbolo que mostra que você é um herdeiro da fé. Esteja ciente de que ninguém no seu grupo, exceto você, pode coletar a Essência do Fogo.";
@@ -702,22 +715,11 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 				}
 				break;
 			case 4:
-				if ((.@ins_baphomet_1f_1 > 0) && (.@ins_baphomet_1f_2 > 0) && (.@ins_baphomet_1f_3 > 0)) {
-					cutin "ins_cata_champ_n",2;
-					mes "[Alma do Herói Antigo]";
-					mes "Você está pronto para ir? Então vou abrir este portão selado agora.";
-					next;
-					set .@exitloop,1;
-				}
-				else {
-					cutin "ins_cata_champ_a",2;
-					mes "[Alma do Herói Antigo]";
-					mes "Pode ser difícil, mas desejo-lhe sorte ao enfrentar os perigos desta catacumba.";
-					next;
-					mes "[Alma do Herói Antigo]";
-					mes "Lembre-se, você precisa coletar ^0000FF10 Essência de Fogo^000000 das tochas e o ^0000FFToken do Apóstolo^000000 dos Apóstolos de Baphomet.";
-					next;
-				}
+				cutin "ins_cata_champ_n",2;
+				mes "[Alma do Her?i Antigo]";
+				mes "Voc? est? pronto para ir? Ent?o vou abrir este port?o selado agora.";
+				next;
+				set .@exitloop,1;
 				break;
 			}
 			if (.@exitloop) break;
@@ -742,9 +744,9 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 	else if (('ins_baphomet == 3) && is_party_leader(.@party_id) == true) {
 		cutin "ins_cata_champ_n",2;
 		mes "[Alma do Herói Antigo]";
-		mes "Você conseguiu 10 ^0000FF Essência de Fogo^000000 e ^0000FF Ficha de Apóstolo^000000?";
+		mes "Você conseguiu 8 ^0000FF Essência de Fogo^000000 e ^0000FF Ficha de Apóstolo^000000?";
 		next;
-		if ((countitem(6001) > 9) && (countitem(6002) > 0)) {
+		if ((countitem(6001) > 7) && (countitem(6002) > 0)) {
 			delitem 6001,countitem(6001); //Essence_Of_Fire
 			set 'ins_baphomet,4;
 			mes "[Alma do Herói Antigo]";
@@ -752,7 +754,7 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 		}
 		else {
 			mes "[Alma do Herói Antigo]";
-			mes "Ainda não está pronto? Prepare 10 ^0000FFEssência do Fogo^000000 e ^0000FFFicha do Apóstolo^000000.";
+			mes "Ainda não está pronto? Prepare 8 ^0000FFEssência do Fogo^000000 e ^0000FFFicha do Apóstolo^000000.";
 		}
 		close2;
 		cutin "",255;
@@ -785,6 +787,19 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 		specialeffect EF_TELEPORTATION;
 		enablenpc instance_npcname("ins_bapho_to_2f");
 		donpcevent instance_npcname("ins_baphomet_1f_timer")+"::OnDisable";
+		viewpointmap instance_mapname("1@cata"),2,267,210,1,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,85,182,2,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,267,154,3,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,157,139,4,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,193,138,5,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,193,102,6,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,157,102,7,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,113,112,8,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,253,56,9,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,239,56,10,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,71,42,11,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),2,155,14,12,0xFFFFFF;
+		viewpointmap instance_mapname("1@cata"),1,281,12,13,0xFFFFFF;
 		mes "[Alma do Herói Antigo]";
 		mes "Agora você pode ir até o altar principal. Ele fica no canto inferior direito deste andar.";
 		next;
@@ -832,6 +847,7 @@ OnInstanceInit:
 1@cata,281,12,0	script	ins_bapho_to_2f	45,1,1,{
 OnTouch:
 	if (countitem(6002) > 0) {
+		viewpointmap instance_mapname("1@cata"),2,281,12,13,0xFFFFFF;
 		delitem 6002,countitem(6002); //Token_Of_Apostle
 		set 'ins_baphomet,5;
 		warp instance_mapname("2@cata"),80,144;
@@ -903,19 +919,34 @@ OnInstanceInit:
 //============================================================
 -	script	Bobbing Torch#SS	-1,{
 	if (is_party_leader() == true) {
-		if (('ins_baphomet == 3) && (countitem(6001) < 11)) {
+		if (('ins_baphomet == 3) && (countitem(6001) < 8)) {
 			mes "Uma enorme tocha, que parece poder queimar tudo, está subindo e descendo na minha frente.";
 			next;
 			mes "A grande aparência e o calor do fogo me fazem recuar... Mas crio coragem e estendo a mão para pegar a tocha.";
 			next;
 			specialeffect2 EF_HOLYHIT;
 			getitem 6001,1; //Essence_Of_Fire
+			getmapxy(.@map$,.@x,.@y,BL_NPC);
+			if (.@x == 267 && .@y == 210) .@marker_id = 1;
+			else if (.@x == 85 && .@y == 182) .@marker_id = 2;
+			else if (.@x == 267 && .@y == 154) .@marker_id = 3;
+			else if (.@x == 157 && .@y == 139) .@marker_id = 4;
+			else if (.@x == 193 && .@y == 138) .@marker_id = 5;
+			else if (.@x == 193 && .@y == 102) .@marker_id = 6;
+			else if (.@x == 157 && .@y == 102) .@marker_id = 7;
+			else if (.@x == 113 && .@y == 112) .@marker_id = 8;
+			else if (.@x == 253 && .@y == 56) .@marker_id = 9;
+			else if (.@x == 239 && .@y == 56) .@marker_id = 10;
+			else if (.@x == 71 && .@y == 42) .@marker_id = 11;
+			else if (.@x == 155 && .@y == 14) .@marker_id = 12;
+			if (.@marker_id)
+				viewpointmap .@map$,2,.@x,.@y,.@marker_id,0xFFFFFF;
 			mes "O símbolo do herdeiro brilha. Então, um pequeno cristal da tocha cai na minha mão.";
 			disablenpc();
 			close;
 		}
-		else if (('ins_baphomet == 3) && (countitem(6001) > 10)) {
-			mes "Você já tem 10 Essências de Fogo, então não precisa coletar mais nenhuma.";
+		else if (('ins_baphomet == 3) && (countitem(6001) > 7)) {
+			mes "Você já tem 8 Essências de Fogo, então não precisa coletar mais nenhuma.";
 			close;
 		}
 		else {
@@ -1190,17 +1221,11 @@ OnInstanceInit:
 
 		// Premiações do Servidor
 		if (#SANTUARIOSELADO_STATUS == 2) {
-			// add_reputation_points(1, 20);
-			callfunc("F_AddRep", 1, 20, 110002, 3000);
-			callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-			callfunc("F_InstanceFinishAnnounce", "Santuario Selado");
-			if (#inst120_name$ == "Santuario Selado") {
-				set #inst120_status,2;
+			.@finish_result = callfunc("F_InstanceFinishBase", "Altar do Selo", "#SANTUARIOSELADO_STATUS", 20, 2, "#inst120_name$", "#inst120_status", 1, 20);
+			if (.@finish_result == -1) {
+				mes "Voce esta com peso demais para receber as recompensas.";
+				close;
 			}
-			getitem 9608,20;	// Moeda de Instância
-			getitem 9198,2;
-			set #SANTUARIOSELADO_STATUS, 3;
 		}
 
 		warp "SavePoint",0,0;
@@ -1525,3 +1550,4 @@ OnInstanceInit:
 	disablenpc instance_npcname("ins_1f_spawn_mobs");
 	end;
 }
+

@@ -1,14 +1,15 @@
 function	script	F_InstanceEntry	{
 
 	// ==============================
-	// Parâmetros esperados:
+	// Parametros esperados:
 	// ==============================
-	// getarg(0) -> Nome exato da instância no DB (string)
+	// getarg(0) -> Nome exato da instancia no DB (string)
 	// getarg(1) -> Nome do NPC (string)
-	// getarg(2) -> Nome da variável de cooldown (string de variável de conta)
-	// getarg(3) -> Nome da variável de status (string de variável de conta)
-	// getarg(4) -> Level mínimo (número)
-	// getarg(5) -> Nome amigável da instância (string opcional)
+	// getarg(2) -> Nome da variavel de cooldown (string de variavel de conta)
+	// getarg(3) -> Nome da variavel de status (string de variavel de conta)
+	// getarg(4) -> Level minimo (numero)
+	// getarg(5) -> Nome amigavel da instancia (string opcional)
+	// getarg(6) -> Quest de caca iniciada ao entrar (numero opcional)
 	// ==============================
 
 	.@db_name$ = getarg(0);
@@ -17,6 +18,7 @@ function	script	F_InstanceEntry	{
 	.@status_var$ = getarg(3);
 	.@min_level = getarg(4);
 	.@display_name$ = getarg(5, .@db_name$);
+	.@hunt_quest = getarg(6, 0);
 
     .@cooldown_name$ = "#cooldown_" + .@cooldown_var$;
     .@status_name$ = "#" + .@status_var$ + "_STATUS";
@@ -36,21 +38,21 @@ function	script	F_InstanceEntry	{
 	sleep2 100;
     
 	// ============================
-	// 1. Checa Level mínimo
+	// 1. Checa Level minimo
 	// ============================
 	if (BaseLevel < .@min_level) {
 		mes "[" + .@npc_name$ + "]";
-		mes "Uau~ Você ainda é muito inexperiente!";
-		mes "Volte quando atingir o nível base ^FF5555" + .@min_level + "^000000.";
+		mes "Uau~ Voce ainda e muito inexperiente!";
+		mes "Volte quando atingir o nivel base ^FF5555" + .@min_level + "^000000.";
 		close;
 	}
 
 	// ============================
-	// 2. Checa se está em grupo
+	// 2. Checa se esta em grupo
 	// ============================
 	if (getcharid(1) < 1) {
 		mes "[" + .@npc_name$ + "]";
-		mes "Você precisa estar em um grupo para entrar na instância.";
+		mes "Voce precisa estar em um grupo para entrar na instancia.";
 		close;
 	}
 
@@ -62,12 +64,21 @@ function	script	F_InstanceEntry	{
     }
 
 	// ============================
-	// 4. Se já completou hoje
+	// 4. Se ja completou hoje
 	// ============================
 	if (getd(.@status_name$) == 3) {
 		mes "[" + .@npc_name$ + "]";
-		mes "Você já fez esta instância hoje.";
-		mes "Volte amanhã após o descanso.";
+		mes "Voce nao pode mais entrar nesta instancia hoje.";
+		mes "Volte amanha apos o reset diario.";
+		close;
+	}
+
+	.@live_iid = instance_id(IM_PARTY);
+	.@same_live_instance = (.@live_iid > 0 && instance_live_info(ILI_NAME, .@live_iid) == .@db_name$);
+	if (getd(.@status_name$) > 0 && !.@same_live_instance) {
+		mes "[" + .@npc_name$ + "]";
+		mes "Voce nao pode mais entrar nesta instancia hoje.";
+		mes "Volte amanha apos o reset diario.";
 		close;
 	}
 
@@ -76,66 +87,77 @@ function	script	F_InstanceEntry	{
 	// =========================
 	if (!callfunc("F_CheckInstanceIPPermission")) {
 		mes "[" + .@npc_name$ + "]";
-		mes "Jogadores com mesmo IP só podem participar de mais de uma ";
-		mes "Instância simultaneamente , se estiverem em grupos diferentes.";
+		mes "Jogadores com mesmo IP so podem participar de mais de uma ";
+		mes "instancia simultaneamente, se estiverem em grupos diferentes.";
 		close;
 	}
 
 	// ============================
-	// 5. Diálogo inicial
+	// 5. Dialogo inicial
 	// ============================
 	mes "[" + .@npc_name$ + "]";
-	mes "Olá, aventureiro! Deseja criar ou entrar na instância ^0055FF" + .@display_name$ + "^000000?";
+	mes "Ola, aventureiro! Deseja criar ou entrar na instancia ^0055FF" + .@display_name$ + "^000000?";
 	next;
 
-	switch(select("Criar instância", "Entrar na instância", "Cancelar")) {
+	if (getd(.@status_name$) > 0)
+		.@menu = select("Entrar na instancia", "Cancelar") + 1;
+	else
+		.@menu = select("Criar instancia", "Entrar na instancia", "Cancelar");
+
+	switch(.@menu) {
 
 		// ============================
-		// 6. Criar instância
+		// 6. Criar instancia
 		// ============================
 		case 1:
 			if (!is_party_leader()) {
-				mes "Somente o líder do grupo pode criar a instância.";
+				mes "Somente o lider do grupo pode criar a instancia.";
 				close;
 			}
-			if (getd(.@status_name$)) == 0 {
-				if (instance_create(.@db_name$) >= 0) {
+			if (getd(.@status_name$) == 0) {
+				.@iid = instance_create(.@db_name$);
+				if (.@iid >= 0) {
 					mes "[" + .@npc_name$ + "]";
-					mes "A Instância está se abrindo...";
-					announce "[Instâncias] " + strcharinfo(0) + " criou " + .@display_name$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
+					mes "A instancia esta se abrindo...";
+					announce "[Instancias] " + strcharinfo(0) + " criou " + .@display_name$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
 					callfunc("F_InstanceLogStart", .@status_var$, .@display_name$);
 
-					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
-					setd(.@status_name$), 1;
+					setd(.@cooldown_name$, gettimetick(2) + callfunc("get_daily_reset"));
+					setd(.@status_name$, 1);
 				} else {
-					mes "Falha ao criar a instância.";
+					mes "Falha ao criar a instancia.";
 				}
 			} else {
-				mes "A instância já foi criada. Use ^0000FF'Entrar na instância'^000000 para entrar.";
+				mes "A instancia ja foi criada. Use ^0000FF'Entrar na instancia'^000000 para entrar.";
 			}
 			close;
 
 		// ============================
-		// 7. Entrar na instância
+		// 7. Entrar na instancia
 		// ============================
 		case 2:
 			switch(instance_enter(.@db_name$)) {
 				case IE_OK:
-					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
-					setd(.@status_name$), 2;
+					setd(.@cooldown_name$, gettimetick(2) + callfunc("get_daily_reset"));
+					setd(.@status_name$, 2);
+					if (.@hunt_quest > 0) {
+						if (isbegin_quest(.@hunt_quest))
+							erasequest .@hunt_quest;
+						setquest .@hunt_quest;
+					}
 					callfunc("F_InstanceLogEnter", .@status_var$, .@display_name$);
 					close2;
 					end;
 				case IE_NOINSTANCE:
-                    if(getd(.@status_name$) == 0) {
-				    mes "A instância ainda não foi criada.";
-                        close;
-                    }
-                    mes "Você já entrou na instância hoje.";
-                    setd(.@status_name$), 3;
+					if (getd(.@status_name$) == 0) {
+						mes "A instancia ainda nao foi criada.";
+						close;
+					}
+					mes "A instancia nao esta disponivel no momento.";
+					mes "Sua tentativa de hoje ja foi registrada, entao sera preciso aguardar o proximo reset.";
 					close;
 				case IE_NOMEMBER:
-					mes "Você não faz parte de um grupo válido para esta instância.";
+					mes "Voce nao faz parte de um grupo valido para esta instancia.";
 					close;
 				default:
 					mes "Ocorreu um erro desconhecido ao tentar entrar.";
@@ -197,19 +219,19 @@ function	script	F_InstanceHistoryCode	{
 		return "ETOWER";
 	if (.@key$ == "NYD" || .@key$ == "Ninho de Nidhog")
 		return "NYD";
-	if (.@key$ == "OldGlastHeim" || .@key$ == "Maldição de Glast Heim" || .@key$ == "Maldicao de Glast Heim")
+	if (.@key$ == "OldGlastHeim" || .@key$ == "Maldicao de Glast Heim" || .@key$ == "Maldicao de Glast Heim")
 		return "OldGlastHeim";
-	if (.@key$ == "SANTUARIOSELADO" || .@key$ == "Santuario Selado")
+	if (.@key$ == "SANTUARIOSELADO" || .@key$ == "Santuario Selado" || .@key$ == "Altar do Selo")
 		return "SANTUARIOSELADO";
-	if (.@key$ == "WLCR" || .@key$ == "Laboratório Werner" || .@key$ == "Laboratorio Werner")
+	if (.@key$ == "WLCR" || .@key$ == "Laboratorio Werner" || .@key$ == "Laboratorio Werner")
 		return "WLCR";
-	if (.@key$ == "GMT" || .@key$ == "Torneio Mágico de Geffen" || .@key$ == "Torneio Magico de Geffen")
+	if (.@key$ == "GMT" || .@key$ == "Torneio Magico de Geffen" || .@key$ == "Torneio da Magia")
 		return "GMT";
-	if (.@key$ == "SaraMemory" || .@key$ == "Memórias de Sara" || .@key$ == "Memorias de Sara")
+	if (.@key$ == "SaraMemory" || .@key$ == "Memorias de Sara" || .@key$ == "Memorias de Sara")
 		return "SaraMemory";
-	if (.@key$ == "InfiniteSpace" || .@key$ == "Espaço Infinito" || .@key$ == "Espaco Infinito")
+	if (.@key$ == "InfiniteSpace" || .@key$ == "Espaco Infinito" || .@key$ == "Espaco Infinito")
 		return "InfiniteSpace";
-	if (.@key$ == "BangungotHospital" || .@key$ == "Hospital Bangungot")
+	if (.@key$ == "BangungotHospital" || .@key$ == "Hospital Bangungot" || .@key$ == "Hospital Abandonado")
 		return "BangungotHospital";
 	if (.@key$ == "BakonawaLake" || .@key$ == "Lago Bakonawa")
 		return "BakonawaLake";
@@ -219,21 +241,29 @@ function	script	F_InstanceHistoryCode	{
 		return "BuwayaCave";
 	if (.@key$ == "CharlestonCrisis" || .@key$ == "Charleston em Crise")
 		return "CharlestonCrisis";
-	if (.@key$ == "EddaHalfMoon" || .@key$ == "Quarto Crescente")
+	if (.@key$ == "EddaBiolab" || .@key$ == "Edda Biolabs" || .@key$ == "Edda do Laboratorio" || .@key$ == "Torre Submersa")
+		return "EddaBiolab";
+	if (.@key$ == "EddaHalfMoon" || .@key$ == "Quarto Crescente" || .@key$ == "Edda do Quarto Crescente")
 		return "EddaHalfMoon";
-	if (.@key$ == "DEVILTOWER" || .@key$ == "Torre do Demônio" || .@key$ == "Torre do Demonio")
+	if (.@key$ == "EddaGlastheimFall" || .@key$ == "Queda de Glast Heim")
+		return "EddaGlastheimFall";
+	if (.@key$ == "EddaGHPur" || .@key$ == "EddaGlastheimPurification" || .@key$ == "Purificacao de Glast Heim")
+		return "EddaGHPur";
+	if (.@key$ == "EddaGHPurH" || .@key$ == "EddaGlastheimPurificationHard" || .@key$ == "Purificacao de Glast Heim Hard")
+		return "EddaGHPurH";
+	if (.@key$ == "DEVILTOWER" || .@key$ == "Torre do Demonio" || .@key$ == "Torre do Demonio")
 		return "DEVILTOWER";
-	if (.@key$ == "LaboratorioCentral" || .@key$ == "Laboratório Central" || .@key$ == "Laboratorio Central")
+	if (.@key$ == "LaboratorioCentral" || .@key$ == "Laboratorio Central" || .@key$ == "Laboratorio Central")
 		return "LaboratorioCentral";
 	if (.@key$ == "EclageInterior" || .@key$ == "Interior de Eclage")
 		return "EclageInterior";
-	if (.@key$ == "HTF" || .@key$ == "Fábrica de Brinquedos de Terror" || .@key$ == "Fabrica de Brinquedos de Terror")
+	if (.@key$ == "HTF" || .@key$ == "Fabrica de Brinquedos de Terror" || .@key$ == "Fabrica de Brinquedos de Terror")
 		return "HTF";
-	if (.@key$ == "RoomConsciousness" || .@key$ == "Salão de Ymir" || .@key$ == "Salao de Ymir")
+	if (.@key$ == "RoomConsciousness" || .@key$ == "Salao de Ymir" || .@key$ == "Salao de Ymir")
 		return "RoomConsciousness";
-	if (.@key$ == "WolfchevLaboratory" || .@key$ == "Laboratório Wolfchev" || .@key$ == "Laboratorio Wolfchev")
+	if (.@key$ == "WolfchevLaboratory" || .@key$ == "Laboratorio Wolfchev" || .@key$ == "Laboratorio Wolfchev")
 		return "WolfchevLaboratory";
-	if (.@key$ == "TRG" || .@key$ == "Templo do Rei Demônio" || .@key$ == "Templo do Rei Demonio")
+	if (.@key$ == "TRG" || .@key$ == "Templo do Rei Demonio" || .@key$ == "Templo do Rei Demonio")
 		return "TRG";
 	if (.@key$ == "IsleOfBios" || .@key$ == "Ilha de Bios")
 		return "IsleOfBios";
@@ -241,7 +271,7 @@ function	script	F_InstanceHistoryCode	{
 		return "MorseCave";
 	if (.@key$ == "OSOccupation" || .@key$ == "Operacao OS")
 		return "OSOccupation";
-	if (.@key$ == "CorOperation" || .@key$ == "Operacao COR")
+	if (.@key$ == "CorOperation" || .@key$ == "Operacao COR" || .@key$ == "Memorial COR")
 		return "CorOperation";
 	if (.@key$ == "WATERGARDEN" || .@key$ == "Jardim Aquatico" || .@key$ == "Water Garden Hard" || .@key$ == "Water Garden")
 		return "WATERGARDEN";
@@ -249,6 +279,8 @@ function	script	F_InstanceHistoryCode	{
 		return "FacewormsNest";
 	if (.@key$ == "NightmarishJitterbug" || .@key$ == "Pesadelo Musical")
 		return "NightmarishJitterbug";
+	if (.@key$ == "HazyForest" || .@key$ == "Mistwood Maze" || .@key$ == "Floresta Nebulosa")
+		return "HazyForest";
 	if (.@key$ == "DeepForest" || .@key$ == "Floresta Profunda")
 		return "DeepForest";
 	if (.@key$ == "GhostPalace" || .@key$ == "Ghost Palace" || .@key$ == "Palacio das Magoas")
@@ -257,11 +289,15 @@ function	script	F_InstanceHistoryCode	{
 		return "TombRemorse";
 	if (.@key$ == "HeartHunterWarBase" || .@key$ == "Heart Hunter War Base 1" || .@key$ == "Heart Hunter War Base 2" || .@key$ == "Base da Guerra Heart Hunter")
 		return "HeartHunterWarBase";
-	if (.@key$ == "FridayDungeon" || .@key$ == "Friday Dungeon" || .@key$ == "Dungeon da Sexta" || .@key$ == "Dungeon da Sexta-Feira" || .@key$ == "Midnight Arena")
+	if (.@key$ == "FridayDungeon" || .@key$ == "Friday Dungeon" || .@key$ == "Dungeon da Sexta" || .@key$ == "Dungeon da Sexta-Feira" || .@key$ == "Tumulo do Monarca" || .@key$ == "Midnight Arena")
 		return "FridayDungeon";
 	if (.@key$ == "HiddenGarden" || .@key$ == "Hidden Flower Garden" || .@key$ == "Security Area 1" || .@key$ == "Security Area 2" || .@key$ == "Jardim de Vermuth")
 		return "HiddenGarden";
-	if (.@key$ == "ThorGunsuBase" || .@key$ == "Thor Military Base" || .@key$ == "Base Militar de Thor")
+	if (.@key$ == "LostFarm" || .@key$ == "Lost Farm in Time" || .@key$ == "Farm Lost in Time" || .@key$ == "Fazenda Perdida no Tempo" || .@key$ == "Fazenda de Pitayas")
+		return "LostFarm";
+	if (.@key$ == "TwilightGarden" || .@key$ == "Twilight Garden" || .@key$ == "Jardim do Crepusculo" || .@key$ == "Duelo com Sweety")
+		return "TwilightGarden";
+	if (.@key$ == "ThorGunsuBase" || .@key$ == "Thor Military Base" || .@key$ == "Base Militar de Thor" || .@key$ == "Base Militar")
 		return "ThorGunsuBase";
 
 	return .@key$;
@@ -353,10 +389,51 @@ function	script	F_InstanceFinishAnnounce	{
 	callfunc("F_InstanceLogFinish", .@db_name$);
 	if (#instancia == 1)
 		#instancia = 2;
-	announce "[Instâncias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
+	announce "[Instancias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
 	return;
 }
 
+function	script	F_InstanceFinishBase	{
+	.@instance_name$ = getarg(0);
+	.@status_var$ = getarg(1);
+	.@coin_amount = getarg(2, 10);
+	.@ticket_amount = getarg(3, 2);
+	.@roulette_name_var$ = getarg(4, "");
+	.@roulette_status_var$ = getarg(5, "");
+	.@rep_id = getarg(6, 1);
+	.@rep_amount = getarg(7, 10);
+	.@rep_achievement = getarg(8, 110002);
+	.@rep_cap = getarg(9, 3000);
+	.@final_status = getarg(10, 3);
+	.@refresh_weekly = getarg(11, 0);
+	.@roulette_match_name$ = getarg(12, .@instance_name$);
+	.@announce_finish = getarg(13, 1);
+
+	if (.@status_var$ == "")
+		return 0;
+	if (getd(.@status_var$) != 2)
+		return 0;
+	if ((.@coin_amount > 0 && checkweight(9608, .@coin_amount) == 0) || (.@ticket_amount > 0 && checkweight(9198, .@ticket_amount) == 0))
+		return -1;
+	if (.@rep_amount > 0)
+		callfunc("F_AddRep", .@rep_id, .@rep_amount, .@rep_achievement, .@rep_cap);
+	callfunc("F_DiaryRefreshDaily");
+	if (.@refresh_weekly)
+		callfunc("F_DiaryRefreshWeekly");
+	if (.@announce_finish)
+		callfunc("F_InstanceFinishAnnounce", .@instance_name$);
+	if (.@roulette_name_var$ != "" && .@roulette_status_var$ != "") {
+		.@roulette_name_value$ = getd(.@roulette_name_var$);
+		if (.@roulette_name_value$ == .@roulette_match_name$)
+			setd(.@roulette_status_var$, 2);
+	}
+	if (.@coin_amount > 0)
+		getitem 9608, .@coin_amount;
+	if (.@ticket_amount > 0)
+		getitem 9198, .@ticket_amount;
+	setd(.@status_var$, .@final_status);
+	return 1;
+}
 function	script	F_InstanceMenuHistoryState	{
 	.@instance_code$ = getarg(0);
 	.@completed = 0;
@@ -454,6 +531,10 @@ function	script	F_InstanceMenuResetStatusRaw	{
 	}
 	return;
 }
+
+
+
+
 
 
 

@@ -19,7 +19,7 @@ OnStartInstance:
 			"cor_operation",
 			"CorOperation",
 			170,
-			"Operacao COR"
+			"Memorial COR"
 		);
 	end;
 }
@@ -775,19 +775,15 @@ OnMobKill:
 		if (checkquest(16376) > -1)
 			erasequest 16376;
 		if (#CorOperation_STATUS == 2) {
-			callfunc("F_AddRep", 1, 10, 110002, 3000);
-			callfunc("F_DiaryRefreshDaily");
-			set #instancia, 2;
-			if (!'reward_announced) {
-				callfunc("F_InstanceFinishAnnounce", "Operacao COR");
-				'reward_announced = 1;
+			.@finish_result = callfunc("F_InstanceFinishBase", "Memorial COR", "#CorOperation_STATUS", 10, 2, "#inst175_name$", "#inst175_status");
+			if (.@finish_result == -1) {
+				mes "[Elena Volkova]";
+				mes "Voce esta com peso demais para receber as recompensas.";
+				mes "Libere espaco e fale comigo novamente.";
+				close;
 			}
-			if (#inst175_name$ == "Operacao COR") {
-				set #inst175_status,2;
-			}
-			getitem 9608,10;
-			getitem 9198,2;
-			set #CorOperation_STATUS, 3;
+			getitem 25669,5;
+			getitem 25723,5;
 		}
 		close2;
 		warp "SavePoint",0,0;
@@ -818,20 +814,16 @@ OnMobKill:
 			getitem 25723,1;
 			getitem 25669,5;
 			if (#CorOperation_STATUS == 2) {
-				callfunc("F_AddRep", 1, 10, 110002, 3000);
-				callfunc("F_DiaryRefreshDaily");
-				set #instancia, 2;
-				if (!'reward_announced) {
-					callfunc("F_InstanceFinishAnnounce", "Operacao COR");
-					'reward_announced = 1;
-				}
-				if (#inst175_name$ == "Operacao COR") {
-					set #inst175_status,2;
-				}
-				getitem 9608,10;
-				getitem 9198,2;
-				set #CorOperation_STATUS, 3;
+			.@finish_result = callfunc("F_InstanceFinishBase", "Memorial COR", "#CorOperation_STATUS", 10, 2, "#inst175_name$", "#inst175_status");
+			if (.@finish_result == -1) {
+				mes "[Elena Volkova]";
+				mes "Voce esta com peso demais para receber as recompensas.";
+				mes "Libere espaco e fale comigo novamente.";
+				close;
 			}
+			getitem 25669,5;
+			getitem 25723,5;
+		}
 			close2;
 			warp "SavePoint",0,0;
 		}
@@ -868,19 +860,15 @@ OnMobKill:
 		if (checkquest(16376) > -1)
 			erasequest 16376;
 		if (#CorOperation_STATUS == 2) {
-			callfunc("F_AddRep", 1, 10, 110002, 3000);
-			callfunc("F_DiaryRefreshDaily");
-			set #instancia, 2;
-			if (!'reward_announced) {
-				callfunc("F_InstanceFinishAnnounce", "Operacao COR");
-				'reward_announced = 1;
+			.@finish_result = callfunc("F_InstanceFinishBase", "Memorial COR", "#CorOperation_STATUS", 10, 2, "#inst175_name$", "#inst175_status");
+			if (.@finish_result == -1) {
+				mes "[Elena Volkova]";
+				mes "Voce esta com peso demais para receber as recompensas.";
+				mes "Libere espaco e fale comigo novamente.";
+				close;
 			}
-			if (#inst175_name$ == "Operacao COR") {
-				set #inst175_status,2;
-			}
-			getitem 9608,10;
-			getitem 9198,2;
-			set #CorOperation_STATUS, 3;
+			getitem 25669,5;
+			getitem 25723,5;
 		}
 		close2;
 		warp "SavePoint",0,0;
@@ -1282,3 +1270,4 @@ OnTouch:
 1@cor,136,240,3	duplicate(#cor_barricade_0)	#cor_barricade_9	4_ROPEPILE
 1@cor,138,240,3	duplicate(#cor_barricade_0)	#cor_barricade_10	4_ROPEPILE
 1@cor,140,240,3	duplicate(#cor_barricade_0)	#cor_barricade_11	4_ROPEPILE,2,2
+

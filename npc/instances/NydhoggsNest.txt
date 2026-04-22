@@ -249,21 +249,9 @@ OnTimer180000:
 		if (#NYD_STATUS == 2) {
 			set ins_nyd2, 0;
 			set ins_nyd, 203;
-			set #NYD_STATUS, 4;
-
-			callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-
-			callfunc("F_InstanceFinishAnnounce", "Ninho de Nidhog");
-			if (#inst60_name$ == "Ninho de Nidhog") {
-				set #inst60_status,2;
-			}
-			// add_reputation_points(1, 10);
-			callfunc("F_AddRep", 1, 10, 110002, 3000);
+			callfunc("F_InstanceFinishBase", "Ninho de Nidhog", "#NYD_STATUS", 10, 2, "#inst60_name$", "#inst60_status", 1, 10, 110002, 3000, 4, 0);
 
 			getitem 607,20; //Fruto de Yggdrasil 
-			getitem 9608,10; //Instance Coin
-			getitem 9198,2;
 		}
 		//setquest 3135;
 		warp "nyd_dun02",98,196;
@@ -570,3 +558,6 @@ OnTimer1800000:
 	disablenpc "Purification Stone#nyd2";
 	end;
 }
+
+
+

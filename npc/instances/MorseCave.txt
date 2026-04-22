@@ -1420,16 +1420,11 @@ OnTouch:
 		close;
 	mes "- Teleportando... -";
 	if (#MorseCave_STATUS == 2) {
-		callfunc("F_AddRep", 1, 10, 110002, 3000);
-		callfunc("F_DiaryRefreshDaily");
-		set #instancia, 2;
-		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Caverna do Morse");
-			'reward_announced = 1;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Caverna do Morse", "#MorseCave_STATUS");
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
 		}
-		getitem 9608,10;
-		getitem 9198,2;
-		set #MorseCave_STATUS, 3;
 	}
 	close2;
 	warp "SavePoint",0,0;
@@ -1495,3 +1490,4 @@ sec_in02,20,20,6	script	Caverna da Morte#a2	4_M_KHKYEL,{
 		close;
 	}
 }
+

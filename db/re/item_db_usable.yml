@@ -89,6 +89,103 @@ Header:
   Version: 3
 
 Body:
+  - Id: 6959
+    AegisName: Costume_Ticket
+    Name: Costume Change Ticket
+    Type: DelayConsume
+    Buy: 0
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@body = 0;
+      switch (Class) {
+      case JOB_RUNE_KNIGHT:
+      case JOB_RUNE_KNIGHT_T:
+      case JOB_DRAGON_KNIGHT:
+        .@body = 4332;
+        break;
+      case JOB_MECHANIC:
+      case JOB_MECHANIC_T:
+      case JOB_MEISTER:
+        .@body = 4333;
+        break;
+      case JOB_GUILLOTINE_CROSS:
+      case JOB_GUILLOTINE_CROSS_T:
+      case JOB_SHADOW_CROSS:
+        .@body = 4334;
+        break;
+      case JOB_WARLOCK:
+      case JOB_WARLOCK_T:
+      case JOB_ARCH_MAGE:
+        .@body = 4335;
+        break;
+      case JOB_ARCH_BISHOP:
+      case JOB_ARCH_BISHOP_T:
+      case JOB_CARDINAL:
+        .@body = 4336;
+        break;
+      case JOB_RANGER:
+      case JOB_RANGER_T:
+      case JOB_WINDHAWK:
+        .@body = 4337;
+        break;
+      case JOB_ROYAL_GUARD:
+      case JOB_ROYAL_GUARD_T:
+      case JOB_IMPERIAL_GUARD:
+        .@body = 4338;
+        break;
+      case JOB_GENETIC:
+      case JOB_GENETIC_T:
+      case JOB_BIOLO:
+        .@body = 4339;
+        break;
+      case JOB_SHADOW_CHASER:
+      case JOB_SHADOW_CHASER_T:
+      case JOB_ABYSS_CHASER:
+        .@body = 4340;
+        break;
+      case JOB_SORCERER:
+      case JOB_SORCERER_T:
+      case JOB_ELEMENTAL_MASTER:
+        .@body = 4341;
+        break;
+      case JOB_SURA:
+      case JOB_SURA_T:
+      case JOB_INQUISITOR:
+        .@body = 4342;
+        break;
+      case JOB_MINSTREL:
+      case JOB_MINSTREL_T:
+      case JOB_TROUBADOUR:
+        .@body = 4343;
+        break;
+      case JOB_WANDERER:
+      case JOB_WANDERER_T:
+      case JOB_TROUVERE:
+        .@body = 4344;
+        break;
+      }
+      if (.@body == 0) {
+        dispbottom "Sua classe nao possui visual 2ND disponivel.";
+        end;
+      }
+      if (getlook(LOOK_BODY2) == .@body) {
+        dispbottom "Voce ja esta usando o visual 2ND desta classe.";
+        end;
+      }
+      mes "[Ticket de Visual]";
+      mes "Este ticket mudara seu personagem para o visual 2ND da classe atual.";
+      mes "O item sera consumido se voce confirmar.";
+      next;
+      if (select("Confirmar:Cancelar") == 2) {
+        close;
+      }
+      delitem 6959,1;
+      setlook LOOK_BODY2,.@body;
+      specialeffect2 EF_JOBLVUP;
+      dispbottom "Visual 2ND aplicado.";
+      close;
   - Id: 500
     AegisName: Warnut_Chocoball
     Name: Choko Gangjeong
