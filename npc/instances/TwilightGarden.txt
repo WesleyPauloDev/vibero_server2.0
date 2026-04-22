@@ -804,18 +804,27 @@ OnTouch_:
 OnTouch:
 	.@iid = instance_id();
 	if (#TWG_REWARD_INSTANCE != .@iid) {
-		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Duelo com Sweety");
-			'reward_announced = 1;
-		}
-		if (!checkweight(9608,20) || !checkweight(9198,2)) {
+		.@finish_result = callfunc("F_InstanceFinishBase", "Duelo com Sweety", "#TwilightGarden_STATUS", 20, 2, "", "", 1, 20, 110002, 3000, 3, 0, "Duelo com Sweety");
+		if (.@finish_result == -1) {
 			mes "[Est]";
 			mes "Voce esta com peso demais para receber as recompensas.";
 			mes "Libere espaco e tente sair novamente pelo portal.";
 			close;
 		}
-		getitem 9608,20;
-		getitem 9198,2;
+		if (.@finish_result == 0) {
+			if (!'reward_announced) {
+				callfunc("F_InstanceFinishAnnounce", "Duelo com Sweety");
+				'reward_announced = 1;
+			}
+			if (!checkweight(9608,20) || !checkweight(9198,2)) {
+				mes "[Est]";
+				mes "Voce esta com peso demais para receber as recompensas.";
+				mes "Libere espaco e tente sair novamente pelo portal.";
+				close;
+			}
+			getitem 9608,20;
+			getitem 9198,2;
+		}
 		#TWG_REWARD_INSTANCE = .@iid;
 	}
 	warp "SavePoint",0,0;
@@ -943,18 +952,27 @@ OnMobDead:
 	close2;
 	.@iid = instance_id();
 	if (#TWG_REWARD_INSTANCE != .@iid) {
-		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Duelo com Sweety");
-			'reward_announced = 1;
-		}
-		if (!checkweight(9608,20) || !checkweight(9198,2)) {
+		.@finish_result = callfunc("F_InstanceFinishBase", "Duelo com Sweety", "#TwilightGarden_STATUS", 20, 2, "", "", 1, 20, 110002, 3000, 3, 0, "Duelo com Sweety");
+		if (.@finish_result == -1) {
 			mes "[Almond]";
 			mes "Voce esta com peso demais para receber as recompensas.";
 			mes "Libere espaco e fale comigo de novo.";
 			close;
 		}
-		getitem 9608,20;
-		getitem 9198,2;
+		if (.@finish_result == 0) {
+			if (!'reward_announced) {
+				callfunc("F_InstanceFinishAnnounce", "Duelo com Sweety");
+				'reward_announced = 1;
+			}
+			if (!checkweight(9608,20) || !checkweight(9198,2)) {
+				mes "[Almond]";
+				mes "Voce esta com peso demais para receber as recompensas.";
+				mes "Libere espaco e fale comigo de novo.";
+				close;
+			}
+			getitem 9608,20;
+			getitem 9198,2;
+		}
 		#TWG_REWARD_INSTANCE = .@iid;
 	}
 	warp "SavePoint",0,0;

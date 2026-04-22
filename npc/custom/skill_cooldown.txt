@@ -5,14 +5,26 @@ prontera,141,180,0	script	Shadow Master	4_F_EDEN_MASTER,{
 	.skill_cd = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 2);
 
 	if (.skill_cd > 0) {
+		.@skill_id = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 0);
+		.@skill_lv = getskilllv(.@skill_id);
+		if (.@skill_lv < 1)
+			.@skill_lv = 1;
+		.@current_cd = getskillcooldown(.@skill_id, .@skill_lv);
+		.@reduced_cd = .skill_cd - .@current_cd;
+		if (.@reduced_cd < 0)
+			.@reduced_cd = 0;
 		.@name$ = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 1);
 		.@cd_str$ = callfunc("Show_cd_skill", .skill_cd);
+		.@current_cd_str$ = callfunc("Show_cd_skill", .@current_cd);
+		.@reduced_cd_str$ = callfunc("Show_cd_skill", .@reduced_cd);
 
 		mes "Voce ja possui uma skill configurada.";
 		mes "";
 		mes "Classe : ^00FF00" + jobname(SHADOW_CLASS) + "^000000";
 		mes "Skill : ^00FF00" + .@name$ + "^000000";
 		mes "Cooldown base: ^00FF00" + .@cd_str$ + "s^000000";
+		mes "Reducao atual: ^00FF00" + .@reduced_cd_str$ + "s^000000";
+		mes "Cooldown atual: ^00FF00" + .@current_cd_str$ + "s^000000";
 		mes "";
 		mes "Deseja trocar a skill?";
 		next;
