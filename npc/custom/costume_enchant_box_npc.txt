@@ -1,0 +1,200 @@
+//==================================================
+// NPC de Encantamento de Visuais por Posicao
+// Usa as pedras das caixas de topo/meio/baixo/capa
+//==================================================
+
+moc_para01,20,18,5	script	Encantador Visual	611,{
+OnTalk:
+	disable_items;
+
+	mes "[Encantador Visual]";
+	mes "Eu posso aplicar pedras de encantamento em seus visuais.";
+	mes "Equipe o visual no slot correto e tenha a pedra no inventario.";
+	next;
+
+	.@menu$ = "";
+	.@count = 0;
+
+	if (getequipid(EQI_COSTUME_HEAD_TOP) > 0) {
+		.@menu$ += getitemname(getequipid(EQI_COSTUME_HEAD_TOP)) + " [Topo]:";
+		.@part_map[.@count] = EQI_COSTUME_HEAD_TOP;
+		.@count++;
+	}
+	if (getequipid(EQI_COSTUME_HEAD_MID) > 0) {
+		.@menu$ += getitemname(getequipid(EQI_COSTUME_HEAD_MID)) + " [Meio]:";
+		.@part_map[.@count] = EQI_COSTUME_HEAD_MID;
+		.@count++;
+	}
+	if (getequipid(EQI_COSTUME_HEAD_LOW) > 0) {
+		.@menu$ += getitemname(getequipid(EQI_COSTUME_HEAD_LOW)) + " [Baixo]:";
+		.@part_map[.@count] = EQI_COSTUME_HEAD_LOW;
+		.@count++;
+	}
+	if (getequipid(EQI_COSTUME_GARMENT) > 0) {
+		.@menu$ += getitemname(getequipid(EQI_COSTUME_GARMENT)) + " [Capa]:";
+		.@part_map[.@count] = EQI_COSTUME_GARMENT;
+		.@count++;
+	}
+
+	if (.@count == 0) {
+		mes "Voce nao esta com nenhum visual equipado em topo, meio, baixo ou capa.";
+		close;
+	}
+
+	.@sel = select(.@menu$ + "Cancelar") - 1;
+	if (.@sel >= .@count)
+		close;
+
+	.@part = .@part_map[.@sel];
+	.@equip_id = getequipid(.@part);
+	.@equip_refine = getequiprefinerycnt(.@part);
+	setarray .@card[0], getequipcardid(.@part,0), getequipcardid(.@part,1), getequipcardid(.@part,2), getequipcardid(.@part,3);
+	copyarray .@equip_card[0], .@card[0], 4;
+
+	switch (.@part) {
+		case EQI_COSTUME_HEAD_TOP:
+			.@slot = 0;
+			.@slot_name$ = "topo";
+			setarray .@stone_id[0],
+				29668,29460,310258,29517,310187,29481,310004,29464,310262,29521,310191,29477,29621,29468,310181,29432,29617,29513,310008,29423,29613,29428,310000,29485,310266,29655,29651,29664,29659,
+				29156,29359,310327,310664,310325,
+				25445,25450,25453;
+			break;
+		case EQI_COSTUME_HEAD_MID:
+			.@slot = 1;
+			.@slot_name$ = "meio";
+			setarray .@stone_id[0],
+				29461,310259,29518,310186,29482,310005,29465,310263,29522,310190,29478,29620,29469,310182,29433,29616,29514,310009,29424,29612,29429,310001,29486,310267,29656,29652,29665,29669,29660,
+				29157,29047,310328,310665,310330,
+				25446,25451,25454;
+			break;
+		case EQI_COSTUME_HEAD_LOW:
+			.@slot = 2;
+			.@slot_name$ = "baixo";
+			setarray .@stone_id[0],
+				29462,310260,29519,310185,29483,310006,29466,310264,29523,310189,29479,29619,29470,310183,29434,29615,29515,310010,29425,29611,29430,310002,29487,310268,29657,29653,29666,29670,29661,
+				29158,29360,310329,310666,310326,
+				25447,25452,25455;
+			break;
+		case EQI_COSTUME_GARMENT:
+			.@slot = 0;
+			.@slot_name$ = "capa";
+			setarray .@stone_id[0],
+				29463,310257,29520,310184,29484,310007,29467,310261,29524,310188,29480,29618,29471,310180,29435,29614,29516,310011,29426,29427,29431,310003,29488,310265,29658,29654,29667,29671,29662,29663,
+				29358,29361,29056,310661,310667,310660,310662,310663,
+				25448,25449,25456;
+			break;
+		default:
+			mes "Slot invalido.";
+			close;
+	}
+
+	mes "[Encantador Visual]";
+	mes "O que deseja fazer com o visual de " + .@slot_name$ + "?";
+	next;
+
+	.@action = select("Aplicar encantamento:Remover encantamento [100.000 z]:Cancelar");
+	if (.@action == 3)
+		close;
+
+	if (.@action == 2) {
+		if (.@card[.@slot] <= 0) {
+			mes "[Encantador Visual]";
+			mes "Este visual nao possui encantamento no slot de " + .@slot_name$ + ".";
+			close;
+		}
+
+		if (Zeny < 100000) {
+			mes "[Encantador Visual]";
+			mes "Voce precisa de 100.000 zeny para remover o encantamento.";
+			close;
+		}
+
+		mes "[Encantador Visual]";
+		mes "Remover o encantamento atual de ^0055FF" + getitemname(.@equip_id) + "^000000 por ^FF0000100.000 zeny^000000?";
+		next;
+		if (select("Sim:Cancelar") == 2)
+			close;
+
+		if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]) || callfunc("F_IsEquipRefineHack", .@part, .@equip_refine))
+			close;
+
+		if (Zeny < 100000) {
+			mes "[Encantador Visual]";
+			mes "Voce nao possui mais zeny suficiente.";
+			close;
+		}
+
+		progressbar "66CCFF",3;
+		specialeffect2 EF_ENHANCE;
+
+		Zeny -= 100000;
+		getitem .@card[.@slot], 1;
+		.@card[.@slot] = 0;
+		delequip .@part;
+		getitem2 .@equip_id,1,1,.@equip_refine,0,.@card[0],.@card[1],.@card[2],.@card[3];
+
+		mes "[Encantador Visual]";
+		mes "Encantamento removido com sucesso.";
+		close;
+	}
+
+	if (.@card[.@slot] > 0) {
+		mes "Este visual ja possui um encantamento no slot de " + .@slot_name$ + ".";
+		mes "Remova o encantamento atual antes de aplicar outro.";
+		close;
+	}
+
+	deletearray .@owned_ids[0], getarraysize(.@owned_ids);
+	deletearray .@owned_menu$[0], getarraysize(.@owned_menu$);
+
+	for (.@i = 0; .@i < getarraysize(.@stone_id); .@i++) {
+		.@id = .@stone_id[.@i];
+		.@amt = countitem(.@id);
+		if (.@amt <= 0)
+			continue;
+
+		.@owned_ids[getarraysize(.@owned_ids)] = .@id;
+		.@owned_menu$[getarraysize(.@owned_menu$)] = getitemname(.@id) + " [x" + .@amt + "]";
+	}
+
+	if (!getarraysize(.@owned_ids)) {
+		mes "Voce nao possui nenhuma pedra compativel com o slot de " + .@slot_name$ + ".";
+		close;
+	}
+
+	mes "Escolha a pedra que deseja aplicar no visual de " + .@slot_name$ + ".";
+	next;
+
+	.@choice = select(implode(.@owned_menu$, ":") + ":Cancelar") - 1;
+	if (.@choice >= getarraysize(.@owned_ids))
+		close;
+
+	.@stone = .@owned_ids[.@choice];
+
+	mes "[Encantador Visual]";
+	mes "Aplicar ^0055FF" + getitemname(.@stone) + "^000000 em ^0055FF" + getitemname(.@equip_id) + "^000000?";
+	next;
+	if (select("Sim:Cancelar") == 2)
+		close;
+
+	if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]) || callfunc("F_IsEquipRefineHack", .@part, .@equip_refine))
+		close;
+
+	if (countitem(.@stone) < 1) {
+		mes "Voce nao possui mais esta pedra.";
+		close;
+	}
+
+	progressbar "66CCFF",3;
+	specialeffect2 EF_ENHANCE;
+
+	.@card[.@slot] = .@stone;
+	delitem .@stone, 1;
+	delequip .@part;
+	getitem2 .@equip_id,1,1,.@equip_refine,0,.@card[0],.@card[1],.@card[2],.@card[3];
+
+	mes "[Encantador Visual]";
+	mes "Encantamento aplicado com sucesso.";
+	close;
+}

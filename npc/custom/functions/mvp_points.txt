@@ -5,6 +5,12 @@ OnNPCKillEvent:
 	// Pega o ID do monstro morto
 	.@mob_id = killedrid;
 
+	.@map$ = strcharinfo(3);
+
+	// Nao contabiliza pontos no gs_room e nem nas instancias dele
+	if (.@map$ == "gs_room" || compare(.@map$, "0336#"))
+		end;
+
     // Verifica se o jogador está dentro de uma instância
 	if (instance_id() > 0)
 		end; // Dentro de instância, não ganha pontos

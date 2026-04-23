@@ -52,6 +52,11 @@ OnInit:
 
 OnNPCKillEvent:
 	.@mob_id = killedrid;
+	.@map$ = strcharinfo(3);
+
+	// Nao contabiliza kills no gs_room e nem nas instancias dele.
+	if (.@map$ == "gs_room" || compare(.@map$, "0336#"))
+		end;
 
 	// Mantem o mesmo comportamento do sistema atual: instancias nao contam.
 	if (instance_id() > 0)
