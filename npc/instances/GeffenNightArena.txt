@@ -1,0 +1,221 @@
+//===== rAthena Script =======================================
+//= Geffen Night Arena
+//===== Description: =========================================
+//= Instancia solo adaptada ao padrao custom do servidor.
+//= Entrada via F_InstanceEntry e fechamento com F_InstanceFinishBase.
+//============================================================
+
+-	script	GeffenNightArena_Instance#Custom	999,{
+	if (!attachrid(#INSTANCERID)) end;
+	#INSTANCERID = 0;
+
+	OnStartInstance:
+		if (getcharid(1) > 0) {
+			getpartymember(getcharid(1), 0);
+			if ($@partymembercount > 1) {
+				mes "[Dispositivo Dimensional]";
+				mes "A Geffen Night Arena so permite um aventureiro por vez.";
+				mes "Crie um grupo solo para acessar a instancia.";
+				close;
+			}
+		}
+
+		callfunc("F_InstanceEntry",
+			"Geffen Night Arena",
+			"Dispositivo Dimensional",
+			"geffen_night_arena",
+			"GeffenNightArena",
+			175,
+			"Geffen Night Arena"
+		);
+	end;
+}
+
+1@ge_sn,111,62,3	script	Dispositivo Dimensional#GNA	4_M_YURI,{
+	.@n$ = "[Dispositivo Dimensional]";
+
+	if (!is_party_leader()) {
+		mes .@n$;
+		mes "Somente o lider do grupo pode operar este dispositivo.";
+		close;
+	}
+
+	if ('gna_finished) {
+		if (#GNA_REWARD_INSTANCE != instance_id()) {
+			.@finish_result = callfunc("F_InstanceFinishBase", "Geffen Night Arena", "#GeffenNightArena_STATUS", 40, 4, "", "", 1, 20, 110002, 3000, 3, 0, "Geffen Night Arena");
+			if (.@finish_result == -1) {
+				mes .@n$;
+				mes "Voce esta carregando peso demais para receber as recompensas.";
+				mes "Libere espaco no inventario e fale comigo novamente.";
+				close;
+			}
+			#GNA_REWARD_INSTANCE = instance_id();
+		}
+
+		mes .@n$;
+		mes "Parabens. Todos os rounds foram concluidos.";
+		mes "Voltando ao ponto de salvamento.";
+		close2;
+		warp "SavePoint", 0, 0;
+		end;
+	}
+
+	if ('gna_failed) {
+		mes .@n$;
+		mes "O tempo limite do desafio foi atingido.";
+		mes "Voce pode retornar depois do proximo reset diario.";
+		close2;
+		warp "SavePoint", 0, 0;
+		end;
+	}
+
+	if ('gna_round_in_progress) {
+		mes .@n$;
+		mes "O round atual ainda esta em andamento.";
+		close;
+	}
+
+	if ('gna_round == 1) {
+		mes .@n$;
+		mes "Cada round possui limite de 1 minuto.";
+		mes "Ao vencer o oponente, fale comigo para iniciar o proximo round.";
+		next;
+	}
+
+	mes .@n$;
+	mes "Deseja iniciar o round " + 'gna_round + "?";
+	next;
+	switch(select("Iniciar round:Desistir e sair")) {
+	case 1:
+		disablenpc instance_npcname(strnpcinfo(0));
+		'gna_round_in_progress = 1;
+		close2;
+		donpcevent instance_npcname("Controlador#GNA") + "::OnStartRound";
+		end;
+	case 2:
+		mes .@n$;
+		mes "Voltando ao ponto de salvamento.";
+		close2;
+		warp "SavePoint", 0, 0;
+		end;
+	}
+	end;
+}
+
+1@ge_sn,1,1,0	script	Controlador#GNA	-1,{
+	end;
+
+OnInstanceInit:
+	'gna_map$ = instance_mapname("1@ge_sn");
+	'gna_round = 1;
+	'gna_round_in_progress = 0;
+	'gna_finished = 0;
+	'gna_failed = 0;
+	'gna_current_mob_id = 0;
+	'gna_current_mob_hp = 0;
+	setarray 'gna_mob_pool[0],20856,20857,20858,20859,20860,20861,20862,20863,20864,20865,20866,20867,20868,20869,20870,20871;
+	end;
+
+OnStartRound:
+	stopnpctimer;
+	killmonster 'gna_map$, instance_npcname(strnpcinfo(0)) + "::OnMobDied";
+
+	if ('gna_round < 10) {
+		.@idx = rand(0, getarraysize('gna_mob_pool) - 1);
+		'gna_current_mob_id = 'gna_mob_pool[.@idx];
+	} else {
+		'gna_current_mob_id = 20872;
+	}
+
+	switch('gna_round) {
+	case 1:
+		'gna_current_mob_hp = getmonsterinfo('gna_current_mob_id, MOB_MAXHP) + 4800000;
+		break;
+	case 2:
+		'gna_current_mob_hp = getmonsterinfo('gna_current_mob_id, MOB_MAXHP) + 12400000;
+		break;
+	case 3:
+		'gna_current_mob_hp = getmonsterinfo('gna_current_mob_id, MOB_MAXHP) + 34700000;
+		break;
+	case 4:
+		'gna_current_mob_hp = getmonsterinfo('gna_current_mob_id, MOB_MAXHP) + 107600000;
+		break;
+	case 5:
+		'gna_current_mob_hp = getmonsterinfo('gna_current_mob_id, MOB_MAXHP) + 362400000;
+		break;
+	case 6:
+		'gna_current_mob_hp = getmonsterinfo('gna_current_mob_id, MOB_MAXHP) + 516300000;
+		break;
+	case 7:
+		'gna_current_mob_hp = getmonsterinfo('gna_current_mob_id, MOB_MAXHP) + 555900000;
+		break;
+	case 8:
+		'gna_current_mob_hp = getmonsterinfo('gna_current_mob_id, MOB_MAXHP) + 972300000;
+		break;
+	case 9:
+		'gna_current_mob_hp = getmonsterinfo('gna_current_mob_id, MOB_MAXHP) + 1337300000;
+		break;
+	default:
+		'gna_current_mob_hp = getmonsterinfo('gna_current_mob_id, MOB_MAXHP) + 1416300000;
+		break;
+	}
+
+	instance_announce 0, "Round " + 'gna_round + " esta prestes a comecar.", bc_map, "0xFFCE00";
+	initnpctimer;
+	end;
+
+OnTimer1000:
+	instance_announce 0, "O oponente sera " + getmonsterinfo('gna_current_mob_id, MOB_NAME) + ".", bc_map, "0xFFCE00";
+	end;
+
+OnTimer5000:
+	instance_announce 0, "5 segundos para comecar.", bc_map, "0xFFCE00";
+	end;
+
+OnTimer6000:
+	instance_announce 0, "4 segundos para comecar.", bc_map, "0xFFCE00";
+	end;
+
+OnTimer7000:
+	instance_announce 0, "3 segundos para comecar.", bc_map, "0xFFCE00";
+	end;
+
+OnTimer8000:
+	instance_announce 0, "2 segundos para comecar.", bc_map, "0xFFCE00";
+	end;
+
+OnTimer9000:
+	instance_announce 0, "1 segundo para comecar.", bc_map, "0xFFCE00";
+	end;
+
+OnTimer10000:
+	.@label$ = instance_npcname(strnpcinfo(0)) + "::OnMobDied";
+	monster 'gna_map$, 112, 48, "--ja--", 'gna_current_mob_id, 1, .@label$;
+	'gna_boss_gid = $@mobid[0];
+	setunitdata 'gna_boss_gid, UMOB_HP, 'gna_current_mob_hp;
+	end;
+
+OnTimer70000:
+	stopnpctimer;
+	killmonster 'gna_map$, instance_npcname(strnpcinfo(0)) + "::OnMobDied";
+	'gna_round_in_progress = 0;
+	'gna_failed = 1;
+	instance_announce 0, "O tempo limite do round foi atingido.", bc_map, "0xFFCE00";
+	enablenpc instance_npcname("Dispositivo Dimensional#GNA");
+	end;
+
+OnMobDied:
+	stopnpctimer;
+	'gna_round_in_progress = 0;
+
+	if ('gna_round >= 10) {
+		'gna_finished = 1;
+		instance_announce 0, "Voce concluiu a Geffen Night Arena.", bc_map, "0xFFCE00";
+	} else {
+		'gna_round++;
+		instance_announce 0, "Round concluido. Fale com o dispositivo para continuar.", bc_map, "0xFFCE00";
+	}
+
+	enablenpc instance_npcname("Dispositivo Dimensional#GNA");
+	end;
+}

@@ -23,7 +23,7 @@ OnAtcommand:
 	}
 
 	.@now = gettimetick(2);
-	.@reset_ver = 9;
+	.@reset_ver = 11;
 	if (#INSTANCE_MENU_RESET_VER != .@reset_ver || #INSTANCE_MENU_RESET_TICK <= .@now) {
 		callfunc("F_InstanceMenuResetStatus", "poringvillage", "PORING");
 		callfunc("F_InstanceMenuResetStatus", "orcMemory", "ORCMEMORY");
@@ -33,6 +33,8 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatus", "santuario_selado", "SANTUARIOSELADO");
 		callfunc("F_InstanceMenuResetStatus", "wlcr", "WLCR");
 		callfunc("F_InstanceMenuResetStatus", "gmt", "GMT");
+		callfunc("F_InstanceMenuResetStatus", "geffen_night_arena", "GeffenNightArena");
+		callfunc("F_InstanceMenuResetStatus", "constellation_tower", "ConstellationTower");
 		callfunc("F_InstanceMenuResetStatus", "sara_memory", "SaraMemory");
 		callfunc("F_InstanceMenuResetStatus", "infinite_space", "InfiniteSpace");
 		callfunc("F_InstanceMenuResetStatus", "BangungotHospital", "BangungotHospital");
@@ -85,6 +87,8 @@ OnAtcommand:
 	.@opt6$ = callfunc("F_InstanceMenuOption", "[75+] Altar do Selo", "santuario_selado", "SANTUARIOSELADO");
 	.@opt7$ = callfunc("F_InstanceMenuOption", "[90+] Laboratorio Werner", "wlcr", "WLCR");
 	.@opt8$ = callfunc("F_InstanceMenuOption", "[90+] Torneio da Magia(Solo)", "gmt", "GMT");
+	.@opt44$ = callfunc("F_InstanceMenuOption", "[175+] Geffen Night Arena (Solo)", "geffen_night_arena", "GeffenNightArena");
+	.@opt45$ = callfunc("F_InstanceMenuOption", "[175+] Constellation Tower", "constellation_tower", "ConstellationTower");
 	.@opt9$ = callfunc("F_InstanceMenuOption", "[95+] Memorias de Sara", "sara_memory", "SaraMemory");
 	.@opt10$ = callfunc("F_InstanceMenuOption", "[100+] Espaco Infinito", "infinite_space", "InfiniteSpace");
 	.@opt11$ = callfunc("F_InstanceMenuOption", "[100+] Floresta Nebulosa", "hazy_forest", "HazyForest");
@@ -163,7 +167,9 @@ OnAtcommand:
 		.@opt35$,
 		.@opt38$,
 		.@opt40$,
-		.@opt43$
+		.@opt43$,
+		.@opt44$,
+		.@opt45$
 	);	close2;
 
 	switch(.@s) {
@@ -376,6 +382,14 @@ OnAtcommand:
 		case 43:
 			#INSTANCENAME$ = "BangungotHospital";
 			doevent "BangungotHospital_Instance#Custom::OnStartInstance";
+			end;
+		case 44:
+			#INSTANCENAME$ = "GeffenNightArena";
+			doevent "GeffenNightArena_Instance#Custom::OnStartInstance";
+			end;
+		case 45:
+			#INSTANCENAME$ = "ConstellationTower";
+			doevent "ConstellationTower_Instance#Custom::OnStartInstance";
 			end;
 	}
 	end;
