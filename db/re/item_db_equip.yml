@@ -72998,6 +72998,23 @@ Body:
       bonus bHealPower,2*.@val;
       bonus bHealPower2,.@val;
       bonus bAddItemHealRate,.@val;
+  - Id: 15206
+    AegisName: Tatenashi_Armor
+    Name: Armadura Tatenashi
+    Type: Armor
+    Buy: 20
+    Weight: 600
+    Defense: 120
+    Slots: 1
+    Locations:
+      Armor: true
+    ArmorLevel: 1
+    EquipLevelMin: 99
+    Refineable: true
+    Script: |
+      .@r = getrefine();
+      bonus bNoKnockback;
+      bonus bVit,min(.@r,14);
   - Id: 15207
     AegisName: 2017RTCRobe
     Name: 2017 RTC Battle Robe
@@ -89993,6 +90010,37 @@ Body:
          bonus2 bSkillAtk,"SO_SPELLFIST",25;
       if (.@r>8)
          bonus bAspd,5;
+  - Id: 18795
+    AegisName: Night_Sparrow_Hat
+    Name: Bone com Asinhas
+    Type: Armor
+    Buy: 20
+    Weight: 200
+    Defense: 5
+    Slots: 1
+    Jobs:
+      Dancer: true
+    Classes:
+      All_Third: true
+      Fourth: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 1
+    EquipLevelMin: 100
+    Refineable: true
+    View: 913
+    Script: |
+      .@r = getrefine();
+      bonus bStr,1;
+      bonus bLuk,2;
+      bonus bLongAtkRate,5;
+      if (.@r >= 7) {
+         bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM",15;
+         bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM_MELEE",15;
+      }
+      if (.@r >= 9) {
+         bonus2 bSkillCooldown,"WM_SEVERE_RAINSTORM",-2000;
+      }
   - Id: 18796
     AegisName: RWC_Champ_Crown_QF
     Name: RWC Champ Crown Fourth Place
@@ -97827,6 +97875,33 @@ Body:
     View: 1697
     Script: |
       bonus2 bSubEle,Ele_All,5;
+  - Id: 19315
+    AegisName: Garden_Of_Eden_BR
+    Name: Chapeu do Eden
+    Type: Armor
+    Buy: 20
+    Weight: 400
+    Defense: 5
+    Slots: 1
+    Locations:
+      Head_Top: true
+    ArmorLevel: 1
+    EquipLevelMin: 90
+    Refineable: true
+    View: 1653
+    Script: |
+      .@r = getrefine();
+      bonus bInt,5;
+      bonus bDex,5;
+      bonus2 bMagicAtkEle,Ele_All,15;
+      if (.@r >= 8) {
+         bonus bVariableCastrate,-15;
+      }
+      if (.@r >= 11) {
+         bonus2 bMagicAtkEle,Ele_All,20;
+      }
+    UnEquipScript: |
+      sc_end SC_TELEKINESIS_INTENSE;
   - Id: 19316
     AegisName: Squirrel_Ear_Hat_BR
     Name: Aeschylus's Hood
@@ -216361,6 +216436,25 @@ Body:
       bonus bAspdRate,7;
       bonus bVariableCastrate,-10;
       bonus2 bMagicAddEle,Ele_All,10;
+  - Id: 490021
+    AegisName: Thor_Gauntlets
+    Name: Luvas de Thor
+    Type: Armor
+    Weight: 800
+    Defense: 2
+    Slots: 1
+    Locations:
+      Both_Accessory: true
+    ArmorLevel: 1
+    EquipLevelMin: 100
+    Script: |
+      skill "WZ_VERMILION",5;
+      bonus bAtkRate,5;
+      bonus bMatkRate,5;
+      bonus bAspdRate,5;
+      bonus bDelayrate,-10;
+      bonus bVariableCastrate,-5;
+      bonus bMdef,15;
   - Id: 490022
     AegisName: TrustRing
     Name: Thunder Ring
