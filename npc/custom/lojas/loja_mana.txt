@@ -1,35 +1,29 @@
--	script	Loja de GLastHeim	-1,{
+moc_para01,34,32,4	script	Loja de Mana	4_F_JOB_BLACKSMITH,{
 OnTalk:
 	mes "[Artesão de Hugin]";
 	mes "Escolha o que deseja fazer:";
 	next;
-	switch(select("Abrir Loja GlastHeim:Mantos Temporais:Encantar Botas Temporais:Slotar Botas Temporais:Sair")) {
+	switch(select("Abrir Loja GlastHeim:Encantar Botas Temporais:Slotar Botas Temporais:Sair")) {
 
 		case 1:
 			close2;
-			// Abre a loja de botas temporais.
-			callshop "boots_temporal_barter",1;
+			// Abre a loja de botas, mantos e armaduras.
+			callshop "mana_equipment_barter",1;
 			end;
 
 		case 2:
-			close2;
-			// Abre a loja de mantos temporais.
-			callshop "temporal_manteau_barter",1;
-			end;
-
-		case 3:
 			close2;
 			// Executa o script do encantador.
 			doevent "Mago de Hugin#pa0829::OnTalk";
 			end;
 
-		case 4:
+		case 3:
 			close2;
 			// Executa o script do NPC que faz slot.
 			doevent "Hugins Craftsman#pa0829::OnTalk";
 			end;
 
-		case 5:
+		case 4:
 			mes "[Artesão de Hugin]";
 			mes "Volte sempre!";
 			close;

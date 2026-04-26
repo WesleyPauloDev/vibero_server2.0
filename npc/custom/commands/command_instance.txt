@@ -33,6 +33,7 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatus", "santuario_selado", "SANTUARIOSELADO");
 		callfunc("F_InstanceMenuResetStatus", "wlcr", "WLCR");
 		callfunc("F_InstanceMenuResetStatus", "gmt", "GMT");
+		callfunc("F_InstanceMenuResetStatus", "malangdo_culvert", "MalangdoCulvert");
 		callfunc("F_InstanceMenuResetStatus", "geffen_night_arena", "GeffenNightArena");
 		callfunc("F_InstanceMenuResetStatus", "constellation_tower", "ConstellationTower");
 		callfunc("F_InstanceMenuResetStatus", "sara_memory", "SaraMemory");
@@ -87,6 +88,7 @@ OnAtcommand:
 	.@opt6$ = callfunc("F_InstanceMenuOption", "[75+] Altar do Selo", "santuario_selado", "SANTUARIOSELADO");
 	.@opt7$ = callfunc("F_InstanceMenuOption", "[90+] Laboratorio Werner", "wlcr", "WLCR");
 	.@opt8$ = callfunc("F_InstanceMenuOption", "[90+] Torneio da Magia(Solo)", "gmt", "GMT");
+	.@opt46$ = callfunc("F_InstanceMenuOption", "[90+] Esgoto de Malangdo", "malangdo_culvert", "MalangdoCulvert");
 	.@opt44$ = callfunc("F_InstanceMenuOption", "[175+] Geffen Night Arena (Solo)", "geffen_night_arena", "GeffenNightArena");
 	.@opt45$ = callfunc("F_InstanceMenuOption", "[175+] Constellation Tower", "constellation_tower", "ConstellationTower");
 	.@opt9$ = callfunc("F_InstanceMenuOption", "[95+] Memorias de Sara", "sara_memory", "SaraMemory");
@@ -133,6 +135,7 @@ OnAtcommand:
 		.@opt6$,
 		.@opt7$,
 		.@opt8$,
+		.@opt46$,
 		.@opt9$,
 		.@opt10$,
 		.@opt11$,
@@ -171,6 +174,11 @@ OnAtcommand:
 		.@opt44$,
 		.@opt45$
 	);	close2;
+
+	if (.@s == 9)
+		.@s = 46;
+	else if (.@s > 9)
+		.@s--;
 
 	switch(.@s) {
 		case 1:
@@ -390,6 +398,10 @@ OnAtcommand:
 		case 45:
 			#INSTANCENAME$ = "ConstellationTower";
 			doevent "ConstellationTower_Instance#Custom::OnStartInstance";
+			end;
+		case 46:
+			#INSTANCENAME$ = "MalangdoCulvert";
+			doevent "MalangdoCulvert_Instance#Custom::OnStartInstance";
 			end;
 	}
 	end;

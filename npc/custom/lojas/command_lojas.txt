@@ -9,7 +9,7 @@ OnAtcommand:
 
 function	script	Menu_Lojas	{
 	mes "[Menu de Lojas]";
-    switch(select("Eden", "Anubis", "Instancia", "Loja de Mana", "Cheffenia", "Bio5", "Votos", "Pontos MVP", "Presenca", "Pets", "Minerios")) {
+    switch(select("Eden", "Anubis", "Instancia", "Cheffenia", "Bio5", "Votos", "Pontos MVP", "Presenca", "Pets", "Minerios")) {
         case 1: // Eden
             callfunc("F_Loja_Eden_Menu");
             end;
@@ -55,11 +55,7 @@ function	script	Menu_Lojas	{
                     callshop "zelunium_instancia_barter",1;
                     end;
             }
-        case 4:  // Loja de Mana
-            next;
-            doEvent "Loja de GLastHeim::OnTalk";
-            end;
-        case 5:  // Cheffenia
+        case 4:  // Cheffenia
             switch(select("Cheffenia Normal", "Cheffenia Hard")) {
                 case 1:
                     switch(select("Equipamentos", "Armas", "Itens")) {
@@ -125,7 +121,7 @@ function	script	Menu_Lojas	{
                             }
                     }
             }
-        case 6:  // Bio5
+        case 5:  // Bio5
             switch(select("Bio5 Normal", "Bio5 Hard")) {
                 case 1:
                     switch(select("Equipamentos", "Armas", "Itens")) {
@@ -191,19 +187,19 @@ function	script	Menu_Lojas	{
                             }
                     }
             }
-        case 7:  // Votos
+        case 6:  // Votos
             next;
             doEvent "Loja de Votos::OnTalk";
             end;
-        case 8:  // Pontos MVP
+        case 7:  // Pontos MVP
             next;
             doEvent "Loja de Pontos MVP::OnTalk";
             end;
-        case 9:  // Pontos de Presenca
+        case 8:  // Pontos de Presenca
             next;
             doEvent "Loja de Presenca::OnTalk";
             end;
-        case 10:  // Pets
+        case 9:  // Pets
             switch(select("Comprar Pet:Vender Pet")) {
                 case 1:
                     callshop "pet_egg_barter_shop",1;
@@ -212,7 +208,7 @@ function	script	Menu_Lojas	{
                     callfunc("PetEggSellMenu");
                     end;
             }
-        case 11:  // Minerios
+        case 10:  // Minerios
             callshop "ore_barter_shop",1;
             end;
     }
@@ -363,4 +359,3 @@ function	script	PetEggSellMenu	{
 	mes "Recebeu " + .@tickets + "x " + getitemname(.@pet_ticket_id) + ".";
 	close;
 }
-
