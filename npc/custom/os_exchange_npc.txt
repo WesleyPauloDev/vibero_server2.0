@@ -281,99 +281,59 @@ L_AutomaticEpicModules:
 
 L_AutomaticInsert:
 	mes "[Operador OS]";
-	mes "Posso inserir modulos nos equipamentos Automatic equipados.";
+	mes "Escolha primeiro o equipamento Automatic equipado que recebera o modulo.";
 	next;
-	switch(select("Engine Wing:Armor:Leg:Accessorio Direito:Accessorio Esquerdo:Cancelar")) {
-	case 1:
-		.@part = EQI_GARMENT;
-		setarray .@equip_required[0],480020,480021;
-		break;
-	case 2:
-		.@part = EQI_ARMOR;
-		setarray .@equip_required[0],450127,450128;
-		break;
-	case 3:
-		.@part = EQI_SHOES;
-		setarray .@equip_required[0],470022,470023;
-		break;
-	case 4:
-		.@part = EQI_ACC_R;
-		setarray .@equip_required[0],490024,490026;
-		break;
-	case 5:
-		.@part = EQI_ACC_L;
-		setarray .@equip_required[0],490025,490027;
-		break;
-	default:
+
+	.@menu$ = "";
+	.@equip_count = 0;
+
+	if (getequipid(EQI_GARMENT) == 480020 || getequipid(EQI_GARMENT) == 480021) {
+		.@part_list[.@equip_count] = EQI_GARMENT;
+		.@menu$ += getequipname(EQI_GARMENT) + " [Engine Wing]:";
+		.@equip_count++;
+	}
+	if (getequipid(EQI_ARMOR) == 450127 || getequipid(EQI_ARMOR) == 450128) {
+		.@part_list[.@equip_count] = EQI_ARMOR;
+		.@menu$ += getequipname(EQI_ARMOR) + " [Armor]:";
+		.@equip_count++;
+	}
+	if (getequipid(EQI_SHOES) == 470022 || getequipid(EQI_SHOES) == 470023) {
+		.@part_list[.@equip_count] = EQI_SHOES;
+		.@menu$ += getequipname(EQI_SHOES) + " [Leg]:";
+		.@equip_count++;
+	}
+	if (getequipid(EQI_ACC_R) == 490024 || getequipid(EQI_ACC_R) == 490026) {
+		.@part_list[.@equip_count] = EQI_ACC_R;
+		.@menu$ += getequipname(EQI_ACC_R) + " [Acessorio Direito]:";
+		.@equip_count++;
+	}
+	if (getequipid(EQI_ACC_L) == 490025 || getequipid(EQI_ACC_L) == 490027) {
+		.@part_list[.@equip_count] = EQI_ACC_L;
+		.@menu$ += getequipname(EQI_ACC_L) + " [Acessorio Esquerdo]:";
+		.@equip_count++;
+	}
+
+	if (!.@equip_count) {
+		mes "[Operador OS]";
+		mes "Voce nao possui nenhum equipamento Automatic elegivel equipado.";
+		mes "Equipe Armor, Engine Wing, Leg ou Acessorios Automatic e tente novamente.";
 		close;
 	}
 
+	.@equip_choice = select(.@menu$ + "Cancelar") - 1;
+	if (.@equip_choice >= .@equip_count)
+		close;
+
+	.@part = .@part_list[.@equip_choice];
 	.@equip_id = getequipid(.@part);
 	.@equip_name$ = getequipname(.@part);
 	.@refine = getequiprefinerycnt(.@part);
 	for (.@i = 0; .@i < 4; ++.@i)
 		.@card[.@i] = getequipcardid(.@part,.@i);
 
-	mes "[Operador OS]";
-	mes "Selecione o grau do modulo que deseja inserir.";
-	next;
-	switch(select("Cancelar:Normal:Rare:Unique:Legendary:Epic 1:Epic 2:Epic 3")) {
-	case 1:
-		close;
-	case 2:
-		setarray .@module_etc[0],1000105,1000106,1000107,1000108,1000109,1000110,1000111,1000112;
-		break;
-	case 3:
-		setarray .@module_etc[0],1000113,1000114,1000115,1000116,1000117,1000118,1000119,1000120,1000121,1000122,1000123,1000124,1000125,1000126,1000127;
-		break;
-	case 4:
-		setarray .@module_etc[0],1000128,1000129,1000130,1000131,1000132,1000133,1000134,1000135,1000136,1000137,1000138,1000139,1000140,1000141,1000142,1000143,1000207,1000208;
-		break;
-	case 5:
-		setarray .@module_etc[0],1000144,1000145,1000146,1000147,1000148,1000149;
-		break;
-	case 6:
-		setarray .@module_etc[0],1000152,1000153,1000154,1000155,1000156,1000157,1000158,1000159,1000160,1000161,1000162,1000163,1000164,1000165,1000166,1000167,1000168;
-		break;
-	case 7:
-		setarray .@module_etc[0],1000169,1000170,1000171,1000172,1000173,1000174,1000175,1000176,1000177,1000178,1000179,1000180,1000181,1000182,1000183,1000184,1000185;
-		break;
-	case 8:
-		setarray .@module_etc[0],1000186,1000187,1000188,1000189,1000190,1000191,1000192,1000193,1000194,1000195,1000196,1000197,1000198,1000199,1000200,1000201,1000202;
-		break;
-	}
-
-	.@size = getarraysize(.@module_etc);
-	.@menu$ = "Cancelar:";
-	for (.@i = 0; .@i < .@size; ++.@i) {
-		if (countitem(.@module_etc[.@i]) < 1)
-			.@menu$ += "^808080" + getitemname(.@module_etc[.@i]) + " (0)^000000:";
-		else
-			.@menu$ += getitemname(.@module_etc[.@i]) + " (" + countitem(.@module_etc[.@i]) + "):";
-	}
-	.@s = select(.@menu$) - 2;
-	if (.@s < 0)
-		close;
-	.@module_id = .@module_etc[.@s];
-
-	if (countitem(.@module_id) < 1) {
-		mes "[Operador OS]";
-		mes "Voce precisa ter o modulo escolhido no inventario.";
-		close;
-	}
-	if (.@equip_required[0] != .@equip_id && .@equip_required[1] != .@equip_id) {
-		mes "[Operador OS]";
-		mes "Equipe primeiro o equipamento Automatic correto para esse slot.";
-		close;
-	}
 	if (.@card[1] > 0) {
 		mes "[Operador OS]";
 		mes "Esse equipamento Automatic ja esta com a capacidade maxima de modulos.";
-		close;
-	}
-	if (.@module_id < 1000105 || .@module_id == 1000150 || .@module_id == 1000151 || (.@module_id >= 1000203 && .@module_id != 1000207 && .@module_id != 1000208)) {
-		mes "[Operador OS]";
-		mes "O modulo selecionado nao e valido para esse sistema.";
 		close;
 	}
 
@@ -390,21 +350,76 @@ L_AutomaticInsert:
 		}
 		break;
 	case EQI_SHOES:
-		setarray .@module_etc_data[0],1000105,3,1000106,3,1000119,2,1000120,2,1000121,2,1000134,1,1000141,1,1000144,1,1000145,1,1000146,1,1000147,1,1000148,1,1000149,1;
+		setarray .@module_etc_data[0],1000105,3,1000106,3,1000119,2,1000120,2,1000121,2,1000133,1,1000134,1,1000141,1,1000144,1,1000145,1,1000146,1,1000147,1,1000148,1,1000149,1;
 		break;
 	case EQI_ACC_L:
 	case EQI_ACC_R:
 		setarray .@module_etc_data[0],1000107,3,1000108,3,1000109,3,1000110,3,1000111,3,1000112,3,1000113,2,1000114,2,1000115,1,1000116,1,1000117,1,1000118,1,1000136,1,1000137,1,1000138,1,1000139,1,1000143,1;
 		break;
-	}
-
-	.@data_index = inarray(.@module_etc_data, .@module_id);
-	if (.@data_index == -1) {
-		mes "[Operador OS]";
-		mes "Esse modulo nao pode ser inserido nesse equipamento.";
+	default:
 		close;
 	}
+
+	mes "[Operador OS]";
+	mes "Escolha o modulo para inserir em:";
+	mes "^0055FF" + .@equip_name$ + "^000000";
+	next;
+
+	.@size = getarraysize(.@module_etc_data);
+	.@module_count = .@size / 2;
+	.@page_size = 15;
+	.@page = 0;
+
+	while (true) {
+		.@start = .@page * .@page_size;
+		.@end = .@start + .@page_size;
+		if (.@end > .@module_count)
+			.@end = .@module_count;
+
+		.@menu$ = "Cancelar:";
+		for (.@i = .@start; .@i < .@end; .@i++) {
+			.@module_id = .@module_etc_data[.@i * 2];
+			if (countitem(.@module_id) < 1)
+				.@menu$ += "^808080" + getitemname(.@module_id) + " (0)^000000:";
+			else
+				.@menu$ += getitemname(.@module_id) + " (" + countitem(.@module_id) + "):";
+		}
+		if (.@page > 0)
+			.@menu$ += "Pagina anterior:";
+		if (.@end < .@module_count)
+			.@menu$ += "Proxima pagina:";
+
+		.@pick = select(.@menu$) - 1;
+		if (.@pick == 0)
+			close;
+
+		.@listed = .@end - .@start;
+		if (.@pick <= .@listed) {
+			.@data_index = (.@start + .@pick - 1) * 2;
+			break;
+		}
+
+		.@nav = .@pick - .@listed;
+		if (.@page > 0 && .@nav == 1) {
+			.@page--;
+			continue;
+		}
+		.@page++;
+	}
+
+	.@module_id = .@module_etc_data[.@data_index];
 	.@max_module = .@module_etc_data[.@data_index + 1];
+
+	if (countitem(.@module_id) < 1) {
+		mes "[Operador OS]";
+		mes "Voce precisa ter o modulo escolhido no inventario.";
+		close;
+	}
+	if (.@module_id < 1000105 || .@module_id == 1000150 || .@module_id == 1000151 || (.@module_id >= 1000203 && .@module_id != 1000207 && .@module_id != 1000208)) {
+		mes "[Operador OS]";
+		mes "O modulo selecionado nao e valido para esse sistema.";
+		close;
+	}
 
 	for (.@i = 1000105; .@i < 1000203; ++.@i) {
 		if (.@i == 1000150 || .@i == 1000151)
@@ -449,7 +464,6 @@ L_AutomaticInsert:
 	mes "[Operador OS]";
 	mes "Modulo inserido com sucesso.";
 	close;
-
 L_AutomaticInfo:
 	mes "[Operador OS]";
 	mes "O sistema Automatic usa equipamentos da linha Illusion, Barmil Ticket e modulos.";

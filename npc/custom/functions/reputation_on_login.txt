@@ -5,11 +5,14 @@ OnInit:
 	end;
 
 OnPCLoginEvent:
-	addtimer 3000, strnpcinfo(3)+"::OnGrantGmTitle";
+	if (getattachedrid())
+		addtimer 3000, strnpcinfo(3)+"::OnGrantGmTitle";
 	callsub S_UpdateBonus;
 	end;
 
 OnGrantGmTitle:
+	if (!getattachedrid())
+		end;
 	if (getgroupid() >= 99 && !achievementexists(110014)) {
 		achievementcomplete(110014);
 	}
