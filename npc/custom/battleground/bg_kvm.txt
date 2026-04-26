@@ -6,7 +6,7 @@ OnInit:
 	disablenpc "Guillaume";	
 
 	// Recupera o estado apos @reloadscript dentro do horario do evento.
-	if (gettime(DT_HOUR) >= 18 && gettime(DT_HOUR) < 19) {
+	if (gettime(DT_HOUR) >= 15 && gettime(DT_HOUR) < 20) {
 		.bg_status = 1;
 		enablenpc "Croix";
 		enablenpc "Guillaume";
@@ -16,7 +16,7 @@ OnInit:
 	
 	end;
     
-OnClock1800:   
+OnClock1500:   
     .bg_status = 1; 
 	
 	enablenpc "Croix";
@@ -25,7 +25,7 @@ OnClock1800:
     announce "Battleground aberto! Use @bg.", bc_all, 0xFF0000;
 	end;
 
-OnClock1900:
+OnClock2000:
     if (.bg_status == 0) end;
     announce "Battleground encerrado.", bc_all;
     .bg_status = 0;
