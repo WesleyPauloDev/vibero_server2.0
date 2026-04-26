@@ -71,6 +71,18 @@ OnJoin:
 
 	callsub S_CleanupQueue;
 
+	.@my_ip$ = getcharip();
+	for (.@i = 0; .@i < getarraysize($@KvM01_CMD_CID); .@i++) {
+		if (!isloggedin($@KvM01_CMD_AID[.@i], $@KvM01_CMD_CID[.@i]))
+			continue;
+
+		.@other_ip$ = getcharip($@KvM01_CMD_AID[.@i]);
+		if (.@other_ip$ != "" && .@other_ip$ == .@my_ip$) {
+			dispbottom "Entrada bloqueada: ja existe uma conta com o mesmo IP na fila do KVM.";
+			end;
+		}
+	}
+
 	.@team1 = callsub(S_CountQueue, 1);
 	.@team2 = callsub(S_CountQueue, 2);
 
@@ -100,7 +112,7 @@ OnJoin:
 	else
 		dispbottom "Voce entrou na fila KVM pelo time Croix. Continue jogando, voce sera chamado quando iniciar.";
 
-	announce "[KVM] "+strcharinfo(0)+" entrou na fila do Battleground. Use @bg para participar!", bc_all, 0x00FF00;
+	announce "[BG] "+strcharinfo(0)+" entrou na fila do Battleground. Use @bg para participar!", bc_all, 0x00FF00;
 
 	callsub S_CheckStart;
 	end;
@@ -112,6 +124,18 @@ OnPCLogoutEvent:
 
 S_CheckStart:
 	callsub S_CleanupQueue;
+
+	.@my_ip$ = getcharip();
+	for (.@i = 0; .@i < getarraysize($@KvM01_CMD_CID); .@i++) {
+		if (!isloggedin($@KvM01_CMD_AID[.@i], $@KvM01_CMD_CID[.@i]))
+			continue;
+
+		.@other_ip$ = getcharip($@KvM01_CMD_AID[.@i]);
+		if (.@other_ip$ != "" && .@other_ip$ == .@my_ip$) {
+			dispbottom "Entrada bloqueada: ja existe uma conta com o mesmo IP na fila do KVM.";
+			end;
+		}
+	}
 
 	.@team1 = callsub(S_CountQueue, 1);
 	.@team2 = callsub(S_CountQueue, 2);
@@ -137,6 +161,18 @@ OnTimer30000:
 	stopnpctimer;
 	$@KvM01_CMD_Ready = 0;
 	callsub S_CleanupQueue;
+
+	.@my_ip$ = getcharip();
+	for (.@i = 0; .@i < getarraysize($@KvM01_CMD_CID); .@i++) {
+		if (!isloggedin($@KvM01_CMD_AID[.@i], $@KvM01_CMD_CID[.@i]))
+			continue;
+
+		.@other_ip$ = getcharip($@KvM01_CMD_AID[.@i]);
+		if (.@other_ip$ != "" && .@other_ip$ == .@my_ip$) {
+			dispbottom "Entrada bloqueada: ja existe uma conta com o mesmo IP na fila do KVM.";
+			end;
+		}
+	}
 
 	.@team1 = callsub(S_CountQueue, 1);
 	.@team2 = callsub(S_CountQueue, 2);
@@ -315,7 +351,7 @@ OnPCKillEvent:
 	if (.@victim$ == "")
 		.@victim$ = "um jogador";
 
-	announce "[KVM] "+.@killer$+" matou "+.@victim$+"!", bc_all, 0xFF0000;
+	announce "[BG] "+.@killer$+" matou "+.@victim$+"!", bc_all, 0xFF0000;
 
 	if ((.@now - kvm_bg_lastkill_time) <= 10)
 		kvm_bg_streak_combo++;
@@ -326,22 +362,22 @@ OnPCKillEvent:
 
 	.@played_combo = 0;
 	if (kvm_bg_streak_combo == 2) {
-		announce "[KVM] "+.@killer$+" fez DOUBLE KILL!", bc_all, 0xFF0000;
+		announce "[BG] "+.@killer$+" fez DOUBLE KILL!", bc_all, 0xFF0000;
 		soundeffectall "kills/double_kill.wav", 0, strcharinfo(3);
 		.@played_combo = 1;
 	}
 	else if (kvm_bg_streak_combo == 3) {
-		announce "[KVM] "+.@killer$+" fez TRIPLE KILL!", bc_all, 0xFF0000;
+		announce "[BG] "+.@killer$+" fez TRIPLE KILL!", bc_all, 0xFF0000;
 		soundeffectall "kills/triple_kill.wav", 0, strcharinfo(3);
 		.@played_combo = 1;
 	}
 	else if (kvm_bg_streak_combo == 4) {
-		announce "[KVM] "+.@killer$+" fez MANIAC!!", bc_all, 0xFF0000;
+		announce "[BG] "+.@killer$+" fez MANIAC!!", bc_all, 0xFF0000;
 		soundeffectall "kills/maniac.wav", 0, strcharinfo(3);
 		.@played_combo = 1;
 	}
 	else if (kvm_bg_streak_combo >= 5) {
-		announce "[KVM] "+.@killer$+" fez SAVAGE!!!", bc_all, 0xFF0000;
+		announce "[BG] "+.@killer$+" fez SAVAGE!!!", bc_all, 0xFF0000;
 		soundeffectall "kills/savage.wav", 0, strcharinfo(3);
 		.@played_combo = 1;
 	}
@@ -349,28 +385,28 @@ OnPCKillEvent:
 	if (!.@played_combo) {
 		switch (kvm_bg_streak_total) {
 			case 3:
-				announce "[KVM] "+.@killer$+" esta em KILLING SPREE!", bc_all, 0xFF0000;
+				announce "[BG] "+.@killer$+" esta em KILLING SPREE!", bc_all, 0xFF0000;
 				soundeffectall "kills/killing_spree.wav", 0, strcharinfo(3);
 				break;
 			case 4:
-				announce "[KVM] "+.@killer$+" esta em MEGA KILL!", bc_all, 0xFF0000;
+				announce "[BG] "+.@killer$+" esta em MEGA KILL!", bc_all, 0xFF0000;
 				soundeffectall "kills/mega_kill.wav", 0, strcharinfo(3);
 				break;
 			case 5:
-				announce "[KVM] "+.@killer$+" esta UNSTOPPABLE!!", bc_all, 0xFF0000;
+				announce "[BG] "+.@killer$+" esta UNSTOPPABLE!!", bc_all, 0xFF0000;
 				soundeffectall "kills/unstoppable.wav", 0, strcharinfo(3);
 				break;
 			case 6:
-				announce "[KVM] "+.@killer$+" fez MONSTER KILL!!!", bc_all, 0xFF0000;
+				announce "[BG] "+.@killer$+" fez MONSTER KILL!!!", bc_all, 0xFF0000;
 				soundeffectall "kills/monster_kill.wav", 0, strcharinfo(3);
 				break;
 			case 7:
-				announce "[KVM] "+.@killer$+" esta GODLIKE!!!", bc_all, 0xFF0000;
+				announce "[BG] "+.@killer$+" esta GODLIKE!!!", bc_all, 0xFF0000;
 				soundeffectall "kills/godlike.wav", 0, strcharinfo(3);
 				break;
 			default:
 				if (kvm_bg_streak_total >= 8) {
-					announce "[KVM] "+.@killer$+" esta LEGENDARY!!!!", bc_all, 0xFF0000;
+					announce "[BG] "+.@killer$+" esta LEGENDARY!!!!", bc_all, 0xFF0000;
 					soundeffectall "kills/legendary.wav", 0, strcharinfo(3);
 				}
 				break;
@@ -381,7 +417,7 @@ OnPCKillEvent:
 
 	if (attachrid(.@victim_aid)) {
 		if (kvm_bg_streak_total >= 3) {
-			announce "[KVM] "+strcharinfo(0)+" foi ELIMINADO APOS UMA SEQUENCIA DE "+kvm_bg_streak_total+" KILLS!!", bc_all, 0xFF0000;
+			announce "[BG] "+strcharinfo(0)+" foi ELIMINADO APOS UMA SEQUENCIA DE "+kvm_bg_streak_total+" KILLS!!", bc_all, 0xFF0000;
 			soundeffectall "kills/shutdown.wav", 0, "bat_c01";
 		}
 		kvm_bg_streak_total = 0;
