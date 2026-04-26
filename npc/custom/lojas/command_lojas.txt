@@ -16,8 +16,14 @@ function	script	Menu_Lojas	{
         case 2:  // Anubis
             switch(select("Encantamentos", "Armas", "Equipamentos")) {
                 case 1:
-                    callshop "enchant_anubis",1;
-                    end;
+                    switch(select("Comprar Encantamentos Visuais", "Reciclar Encantamentos Visuais")) {
+                        case 1:
+                            callshop "enchant_anubis",1;
+                            end;
+                        case 2:
+                            callfunc("F_Anubis_Recycle_Costume_Enchant");
+                            end;
+                    }
                 case 2:
                     callshop "weapons_anubis",1;
                     end;
@@ -212,6 +218,84 @@ function	script	Menu_Lojas	{
     }
     close;
 	return;
+}
+
+function	script	F_Anubis_Recycle_Costume_Enchant	{
+	.@coin_id = 9650; // Anubis_Coin
+	.@coin_amount = 25;
+
+	setarray .@enchant_id[0],
+		25445, 25446, 25447, 25448, 25449, 25450, 25451, 25452, 25453, 25454, 25455, 25456,
+		29047, 29056, 29156, 29157, 29158, 29358, 29359, 29360, 29361,
+		29423, 29424, 29425, 29426, 29427, 29428, 29429, 29430, 29431, 29432, 29433, 29434, 29435,
+		29460, 29461, 29462, 29463, 29464, 29465, 29466, 29467, 29468, 29469, 29470, 29471,
+		29477, 29478, 29479, 29480, 29481, 29482, 29483, 29484, 29485, 29486, 29487, 29488,
+		29513, 29514, 29515, 29516, 29517, 29518, 29519, 29520, 29521, 29522, 29523, 29524,
+		29611, 29612, 29613, 29614, 29615, 29616, 29617, 29618, 29619, 29620, 29621,
+		29651, 29652, 29653, 29654, 29655, 29656, 29657, 29658, 29659, 29660, 29661, 29662, 29663,
+		29664, 29665, 29666, 29667, 29668, 29669, 29670, 29671,
+		310000, 310001, 310002, 310003, 310004, 310005, 310006, 310007, 310008, 310009, 310010, 310011,
+		310180, 310181, 310182, 310183, 310184, 310185, 310186, 310187, 310188, 310189, 310190, 310191,
+		310257, 310258, 310259, 310260, 310261, 310262, 310263, 310264, 310265, 310266, 310267, 310268,
+		310325, 310326, 310327, 310328, 310329, 310330,
+		310660, 310661, 310662, 310663, 310664, 310665, 310666, 310667;
+
+	while (true) {
+		.@menu$ = "";
+		.@total = 0;
+
+		for (.@i = 0; .@i < getarraysize(.@enchant_id); .@i++) {
+			.@count = countitem(.@enchant_id[.@i]);
+			if (.@count <= 0)
+				continue;
+
+			.@slot[.@total] = .@i;
+			.@menu$ += getitemname(.@enchant_id[.@i]) + " (x" + .@count + ") -> " + .@coin_amount + " " + getitemname(.@coin_id) + ":";
+			.@total++;
+		}
+
+		mes "[Reciclagem Anubis]";
+		if (!.@total) {
+			mes "Voce nao possui encantamentos visuais das caixas:";
+			mes "- Caixa de Encanto Visual de Classe";
+			mes "- Caixa de Encanto Visual Generico";
+			close;
+		}
+
+		mes "Escolha o encantamento visual que deseja reciclar.";
+		mes "Cada item reciclado rende " + .@coin_amount + "x " + getitemname(.@coin_id) + ".";
+		next;
+
+		.@choice = select(.@menu$ + "Cancelar") - 1;
+		if (.@choice >= .@total)
+			close;
+
+		.@item_id = .@enchant_id[.@slot[.@choice]];
+		if (countitem(.@item_id) < 1) {
+			mes "[Reciclagem Anubis]";
+			mes "Esse item nao esta mais no seu inventario.";
+			close;
+		}
+		if (!checkweight(.@coin_id, .@coin_amount)) {
+			mes "[Reciclagem Anubis]";
+			mes "Voce esta com peso alto. Libere peso e tente novamente.";
+			close;
+		}
+
+		delitem .@item_id, 1;
+		getitem .@coin_id, .@coin_amount;
+		logshop "SCRIPT_EXCHANGE", "AnubisEnchantRecycle", .@coin_id, .@coin_amount, 0, .@item_id, 1, "", 0;
+
+		mes "[Reciclagem Anubis]";
+		mes "Voce reciclou 1x " + getitemname(.@item_id) + ".";
+		mes "Recebeu " + .@coin_amount + "x " + getitemname(.@coin_id) + ".";
+		next;
+
+		if (select("Continuar reciclando", "Encerrar") == 2)
+			close;
+		clear;
+	}
+	end;
 }
 
 function	script	PetEggSellMenu	{
