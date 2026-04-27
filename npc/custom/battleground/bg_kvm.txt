@@ -6,7 +6,7 @@ OnInit:
 	disablenpc "Guillaume";	
 
 	// Recupera o estado apos @reloadscript dentro do horario do evento.
-	if (gettime(DT_HOUR) >= 15 && gettime(DT_HOUR) < 20) {
+	if (callsub(S_IsBGOpenNow)) {
 		.bg_status = 1;
 		enablenpc "Croix";
 		enablenpc "Guillaume";
@@ -15,20 +15,27 @@ OnInit:
 		.bg_status = 0;
 	
 	end;
-    
-OnClock1500:   
-    .bg_status = 1; 
-	
+
+OnClock1200:
+OnClock1500:
+OnClock1800:
+	if (!callsub(S_IsBGOpenNow)) end;
+	if (.bg_status) end;
+
+	.bg_status = 1;
 	enablenpc "Croix";
 	enablenpc "Guillaume";	
-   
-    announce "Battleground aberto! Use @bg.", bc_all, 0xFF0000;
+	announce "Battleground aberto! Use @bg.", bc_all, 0xFF0000;
 	end;
 
+OnClock1300:
+OnClock1900:
 OnClock2000:
-    if (.bg_status == 0) end;
-    announce "Battleground encerrado.", bc_all;
-    .bg_status = 0;
+	if (callsub(S_IsBGOpenNow)) end;
+	if (.bg_status == 0) end;
+
+	announce "Battleground encerrado.", bc_all;
+	.bg_status = 0;
 	$@KvM01_CMD_Ready = 0;
 	for (.@i = 0; .@i < getarraysize($@KvM01_CMD_CID); .@i++) {
 		if (!isloggedin($@KvM01_CMD_AID[.@i], $@KvM01_CMD_CID[.@i]))
@@ -43,8 +50,23 @@ OnClock2000:
 	deletearray $@KvM01_CMD_TEAM;
 	disablenpc "Croix";
 	disablenpc "Guillaume";	
-    end;
+	end;
 
+S_IsBGOpenNow:
+	.@day = gettime(DT_DAYOFWEEK);
+	.@hour = gettime(DT_HOUR);
+
+	// Sabado e domingo: 15:00 as 20:00.
+	if ((.@day == 0 || .@day == 6) && .@hour >= 15 && .@hour < 20)
+		return 1;
+
+	// Segunda a sexta: 12:00 as 13:00 e 18:00 as 19:00.
+	if (.@day >= 1 && .@day <= 5) {
+		if ((.@hour >= 12 && .@hour < 13) || (.@hour >= 18 && .@hour < 19))
+			return 1;
+	}
+
+	return 0;
 OnJoin:
     if (.bg_status == 0) {
         dispbottom "O Battleground esta fechado.";
@@ -828,3 +850,91 @@ OnEnterBG:
 
 
 
+
+prontera,164,212,7	script	Loja BG#bravura	4_M_KNIGHT_GOLD,{
+	mes "[Loja BG]";
+	mes "Escolha uma categoria.";
+	mes "Seus pontos KVM: " + kvm_point;
+	next;
+	switch(select("Set da Bravura:Itens:Sair")) {
+	case 1:
+		close2;
+		npcshopattach "BG_Bravura_Shop";
+		callshop "BG_Bravura_Shop",1;
+		break;
+	case 2:
+		close2;
+		npcshopattach "BG_Items_Shop";
+		callshop "BG_Items_Shop",1;
+		break;
+	case 3:
+		close;
+	}
+	end;
+
+OnBuyItem:
+	for (.@i = 0; .@i < getarraysize(@bought_nameid); .@i++) {
+		callfunc "BG_KVM_Shop_Process", @bought_nameid[.@i], @bought_quantity[.@i];
+	}
+	end;
+}
+
+// Estes itens devem acompanhar o array shop_items e shop_prices
+-	shop	BG_Bravura_Shop	-1,400024:100,400025:100,400026:100,400027:100,400028:100,400029:100,5170:100,300040:100
+-	shop	BG_Items_Shop	-1,9593:100,9199:100,9198:50,12596:10,12210:50,14545:200,14536:10,12375:20,12710:20,9675:50,9676:100
+
+function	script	BG_KVM_Shop_Process	{
+
+	// =============================
+	// CONFIGURACAO DA LOJA
+	// =============================
+	// Itens e precos em pontos KVM/BG
+	setarray .@shop_items[0], 400024, 400025, 400026, 400027, 400028, 400029, 5170, 300040, 9593, 9199, 9198, 12596, 12210, 14545, 14536, 12375, 12710, 9675, 9676;
+	setarray .@shop_prices[0],   100,    100,    100,    100,    100,    100,  100,    100,  100,  100,   50,    10,    50,   200,    10,    20,    20,   50,  100; // preco por item em pontos
+
+	// =============================
+	// PARAMETROS DA FUNCAO
+	// =============================
+	.@id  = getarg(0); // ID do item comprado
+	.@qtd = getarg(1); // Quantidade comprada
+
+	// =============================
+	// PROCURA O ITEM NA TABELA
+	// =============================
+	.@found = 0;
+	for (.@i = 0; .@i < getarraysize(.@shop_items); .@i++) {
+		if (.@id == .@shop_items[.@i]) {
+			.@found = 1;
+			.@unit_price = .@shop_prices[.@i];
+			break;
+		}
+	}
+
+	if (!.@found) {
+		dispbottom "[BG] Erro: item nao esta registrado na loja.";
+		return;
+	}
+
+	// =============================
+	// CALCULA O CUSTO TOTAL
+	// =============================
+	.@total_cost = .@unit_price * .@qtd;
+
+	// =============================
+	// VERIFICA PONTOS
+	// =============================
+	if (kvm_point < .@total_cost) {
+		dispbottom "Pontos KVM/BG insuficientes.";
+		return;
+	}
+
+	// =============================
+	// DESCONTA E ENTREGA
+	// =============================
+	kvm_point -= .@total_cost;
+	getitem .@id, .@qtd;
+	logshop "SCRIPT_SHOP_BUY", "BG_Bravura_Shop", .@id, .@qtd, 0, 0, 0, "kvm_point", .@total_cost;
+
+	dispbottom "[BG] -" + .@total_cost + " ponto(s) KVM/BG. Restam: " + kvm_point + ".";
+	return;
+}
