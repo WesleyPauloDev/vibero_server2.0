@@ -13,6 +13,7 @@ prontera,145,203,4	script	PvP Warper	468,{
 
 			// IP do jogador que está tentando entrar
 			.@my_ip$ = getcharip();
+			.@is_gm = (getgroupid() >= 99);
 
 			// Verifica todos os jogadores no mapa PvP
 			.@map$ = "pvp_y_1-2";
@@ -37,17 +38,19 @@ prontera,145,203,4	script	PvP Warper	468,{
 			.@unit_count = getmapunits(BL_PC, .@map$, .@units[0]);
 
 			// Ceckar IPs dos jogadores na sala escolhida
-			for (.@i = 0; .@i < .@unit_count; .@i++) {
-				.@id = .@units[.@i];
+			if (!.@is_gm) {
+				for (.@i = 0; .@i < .@unit_count; .@i++) {
+					.@id = .@units[.@i];
 
-				// pega o IP de cada jogador
-				.@other_ip$ = getcharip(.@id);
+					// pega o IP de cada jogador
+					.@other_ip$ = getcharip(.@id);
 
-				// se o IP for igual ? bloqueia
-				if (.@other_ip$ != "" && .@other_ip$ == .@my_ip$) {
-					mes "^FF0000Entrada bloqueada.^000000";
-					mes "Já existe um jogador com o MESMO IP no PvP.";
-					close;
+					// se o IP for igual ? bloqueia
+					if (.@other_ip$ != "" && .@other_ip$ == .@my_ip$) {
+						mes "^FF0000Entrada bloqueada.^000000";
+						mes "Já existe um jogador com o MESMO IP no PvP.";
+						close;
+					}
 				}
 			}
 
