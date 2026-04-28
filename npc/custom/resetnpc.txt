@@ -16,25 +16,26 @@
 	setarray .@Reset,	5000,	5000,	9000,	0;
 	mes "[Resetadora]";
 	if(.@Reset[3] && reset_limit > .@Reset[3]) {
-		mes "Desculpe, você só pode resetar "+callfunc("F_InsertPlural",.@Reset[3],"vez")+" na sua vida.";
+		mes "Desculpe, voce so pode resetar "+callfunc("F_InsertPlural",.@Reset[3],"vez")+" na sua vida.";
 		close;
 	}
 	mes "Eu sou a Resetadora.";
 	mes "Resetar Atributos: "+ callfunc("F_InsertComma",.@Reset[1]) +"z";
 	mes "Resetar Habilidades: "+ callfunc("F_InsertComma",.@Reset[0]) +"z";
 	mes "Resetar Ambos: "+ callfunc("F_InsertComma",.@Reset[2]) +"z";
-	if(.@Reset[3]) mes "Você só pode resetar "+callfunc("F_InsertPlural",.@Reset[3],"vez")+", então use "+((.@Reset[3]>1)?"essas oportunidades":"essa oportunidade")+" com sabedoria.";
-	mes "Por favor, selecione o serviço desejado:";
+	if(.@Reset[3]) mes "Voce so pode resetar "+callfunc("F_InsertPlural",.@Reset[3],"vez")+", entao use "+((.@Reset[3]>1)?"essas oportunidades":"essa oportunidade")+" com sabedoria.";
+	mes "Por favor, selecione o servico desejado:";
 	next;
-	set .@i,(select("^FF3355Resetar Habilidades:Resetar Atributos:Resetar Ambos^000000:Cancelar"));
-	if(.@i > 3) close;
+	set .@i,(select("^FF3355Resetar Habilidades:Resetar Atributos:Resetar Ambos^000000:Build Salva:Cancelar"));
+	if(.@i == 4) goto L_BuildMenu;
+	if(.@i > 4) close;
 	mes "[Resetadora]";
 	if (Zeny < .@Reset[.@i-1]) {
-		mes "Desculpe, você não tem Zeny suficiente.";
+		mes "Desculpe, voce nao tem Zeny suficiente.";
 		close;
 	}
 	if(.@Reset[3]){
-		mes "Você só pode resetar "+callfunc("F_InsertPlural",.@Reset[3],"vez")+" na sua vida. Tem certeza?";
+		mes "Voce so pode resetar "+callfunc("F_InsertPlural",.@Reset[3],"vez")+" na sua vida. Tem certeza?";
 		if(select("Preciso pensar:Sim, tenho certeza") == 1) close;
 	}
 	set Zeny, Zeny-.@Reset[.@i-1];
@@ -46,5 +47,124 @@
 	mes "Prontinho!";
 	if(.@Reset[3]) set reset_limit,reset_limit + 1;
 	close;
-}
 
+L_BuildMenu:
+	mes "[Resetadora]";
+	mes "Aqui eu posso guardar seus atributos e habilidades atuais em uma build salva.";
+	next;
+	switch(select("Salvar Build:Carregar Build:Cancelar")) {
+	case 1:
+		callsub L_SaveBuild;
+		close;
+	case 2:
+		callsub L_LoadBuild;
+		close;
+	default:
+		close;
+	}
+
+L_SaveBuild:
+	mes "[Resetadora]";
+	if (reset_build_count >= .MaxBuilds) {
+		mes "Voce ja tem "+.MaxBuilds+" builds salvas.";
+		mes "Use o nome de uma build existente se quiser sobrescrever.";
+	}
+	mes "Digite o nome da build:";
+	next;
+	input .@name$;
+	if (.@name$ == "" || compare(.@name$, ":")) {
+		mes "[Resetadora]";
+		mes "Nome invalido.";
+		mes "Use um nome sem dois-pontos.";
+		return;
+	}
+	set .@slot,-1;
+	for(set .@i,0; .@i < reset_build_count; set .@i,.@i+1) {
+		if (getd("reset_build_name$["+.@i+"]") == .@name$) {
+			set .@slot,.@i;
+			set .@i,reset_build_count;
+		}
+	}
+	if (.@slot < 0) {
+		if (reset_build_count >= .MaxBuilds) {
+			mes "[Resetadora]";
+			mes "Nao ha espaco para uma nova build.";
+			return;
+		}
+		set .@slot,reset_build_count;
+		set reset_build_count,reset_build_count + 1;
+	}
+	set .@prefix$,"reset_build_"+.@slot+"_";
+	for(set .@i,0; .@i < getd(.@prefix$+"skill_count"); set .@i,.@i+1) {
+		setd(.@prefix$+"skill_id["+.@i+"]",0);
+		setd(.@prefix$+"skill_lv["+.@i+"]",0);
+		setd(.@prefix$+"skill_flag["+.@i+"]",0);
+	}
+	getskilllist;
+	setd("reset_build_name$["+.@slot+"]",.@name$);
+	setd(.@prefix$+"str",readparam(bStr));
+	setd(.@prefix$+"agi",readparam(bAgi));
+	setd(.@prefix$+"vit",readparam(bVit));
+	setd(.@prefix$+"int",readparam(bInt));
+	setd(.@prefix$+"dex",readparam(bDex));
+	setd(.@prefix$+"luk",readparam(bLuk));
+	setd(.@prefix$+"status_point",StatusPoint);
+	setd(.@prefix$+"skill_point",SkillPoint);
+	setd(.@prefix$+"job",Class);
+	setd(.@prefix$+"skill_count",@skilllist_count);
+	for(set .@i,0; .@i < @skilllist_count && .@i < .MaxSkillSlots; set .@i,.@i+1) {
+		setd(.@prefix$+"skill_id["+.@i+"]",@skilllist_id[.@i]);
+		setd(.@prefix$+"skill_lv["+.@i+"]",@skilllist_lv[.@i]);
+		setd(.@prefix$+"skill_flag["+.@i+"]",@skilllist_flag[.@i]);
+	}
+	mes "[Resetadora]";
+	mes "Build ^0055FF"+.@name$+"^000000 salva.";
+	return;
+
+L_LoadBuild:
+	mes "[Resetadora]";
+	if (!reset_build_count) {
+		mes "Voce ainda nao tem builds salvas.";
+		return;
+	}
+	set .@menu$,"";
+	for(set .@i,0; .@i < reset_build_count; set .@i,.@i+1)
+		set .@menu$,.@menu$ + getd("reset_build_name$["+.@i+"]") + ":";
+	set .@menu$,.@menu$ + "Cancelar";
+	set .@slot,select(.@menu$) - 1;
+	if (.@slot >= reset_build_count) return;
+	set .@prefix$,"reset_build_"+.@slot+"_";
+	mes "[Resetadora]";
+	mes "Carregar a build ^0055FF"+getd("reset_build_name$["+.@slot+"]")+"^000000?";
+	if (getd(.@prefix$+"job") != Class) {
+		mes "Essa build foi salva em outra classe.";
+		return;
+	}
+	mes "Seus atributos e habilidades atuais serao substituidos.";
+	next;
+	if(select("Cancelar:Carregar") == 1) return;
+	sc_end_class;
+	ResetSkill;
+	ResetStatus;
+	statusup2 bStr,getd(.@prefix$+"str") - readparam(bStr);
+	statusup2 bAgi,getd(.@prefix$+"agi") - readparam(bAgi);
+	statusup2 bVit,getd(.@prefix$+"vit") - readparam(bVit);
+	statusup2 bInt,getd(.@prefix$+"int") - readparam(bInt);
+	statusup2 bDex,getd(.@prefix$+"dex") - readparam(bDex);
+	statusup2 bLuk,getd(.@prefix$+"luk") - readparam(bLuk);
+	set .@skill_count,getd(.@prefix$+"skill_count");
+	for(set .@i,0; .@i < .@skill_count && .@i < .MaxSkillSlots; set .@i,.@i+1) {
+		if (getd(.@prefix$+"skill_id["+.@i+"]") > 0)
+			skill getd(.@prefix$+"skill_id["+.@i+"]"),getd(.@prefix$+"skill_lv["+.@i+"]"),getd(.@prefix$+"skill_flag["+.@i+"]");
+	}
+	set StatusPoint,getd(.@prefix$+"status_point");
+	set SkillPoint,getd(.@prefix$+"skill_point");
+	mes "[Resetadora]";
+	mes "Build carregada.";
+	return;
+
+OnInit:
+	set .MaxBuilds,10;
+	set .MaxSkillSlots,1634;
+	end;
+}
