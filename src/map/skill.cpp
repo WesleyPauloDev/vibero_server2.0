@@ -7760,10 +7760,14 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 			}
 			if (skill_id == AL_HEAL)
 				status_change_end(bl, SC_BITESCAR);
-			clif_skill_nodamage(src, *bl, skill_id, heal);
-			if( tsc && tsc->getSCE(SC_AKAITSUKI) && heal && skill_id != HLIF_HEAL )
+			bool akaitsuki_damage = tsc && tsc->getSCE(SC_AKAITSUKI) && heal && skill_id != HLIF_HEAL;
+			if (akaitsuki_damage)
+				clif_skill_nodamage(src, *bl, skill_id, heal);
+			if (akaitsuki_damage)
 				heal = ~heal + 1;
 			t_exp heal_get_jobexp = status_heal(bl,heal,0,0);
+			if (!akaitsuki_damage)
+				clif_skill_nodamage(src, *bl, skill_id, static_cast<int32>(heal_get_jobexp));
 
 			if(sd && dstsd && heal > 0 && sd != dstsd && battle_config.heal_exp > 0){
 				heal_get_jobexp = heal_get_jobexp * battle_config.heal_exp / 100;
@@ -7787,8 +7791,7 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 			heal_amount = tstatus->max_hp;
 
 		clif_skill_nodamage(src, *bl, skill_id, skill_lv);
-		clif_skill_nodamage(nullptr, *bl, AL_HEAL, heal_amount);
-		status_heal(bl, heal_amount, 0, 0);
+		clif_skill_nodamage(nullptr, *bl, AL_HEAL, status_heal(bl, heal_amount, 0, 0));
 	}
 	break;
 
@@ -8487,8 +8490,7 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 			if (sd == nullptr || sd->status.party_id == 0 || (flag & 2)) {
 				int32 heal_amount = skill_calc_heal(src, bl, skill_id, skill_lv, 1);
 
-				clif_skill_nodamage(nullptr, *bl, AL_HEAL, heal_amount);
-				status_heal(bl, heal_amount, 0, 0);
+				clif_skill_nodamage(nullptr, *bl, AL_HEAL, status_heal(bl, heal_amount, 0, 0));
 			} else if (sd)
 				party_foreachsamemap(skill_area_sub, sd, skill_get_splash(skill_id, skill_lv), src, skill_id, skill_lv, tick, flag | BCT_PARTY | 3, skill_castend_nodamage_id);
 		} else {
@@ -13291,12 +13293,10 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 
 			if (skill_id == ABR_NET_REPAIR) {
 				heal_amount = tstatus->max_hp * 10 / 100;
-				clif_skill_nodamage(nullptr, *bl, AL_HEAL, heal_amount);
-				status_heal(bl, heal_amount, 0, 0);
+				clif_skill_nodamage(nullptr, *bl, AL_HEAL, status_heal(bl, heal_amount, 0, 0));
 			} else { // ABR_NET_SUPPORT
 				heal_amount = tstatus->max_sp * 3 / 100;
-				clif_skill_nodamage(nullptr, *bl, MG_SRECOVERY, heal_amount);
-				status_heal(bl, 0, heal_amount, 0);
+				clif_skill_nodamage(nullptr, *bl, MG_SRECOVERY, status_heal(bl, 0, heal_amount, 0));
 			}
 		} else {
 			clif_skill_nodamage(src, *bl, skill_id, skill_lv);

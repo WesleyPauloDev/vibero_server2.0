@@ -4912,6 +4912,14 @@ bool map_setmapflag_sub(int16 m, enum e_mapflag mapflag, bool status, union u_ma
 			} else
 				mapdata->setMapFlag(mapflag, false);
 			break;
+		case MF_COMBAT_RATE:
+			if (status) {
+				nullpo_retr(false, args);
+
+				mapdata->setMapFlag(mapflag, cap_value(args->flag_val, 0, 100));
+			} else
+				mapdata->setMapFlag(mapflag, false);
+			break;
 		case MF_BATTLEGROUND:
 			if (status) {
 				nullpo_retr(false, args);

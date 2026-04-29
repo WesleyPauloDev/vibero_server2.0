@@ -49,6 +49,19 @@ int32 battle_get_magic_element(struct block_list* src, struct block_list* target
 int32 battle_get_misc_element(struct block_list* src, struct block_list* target, uint16 skill_id, uint16 skill_lv, int32 mflag);
 static void battle_calc_defense_reduction(struct Damage* wd, struct block_list* src, struct block_list* target, uint16 skill_id, uint16 skill_lv);
 
+static int64 battle_apply_combat_rate(struct block_list *target, int64 damage)
+{
+	if (damage <= 0 || target == nullptr || target->m < 0)
+		return damage;
+
+	int32 rate = map_getmapflag(target->m, MF_COMBAT_RATE);
+
+	if (rate <= 0)
+		return damage;
+
+	return i64max(damage * cap_value(rate, 0, 100) / 100, 1);
+}
+
 /**
  * Returns the current/list skill used by the bl
  * @param bl
@@ -2065,6 +2078,8 @@ int64 battle_calc_damage(struct block_list *src,struct block_list *bl,struct Dam
 				damage = md->damage_cap;
 		}
 	}
+
+	damage = battle_apply_combat_rate(bl, damage);
 
 	return damage;
 }

@@ -6291,6 +6291,8 @@ bool pc_isUseitem(map_session_data *sd,int32 n)
 
 	if(mapdata->getMapFlag(MF_NOITEMCONSUMPTION)) //consumable but mapflag prevent it
 		return false;
+	if(mapdata->getMapFlag(MF_NORECOVERYITEM) && item->type == IT_HEALING)
+		return false;
 	//Prevent mass item usage. [Skotlex]
 	if( DIFF_TICK(sd->canuseitem_tick,gettick()) > 0 ||
 		(itemdb_group.item_exists(IG_CASH_FOOD, nameid) && DIFF_TICK(sd->canusecashfood_tick,gettick()) > 0)

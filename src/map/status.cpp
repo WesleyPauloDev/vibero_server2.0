@@ -1816,6 +1816,16 @@ int32 status_heal(struct block_list *bl,int64 hhp,int64 hsp, int64 hap, int32 fl
 	if (sc != nullptr && sc->empty())
 		sc = nullptr;
 
+	if (bl->type == BL_PC && bl->m >= 0) {
+		int32 rate = map_getmapflag(bl->m, MF_COMBAT_RATE);
+
+		if (rate > 0 && rate < 100) {
+			hp = hp > 0 ? hp * rate / 100 : hp;
+			sp = sp > 0 ? sp * rate / 100 : sp;
+			ap = ap > 0 ? ap * rate / 100 : ap;
+		}
+	}
+
 	if (hp < 0) {
 		if (hp == INT_MIN) // -INT_MIN == INT_MIN in some architectures!
 			hp++;
