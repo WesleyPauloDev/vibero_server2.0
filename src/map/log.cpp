@@ -46,6 +46,7 @@ e_log_filter;
 struct Log_Config log_config;
 static constexpr const char* CASHSHOP_TRANSACTIONS_TABLE = "cashshop_transactions";
 static constexpr const char* SHOP_TRANSACTIONS_TABLE = "shop_transactions";
+static constexpr const char* REFINE_LOG_TABLE = "refine_log";
 
 
 #ifdef SQL_INNODB
@@ -141,6 +142,21 @@ static char log_feedingtype2char(e_log_feeding_type type) {
 
 	ShowDebug("log_feedingtype2char: Unknown feeding type %d.\n", type);
 	return 'O';
+}
+
+static const char* log_refine_result_name( e_log_refine_result result ){
+	switch( result ){
+		case LOG_REFINE_SUCCESS:
+			return "success";
+		case LOG_REFINE_FAILURE:
+			return "failure";
+		case LOG_REFINE_BREAK:
+			return "break";
+		case LOG_REFINE_DOWNGRADE:
+			return "downgrade";
+	}
+
+	return "failure";
 }
 
 /// check if this item should be logged according the settings
@@ -634,6 +650,76 @@ void log_shop_transaction( map_session_data* sd, const char* source, const char*
 	{
 		Sql_ShowDebug( logmysql_handle );
 	}
+}
+
+void log_refine_event( map_session_data* sd, e_log_refine_result result, struct item* itm, uint8 refine_before, uint8 refine_after, t_itemid material_item_id, uint16 material_amount, t_itemid blessing_item_id, uint16 blessing_amount ){
+	nullpo_retv( sd );
+	nullpo_retv( itm );
+
+	if( !log_config.sql_logs ){
+		return;
+	}
+
+	std::shared_ptr<item_data> id = item_db.find( itm->nameid );
+	const char* item_name = id != nullptr ? id->name.c_str() : "";
+
+	char esc_char_name[NAME_LENGTH * 2 + 1] = { 0 };
+	char esc_item_name[ITEM_NAME_LENGTH * 2 + 1] = { 0 };
+
+	Sql_EscapeString( logmysql_handle, esc_char_name, sd->status.name );
+	Sql_EscapeString( logmysql_handle, esc_item_name, item_name );
+
+	StringBuf buf;
+	StringBuf_Init( &buf );
+
+	StringBuf_Printf( &buf,
+		LOG_QUERY " INTO `%s` (`time`, `account_id`, `char_id`, `char_name`, `map`, `result`, `item_id`, `item_name`, `unique_id`, `refine_before`, `refine_after`, `material_item_id`, `material_amount`, `blessing_item_id`, `blessing_amount`, `bound`, `enchantgrade`, `attribute`, `identify`",
+		REFINE_LOG_TABLE );
+
+	for( int32 i = 0; i < MAX_SLOTS; ++i ){
+		StringBuf_Printf( &buf, ", `card%d`", i );
+	}
+
+	for( int32 i = 0; i < MAX_ITEM_RDM_OPT; ++i ){
+		StringBuf_Printf( &buf, ", `option_id%d`, `option_val%d`, `option_parm%d`", i, i, i );
+	}
+
+	StringBuf_Printf( &buf,
+		") VALUES (NOW(), '%d', '%d', '%s', '%s', '%s', '%u', '%s', '%" PRIu64 "', '%u', '%u', '%u', '%u', '%u', '%u', '%d', '%u', '%d', '%d'",
+		sd->status.account_id,
+		sd->status.char_id,
+		esc_char_name,
+		mapindex_id2name( sd->mapindex ),
+		log_refine_result_name( result ),
+		itm->nameid,
+		esc_item_name,
+		itm->unique_id,
+		refine_before,
+		refine_after,
+		material_item_id,
+		material_amount,
+		blessing_item_id,
+		blessing_amount,
+		itm->bound,
+		itm->enchantgrade,
+		itm->attribute,
+		itm->identify );
+
+	for( int32 i = 0; i < MAX_SLOTS; ++i ){
+		StringBuf_Printf( &buf, ", '%u'", itm->card[i] );
+	}
+
+	for( int32 i = 0; i < MAX_ITEM_RDM_OPT; ++i ){
+		StringBuf_Printf( &buf, ", '%d', '%d', '%d'", itm->option[i].id, itm->option[i].value, itm->option[i].param );
+	}
+
+	StringBuf_Printf( &buf, ")" );
+
+	if( SQL_ERROR == Sql_QueryStr( logmysql_handle, StringBuf_Value( &buf ) ) ){
+		Sql_ShowDebug( logmysql_handle );
+	}
+
+	StringBuf_Destroy( &buf );
 }
 
 /**

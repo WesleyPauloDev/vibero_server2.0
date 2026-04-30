@@ -22814,6 +22814,11 @@ void clif_parse_refineui_refine( int32 fd, map_session_data* sd ){
 		return;
 	}
 
+	struct item refine_log_item = *item;
+	uint8 refine_before = item->refine;
+	uint8 refine_after = refine_before;
+	t_itemid blessing_item_id = blacksmith_amount > 0 ? ITEMID_BLACKSMITH_BLESSING : 0;
+
 	// Try to pay for the refine
 	if( pc_payzeny( sd, cost->zeny, LOG_TYPE_CONSUME ) ){
 		clif_npc_buy_result( sd, e_purchase_result::PURCHASE_FAIL_MONEY ); // "You do not have enough zeny."
@@ -22835,6 +22840,8 @@ void clif_parse_refineui_refine( int32 fd, map_session_data* sd ){
 		log_pick_pc( sd, LOG_TYPE_OTHER, -1, item );
 		// Success
 		item->refine = cap_value( item->refine + 1, 0, MAX_REFINE );
+		refine_after = item->refine;
+		log_refine_event( sd, LOG_REFINE_SUCCESS, &refine_log_item, refine_before, refine_after, material, 1, blessing_item_id, blacksmith_amount );
 		log_pick_pc( sd, LOG_TYPE_OTHER, 1, item );
 		clif_misceffect( *sd, NOTIFYEFFECT_REFINE_SUCCESS );
 		clif_refine( *sd, index, ITEMREFINING_SUCCESS );
@@ -22853,19 +22860,24 @@ void clif_parse_refineui_refine( int32 fd, map_session_data* sd ){
 		}
 		// Blacksmith blessings were used to prevent breaking and downgrading
 		if( blacksmith_amount > 0 ){
+			log_refine_event( sd, LOG_REFINE_FAILURE, &refine_log_item, refine_before, refine_after, material, 1, blessing_item_id, blacksmith_amount );
 			clif_refine( *sd, index, ITEMREFINING_FAILURE2 );
 			clif_refineui_info( sd, index );
 		// Delete the item if it is breakable
 		}else if( cost->breaking_rate > 0 && ( rnd() % 10000 ) < cost->breaking_rate ){
+			log_refine_event( sd, LOG_REFINE_BREAK, &refine_log_item, refine_before, refine_after, material, 1, blessing_item_id, blacksmith_amount );
 			clif_refine( *sd, index, ITEMREFINING_FAILURE );
 			pc_delitem( sd, index, 1, 0, 2, LOG_TYPE_CONSUME );
 		// Downgrade the item if necessary
 		}else if( cost->downgrade_amount > 0 ){
 			item->refine = cap_value( item->refine - cost->downgrade_amount, 0, MAX_REFINE );
+			refine_after = item->refine;
+			log_refine_event( sd, LOG_REFINE_DOWNGRADE, &refine_log_item, refine_before, refine_after, material, 1, blessing_item_id, blacksmith_amount );
 			clif_refine( *sd, index, ITEMREFINING_DOWNGRADE );
 			clif_refineui_info(sd, index);
 		// Only show failure, but dont do anything
 		}else{
+			log_refine_event( sd, LOG_REFINE_FAILURE, &refine_log_item, refine_before, refine_after, material, 1, blessing_item_id, blacksmith_amount );
 			clif_refine( *sd, index, ITEMREFINING_FAILURE2 );
 			clif_refineui_info( sd, index );
 		}
