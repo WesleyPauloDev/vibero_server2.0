@@ -23,13 +23,14 @@ OnAtcommand:
 	}
 
 	.@now = gettimetick(2);
-	.@reset_ver = 12;
+	.@reset_ver = 17;
 	if (#INSTANCE_MENU_RESET_VER != .@reset_ver || #INSTANCE_MENU_RESET_TICK <= .@now) {
 		callfunc("F_InstanceMenuResetStatus", "poringvillage", "PORING");
 		callfunc("F_InstanceMenuResetStatus", "orcMemory", "ORCMEMORY");
 		callfunc("F_InstanceMenuResetStatusRaw", "#ETOWER_COOLDOWN", "#ETOWER_STATUS", "ETOWER");
 		callfunc("F_InstanceMenuResetStatusRaw", "#NYD_COOLDOWN", "#NYD_STATUS", "NYD");
 		callfunc("F_InstanceMenuResetStatus", "glastHeim", "OldGlastHeim");
+		callfunc("F_InstanceMenuResetStatus", "octopus_cave", "OctopusCave");
 		callfunc("F_InstanceMenuResetStatus", "santuario_selado", "SANTUARIOSELADO");
 		callfunc("F_InstanceMenuResetStatus", "wlcr", "WLCR");
 		callfunc("F_InstanceMenuResetStatus", "gmt", "GMT");
@@ -38,6 +39,8 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatus", "constellation_tower", "ConstellationTower");
 		callfunc("F_InstanceMenuResetStatus", "sara_memory", "SaraMemory");
 		callfunc("F_InstanceMenuResetStatus", "infinite_space", "InfiniteSpace");
+		callfunc("F_InstanceMenuResetStatus", "ritual_blessing", "RitualOfBlessing");
+		callfunc("F_InstanceMenuResetStatus", "regenschirm", "Regenschirm");
 		callfunc("F_InstanceMenuResetStatus", "BangungotHospital", "BangungotHospital");
 		callfunc("F_InstanceMenuResetStatus", "BakonawaLake", "BakonawaLake");
 		callfunc("F_InstanceMenuResetStatus", "ghost_palace", "GhostPalace");
@@ -55,12 +58,14 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatus", "eclage_interior", "EclageInterior");
 		callfunc("F_InstanceMenuResetStatus", "htf", "HTF");
 		callfunc("F_InstanceMenuResetStatus", "room_consciousness", "RoomConsciousness");
+		callfunc("F_InstanceMenuResetStatus", "sarah_fenrir", "SarahAndFenrir");
 		callfunc("F_InstanceMenuResetStatus", "wolfchev_laboratory", "WolfchevLaboratory");
 		callfunc("F_InstanceMenuResetStatus", "hidden_garden", "HiddenGarden");
 		callfunc("F_InstanceMenuResetStatus", "lost_farm", "LostFarm");
 		callfunc("F_InstanceMenuResetStatus", "trg", "TRG");
 		callfunc("F_InstanceMenuResetStatus", "isle_bios", "IsleOfBios");
 		callfunc("F_InstanceMenuResetStatus", "morse_cave", "MorseCave");
+		callfunc("F_InstanceMenuResetStatus", "sealed_os", "SealedOs");
 		callfunc("F_InstanceMenuResetStatus", "os_occupation", "OSOccupation");
 		callfunc("F_InstanceMenuResetStatus", "cor_operation", "CorOperation");
 		callfunc("F_InstanceMenuResetStatus", "thor_gunsu_base", "ThorGunsuBase");
@@ -89,11 +94,14 @@ OnAtcommand:
 	.@opt6$ = callfunc("F_InstanceMenuOption", "[75+] Altar do Selo", "santuario_selado", "SANTUARIOSELADO");
 	.@opt7$ = callfunc("F_InstanceMenuOption", "[90+] Laboratorio Werner", "wlcr", "WLCR");
 	.@opt8$ = callfunc("F_InstanceMenuOption", "[90+] Torneio da Magia(Solo)", "gmt", "GMT");
+	.@opt48$ = callfunc("F_InstanceMenuOption", "[70+] Caverna do Polvo", "octopus_cave", "OctopusCave");
 	.@opt46$ = callfunc("F_InstanceMenuOption", "[90+] Esgoto de Malangdo", "malangdo_culvert", "MalangdoCulvert");
 	.@opt44$ = callfunc("F_InstanceMenuOption", "[175+] Geffen Night Arena (Solo)", "geffen_night_arena", "GeffenNightArena");
 	.@opt45$ = callfunc("F_InstanceMenuOption", "[175+] Constellation Tower", "constellation_tower", "ConstellationTower");
 	.@opt9$ = callfunc("F_InstanceMenuOption", "[95+] Memorias de Sara", "sara_memory", "SaraMemory");
 	.@opt10$ = callfunc("F_InstanceMenuOption", "[100+] Espaco Infinito", "infinite_space", "InfiniteSpace");
+	.@opt50$ = callfunc("F_InstanceMenuOption", "[100+] Ritual da Bencao", "ritual_blessing", "RitualOfBlessing");
+	.@opt49$ = callfunc("F_InstanceMenuOption", "[110+] Regenschirm", "regenschirm", "Regenschirm");
 	.@opt11$ = callfunc("F_InstanceMenuOption", "[100+] Floresta Nebulosa", "hazy_forest", "HazyForest");
 	.@opt12$ = callfunc("F_InstanceMenuOption", "[120+] Lago Bakonawa", "BakonawaLake", "BakonawaLake");
 	.@opt13$ = callfunc("F_InstanceMenuOption", "[120+] Palacio das Magoas", "ghost_palace", "GhostPalace");
@@ -109,12 +117,14 @@ OnAtcommand:
 	.@opt21$ = callfunc("F_InstanceMenuOption", "[140+] Fabrica de Brinquedos de Terror", "htf", "HTF");
 	.@opt22$ = callfunc("F_InstanceMenuOption", "[140+] Salao de Ymir", "room_consciousness", "RoomConsciousness");
 	.@opt23$ = callfunc("F_InstanceMenuOption", "[140+] Base da Guerra Heart Hunter", "heart_hunter_war_base", "HeartHunterWarBase");
+	.@opt51$ = callfunc("F_InstanceMenuOption", "[145+] Sarah e Fenrir", "sarah_fenrir", "SarahAndFenrir");
 	.@opt24$ = callfunc("F_InstanceMenuOption", "[150/175] Jardim de Vermuth (Normal/Hard)", "hidden_garden", "HiddenGarden");
 	.@opt41$ = callfunc("F_InstanceMenuOption", "[150+] Fazenda de Pitayas", "lost_farm", "LostFarm");
 	.@opt37$ = callfunc("F_InstanceMenuOption", "[150+] Laboratorio Wolfchev", "wolfchev_laboratory", "WolfchevLaboratory");
 	.@opt25$ = callfunc("F_InstanceMenuOption", "[160+] Templo do Rei Demonio", "trg", "TRG");
 	.@opt26$ = callfunc("F_InstanceMenuOption", "[160+] Ilha de Bios", "isle_bios", "IsleOfBios");
 	.@opt27$ = callfunc("F_InstanceMenuOption", "[160+] Caverna do Morse", "morse_cave", "MorseCave");
+	.@opt52$ = callfunc("F_InstanceMenuOption", "[170+] OS Selado", "sealed_os", "SealedOs");
 	.@opt28$ = callfunc("F_InstanceMenuOption", "[170+] Operacao OS", "os_occupation", "OSOccupation");
 	.@opt29$ = callfunc("F_InstanceMenuOption", "[170+] Memorial COR", "cor_operation", "CorOperation");
 	.@opt30$ = callfunc("F_InstanceMenuOption", "[170+] Base Militar", "thor_gunsu_base", "ThorGunsuBase");
@@ -134,6 +144,7 @@ OnAtcommand:
 		.@opt3$,
 		.@opt4$,
 		.@opt5$,
+		.@opt48$,
 		.@opt6$,
 		.@opt7$,
 		.@opt8$,
@@ -141,6 +152,8 @@ OnAtcommand:
 		.@opt9$,
 		.@opt10$,
 		.@opt11$,
+		.@opt50$,
+		.@opt49$,
 		.@opt12$,
 		.@opt13$,
 		.@opt14$,
@@ -155,12 +168,14 @@ OnAtcommand:
 		.@opt21$,
 		.@opt22$,
 		.@opt23$,
+		.@opt51$,
 		.@opt24$,
 		.@opt41$,
 		.@opt37$,
 		.@opt25$,
 		.@opt26$,
 		.@opt27$,
+		.@opt52$,
 		.@opt28$,
 		.@opt29$,
 		.@opt30$,
@@ -178,13 +193,33 @@ OnAtcommand:
 		.@opt45$
 	);	close2;
 
-	if (.@s == 9)
+	if (.@s == 6)
+		.@s = 48;
+	else if (.@s == 10)
 		.@s = 46;
-	else if (.@s == 36)
+	else if (.@s == 14)
+		.@s = 50;
+	else if (.@s == 15)
+		.@s = 49;
+	else if (.@s == 30)
+		.@s = 51;
+	else if (.@s == 37)
+		.@s = 52;
+	else if (.@s == 41)
 		.@s = 47;
-	else if (.@s > 36)
+	else if (.@s > 41)
+		.@s -= 7;
+	else if (.@s > 37)
+		.@s -= 6;
+	else if (.@s > 30)
+		.@s -= 5;
+	else if (.@s > 15)
+		.@s -= 4;
+	else if (.@s > 14)
+		.@s -= 3;
+	else if (.@s > 10)
 		.@s -= 2;
-	else if (.@s > 9)
+	else if (.@s > 6)
 		.@s--;
 
 	switch(.@s) {
@@ -219,6 +254,10 @@ OnAtcommand:
 			case 3:
 				end;
 			}
+		case 48:
+			#INSTANCENAME$ = "OctopusCave";
+			doevent "OctopusCave_Instance#Custom::OnStartInstance";
+			end;
 		case 6:
 			#INSTANCENAME$ = "SantuarioSelado";
 			doevent "SantuarioSelado_Instance#Custom::OnStartInstance";
@@ -238,6 +277,14 @@ OnAtcommand:
 		case 10:
 			#INSTANCENAME$ = "InfiniteSpace";
 			doevent "InfiniteSpace_Instance#Custom::OnStartInstance";
+			end;
+		case 49:
+			#INSTANCENAME$ = "Regenschirm";
+			doevent "Regenschirm_Instance#Custom::OnStartInstance";
+			end;
+		case 50:
+			#INSTANCENAME$ = "RitualOfBlessing";
+			doevent "RitualOfBlessing_Instance#Custom::OnStartInstance";
 			end;
 		case 11:
 			#INSTANCENAME$ = "HazyForest";
@@ -315,6 +362,10 @@ OnAtcommand:
 			#INSTANCENAME$ = "HeartHunterWarBase";
 			doevent "HeartHunterWarBase_Instance#Custom::OnStartInstance";
 			end;
+		case 51:
+			#INSTANCENAME$ = "SarahAndFenrir";
+			doevent "SarahAndFenrir_Instance#Custom::OnStartInstance";
+			end;
 		case 26:
 			#INSTANCENAME$ = "HiddenGarden";
 			doevent "HiddenGarden_Instance#Custom::OnStartInstance";
@@ -338,6 +389,10 @@ OnAtcommand:
 		case 31:
 			#INSTANCENAME$ = "MorseCave";
 			doevent "MorseCave_Instance#Custom::OnStartInstance";
+			end;
+		case 52:
+			#INSTANCENAME$ = "SealedOs";
+			doevent "SealedOs_Instance#Custom::OnStartInstance";
 			end;
 		case 32:
 			#INSTANCENAME$ = "OSOccupation";
