@@ -23,7 +23,7 @@ OnAtcommand:
 	}
 
 	.@now = gettimetick(2);
-	.@reset_ver = 11;
+	.@reset_ver = 12;
 	if (#INSTANCE_MENU_RESET_VER != .@reset_ver || #INSTANCE_MENU_RESET_TICK <= .@now) {
 		callfunc("F_InstanceMenuResetStatus", "poringvillage", "PORING");
 		callfunc("F_InstanceMenuResetStatus", "orcMemory", "ORCMEMORY");
@@ -65,6 +65,7 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatus", "cor_operation", "CorOperation");
 		callfunc("F_InstanceMenuResetStatus", "thor_gunsu_base", "ThorGunsuBase");
 		callfunc("F_InstanceMenuResetStatus", "twilight_garden", "TwilightGarden");
+		callfunc("F_InstanceMenuResetStatus", "maze_of_oz", "MazeofOz");
 		callfunc("F_InstanceMenuResetStatus", "water_garden", "WATERGARDEN");
 		callfunc("F_InstanceMenuResetStatus", "faceworms_nest", "FacewormsNest");
 		callfunc("F_InstanceMenuResetStatus", "nightmarish_jitterbug", "NightmarishJitterbug");
@@ -117,6 +118,7 @@ OnAtcommand:
 	.@opt28$ = callfunc("F_InstanceMenuOption", "[170+] Operacao OS", "os_occupation", "OSOccupation");
 	.@opt29$ = callfunc("F_InstanceMenuOption", "[170+] Memorial COR", "cor_operation", "CorOperation");
 	.@opt30$ = callfunc("F_InstanceMenuOption", "[170+] Base Militar", "thor_gunsu_base", "ThorGunsuBase");
+	.@opt47$ = callfunc("F_InstanceMenuOption", "[170+] Labirinto de Oz", "maze_of_oz", "MazeofOz");
 	.@opt42$ = callfunc("F_InstanceMenuOption", "[170+] Fortaleza Celeste", "sky_fortress", "SkyFortress");
 	.@opt31$ = callfunc("F_InstanceMenuOption", "[170+] Duelo com Sweety", "twilight_garden", "TwilightGarden");
 	.@opt32$ = callfunc("F_InstanceMenuOption", "[170+] WaterGarden", "water_garden", "WATERGARDEN");
@@ -162,6 +164,7 @@ OnAtcommand:
 		.@opt28$,
 		.@opt29$,
 		.@opt30$,
+		.@opt47$,
 		.@opt42$,
 		.@opt31$,
 		.@opt32$,
@@ -177,6 +180,10 @@ OnAtcommand:
 
 	if (.@s == 9)
 		.@s = 46;
+	else if (.@s == 36)
+		.@s = 47;
+	else if (.@s > 36)
+		.@s -= 2;
 	else if (.@s > 9)
 		.@s--;
 
@@ -343,6 +350,10 @@ OnAtcommand:
 		case 34:
 			#INSTANCENAME$ = "ThorGunsuBase";
 			doevent "ThorGunsuBase_Instance#Custom::OnStartInstance";
+			end;
+		case 47:
+			#INSTANCENAME$ = "MazeofOz";
+			doevent "MazeofOz_Instance#Custom::OnStartInstance";
 			end;
 		case 35:
 			#INSTANCENAME$ = "SkyFortress";

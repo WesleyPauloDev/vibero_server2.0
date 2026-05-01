@@ -84,6 +84,9 @@ OnPCLoadMapEvent:
     if (strcharinfo(3) != .Castle$) end;
     if (!agitcheck()) end;
 
+    deltimer strnpcinfo(3)+"::OnKvmPointMinute";
+    addtimer 60000, strnpcinfo(3)+"::OnKvmPointMinute";
+
     .@gid = getcharid(2);
     .@cid = getcharid(0);
 
@@ -99,6 +102,16 @@ OnPCLoadMapEvent:
     $WOE_ENTRY_COUNT[.@gid] = $WOE_ENTRY_COUNT[.@gid] + 1;
     if (inarray($WOE_ENTRY_LIST, .@gid) < 0)
         $WOE_ENTRY_LIST[getarraysize($WOE_ENTRY_LIST)] = .@gid;
+    end;
+
+OnKvmPointMinute:
+    if (strcharinfo(3) != .Castle$) end;
+    if (!agitcheck()) end;
+
+    kvm_point = kvm_point + 1;
+    dispbottom "[WoE] Voce ganhou 1 ponto KVM por permanecer no castelo. Total: " + kvm_point + ".";
+
+    addtimer 60000, strnpcinfo(3)+"::OnKvmPointMinute";
     end;
 
 //============================================================
