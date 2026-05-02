@@ -2914,6 +2914,8 @@ OnTouch:
 	sleep 2000;
 	npctalk "Agora, vamos comecar a missao!", instance_npcname("Temple Guard#2dms101");
 	enablenpc instance_npcname("Temple Guard#2dms10");
+	navigateto("2@nyr",35,171);
+	viewpointmap 'map_2nyr$,1,35,171,1,0xFFFFFF;
 	end;
 }
 
@@ -2998,6 +3000,9 @@ S_Next:
 	mapannounce 'map_2nyr$, getarg(1), bc_map, 0xFFCC;
 	for ( .@i = 2; .@i < getargcount(); ++.@i )
 		enablenpc instance_npcname( getarg(.@i) );
+	getmapxy .@mark_map$, .@mark_x, .@mark_y, BL_NPC, getarg(2);
+	navigateto("2@nyr",.@mark_x,.@mark_y);
+	viewpointmap 'map_2nyr$,1,.@mark_x,.@mark_y,1,0xFFFFFF;
 	end;
 
 S_Call:
@@ -3028,7 +3033,9 @@ OnFinal:
 	mapannounce 'map_2nyr$, "Redefinicao do codigo de seguranca do cofre em andamento!", bc_map, 0xFFCC;
 	disablenpc instance_npcname("#2mstep07");
 	disablenpc instance_npcname("#2mstep08");
-	// enablenpc instance_npcname("#2mstep09");
+	enablenpc instance_npcname("#2mstep09");
+	navigateto("2@nyr",120,141);
+	viewpointmap 'map_2nyr$,1,120,141,1,0xFFFFFF;
 	// enablenpc instance_npcname("#2mstep10");
 	end;
 }
@@ -3234,6 +3241,8 @@ OnTouch:
 	monster 'map_2nyr$,111,209,"Resonator",21312,1, .@label$;
 	monster 'map_2nyr$,112,206,"Resonator",21312,1, .@label$;
 	monster 'map_2nyr$,115,201,"Resonator",21313,1, .@label$;	// EP18_MD_HEARTHUNTER_F
+	navigateto("2@nyr",115,201);
+	viewpointmap 'map_2nyr$,1,115,201,1,0xFFFFFF;
 	end;
 }
 
@@ -3252,6 +3261,8 @@ OnTouch:
 	'nyr_daily_step = 19;
 	disablenpc instance_npcname("#2mstep01");
 	enablenpc instance_npcname("Security Device#2dms10");
+	navigateto("2@nyr",51,57);
+	viewpointmap 'map_2nyr$,1,51,57,1,0xFFFFFF;
 	end;
 }
 
@@ -3268,6 +3279,8 @@ OnTouch:
 	'nyr_daily_step = 24;
 	disablenpc instance_npcname("#2mstep03");
 	enablenpc instance_npcname("Security Device#2dms20");
+	navigateto("2@nyr",115,69);
+	viewpointmap 'map_2nyr$,1,115,69,1,0xFFFFFF;
 	end;
 }
 
@@ -3284,6 +3297,8 @@ OnTouch:
 	'nyr_daily_step = 29;
 	disablenpc instance_npcname("#2mstep05");
 	enablenpc instance_npcname("Security Device#2dms30");
+	navigateto("2@nyr",184,100);
+	viewpointmap 'map_2nyr$,1,184,100,1,0xFFFFFF;
 	end;
 }
 
@@ -3292,6 +3307,7 @@ OnTouch:
 OnTouch:
 	warp 'map_2nyr$,120,126;
 	navigateto("2@nyr",120,137);
+	viewpointmap 'map_2nyr$,1,120,137,1,0xFFFFFF;
 	end;
 }
 
@@ -3300,6 +3316,7 @@ OnTouch:
 OnTouch:
 	warp 'map_2nyr$,120,147;
 	navigateto("2@nyr",120,200);
+	viewpointmap 'map_2nyr$,1,120,200,1,0xFFFFFF;
 	end;
 }
 
@@ -3308,6 +3325,7 @@ OnTouch:
 OnTouch:
 	warp 'map_2nyr$,120,134;
 	navigateto("2@nyr",151,131);
+	viewpointmap 'map_2nyr$,1,151,131,1,0xFFFFFF;
 	if (is_party_leader() == false)
 		end;
 	if ('nyr_daily_step != 32)
@@ -3322,6 +3340,7 @@ OnTouch:
 OnTouch:
 	warp 'map_2nyr$,159,131;
 	navigateto("2@nyr",203,220);
+	viewpointmap 'map_2nyr$,1,203,220,1,0xFFFFFF;
 	end;
 }
 
@@ -3416,6 +3435,7 @@ OnTouch:
 		enablenpc instance_npcname( .@enable$ );
 	}
 	navigateto("2@nyr",.@xy[0],.@xy[1]);
+	viewpointmap 'map_2nyr$,1,.@xy[0],.@xy[1],1,0xFFFFFF;
 	close;
 OnTouch:
 	switch( atoi( replacestr( strnpcinfo(2), "2dms", "" ) ) ) {
@@ -3469,6 +3489,7 @@ OnTouch:
 		mapannounce 'map_2nyr$, "Todos os setores foram limpos! Reunam-se na saida!", bc_map, 0xFFCC;
 	}
 	navigateto("2@nyr",151,131);
+	viewpointmap 'map_2nyr$,1,151,131,1,0xFFFFFF;
 	close;
 OnTouch:
 	if ('nyr_daily_step <= 33)
@@ -3514,5 +3535,6 @@ OnTouch:
 	end;
 OnTouch_:
 	navigateto("2@nyr",203,220);
+	viewpointmap 'map_2nyr$,1,203,220,1,0xFFFFFF;
 	end;
 }

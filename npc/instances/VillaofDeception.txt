@@ -22,22 +22,22 @@ OnStartInstance:
 	.@selected_mode = #VILLA_DECEPTION_MODE;
 	#VILLA_DECEPTION_MODE = 0;
 	if (.@selected_mode == 1)
-		callsub S_Entry, "Villa of Deception", "villa_deception", "VillaDeception", 170, "Vila da Decepcao";
+		callsub S_Entry, "Villa of Deception", "vdec", "VillaDeception", 170, "Vila da Decepcao";
 	if (.@selected_mode == 2)
-		callsub S_Entry, "Villa of Deception Advanced", "villa_deception_advanced", "VillaDeceptionAdvanced", 200, "Vila da Decepcao Avancada";
+		callsub S_Entry, "Villa of Deception Advanced", "vdec_adv", "VillaDeceptionAdvanced", 175, "Vila da Decepcao Avancada";
 
 	mes "[Aira]";
 	mes "Qual versao da Vila da Decepcao voce deseja acessar?";
 	next;
-	.@normal$ = callfunc("F_InstanceMenuOption", "[170] Normal", "villa_deception", "VillaDeception");
-	.@advanced$ = callfunc("F_InstanceMenuOption", "[200] Avancada", "villa_deception_advanced", "VillaDeceptionAdvanced");
+	.@normal$ = callfunc("F_InstanceMenuOption", "[170] Normal", "vdec", "VillaDeception");
+	.@advanced$ = callfunc("F_InstanceMenuOption", "[175] Avancada", "vdec_adv", "VillaDeceptionAdvanced");
 	switch(select(.@normal$, .@advanced$, "Cancelar")) {
 	case 1:
 		#INSTANCENAME$ = "VillaDeception";
-		callsub S_Entry, "Villa of Deception", "villa_deception", "VillaDeception", 170, "Vila da Decepcao";
+		callsub S_Entry, "Villa of Deception", "vdec", "VillaDeception", 170, "Vila da Decepcao";
 	case 2:
 		#INSTANCENAME$ = "VillaDeceptionAdvanced";
-		callsub S_Entry, "Villa of Deception Advanced", "villa_deception_advanced", "VillaDeceptionAdvanced", 200, "Vila da Decepcao Avancada";
+		callsub S_Entry, "Villa of Deception Advanced", "vdec_adv", "VillaDeceptionAdvanced", 175, "Vila da Decepcao Avancada";
 	default:
 		close;
 	}
@@ -159,8 +159,8 @@ OnInstanceInit:
 
 	'advs_step = 0;
 	'map_advs$ = instance_mapname("1@advs");
-	'villa_deception_finish_announced = 0;
-	deletearray 'villa_deception_reward_claimed;
+	'vdec_done = 0;
+	deletearray 'vdec_reward;
 
 	// variables step 1
 	'sw_timer = 0;
@@ -956,7 +956,7 @@ OnTouch:	// effect ?
 1@advs,123,358,4	script	#box_admin	4_ENERGY_YELLOW,2,2,{
 	.@is_hard = (instance_live_info(ILI_NAME) == "Villa of Deception Advanced");
 	.@aid = getcharid(3);
-	if ('villa_deception_reward_claimed[.@aid]) {
+	if ('vdec_reward[.@aid]) {
 		mes "[Aira]";
 		mes "Voce ja recebeu a recompensa desta execucao.";
 		mes "Vou te enviar ao seu ponto de salvamento.";
@@ -982,7 +982,7 @@ OnTouch:	// effect ?
 		.@rep = 20;
 	}
 
-	.@announce = (!'villa_deception_finish_announced && getcharid(1) > 0);
+	.@announce = (!'vdec_done && getcharid(1) > 0);
 	.@finish_result = callfunc("F_InstanceFinishBase", .@display_name$, .@status_var$, .@coin, .@ticket, "", "", 1, .@rep, 110002, 3000, 3, 0, .@display_name$, .@announce);
 	if (.@finish_result == -1) {
 		mes "[Aira]";
@@ -991,9 +991,9 @@ OnTouch:	// effect ?
 		close;
 	}
 	if (.@finish_result == 1) {
-		'villa_deception_reward_claimed[.@aid] = 1;
-		if (!'villa_deception_finish_announced) {
-			'villa_deception_finish_announced = 1;
+		'vdec_reward[.@aid] = 1;
+		if (!'vdec_done) {
+			'vdec_done = 1;
 			if (getcharid(1) < 1) {
 				callfunc("F_InstanceProgressComplete", .@aid, .@instance_code$, .@display_name$);
 				announce "[Instancias] " + strcharinfo(0) + " concluiu " + .@display_name$ + " em modo solo.", bc_all, "0xFF9900";
