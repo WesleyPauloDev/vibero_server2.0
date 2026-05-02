@@ -177,9 +177,8 @@ OnAtcommand:
 	.@opt38$ = callfunc("F_InstanceMenuOption", "[175] Tumba Remorso", "tomb_remorse", "TombRemorse");
 	.@opt40$ = callfunc("F_InstanceMenuOption", "[175] Edda Biolab", "edda_biolab", "EddaBiolab");
 	.@opt43$ = callfunc("F_InstanceMenuOption", "[110] Hospital Bangungot", "BangungotHospital", "BangungotHospital");
-	.@opt53$ = "[170] Vilas Episodio 18";
+	.@opt53$ = "[170] Vila da Decepcao";
 	.@opt54$ = "[100] Wave Mode";
-	.@opt55$ = "[170] Operacoes Lobos";
 	.@s = select(
 		.@opt1$,
 		.@opt2$,
@@ -223,7 +222,6 @@ OnAtcommand:
 		.@opt30$,
 		.@opt47$,
 		.@opt53$,
-		.@opt55$,
 		.@opt42$,
 		.@opt31$,
 		.@opt32$,
@@ -241,7 +239,7 @@ OnAtcommand:
 		9,10,54,11,50,43,12,13,14,
 		15,16,17,18,19,20,21,22,23,24,
 		25,51,26,27,28,29,30,31,32,
-		33,34,47,53,55,35,36,37,38,39,
+		33,34,47,53,35,36,37,38,39,
 		40,
 		41,42,44,45;
 	.@s = .@case_map[.@s];
@@ -305,25 +303,6 @@ OnAtcommand:
 		case 54:
 			#INSTANCENAME$ = "WaveMode";
 			doevent "WaveMode_Instance#Custom::OnStartInstance";
-			end;
-		case 55:
-			mes "[Suad]";
-			mes "Qual operacao voce quer acessar?";
-			next;
-			.@wolves$ = callfunc("F_InstanceMenuOption", "[170+] Encontro dos Lobos", "wolves_gathering", "WolvesGathering");
-			.@sanctuary$ = callfunc("F_InstanceMenuOption", "[170+] Purificacao", "sanctuary_purification", "SanctuaryPurification");
-			switch(select(.@wolves$, .@sanctuary$, "Cancelar")) {
-			case 1:
-				#INSTANCENAME$ = "WolvesGathering";
-				callfunc("F_InstanceEntry", "Wolves Gathering Place", "Suad", "wolves_gathering", "WolvesGathering", 170, "Encontro dos Lobos");
-				end;
-			case 2:
-				#INSTANCENAME$ = "SanctuaryPurification";
-				callfunc("F_InstanceEntry", "Sanctuary Purification", "Sacerdote", "sanctuary_purification", "SanctuaryPurification", 170, "Purificacao");
-				end;
-			default:
-				close;
-			}
 			end;
 		case 49:
 			#INSTANCENAME$ = "Regenschirm";
@@ -458,20 +437,15 @@ OnAtcommand:
 			doevent "MazeofOz_Instance#Custom::OnStartInstance";
 			end;
 		case 53:
-			.@vhp$ = callfunc("F_InstanceMenuOption", "[170] Sumo Sacerdote", "villa_high_priest", "VillaHighPriest");
-			.@vdec$ = callfunc("F_InstanceMenuOption", "[170] Decepcao", "vdec", "VillaDeception");
-			.@vdeca$ = callfunc("F_InstanceMenuOption", "[175] Decepcao Avancada", "vdec_adv", "VillaDeceptionAdvanced");
-			switch(select(.@vhp$, .@vdec$, .@vdeca$, "Cancelar")) {
+			.@vdec$ = callfunc("F_InstanceMenuOption", "[170] Normal", "vdec", "VillaDeception");
+			.@vdeca$ = callfunc("F_InstanceMenuOption", "[175] Hard", "vdec_adv", "VillaDeceptionAdvanced");
+			switch(select(.@vdec$, .@vdeca$, "Cancelar")) {
 			case 1:
-				#INSTANCENAME$ = "VillaHighPriest";
-				doevent "VillaHighPriest_Instance#Custom::OnStartInstance";
-				end;
-			case 2:
 				#INSTANCENAME$ = "VillaDeception";
 				#VILLA_DECEPTION_MODE = 1;
 				doevent "VillaDeception_Instance#Custom::OnStartInstance";
 				end;
-			case 3:
+			case 2:
 				#INSTANCENAME$ = "VillaDeceptionAdvanced";
 				#VILLA_DECEPTION_MODE = 2;
 				doevent "VillaDeception_Instance#Custom::OnStartInstance";

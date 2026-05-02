@@ -10,7 +10,7 @@
 //============================================================
 -	script	lhz_dun_n	-1,{
 OnInit:
-	// === CONFIGURAÇÃO =========================================
+	// === CONFIGURACAO =========================================
 	// mapas onde quer repetir
 	setarray .@maps$[0], "lhz_dun_n", "lhz_dun_n2", "lhz_dun_n3", "lhz_dun_n4";	
 	setarray .@mob[0], 3208, 3209, 3210, 3211, 3212, 3213, 3226, 3227, 3228, 3229, 3230, 3231, 3232;	
@@ -145,7 +145,7 @@ OnMyMVPDead:
 
 	// mata apenas os monstros registrados para esse mapa
 	killmonster .@map$, strnpcinfo(0) + "::OnMyMVPDead";
-	// mapannounce "lhz_dun_n", "Voz do Reaper: Até breve.", bc_map, "0x00FF00";
+	// mapannounce "lhz_dun_n", "Voz do Reaper: Ate breve.", bc_map, "0x00FF00";
 	mapannounce strcharinfo(3), "O MVP foi derrotado!", bc_map, 0x00FF00;
 	end;
 OnTimer60000: // a cada 60 segundos
@@ -167,13 +167,13 @@ OnTimer60000: // a cada 60 segundos
 
 	OnNPCKillEvent:
 		.@map$ = strcharinfo(3);
-		// Só processa mobs
+		// So processa mobs
 		if (.@map$ == "lhz_dun_n" || .@map$ == "lhz_dun_n2") {
-			callfunc("F_PartyNearbyKillReward", .@map$, 9648, 20, "#bio_kills", 5, 5, 1, 110006, 5000, "[Reputa??o] Voc? recebeu +1 ponto de reputa??o Bio5 Normal!", 30);
+			callfunc("F_PartyNearbyKillReward", .@map$, 9648, 20, "#bio_kills", 5, 5, 1, 110006, 5000, "[Reputacao] Voce recebeu +1 ponto de reputacao Bio5 Normal!", 30);
 		}
 
 		if (.@map$ == "lhz_dun_n3" || .@map$ == "lhz_dun_n4") {
-			callfunc("F_PartyNearbyKillReward", .@map$, 9649, 20, "#bio_hardkills", 5, 6, 1, 110007, 5000, "[Reputa??o] Voc? recebeu +1 ponto de reputa??o Bio5 Hard!", 30);
+			callfunc("F_PartyNearbyKillReward", .@map$, 9649, 20, "#bio_hardkills", 5, 6, 1, 110007, 5000, "[Reputacao] Voce recebeu +1 ponto de reputacao Bio5 Hard!", 30);
 		}
 		callsub( S_Regular, killedrid );
 
