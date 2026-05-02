@@ -1,0 +1,210 @@
+//==================================================
+// Gerenciador Varmundt / Biosphere
+// Centraliza trocas, encantamentos e reformas dos equipamentos Varmundt.
+//==================================================
+
+moc_para01,52,26,4	script	Administrador Varmundt#bio	4_M_BARMUND,{
+	disable_items;
+
+	mes "[Administrador Varmundt]";
+	mes "Eu organizo os equipamentos e materiais da Biosphere.";
+	mes "Escolha o servico desejado.";
+	next;
+
+	switch (select(
+		"Trocar fragmentos de runa:" +
+		"Criar equipamentos Engraved:" +
+		"Encantar Varmundt base:" +
+		"Encantar Rune Equipment:" +
+		"Reformar/upgrade Varmundt:" +
+		"Encantar aneis Varmundt:" +
+		"Encantar aneis melhorados:" +
+		"Cancelar"
+	)) {
+	case 1:
+		mes "[Administrador Varmundt]";
+		mes "Troco fragmentos por runas e essencias por aguas magicas.";
+		close2;
+		callshop "barter_varmundt_fragments";
+		end;
+	case 2:
+		mes "[Administrador Varmundt]";
+		mes "Aqui voce grava os equipamentos classicos usando as runas da Biosphere.";
+		close2;
+		callshop "barter_varmundt_engraved";
+		end;
+	case 3:
+		callsub L_EnchantBase;
+		end;
+	case 4:
+		callsub L_EnchantRune;
+		end;
+	case 5:
+		callsub L_Reform;
+		end;
+	case 6:
+		callsub L_EnchantRingBase;
+		end;
+	case 7:
+		callsub L_EnchantRingUpgraded;
+		end;
+	default:
+		close;
+	}
+	end;
+
+L_EnchantBase:
+	mes "[Administrador Varmundt]";
+	mes "Encantamento dos conjuntos Varmundt base.";
+	mes "Equipe ou tenha o item alvo no inventario e a janela oficial cuidara dos requisitos.";
+	next;
+
+	switch (select("Glade:Fire:Ice:Death:Cancelar")) {
+	case 1:
+		.@enchant = 16;
+		break;
+	case 2:
+		.@enchant = 17;
+		break;
+	case 3:
+		.@enchant = 18;
+		break;
+	case 4:
+		.@enchant = 19;
+		break;
+	default:
+		close;
+	}
+	close2;
+	item_enchant(.@enchant);
+	end;
+
+L_EnchantRune:
+	mes "[Administrador Varmundt]";
+	mes "Encantamento dos equipamentos Rune melhorados.";
+	next;
+
+	switch (select("Plain:Flame:Ice:Death:Cancelar")) {
+	case 1:
+		.@enchant = 52;
+		break;
+	case 2:
+		.@enchant = 53;
+		break;
+	case 3:
+		.@enchant = 54;
+		break;
+	case 4:
+		.@enchant = 55;
+		break;
+	default:
+		close;
+	}
+	close2;
+	item_enchant(.@enchant);
+	end;
+
+L_EnchantRingBase:
+	mes "[Administrador Varmundt]";
+	mes "Encantamento dos aneis Varmundt base.";
+	next;
+
+	switch (select("Soul:Venom:Temple:Cancelar")) {
+	case 1:
+		.@enchant = 57;
+		break;
+	case 2:
+		.@enchant = 58;
+		break;
+	case 3:
+		.@enchant = 59;
+		break;
+	default:
+		close;
+	}
+	close2;
+	item_enchant(.@enchant);
+	end;
+
+L_EnchantRingUpgraded:
+	mes "[Administrador Varmundt]";
+	mes "Encantamento dos aneis melhorados e magicos.";
+	next;
+
+	switch (select("Soul:Venom:Temple:Cancelar")) {
+	case 1:
+		.@enchant = 60;
+		break;
+	case 2:
+		.@enchant = 61;
+		break;
+	case 3:
+		.@enchant = 62;
+		break;
+	default:
+		close;
+	}
+	close2;
+	item_enchant(.@enchant);
+	end;
+
+L_Reform:
+	mes "[Administrador Varmundt]";
+	mes "A reforma usa o sistema oficial do servidor.";
+	mes "Os conjuntos precisam estar +7 ou mais. A janela vai validar materiais, refino e item base.";
+	next;
+
+	switch (select(
+		"Fire Rune Equipment:" +
+		"Plain Rune Equipment:" +
+		"Ice Rune Equipment:" +
+		"Death Rune Equipment:" +
+		"Soul Rune Ring:" +
+		"Venom Rune Ring:" +
+		"Temple Rune Ring:" +
+		"Soul Magic Ring:" +
+		"Venom Magic Ring:" +
+		"Temple Magic Ring:" +
+		"Cancelar"
+	)) {
+	case 1:
+		.@reform$ = "Barmund_Flame_Reform";
+		break;
+	case 2:
+		.@reform$ = "Barmund_Plain_Reform";
+		break;
+	case 3:
+		.@reform$ = "Barmund_Ice_Reform";
+		break;
+	case 4:
+		.@reform$ = "Barmund_Death_Reform";
+		break;
+	case 5:
+		.@reform$ = "Barmund_Soul_Reform";
+		break;
+	case 6:
+		.@reform$ = "Barmund_Venom_Reform";
+		break;
+	case 7:
+		.@reform$ = "Barmund_Temple_Reform";
+		break;
+	case 8:
+		.@reform$ = "Barmund_S_Reform";
+		break;
+	case 9:
+		.@reform$ = "Barmund_V_Reform";
+		break;
+	case 10:
+		.@reform$ = "Barmund_T_Reform";
+		break;
+	default:
+		close;
+	}
+	close2;
+	item_reform(.@reform$);
+	end;
+
+OnInit:
+	setunittitle(getnpcid(0), "Biosphere");
+	end;
+}
