@@ -14,6 +14,7 @@ moc_para01,52,26,4	script	Administrador Varmundt#bio	4_M_BARMUND,{
 	switch (select(
 		"Trocar fragmentos de runa:" +
 		"Criar equipamentos Engraved:" +
+		"Comprar set Varmundt:" +
 		"Encantar Varmundt base:" +
 		"Encantar Rune Equipment:" +
 		"Reformar/upgrade Varmundt:" +
@@ -35,22 +36,54 @@ moc_para01,52,26,4	script	Administrador Varmundt#bio	4_M_BARMUND,{
 		callshop "barter_varmundt_engraved";
 		end;
 	case 3:
-		callsub L_EnchantBase;
+		callsub L_BuyVarmundtSet;
 		end;
 	case 4:
-		callsub L_EnchantRune;
+		callsub L_EnchantBase;
 		end;
 	case 5:
-		callsub L_Reform;
+		callsub L_EnchantRune;
 		end;
 	case 6:
-		callsub L_EvolutionStones;
+		callsub L_Reform;
 		end;
 	case 7:
-		callsub L_EnchantRingBase;
+		callsub L_EvolutionStones;
 		end;
 	case 8:
+		callsub L_EnchantRingBase;
+		end;
+	case 9:
 		callsub L_EnchantRingUpgraded;
+		end;
+	default:
+		close;
+	}
+	end;
+
+L_BuyVarmundtSet:
+	mes "[Administrador Varmundt]";
+	mes "Tenho os equipamentos base usados na reforma Varmundt.";
+	mes "Cada equipamento custa 200 runas do respectivo tipo.";
+	mes "Escolha a categoria.";
+	next;
+
+	switch (select("Armadura:Capa:Bota:Acessorios:Cancelar")) {
+	case 1:
+		close2;
+		callshop "barter_varmundt_buy_armor";
+		end;
+	case 2:
+		close2;
+		callshop "barter_varmundt_buy_garment";
+		end;
+	case 3:
+		close2;
+		callshop "barter_varmundt_buy_boots";
+		end;
+	case 4:
+		close2;
+		callshop "barter_varmundt_buy_accessory";
 		end;
 	default:
 		close;
