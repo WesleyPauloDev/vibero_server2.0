@@ -1954,13 +1954,15 @@ end;
 		if (#EddaGHPur_STATUS == 2) {
 			.@coin = (.@mode ? 20 : 10);
 			.@ticket = (.@mode ? 3 : 2);
-			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0) {
+			.@stone = (.@mode ? 3 : 1);
+			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0 || checkweight(25740,.@stone) == 0) {
 				mes "Voce esta com peso demais para receber as recompensas.";
 				close;
 			}
 			callfunc("F_InstanceFinishAnnounce", .@finish_name$);
 			getitem 9608,.@coin;
 			getitem 9198,.@ticket;
+			getitem 25740,.@stone;
 			#EddaGHPur_STATUS = 3;
 		}
 	}
