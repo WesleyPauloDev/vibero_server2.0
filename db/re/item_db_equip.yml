@@ -74804,8 +74804,16 @@ Body:
     Name: Rabbit Pattern Shirt
     Type: Armor
     Weight: 500
-    Defense: 100
-    Slots: 2
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Acolyte: true
+      Mage: true
+      Monk: true
+      Priest: true
+      Sage: true
+      SoulLinker: true
+      Wizard: true
     Locations:
       Armor: true
     ArmorLevel: 2
@@ -74815,37 +74823,30 @@ Body:
     Script: |
       .@g = getenchantgrade();
       .@r = getrefine();
-
-      bonus bMDef,30;      
-
-      bonus bMaxHPRate,20;
-      bonus bMaxSPRate,20;
-
-      if (.@r>0) {
-        bonus bDef,10 * .@r;
-        bonus bMDef,5 * .@r;
+      bonus bSMatk,1+(.@r/2);
+      bonus bSpl,1;
+      bonus bMatk,5*.@r;
+      if (.@r>=7) {
+         bonus bSMatk,2;
+         bonus bSpl,2;
+         if (.@r>=9) {
+            bonus bMaxHPrate,5;
+            bonus bMaxSPrate,5;
+            if (.@r>=11) {
+               bonus2 bMagicAtkEle,Ele_Ghost,35;
+               bonus2 bMagicAtkEle,Ele_Dark,35;
+            }
+         }
       }
-      if (.@r>=8) {
-          bonus2 bResEff,Eff_Freeze,5000;
-          bonus2 bSubEle,Ele_Neutral,20;
-      }
-      if (.@g>=ENCHANTGRADE_D) {
-          bonus bDef,50;
-          bonus bMDef,30;
-          if (.@g>=ENCHANTGRADE_C) {
-              bonus bDef,50;
-              bonus bMDef,30;
-              if (.@g>=ENCHANTGRADE_B) {
-                  bonus bDef,50;
-                  bonus bMDef,30;
-                  bonus2 bSubEle,Ele_Neutral,20;      
-                  if (.@g>=ENCHANTGRADE_A) {
-                      bonus bDef,50;
-                      bonus bMDef,30;
-                      bonus2 bResEff,Eff_Freeze,5000;
-                  }
-              }
-          }
+      if (.@g >= ENCHANTGRADE_D) {
+         bonus bSMatk,2;
+         if (.@g >= ENCHANTGRADE_C) {
+            bonus bSMatk,1;
+            bonus bSpl,3;
+            if (.@g >= ENCHANTGRADE_B) {
+               bonus2 bMagicAddEle,Ele_All,15;
+            }
+         }
       }
   - Id: 15283
     AegisName: Armor_of_Rosary
@@ -200637,6 +200638,41 @@ Body:
          bonus bPerfectHitAddRate,20;
       if (.@r>=9)
          bonus bPerfectHitAddRate,20;
+  - Id: 470052
+    AegisName: Shoes_Of_Pilgrim_
+    Name: Pilgrim Shoes
+    Type: Armor
+    Buy: 20
+    Weight: 500
+    Defense: 15
+    Locations:
+      Shoes: true
+    ArmorLevel: 1
+    EquipLevelMin: 100
+    Slots: 1
+    Refineable: true
+    Script: |
+      .@r = getrefine();
+      bonus bMaxHPrate,3;
+      bonus bMaxSPrate,3;
+      bonus bDef,50*getskilllv("AB_SECRAMENT");
+      bonus bMdef,15;
+      bonus bAspdRate,4*getskilllv("AB_CANTO");
+      bonus2 bSkillCooldown,"AB_PRAEFATIO",-1000;
+      bonus bDelayrate,-6*getskilllv("AB_PRAEFATIO");
+      bonus2 bSubRace,RC_DemiHuman,2*getskilllv("AB_SECRAMENT");
+      bonus2 bSubRace,RC_Player_Human,2*getskilllv("AB_SECRAMENT");
+      bonus bHealPower,5*getskilllv("AB_HIGHNESSHEAL");
+      if (.@r>=5) {
+         bonus bMaxHPrate,7;
+         bonus bMaxSPrate,7;
+         bonus bUseSPrate,-3;
+      }
+      if (.@r>=7) {
+         bonus bMaxHPrate,10;
+         bonus bMaxSPrate,10;
+         bonus bUseSPrate,-5;
+      }
   - Id: 470051
     AegisName: Gray_Wing_Boots_
     Name: Gray Wing Boots
