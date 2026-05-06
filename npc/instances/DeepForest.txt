@@ -473,7 +473,26 @@ OnMobDead:
 
 // Step 6
 1@exsh,90,148,3	script(CLOAKED)	Hyunrok#sh2	4_EXJOB_HYUN_ROK,{
-	if ('step >= 8) {	// custom (debug)
+	if ('step >= 9) {
+		mes "[Hyunrok]";
+		mes "Voce deseja sair da Floresta Profunda agora?";
+		next;
+		if (select("Sair da Floresta Profunda.", "Ficar.") == 2)
+			close;
+		if (isbegin_quest(11782) == 1) {
+			erasequest 11782;
+			setquest 11769;
+		}
+		if (#DeepForest_STATUS == 2) {
+			.@finish_result = callfunc("F_InstanceFinishBase", "Floresta Profunda", "#DeepForest_STATUS", 10, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Floresta Profunda", ('reward_announced ? 0 : 1));
+			if (.@finish_result == -1) {
+				mes "Voce esta com peso demais para receber as recompensas.";
+				close;
+			}
+			if (.@finish_result == 1)
+				'reward_announced = 1;
+		}
+		close2;
 		warp "pay_fild09",113,343;
 		end;
 	}
@@ -553,23 +572,11 @@ OnMobDead:
 	npctalk "Hyunrok : Por favor...", .@npc_d$;
 	sleep2 2000;
 	npctalk "Hyunrok : Tenha uma viagem segura para casa...", .@npc_d$;
-	if (isbegin_quest(11782) == 1) {
-		erasequest 11782;
-		setquest 11769;
-	}
-	if (#DeepForest_STATUS == 2) {
-		.@finish_result = callfunc("F_InstanceFinishBase", "Floresta Profunda", "#DeepForest_STATUS");
-		if (.@finish_result == -1) {
-			mes "Voce esta com peso demais para receber as recompensas.";
-			close;
-		}
-	}
 	if ('step == 8)
 		'step = 9;
 	sleep2 2000;
 	setpcblock( PCBLOCK_NPC, false );
 	cutin "",255;
-	warp "SavePoint",0,0;
 	end;
 }
 
