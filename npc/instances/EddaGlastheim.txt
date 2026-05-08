@@ -1942,6 +1942,11 @@ end;
 		}
 		erasequest .@var;
 	}
+	.@stone = (.@mode ? 3 : 1);
+	if (getd(.@finish_status$) == 2 && checkweight(25740,.@stone) == 0) {
+		mes "Voce esta com peso demais para receber as recompensas.";
+		close;
+	}
 	if (!.@mode)
 		.@finish_result = callfunc("F_InstanceFinishBase", .@finish_name$, .@finish_status$);
 	else
@@ -1950,22 +1955,8 @@ end;
 		mes "Voce esta com peso demais para receber as recompensas.";
 		close;
 	}
-	if (.@finish_result == 0) {
-		if (#EddaGHPur_STATUS == 2) {
-			.@coin = (.@mode ? 20 : 10);
-			.@ticket = (.@mode ? 3 : 2);
-			.@stone = (.@mode ? 3 : 1);
-			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0 || checkweight(25740,.@stone) == 0) {
-				mes "Voce esta com peso demais para receber as recompensas.";
-				close;
-			}
-			callfunc("F_InstanceFinishAnnounce", .@finish_name$);
-			getitem 9608,.@coin;
-			getitem 9198,.@ticket;
-			getitem 25740,.@stone;
-			#EddaGHPur_STATUS = 3;
-		}
-	}
+	if (.@finish_result == 1)
+		getitem 25740,.@stone;
 	close2;
 	warp "SavePoint",0,0;
 	end;
