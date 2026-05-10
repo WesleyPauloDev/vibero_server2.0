@@ -99,12 +99,12 @@ OnNPCKillEvent:
 -	script	MVP_Kills_Ranking_Controller	-1,{
 OnInit:
 	// Config: premios (Top 3)
-	setarray .WeeklyRewardItem1[0], 9198;
-	setarray .WeeklyRewardAmt1[0], 50;
-	setarray .WeeklyRewardItem2[0], 9198;
-	setarray .WeeklyRewardAmt2[0], 30;
-	setarray .WeeklyRewardItem3[0], 9198;
-	setarray .WeeklyRewardAmt3[0], 10;
+	setarray .WeeklyRewardItem1[0], 12411, 12411, 9198;
+	setarray .WeeklyRewardAmt1[0], 5, 5, 50;
+	setarray .WeeklyRewardItem2[0], 12411, 12411, 9198;
+	setarray .WeeklyRewardAmt2[0], 3, 3, 30;
+	setarray .WeeklyRewardItem3[0], 12411, 12411, 9198;
+	setarray .WeeklyRewardAmt3[0], 1, 1, 10;
 
 	callsub S_CheckPeriodRollovers;
 	end;
@@ -170,15 +170,15 @@ S_CloseMonth:
 }
 
 // ------------------------------------------------------------
-// NPC: Ranking + Resgate do Prêmio Semanal
+// NPC: Ranking + Resgate do Premio Semanal
 // ------------------------------------------------------------
 prontera,140,175,5	script	Ranking MVP	615,{
 	mes "[Ranking MVP]";
-	mes "Aqui você vê o ranking de MVP kills.";
+	mes "Aqui voce ve o ranking de MVP kills.";
 	next;
 
 	while (true) {
-		.@opt = select("Ranking semanal:Ranking mensal:Ranking global:MVPs mais caçados:Prêmio semanal:Fechar");
+		.@opt = select("Ranking semanal:Ranking mensal:Ranking global:MVPs mais cacados:Premio semanal:Fechar");
 		switch (.@opt) {
 			case 1:
 				callsub S_ShowWeekly;
@@ -237,7 +237,7 @@ if (.@rows <= 0) {
 		mes " ";
 		if (.@my_week > 0) {
 			mes "1. " + strcharinfo(0) + " : " + .@my_week;
-			mes "Obs: ranking ainda não foi salvo/atualizado para consulta.";
+			mes "Obs: ranking ainda nao foi salvo/atualizado para consulta.";
 		} else
 			mes "Sem registros nesta semana ainda.";
 		return;
@@ -265,7 +265,7 @@ S_ShowMonthly:
 
 	mes "[Ranking MVP]";
 	mes "Ranking Mensal";
-	.@menu$ = "Mês atual:Mês passado:Voltar";
+	.@menu$ = "Mes atual:Mes passado:Voltar";
 	.@sel = select(.@menu$);
 	if (.@sel == 3)
 		return;
@@ -275,7 +275,7 @@ S_ShowMonthly:
 		.@month_id = .@now_month;
 	.@my_month = MVP_Kills_Month[.@month_id];
 
-	mes "Seus MVP kills no mês: " + .@my_month;
+	mes "Seus MVP kills no mes: " + .@my_month;
 
 	.@rows = query_sql(
 		"SELECT c.name, c.class, mk.value " +
@@ -290,9 +290,9 @@ if (.@rows <= 0) {
 		mes " ";
 		if (.@my_month > 0) {
 			mes "1. " + strcharinfo(0) + " : " + .@my_month;
-			mes "Obs: ranking ainda não foi salvo/atualizado para consulta.";
+			mes "Obs: ranking ainda nao foi salvo/atualizado para consulta.";
 		} else
-			mes "Sem registros neste mês ainda.";
+			mes "Sem registros neste mes ainda.";
 		return;
 	}
 	for (.@i = 0; .@i < .@rows; .@i++) {
@@ -341,8 +341,8 @@ S_ShowMostHunted:
 		.@now_month = callfunc("F_MVP_MonthId");
 
 	mes "[Ranking MVP]";
-	mes "MVPs mais caçados";
-	.@sel = select("Semana atual:Mês atual:Global:Voltar");
+	mes "MVPs mais cacados";
+	.@sel = select("Semana atual:Mes atual:Global:Voltar");
 	if (.@sel == 4)
 		return;
 
@@ -351,7 +351,7 @@ S_ShowMostHunted:
 		.@where$ = "WHERE `week_id` = " + .@now_week + " ";
 	}
 	else if (.@sel == 2) {
-		.@title$ = "Mês atual";
+		.@title$ = "Mes atual";
 		.@where$ = "WHERE `month_id` = " + .@now_month + " ";
 	}
 	else {
@@ -371,8 +371,8 @@ S_ShowMostHunted:
 	);
 
 	if (.@rows <= 0) {
-		mes "Sem registros de MVP neste período.";
-		mes "Obs: este histórico começa a contar a partir da atualização do log.";
+		mes "Sem registros de MVP neste periodo.";
+		mes "Obs: este historico comeca a contar a partir da atualizacao do log.";
 		return;
 	}
 
@@ -384,11 +384,11 @@ S_ShowMostHunted:
 S_WeeklyReward:
 	mes "[Ranking MVP]";
 	if ($MVP_Kills_RewardWeekId == 0) {
-		mes "Ainda não existe uma semana encerrada para premiação.";
+		mes "Ainda nao existe uma semana encerrada para premiacao.";
 		return;
 	}
 	.@w = $MVP_Kills_RewardWeekId;
-	mes "Premiação da semana encerrada.";
+	mes "Premiacao da semana encerrada.";
 	next;
 
 	.@n1$ = "-"; .@n2$ = "-"; .@n3$ = "-";
@@ -411,16 +411,16 @@ S_WeeklyReward:
 	else if (.@cid == $MVP_Kills_Winner3_CID) .@rank = 3;
 
 	if (.@rank == 0) {
-		mes "Você não ficou no Top 3 nesta semana.";
+		mes "Voce nao ficou no Top 3 nesta semana.";
 		return;
 	}
 	if (MVP_Kills_RewardedWeek == .@w) {
-		mes "Prêmio desta semana já foi resgatado neste personagem.";
+		mes "Premio desta semana ja foi resgatado neste personagem.";
 		return;
 	}
 
-	mes "Você ficou em #" + .@rank + " nesta semana!";
-	if (select("Resgatar prêmio:Cancelar") == 2)
+	mes "Voce ficou em #" + .@rank + " nesta semana!";
+	if (select("Resgatar premio:Cancelar") == 2)
 		return;
 
 	if (.@rank == 1) {
@@ -446,6 +446,6 @@ S_WeeklyReward:
 	}
 
 	MVP_Kills_RewardedWeek = .@w;
-	mes "Prêmio entregue. Parabéns!";
+	mes "Premio entregue. Parabens!";
 	return;
 }
