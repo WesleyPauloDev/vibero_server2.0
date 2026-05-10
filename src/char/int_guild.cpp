@@ -543,23 +543,7 @@ std::shared_ptr<CharGuild> inter_guild_fromsql( int32 guild_id ){
  */
 uint16 inter_guild_storagemax(int32 guild_id)
 {
-#ifdef OFFICIAL_GUILD_STORAGE
-	auto g = inter_guild_fromsql( guild_id );
-	uint16 max = 0;
-
-	if( g == nullptr ){
-		ShowError("Guild %d not found!\n", guild_id);
-		return 0;
-	}
-
-	max = guild_checkskill(g, GD_GUILD_STORAGE);
-	if (max)
-		max *= 100;
-
-	return max;
-#else
 	return MAX_GUILD_STORAGE;
-#endif
 }
 
 // `guild_castle` (`castle_id`, `guild_id`, `economy`, `defense`, `triggerE`, `triggerD`, `nextTime`, `payTime`, `createTime`, `visibleC`, `visibleG0`, `visibleG1`, `visibleG2`, `visibleG3`, `visibleG4`, `visibleG5`, `visibleG6`, `visibleG7`)

@@ -728,6 +728,8 @@ struct Battle_Config
 	int32 mer_idle_no_share;
 	int32 idletime_mer_option;
 	int32 feature_refineui;
+	int32 refine_failure_bonus_per_fail;
+	int32 refine_failure_bonus_max;
 	int32 rndopt_drop_pillar;
 	int32 pet_legacy_formula;
 	int32 pet_distance_check;

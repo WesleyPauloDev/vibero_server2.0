@@ -22588,6 +22588,44 @@ TIMER_FUNC( clif_ping_timer ){
 	return 0;
 }
 
+static uint64 clif_refine_failure_key( const struct item& item, uint8 refine ){
+	uint64 base = item.unique_id != 0 ? item.unique_id : ( ( static_cast<uint64>( static_cast<uint32>( item.id ) ) << 32 ) | item.nameid );
+
+	return base ^ ( static_cast<uint64>( refine ) + 0x9e3779b97f4a7c15ULL + ( base << 6 ) + ( base >> 2 ) );
+}
+
+static uint16 clif_refine_failure_bonus( map_session_data* sd, const struct item& item, uint8 refine ){
+	if( battle_config.refine_failure_bonus_per_fail <= 0 || battle_config.refine_failure_bonus_max <= 0 ){
+		return 0;
+	}
+
+	auto it = sd->refine_failure_bonus.find( clif_refine_failure_key( item, refine ) );
+
+	if( it == sd->refine_failure_bonus.end() ){
+		return 0;
+	}
+
+	return static_cast<uint16>( cap_value( it->second, 0, battle_config.refine_failure_bonus_max ) );
+}
+
+static uint16 clif_refine_effective_chance( map_session_data* sd, const struct item& item, uint8 refine, uint16 base_chance ){
+	return static_cast<uint16>( cap_value( base_chance + clif_refine_failure_bonus( sd, item, refine ), 0, 10000 ) );
+}
+
+static void clif_refine_add_failure_bonus( map_session_data* sd, const struct item& item, uint8 refine ){
+	if( battle_config.refine_failure_bonus_per_fail <= 0 || battle_config.refine_failure_bonus_max <= 0 ){
+		return;
+	}
+
+	uint64 key = clif_refine_failure_key( item, refine );
+	uint16& bonus = sd->refine_failure_bonus[key];
+
+	bonus = static_cast<uint16>( cap_value( bonus + battle_config.refine_failure_bonus_per_fail, 0, battle_config.refine_failure_bonus_max ) );
+}
+
+static void clif_refine_clear_failure_bonus( map_session_data* sd, const struct item& item, uint8 refine ){
+	sd->refine_failure_bonus.erase( clif_refine_failure_key( item, refine ) );
+}
 /**
  * Opens the refine UI on the designated client.
  * 0aa0
@@ -22675,7 +22713,7 @@ void clif_refineui_info( map_session_data* sd, uint16 index ){
 			PACKET_ZC_REFINING_MATERIAL_LIST_SUB& entry = p->req[count];
 
 			entry.itemId = client_nameid( cost->nameid );
-			entry.chance = static_cast<decltype(entry.chance)>( cost->chance / 100 );
+			entry.chance = static_cast<decltype(entry.chance)>( clif_refine_effective_chance( sd, *item, item->refine, cost->chance ) / 100 );
 			entry.zeny = cost->zeny;
 
 			p->packetLength += static_cast<decltype(p->packetLength)>( sizeof( entry ) );
@@ -22836,9 +22874,12 @@ void clif_parse_refineui_refine( int32 fd, map_session_data* sd ){
 	}
 
 	// Try to refine the item
-	if( cost->chance >= ( rnd() % 10000 ) ){
+	uint16 refine_chance = clif_refine_effective_chance( sd, *item, refine_before, cost->chance );
+
+	if( refine_chance >= ( rnd() % 10000 ) ){
 		log_pick_pc( sd, LOG_TYPE_OTHER, -1, item );
 		// Success
+		clif_refine_clear_failure_bonus( sd, refine_log_item, refine_before );
 		item->refine = cap_value( item->refine + 1, 0, MAX_REFINE );
 		refine_after = item->refine;
 		log_refine_event( sd, LOG_REFINE_SUCCESS, &refine_log_item, refine_before, refine_after, material, 1, blessing_item_id, blacksmith_amount );
@@ -22854,6 +22895,7 @@ void clif_parse_refineui_refine( int32 fd, map_session_data* sd ){
 		clif_refineui_info( sd, index );
 	}else{
 		// Failure
+		clif_refine_add_failure_bonus( sd, refine_log_item, refine_before );
 
 		if (info->broadcast_failure) {
 			clif_broadcast_refine_result(*sd, item->nameid, item->refine, false);
@@ -22866,6 +22908,7 @@ void clif_parse_refineui_refine( int32 fd, map_session_data* sd ){
 		// Delete the item if it is breakable
 		}else if( cost->breaking_rate > 0 && ( rnd() % 10000 ) < cost->breaking_rate ){
 			log_refine_event( sd, LOG_REFINE_BREAK, &refine_log_item, refine_before, refine_after, material, 1, blessing_item_id, blacksmith_amount );
+			clif_refine_clear_failure_bonus( sd, refine_log_item, refine_before );
 			clif_refine( *sd, index, ITEMREFINING_FAILURE );
 			pc_delitem( sd, index, 1, 0, 2, LOG_TYPE_CONSUME );
 		// Downgrade the item if necessary

@@ -6,6 +6,7 @@
 
 #include <bitset>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include <common/cbasetypes.hpp>
@@ -497,6 +498,7 @@ public:
 	int  vend_coin_type = 0; // 0=zeny,1=rops,2=rmt...
 
 	struct item_data* inventory_data[MAX_INVENTORY]; // direct pointers to itemdb entries (faster than doing item_id lookups)
+	std::unordered_map<uint64, uint16> refine_failure_bonus;
 	int16 equip_index[EQI_MAX];
 	int16 equip_switch_index[EQI_MAX];
 	uint32 weight,max_weight,add_max_weight;
