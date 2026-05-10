@@ -1,15 +1,49 @@
 // Gray Wolf exchange duplicate, unlocked in Eden Group.
 
-moc_para01,56,28,3	script	Emmet#graywolf_para	4_EP18_GW_WOMAN01,{
+moc_para01,56,28,3	script	Gray Wolf#graywolf_para	4_EP18_GW_WOMAN01,{
 	mes "[Emmet]";
 	mes "Ola, aventureiro.";
-	mes "Estou trocando equipamentos Gray Wolf por Fragmentos de Ametista.";
+	mes "Estou trocando e encantando equipamentos Gray Wolf por Fragmentos de Ametista.";
 	mes "Aqui a troca esta liberada, sem precisar avancar na historia do Episodio 18.";
 	next;
 	mes "[Emmet]";
-	mes "Cada equipamento desta lista usa os custos configurados na loja oficial.";
-	mes "Escolha com calma.";
-	close2;
-	callshop "barter_ep18_1",1;
+	mes "O que voce deseja fazer?";
+	next;
+	switch (select("Trocar equipamentos:Encantar Gray Wolf")) {
+	case 1:
+		mes "[Emmet]";
+		mes "Cada equipamento desta lista usa os custos configurados na loja oficial.";
+		mes "Escolha com calma.";
+		close2;
+		callshop "barter_ep18_1",1;
+		end;
+	case 2:
+		mes "[Emmet]";
+		mes "Escolha a parte do equipamento que deseja encantar.";
+		next;
+		switch (select("Armadura:Capa:Calcado:Acessorio direito:Acessorio esquerdo")) {
+		case 1:
+			close2;
+			item_enchant(1);
+			end;
+		case 2:
+			close2;
+			item_enchant(2);
+			end;
+		case 3:
+			close2;
+			item_enchant(3);
+			end;
+		case 4:
+			close2;
+			item_enchant(4);
+			end;
+		case 5:
+			close2;
+			item_enchant(5);
+			end;
+		}
+		end;
+	}
 	end;
 }
