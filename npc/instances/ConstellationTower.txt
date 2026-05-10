@@ -35,6 +35,14 @@ e_tower,72,115,2	script	Oscar#Con1	4_ED_OSCAR,{
 	mes "Ola, ^0000ff"+strcharinfo(0)+"^000000. Quer comecar? Entao vamos la!";
 	cutin "oscar01",2;
 	next;
+	if (#cooldown_constellation_tower < gettimetick(2) && #ConstellationTower_STATUS != 0)
+		#ConstellationTower_STATUS = 0;
+	if (#ConstellationTower_STATUS == 3) {
+		mes "[Constellation Tower]";
+		mes "Voce nao pode mais entrar nesta instancia hoje.";
+		mes "Volte amanha apos o reset diario.";
+		close;
+	}
 //Â¤JÂ³ÃµÂµÂ¥Â¯Ã…Â³]Â©w
 		if (BaseLevel < 175){
 			mes "[Constellation Tower]";
@@ -192,6 +200,8 @@ e_tower,72,115,2	script	Oscar#Con1	4_ED_OSCAR,{
 					switch(instance_enter("Constellation Tower")) {
 						case 0:
 							setquest 30059; //state=1
+							#cooldown_constellation_tower = gettimetick(2) + callfunc("get_daily_reset");
+							#ConstellationTower_STATUS = 2;
 							end;	
 						case 1:
 							mes "Apenas membros registrados podem entrar na "+"Torre das Constelacoes"+".";
@@ -404,6 +414,7 @@ function	script	CT_FinishRun	{
 	.@stage$ = getarg(0, "final");
 	.@coin_amount = 20;
 	.@ticket_amount = 2;
+	.@already_finished = (#ConstellationTower_STATUS == 3);
 
 	if (.@stage$ == "andar 50") {
 		.@coin_amount = 30;
@@ -414,9 +425,16 @@ function	script	CT_FinishRun	{
 	}
 
 	if (#CT_REWARD_INSTANCE != instance_id()) {
-		.@finish_result = callfunc("F_InstanceFinishBase", "Constellation Tower", "#ConstellationTower_STATUS", .@coin_amount, .@ticket_amount, "", "", 1, 20, 110002, 3000, 3, 0, "Constellation Tower");
-		if (.@finish_result == -1)
+		if (.@already_finished)
+			#ConstellationTower_STATUS = 2;
+		.@finish_result = callfunc("F_InstanceFinishBase", "Constellation Tower", "#ConstellationTower_STATUS", .@coin_amount, .@ticket_amount, "", "", 1, 20, 110002, 3000, 3, 0, "Constellation Tower", !.@already_finished);
+		if (.@finish_result == -1) {
+			if (.@already_finished)
+				#ConstellationTower_STATUS = 3;
 			return -1;
+		}
+		if (!.@finish_result && .@already_finished)
+			#ConstellationTower_STATUS = 3;
 		if (.@finish_result)
 			#CT_REWARD_INSTANCE = instance_id();
 	}
@@ -875,7 +893,7 @@ OnMyMobDead:
 	set .@map$, instance_mapname("2@ch_t");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#101FShadowDust1")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
-		mapannounce .@map$, "Mysterious voice: Who gave you the guts to step into my holy land?!",bc_map,"0xffff00";
+		mapannounce .@map$, "Voz misteriosa: Quem te deu coragem para pisar em minha terra sagrada?!",bc_map,"0xffff00";
 		donpcevent instance_npcname("#101FShadowDust")+"::OnDisable";
 		donpcevent instance_npcname("Naght Sieger")+"::OnEnable";
 	}
@@ -2054,11 +2072,9 @@ OnStart1:
 	
 	'bossskill = 0;
 	'fail=0;
-	donpcevent instance_npcname("#50bossarea")+"::OnEnable";
 	initnpctimer instance_npcname("#heal_boss");
 		donpcevent instance_npcname("#AstrologicalDeathDetection")+"::OnEnable";	
 	mapannounce .@map$, "Desafio iniciado: <Betelgeuse - Primeira Forma>.",bc_map,"0xFFFF00";
-	mapannounce .@map$, "Atencao: nao deixe o chefe sair do circulo central por muito tempo, ou a luta sera reiniciada.",bc_map,"0xFFFF00";
 	initnpctimer;
 	end;
 	
@@ -2076,12 +2092,10 @@ OnStart2:
 	'bossskill = 0;
 	'fail=0;
 	donpcevent instance_npcname("#def_mob_timer")+"::OnEnable";	
-	donpcevent instance_npcname("#50bossarea")+"::OnEnable";	
 	initnpctimer instance_npcname("#heal_boss");
 	donpcevent instance_npcname("#AstrologicalDeathDetection")+"::OnEnable";	
 
 	mapannounce .@map$, "Desafio iniciado: <Betelgeuse - Segunda Forma>.",bc_map,"0xFFFF00";
-	mapannounce .@map$, "Atencao: nao deixe o chefe sair do circulo central por muito tempo, ou a luta sera reiniciada.",bc_map,"0xFFFF00";	
 	initnpctimer;
 	end;	
 
@@ -2097,13 +2111,11 @@ OnStart3:
 	else setunitdata 'BossID,UMOB_DAMAGETAKEN,15;
 	'bossskill = 0;
 	'fail=0;
-	donpcevent instance_npcname("#50bossarea")+"::OnEnable";
 	donpcevent instance_npcname("#def_mob_timer")+"::OnEnable";	
 	initnpctimer instance_npcname("#heal_boss");
 		donpcevent instance_npcname("#AstrologicalDeathDetection")+"::OnEnable";	
 
 	mapannounce .@map$, "Desafio iniciado: <Betelgeuse - Terceira Forma>.",bc_map,"0xFFFF00";
-	mapannounce .@map$, "Atencao: nao deixe o chefe sair do circulo central por muito tempo, ou a luta sera reiniciada.",bc_map,"0xFFFF00";	
 	initnpctimer;
 	end;	
 	
@@ -2162,6 +2174,19 @@ OnKillBOSS2:
 OnKillBOSS3:
 	if('fail)end;
 	'Win=1;
+	.@origin_aid = getcharid(3);
+	getpartymember getcharid(1),1;
+	getpartymember getcharid(1),2;
+	for (.@i = 0; .@i < $@partymembercount; .@i++) {
+		if (!isloggedin($@partymemberaid[.@i], $@partymembercid[.@i]))
+			continue;
+		if (!attachrid($@partymemberaid[.@i]))
+			continue;
+		#cooldown_constellation_tower = gettimetick(2) + callfunc("get_daily_reset");
+		#ConstellationTower_STATUS = 3;
+	}
+	attachrid(.@origin_aid);
+	callfunc("F_InstanceFinishAnnounce", "Constellation Tower");
 	'bull_stop=1;
 	'bossskill = 1;
 	'bosskilled = 3;
