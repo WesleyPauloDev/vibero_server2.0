@@ -1,0 +1,148 @@
+//=====================================================
+// Sistema de Rate de Fim de Semana
+//=====================================================
+
+-	script	Weekend_Rates	-1,{
+
+OnInit:
+	// 100 = 1x, 150 = 1.5x, 200 = 2x.
+	.normal_base_exp_rate = 100;
+	.normal_job_exp_rate = 100;
+	.normal_drop_rate = 100;
+
+	.weekend_base_exp_rate = 100;
+	.weekend_job_exp_rate = 100;
+	.weekend_drop_rate = 100;
+
+	bindatcmd "weekendrates", strnpcinfo(3)+"::OnAtcommand", 99, 99;
+	callsub S_ApplyRates, 0;
+	end;
+
+OnClock0000:
+OnClock0200:
+OnClock1200:
+	callsub S_ApplyRates, 1;
+	end;
+
+OnClock0015:
+OnClock0215:
+OnClock0415:
+OnClock0615:
+OnClock0815:
+OnClock1015:
+OnClock1215:
+OnClock1415:
+OnClock1615:
+OnClock1815:
+OnClock2015:
+OnClock2215:
+	callsub S_AnnounceActiveRates;
+	end;
+
+OnPCLoginEvent:
+	addtimer 1000, strnpcinfo(3)+"::OnLoginNotice";
+	end;
+
+OnLoginNotice:
+	if (callsub(S_IsWeekendEvent)) {
+		dispbottom "[Evento] Rates de fim de semana ativas: Base EXP " + .weekend_base_exp_rate + "% / Job EXP " + .weekend_job_exp_rate + "% / Drop " + .weekend_drop_rate + "%.";
+	}
+	end;
+
+OnAtcommand:
+	callsub S_ApplyRates, 0;
+	mes "[Weekend Rates]";
+	if (.weekend_rates_active) {
+		mes "Status: ^00AA00ativo^000000.";
+		mes "Base EXP: " + .weekend_base_exp_rate + "%";
+		mes "Job EXP: " + .weekend_job_exp_rate + "%";
+		mes "Drop: " + .weekend_drop_rate + "%";
+	}
+	else {
+		mes "Status: ^777777inativo^000000.";
+		mes "Base EXP: " + .normal_base_exp_rate + "%";
+		mes "Job EXP: " + .normal_job_exp_rate + "%";
+		mes "Drop: " + .normal_drop_rate + "%";
+	}
+	close;
+
+S_IsWeekendEvent:
+	.@day = gettime(DT_DAYOFWEEK);
+	.@hour = gettime(DT_HOUR);
+
+	// Sexta a partir de 12:00.
+	if (.@day == 5 && .@hour >= 12)
+		return 1;
+
+	// Sabado e domingo inteiros.
+	if (.@day == 6 || .@day == 0)
+		return 1;
+
+	// Segunda ate 02:00.
+	if (.@day == 1 && .@hour < 2)
+		return 1;
+
+	return 0;
+
+S_ApplyRates:
+	.@announce = getarg(0);
+	.@old_state = .weekend_rates_active;
+	.@weekend = callsub(S_IsWeekendEvent);
+
+	if (.@weekend) {
+		.@base_exp_rate = .weekend_base_exp_rate;
+		.@job_exp_rate = .weekend_job_exp_rate;
+		.@drop_rate = .weekend_drop_rate;
+	}
+	else {
+		.@base_exp_rate = .normal_base_exp_rate;
+		.@job_exp_rate = .normal_job_exp_rate;
+		.@drop_rate = .normal_drop_rate;
+	}
+
+	callsub S_SetRates, .@base_exp_rate, .@job_exp_rate, .@drop_rate;
+	.weekend_rates_active = .@weekend;
+
+	if (.@announce && .@old_state != .weekend_rates_active) {
+		if (.weekend_rates_active)
+			announce "[Evento] Fim de semana iniciado: rates especiais ativadas!", bc_all, 0x00FF00;
+		else
+			announce "[Evento] Fim de semana encerrado: rates normais restauradas.", bc_all, 0x00AAFF;
+	}
+	return;
+
+S_SetRates:
+	.@base_exp_rate = getarg(0);
+	.@job_exp_rate = getarg(1);
+	.@drop_rate = getarg(2);
+
+	setbattleflag("base_exp_rate", .@base_exp_rate);
+	setbattleflag("job_exp_rate", .@job_exp_rate);
+
+	setbattleflag("item_rate_common", .@drop_rate);
+	setbattleflag("item_rate_common_boss", .@drop_rate);
+	setbattleflag("item_rate_common_mvp", .@drop_rate);
+	setbattleflag("item_rate_heal", .@drop_rate);
+	setbattleflag("item_rate_heal_boss", .@drop_rate);
+	setbattleflag("item_rate_heal_mvp", .@drop_rate);
+	setbattleflag("item_rate_use", .@drop_rate);
+	setbattleflag("item_rate_use_boss", .@drop_rate);
+	setbattleflag("item_rate_use_mvp", .@drop_rate);
+	setbattleflag("item_rate_equip", .@drop_rate);
+	setbattleflag("item_rate_equip_boss", .@drop_rate);
+	setbattleflag("item_rate_equip_mvp", .@drop_rate);
+	setbattleflag("item_rate_card", .@drop_rate);
+	setbattleflag("item_rate_card_boss", .@drop_rate);
+	setbattleflag("item_rate_card_mvp", .@drop_rate);
+	setbattleflag("item_rate_mvp", .@drop_rate);
+	setbattleflag("item_rate_adddrop", .@drop_rate);
+	setbattleflag("item_rate_treasure", .@drop_rate, true);
+	return;
+
+S_AnnounceActiveRates:
+	if (!callsub(S_IsWeekendEvent))
+		return;
+
+	announce "[Evento] Rates de fim de semana ativas: Base EXP " + .weekend_base_exp_rate + "% / Job EXP " + .weekend_job_exp_rate + "% / Drop " + .weekend_drop_rate + "%.", bc_all, 0x00FF00;
+	return;
+}
