@@ -11,9 +11,146 @@ moc_para01,52,30,3	script	Oscar de Glast Heim	4_ED_OSCAR,{
 	mes "Armadura e capa custam 5 " + getitemname(25739) + " e 10 " + getitemname(6607) + ".";
 	mes "Cada insignia custa 5 " + getitemname(25740) + " e 5 " + getitemname(6755) + ".";
 	next;
-	close2;
-	callshop "barter_edda_glastheim_insignia";
-	end;
+
+	switch(select("Trocar equipamentos:Encantar equipamentos:Cancelar")) {
+	case 1:
+		close2;
+		callshop "barter_edda_glastheim_insignia";
+		end;
+	case 2:
+		callsub L_SchmidtEnchant;
+		end;
+	default:
+		close;
+	}
+
+L_SchmidtEnchant:
+	mes "[Oscar de Glast Heim]";
+	mes "Escolha o equipamento Schmidt equipado que deseja encantar.";
+	mes "Eu trabalho com armadura, capa e insignia no acessorio esquerdo.";
+	next;
+
+	switch(select("Armadura:Capa:Acessorio Esquerdo:Cancelar")) {
+	case 1:
+		.@part = EQI_ARMOR;
+		.@equip_id = getequipid(.@part);
+		setarray .@valid_ids[0],15388;
+		setarray .@requirement[0],25739,5,6608,5;
+		break;
+	case 2:
+		.@part = EQI_GARMENT;
+		.@equip_id = getequipid(.@part);
+		setarray .@valid_ids[0],15389;
+		setarray .@requirement[0],25739,5,6608,5;
+		break;
+	case 3:
+		.@part = EQI_ACC_L;
+		.@equip_id = getequipid(.@part);
+		setarray .@valid_ids[0],32228,32229,32230,32231,32232,32233;
+		setarray .@requirement[0],25740,5,6755,5;
+		break;
+	default:
+		close;
+	}
+
+	if (inarray(.@valid_ids, .@equip_id) == -1) {
+		mes "[Oscar de Glast Heim]";
+		mes "Voce nao esta usando um equipamento Schmidt valido nessa posicao.";
+		close;
+	}
+
+	.@refine = getequiprefinerycnt(.@part);
+	.@equip_name$ = getitemname(.@equip_id);
+	for (.@i = 0; .@i < 4; .@i++) {
+		.@card[.@i] = getequipcardid(.@part,.@i);
+		.@check[.@i] = .@card[.@i];
+	}
+
+	if (.@card[1] > 0) {
+		mes "[Oscar de Glast Heim]";
+		mes "Este equipamento ja chegou ao limite de encantamentos.";
+		close;
+	}
+
+	.@slot = (.@card[3] == 0 ? 3 : (.@card[2] == 0 ? 2 : 1));
+	switch(.@slot) {
+	case 1:
+		if (.@part == EQI_ARMOR)
+			setarray .@enchant_list[0],4702,4712,4722,4732,4742,4752,29302,29303,29304,29305,29306,29307,29308,29309;
+		else if (.@part == EQI_GARMENT)
+			setarray .@enchant_list[0],4808,4820,4821,4813,4812,4826,4817,4816,4843,4834,4835,4836,4863,4864,4865;
+		else {
+			setarray .@enchant_list[0],29587,29588,29589,29590,29591,29592;
+			.@break_chance = 30;
+		}
+		.@slot_name$ = "Ultimo";
+		break;
+	case 2:
+		if (.@part == EQI_ARMOR)
+			setarray .@enchant_list[0],4702,4703,4704,4712,4713,4714,4722,4723,4724,4732,4733,4734,4742,4743,4744,4752,4753,4754;
+		else if (.@part == EQI_GARMENT)
+			setarray .@enchant_list[0],4808,4820,4821,4813,4812,4826,4817,4816,4843,4834,4835,4836,4863,4864,4865;
+		else
+			setarray .@enchant_list[0],4821,4822,4812,4826,4843,4844,4835,4836,4864,4865;
+		.@slot_name$ = "Segundo";
+		break;
+	case 3:
+		if (.@part == EQI_ARMOR)
+			setarray .@enchant_list[0],4702,4703,4704,4712,4713,4714,4722,4723,4724,4732,4733,4734,4742,4743,4744,4752,4753,4754;
+		else if (.@part == EQI_GARMENT)
+			setarray .@enchant_list[0],4808,4820,4821,4813,4812,4826,4817,4816,4843,4834,4835,4836,4863,4864,4865;
+		else
+			setarray .@enchant_list[0],4702,4703,4704,4712,4713,4714,4722,4723,4724,4732,4733,4734,4742,4743,4744,4752,4753,4754;
+		.@slot_name$ = "Primeiro";
+		break;
+	}
+
+	mes "[Oscar de Glast Heim]";
+	mes "^0000CD" + .@equip_name$ + "^000000";
+	mes "Slot: " + .@slot_name$ + " encanto";
+	mes "Requisitos:";
+	for (.@i = 0; .@i < getarraysize(.@requirement); .@i += 2) {
+		mes "^0000CD" + .@requirement[.@i + 1] + " " + getitemname(.@requirement[.@i]) + "^000000";
+		if (countitem(.@requirement[.@i]) < .@requirement[.@i + 1])
+			.@missing = 1;
+	}
+	if (.@break_chance) {
+		mes "";
+		mes "^FF0000Aviso:^000000 este ultimo encanto tem " + .@break_chance + "% de chance de falhar.";
+	}
+	next;
+
+	if (select("Prosseguir:Cancelar") == 2)
+		close;
+
+	if (.@missing) {
+		mes "[Oscar de Glast Heim]";
+		mes "Voce nao possui os materiais necessarios.";
+		close;
+	}
+
+	.@enchant = .@enchant_list[rand(getarraysize(.@enchant_list))];
+	.@card[.@slot] = .@enchant;
+
+	for (.@i = 0; .@i < getarraysize(.@requirement); .@i += 2)
+		delitem .@requirement[.@i], .@requirement[.@i + 1];
+
+	if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipRefineHack", .@part, .@refine) || callfunc("F_IsEquipCardHack", .@part, .@check[0], .@check[1], .@check[2], .@check[3]))
+		end;
+
+	if (rand(1,100) > .@break_chance) {
+		delequip .@part;
+		getitem2 .@equip_id,1,1,.@refine,0,.@card[0],.@card[1],.@card[2],.@card[3];
+		specialeffect2 EF_REPAIRWEAPON;
+		mes "[Oscar de Glast Heim]";
+		mes "Encantamento inserido com sucesso.";
+	}
+	else {
+		specialeffect2 EF_REFINEFAIL;
+		mes "[Oscar de Glast Heim]";
+		mes "O encantamento falhou, mas o equipamento foi preservado.";
+	}
+	close;
 }
 
 moc_para01,42,36,3	script	Operador OS	4_M_REPAIR,{
