@@ -522,15 +522,36 @@ OnReward:
         sleep 2000;
         announce "[WoE] A guilda "+getguildname(.@second_gid)+" ficou em segundo lugar na WoE!", bc_all|bc_woe;
 
+        getguildmember .@second_gid, 1, .@cid;
+        .@sz = getguildmember(.@second_gid, 2, .@aid);
+
+        .@title$ = "Recompensa de Segundo Lugar (Membro)";
+        .@body$  = "Sua guild ficou em segundo lugar na WoE. Esta recompensa e para fortalecer sua participacao na proxima batalha.";
+
+        setarray .@item_id[0], 14002;
+        setarray .@amount[0], 1;
+        setarray .@refine[0], 0;
+        setarray .@bound[0], 0;
+        setarray .@card0[0], 0;
+        setarray .@card1[0], 0;
+        setarray .@card2[0], 0;
+        setarray .@card3[0], 0;
+
+        for (.@i = 0; .@i < .@sz; .@i++) {
+            mail .@cid[.@i], .@sender$, .@title$, .@body$, 0,
+                .@item_id, .@amount, .@refine, .@bound,
+                .@card0, .@card1, .@card2, .@card3;
+        }
+
         .@second_leader_cid = getguildmasterid(.@second_gid);
         .@title$ = "Recompensa de Lideranca (Segundo Lugar)";
         .@body$  = "Sua guild ficou em segundo lugar na WoE. Reforce a equipe e volte mais forte na proxima batalha.";
         .@second_participants = $WOE_ENTRY_COUNT[.@second_gid];
         if (.@second_participants < 1)
             .@second_participants = 1;
+        if (.@second_participants > 5)
+            .@second_participants = 5;
         .@second_coin_reward = .@second_participants * 50;
-        if (.@second_coin_reward > 200)
-            .@second_coin_reward = 200;
 
         setarray .@item_id[0], 9646;
         setarray .@amount[0], .@second_coin_reward;
