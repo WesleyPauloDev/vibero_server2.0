@@ -80,7 +80,7 @@ e_tower,72,115,2	script	Oscar#Con1	4_ED_OSCAR,{
 			switch(select(.@menu$)) {
 				case 1:
 					if(instance_mapname("1@mcd") != "") {
-						mes "- Copies cannot be opened repeatedlyÂ¡C -";
+						mes "A instancia nao pode ser aberta repetidamente.";
 						close;
 					}
 
@@ -225,7 +225,7 @@ e_tower,72,115,2	script	Oscar#Con1	4_ED_OSCAR,{
 //Â½Ã•Â¸Ã•Â¥ÃŽ
 1@ch_t,46,17,3	script	Oscar#Con2	4_ED_OSCAR,{
 	if (getgmlevel() < 80) end;
-	switch(select("25 Levels of normal challenge:50 levels of mid  challenge:75 levels of high challenge")){
+	switch(select("25 andares de desafio normal:50 andares de desafio intermediario:75 andares de desafio alto")){
 	case 1:
 		warp instance_mapname("2@ch_t"),101,72;
 		end;
@@ -285,26 +285,17 @@ OnInstanceInit:
 		}
 	}
 	
-	//Â¨CÂ¼hÂ¤pÂ©Ã‡Â¼Ã†Â¶q
 	'mob_count = 35;	
-	//Â¨CÂ¼hBOSSÂ¼Ã†Â¶q
 	'mob_mvp_count = 3;	
-		
 
-	//Â¤pÂ©Ã‡Â±Â¼Â¸Â¨Â¹kÂ¥Ã›Â¸HÂ¤Ã¹Â¾Ã·Â²v
 	'droprate=10;
 
-	//Â¼Ã“Â¼hÂ¸ÃµÂ¼hÂ¹DÂ¨Ã£Â»PÂ±jÂ¤Ã†Â³ÃŒÂ«Ã¡BOSSÂ¹DÂ¨Ã£id Ã€qÂ»{:1000372
 	'Fenwei= 1000372 ;
 
-	//Â³]Â¸mÃ…]ÂªÂ«Ã€HÂ¾Ã·ID
 	setarray 'mob_id[0],20998,20999,21000,21001,21002,21003,21004,21005,21006,21007,21008,21009,21010,21011,21012,21013,21014,21015,21016,21017,21018,21019,21020,21021,21022,21023,21024,21025,21026,21027,21028,21029,21030,21031,21032,21033,21034,21035,21036,21037,21038,21039,21040,21041,21042,21043,21044,21045,21046,21047;
 
-
-	//Â³]Â¸mMVPÃ…]ÂªÂ«Ã€HÂ¾Ã·ID	
 	setarray 'mvp_mob_id[0],21325,21326,21327,21328,21329,21330,21331,21332,21333,21334,21335,21336,21337,21338,21339,21340,21341,21342,21343,21344,21345,21346,21347,21348,21349,21350,21351,21352,21353,21354,21355,21356,21357,21358,21359;
 
-	//Â¨CÂ¼hÂ¤pÂ©Ã‡Â¥[Â¦Â¨Ã„ÃÂ©ÃŠ
 	'C_HP_mob=10;
 	'C_ATKMIN_mob=1000;
 	'C_ATKMAX_mob=1000;
@@ -334,11 +325,9 @@ OnInstanceInit:
 	'N_MDEF_par=0;
 	'N_HIT_par=0;	
 		
-	//101Â¼hFloatingIceÂ»PÂ¤ÃµÂ¥[Â¦Â¨Ã„ÃÂ©ÃŠ
 	$@MATKMIN_bullmob=1;
 	$@MATKMAX_bullmob=1;
 	
-	//100Â¼hBOSSÂ¥[Â¦Â¨Ã„ÃÂ©ÃŠ
 	'B_HP_mvpmob=1;
 	'B_ATKMIN_mvpmob=1;
 	'B_ATKMAX_mvpmob=1;
@@ -347,7 +336,6 @@ OnInstanceInit:
 	'B_DEF_mvpmob=1;
 	'B_MDEF_mvpmob=1;
 	
-	//100Â¼hBOSSÂ¥Ã¾Â«ÃŒÂ§ÃžÂ¯Ã Â¥[Â¦Â¨Ã„ÃÂ©ÃŠ
 	'B_MATKMIN_skillmob=1000;
 	'B_MATKMAX_skillmob=1000;
 
@@ -537,7 +525,7 @@ function	script	CT_DeployFloorMvpMob	{
 OnInstanceInit:	
 		callfunc "CT_DeployFloorMob",0,'mob_count,instance_npcname("#1F_Controller")+"::OnMyMobDead";
 		sleep 10000;
-		mapannounce strnpcinfo(4), "Note : The current floor has reached 24 floors. The entrance will be closed. Those who have not yet entered the copy. You will not be able to enter again. Please enter the copy in time",bc_map,"0xffff00";
+		mapannounce strnpcinfo(4), "Aviso: o grupo chegou ao andar 24. A entrada sera fechada em breve. Quem ainda nao entrou na instancia nao podera entrar depois.",bc_map,"0xffff00";
 	end;
 	
 OnMyMobDead:
@@ -546,11 +534,11 @@ OnMyMobDead:
 		initnpctimer;
 	}
 	else
-		mapannounce 'map_1$, "The number of demons remaining in level 1 is - "+.@mob_dead_num,bc_map,"0x00ff99";
+		mapannounce 'map_1$, "Monstros restantes no andar 1: "+.@mob_dead_num,bc_map,"0x00ff99";
 	end;
 	
 OnTimer1000:
-	mapannounce 'map_1$, "All the demons in level 1 have been defeated",bc_map,"0xffff00";
+	mapannounce 'map_1$, "Todos os monstros do andar 1 foram derrotados.",bc_map,"0xffff00";
 	donpcevent instance_npcname("1FJumping Device")+"::OnEnable";
 	stopnpctimer;
 	end;
@@ -754,7 +742,7 @@ OnMyMobDead:
 		initnpctimer;
 	}
 	else
-		mapannounce 'map_1$, "Floor "+.@level+" The number of mobs left on the floor is - " + .@mob_dead_num,bc_map,"0x00ff99";
+		mapannounce 'map_1$, "Andar "+.@level+": monstros restantes - " + .@mob_dead_num,bc_map,"0x00ff99";
 	end;
 	
 OnTimer1000:
@@ -763,7 +751,7 @@ OnTimer1000:
 	if(getd("'warpselect"+replacestr(strnpcinfo(0),"Jumping Device",""))==2)
 		set .@level,5-atoi(replacestr(strnpcinfo(0),"FJumping Device",""))%5 + atoi(replacestr(strnpcinfo(0),"FJumping Device",""));
 	
-	mapannounce strnpcinfo(4), "Floor "+.@level+" All the monsters were eliminated",bc_map,"0xffff00";
+	mapannounce strnpcinfo(4), "Andar "+.@level+": todos os monstros foram eliminados.",bc_map,"0xffff00";
 	donpcevent instance_npcname(.@level+"FJumping Device")+"::OnEnable";
 	stopnpctimer;
 	end;
@@ -878,7 +866,7 @@ OnTimer1000:
 
 
 
-//=======================Â¤Â¤Â¶Â¡BOSS
+//======================= BOSS
 
 2@ch_t,82,112,2	script	#101FShadowDust1	844,{
 	end;
@@ -1047,7 +1035,6 @@ OnTimer1000:
 		
 		switch(.@skill) {
 	case 1:
-			//Â¼sÂ½dÂ³Ã²
 			unittalk 'Boss_25_UID, "!!";
 			.@k=0;
 			
@@ -1099,7 +1086,6 @@ OnTimer1000:
 			sleep 1000;
 			break;
 		case 2:
-			//Â¤QÂ¦rÂ¦aÂ¾_Â³N
 			unittalk 'Boss_25_UID, "!!!";
 			sleep 1000;
 			monster .@map$,.@x+3,.@y+3,"--ja--",3095,1,.@label$;
@@ -1129,7 +1115,6 @@ OnTimer1000:
 			sleep 1000;
 			break;
 		case 3:
-			//Ã‚XÂ´Â²Â¦aÂ¾_
 			unittalk 'Boss_25_UID, "Rage Explosion!!!";
 			sleep 500;
 			monster .@map$,.@x+3,.@y+3,"--ja--",3095,1,.@label$;
@@ -1168,7 +1153,6 @@ OnTimer1000:
 			sleep 1000;
 			break;
 		case 4:
-			//Â¥Ã¦Â¤eÂ¤ÃµÃ€Ã°
 			unittalk 'Boss_25_UID, "!!!";
 			sleep 1000;
 			monster .@map$,.@x,.@y,"--ja--",3095,1,.@label$;
@@ -1251,7 +1235,7 @@ OnTimer1000:
 		killmonsterall strnpcinfo(4);
 		stopnpctimer;
 		donpcevent instance_npcname("Naght Sieger#die")+"::OnTalk";
-		donpcevent instance_npcname("The Lost Soul#101")+"::OnEnable";
+		donpcevent instance_npcname("Alma Perdida#101")+"::OnEnable";
 		end;
 	}
 }
@@ -1315,32 +1299,32 @@ OnInstanceInit:
 
 
 
-2@ch_t,103,106,2	script	The Lost Soul#101	796,{
+2@ch_t,103,106,2	script	Alma Perdida#101	796,{
 	if (checkweight(1201,1) == 0) {
 		mes "Voce esta com peso demais. Esvazie a mochila e volte.";
 		close;
 	}
-	mes "[The Lost Soul]";
+	mes "[Alma Perdida]";
 	mes "Foi voce quem nos salvou daquele maldito Nadutkig, nao foi?";
 	next;
-	mes "[The Lost Soul]";
+	mes "[Alma Perdida]";
 	mes "Muito obrigado. Agora finalmente podemos sair deste lugar frio e escuro...";
 	next;
 	if ((countitem(13412) > 0) && (countitem(13413) > 0)) {
-		mes "[The Lost Soul]";
+		mes "[Alma Perdida]";
 		mes "Ei, voce esta carregando as reliquias de Nachtkirg.";
 		next;
-		mes "[The Lost Soul]";
+		mes "[Alma Perdida]";
 		mes "Sao espadas de uma mao. Se quiser, posso juntar as duas e fazer uma espada de duas maos para agradecer por nos libertar.";
 		next;
 		switch(select("Quero a espada de duas maos.:Nao, obrigado.")) {
 	case 1:
-			mes "[The Lost Soul]";
+			mes "[Alma Perdida]";
 			mes "Se as armas estiverem refinadas ou com carta, tudo sera perdido. Tem certeza?";
 			next;
 			switch(select("Pode fazer.:Melhor nao.")) {
 		case 1:
-				mes "[The Lost Soul]";
+				mes "[Alma Perdida]";
 				mes "Certo. Vou unir as duas em uma espada de duas maos.";
 				next;
 				delitem 13412,1;
@@ -1351,33 +1335,33 @@ OnInstanceInit:
 				//Violet_Fear
 				break;
 			case 2:
-				mes "[The Lost Soul]";
+				mes "[Alma Perdida]";
 				mes "Entendi. Voce e mais cauteloso do que outros aventureiros.";
 				next;
 				break;
 			}
 			break;
 		case 2:
-			mes "[The Lost Soul]";
+			mes "[Alma Perdida]";
 			mes "Entendi. Voce e mais cauteloso do que outros aventureiros.";
 			next;
 			break;
 		}
 	}
-	mes "[The Lost Soul]";
+	mes "[Alma Perdida]";
 	mes "Eu queria falar mais... mas preciso ir agora...";
 	next;
-	mes "[The Lost Soul]";
+	mes "[Alma Perdida]";
 	mes "Adeus, jovem aventureiro. Que a sorte esteja sempre com voce.";
 	close;
 	end;
 	
 OnInstanceInit:
-	disablenpc instance_npcname("The Lost Soul#101");
+	disablenpc instance_npcname("Alma Perdida#101");
 	end;
 	
 OnEnable:
-	enablenpc instance_npcname("The Lost Soul#101");
+	enablenpc instance_npcname("Alma Perdida#101");
 	end;
 	
 }
@@ -2164,7 +2148,7 @@ OnKillBOSS2:
 		
 	set .@map$,instance_mapname(strnpcinfo(4));
 	mapannounce .@map$, "A segunda forma de Betelgeuse foi derrotada!",bc_map,"0xFFFF00";
-	sleep 10000;//Â¥Â²Â­nÂ­Â«Â¸mÂ©ÂµÂ¿Ã° Â¤Â£Â­nÂµÃ¹Ã„Ã€
+	sleep 10000;
 	hideoffnpc instance_npcname("Betelgeuse");	
 	sleep 3000;
 	donpcevent instance_npcname("Betelgeuse")+"::OnStartChallenge";
@@ -2479,12 +2463,13 @@ end;
 OnEnable:
 	initnpctimer;
 	end;
-OnTimer10000:
+OnTimer30000:
 	if('bull_stop)end;
 	setunitdata 'BossID,UMOB_DAMAGETAKEN,1;
 	
-	mapannounce 'map_3$, "Star spirits are scattered in four places. Please break them quickly. Betelgeuse's defense has increased dramatically.",bc_map,"0x00ff00";
+	mapannounce 'map_3$, "Espiritos estelares se espalharam pela arena. Destrua-os rapidamente. A defesa de Betelgeuse aumentou drasticamente.",bc_map,"0x00ff00";
 	areamonster 'map_3$,126,64,185,148,"Star Soul",20995,3+'boss_state_4,instance_npcname(strnpcinfo(0))+"::OnSTARKILL";
+	mapannounce 'map_3$,"Reviva os membros caidos o quanto antes, ou o chefe continuara em estado [ invencivel ] ate todos voltarem.",bc_map,"0x00ff99";
 	stopnpctimer;
 	end;
 OnSTARKILL:	
@@ -2492,7 +2477,7 @@ OnSTARKILL:
 	
 	set .@mob_dead_num,mobcount('map_3$,instance_npcname(strnpcinfo(0))+"::OnSTARKILL");
 	if (.@mob_dead_num < 1) {
-	mapannounce 'map_3$, "All star souls have been cleared~",bc_map,"0x00ff00";
+	mapannounce 'map_3$, "Todos os espiritos estelares foram eliminados.",bc_map,"0x00ff00";
 		if('boss_floor_lv == 75){
 		setunitdata 'BossID,UMOB_DAMAGETAKEN,3;
 	}
@@ -2501,7 +2486,7 @@ OnSTARKILL:
 	initnpctimer;
 	}
 	else {
-		mapannounce 'map_3$, "Star soul is still left:[ "+.@mob_dead_num+" ]only",bc_map,"0x00ff00";
+		mapannounce 'map_3$, "Espiritos estelares restantes: [ "+.@mob_dead_num+" ]",bc_map,"0x00ff00";
 
 	}
 
@@ -2580,7 +2565,7 @@ OnTimer10000://10Â¬Ã­Â§PÂ©wÂ¤@Â¦Â¸ Ã‚Ã·Â¶}Â¶WÂ¹L30Â¬�
 		detachnpctimer;
 		set .@map$,instance_mapname(strnpcinfo(4));
 		mapannounce .@map$, "Betelgeuse: Parece que voces nao estao prontos para este desafio.",bc_map,"0xFF3333";
-		sleep 10000;//Â¥Â²Â­nÂ­Â«Â¸mÂ©ÂµÂ¿Ã°
+		sleep 10000;
 		hideoffnpc instance_npcname("Betelgeuse");		
 	}
 	end;
@@ -2606,7 +2591,6 @@ OnTimer1000:
 			if(Hp<2){
 
 				setunitdata 'BossID,UMOB_DMGIMMUNE,true;
-				mapannounce 'map_3$,"Reviva os membros caidos o quanto antes, ou o chefe continuara em estado [ invencivel ] ate todos voltarem.",bc_map,"0x00ff99";	
 				stopnpctimer;
 				initnpctimer;
 
