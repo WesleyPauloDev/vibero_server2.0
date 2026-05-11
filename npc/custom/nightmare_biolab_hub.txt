@@ -277,16 +277,17 @@ L_Wandering:
 			mes "[Espectro Vagante]";
 			mes "Voce pode tentar o encantamento aleatorio ou pagar mais caro para escolher exatamente o poder do 2o slot.";
 			next;
-			switch (select("Aleatorio - 10 Fragmentos Raciais","Perfeito - 20 Fragmentos Raciais")) {
+			switch (select("Aleatorio - 10 Fragmentos Raciais","Perfeito - 500 Fragmentos Raciais")) {
 			case 1:
 				break;
 			case 2:
 				.@perfect_enchant = 1;
-				.@requirement = 20;
+				.@requirement = 500;
 				setarray .@perfect_enchant_id[0],4703,4704,4713,4714,4723,4724,4733,4734,4743,4744,4753,4754,29706,29061,29071,29081,29091,29101,29111;
+				setarray .@perfect_enchant_name$[0],"STR+4","STR+5","INT+4","INT+5","DEX+4","DEX+5","AGI+4","AGI+5","VIT+4","VIT+5","LUK+4","LUK+5","Insignia da Tenacidade 1","Insignia da Potencia 1","Insignia da Virtude 1","Insignia do Talento 1","Insignia da Maestria 1","Insignia da Resiliencia 1","Insignia da Afeicao 1";
 				.@menu$ = "";
 				for (.@i = 0; .@i < getarraysize(.@perfect_enchant_id); .@i++)
-					.@menu$ += getitemname(.@perfect_enchant_id[.@i]) + ":";
+					.@menu$ += .@perfect_enchant_name$[.@i] + ":";
 				.@perfect_choice = select(.@menu$) - 1;
 				.@perfect_enchant_id = .@perfect_enchant_id[.@perfect_choice];
 				break;
