@@ -91,6 +91,7 @@ OnChequeo:
 					dispbottom "Parabens, voce acertou!" ,0x00FF00;
 					announce "[Corrida dos Porings]: A aposta de "+strcharinfo(0)+" venceu a corrida!", bc_all|bc_blue;
 					getitem 9608, 10;
+					getitem 25274, 1;
 					query_sql( "INSERT INTO `rank_evento` SET `char_id`='"+ getcharid(0) +"',`name`='"+ strcharinfo(0) +"',`count`='1' ON DUPLICATE KEY UPDATE `count`=`count`+1" );
 					set Zeny, Zeny + 1000000;
 				} else {
@@ -168,7 +169,6 @@ p_track01,58,41,3	script	Bidder#prace0	877,{
 	set $prace_bets,$prace_bets+1;
 	set $prace_bidders[$prace_bets], getcharid(3);
 	set prace_playing, 1;
-	getitem 25274, 1;
 	if (#evento == 1)
 		#evento = 2;
 	mes "^0099FF[ "+ strnpcinfo(1) +" ]^000000";
