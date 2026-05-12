@@ -33,6 +33,21 @@ OnTalk:
 	specialeffect2 EF_HEAL2;
 	percentheal 100,100;
 
+	getinventorylist;
+	.@needsRepair = 0;
+	for (.@i = 0; .@i < @inventorylist_count; .@i++) {
+		// attribute == 1 => quebrado (mesmo critério usado no repairall em C)
+		if (@inventorylist_attribute[.@i] == 1) {
+			.@needsRepair = 1;
+			break;
+		}
+	}
+
+	if (.@needsRepair) {
+		repairall;
+		message strcharinfo(0), "Itens quebrados foram reparados.";
+	}
+
 OnBuffOnly:
 	// Buffs
 	if (getgroupid() != 0) {
@@ -68,20 +83,6 @@ OnBuffOnly:
 		sc_start SC_FOOD_DEX_CASH,600000,10;
 		sc_start SC_FOOD_LUK_CASH,600000,10;		
 
-		getinventorylist;
-		.@needsRepair = 0;
-		for (.@i = 0; .@i < @inventorylist_count; .@i++) {
-			// attribute == 1 => quebrado (mesmo critério usado no repairall em C)
-			if (@inventorylist_attribute[.@i] == 1) {
-				.@needsRepair = 1;
-				break;
-			}
-		}
-
-		if (.@needsRepair) {
-			atcommand("@repairall");
-			message strcharinfo(0), "Itens quebrados foram reparados.";
-		}		
 	}
 	end;
 }
