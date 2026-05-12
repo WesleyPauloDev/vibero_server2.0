@@ -1,0 +1,356 @@
+prontera,136,168,5	script	Chapeus Racing	4_M_03,{
+	mes "[Chapeus Racing]";
+	mes "Escolha o servico desejado.";
+	next;
+
+	switch (select("Itens Racing:Encantamentos:Upgrade de encantamento:Encantar chapeu:Cancelar")) {
+	case 1:
+		callshop "barter_racing_caps",1;
+		end;
+	case 2:
+		callshop "barter_racing_enchants",1;
+		end;
+	case 3:
+		callsub L_UpgradeEnchant;
+		end;
+	case 4:
+		callsub L_EnchantCap;
+		end;
+	default:
+		close;
+	}
+
+L_UpgradeEnchant:
+	.@cost_ticket = 20;
+	.@menu$ = "";
+	.@choice_count = 0;
+
+	for (.@i = 0; .@i < getarraysize(.racing_upgrade_from); .@i++) {
+		if (countitem(.racing_upgrade_from[.@i]) > 0) {
+			.@upgrade_mode[.@choice_count] = 0;
+			.@upgrade_from[.@choice_count] = .racing_upgrade_from[.@i];
+			.@upgrade_to[.@choice_count] = .racing_upgrade_to[.@i];
+			.@menu$ += getitemname(.racing_upgrade_from[.@i]) + " -> " + getitemname(.racing_upgrade_to[.@i]) + ":";
+			.@choice_count++;
+		}
+	}
+
+	getinventorylist;
+
+	for (.@i = 0; .@i < @inventorylist_count; .@i++) {
+		if (inarray(.racing_cap_ids[0], @inventorylist_id[.@i]) == -1)
+			continue;
+		if (@inventorylist_equip[.@i] != 0 || @inventorylist_attribute[.@i] != 0)
+			continue;
+
+		.@upgrade_index = inarray(.racing_upgrade_from[0], @inventorylist_card1[.@i]);
+		if (.@upgrade_index == -1)
+			continue;
+
+		.@upgrade_mode[.@choice_count] = 1;
+		.@upgrade_inventory_index[.@choice_count] = .@i;
+		.@upgrade_from[.@choice_count] = .racing_upgrade_from[.@upgrade_index];
+		.@upgrade_to[.@choice_count] = .racing_upgrade_to[.@upgrade_index];
+		.@menu$ += getitemname(@inventorylist_id[.@i]) + " [+" + @inventorylist_refine[.@i] + "] - " + getitemname(.@upgrade_from[.@choice_count]) + " -> " + getitemname(.@upgrade_to[.@choice_count]) + ":";
+		.@choice_count++;
+	}
+
+	if (.@choice_count == 0) {
+		mes "[Chapeus Racing]";
+		mes "Voce nao possui encantamentos Racing que possam ser evoluidos.";
+		mes "Tambem posso evoluir encantamentos ja aplicados em Racing Caps, desde que o chapeu esteja desequipado.";
+		close;
+	}
+
+	mes "[Chapeus Racing]";
+	mes "Escolha o encantamento que deseja evoluir.";
+	mes "Custo: " + .@cost_ticket + "x " + mesitemlink(25274, false) + ".";
+	next;
+
+	.@selected = select(.@menu$ + "Cancelar") - 1;
+	if (.@selected == .@choice_count)
+		close;
+
+	.@from = .@upgrade_from[.@selected];
+	.@to = .@upgrade_to[.@selected];
+
+	mes "[Chapeus Racing]";
+	mes "Evoluir:";
+	if (.@upgrade_mode[.@selected] == 1) {
+		.@inv_i = .@upgrade_inventory_index[.@selected];
+		mes "Equipamento: " + mesitemlink(@inventorylist_id[.@inv_i], false) + " [+" + @inventorylist_refine[.@inv_i] + "]";
+	}
+	mes mesitemlink(.@from, false) + " -> " + mesitemlink(.@to, false);
+	mes "Custo: " + .@cost_ticket + "x " + mesitemlink(25274, false) + ".";
+	next;
+
+	if (select("Evoluir:Cancelar") == 2)
+		close;
+
+	if (countitem(25274) < .@cost_ticket) {
+		mes "[Chapeus Racing]";
+		mes "Voce nao possui tickets suficientes.";
+		close;
+	}
+
+	if (.@upgrade_mode[.@selected] == 0) {
+		if (countitem(.@from) < 1) {
+			mes "[Chapeus Racing]";
+			mes "O encantamento selecionado nao esta mais no inventario.";
+			close;
+		}
+
+		delitem 25274,.@cost_ticket;
+		delitem .@from,1;
+		getitem .@to,1;
+	} else {
+		.@inv_i = .@upgrade_inventory_index[.@selected];
+		.@item_id = @inventorylist_id[.@inv_i];
+		.@identify = @inventorylist_identify[.@inv_i];
+		.@refine = @inventorylist_refine[.@inv_i];
+		.@attribute = @inventorylist_attribute[.@inv_i];
+		.@bound = @inventorylist_bound[.@inv_i];
+		.@grade = @inventorylist_enchantgrade[.@inv_i];
+		setarray .@card[0], @inventorylist_card1[.@inv_i], @inventorylist_card2[.@inv_i], @inventorylist_card3[.@inv_i], @inventorylist_card4[.@inv_i];
+
+		for (.@i = 0; .@i < 5; .@i++) {
+			.@opt_id[.@i] = getd("@inventorylist_option_id" + (.@i + 1) + "[" + .@inv_i + "]");
+			.@opt_val[.@i] = getd("@inventorylist_option_value" + (.@i + 1) + "[" + .@inv_i + "]");
+			.@opt_param[.@i] = getd("@inventorylist_option_parameter" + (.@i + 1) + "[" + .@inv_i + "]");
+		}
+
+		if (countitem4(.@item_id, .@identify, .@refine, .@attribute, .@card[0], .@card[1], .@card[2], .@card[3], .@grade, .@opt_id, .@opt_val, .@opt_param) < 1) {
+			mes "[Chapeus Racing]";
+			mes "O chapeu selecionado nao esta mais disponivel.";
+			close;
+		}
+
+		delitem 25274,.@cost_ticket;
+		delitem4 .@item_id,1,.@identify,.@refine,.@attribute,.@card[0],.@card[1],.@card[2],.@card[3],.@grade,.@opt_id,.@opt_val,.@opt_param;
+
+		.@card[0] = .@to;
+
+		if (.@bound > 0)
+			getitembound4 .@item_id,1,.@identify,.@refine,.@attribute,.@card[0],.@card[1],.@card[2],.@card[3],.@bound,.@grade,.@opt_id,.@opt_val,.@opt_param;
+		else
+			getitem4 .@item_id,1,.@identify,.@refine,.@attribute,.@card[0],.@card[1],.@card[2],.@card[3],.@grade,.@opt_id,.@opt_val,.@opt_param;
+	}
+
+	mes "[Chapeus Racing]";
+	mes "Upgrade concluido.";
+	close;
+
+L_EnchantCap:
+	if (Weight * 100 >= MaxWeight * 70) {
+		mes "[Chapeus Racing]";
+		mes "Voce precisa estar com menos de 70% de peso para encantar.";
+		close;
+	}
+
+	getinventorylist;
+
+	.@has_cap = false;
+	.@has_equipped = false;
+	.@has_broken = false;
+	.@has_enchanted = false;
+	.@has_ready = false;
+	.@menu$ = "";
+	.@choice_count = 0;
+
+	for (.@i = 0; .@i < @inventorylist_count; .@i++) {
+		.@cap_index = inarray(.racing_cap_ids[0], @inventorylist_id[.@i]);
+		if (.@cap_index == -1)
+			continue;
+
+		.@has_cap = true;
+
+		if (@inventorylist_equip[.@i] != 0) {
+			.@has_equipped = true;
+			continue;
+		}
+		if (@inventorylist_attribute[.@i] != 0) {
+			.@has_broken = true;
+			continue;
+		}
+		if (@inventorylist_card1[.@i] != 0) {
+			.@has_enchanted = true;
+			continue;
+		}
+
+		.@has_ready = true;
+		.@candidate[.@choice_count] = .@i;
+		.@candidate_cap_index[.@choice_count] = .@cap_index;
+		.@menu$ += getitemname(@inventorylist_id[.@i]) + " [+" + @inventorylist_refine[.@i] + "]:";
+		.@choice_count++;
+	}
+
+	if (!.@has_cap) {
+		mes "[Chapeus Racing]";
+		mes "Nao encontrei nenhum Racing Cap no seu inventario.";
+		close;
+	}
+
+	if (!.@has_ready) {
+		mes "[Chapeus Racing]";
+		mes "Encontrei Racing Cap, mas nenhum pode ser encantado agora.";
+		if (.@has_equipped)
+			mes "- Desequipe o chapeu primeiro.";
+		if (.@has_broken)
+			mes "- Repare o chapeu antes de encantar.";
+		if (.@has_enchanted)
+			mes "- O slot de encantamento ja esta ocupado.";
+		close;
+	}
+
+	mes "[Chapeus Racing]";
+	mes "Escolha o chapeu que deseja encantar.";
+	next;
+
+	.@selected = select(.@menu$ + "Cancelar") - 1;
+	if (.@selected == .@choice_count)
+		close;
+
+	.@inv_i = .@candidate[.@selected];
+	.@cap_index = .@candidate_cap_index[.@selected];
+	.@enchant_menu$ = "";
+	.@enchant_count = 0;
+
+	for (.@i = 0; .@i < 3; .@i++) {
+		.@enchant_id = .racing_enchants[(.@cap_index * 3) + .@i];
+		if (countitem(.@enchant_id) <= 0)
+			continue;
+
+		.@enchant_candidate[.@enchant_count] = .@enchant_id;
+		.@enchant_menu$ += getitemname(.@enchant_id) + ":";
+		.@enchant_count++;
+	}
+
+	if (.@enchant_count == 0) {
+		mes "[Chapeus Racing]";
+		mes "Voce nao possui encantamentos compativeis com este chapeu.";
+		mes "Compre o encantamento desejado na opcao de encantamentos.";
+		close;
+	}
+
+	mes "[Chapeus Racing]";
+	mes "Escolha o encantamento que sera aplicado.";
+	next;
+
+	.@enchant_selected = select(.@enchant_menu$ + "Cancelar") - 1;
+	if (.@enchant_selected == .@enchant_count)
+		close;
+
+	.@item_id = @inventorylist_id[.@inv_i];
+	.@identify = @inventorylist_identify[.@inv_i];
+	.@refine = @inventorylist_refine[.@inv_i];
+	.@attribute = @inventorylist_attribute[.@inv_i];
+	.@bound = @inventorylist_bound[.@inv_i];
+	.@grade = @inventorylist_enchantgrade[.@inv_i];
+	.@enchant_id = .@enchant_candidate[.@enchant_selected];
+	setarray .@card[0], @inventorylist_card1[.@inv_i], @inventorylist_card2[.@inv_i], @inventorylist_card3[.@inv_i], @inventorylist_card4[.@inv_i];
+
+	for (.@i = 0; .@i < 5; .@i++) {
+		.@opt_id[.@i] = getd("@inventorylist_option_id" + (.@i + 1) + "[" + .@inv_i + "]");
+		.@opt_val[.@i] = getd("@inventorylist_option_value" + (.@i + 1) + "[" + .@inv_i + "]");
+		.@opt_param[.@i] = getd("@inventorylist_option_parameter" + (.@i + 1) + "[" + .@inv_i + "]");
+	}
+
+	mes "[Chapeus Racing]";
+	mes "Equipamento: " + mesitemlink(.@item_id, false) + " [+" + .@refine + "]";
+	mes "Encantamento: " + mesitemlink(.@enchant_id, false);
+	mes "O encantamento sera consumido.";
+	next;
+
+	if (select("Encantar:Cancelar") == 2)
+		close;
+
+	if (countitem(.@enchant_id) < 1) {
+		mes "[Chapeus Racing]";
+		mes "O encantamento selecionado nao esta mais no inventario.";
+		close;
+	}
+
+	if (countitem4(.@item_id, .@identify, .@refine, .@attribute, .@card[0], .@card[1], .@card[2], .@card[3], .@grade, .@opt_id, .@opt_val, .@opt_param) < 1) {
+		mes "[Chapeus Racing]";
+		mes "O chapeu selecionado nao esta mais disponivel.";
+		close;
+	}
+
+	delitem .@enchant_id,1;
+	delitem4 .@item_id,1,.@identify,.@refine,.@attribute,.@card[0],.@card[1],.@card[2],.@card[3],.@grade,.@opt_id,.@opt_val,.@opt_param;
+
+	.@card[0] = .@enchant_id;
+
+	if (.@bound > 0)
+		getitembound4 .@item_id,1,.@identify,.@refine,.@attribute,.@card[0],.@card[1],.@card[2],.@card[3],.@bound,.@grade,.@opt_id,.@opt_val,.@opt_param;
+	else
+		getitem4 .@item_id,1,.@identify,.@refine,.@attribute,.@card[0],.@card[1],.@card[2],.@card[3],.@grade,.@opt_id,.@opt_val,.@opt_param;
+
+	mes "[Chapeus Racing]";
+	mes "Encantamento concluido.";
+	close;
+
+OnInit:
+	setarray .racing_cap_ids[0],
+		19189,19190,19191,19192,19193,19194,19195,19196,19197,19198,
+		19199,19200,19201,19202,19203,19204,19205,19396,19397;
+	setarray .racing_enchants[0],
+		29316,29317,29318,
+		29319,29320,29321,
+		29322,29323,29324,
+		29325,29326,29327,
+		29328,29329,29330,
+		29331,29332,29333,
+		29310,29311,29312,
+		29313,29314,29315,
+		29334,29335,29336,
+		29337,29338,29339,
+		29340,29341,29342,
+		29343,29344,29345,
+		29343,29344,29345,
+		29346,29347,29348,
+		29349,29350,29351,
+		29352,29353,29354,
+		29355,29356,29357,
+		29579,29580,29581,
+		29582,29583,29584;
+	setarray .racing_upgrade_from[0],
+		29310,29311,
+		29313,29314,
+		29316,29317,
+		29319,29320,
+		29322,29323,
+		29325,29326,
+		29328,29329,
+		29331,29332,
+		29334,29335,
+		29337,29338,
+		29340,29341,
+		29343,29344,
+		29346,29347,
+		29349,29350,
+		29352,29353,
+		29355,29356,
+		29579,29580,
+		29582,29583;
+	setarray .racing_upgrade_to[0],
+		29311,29312,
+		29314,29315,
+		29317,29318,
+		29320,29321,
+		29323,29324,
+		29326,29327,
+		29329,29330,
+		29332,29333,
+		29335,29336,
+		29338,29339,
+		29341,29342,
+		29344,29345,
+		29347,29348,
+		29350,29351,
+		29353,29354,
+		29356,29357,
+		29580,29581,
+		29583,29584;
+	end;
+}
