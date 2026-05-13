@@ -115,6 +115,7 @@ OnResetBettors:
 		set $prace_bidders[.@tmp1], 0;
 	}
 	deletearray $prace_bidders[0], getarraysize($prace_bidders);
+	deletearray $prace_bidder_ips$[0], getarraysize($prace_bidder_ips$);
 	set $prace_bets, 0;
 	end;
 }
@@ -158,6 +159,14 @@ p_track01,58,41,3	script	Bidder#prace0	877,{
 		mes "Ha uma corrida acontecendo...";
 		close;
 	}
+	set .@char_ip$, getcharip();
+	for( set .@i, 0; .@i < getarraysize($prace_bidder_ips$); set .@i, .@i + 1 ) {
+		if( $prace_bidder_ips$[.@i] == .@char_ip$ ) {
+			mes "^0099FF[ "+ strnpcinfo(1) +" ]^000000";
+			mes "Ja existe uma aposta feita por este IP nesta corrida.";
+			close;
+		}
+	}
 	if( Zeny < .@prace_zeny) {
 		set prace_winner$,"";
 		mes "^0099FF[ "+ strnpcinfo(1) +" ]^000000";
@@ -168,6 +177,7 @@ p_track01,58,41,3	script	Bidder#prace0	877,{
 	set prace_winner$, .@thining$;
 	set $prace_bets,$prace_bets+1;
 	set $prace_bidders[$prace_bets], getcharid(3);
+	set $prace_bidder_ips$[$prace_bets], .@char_ip$;
 	set prace_playing, 1;
 	if (#evento == 1)
 		#evento = 2;
@@ -272,6 +282,7 @@ OnInit:
 	set $prace_winner$, "";
 	set $prace_bets, 0;
 	deletearray $prace_bidders[0], getarraysize($prace_bidders);
+	deletearray $prace_bidder_ips$[0], getarraysize($prace_bidder_ips$);
 	set $prace_countdown_active, 0;
 	set $prace_race_active, 0;
 	end;
