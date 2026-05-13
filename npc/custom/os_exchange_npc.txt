@@ -25,10 +25,10 @@ moc_para01,52,30,3	script	Oscar de Glast Heim	4_ED_OSCAR,{
 L_SchmidtEnchant:
 	mes "[Oscar de Glast Heim]";
 	mes "Escolha o equipamento Schmidt equipado que deseja encantar.";
-	mes "Eu trabalho com armadura, capa e insignia no acessorio esquerdo.";
+	mes "Eu trabalho com armadura, capa e insignia nos acessorios.";
 	next;
 
-	switch(select("Armadura:Capa:Acessorio Esquerdo:Cancelar")) {
+	switch(select("Armadura:Capa:Acessorio Esquerdo:Acessorio Direito:Cancelar")) {
 	case 1:
 		.@part = EQI_ARMOR;
 		.@equip_id = getequipid(.@part);
@@ -43,6 +43,12 @@ L_SchmidtEnchant:
 		break;
 	case 3:
 		.@part = EQI_ACC_L;
+		.@equip_id = getequipid(.@part);
+		setarray .@valid_ids[0],32228,32229,32230,32231,32232,32233;
+		setarray .@requirement[0],25740,5,6755,5;
+		break;
+	case 4:
+		.@part = EQI_ACC_R;
 		.@equip_id = getequipid(.@part);
 		setarray .@valid_ids[0],32228,32229,32230,32231,32232,32233;
 		setarray .@requirement[0],25740,5,6755,5;
@@ -62,6 +68,41 @@ L_SchmidtEnchant:
 	for (.@i = 0; .@i < 4; .@i++) {
 		.@card[.@i] = getequipcardid(.@part,.@i);
 		.@check[.@i] = .@card[.@i];
+	}
+
+	mes "[Oscar de Glast Heim]";
+	mes "^0000CD" + .@equip_name$ + "^000000";
+	next;
+
+	switch(select("Encantar:Resetar encantamentos:Cancelar")) {
+	case 1:
+		break;
+	case 2:
+		if (.@card[1] == 0 && .@card[2] == 0 && .@card[3] == 0) {
+			mes "[Oscar de Glast Heim]";
+			mes "Este equipamento nao possui encantamentos para resetar.";
+			close;
+		}
+
+		mes "[Oscar de Glast Heim]";
+		mes "Vou remover todos os encantamentos deste equipamento.";
+		mes "^FF0000Os encantamentos removidos serao destruidos e nao serao devolvidos.^000000";
+		next;
+
+		if (select("Resetar encantamentos:Cancelar") == 2)
+			close;
+
+		if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipRefineHack", .@part, .@refine) || callfunc("F_IsEquipCardHack", .@part, .@check[0], .@check[1], .@check[2], .@check[3]))
+			end;
+
+		delequip .@part;
+		getitem2 .@equip_id,1,1,.@refine,0,.@card[0],0,0,0;
+		specialeffect2 EF_REPAIRWEAPON;
+		mes "[Oscar de Glast Heim]";
+		mes "Todos os encantamentos Schmidt foram resetados.";
+		close;
+	default:
+		close;
 	}
 
 	if (.@card[1] > 0) {
@@ -103,6 +144,47 @@ L_SchmidtEnchant:
 		break;
 	}
 
+	if (.@part == EQI_ACC_L || .@part == EQI_ACC_R) {
+		mes "[Oscar de Glast Heim]";
+		mes "Escolha o tipo de encantamento para o acessorio.";
+		mes "No encantamento perfeito voce escolhe o bonus maximo para o slot atual.";
+		next;
+
+		switch(select("Encantamento aleatorio:Encantamento perfeito:Cancelar")) {
+		case 1:
+			break;
+		case 2:
+			.@perfect_enchant = 1;
+			.@break_chance = 0;
+			setarray .@requirement[0],25740,15,6755,15;
+
+			switch(.@slot) {
+			case 1:
+				setarray .@enchant_list[0],29587,29588,29589,29590,29591,29592;
+				setarray .@enchant_name$[0],"Flash (Dano critico +30%)","Power (Dano fisico contra todos tamanhos +25%)","Celestial (ATQ fisico +10%)","Divine Power (Dano magico elemental +15%)","Rigid Body (Pos-conjuracao -10%)","Hundred Lucks (ASPD +2)";
+				break;
+			case 2:
+				setarray .@enchant_list[0],4822,4826,4844,4836,4865;
+				setarray .@enchant_name$[0],"Fighting Spirit 7 (ATK +24 / HIT +5)","Spell 5 (MATK +18 / Cast -10%)","Sharp 5 (CRIT +15 / HIT +6)","Expert Archer 5 (Long Range +10%)","Fatal 3 (Crit Damage +8% / CRIT +3)";
+				break;
+			case 3:
+				setarray .@enchant_list[0],4704,4714,4724,4734,4744,4754;
+				setarray .@enchant_name$[0],"STR +5","INT +5","DEX +5","AGI +5","VIT +5","LUK +5";
+				break;
+			}
+
+			.@menu$ = "";
+			for (.@i = 0; .@i < getarraysize(.@enchant_list); .@i++)
+				.@menu$ += .@enchant_name$[.@i] + ":";
+			.@enchant = .@enchant_list[select(.@menu$ + "Cancelar") - 1];
+			if (.@enchant == 0)
+				close;
+			break;
+		default:
+			close;
+		}
+	}
+
 	mes "[Oscar de Glast Heim]";
 	mes "^0000CD" + .@equip_name$ + "^000000";
 	mes "Slot: " + .@slot_name$ + " encanto";
@@ -127,7 +209,8 @@ L_SchmidtEnchant:
 		close;
 	}
 
-	.@enchant = .@enchant_list[rand(getarraysize(.@enchant_list))];
+	if (!.@perfect_enchant)
+		.@enchant = .@enchant_list[rand(getarraysize(.@enchant_list))];
 	.@card[.@slot] = .@enchant;
 
 	for (.@i = 0; .@i < getarraysize(.@requirement); .@i += 2)
