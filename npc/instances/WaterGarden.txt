@@ -852,8 +852,6 @@ OnStart:
 		monster 'map_ghg$,277,279,"--ja--",20665,1;
 		monster 'map_ghg$,286,284,"--ja--",20665,1;
 		monster 'map_ghg$,280,284,"--ja--",20665,1;
-		monster 'map_ghg$,278,241,"--ja--",20671,1, .@event$; // monstros principais
-		monster 'map_ghg$,278,301,"--ja--",20674,1, .@event$;
 	}
 	else {
 		monster 'map_ghg$,334,304,"--ja--","MD_ARIES_H",1;
@@ -876,10 +874,26 @@ OnStart:
 		monster 'map_ghg$,285,279,"--ja--","MD_VERPORTE_H",1;
 		monster 'map_ghg$,275,282,"--ja--","MD_VERPORTE_H",1;
 		monster 'map_ghg$,286,282,"--ja--","MD_VERPORTE_H",1;
-		monster 'map_ghg$,278,301,"--ja--","MD_PAPILA_CAE_H",1, .@event$;
-		monster 'map_ghg$,278,241,"--ja--","MD_PAPILA_RUBA_H",1, .@event$;
 	}
+	callsub( S_SpawnMainMob, 20671, .@event$ );
+	callsub( S_SpawnMainMob, 20672, .@event$ );
+	callsub( S_SpawnMainMob, 20674, .@event$ );
+	callsub( S_SpawnMainMob, 20675, .@event$ );
 	end;
+
+S_SpawnMainMob:
+	setarray .@xy[0],
+		278,241,278,301,314,301,317,296,324,296,
+		317,275,318,266,311,268,277,279,286,284,
+		280,284,334,304,333,310,327,304,327,303,
+		326,302,321,299,318,295,314,296,318,291,
+		313,297,315,271,320,271,322,264,311,269,
+		275,273,275,277,285,279,275,282,286,282;
+	for (.@i = 0; .@i < 4; .@i++) {
+		.@r = rand(getarraysize(.@xy) / 2) * 2;
+		monster 'map_ghg$,.@xy[.@r],.@xy[.@r+1],"--ja--",getarg(0),1,getarg(1);
+	}
+	return;
 
 OnMobDead:
 	if ('water_garden != 7)
