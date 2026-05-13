@@ -875,10 +875,14 @@ OnStart:
 		monster 'map_ghg$,275,282,"--ja--","MD_VERPORTE_H",1;
 		monster 'map_ghg$,286,282,"--ja--","MD_VERPORTE_H",1;
 	}
-	callsub( S_SpawnMainMob, 20671, .@event$ );
-	callsub( S_SpawnMainMob, 20672, .@event$ );
-	callsub( S_SpawnMainMob, 20674, .@event$ );
-	callsub( S_SpawnMainMob, 20675, .@event$ );
+	if ('mode == 0) {
+		callsub( S_SpawnMainMob, 20671, .@event$ );
+		callsub( S_SpawnMainMob, 20674, .@event$ );
+	}
+	else {
+		callsub( S_SpawnMainMob, 20672, .@event$ );
+		callsub( S_SpawnMainMob, 20675, .@event$ );
+	}
 	end;
 
 S_SpawnMainMob:
