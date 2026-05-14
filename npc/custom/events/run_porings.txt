@@ -15,9 +15,18 @@ OnWhisperGlobal:
 	}
 	end;
 
-OnClock0900:
-OnClock2000:
-OnClock0200:
+OnClock0115:
+OnClock0315:
+OnClock0515:
+OnClock0715:
+OnClock0915:
+OnClock1115:
+OnClock1315:
+OnClock1515:
+OnClock1715:
+OnClock1915:
+OnClock2115:
+OnClock2315:
 OnStartRace:
 	set $accessPrace, 1;
 	announce "[Corrida dos Porings]: O evento foi aberto!", bc_all|bc_blue;
@@ -32,9 +41,11 @@ OnPraceEnd:
 prontera,146,170,5	script	Corrida dos Porings	514,{
 	mes "^0099FF[ "+ strnpcinfo(1) +" ]^000000";
 	mes "O evento ^EE1289Corrida dos Porings^000000 e uma corrida de porings. Nela voce aposta no monstro de sua preferencia e, se ele ganhar, voce tambem ganha.";
-	mes "Horarios do evento: ^00CC0002:00^000000, ^00CC0009:00^000000 e ^00CC0020:00^000000.";
+	mes "Horarios do evento: ^00CC00a cada 2 horas^000000, iniciando as ^00CC0001:15^000000.";
 	mes "^777777- Premio do Evento^000000:";
-	mes "  ^00CC00"+getitemname(9608)+".^000000";
+	mes "  Vencedor: ^00CC0010 "+getitemname(9608)+"^000000.";
+	mes "  Participacao: ^00CC005 "+getitemname(9608)+"^000000.";
+	mes "  Ticket na vitoria: ^00CC001 "+getitemname(25274)+"^000000.";
 	mes "  ^EEAD0E1,000,000 Zenys.^000000";
 	next;
 	if (getgmlevel() >= 60) {
@@ -96,6 +107,7 @@ OnChequeo:
 					set Zeny, Zeny + 1000000;
 				} else {
 					dispbottom "Voce errou na sua aposta." ,0x00FF00;
+					getitem 9608, 5;
 				}
 				emotion 28;
 				set prace_winner$, "";
