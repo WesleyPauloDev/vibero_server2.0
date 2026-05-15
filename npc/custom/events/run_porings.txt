@@ -28,6 +28,8 @@ OnClock1915:
 OnClock2115:
 OnClock2315:
 OnStartRace:
+	if( $prace_race_active == 0 )
+		donpcevent "Bidder#prace0::OnGMResetTrack";
 	set $accessPrace, 1;
 	announce "[Corrida dos Porings]: O evento foi aberto!", bc_all|bc_blue;
 	end;
@@ -208,6 +210,7 @@ p_track01,58,41,3	script	Bidder#prace0	877,{
 Start1:
 	set $prace_countdown_active, 0;
 	set $prace_race_active, 1;
+	callsub ReturnRace;
 	stopnpctimer;
 	initnpctimer;
 	startnpctimer;
@@ -286,6 +289,7 @@ WinRace:
 	set $prace_countdown_active, 0;
 	set $prace_race_active, 0;
 	donpcevent "PRace#Evt::OnPraceEnd";
+	callsub ReturnRace;
 	end;
 
 OnInit:
@@ -359,7 +363,7 @@ OnStop:
 	stopnpctimer;
 	end;
 OnReturn:
-	npcwalkto 58,38;
+	movenpc "Poring#prace1",58,38,2;
 	end;
 OnTimer1100:
 	getmapxy(.@mapname$,.@x,.@y,BL_NPC,"Poring#prace1");
@@ -383,7 +387,7 @@ OnStop:
 	stopnpctimer;
 	end;
 OnReturn:
-	npcwalkto 58,36;
+	movenpc "Angeling#prace2",58,36,2;
 	end;
 OnTimer1100:
 	getmapxy(.@mapname$,.@x,.@y,BL_NPC,"Angeling#prace2");
@@ -406,7 +410,7 @@ OnStop:
 	stopnpctimer;
 	end;
 OnReturn:
-	npcwalkto 58,34;
+	movenpc "Drops#prace3",58,34,2;
 end;
 OnTimer1100:
 	getmapxy(.@mapname$,.@x,.@y,BL_NPC,"Drops#prace3");
@@ -429,7 +433,7 @@ OnStop:
 	stopnpctimer;
 	end;
 OnReturn:
-	npcwalkto 58,32;
+	movenpc "Marin#prace4",58,32,2;
 	end;
 OnTimer1100:
 	getmapxy(.@mapname$,.@x,.@y,BL_NPC,"Marin#prace4");
@@ -452,7 +456,7 @@ OnStop:
 	stopnpctimer;
 end;
 OnReturn:
-	npcwalkto 58,30;
+	movenpc "Santa Poring#prace5",58,30,2;
 	end;
 OnTimer1100:
 	getmapxy( .@mapname$,.@x,.@y,BL_NPC,"Santa Poring#prace5");
@@ -475,7 +479,7 @@ OnStop:
 	stopnpctimer;
 end;
 OnReturn:
-	npcwalkto 58,28;
+	movenpc "Poporing#prace6",58,28,2;
 end;
 OnTimer1100:
 	getmapxy(.@mapname$,.@x,.@y,BL_NPC,"Poporing#prace6");
