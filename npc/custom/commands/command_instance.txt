@@ -64,6 +64,7 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatusRaw", "#ETOWER_COOLDOWN", "#ETOWER_STATUS", "ETOWER");
 		callfunc("F_InstanceMenuResetStatusRaw", "#NYD_COOLDOWN", "#NYD_STATUS", "NYD");
 		callfunc("F_InstanceMenuResetStatus", "glastHeim", "OldGlastHeim");
+		callfunc("F_InstanceMenuResetStatus", "ogh_challenge", "OldGlastHeimChallenge");
 		callfunc("F_InstanceMenuResetStatus", "octopus_cave", "OctopusCave");
 		callfunc("F_InstanceMenuResetStatus", "santuario_selado", "SANTUARIOSELADO");
 		callfunc("F_InstanceMenuResetStatus", "wlcr", "WLCR");
@@ -132,6 +133,12 @@ OnAtcommand:
 	.@opt3$ = callfunc("F_InstanceMenuOptionRaw", "[50] Torre Sem Fim", "#ETOWER_COOLDOWN", "#ETOWER_STATUS", 3, 4, "ETOWER");
 	.@opt4$ = callfunc("F_InstanceMenuOptionRaw", "[55] Ninho de Nidhog", "#NYD_COOLDOWN", "#NYD_STATUS", 3, 4, "NYD");
 	.@opt5$ = "[60] Mal. Glast Heim";
+	.@oghc_level = #OGHC_MAX_LEVEL;
+	if (.@oghc_level < 1)
+		.@oghc_level = 1;
+	if (.@oghc_level > 10)
+		.@oghc_level = 10;
+	.@opt55$ = callfunc("F_InstanceMenuOption", "[175] Glast Heim Desafio Nv." + .@oghc_level, "ogh_challenge", "OldGlastHeimChallenge");
 	.@opt6$ = callfunc("F_InstanceMenuOption", "[75] Santuario Selado", "santuario_selado", "SANTUARIOSELADO");
 	.@opt7$ = callfunc("F_InstanceMenuOption", "[90] Lab. Werner", "wlcr", "WLCR");
 	.@opt8$ = callfunc("F_InstanceMenuOption", "[90] Torneio Magico", "gmt", "GMT");
@@ -231,7 +238,8 @@ OnAtcommand:
 		.@opt38$,
 		.@opt40$,
 		.@opt44$,
-		.@opt45$
+		.@opt45$,
+		.@opt55$
 	);	close2;
 
 	setarray .@case_map[1],
@@ -241,7 +249,7 @@ OnAtcommand:
 		25,51,26,27,28,29,30,31,32,
 		33,34,47,53,35,36,37,38,39,
 		40,
-		41,42,44,45;
+		41,42,44,45,55;
 	.@s = .@case_map[.@s];
 
 	switch(.@s) {
@@ -276,6 +284,10 @@ OnAtcommand:
 			case 3:
 				end;
 			}
+		case 55:
+			#INSTANCENAME$ = "OGHC";
+			doevent "OGHC_Instance#Custom::OnStartInstance";
+			end;
 		case 48:
 			#INSTANCENAME$ = "OctopusCave";
 			doevent "OctopusCave_Instance#Custom::OnStartInstance";
@@ -515,6 +527,3 @@ OnAtcommand:
 	}
 	end;
 }
-
-
-

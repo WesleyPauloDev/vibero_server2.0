@@ -1,0 +1,810 @@
+//===== rAthena Script =======================================
+//= Old Glast Heim Challenge
+//===== Description: =========================================
+//= Glast Heim Challenge Mode custom, com entrada via menu,
+//= progressao de dificuldade 1~10 e bau final.
+//============================================================
+
+function	script	F_OGHC_SelectedLevel	{
+	.@max = #OGHC_MAX_LEVEL;
+	if (.@max < 1)
+		.@max = 1;
+	if (.@max > 10)
+		.@max = 10;
+
+	.@menu$ = "";
+	for (.@i = 1; .@i <= .@max; ++.@i)
+		.@menu$ += "Nivel de Contaminacao " + .@i + ":";
+	.@menu$ = "Cancelar:" + .@menu$;
+
+	.@s = select(.@menu$);
+	if (.@s == 1)
+		return 0;
+	return .@s - 1;
+}
+
+function	script	F_OGHC_ApplyMobLevel	{
+	.@gid = getarg(0);
+	if (.@gid <= 0)
+		return;
+
+	.@lv = getarg(1, 1);
+	if (.@lv < 1)
+		.@lv = 1;
+	if (.@lv > 10)
+		.@lv = 10;
+
+	getunitdata .@gid, .@mob;
+	if (!getarraysize(.@mob))
+		return;
+
+	.@hp_mul = 100 + ((.@lv - 1) * 45);
+	.@atk_mul = 100 + ((.@lv - 1) * 18);
+	.@def_mul = 100 + ((.@lv - 1) * 10);
+
+	.@maxhp = (.@mob[UMOB_MAXHP] * .@hp_mul) / 100;
+	.@atkmin = (.@mob[UMOB_ATKMIN] * .@atk_mul) / 100;
+	.@atkmax = (.@mob[UMOB_ATKMAX] * .@atk_mul) / 100;
+	.@def = (.@mob[UMOB_DEF] * .@def_mul) / 100;
+	.@mdef = (.@mob[UMOB_MDEF] * .@def_mul) / 100;
+
+	if (.@maxhp < 1) .@maxhp = 1;
+	if (.@atkmin < 1) .@atkmin = 1;
+	if (.@atkmax < .@atkmin) .@atkmax = .@atkmin;
+
+	setunitdata .@gid, UMOB_MAXHP, .@maxhp;
+	setunitdata .@gid, UMOB_HP, .@maxhp;
+	setunitdata .@gid, UMOB_ATKMIN, .@atkmin;
+	setunitdata .@gid, UMOB_ATKMAX, .@atkmax;
+	setunitdata .@gid, UMOB_DEF, .@def;
+	setunitdata .@gid, UMOB_MDEF, .@mdef;
+	return;
+}
+
+function	script	F_OGHC_SpawnValidArea	{
+	.@map$ = getarg(0);
+	.@x1 = getarg(1);
+	.@y1 = getarg(2);
+	.@x2 = getarg(3);
+	.@y2 = getarg(4);
+	.@name$ = getarg(5);
+	.@mob_id = getarg(6);
+	.@amount = getarg(7);
+	.@label$ = getarg(8);
+	.@level = getarg(9, 1);
+
+	for (.@i = 0; .@i < .@amount; ++.@i) {
+		.@spawned = 0;
+		for (.@try = 0; .@try < 100; ++.@try) {
+			.@x = rand(.@x1, .@x2);
+			.@y = rand(.@y1, .@y2);
+			if (checkcell(.@map$, .@x, .@y, CELL_CHKPASS)) {
+				monster .@map$, .@x, .@y, .@name$, .@mob_id, 1, .@label$;
+				callfunc("F_OGHC_ApplyMobLevel", $@mobid[0], .@level);
+				.@spawned = 1;
+				break;
+			}
+		}
+
+		if (!.@spawned) {
+			getfreecell .@map$, .@x, .@y, ((.@x1 + .@x2) / 2), ((.@y1 + .@y2) / 2), ((.@x2 - .@x1) / 2), ((.@y2 - .@y1) / 2), 5;
+			if (.@x >= .@x1 && .@x <= .@x2 && .@y >= .@y1 && .@y <= .@y2 && checkcell(.@map$, .@x, .@y, CELL_CHKPASS)) {
+				monster .@map$, .@x, .@y, .@name$, .@mob_id, 1, .@label$;
+				callfunc("F_OGHC_ApplyMobLevel", $@mobid[0], .@level);
+			} else {
+				--.@i;
+			}
+		}
+	}
+	return;
+}
+
+function	script	F_OGHC_DropReward	{
+	.@level = getarg(0, 1);
+	if (.@level < 1) .@level = 1;
+	if (.@level > 10) .@level = 10;
+
+	.@circlet_amount = .@level;
+	.@frag_amount = .@level * 2;
+	.@map$ = instance_mapname("1@gl_he");
+	.@x1 = 146;
+	.@y1 = 228;
+	.@x2 = 170;
+	.@y2 = 250;
+
+	callfunc("F_OGHC_MakeSpreadReward", 25864, .@circlet_amount, .@map$, .@x1, .@y1, .@x2, .@y2);
+	callfunc("F_OGHC_MakeSpreadReward", 25867, .@frag_amount, .@map$, .@x1, .@y1, .@x2, .@y2);
+
+	if (.@level >= 6) {
+		.@spell_amount = .@frag_amount / 2;
+		callfunc("F_OGHC_MakeSpreadReward", 25866, .@spell_amount, .@map$, .@x1, .@y1, .@x2, .@y2);
+
+		.@jewel_chance = .@level * 10;
+		if (.@jewel_chance > 100)
+			.@jewel_chance = 100;
+		if (rand(100) < .@jewel_chance) {
+			.@jewel_amount = .@level - 5;
+			if (.@jewel_amount < 1)
+				.@jewel_amount = 1;
+			if (.@jewel_amount > 5)
+				.@jewel_amount = 5;
+			callfunc("F_OGHC_MakeSpreadReward", 25865, .@jewel_amount, .@map$, .@x1, .@y1, .@x2, .@y2);
+		}
+	}
+	return;
+}
+
+function	script	F_OGHC_MakeSpreadReward	{
+	.@item_id = getarg(0);
+	.@amount = getarg(1);
+	.@map$ = getarg(2);
+	.@x1 = getarg(3);
+	.@y1 = getarg(4);
+	.@x2 = getarg(5);
+	.@y2 = getarg(6);
+
+	for (.@i = 0; .@i < .@amount; ++.@i) {
+		.@x = 158;
+		.@y = 240;
+		for (.@try = 0; .@try < 50; ++.@try) {
+			.@tx = rand(.@x1, .@x2);
+			.@ty = rand(.@y1, .@y2);
+			if (checkcell(.@map$, .@tx, .@ty, CELL_CHKPASS)) {
+				.@x = .@tx;
+				.@y = .@ty;
+				break;
+			}
+		}
+		makeitem .@item_id, 1, .@map$, .@x, .@y;
+	}
+	return;
+}
+
+function	script	F_OGHC_CheckInstance	{
+	if (instance_id() > 0)
+		return 1;
+
+	mes "[Oscar]";
+	mes "Esta distorcao ainda nao foi estabilizada.";
+	mes "Entre pela opcao correta da instancia.";
+	close;
+	return 0;
+}
+
+-	script	OGHC_Instance#Custom	4_ED_OSCAR,{
+	OnStartInstance:
+		.@db_name$ = "Old Glast Heim (Challenge Mode)";
+		.@display_name$ = "Glast Heim Modo Desafio";
+		.@npc_name$ = "Oscar";
+		.@cooldown_name$ = "#cooldown_ogh_challenge";
+		.@status_name$ = "#OldGlastHeimChallenge_STATUS";
+		.@status_var$ = "OldGlastHeimChallenge";
+
+		if (!isloggedin(getcharid(3)))
+			end;
+
+		if (BaseLevel < 175) {
+			mes "[" + .@npc_name$ + "]";
+			mes "Esta distorcao exige nivel base ^FF5555175^000000 ou superior.";
+			close;
+		}
+
+		if (getcharid(1) < 1) {
+			mes "[" + .@npc_name$ + "]";
+			mes "Voce precisa estar em um grupo para entrar na instancia.";
+			close;
+		}
+
+		if (getd(.@cooldown_name$) < gettimetick(2) && getd(.@status_name$) != 0)
+			setd(.@status_name$, 0);
+
+		if (getd(.@status_name$) == 3) {
+			mes "[" + .@npc_name$ + "]";
+			mes "Voce nao pode mais entrar nesta instancia por enquanto.";
+			mes "A recarga termina no proximo periodo definido para esta instancia.";
+			close;
+		}
+
+		.@live_iid = instance_id(IM_PARTY);
+		.@same_live_instance = (.@live_iid > 0 && instance_live_info(ILI_NAME, .@live_iid) == .@db_name$);
+		if (getd(.@status_name$) > 0 && !.@same_live_instance) {
+			mes "[" + .@npc_name$ + "]";
+			mes "Sua tentativa ja foi registrada e a instancia nao esta mais aberta.";
+			close;
+		}
+
+		if (!callfunc("F_CheckInstanceIPPermission")) {
+			mes "[" + .@npc_name$ + "]";
+			mes "Jogadores com mesmo IP so podem participar de mais de uma instancia simultaneamente se estiverem em grupos diferentes.";
+			close;
+		}
+
+		mes "[" + .@npc_name$ + "]";
+		mes "Deseja criar ou entrar na instancia ^0055FF" + .@display_name$ + "^000000?";
+		next;
+
+		if (getd(.@status_name$) > 0)
+			.@menu = select("Entrar na Glast Heim Challenge", "Cancelar") + 1;
+		else
+			.@menu = select("Abrir Portal", "Entrar na Glast Heim Challenge", "Cancelar");
+
+		switch(.@menu) {
+		case 1:
+			if (!is_party_leader()) {
+				mes "Somente o lider do grupo pode abrir o portal.";
+				close;
+			}
+
+			$OGHC_LEVEL_PENDING[getcharid(1)] = 0;
+			.@iid = instance_create(.@db_name$);
+			if (.@iid >= 0) {
+				mes "[" + .@npc_name$ + "]";
+				mes "A Glast Heim Challenge esta se abrindo.";
+				announce "[Instancias] " + strcharinfo(0) + " criou " + .@display_name$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
+				callfunc("F_InstanceLogStart", .@status_var$, .@display_name$);
+				setd(.@cooldown_name$, gettimetick(2) + (86400 * 3));
+				setd(.@status_name$, 1);
+			} else {
+				$OGHC_LEVEL_PENDING[getcharid(1)] = 0;
+				mes "Falha ao criar a instancia.";
+			}
+			close;
+
+		case 2:
+			switch(instance_enter(.@db_name$)) {
+			case IE_OK:
+				setd(.@cooldown_name$, gettimetick(2) + (86400 * 3));
+				setd(.@status_name$, 2);
+				callfunc("F_InstanceLogEnter", .@status_var$, .@display_name$);
+				close2;
+				end;
+			case IE_NOINSTANCE:
+				mes "A instancia ainda nao foi criada.";
+				close;
+			case IE_NOMEMBER:
+				mes "Voce nao faz parte de um grupo valido para esta instancia.";
+				close;
+			default:
+				mes "Ocorreu um erro desconhecido ao tentar entrar.";
+				close;
+			}
+			close;
+
+		case 3:
+			close;
+		}
+	end;
+}
+
+1@gl_he,150,40,3	script	Oscar#OGHC_In	4_ED_OSCAR,{
+	.@n$ = "[Oscar]";
+	callfunc("F_OGHC_CheckInstance");
+
+	if (!is_party_leader()) {
+		mes .@n$;
+		mes "Apenas o lider do grupo pode iniciar o desafio.";
+		close;
+	}
+
+	if ('oghc_started) {
+		mes .@n$;
+		mes "A corrupcao ja se espalhou. Sigam pelo castelo.";
+		close;
+	}
+
+	mes .@n$;
+	mes "Hmm... Este lugar esta muito distorcido. A densidade da magia espalhada no ar e diferente.";
+	next;
+	mes .@n$;
+	mes "Atencao! O nivel de contaminacao depende do numero de vezes que Rohlt esteve aqui.";
+	next;
+	mes .@n$;
+	mes "Quanto mais vivencias o lider do grupo tiver, mais profundo sera o nivel de contaminacao liberado.";
+	mes "Espero que compreendam isso.";
+	next;
+	mes .@n$;
+	mes "Esta e a lista de niveis de contaminacao que Rohlt pode acessar.";
+	mes "Quanto maior a contaminacao, maior sera a dificuldade, entao escolha com cuidado.";
+	next;
+
+	.@level = callfunc("F_OGHC_SelectedLevel");
+	if (.@level == 0)
+		close;
+
+	mes .@n$;
+	mes "Seu grupo tem ^0055FF" + getmapusers(strnpcinfo(4)) + " membros^000000 nesta area.";
+	mes "^FF0000Se comecarem antes de todos entrarem, pode causar um grande problema.^000000";
+	next;
+	switch(select("Esperar um momento", "Prosseguir")) {
+	case 1:
+		close;
+	case 2:
+		mes .@n$;
+		mes "Registrei um grupo de ^0055FF" + getmapusers(strnpcinfo(4)) + "^000000. Cuidado, pois se o numero de pessoas mudar durante a batalha, podera causar um grande acidente.";
+		break;
+	}
+
+	close2;
+	sleep2 200;
+	'oghc_level = .@level;
+	'oghc_started = 1;
+	disablenpc instance_npcname(strnpcinfo(0));
+	addtimer 500, instance_npcname("Controlador#OGHC") + "::OnStart";
+	warp instance_mapname("1@gl_he"),125,124;
+	end;
+}
+
+1@gl_he,134,82,0	warp	Portal#OGHC_Left	1,1,1@gl_he,174,102
+
+1@gl_he,174,102,0	script	#OGHC_RightStart	HIDDEN_WARP_NPC,3,3,{
+	if (instance_id() < 1)
+		end;
+	if (!'oghc_portal1 || 'oghc_step != 1)
+		end;
+	'oghc_portal1 = 0;
+	disablenpc instance_npcname("Portal#OGHC_Left");
+	donpcevent instance_npcname("Controlador#OGHC") + "::OnWave2";
+	end;
+}
+
+1@gl_he,166,102,0	warp	Portal#OGHC_Right	1,1,1@gl_he,149,47
+
+1@gl_he,149,47,0	script	#OGHC_CenterStart	HIDDEN_WARP_NPC,3,3,{
+	if (instance_id() < 1)
+		end;
+	if (!'oghc_portal2 || 'oghc_step != 2)
+		end;
+	'oghc_portal2 = 0;
+	'oghc_step = 3;
+	'oghc_corridor_spawned = 0;
+	'oghc_corridor_pending = 0;
+	'oghc_corridor_clear = 0;
+	disablenpc instance_npcname("Portal#OGHC_Right");
+	enablenpc instance_npcname("Oscar#OGHC_Corridor");
+	mapannounce instance_mapname("1@gl_he"), "Oscar: Sigam pelo corredor. A origem da corrupcao pode reagir a sua presenca.", bc_map, "0xFFCE00";
+	end;
+}
+
+1@gl_he,150,93,0	script	#OGHC_CorridorRoot	HIDDEN_WARP_NPC,5,45,{
+	if (instance_id() < 1)
+		end;
+	if ('oghc_step != 3 || 'oghc_corridor_spawned)
+		end;
+	'oghc_corridor_spawned = 1;
+	'oghc_corridor_pending = 1;
+	addtimer 1000, instance_npcname("Controlador#OGHC") + "::OnCorridorRoot";
+	end;
+}
+
+1@gl_he,150,161,0	warp	Portal#OGHC_Center	1,1,1@gl_he,149,171
+
+1@gl_he,149,171,0	script	#OGHC_FinalAreaStart	HIDDEN_WARP_NPC,3,3,{
+	if (instance_id() < 1)
+		end;
+	if (!'oghc_portal3 || 'oghc_step != 3)
+		end;
+	end;
+}
+
+1@gl_he,150,156,3	script	Oscar#OGHC_Corridor	4_ED_OSCAR,{
+	.@n$ = "[Oscar]";
+	callfunc("F_OGHC_CheckInstance");
+
+	if ('oghc_step < 3) {
+		mes .@n$;
+		mes "Ainda precisamos purificar as areas laterais.";
+		close;
+	}
+
+	if ('oghc_guide_done) {
+		mes .@n$;
+		mes "Sigam em frente. A proxima area ja esta aberta.";
+		close;
+	}
+
+	if ('oghc_portal3) {
+		mes .@n$;
+		mes "O portal ja esta aberto. Sigam-me para o outro lado.";
+		close;
+	}
+
+	mes .@n$;
+	mes "Se me solicitar, criarei um portal que leva ao outro lado.";
+	next;
+	if (select("Aguarde um momento", "Crie um portal") == 1)
+		close;
+
+	mes .@n$;
+	mes "Certo, entao abrirei o portal agora.";
+	close2;
+	'oghc_guide_done = 0;
+	'oghc_guide_busy = 1;
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnOpenCenterPortal";
+	end;
+
+OnInstanceInit:
+	'oghc_guide_busy = 0;
+	'oghc_guide_done = 0;
+	movenpc instance_npcname(strnpcinfo(0)),150,156,3;
+	disablenpc instance_npcname(strnpcinfo(0));
+	end;
+
+OnOpenCenterPortal:
+	npctalk "Levarei apenas um instante.";
+	progressbar_npc "00FF00",5, instance_npcname(strnpcinfo(0));
+	specialeffect EF_PORTAL, AREA, instance_npcname(strnpcinfo(0));
+	setnpcdisplay instance_npcname(strnpcinfo(0)), 1713;
+	'oghc_portal3 = 1;
+	enablenpc instance_npcname("Portal#OGHC_Center");
+	npctalk "Sigam-me.";
+	sleep 3000;
+	unitwalk getnpcid(0), 150,161;
+	sleep 3500;
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnGuideBottomPortal";
+	end;
+
+OnGuideBottomPortal:
+	disablenpc instance_npcname(strnpcinfo(0));
+	enablenpc instance_npcname("Oscar#OGHC_CorridorTop");
+	donpcevent instance_npcname("Oscar#OGHC_CorridorTop") + "::OnGuideTopStart";
+	end;
+
+OnTopGuide:
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnGuideBottomPortal";
+	end;
+}
+
+1@gl_he,149,171,3	script	Oscar#OGHC_CorridorTop	1713,{
+	.@n$ = "[Oscar]";
+	callfunc("F_OGHC_CheckInstance");
+
+	if (!'oghc_guide_done) {
+		mes .@n$;
+		mes "Sigam-me ate o centro da distorcao.";
+		close;
+	}
+
+	if (!is_party_leader()) {
+		mes .@n$;
+		mes "Apenas o lider do grupo pode conduzir esta parte.";
+		close;
+	}
+
+	if ('oghc_boss_dead) {
+		mes .@n$;
+		mes "A corrupcao foi contida. Fale com Oscar para sair.";
+		close;
+	}
+
+	if ('oghc_boss_started) {
+		mes .@n$;
+		mes "A batalha ainda esta em andamento.";
+		close;
+	}
+
+	mes .@n$;
+	mes "O que esta a frente e a origem da contaminacao que permanece nesta dimensao.";
+	next;
+	mes .@n$;
+	mes "Por enquanto esta na forma de uma miragem, mas se eu redefinir com precisao as coordenadas dessa origem, ela aparecera diante de seus olhos.";
+	next;
+	mes .@n$;
+	mes "E melhor nao baixar a guarda. O poder da entidade de contaminacao dimensional esta alem da imaginacao.";
+	next;
+	mes .@n$;
+	mes "Se seu grupo estiver pronto, por favor me avise.";
+	next;
+	if (select("Ainda nao!", "Vamos comecar!") == 1)
+		close;
+
+	close2;
+	'oghc_boss_started = 1;
+	progressbar_npc "00FF00",10, instance_npcname(strnpcinfo(0));
+	donpcevent instance_npcname("Controlador#OGHC") + "::OnBoss";
+	end;
+
+OnInstanceInit:
+	movenpc instance_npcname(strnpcinfo(0)),149,171,3;
+	setnpcdisplay instance_npcname(strnpcinfo(0)), 1713;
+	disablenpc instance_npcname(strnpcinfo(0));
+	end;
+
+OnGuideTopStart:
+	movenpc instance_npcname(strnpcinfo(0)),149,171,3;
+	setnpcdisplay instance_npcname(strnpcinfo(0)), 1713;
+	enablenpc instance_npcname(strnpcinfo(0));
+	npctalk "E por aqui...";
+	sleep 3000;
+	'oghc_top_guide_arrived = 0;
+	'oghc_top_guide_stage = 0;
+	unitwalk getnpcid(0), 149,190, instance_npcname(strnpcinfo(0)) + "::OnGuideTopStep1";
+	sleep 7000;
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnGuideTopStep1";
+	end;
+
+OnGuideTopStep1:
+	if ('oghc_top_guide_stage > 0)
+		end;
+	'oghc_top_guide_stage = 1;
+	unitwalk getnpcid(0), 151,205, instance_npcname(strnpcinfo(0)) + "::OnGuideTopStep2";
+	sleep 7000;
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnGuideTopStep2";
+	end;
+
+OnGuideTopStep2:
+	if ('oghc_top_guide_stage > 1)
+		end;
+	'oghc_top_guide_stage = 2;
+	unitwalk getnpcid(0), 154,220, instance_npcname(strnpcinfo(0)) + "::OnGuideTopStep3";
+	sleep 7000;
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnGuideTopStep3";
+	end;
+
+OnGuideTopStep3:
+	if ('oghc_top_guide_stage > 2)
+		end;
+	'oghc_top_guide_stage = 3;
+	unitwalk getnpcid(0), 158,230, instance_npcname(strnpcinfo(0)) + "::OnGuideTopArrive";
+	sleep 7000;
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnGuideTopArrive";
+	end;
+
+OnGuideTopArrive:
+	if ('oghc_top_guide_arrived)
+		end;
+	'oghc_top_guide_arrived = 1;
+	setnpcdisplay instance_npcname(strnpcinfo(0)), 4_ED_OSCAR;
+	'oghc_guide_busy = 0;
+	'oghc_guide_done = 1;
+	mapannounce 'oghc_map$, "Oscar: A fonte da corrupcao esta logo adiante. Falem comigo quando estiverem prontos.", bc_map, "0xFFCE00";
+	end;
+}
+
+1@gl_he2,150,35,3	script	Oscar#OGHC_Boss	4_ED_OSCAR,{
+	.@n$ = "[Oscar]";
+	callfunc("F_OGHC_CheckInstance");
+
+	if (!is_party_leader()) {
+		mes .@n$;
+		mes "Apenas o lider do grupo pode conduzir esta parte.";
+		close;
+	}
+
+	if ('oghc_boss_dead) {
+		mes .@n$;
+		mes "O desafio foi concluido. O bau esta disponivel.";
+		close;
+	}
+
+	if ('oghc_boss_started) {
+		mes .@n$;
+		mes "A batalha ainda esta em andamento.";
+		close;
+	}
+
+	mes .@n$;
+	mes "A fonte desta corrupcao esta adiante.";
+	next;
+	if (select("Iniciar batalha", "Cancelar") == 2)
+		close;
+
+	close2;
+	'oghc_boss_started = 1;
+	donpcevent instance_npcname("Controlador#OGHC") + "::OnBoss";
+	end;
+}
+
+1@gl_he,158,236,3	script	Bau Temporal#OGHC	4_TREASURE_BOX,{
+	callfunc("F_OGHC_CheckInstance");
+
+	if (!'oghc_boss_dead)
+		end;
+
+	if (#OGHC_CHEST_INSTANCE == instance_id()) {
+		end;
+	}
+
+	#OGHC_CHEST_INSTANCE = instance_id();
+	callfunc("F_OGHC_DropReward", 'oghc_level);
+	disablenpc instance_npcname(strnpcinfo(0));
+	end;
+
+OnInstanceInit:
+	disablenpc instance_npcname(strnpcinfo(0));
+	end;
+}
+
+1@gl_he,162,236,3	script	Oscar#OGHC_Out	4_ED_OSCAR,{
+	callfunc("F_OGHC_CheckInstance");
+
+	mes "[Oscar]";
+	mes "Deseja sair da Glast Heim Challenge?";
+	next;
+	if (select("Vou sair", "Ficar") == 1) {
+		if (!'oghc_boss_dead) {
+			close2;
+			warp "SavePoint", 0, 0;
+			end;
+		}
+
+		if (#OGHC_FINISH_INSTANCE != instance_id()) {
+			.@finish = callfunc("F_InstanceFinishBase", "Glast Heim Modo Desafio", "#OldGlastHeimChallenge_STATUS", 40, 4, "", "", 1, 20, 110002, 3000, 3, 0, "Glast Heim Modo Desafio", ('oghc_finish_announced ? 0 : 1));
+			if (.@finish == -1) {
+				mes "[Oscar]";
+				mes "Voce esta carregando peso demais para receber as recompensas.";
+				close;
+			}
+
+			if (.@finish > 0) {
+				#OGHC_FINISH_INSTANCE = instance_id();
+				if (#OGHC_MAX_LEVEL < 'oghc_level + 1 && 'oghc_level < 10)
+					#OGHC_MAX_LEVEL = 'oghc_level + 1;
+				else if (#OGHC_MAX_LEVEL < 'oghc_level)
+					#OGHC_MAX_LEVEL = 'oghc_level;
+				'oghc_finish_announced = 1;
+			}
+		}
+
+		close2;
+		warp "SavePoint", 0, 0;
+		end;
+	}
+	close;
+
+OnInstanceInit:
+	disablenpc instance_npcname(strnpcinfo(0));
+	end;
+}
+
+1@gl_he,1,1,0	script	Controlador#OGHC	-1,{
+	end;
+
+OnInstanceInit:
+	'oghc_map$ = instance_mapname("1@gl_he");
+	'oghc_boss_map$ = instance_mapname("1@gl_he");
+	'oghc_started = 0;
+	'oghc_step = 0;
+	'oghc_portal1 = 0;
+	'oghc_portal2 = 0;
+	'oghc_portal3 = 0;
+	'oghc_corridor_spawned = 0;
+	'oghc_corridor_pending = 0;
+	'oghc_corridor_clear = 0;
+	'oghc_boss_started = 0;
+	'oghc_boss_dead = 0;
+	'oghc_finish_announced = 0;
+	disablenpc instance_npcname("Portal#OGHC_Left");
+	disablenpc instance_npcname("Portal#OGHC_Right");
+	disablenpc instance_npcname("Portal#OGHC_Center");
+	end;
+
+OnStart:
+	if ('oghc_level < 1)
+		'oghc_level = 1;
+	if ('oghc_level > 10)
+		'oghc_level = 10;
+	mapannounce 'oghc_map$, "Oscar: Precisamos purificar as areas a esquerda e a direita.", bc_map, "0xFFCE00";
+	mapannounce 'oghc_map$, "Glast Heim Challenge Nivel de Contaminacao " + 'oghc_level + " iniciada.", bc_map, "0xFFCE00";
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnWave1";
+	end;
+
+OnWave1:
+	'oghc_step = 1;
+	.@label$ = instance_npcname(strnpcinfo(0)) + "::OnWaveMobDead";
+	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 36, 23, 123, 162, "Raydric Amaldicoado", 20577, 25, .@label$, 'oghc_level);
+	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 36, 23, 123, 162, "Raydric Arqueiro Amaldicoado", 20578, 15, .@label$, 'oghc_level);
+	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 36, 23, 123, 162, "C. Branco Corrompido", 20574, 5, .@label$, 'oghc_level);
+	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 36, 23, 123, 162, "Khalitz Corrompida", 20576, 5, .@label$, 'oghc_level);
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnAnnounceMobCount";
+	end;
+
+OnWave2:
+	'oghc_step = 2;
+	.@label$ = instance_npcname(strnpcinfo(0)) + "::OnWaveMobDead";
+	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 175, 23, 264, 162, "Raydric Amaldicoado", 20577, 25, .@label$, 'oghc_level);
+	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 175, 23, 264, 162, "Raydric Arqueiro Amaldicoado", 20578, 15, .@label$, 'oghc_level);
+	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 175, 23, 264, 162, "C. Branco Corrompido", 20574, 5, .@label$, 'oghc_level);
+	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 175, 23, 264, 162, "Khalitz Corrompida", 20576, 5, .@label$, 'oghc_level);
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnAnnounceMobCount";
+	end;
+
+OnCorridorRoot:
+	'oghc_corridor_pending = 0;
+	if ('oghc_step != 3 || 'oghc_corridor_clear)
+		end;
+
+	.@chance = 'oghc_level * 10;
+	if (.@chance < 10)
+		.@chance = 10;
+	if (.@chance > 100)
+		.@chance = 100;
+
+	if (rand(100) >= .@chance) {
+		'oghc_corridor_clear = 1;
+		mapannounce 'oghc_map$, "Oscar: A corrupcao no corredor se dissipou. Sigam ate mim.", bc_map, "0xFFCE00";
+		end;
+	}
+
+	.@label$ = instance_npcname(strnpcinfo(0)) + "::OnWaveMobDead";
+	.@amount = 'oghc_level;
+	if (.@amount < 1)
+		.@amount = 1;
+	if (.@amount > 5)
+		.@amount = 5;
+	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 146, 87, 153, 123, "Origem Corrupcao", 20575, .@amount, .@label$, 'oghc_level + 2);
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnAnnounceMobCount";
+	end;
+
+OnWave4:
+	'oghc_step = 4;
+	end;
+
+OnAnnounceMobCount:
+	.@left = mobcount('oghc_map$, instance_npcname(strnpcinfo(0)) + "::OnWaveMobDead");
+	mapannounce 'oghc_map$, "Monstros Restantes -> " + .@left, bc_map, "0x33CC33";
+	end;
+
+OnWaveMobDead:
+	.@left = mobcount('oghc_map$, instance_npcname(strnpcinfo(0)) + "::OnWaveMobDead");
+	mapannounce 'oghc_map$, "Monstros Restantes -> " + .@left, bc_map, "0x33CC33";
+	if (.@left > 0)
+		end;
+
+	mapannounce 'oghc_map$, "Oscar: Os monstros desta area foram derrotados. O proximo portal esta seguro.", bc_map, "0xFFCE00";
+	switch('oghc_step) {
+	case 1:
+		'oghc_portal1 = 1;
+		enablenpc instance_npcname("Portal#OGHC_Left");
+		break;
+	case 2:
+		'oghc_portal2 = 1;
+		enablenpc instance_npcname("Portal#OGHC_Right");
+		break;
+	case 3:
+		'oghc_corridor_clear = 1;
+		mapannounce 'oghc_map$, "Oscar: Sigam ate o fim do corredor.", bc_map, "0xFFCE00";
+		break;
+	case 4:
+		instance_announce 0, "Oscar aguarda na sala final.", bc_map, "0xFFCE00";
+		break;
+	}
+	end;
+
+OnBoss:
+	instance_announce 0, "A batalha final comecara em instantes.", bc_map, "0xFFCE00";
+	.@label$ = instance_npcname(strnpcinfo(0)) + "::OnBossDead";
+	if ('oghc_level > 5 && rand(100) < 10)
+		monster 'oghc_boss_map$,158,240,"Espectro da Himmelmez",20572,1,.@label$;
+	else
+		monster 'oghc_boss_map$,158,240,"Fantasma de Amdarais",20573,1,.@label$;
+	disablenpc instance_npcname("Oscar#OGHC_CorridorTop");
+	callfunc("F_OGHC_ApplyMobLevel", $@mobid[0], 'oghc_level + 4);
+	sleep 5000;
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnBossThorns";
+	end;
+
+OnBossThorns:
+	if (!'oghc_boss_started || 'oghc_boss_dead)
+		end;
+	.@label$ = instance_npcname(strnpcinfo(0)) + "::OnThornDead";
+	setarray .@x[0], 144,153,162,171;
+	setarray .@y[0], 249,241,233,226;
+	for (.@iy = 0; .@iy < 4; ++.@iy) {
+		for (.@ix = 0; .@ix < 4; ++.@ix) {
+			monster 'oghc_boss_map$, .@x[.@ix], .@y[.@iy], "Espinhos Mutantes", 20581, 1, .@label$;
+			callfunc("F_OGHC_ApplyMobLevel", $@mobid[0], 1);
+		}
+	}
+	end;
+
+OnThornDead:
+	end;
+
+OnBossDead:
+	'oghc_boss_dead = 1;
+	killmonster 'oghc_boss_map$, instance_npcname(strnpcinfo(0)) + "::OnThornDead";
+	instance_announce 0, "A corrupcao foi contida. Abra o bau e fale com Oscar para sair.", bc_map, "0xFFCE00";
+	enablenpc instance_npcname("Bau Temporal#OGHC");
+	enablenpc instance_npcname("Oscar#OGHC_Out");
+	end;
+}
