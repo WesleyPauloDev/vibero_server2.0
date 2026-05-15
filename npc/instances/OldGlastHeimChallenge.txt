@@ -41,16 +41,29 @@ function	script	F_OGHC_ApplyMobLevel	{
 	.@hp_mul = 100 + ((.@lv - 1) * 45);
 	.@atk_mul = 100 + ((.@lv - 1) * 18);
 	.@def_mul = 100 + ((.@lv - 1) * 10);
+	.@stat_mul = 100 + ((.@lv - 1) * 35);
 
 	.@maxhp = (.@mob[UMOB_MAXHP] * .@hp_mul) / 100;
 	.@atkmin = (.@mob[UMOB_ATKMIN] * .@atk_mul) / 100;
 	.@atkmax = (.@mob[UMOB_ATKMAX] * .@atk_mul) / 100;
 	.@def = (.@mob[UMOB_DEF] * .@def_mul) / 100;
 	.@mdef = (.@mob[UMOB_MDEF] * .@def_mul) / 100;
+	.@str = (.@mob[UMOB_STR] * .@stat_mul) / 100;
+	.@agi = (.@mob[UMOB_AGI] * .@stat_mul) / 100;
+	.@vit = (.@mob[UMOB_VIT] * .@stat_mul) / 100;
+	.@int = (.@mob[UMOB_INT] * .@stat_mul) / 100;
+	.@dex = (.@mob[UMOB_DEX] * .@stat_mul) / 100;
+	.@luk = (.@mob[UMOB_LUK] * .@stat_mul) / 100;
 
 	if (.@maxhp < 1) .@maxhp = 1;
 	if (.@atkmin < 1) .@atkmin = 1;
 	if (.@atkmax < .@atkmin) .@atkmax = .@atkmin;
+	if (.@str < 1) .@str = 1;
+	if (.@agi < 1) .@agi = 1;
+	if (.@vit < 1) .@vit = 1;
+	if (.@int < 1) .@int = 1;
+	if (.@dex < 1) .@dex = 1;
+	if (.@luk < 1) .@luk = 1;
 
 	setunitdata .@gid, UMOB_MAXHP, .@maxhp;
 	setunitdata .@gid, UMOB_HP, .@maxhp;
@@ -58,6 +71,12 @@ function	script	F_OGHC_ApplyMobLevel	{
 	setunitdata .@gid, UMOB_ATKMAX, .@atkmax;
 	setunitdata .@gid, UMOB_DEF, .@def;
 	setunitdata .@gid, UMOB_MDEF, .@mdef;
+	setunitdata .@gid, UMOB_STR, .@str;
+	setunitdata .@gid, UMOB_AGI, .@agi;
+	setunitdata .@gid, UMOB_VIT, .@vit;
+	setunitdata .@gid, UMOB_INT, .@int;
+	setunitdata .@gid, UMOB_DEX, .@dex;
+	setunitdata .@gid, UMOB_LUK, .@luk;
 	return;
 }
 
@@ -359,13 +378,24 @@ function	script	F_OGHC_CheckInstance	{
 	'oghc_corridor_spawned = 0;
 	'oghc_corridor_pending = 0;
 	'oghc_corridor_clear = 0;
+	.@chance = 'oghc_level * 10;
+	if (.@chance < 10)
+		.@chance = 10;
+	if (.@chance > 100)
+		.@chance = 100;
+	'oghc_corridor_root_roll = (rand(100) < .@chance);
+	'oghc_corridor_root_amount = 'oghc_level;
+	if ('oghc_corridor_root_amount < 1)
+		'oghc_corridor_root_amount = 1;
+	if ('oghc_corridor_root_amount > 5)
+		'oghc_corridor_root_amount = 5;
 	disablenpc instance_npcname("Portal#OGHC_Right");
 	enablenpc instance_npcname("Oscar#OGHC_Corridor");
 	mapannounce instance_mapname("1@gl_he"), "Oscar: Sigam pelo corredor. A origem da corrupcao pode reagir a sua presenca.", bc_map, "0xFFCE00";
 	end;
 }
 
-1@gl_he,150,93,0	script	#OGHC_CorridorRoot	HIDDEN_WARP_NPC,5,45,{
+1@gl_he,150,110,0	script	#OGHC_CorridorRoot	HIDDEN_WARP_NPC,8,8,{
 	if (instance_id() < 1)
 		end;
 	if ('oghc_step != 3 || 'oghc_corridor_spawned)
@@ -600,11 +630,11 @@ OnGuideTopArrive:
 	if (!'oghc_boss_dead)
 		end;
 
-	if (#OGHC_CHEST_INSTANCE == instance_id()) {
+	if ('oghc_chest_opened) {
 		end;
 	}
 
-	#OGHC_CHEST_INSTANCE = instance_id();
+	'oghc_chest_opened = 1;
 	callfunc("F_OGHC_DropReward", 'oghc_level);
 	disablenpc instance_npcname(strnpcinfo(0));
 	end;
@@ -670,8 +700,11 @@ OnInstanceInit:
 	'oghc_corridor_spawned = 0;
 	'oghc_corridor_pending = 0;
 	'oghc_corridor_clear = 0;
+	'oghc_corridor_root_roll = 0;
+	'oghc_corridor_root_amount = 0;
 	'oghc_boss_started = 0;
 	'oghc_boss_dead = 0;
+	'oghc_chest_opened = 0;
 	'oghc_finish_announced = 0;
 	disablenpc instance_npcname("Portal#OGHC_Left");
 	disablenpc instance_npcname("Portal#OGHC_Right");
@@ -713,30 +746,26 @@ OnCorridorRoot:
 	if ('oghc_step != 3 || 'oghc_corridor_clear)
 		end;
 
-	.@chance = 'oghc_level * 10;
-	if (.@chance < 10)
-		.@chance = 10;
-	if (.@chance > 100)
-		.@chance = 100;
-
-	if (rand(100) >= .@chance) {
+	if (!'oghc_corridor_root_roll) {
 		'oghc_corridor_clear = 1;
 		mapannounce 'oghc_map$, "Oscar: A corrupcao no corredor se dissipou. Sigam ate mim.", bc_map, "0xFFCE00";
 		end;
 	}
 
-	.@label$ = instance_npcname(strnpcinfo(0)) + "::OnWaveMobDead";
-	.@amount = 'oghc_level;
+	.@label$ = instance_npcname(strnpcinfo(0)) + "::OnCorridorBonusDead";
+	.@amount = 'oghc_corridor_root_amount;
 	if (.@amount < 1)
 		.@amount = 1;
 	if (.@amount > 5)
 		.@amount = 5;
 	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 146, 87, 153, 123, "Origem Corrupcao", 20575, .@amount, .@label$, 'oghc_level + 2);
-	donpcevent instance_npcname(strnpcinfo(0)) + "::OnAnnounceMobCount";
 	end;
 
 OnWave4:
 	'oghc_step = 4;
+	end;
+
+OnCorridorBonusDead:
 	end;
 
 OnAnnounceMobCount:
@@ -803,6 +832,7 @@ OnThornDead:
 OnBossDead:
 	'oghc_boss_dead = 1;
 	killmonster 'oghc_boss_map$, instance_npcname(strnpcinfo(0)) + "::OnThornDead";
+	killmonster 'oghc_map$, instance_npcname(strnpcinfo(0)) + "::OnCorridorBonusDead";
 	instance_announce 0, "A corrupcao foi contida. Abra o bau e fale com Oscar para sair.", bc_map, "0xFFCE00";
 	enablenpc instance_npcname("Bau Temporal#OGHC");
 	enablenpc instance_npcname("Oscar#OGHC_Out");

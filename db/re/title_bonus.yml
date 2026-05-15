@@ -94,4 +94,8 @@ Body:
       bonus2 bResEff,Eff_Blind,10000;
       bonus2 bResEff,Eff_Bleeding,10000;
 
-      bonus2 bSkillCooldown, 2330, -100;
+      .@skill_cd_base = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 2);
+      .@skill_id = callfunc("F_ShadowSkillData", SHADOW_CLASS, SHADOW_SKILL, 0);
+      if (.@skill_id > 0 && .@skill_cd_base > 0) {
+        bonus2 bSkillCooldown, .@skill_id, -.@skill_cd_base;
+      }
