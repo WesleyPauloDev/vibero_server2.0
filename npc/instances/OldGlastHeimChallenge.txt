@@ -353,6 +353,8 @@ function	script	F_OGHC_CheckInstance	{
 	end;
 }
 
+1@gl_he,146,122,0	warp	Portal#OGHC_LeftActive	1,1,1@gl_he,125,124
+
 1@gl_he,134,82,0	warp	Portal#OGHC_Left	1,1,1@gl_he,174,102
 
 1@gl_he,174,102,0	script	#OGHC_RightStart	HIDDEN_WARP_NPC,3,3,{
@@ -365,6 +367,8 @@ function	script	F_OGHC_CheckInstance	{
 	donpcevent instance_npcname("Controlador#OGHC") + "::OnWave2";
 	end;
 }
+
+1@gl_he,153,101,0	warp	Portal#OGHC_RightActive	1,1,1@gl_he,174,102
 
 1@gl_he,166,102,0	warp	Portal#OGHC_Right	1,1,1@gl_he,149,47
 
@@ -706,7 +710,9 @@ OnInstanceInit:
 	'oghc_boss_dead = 0;
 	'oghc_chest_opened = 0;
 	'oghc_finish_announced = 0;
+	disablenpc instance_npcname("Portal#OGHC_LeftActive");
 	disablenpc instance_npcname("Portal#OGHC_Left");
+	disablenpc instance_npcname("Portal#OGHC_RightActive");
 	disablenpc instance_npcname("Portal#OGHC_Right");
 	disablenpc instance_npcname("Portal#OGHC_Center");
 	end;
@@ -723,6 +729,7 @@ OnStart:
 
 OnWave1:
 	'oghc_step = 1;
+	enablenpc instance_npcname("Portal#OGHC_LeftActive");
 	.@label$ = instance_npcname(strnpcinfo(0)) + "::OnWaveMobDead";
 	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 36, 23, 123, 162, "Raydric Amaldicoado", 20577, 25, .@label$, 'oghc_level);
 	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 36, 23, 123, 162, "Raydric Arqueiro Amaldicoado", 20578, 15, .@label$, 'oghc_level);
@@ -733,6 +740,7 @@ OnWave1:
 
 OnWave2:
 	'oghc_step = 2;
+	enablenpc instance_npcname("Portal#OGHC_RightActive");
 	.@label$ = instance_npcname(strnpcinfo(0)) + "::OnWaveMobDead";
 	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 175, 23, 264, 162, "Raydric Amaldicoado", 20577, 25, .@label$, 'oghc_level);
 	callfunc("F_OGHC_SpawnValidArea", 'oghc_map$, 175, 23, 264, 162, "Raydric Arqueiro Amaldicoado", 20578, 15, .@label$, 'oghc_level);
@@ -783,10 +791,12 @@ OnWaveMobDead:
 	switch('oghc_step) {
 	case 1:
 		'oghc_portal1 = 1;
+		disablenpc instance_npcname("Portal#OGHC_LeftActive");
 		enablenpc instance_npcname("Portal#OGHC_Left");
 		break;
 	case 2:
 		'oghc_portal2 = 1;
+		disablenpc instance_npcname("Portal#OGHC_RightActive");
 		enablenpc instance_npcname("Portal#OGHC_Right");
 		break;
 	case 3:
@@ -807,7 +817,6 @@ OnBoss:
 	else
 		monster 'oghc_boss_map$,158,240,"Fantasma de Amdarais",20573,1,.@label$;
 	disablenpc instance_npcname("Oscar#OGHC_CorridorTop");
-	callfunc("F_OGHC_ApplyMobLevel", $@mobid[0], 'oghc_level + 4);
 	sleep 5000;
 	donpcevent instance_npcname(strnpcinfo(0)) + "::OnBossThorns";
 	end;
