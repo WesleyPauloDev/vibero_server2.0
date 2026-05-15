@@ -114,6 +114,7 @@ OnInstanceInit:
 	'gna_current_mob_id = 0;
 	'gna_current_mob_hp = 0;
 	setarray 'gna_mob_pool[0],20856,20857,20858,20859,20860,20861,20862,20863,20864,20865,20866,20867,20868,20869,20870,20871;
+	setarray 'gna_round_reward[0],4,8,12,16,20,24,28,32,36,40;
 	end;
 
 OnStartRound:
@@ -197,16 +198,26 @@ OnTimer10000:
 
 OnTimer70000:
 	stopnpctimer;
-	killmonster 'gna_map$, instance_npcname(strnpcinfo(0)) + "::OnMobDied";
 	'gna_round_in_progress = 0;
+	killmonster 'gna_map$, instance_npcname(strnpcinfo(0)) + "::OnMobDied";
 	'gna_failed = 1;
 	instance_announce 0, "O tempo limite do round foi atingido.", bc_map, "0xFFCE00";
 	enablenpc instance_npcname("Dispositivo Dimensional#GNA");
 	end;
 
 OnMobDied:
+	if (!'gna_round_in_progress)
+		end;
+
 	stopnpctimer;
 	'gna_round_in_progress = 0;
+
+	.@reward = 'gna_round_reward['gna_round - 1];
+	if (.@reward > 0 && killerrid && attachrid(killerrid)) {
+		getitem 6671, .@reward;
+		dispbottom "[Geffen Night Arena] Voce recebeu " + .@reward + " Moedas do Torneio de Geffen.";
+		detachrid;
+	}
 
 	if ('gna_round >= 10) {
 		'gna_finished = 1;
