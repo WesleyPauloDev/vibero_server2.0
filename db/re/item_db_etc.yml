@@ -8272,7 +8272,8 @@ Body:
       BuyingStore: true
       DropEffect: CLIENT
     Script: |
-      if (BaseJob == Job_Priest && !isequipped(300372))
+      .@has_pray_giver = (getequipcardid(EQI_GARMENT,0) == 300272 || getequipcardid(EQI_GARMENT,1) == 300272 || getequipcardid(EQI_GARMENT,2) == 300272 || getequipcardid(EQI_GARMENT,3) == 300272);
+      if (BaseJob == Job_Priest && !.@has_pray_giver)
          bonus3 bAutoSpell,"CR_GRANDCROSS",5,20;
   - Id: 4395
     AegisName: Tha_Maero_Card
