@@ -190,6 +190,296 @@ function	script	F_OGHC_CheckInstance	{
 	return 0;
 }
 
+function	script	F_OGHC_ChallengeMenu	{
+	disable_items;
+
+L_Main:
+	mes "[Oscar]";
+	mes "Servicos da ^0055FFOld Glast Heim Challenge^000000.";
+	next;
+
+	switch (select("Hats temporais:Armas reais e guardioes:Encantar Circlet equipado:Aprimorar encantamento:Resetar encantamentos:Informacoes:Voltar")) {
+	case 1:
+		close2;
+		callshop "barter_ogh_challenge_hats",1;
+		end;
+
+	case 2:
+		close2;
+		callshop "barter_ogh_challenge_weapons",1;
+		end;
+
+	case 3:
+		goto L_Enchant;
+
+	case 4:
+		goto L_Upgrade;
+
+	case 5:
+		goto L_Reset;
+
+	case 6:
+		mes "[Oscar]";
+		mes "Equipe o Circlet Temporal no topo da cabeca.";
+		mes "O processo preenche os slots na ordem: ^0055FF4o slot^000000, ^0055FF3o slot^000000 e ^0055FF2o slot^000000.";
+		next;
+		mes "[Oscar]";
+		mes "Custos:";
+		mes "4o slot: ^0055FF10x " + getitemname(25867) + "^000000.";
+		mes "3o slot normal: ^0055FF20x " + getitemname(25867) + "^000000.";
+		mes "3o slot especial: ^0055FF2x " + getitemname(25865) + "^000000.";
+		mes "2o slot aleatorio: ^0055FF2x " + getitemname(25866) + "^000000.";
+		mes "2o slot escolhido: ^0055FF5.000.000 Zeny + 40x " + getitemname(25866) + "^000000.";
+		mes "Aprimoramento perfeito: ^0055FF5x o custo normal + 5.000.000z por nivel atual^000000.";
+		next;
+		goto L_Main;
+
+	default:
+		return;
+	}
+
+L_Enchant:
+	.@part = EQI_HEAD_TOP;
+	.@equip_id = getequipid(.@part);
+	if (.@equip_id < 19474 || .@equip_id > 19492) {
+		mes "[Oscar]";
+		mes "Equipe um Circlet Temporal no topo da cabeca.";
+		close;
+	}
+
+	setarray .@card[0], getequipcardid(.@part,0), getequipcardid(.@part,1), getequipcardid(.@part,2), getequipcardid(.@part,3);
+	.@refine = getequiprefinerycnt(.@part);
+	.@cost_item = 0;
+	.@cost_amount = 0;
+	.@cost_zeny = 0;
+	.@target_slot = 0;
+	.@perfect = 0;
+
+	if (!.@card[3]) {
+		.@target_slot = 3;
+		.@cost_item = 25867;
+		.@cost_amount = 10;
+		setarray .@enchant[0],4700,4701,4702,4703,4710,4711,4712,4713,4720,4721,4722,4723,4730,4731,4732,4733,4740,4741,4742,4743,4750,4751,4752,4753;
+	} else if (!.@card[2]) {
+		mes "[Oscar]";
+		mes "O 4o slot ja esta encantado com ^0055FF" + getitemname(.@card[3]) + "^000000.";
+		mes "Qual encantamento deseja tentar no 3o slot?";
+		next;
+		.@mode = select("Normal - 20 Fragmentos:Especial - 2 Gemas:Cancelar");
+		if (.@mode == 3)
+			close;
+
+		.@target_slot = 2;
+		if (.@mode == 1) {
+			.@cost_item = 25867;
+			.@cost_amount = 20;
+			setarray .@enchant[0],4700,4701,4702,4703,4710,4711,4712,4713,4720,4721,4722,4723,4730,4731,4732,4733,4740,4741,4742,4743,4750,4751,4752,4753;
+		} else {
+			.@cost_item = 25865;
+			.@cost_amount = 2;
+			setarray .@enchant[0],29672,29673,29674,29675,29676,29677,29678,29679,29680,29681,29682,29683,29684,29685,29686,29687,29688,29689;
+		}
+	} else if (!.@card[1]) {
+		mes "[Oscar]";
+		mes "O 2o slot pode receber um encantamento avancado.";
+		next;
+		.@mode = select("Aleatorio - 2 Temporal Spell:Escolher - 5.000.000z + 40 Temporal Spell:Cancelar");
+		if (.@mode == 3)
+			close;
+
+		.@target_slot = 1;
+		.@cost_item = 25866;
+		if (.@mode == 1) {
+			.@cost_amount = 2;
+			setarray .@enchant[0],4818,4817,4816,4843,4832,4833,4834,4835,4869,4872,4873,4881,4815,4814,4813,4812,29706,29061,29111,29101,29091,29071,29081;
+		} else {
+			.@perfect = 1;
+			.@cost_amount = 40;
+			.@cost_zeny = 5000000;
+			setarray .@enchant[0],4818,4817,4816,4843,4832,4833,4834,4835,4869,4872,4873,4881,4815,4814,4813,4812,29706,29061,29111,29101,29091,29071,29081;
+			.@menu$ = "";
+			for (.@i = 0; .@i < getarraysize(.@enchant); ++.@i)
+				.@menu$ += getitemname(.@enchant[.@i]) + ":";
+			.@pick = select(.@menu$) - 1;
+			.@chosen_enchant = .@enchant[.@pick];
+		}
+	} else {
+		mes "[Oscar]";
+		mes "Este Circlet ja possui os 3 encantamentos.";
+		mes "Use a opcao de aprimoramento para evoluir encantamentos especiais.";
+		close;
+	}
+
+	if (!.@perfect)
+		.@chosen_enchant = .@enchant[rand(getarraysize(.@enchant))];
+
+	mes "[Oscar]";
+	mes "Vou encantar o ^0055FF" + getequipname(.@part) + "^000000.";
+	mes "Custo: ^0055FF" + .@cost_amount + "x " + getitemname(.@cost_item) + "^000000.";
+	if (.@cost_zeny)
+		mes "Zeny: ^0055FF5.000.000^000000.";
+	next;
+	if (select("Confirmar:Cancelar") == 2)
+		close;
+
+	if (countitem(.@cost_item) < .@cost_amount) {
+		mes "[Oscar]";
+		mes "Voce nao possui material suficiente.";
+		close;
+	}
+	if (Zeny < .@cost_zeny) {
+		mes "[Oscar]";
+		mes "Voce nao possui Zeny suficiente.";
+		close;
+	}
+
+	if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@card[0], .@card[1], .@card[2], .@card[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine))
+		close;
+
+	delitem .@cost_item, .@cost_amount;
+	Zeny -= .@cost_zeny;
+	progressbar "ffff00",2;
+	setitemcard(.@part, .@target_slot, .@chosen_enchant);
+	specialeffect2 EF_ENHANCE;
+
+	mes "[Oscar]";
+	mes "O Circlet recebeu ^0055FF" + getitemname(.@chosen_enchant) + "^000000.";
+	close;
+
+L_Upgrade:
+	.@part = EQI_HEAD_TOP;
+	.@equip_id = getequipid(.@part);
+	if (.@equip_id < 19474 || .@equip_id > 19492) {
+		mes "[Oscar]";
+		mes "Equipe um Circlet Temporal no topo da cabeca.";
+		close;
+	}
+
+	setarray .@card[0], getequipcardid(.@part,0), getequipcardid(.@part,1), getequipcardid(.@part,2), getequipcardid(.@part,3);
+	.@refine = getequiprefinerycnt(.@part);
+	setarray .@base[0],29706,29061,29111,29101,29091,29071,29081;
+	.@base_id = 0;
+	for (.@i = 0; .@i < getarraysize(.@base); ++.@i) {
+		if (.@card[1] >= .@base[.@i] && .@card[1] <= .@base[.@i] + 9) {
+			.@base_id = .@base[.@i];
+			break;
+		}
+	}
+	if (!.@base_id) {
+		mes "[Oscar]";
+		mes "O 2o slot deste Circlet nao possui um encantamento especial aprimoravel.";
+		close;
+	}
+
+	.@level = .@card[1] - .@base_id + 1;
+	if (.@level >= 10) {
+		mes "[Oscar]";
+		mes "Este encantamento ja esta no nivel maximo.";
+		close;
+	}
+
+	setarray .@cost[1],4,6,8,10,12,16,20,28,40;
+	setarray .@chance[1],80,70,50,20,20,20,20,20,20;
+	.@perfect_cost = .@cost[.@level] * 5;
+	.@perfect_zeny = .@level * 5000000;
+	mes "[Oscar]";
+	mes "Encantamento atual: ^0055FF" + getitemname(.@card[1]) + "^000000.";
+	mes "Tentativa para nivel " + (.@level + 1) + ".";
+	mes "Normal: ^0055FF" + .@cost[.@level] + "x " + getitemname(25866) + "^000000, chance " + .@chance[.@level] + "%.";
+	mes "Perfeito: ^0055FF" + .@perfect_cost + "x " + getitemname(25866) + " + " + .@perfect_zeny + " Zeny^000000, chance 100%.";
+	mes "Na tentativa normal, falha reduz 1 nivel se o encantamento atual for nivel 2 ou maior.";
+	next;
+	.@mode = select("Aprimorar normal:Aprimorar perfeito:Cancelar");
+	if (.@mode == 3)
+		close;
+
+	.@need_spell = (.@mode == 2) ? .@perfect_cost : .@cost[.@level];
+	.@need_zeny = (.@mode == 2) ? .@perfect_zeny : 0;
+
+	if (countitem(25866) < .@need_spell) {
+		mes "[Oscar]";
+		mes "Voce nao possui " + getitemname(25866) + " suficiente.";
+		close;
+	}
+	if (Zeny < .@need_zeny) {
+		mes "[Oscar]";
+		mes "Voce nao possui Zeny suficiente.";
+		close;
+	}
+
+	if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@card[0], .@card[1], .@card[2], .@card[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine))
+		close;
+
+	delitem 25866, .@need_spell;
+	Zeny -= .@need_zeny;
+	progressbar "ffff00",2;
+	if (.@mode == 2 || rand(100) < .@chance[.@level]) {
+		setitemcard(.@part, 1, .@card[1] + 1);
+		specialeffect2 EF_ENHANCE;
+		mes "[Oscar]";
+		if (.@mode == 2)
+			mes "Aprimoramento perfeito concluido.";
+		else
+			mes "Sucesso.";
+		mes "O encantamento evoluiu para ^0055FF" + getitemname(.@card[1] + 1) + "^000000.";
+	} else {
+		if (.@level > 1) {
+			setitemcard(.@part, 1, .@card[1] - 1);
+			mes "[Oscar]";
+			mes "A tentativa falhou. O encantamento voltou para ^FF5555" + getitemname(.@card[1] - 1) + "^000000.";
+		} else {
+			mes "[Oscar]";
+			mes "A tentativa falhou. O encantamento permaneceu no nivel 1.";
+		}
+	}
+	close;
+
+L_Reset:
+	.@part = EQI_HEAD_TOP;
+	.@equip_id = getequipid(.@part);
+	if (.@equip_id < 19474 || .@equip_id > 19492) {
+		mes "[Oscar]";
+		mes "Equipe um Circlet Temporal no topo da cabeca.";
+		close;
+	}
+
+	setarray .@card[0], getequipcardid(.@part,0), getequipcardid(.@part,1), getequipcardid(.@part,2), getequipcardid(.@part,3);
+	.@refine = getequiprefinerycnt(.@part);
+	if (!.@card[1] && !.@card[2] && !.@card[3]) {
+		mes "[Oscar]";
+		mes "Este Circlet nao possui encantamentos para resetar.";
+		close;
+	}
+
+	mes "[Oscar]";
+	mes "Posso remover os 3 encantamentos do Circlet equipado.";
+	mes "A carta real do item sera preservada.";
+	mes "Custo: ^0055FF2x " + getitemname(6909) + "^000000.";
+	next;
+	if (select("Confirmar reset:Cancelar") == 2)
+		close;
+
+	if (countitem(6909) < 2) {
+		mes "[Oscar]";
+		mes "Voce nao possui " + getitemname(6909) + " suficiente.";
+		close;
+	}
+
+	if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@card[0], .@card[1], .@card[2], .@card[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine))
+		close;
+
+	delitem 6909,2;
+	progressbar "ff8080",2;
+	setitemcard(.@part,1,0);
+	setitemcard(.@part,2,0);
+	setitemcard(.@part,3,0);
+	specialeffect2 EF_REPAIRWEAPON;
+
+	mes "[Oscar]";
+	mes "Os encantamentos foram removidos.";
+	close;
+}
+
 -	script	OGHC_Instance#Custom	4_ED_OSCAR,{
 	OnStartInstance:
 		.@db_name$ = "Old Glast Heim (Challenge Mode)";

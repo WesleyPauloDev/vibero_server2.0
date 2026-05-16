@@ -8,7 +8,7 @@
 //= rAthena Project
 //===== Descrição: ==========================================
 //= Devil Square, baseado no evento do MU Online.
-//= Derrote três ondas de monstros para ganhar tesouros.
+//= Derrote cinco ondas de monstros para ganhar tesouros.
 //============================================================
 
 prontera,147,154,7	script	Guardião do Devil Square#1	406,{
@@ -66,7 +66,7 @@ prontera,147,154,7	script	Guardião do Devil Square#1	406,{
 
 	case 2:
 		mes "[Guardião do Devil Square]";
-		mes "Lá dentro, você enfrentará 3 ondas de monstros.";
+		mes "Lá dentro, você enfrentará 5 ondas de monstros.";
 		mes "A cada rodada, os inimigos ficam mais fortes.";
 		next;
 		mes "[Guardião do Devil Square]";
@@ -144,12 +144,12 @@ OnClock1800:
 	.round = 1;	
 
 	areamonster "ordeal_1-1",183,182,246,244,"[DS] SOLDADO ESQUELETO",1028,10,strnpcinfo(0)+"::OnDevilDead";
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] ARQUEIRO ORC",1189,10,strnpcinfo(0)+"::OnDevilDead";
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] SANDMAN",1165,10,strnpcinfo(0)+"::OnDevilDead";
 	areamonster "ordeal_1-1",183,182,246,244,"[DS] ARQUEIRO ESQUELETO",1016,10,strnpcinfo(0)+"::OnDevilDead";
 	areamonster "ordeal_1-1",183,182,246,244,"[DS] MINOROUS",1149,10,strnpcinfo(0)+"::OnDevilDead";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] ARQUEIRO ORC",1189,10,strnpcinfo(0)+"::OnDevilDead";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] SANDMAN",1165,10,strnpcinfo(0)+"::OnDevilDead";
 	areamonster "ordeal_1-1",183,182,246,244,"[DS] REQUIEM",1164,10,strnpcinfo(0)+"::OnDevilDead";
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] MOONLIGHT FLOWER",1150,1,strnpcinfo(0)+"::OnDevilDead";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] ORK HERO",1087,1,strnpcinfo(0)+"::OnDevilDead";
 	areamonster "ordeal_1-1",183,182,246,244,"[DS] MISTRESS",1059,1,strnpcinfo(0)+"::OnDevilDead";
 
 	end;
@@ -169,14 +169,14 @@ OnDevil2:
 	.round = 2;
 	.mob = 62;
 
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] ALARM",1193,10,strnpcinfo(0)+"::OnDevilDead2";
 	areamonster "ordeal_1-1",183,182,246,244,"[DS] HIGH ORC",1213,10,strnpcinfo(0)+"::OnDevilDead2";
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] INJUSTICE",1257,10,strnpcinfo(0)+"::OnDevilDead2";
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] WRAITH",1192,10,strnpcinfo(0)+"::OnDevilDead2";
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] GÁRGULA",1253,10,strnpcinfo(0)+"::OnDevilDead2";
 	areamonster "ordeal_1-1",183,182,246,244,"[DS] MIMIC",1191,10,strnpcinfo(0)+"::OnDevilDead2";
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] DARK LORD",1272,1,strnpcinfo(0)+"::OnDevilDead2";
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] ORK HERO",1087,1,strnpcinfo(0)+"::OnDevilDead2";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] ALARM",1193,10,strnpcinfo(0)+"::OnDevilDead2";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] WRAITH",1192,10,strnpcinfo(0)+"::OnDevilDead2";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] JOKER",1131,10,strnpcinfo(0)+"::OnDevilDead2";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] DEVIRUCHI",1109,10,strnpcinfo(0)+"::OnDevilDead2";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] MOONLIGHT FLOWER",1150,1,strnpcinfo(0)+"::OnDevilDead2";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] BAPHOMET",1039,1,strnpcinfo(0)+"::OnDevilDead2";
 
 	end;
 
@@ -185,7 +185,7 @@ OnDevilDead2:
 	if (.mob > 0)
 		announce "Devil Square: Restam "+ .mob +" monstros na rodada 2.", bc_map;
 	else if (.mob <= 0) {
-		announce "Devil Square está entrando na rodada final...", bc_map,"0xFF0000";
+		announce "Devil Square está entrando na rodada 3...", bc_map,"0xFF0000";
 		sleep 5000;
 		goto OnDevil3;
 	}
@@ -193,29 +193,80 @@ OnDevilDead2:
 
 OnDevil3:
 	.round = 3;
-	.mob = 42;
+	.mob = 62;
 
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] DEVIRUCHI",1109,10,strnpcinfo(0)+"::OnDevilDead3";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] INJUSTICE",1257,10,strnpcinfo(0)+"::OnDevilDead3";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] GÁRGULA",1253,10,strnpcinfo(0)+"::OnDevilDead3";
 	areamonster "ordeal_1-1",183,182,246,244,"[DS] ANOLIAN",1206,10,strnpcinfo(0)+"::OnDevilDead3";
 	areamonster "ordeal_1-1",183,182,246,244,"[DS] WANDERER",1208,10,strnpcinfo(0)+"::OnDevilDead3";
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] JOKER",1131,10,strnpcinfo(0)+"::OnDevilDead3";
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] BAPHOMET",1039,1,strnpcinfo(0)+"::OnDevilDead3";
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] VALKYRIE RANDGRIS",1751,1,strnpcinfo(0)+"::OnDevilDead3";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] LUCIOLA VESPA",2160,10,strnpcinfo(0)+"::OnDevilDead3";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] MIMING",2137,10,strnpcinfo(0)+"::OnDevilDead3";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] DARK LORD",1272,1,strnpcinfo(0)+"::OnDevilDead3";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] GIOIA",2251,1,strnpcinfo(0)+"::OnDevilDead3";
 	end;
 
 OnDevilDead3:
 	.mob--;
 	if (.mob > 0)
-		announce "Devil Square: Restam "+ .mob +" monstros na rodada final.", bc_map;
+		announce "Devil Square: Restam "+ .mob +" monstros na rodada 3.", bc_map;
 	else if (.mob <= 0) {
-		announce "[Devil Square] Todos os monstros foram derrotados!", bc_all,"0xFF0000";
-		
-		sleep 3000;
+		announce "Devil Square está entrando na rodada 4...", bc_map,"0xFF0000";
+		sleep 5000;
 		goto OnDevil4;
 	}
 	end;
 
 OnDevil4:
+	.round = 4;
+	.mob = 62;
+
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] SACERDOTE SOMBRIO",2283,10,strnpcinfo(0)+"::OnDevilDead4";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] LITTLE FATUM",2136,10,strnpcinfo(0)+"::OnDevilDead4";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] ANGRA MANTIS",2133,10,strnpcinfo(0)+"::OnDevilDead4";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] POM SPIDER",2132,10,strnpcinfo(0)+"::OnDevilDead4";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] MOLDURA SOMBRIA",2282,10,strnpcinfo(0)+"::OnDevilDead4";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] SOMBRA SOMBRIA",2281,10,strnpcinfo(0)+"::OnDevilDead4";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] BEELZEBUB",1874,1,strnpcinfo(0)+"::OnDevilDead4";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] BISPO CAIDO",1871,1,strnpcinfo(0)+"::OnDevilDead4";
+	end;
+
+OnDevilDead4:
+	.mob--;
+	if (.mob > 0)
+		announce "Devil Square: Restam "+ .mob +" monstros na rodada 4.", bc_map;
+	else if (.mob <= 0) {
+		announce "Devil Square está entrando na rodada final...", bc_map,"0xFF0000";
+		sleep 5000;
+		goto OnDevil5;
+	}
+	end;
+
+OnDevil5:
+	.round = 5;
+	.mob = 62;
+
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] TATACHO",1986,10,strnpcinfo(0)+"::OnDevilDead5";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] CENTOPEIA",1987,10,strnpcinfo(0)+"::OnDevilDead5";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] DOLOMEDES",2092,10,strnpcinfo(0)+"::OnDevilDead5";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] GUARDIAO DO TEMPO",2918,10,strnpcinfo(0)+"::OnDevilDead5";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] NECROMANTE",1870,10,strnpcinfo(0)+"::OnDevilDead5";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] PLASMA ESPECTRAL",20608,10,strnpcinfo(0)+"::OnDevilDead5";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] SENHOR DO TEMPO",3074,1,strnpcinfo(0)+"::OnDevilDead5";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] VALKYRIE RANDGRIS",1751,1,strnpcinfo(0)+"::OnDevilDead5";
+	end;
+
+OnDevilDead5:
+	.mob--;
+	if (.mob > 0)
+		announce "Devil Square: Restam "+ .mob +" monstros na rodada final.", bc_map;
+	else if (.mob <= 0) {
+		announce "[Devil Square] Todos os monstros foram derrotados!", bc_all,"0xFF0000";
+		sleep 3000;
+		goto OnDevilClear;
+	}
+	end;
+
+OnDevilClear:
 
 	enablenpc "Devil Square Reward Box";
 	killmonsterall "ordeal_1-1";
@@ -243,13 +294,13 @@ ordeal_1-1,246,245,3	script	Devil Square Reward Box	10404,{
 	mes "[Bau do Tesouro do Devil Square]";
 	mes "Voce abriu o Bau do Tesouro e recebeu uma recompensa!";
 
-	// Premio garantido: 20 Moedas de Instancia
-	getitem 9608,20;
+	// Premio garantido: 50 Moedas de Instancia
+	getitem 9608,50;
 	callfunc("F_DiaryRefreshDaily");
 	#evento = 2; 
 
-	// Premio extra: 20% de chance
-	if (rand(100) < 20) {
+	// Premios extras garantidos: 3 itens sorteados
+	for (.@i = 0; .@i < 3; .@i++) {
 		switch (rand(1,5)) {
 		case 1:
 			// Manual de Combate
@@ -273,7 +324,6 @@ ordeal_1-1,246,245,3	script	Devil Square Reward Box	10404,{
 			break;
 		}
 	}
-
 	close2;
 	warp "SavePoint",0,0;
 	end;
