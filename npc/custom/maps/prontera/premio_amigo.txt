@@ -9,7 +9,6 @@
 			mes "^0055FF10x Super Pocao Media de Vida^000000";
 			mes "^0055FF10x Macaroons Sortidos^000000";
 			mes "^0055FF10x Taça da Felicidade^000000";
-			mes "^0055FF10x Amuleto de Ziegfried^000000";
 			mes "^0055FF4x Diario de Aventuras^000000";
 			next;
 			mes "Ao informar o nome de quem te indicou,";
@@ -40,7 +39,7 @@
 		mes "Digite o nick de quem te indicou:";
 		input .@friend$;
 
-		query_sql("SELECT char_id, account_id FROM `char` WHERE name = '"+escape_sql(.@friend$)+"'", .@friend_id, .@friend_aid);
+		query_sql("SELECT char_id, account_id, name FROM `char` WHERE name = '"+escape_sql(.@friend$)+"'", .@friend_id, .@friend_aid, .@friend_name$);
 		if (!getarraysize(.@friend_id)) {
 			mes "Nick não encontrado. Deseja tentar novamente?";
 			if (select("Tentar novamente","Cancelar") == 1)
@@ -62,24 +61,32 @@
 			break;
 		}
 
+		setarray .@reward_item_id[0], 12210, 22818, 12223, 12224, 14545;
+		setarray .@small_reward_amount[0], 1, 1, 1, 1, 1;
+		if (!checkweight2(.@reward_item_id, .@small_reward_amount)) {
+			mes "Você precisa liberar espaço ou peso no inventário antes de receber seu prêmio.";
+			close;
+		}
+
 		// Registra quem indicou para bloquear novas alterações nesta conta.
 		#friend_ref_set = 1;
-		#friend_ref_name$ = .@friend$;
+		#friend_ref_name$ = .@friend_name$[0];
 		#friend_ref_time = gettimetick(2);
+
+		// Premia imediatamente quem foi indicado com 1 unidade de cada item.
+		for (.@i = 0; .@i < getarraysize(.@reward_item_id); .@i++)
+			getitem .@reward_item_id[.@i], .@small_reward_amount[.@i];
+
+		// Premia quem indicou com o pacote maior via Rodex.
+		setarray .@mail_item_id[0], 12210, 22818, 12223, 12224, 14545;
+		setarray .@mail_item_amount[0], 10, 10, 10, 10, 4;
+		mail(.@friend_id[0], "Evento do Amigo", "Indicação de Amigo", "O jogador "+strcharinfo(0)+" informou seu nome como indicador. Este é o seu prêmio.", 0, .@mail_item_id, .@mail_item_amount);
 
 		next;
 		mes "[Prêmio do Amigo]";
 		mes "Nick encontrado! Sua indicação foi registrada.";
-
-		// Premia quem indicou com o pacote maior.
-		setarray .@mail_item_id[0], 12210, 22818, 12223, 12224, 7621, 14545;
-		setarray .@mail_item_amount[0], 10, 10, 10, 10, 10, 4;
-		mail(.@friend_id[0], "Evento do Amigo", "Indicação de Amigo", "Você indicou "+strcharinfo(0)+" e recebeu seu prêmio! Parabens!", 0, .@mail_item_id, .@mail_item_amount);
-
-		// Premia quem foi indicado com 1 unidade de cada item.
-		setarray .@mail_item_amount[0], 1, 1, 1, 1, 1, 1;
-		mail(getcharid(0), "Evento do Amigo", "Indicação Registrada", "Sua indicação foi registrada com sucesso! Aqui está seu prêmio.", 0, .@mail_item_id, .@mail_item_amount);
-		mes "Os prêmios foram enviados para você e para seu amigo!";
+		mes "Você recebeu seu prêmio agora.";
+		mes "Seu amigo receberá o prêmio maior pelo Rodex.";
 		break;
 	}
 	close;

@@ -243,7 +243,31 @@ function	Job_Options	{
 			case Job_Novice_High:
 				// Job change after rebirth
 				if( .LastJob && lastJob ) {
-					.@rebirth_job = roclass((eaclass(lastJob)&EAJ_BASEMASK)|EAJL_UPPER);
+					.@last_eac = eaclass(lastJob);
+					.@last_base_eac = .@last_eac&(~EAJL_BABY);
+					.@rebirth_job = -1;
+
+					if( .@last_base_eac == EAJ_TAEKWON ||
+						.@last_base_eac == EAJ_STAR_GLADIATOR ||
+						.@last_base_eac == EAJ_SOUL_LINKER ||
+						.@last_base_eac == EAJ_STAR_EMPEROR ||
+						.@last_base_eac == EAJ_SOUL_REAPER )
+						.@rebirth_job = Job_Taekwon;
+					else if( .@last_base_eac == EAJ_NINJA ||
+							 .@last_base_eac == EAJ_KAGEROUOBORO )
+						.@rebirth_job = Job_Ninja;
+					else if( .@last_base_eac == EAJ_GUNSLINGER ||
+							 .@last_base_eac == EAJ_REBELLION )
+						.@rebirth_job = Job_Gunslinger;
+					else if( ( .@last_eac&EAJ_UPPERMASK ) == EAJ_SUPER_NOVICE ||
+							 .@last_base_eac == EAJ_SUPER_NOVICE_E )
+						.@rebirth_job = Job_Super_Novice;
+					else if( .@last_base_eac == EAJ_SUMMONER ||
+							 .@last_base_eac == EAJ_SPIRIT_HANDLER )
+						.@rebirth_job = Job_Summoner;
+					else
+						.@rebirth_job = roclass((.@last_eac&EAJ_BASEMASK)|EAJL_UPPER);
+
 					if (.@rebirth_job > 0)
 						Job_Options(.@job_opt, .@rebirth_job);
 					else
@@ -280,8 +304,8 @@ function	Job_Options	{
 		.@class1 = roclass(.@eac|EAJL_2_1); // 2-1
 		.@class2 = roclass(.@eac|EAJL_2_2); // 2-2
 		// dispbottom "Debug: Classes: class1 ("+.@class1+"), class2 ("+.@class2+")";
-		if(.LastJob && lastJob && (.@eac&EAJL_UPPER)) {
-			// Player is rebirth Cls and linear class changes are enforced
+		if(.LastJob && lastJob && ((.@eac&EAJL_UPPER) || .@eac == EAJ_TAEKWON)) {
+			// Player is rebirth/expanded Cls and linear class changes are enforced
 			.@last_eac = eaclass(lastJob);
 			.@linear_job = -1;
 

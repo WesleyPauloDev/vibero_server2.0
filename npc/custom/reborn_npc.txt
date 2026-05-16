@@ -5,6 +5,11 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 	// ===== Configurações =====
 	.@req_base = 175;        // Nível base mínimo
 	.@req_job  = 70;        // Nível de classe mínimo
+	.@eac = eaclass();
+	.@base_eac = .@eac&(~EAJL_BABY);
+	.@is_doram = (.@base_eac == EAJ_SUMMONER || .@base_eac == EAJ_SPIRIT_HANDLER);
+	if (.@is_doram)
+		.@req_job = 60;
 	.@exp_penalty = 10;  // -10% EXP
     .@drop_bonus = 20;   // +20% DROP
 	
@@ -38,10 +43,15 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 
 		// ===== Aplicar renascimento =====
 		// Mesmo fluxo do Job Master:
-		// salva a linha de classe base para manter progressão no Job Master.
-		lastJob = BaseJob;
-		jobchange Job_Novice_High;
+		// salva a classe atual para manter a progressão linear no Job Master.
+		lastJob = Class;
+		if (.@is_doram)
+			jobchange Job_Summoner;
+		else
+			jobchange Job_Novice_High;
 		resetlvl(1);
+		if (.@is_doram)
+			StatusPoint = 100;
 		setpcblock(0,1); // evita movimentos durante ajustes
 
 		// Guarda em variáveis de personagem		
