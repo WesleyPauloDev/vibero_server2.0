@@ -16,8 +16,18 @@ OnAtcommand:
 		// Lider ja criou a instancia c entrar
 		if (getcharid(1) && getpartyleader(getcharid(1), 2) == getcharid(0)) {
 			#INSTANCERID = getcharid(3);
+			.@live_name$ = instance_live_info(ILI_NAME, .@iid);
+			if (.@live_name$ == "Edda do Laboratorio") {
+				#INSTANCENAME$ = "EddaBiolabs";
+				doevent "EddaBiolabs_Instance#Custom::OnStartInstance";
+				end;
+			}
+			if (.@live_name$ == "Poring Village") {
+				#INSTANCENAME$ = "PoringVillage";
+				doevent "PoringVillage_Instance#Custom::OnStartInstance";
+				end;
+			}
 			if (#INSTANCENAME$ == "Wolves") {
-				.@live_name$ = instance_live_info(ILI_NAME, .@iid);
 				if (.@live_name$ == "Wolves Gathering Place") {
 					#INSTANCENAME$ = "WolvesGathering";
 					callfunc("F_InstanceEntry", "Wolves Gathering Place", "Suad", "wolves_gathering", "WolvesGathering", 170, "Encontro dos Lobos");
@@ -248,8 +258,7 @@ OnAtcommand:
 		15,16,17,18,19,20,21,22,23,24,
 		25,51,26,27,28,29,30,31,32,
 		33,34,47,53,35,36,37,38,39,
-		40,
-		41,42,44,45,55;
+		40,41,42,44,45,55;
 	.@s = .@case_map[.@s];
 
 	switch(.@s) {

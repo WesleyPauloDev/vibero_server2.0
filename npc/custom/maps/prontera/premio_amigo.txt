@@ -1,7 +1,7 @@
 -	script	Premio do Amigo#base	-1,{
 
 	mes "[Prêmio do Amigo]";
-	switch(select("Quero saber sobre o prêmio!","Um amigo me indicou!","Sair")) {
+	switch(select("Quero saber sobre o prêmio!","Um amigo me indicou!","Resgatar prêmio por indicação","Sair")) {
 		case 1:
 			mes "Uma caixa especial recebida ao indicar um amigo.";
 			mes "Contém os seguintes itens para quem indicou:";
@@ -12,11 +12,14 @@
 			mes "^0055FF4x Diario de Aventuras^000000";
 			next;
 			mes "Ao informar o nome de quem te indicou,";
-			mes "o amigo indicado recebe esse pacote.";
-			mes "Você também recebe ^0055FF1 unidade de cada item^000000.";
+			mes "você recebe ^0055FF1 unidade de cada item^000000.";
+			mes "Quem te indicou poderá resgatar o pacote maior neste NPC.";
 			close;
 		case 2:
 			break;
+		case 3:
+			callsub S_ClaimReferralReward;
+			close;
 		default:
 			close;
 	}
@@ -73,21 +76,53 @@
 		#friend_ref_name$ = .@friend_name$[0];
 		#friend_ref_time = gettimetick(2);
 
+		// Deixa o prêmio maior pendente para o indicador resgatar no NPC.
+		.@pending_var$ = "$friend_ref_pending_"+.@friend_id[0];
+		.@last_ref_var$ = "$friend_ref_last_"+.@friend_id[0]+"$";
+		setd .@pending_var$, getd(.@pending_var$) + 1;
+		setd .@last_ref_var$, strcharinfo(0);
+
 		// Premia imediatamente quem foi indicado com 1 unidade de cada item.
 		for (.@i = 0; .@i < getarraysize(.@reward_item_id); .@i++)
 			getitem .@reward_item_id[.@i], .@small_reward_amount[.@i];
-
-		// Premia quem indicou com o pacote maior via Rodex.
-		setarray .@mail_item_id[0], 12210, 22818, 12223, 12224, 14545;
-		setarray .@mail_item_amount[0], 10, 10, 10, 10, 4;
-		mail(.@friend_id[0], "Evento do Amigo", "Indicação de Amigo", "O jogador "+strcharinfo(0)+" informou seu nome como indicador. Este é o seu prêmio.", 0, .@mail_item_id, .@mail_item_amount);
 
 		next;
 		mes "[Prêmio do Amigo]";
 		mes "Nick encontrado! Sua indicação foi registrada.";
 		mes "Você recebeu seu prêmio agora.";
-		mes "Seu amigo receberá o prêmio maior pelo Rodex.";
+		mes "Seu amigo poderá resgatar o prêmio maior neste NPC.";
 		break;
 	}
 	close;
+
+S_ClaimReferralReward:
+	.@pending_var$ = "$friend_ref_pending_"+getcharid(0);
+	.@last_ref_var$ = "$friend_ref_last_"+getcharid(0)+"$";
+	.@pending = getd(.@pending_var$);
+
+	if (.@pending <= 0) {
+		mes "Você não possui prêmios de indicação para resgatar.";
+		return;
+	}
+
+	mes "Você possui ^0055FF"+.@pending+"^000000 prêmio(s) de indicação pendente(s).";
+	if (getd(.@last_ref_var$) != "")
+		mes "Último indicado: ^0055FF"+getd(.@last_ref_var$)+"^000000.";
+	next;
+
+	setarray .@reward_item_id[0], 12210, 22818, 12223, 12224, 14545;
+	setarray .@reward_item_amount[0], 10, 10, 10, 10, 4;
+	if (!checkweight2(.@reward_item_id, .@reward_item_amount)) {
+		mes "Você precisa liberar espaço ou peso no inventário antes de receber seu prêmio.";
+		return;
+	}
+
+	for (.@i = 0; .@i < getarraysize(.@reward_item_id); .@i++)
+		getitem .@reward_item_id[.@i], .@reward_item_amount[.@i];
+
+	setd .@pending_var$, .@pending - 1;
+	mes "Prêmio de indicação resgatado com sucesso.";
+	if (.@pending - 1 > 0)
+		mes "Ainda resta(m) ^0055FF"+(.@pending - 1)+"^000000 prêmio(s) para resgatar.";
+	return;
 }
