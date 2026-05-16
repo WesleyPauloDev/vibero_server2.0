@@ -504,7 +504,12 @@ L_Reset:
 			close;
 		}
 
-		if (getd(.@cooldown_name$) < gettimetick(2) && getd(.@status_name$) != 0)
+		.@now = gettimetick(2);
+		.@daily_reset = callfunc("get_daily_reset");
+		if (getd(.@cooldown_name$) > .@now + .@daily_reset && getd(.@status_name$) != 0)
+			setd(.@cooldown_name$, .@now - 1);
+
+		if (getd(.@cooldown_name$) <= .@now && getd(.@status_name$) != 0)
 			setd(.@status_name$, 0);
 
 		if (getd(.@status_name$) == 3) {
@@ -551,7 +556,7 @@ L_Reset:
 				mes "A Glast Heim Challenge esta se abrindo.";
 				announce "[Instancias] " + strcharinfo(0) + " criou " + .@display_name$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
 				callfunc("F_InstanceLogStart", .@status_var$, .@display_name$);
-				setd(.@cooldown_name$, gettimetick(2) + (86400 * 3));
+				setd(.@cooldown_name$, gettimetick(2) + callfunc("get_daily_reset"));
 				setd(.@status_name$, 1);
 			} else {
 				$OGHC_LEVEL_PENDING[getcharid(1)] = 0;
@@ -562,7 +567,7 @@ L_Reset:
 		case 2:
 			switch(instance_enter(.@db_name$)) {
 			case IE_OK:
-				setd(.@cooldown_name$, gettimetick(2) + (86400 * 3));
+				setd(.@cooldown_name$, gettimetick(2) + callfunc("get_daily_reset"));
 				setd(.@status_name$, 2);
 				callfunc("F_InstanceLogEnter", .@status_var$, .@display_name$);
 				close2;
