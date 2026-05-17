@@ -13,53 +13,52 @@ OnAtcommand:
 	.@iid = instance_id(IM_PARTY);
 
 	if (.@iid > 0) {
-		// Lider ja criou a instancia c entrar
-		if (getcharid(1) && getpartyleader(getcharid(1), 2) == getcharid(0)) {
-			#INSTANCERID = getcharid(3);
-			.@live_name$ = instance_live_info(ILI_NAME, .@iid);
-			if (.@live_name$ == "Edda do Laboratorio") {
-				#INSTANCENAME$ = "EddaBiolabs";
-				doevent "EddaBiolabs_Instance#Custom::OnStartInstance";
-				end;
-			}
-			if (.@live_name$ == "Poring Village") {
-				#INSTANCENAME$ = "PoringVillage";
-				doevent "PoringVillage_Instance#Custom::OnStartInstance";
-				end;
-			}
-			if (#INSTANCENAME$ == "Wolves") {
-				if (.@live_name$ == "Wolves Gathering Place") {
-					#INSTANCENAME$ = "WolvesGathering";
-					callfunc("F_InstanceEntry", "Wolves Gathering Place", "Suad", "wolves_gathering", "WolvesGathering", 170, "Encontro dos Lobos");
-					end;
-				}
-				if (.@live_name$ == "Sanctuary Purification") {
-					#INSTANCENAME$ = "SanctuaryPurification";
-					callfunc("F_InstanceEntry", "Sanctuary Purification", "Sacerdote", "sanctuary_purification", "SanctuaryPurification", 170, "Purificacao");
-					end;
-				}
+		#INSTANCERID = getcharid(3);
+		.@live_name$ = instance_live_info(ILI_NAME, .@iid);
+		if (.@live_name$ == "Edda do Laboratorio") {
+			#INSTANCENAME$ = "EddaBiolabs";
+			doevent "EddaBiolabs_Instance#Custom::OnStartInstance";
+			end;
+		}
+		if (.@live_name$ == "Poring Village") {
+			#INSTANCENAME$ = "PoringVillage";
+			doevent "PoringVillage_Instance#Custom::OnStartInstance";
+			end;
+		}
+		if (#INSTANCENAME$ == "Wolves" || .@live_name$ == "Wolves Gathering Place" || .@live_name$ == "Sanctuary Purification") {
+			if (.@live_name$ == "Wolves Gathering Place") {
 				#INSTANCENAME$ = "WolvesGathering";
 				callfunc("F_InstanceEntry", "Wolves Gathering Place", "Suad", "wolves_gathering", "WolvesGathering", 170, "Encontro dos Lobos");
 				end;
 			}
-			if (#INSTANCENAME$ == "WolvesGathering") {
-				callfunc("F_InstanceEntry", "Wolves Gathering Place", "Suad", "wolves_gathering", "WolvesGathering", 170, "Encontro dos Lobos");
-				end;
-			}
-			if (#INSTANCENAME$ == "SanctuaryPurification") {
+			if (.@live_name$ == "Sanctuary Purification") {
+				#INSTANCENAME$ = "SanctuaryPurification";
 				callfunc("F_InstanceEntry", "Sanctuary Purification", "Sacerdote", "sanctuary_purification", "SanctuaryPurification", 170, "Purificacao");
 				end;
 			}
-			if (#INSTANCENAME$ == "VillaDeception") {
-				#VILLA_DECEPTION_MODE = 1;
-				doevent "VillaDeception_Instance#Custom::OnStartInstance";
-				end;
-			}
-			if (#INSTANCENAME$ == "VillaDeceptionAdvanced") {
-				#VILLA_DECEPTION_MODE = 2;
-				doevent "VillaDeception_Instance#Custom::OnStartInstance";
-				end;
-			}
+			#INSTANCENAME$ = "WolvesGathering";
+			callfunc("F_InstanceEntry", "Wolves Gathering Place", "Suad", "wolves_gathering", "WolvesGathering", 170, "Encontro dos Lobos");
+			end;
+		}
+		if (#INSTANCENAME$ == "WolvesGathering") {
+			callfunc("F_InstanceEntry", "Wolves Gathering Place", "Suad", "wolves_gathering", "WolvesGathering", 170, "Encontro dos Lobos");
+			end;
+		}
+		if (#INSTANCENAME$ == "SanctuaryPurification") {
+			callfunc("F_InstanceEntry", "Sanctuary Purification", "Sacerdote", "sanctuary_purification", "SanctuaryPurification", 170, "Purificacao");
+			end;
+		}
+		if (#INSTANCENAME$ == "VillaDeception") {
+			#VILLA_DECEPTION_MODE = 1;
+			doevent "VillaDeception_Instance#Custom::OnStartInstance";
+			end;
+		}
+		if (#INSTANCENAME$ == "VillaDeceptionAdvanced") {
+			#VILLA_DECEPTION_MODE = 2;
+			doevent "VillaDeception_Instance#Custom::OnStartInstance";
+			end;
+		}
+		if (getcharid(1) && getpartyleader(getcharid(1), 2) == getcharid(0) && #INSTANCENAME$ != "") {
 			debugmes #INSTANCENAME$;
 			doevent #INSTANCENAME$ + "_Instance#Custom::OnStartInstance";
 			end;

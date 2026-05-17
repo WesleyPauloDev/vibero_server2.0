@@ -14907,8 +14907,18 @@ int32 skill_castend_pos2(struct block_list* src, int32 x, int32 y, uint16 skill_
 #else
 			clif_skill_poseffect( *src, skill_id, skill_lv, src->x, src->y, tick );
 #endif
-			if (sd)
+			if (sd) {
+				struct map_data *mapdata = map_getmapdata(sd->m);
+
 				skill_blockpc_start (*sd, MO_EXTREMITYFIST, 2000);
+				if (mapdata &&
+					(strcmp(mapdata->name, "pvp_y_1-2") == 0 ||
+					 strcmp(mapdata->name, "pvp_y_2-2") == 0 ||
+					 strcmp(mapdata->name, "prtg_cas03") == 0 ||
+					 strcmp(mapdata->name, "bat_c01") == 0 ||
+					 strcmp(mapdata->name, "guild_vs2") == 0))
+					skill_blockpc_start(*sd, MO_BODYRELOCATION, 1000);
+			}
 		}
 		break;
 	case NJ_SHADOWJUMP:

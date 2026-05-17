@@ -79,7 +79,7 @@ L_Diarias:
 			#voto = 2;
 	}
 
-	if (#instancia != 1 && #d_monstros != 1 && #voto != 1 && #evento != 1)
+	if (#todas == 1 && #instancia == 0 && #d_monstros == 0 && #voto == 0 && #evento == 0)
 		#todas = 2;
 
 	mes "[Mural de Missões]";
@@ -123,7 +123,8 @@ L_Diarias:
 				mes "Aqui está sua recompensa.";
 				getitem 12412, 1;
 				#d_monstros = 0;
-				#todas_count++;
+				if (#todas_count < 4)
+					#todas_count++;
 				close;
 			} else if (#d_monstros == 0) {
 				mes "[Mural de Missões]";
@@ -149,7 +150,8 @@ L_Diarias:
 				mes "Aqui está sua recompensa.";
 				getitem 22818, 2;
 				#instancia = 0;
-				#todas_count++;
+				if (#todas_count < 4)
+					#todas_count++;
 				close;
 			} else if (#instancia == 0) {
 				mes "[Mural de Missões]";
@@ -171,7 +173,8 @@ L_Diarias:
 				mes "Aqui está sua recompensa.";
 				getitem 607, 50;
 				#voto = 0;
-				#todas_count++;
+				if (#todas_count < 4)
+					#todas_count++;
 				close;
 			} else if (#voto == 0) {
 				mes "[Mural de Missões]";
@@ -195,7 +198,8 @@ L_Diarias:
 				mes "Receba sua recompensa.";
 				getitem 7621, 5;
 				#evento = 0;
-				#todas_count++;
+				if (#todas_count < 4)
+					#todas_count++;
 				close;
 			} else if (#evento == 0) {
 				mes "[Mural de Missões]";
@@ -242,7 +246,7 @@ L_Semanais:
 	mes "Missões semanais:";
 	next;
 
-	if (#torre != 1 && #boss != 1)
+	if (#todas_semanais == 1 && #torre == 0 && #boss == 0)
 		#todas_semanais = 2;
 
 	if (#torre == 1) set .@st_torre$, "^FF0000[Pendente]^000000";
@@ -272,7 +276,8 @@ L_Semanais:
 				mes "Aqui está sua recompensa!";
 				getitem 12223, 5;
 				#torre = 0;
-				#semanal_count++;
+				if (#semanal_count < 2)
+					#semanal_count++;
 				close;
 			} else if (#torre == 0) {
 				mes "[Mural de Missões]";
@@ -294,7 +299,8 @@ L_Semanais:
 				mes "Receba sua recompensa!";
 				getitem 12224, 5;
 				#boss = 0;
-				#semanal_count++;
+				if (#semanal_count < 2)
+					#semanal_count++;
 				close;
 			} else if (#boss == 0) {
 				mes "[Mural de Missões]";
