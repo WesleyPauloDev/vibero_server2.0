@@ -1,0 +1,288 @@
+//============================================================
+// Geffen Night Arena - Barter Exchange
+//============================================================
+
+geffen,112,65,5	script	Trocador da Night Arena#gna	4_M_HUMERCHANT,{
+	disable_items;
+
+	mes "[Arena de Geffen]";
+	mes "Troco as recompensas da Geffen Night Arena por equipamentos, joias magicas e cartas.";
+	next;
+
+	switch(select("Equipamentos basicos:Equipamentos especiais e joias:Cartas da meia-noite:Encantar com joias:Cancelar")) {
+	case 1:
+		callshop "barter_gna_default",1;
+		end;
+	case 2:
+		callshop "barter_gna_special",1;
+		end;
+	case 3:
+		callshop "barter_gna_cards",1;
+		end;
+	case 4:
+		callsub L_EnchantMenu;
+		end;
+	default:
+		close;
+	}
+
+L_EnchantMenu:
+	mes "[Arena de Geffen]";
+	mes "As joias magicas aplicam opcoes aleatorias no equipamento correspondente.";
+	mes "O equipamento precisa estar equipado.";
+	next;
+
+	switch(select("Armadura:Capa:Acessorio esquerdo:Acessorio direito:Escudo:Cancelar")) {
+	case 1:
+		.@part = EQI_ARMOR;
+		.@jewel = 100365;
+		setarray .@valid[0],450149,450150;
+		.@type = 1;
+		break;
+	case 2:
+		.@part = EQI_GARMENT;
+		.@jewel = 100366;
+		setarray .@valid[0],480065,480066,480067,480068;
+		.@type = 2;
+		break;
+	case 3:
+		.@part = EQI_ACC_L;
+		.@jewel = 100367;
+		setarray .@valid[0],490077,490078;
+		.@type = 3;
+		break;
+	case 4:
+		.@part = EQI_ACC_R;
+		.@jewel = 100367;
+		setarray .@valid[0],490077,490078;
+		.@type = 3;
+		break;
+	case 5:
+		.@part = EQI_HAND_L;
+		.@jewel = 100368;
+		setarray .@valid[0],460005,460006;
+		.@type = 4;
+		break;
+	default:
+		close;
+	}
+
+	.@equip = getequipid(.@part);
+	if (inarray(.@valid[0], .@equip) == -1) {
+		mes "[Arena de Geffen]";
+		mes "Voce nao esta usando um equipamento valido nessa posicao.";
+		close;
+	}
+
+	if (countitem(.@jewel) < 1) {
+		mes "[Arena de Geffen]";
+		mes "Voce precisa de 1x " + getitemname(.@jewel) + ".";
+		close;
+	}
+
+	mes "[Arena de Geffen]";
+	mes "Equipamento:";
+	mes "^0000CD" + getitemname(.@equip) + "^000000";
+	mes "Custo:";
+	mes "^0000CD1x " + getitemname(.@jewel) + "^000000";
+	mes "";
+	mes "^FF0000As opcoes aleatorias atuais serao substituidas.^000000";
+	next;
+
+	if (select("Encantar:Cancelar") == 2)
+		close;
+
+	delitem .@jewel,1;
+
+	switch(.@type) {
+	case 1:
+		callsub L_EnchantArmor,.@part;
+		break;
+	case 2:
+		callsub L_EnchantGarment,.@part;
+		break;
+	case 3:
+		callsub L_EnchantAccessory,.@part;
+		break;
+	case 4:
+		callsub L_EnchantShield,.@part;
+		break;
+	}
+
+	specialeffect2 EF_REPAIRWEAPON;
+	mes "[Arena de Geffen]";
+	mes "Encantamento aplicado.";
+	close;
+
+L_SetOpt:
+	setrandomoption getarg(0),getarg(1),getarg(2),rand(getarg(3),getarg(4)),0;
+	return;
+
+L_SetOptValue:
+	setrandomoption getarg(0),getarg(1),getarg(2),getarg(3),0;
+	return;
+
+L_EnchantArmor:
+	.@part = getarg(0);
+	switch(rand(4)) {
+	case 0: callsub L_SetOpt,.@part,0,1,100,1500; break;
+	case 1: callsub L_SetOpt,.@part,0,2,100,500; break;
+	case 2: callsub L_SetOpt,.@part,0,9,1,10; break;
+	case 3: callsub L_SetOpt,.@part,0,10,1,10; break;
+	}
+	switch(rand(27)) {
+	case 0: callsub L_SetOpt,.@part,1,11,30,65; break;
+	case 1: callsub L_SetOpt,.@part,1,12,30,65; break;
+	case 2: callsub L_SetOpt,.@part,1,22,2,30; break;
+	case 3: callsub L_SetOpt,.@part,1,20,10,55; break;
+	case 4: callsub L_SetOpt,.@part,1,21,1,6; break;
+	case 5: callsub L_SetOpt,.@part,1,169,5,10; break;
+	case 6: callsub L_SetOpt,.@part,1,170,1,10; break;
+	case 7: callsub L_SetOpt,.@part,1,36,5,10; break;
+	case 8: callsub L_SetOpt,.@part,1,38,5,10; break;
+	case 9: callsub L_SetOpt,.@part,1,40,5,10; break;
+	case 10: callsub L_SetOpt,.@part,1,42,5,10; break;
+	case 11: callsub L_SetOpt,.@part,1,44,5,10; break;
+	case 12: callsub L_SetOpt,.@part,1,46,5,10; break;
+	case 13: callsub L_SetOpt,.@part,1,48,5,10; break;
+	case 14: callsub L_SetOpt,.@part,1,50,5,10; break;
+	case 15: callsub L_SetOpt,.@part,1,52,5,10; break;
+	case 16: callsub L_SetOpt,.@part,1,54,5,10; break;
+	case 17: callsub L_SetOpt,.@part,1,56,5,10; break;
+	case 18: callsub L_SetOpt,.@part,1,58,5,10; break;
+	case 19: callsub L_SetOpt,.@part,1,60,5,10; break;
+	case 20: callsub L_SetOpt,.@part,1,62,5,10; break;
+	case 21: callsub L_SetOpt,.@part,1,64,5,10; break;
+	case 22: callsub L_SetOpt,.@part,1,66,5,10; break;
+	case 23: callsub L_SetOpt,.@part,1,68,5,10; break;
+	case 24: callsub L_SetOpt,.@part,1,70,5,10; break;
+	case 25: callsub L_SetOpt,.@part,1,72,5,10; break;
+	case 26: callsub L_SetOpt,.@part,1,74,5,10; break;
+	}
+	if (rand(2))
+		callsub L_SetOpt,.@part,2,1,100,1500;
+	else
+		callsub L_SetOpt,.@part,2,2,100,500;
+	return;
+
+L_EnchantGarment:
+	.@part = getarg(0);
+	switch(rand(4)) {
+	case 0: callsub L_SetOpt,.@part,0,1,100,1000; break;
+	case 1: callsub L_SetOpt,.@part,0,2,10,300; break;
+	case 2: callsub L_SetOpt,.@part,0,9,1,5; break;
+	case 3: callsub L_SetOpt,.@part,0,10,1,5; break;
+	}
+	switch(rand(38)) {
+	case 0: callsub L_SetOpt,.@part,1,22,5,20; break;
+	case 1: callsub L_SetOpt,.@part,1,20,5,60; break;
+	case 2: callsub L_SetOpt,.@part,1,21,1,6; break;
+	case 3: callsub L_SetOpt,.@part,1,169,5,10; break;
+	case 4: callsub L_SetOpt,.@part,1,170,1,10; break;
+	case 5: callsub L_SetOpt,.@part,1,36,5,10; break;
+	case 6: callsub L_SetOpt,.@part,1,38,5,10; break;
+	case 7: callsub L_SetOpt,.@part,1,40,5,10; break;
+	case 8: callsub L_SetOpt,.@part,1,42,5,10; break;
+	case 9: callsub L_SetOpt,.@part,1,44,5,10; break;
+	case 10: callsub L_SetOpt,.@part,1,46,5,10; break;
+	case 11: callsub L_SetOpt,.@part,1,48,5,10; break;
+	case 12: callsub L_SetOpt,.@part,1,50,5,10; break;
+	case 13: callsub L_SetOpt,.@part,1,52,5,10; break;
+	case 14: callsub L_SetOpt,.@part,1,54,5,10; break;
+	case 15: callsub L_SetOpt,.@part,1,56,5,10; break;
+	case 16: callsub L_SetOpt,.@part,1,58,5,10; break;
+	case 17: callsub L_SetOpt,.@part,1,60,5,10; break;
+	case 18: callsub L_SetOpt,.@part,1,62,5,10; break;
+	case 19: callsub L_SetOpt,.@part,1,64,5,10; break;
+	case 20: callsub L_SetOpt,.@part,1,66,5,10; break;
+	case 21: callsub L_SetOpt,.@part,1,68,5,10; break;
+	case 22: callsub L_SetOpt,.@part,1,70,5,10; break;
+	case 23: callsub L_SetOpt,.@part,1,72,5,10; break;
+	case 24: callsub L_SetOpt,.@part,1,74,5,10; break;
+	default: callsub L_SetOpt,.@part,1,25 + rand(10),1,5; break;
+	}
+	if (rand(2))
+		callsub L_SetOpt,.@part,2,1,200,800;
+	else
+		callsub L_SetOpt,.@part,2,2,50,300;
+	return;
+
+L_EnchantAccessory:
+	.@part = getarg(0);
+	callsub L_AccessoryLine,.@part,0,1;
+	callsub L_AccessoryLine,.@part,1,2;
+	return;
+
+L_AccessoryLine:
+	.@part = getarg(0);
+	.@slot = getarg(1);
+	.@tier = getarg(2);
+	switch(rand(12)) {
+	case 0: callsub L_SetOpt,.@part,.@slot,16,3,(.@tier == 1 ? 7 : 5); break;
+	case 1: callsub L_SetOpt,.@part,.@slot,170,5,(.@tier == 1 ? 10 : 8); break;
+	case 2: callsub L_SetOpt,.@part,.@slot,24,5,(.@tier == 1 ? 10 : 8); break;
+	case 3: callsub L_SetOpt,.@part,.@slot,28,3,5; break;
+	case 4: callsub L_SetOpt,.@part,.@slot,26,3,5; break;
+	case 5: callsub L_SetOpt,.@part,.@slot,27,3,5; break;
+	case 6: callsub L_SetOpt,.@part,.@slot,29,3,5; break;
+	case 7: callsub L_SetOpt,.@part,.@slot,172,3,5; break;
+	case 8: callsub L_SetOpt,.@part,.@slot,9,1,(.@tier == 1 ? 5 : 3); break;
+	case 9: callsub L_SetOpt,.@part,.@slot,10,1,(.@tier == 1 ? 5 : 3); break;
+	case 10: callsub L_SetOpt,.@part,.@slot,13,1,(.@tier == 1 ? 5 : 3); break;
+	case 11: callsub L_SetOpt,.@part,.@slot,14,1,(.@tier == 1 ? 5 : 3); break;
+	}
+	return;
+
+L_EnchantShield:
+	.@part = getarg(0);
+	callsub L_ShieldLine,.@part,0,1;
+	callsub L_ShieldLine,.@part,1,2;
+	callsub L_ShieldLine3,.@part;
+	return;
+
+L_ShieldLine:
+	.@part = getarg(0);
+	.@slot = getarg(1);
+	switch(rand(34)) {
+	case 0: callsub L_SetOpt,.@part,.@slot,21,3,10; break;
+	case 1: callsub L_SetOpt,.@part,.@slot,20,30,100; break;
+	case 2: callsub L_SetOpt,.@part,.@slot,1,100,1000; break;
+	case 3: callsub L_SetOpt,.@part,.@slot,2,20,200; break;
+	case 4: callsub L_SetOpt,.@part,.@slot,168,5,10; break;
+	case 5: callsub L_SetOpt,.@part,.@slot,170,1,5; break;
+	case 6: if (getarg(2) == 2) callsub L_SetOptValue,.@part,.@slot,16,0 - rand(1,5); else callsub L_SetOpt,.@part,.@slot,87 + rand(10),2,7; break;
+	default:
+		.@r = rand(28);
+		if (.@r < 10)
+			callsub L_SetOpt,.@part,.@slot,87 + .@r,2,7;
+		else if (.@r < 19)
+			callsub L_SetOpt,.@part,.@slot,97 + (.@r - 10),1,5;
+		else
+			callsub L_SetOpt,.@part,.@slot,107 + (.@r - 19),1,5;
+		break;
+	}
+	return;
+
+L_ShieldLine3:
+	.@part = getarg(0);
+	switch(rand(35)) {
+	case 0: callsub L_SetOptValue,.@part,2,15,1; break;
+	case 1: callsub L_SetOpt,.@part,2,155,30,60; break;
+	case 2: callsub L_SetOpt,.@part,2,156,30,60; break;
+	case 3: callsub L_SetOpt,.@part,2,153,30,60; break;
+	case 4: callsub L_SetOpt,.@part,2,154,30,60; break;
+	case 5: callsub L_SetOpt,.@part,2,171,1,3; break;
+	default:
+		.@r = rand(29);
+		if (.@r < 10)
+			callsub L_SetOpt,.@part,2,97 + .@r,5,10;
+		else if (.@r < 20)
+			callsub L_SetOpt,.@part,2,107 + (.@r - 10),5,10;
+		else if (.@r < 25)
+			callsub L_SetOpt,.@part,2,127 + (.@r - 20),30,60;
+		else
+			callsub L_SetOpt,.@part,2,137 + (.@r - 25),30,60;
+		break;
+	}
+	return;
+}

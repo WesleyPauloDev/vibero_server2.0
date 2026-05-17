@@ -11727,6 +11727,18 @@ ACMD_FUNC(battlestats)
 	out("-- HP/SP --");
 	out("HP: max %+d%% | flat %+d | regen %+d%%", sd->hprate - 100, sd->bonus.hp, sd->hprecov_rate - 100);
 	out("SP: max %+d%% | flat %+d | regen %+d%%", sd->sprate - 100, sd->bonus.sp, sd->sprecov_rate - 100);
+	out("Cura: bHealPower %+d%% | bHealPower2 %+d%%", sd->bonus.add_heal_rate, sd->bonus.add_heal2_rate);
+	if (!sd->skillheal.empty() || !sd->skillheal2.empty()) {
+		out("Cura por skill:");
+		for (const auto &it : sd->skillheal) {
+			if (it.val)
+				out("  %s bHealPower %+d%%", skill_get_desc(it.id), it.val);
+		}
+		for (const auto &it : sd->skillheal2) {
+			if (it.val)
+				out("  %s bHealPower2 %+d%%", skill_get_desc(it.id), it.val);
+		}
+	}
 
 	bool any = false;
 	if (phys_race(RC_PLAYER_HUMAN) || magic_race(RC_PLAYER_HUMAN) || phys_race(RC_PLAYER_DORAM) || magic_race(RC_PLAYER_DORAM)) {
