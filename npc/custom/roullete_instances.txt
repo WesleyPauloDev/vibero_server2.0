@@ -1,3 +1,89 @@
+function	script	F_InstanceRouletteLog	{
+	.@event_type$ = getarg(0);
+	.@category$ = getarg(1);
+	.@instance_name$ = getarg(2, "");
+	.@reward_item_id = getarg(3, 0);
+	.@reward_amount = getarg(4, 0);
+	.@guaranteed_item_id = getarg(5, 0);
+	.@guaranteed_amount = getarg(6, 0);
+	.@rare_item_id = getarg(7, 0);
+	.@rare_amount = getarg(8, 0);
+	.@period_expr$ = "DATE_FORMAT(CURDATE(), '%Y-%m-%d')";
+
+	.@already_logged = 0;
+	query_logsql(
+		"SELECT COUNT(*) FROM `instance_roulette_log` " +
+		"WHERE `account_id` = " + getcharid(3) + " " +
+		"AND `event_type` = '" + escape_sql(.@event_type$) + "' " +
+		"AND `category` = '" + escape_sql(.@category$) + "' " +
+		"AND `period_key` = " + .@period_expr$,
+		.@already_logged
+	);
+
+	if (.@already_logged > 0) {
+		logmes "[INSTANCE_ROULETTE_DUPLICATE_BLOCK] acc=" + getcharid(3) + " char=" + getcharid(0) + " event=" + .@event_type$ + " category=" + .@category$;
+		return 0;
+	}
+
+	query_logsql(
+		"INSERT INTO `instance_roulette_log` " +
+		"(`account_id`, `char_id`, `char_name`, `event_type`, `category`, `instance_name`, `period_key`, " +
+		"`reward_item_id`, `reward_item_name`, `reward_amount`, `guaranteed_item_id`, `guaranteed_item_name`, " +
+		"`guaranteed_amount`, `rare_item_id`, `rare_item_name`, `rare_amount`, `map`, `created_at`) VALUES (" +
+		getcharid(3) + ", " +
+		getcharid(0) + ", '" +
+		escape_sql(strcharinfo(0)) + "', '" +
+		escape_sql(.@event_type$) + "', '" +
+		escape_sql(.@category$) + "', '" +
+		escape_sql(.@instance_name$) + "', " +
+		.@period_expr$ + ", " +
+		.@reward_item_id + ", '" +
+		((.@reward_item_id > 0) ? escape_sql(getitemname(.@reward_item_id)) : "") + "', " +
+		.@reward_amount + ", " +
+		.@guaranteed_item_id + ", '" +
+		((.@guaranteed_item_id > 0) ? escape_sql(getitemname(.@guaranteed_item_id)) : "") + "', " +
+		.@guaranteed_amount + ", " +
+		.@rare_item_id + ", '" +
+		((.@rare_item_id > 0) ? escape_sql(getitemname(.@rare_item_id)) : "") + "', " +
+		.@rare_amount + ", '" +
+		escape_sql(strcharinfo(3)) + "', NOW())"
+	);
+
+	return 1;
+}
+
+-	script	Instance_Roulette_SQL	-1,{
+OnInit:
+	query_logsql(
+		"CREATE TABLE IF NOT EXISTS `instance_roulette_log` (" +
+		"`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, " +
+		"`account_id` INT UNSIGNED NOT NULL DEFAULT 0, " +
+		"`char_id` INT UNSIGNED NOT NULL DEFAULT 0, " +
+		"`char_name` VARCHAR(30) NOT NULL DEFAULT '', " +
+		"`event_type` VARCHAR(12) NOT NULL DEFAULT '', " +
+		"`category` VARCHAR(10) NOT NULL DEFAULT '', " +
+		"`instance_name` VARCHAR(80) NOT NULL DEFAULT '', " +
+		"`period_key` VARCHAR(10) NOT NULL DEFAULT '', " +
+		"`reward_item_id` INT UNSIGNED NOT NULL DEFAULT 0, " +
+		"`reward_item_name` VARCHAR(50) NOT NULL DEFAULT '', " +
+		"`reward_amount` INT UNSIGNED NOT NULL DEFAULT 0, " +
+		"`guaranteed_item_id` INT UNSIGNED NOT NULL DEFAULT 0, " +
+		"`guaranteed_item_name` VARCHAR(50) NOT NULL DEFAULT '', " +
+		"`guaranteed_amount` INT UNSIGNED NOT NULL DEFAULT 0, " +
+		"`rare_item_id` INT UNSIGNED NOT NULL DEFAULT 0, " +
+		"`rare_item_name` VARCHAR(50) NOT NULL DEFAULT '', " +
+		"`rare_amount` INT UNSIGNED NOT NULL DEFAULT 0, " +
+		"`map` VARCHAR(24) NOT NULL DEFAULT '', " +
+		"`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
+		"PRIMARY KEY (`id`), " +
+		"UNIQUE KEY `uq_instance_roulette_once` (`account_id`, `event_type`, `category`, `period_key`), " +
+		"KEY `idx_created_at` (`created_at`), " +
+		"KEY `idx_event_category_period` (`event_type`, `category`, `period_key`), " +
+		"KEY `idx_char_id` (`char_id`) " +
+		") ENGINE=InnoDB DEFAULT CHARSET=utf8"
+	);
+	end;
+}
 prontera,164,169,3	script	Roleta das Instâncias	563,{
 
 	// ===========================
@@ -86,6 +172,11 @@ prontera,164,169,3	script	Roleta das Instâncias	563,{
 	if (#recs == 3) {
 		mes "[Roleta das Instâncias]";
 		mes "Parabéns! Você Conclui Todas Missões da Roleta hoje.";
+		if (!callfunc("F_InstanceRouletteLog", "bonus", "daily", "Todas as categorias", 12412, 1, 0, 0, 0, 0)) {
+			#recs = 4;
+			mes "Este bonus ja consta como recebido no banco.";
+			close;
+		}
 		getitem 12412,1;
 		#recs = 4;
 		close;
@@ -225,6 +316,10 @@ prontera,164,169,3	script	Roleta das Instâncias	563,{
 	.@sorteada$ = getd(.@var$+"["+.@final+"]");
     .@inst_name$ = "#inst" + .@cat$ + "_name$";
     .@inst_status$ = "#inst" + .@cat$ + "_status";
+	if (!callfunc("F_InstanceRouletteLog", "roll", .@cat$, .@sorteada$, 0, 0, 0, 0, 0, 0)) {
+		mes "Voce ja possui uma roleta registrada hoje para esta categoria.";
+		close;
+	}
     setd(.@inst_name$, .@sorteada$);
     setd(.@inst_status$, 1);
 	mes "Sua missão de instância é: ^FFAA00" + getd("#inst"+.@cat$+"_name$") + "^000000!";
@@ -267,18 +362,36 @@ L_Rewards:
 	mes "[Roleta das Instâncias]";	
 
 	if (.@reward_cat$ == "60" && #inst60_status == 2) {
-		getitem .inst_60_reward[rand(0,2)],2;
+		.@reward_item = .inst_60_reward[rand(0,2)];
+		.@rare_item = 0;
+		if (rand(100) < 5)
+			.@rare_item = 9592;
+		if (!callfunc("F_InstanceRouletteLog", "reward", "60", #inst60_name$, .@reward_item, 2, 40111, 1, .@rare_item, (.@rare_item > 0))) {
+			set #inst60_status,3;
+			mes "Esta recompensa ja consta como recebida no banco.";
+			close;
+		}
+		getitem .@reward_item,2;
 		getitem 40111,1;
-		if (rand(100) < 5) getitem 9592,1;
+		if (.@rare_item > 0) getitem .@rare_item,1;
 		set #inst60_status,3;
 		mes "Recompensa da missão Lv 60 entregue!";
 		#recs++;
 		close;
 	}
 	if (.@reward_cat$ == "120" && #inst120_status == 2) {
-		getitem .inst_120_reward[rand(0,2)],2;
+		.@reward_item = .inst_120_reward[rand(0,2)];
+		.@rare_item = 0;
+		if (rand(100) < 5)
+			.@rare_item = 9592;
+		if (!callfunc("F_InstanceRouletteLog", "reward", "120", #inst120_name$, .@reward_item, 2, 40111, 1, .@rare_item, (.@rare_item > 0))) {
+			set #inst120_status,3;
+			mes "Esta recompensa ja consta como recebida no banco.";
+			close;
+		}
+		getitem .@reward_item,2;
 		getitem 40111,1;
-		if (rand(100) < 5) getitem 9592,1;
+		if (.@rare_item > 0) getitem .@rare_item,1;
 		set #inst120_status,3;
 		mes "Recompensa da missão Lv 120 entregue!";
 		#recs++;
@@ -286,9 +399,18 @@ L_Rewards:
 
 	}
 	if (.@reward_cat$ == "175" && #inst175_status == 2) {
-		getitem .inst_175_reward[rand(0,2)],2;
+		.@reward_item = .inst_175_reward[rand(0,2)];
+		.@rare_item = 0;
+		if (rand(100) < 5)
+			.@rare_item = 9592;
+		if (!callfunc("F_InstanceRouletteLog", "reward", "175", #inst175_name$, .@reward_item, 2, 40111, 1, .@rare_item, (.@rare_item > 0))) {
+			set #inst175_status,3;
+			mes "Esta recompensa ja consta como recebida no banco.";
+			close;
+		}
+		getitem .@reward_item,2;
 		getitem 40111,1;
-		if (rand(100) < 5) getitem 9592,1;
+		if (.@rare_item > 0) getitem .@rare_item,1;
 		set #inst175_status,3;
 		mes "Recompensa da missão Lv 175 entregue!";
 		#recs++;

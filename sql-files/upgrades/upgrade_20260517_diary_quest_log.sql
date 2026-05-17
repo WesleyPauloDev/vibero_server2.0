@@ -1,3 +1,4 @@
+-- Apply this on the log database configured as log_db_db (currently log2025).
 CREATE TABLE IF NOT EXISTS `diary_quest_reward_log` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `account_id` INT UNSIGNED NOT NULL DEFAULT 0,
