@@ -1784,7 +1784,8 @@ OnTouch_:
 			// Premiações do Servidor
 			if (#ETOWER_STATUS == 2) {
 				.@finish_result = callfunc("F_InstanceFinishBase", "Torre Sem Fim", "#ETOWER_STATUS", 30, 3, "#inst60_name$", "#inst60_status", 1, 50, 110002, 3000, 4, 1);
-				set #torre, 2;
+				if (#torre == 1)
+					set #torre, 2;
 			}
 
 			// // anuncia globalmente
@@ -2229,7 +2230,8 @@ OnMyMobDead:
 		// Premiações do Servidor
 		if (#ETOWER_STATUS == 2) {
 			.@finish_result = callfunc("F_InstanceFinishBase", "Torre Sem Fim", "#ETOWER_STATUS", 30, 3, "#inst60_name$", "#inst60_status", 1, 50, 110002, 3000, 4, 1);
-				set #torre, 2;
+				if (#torre == 1)
+					set #torre, 2;
 			erasequest 60201;
 		}
 

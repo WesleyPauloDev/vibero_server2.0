@@ -31,12 +31,26 @@ OnStartRace:
 	if( $prace_race_active == 0 )
 		donpcevent "Bidder#prace0::OnGMResetTrack";
 	set $accessPrace, 1;
+	stopnpctimer;
+	initnpctimer;
+	startnpctimer;
 	announce "[Corrida dos Porings]: O evento foi aberto!", bc_all|bc_blue;
 	end;
 
 OnPraceEnd:
 	set $accessPrace, 0;
+	set $prace_countdown_active, 0;
+	set $prace_countdown_id, $prace_countdown_id + 1;
+	stopnpctimer;
 	announce "[Corrida dos Porings]: O evento terminou!", bc_all|bc_blue;
+	end;
+
+OnTimer600000:
+	stopnpctimer;
+	if ($accessPrace == 1 && $prace_countdown_active == 0 && $prace_race_active == 0) {
+		set $accessPrace, 0;
+		announce "[Corrida dos Porings]: O evento foi encerrado por falta de apostas.", bc_all|bc_blue;
+	}
 	end;
 }
 
@@ -63,7 +77,6 @@ prontera,146,170,5	script	Corrida dos Porings	514,{
 				mes "Evento aberto.";
 				close;
 			case 2:
-				donpcevent "Bidder#prace0::OnGMResetTrack";
 				donpcevent "Bidder#prace0::OnGMStartCountdown";
 				mes "^0099FF[ "+ strnpcinfo(1) +" ]^000000";
 				mes "Contagem da corrida iniciada.";
@@ -81,9 +94,14 @@ prontera,146,170,5	script	Corrida dos Porings	514,{
 		}
 	}
 	if(select("^00CC00 ^000000 Participar.","^00CC00 ^000000 Sair.") == 2 ) close;
-		if( $accessPrace == 0 ){
+		if( $accessPrace != 1 ){
 			mes "^0099FF[ "+ strnpcinfo(1) +" ]^000000";
-			mes "O evento nao esta aberto no momento.";
+			mes "O evento nao esta ativo no momento.";
+			close;
+		}
+		if( $prace_race_active == 1 ){
+			mes "^0099FF[ "+ strnpcinfo(1) +" ]^000000";
+			mes "A corrida ja esta em andamento. Aguarde a proxima rodada.";
 			close;
 		}
 		close2;
@@ -133,7 +151,69 @@ OnResetBettors:
 	set $prace_bets, 0;
 	end;
 }
-p_track01,58,41,3	script	Bidder#prace0	877,{ 
+-	script	PRaceCountdown#prace0	-1,{
+	end;
+
+OnStartCountdown:
+	.@countdown_id = $prace_countdown_id;
+	mapannounce "p_track01","[Corrida dos Porings]: A corrida vai comecar em 2 minutos.", bc_all|bc_blue;
+	sleep 60000;
+	if (.@countdown_id != $prace_countdown_id || $prace_countdown_active != 1 || $prace_race_active == 1) end;
+	mapannounce "p_track01","[Corrida dos Porings]: Eu tenho "+$prace_bets+" apostas. Alguem mais?", bc_all|bc_blue;
+	sleep 30000;
+	if (.@countdown_id != $prace_countdown_id || $prace_countdown_active != 1 || $prace_race_active == 1) end;
+	mapannounce "p_track01","[Corrida dos Porings]: A corrida ira iniciar em 30 segundos.", bc_all|bc_blue;
+	sleep 20000;
+	if (.@countdown_id != $prace_countdown_id || $prace_countdown_active != 1 || $prace_race_active == 1) end;
+	mapannounce "p_track01","[Corrida dos Porings]: A corrida ira iniciar em 10 segundos. Ultima chance.", bc_all|bc_blue;
+	sleep 10000;
+	if (.@countdown_id != $prace_countdown_id || $prace_countdown_active != 1 || $prace_race_active == 1) end;
+	set $prace_countdown_active, 0;
+	set $prace_race_active, 1;
+	donpcevent "Poring#prace1::OnReturn";
+	donpcevent "Angeling#prace2::OnReturn";
+	donpcevent "Drops#prace3::OnReturn";
+	donpcevent "Marin#prace4::OnReturn";
+	donpcevent "Santa Poring#prace5::OnReturn";
+	donpcevent "Poporing#prace6::OnReturn";
+	mapannounce "p_track01","[Corrida dos Porings]: Porings, em suas marcas...", bc_all|bc_blue;
+	sleep 2500;
+	mapannounce "p_track01","--- 3 ---", bc_all|bc_blue;
+	sleep 1000;
+	mapannounce "p_track01","  2 ---", bc_all|bc_blue;
+	sleep 1000;
+	mapannounce "p_track01","  1 ---", bc_all|bc_blue;
+	donpcevent "Drops#prace3::OnRace";
+	donpcevent "Poring#prace1::OnRace";
+	donpcevent "Poporing#prace6::OnRace";
+	donpcevent "Angeling#prace2::OnRace";
+	donpcevent "Santa Poring#prace5::OnRace";
+	donpcevent "Marin#prace4::OnRace";
+	mapannounce "p_track01","--- Valendo!!! ---", bc_all|bc_blue;
+	sleep 35000;
+	if ($prace_race_active == 1 && $prace_winner$ == "") {
+		donpcevent "Poring#prace1::OnStop";
+		donpcevent "Angeling#prace2::OnStop";
+		donpcevent "Drops#prace3::OnStop";
+		donpcevent "Marin#prace4::OnStop";
+		donpcevent "Santa Poring#prace5::OnStop";
+		donpcevent "Poporing#prace6::OnStop";
+		donpcevent "Checker#prace0::OnResetBettors";
+		set $prace_countdown_active, 0;
+		set $prace_race_active, 0;
+		donpcevent "Poring#prace1::OnReturn";
+		donpcevent "Angeling#prace2::OnReturn";
+		donpcevent "Drops#prace3::OnReturn";
+		donpcevent "Marin#prace4::OnReturn";
+		donpcevent "Santa Poring#prace5::OnReturn";
+		donpcevent "Poporing#prace6::OnReturn";
+		mapannounce "p_track01","[Corrida dos Porings]: A corrida terminou sem vencedor.", bc_all|bc_blue;
+		mapwarp "p_track01","prontera", 156, 191;
+		donpcevent "PRace#Evt::OnPraceEnd";
+	}
+	end;
+}
+p_track01,58,41,3	script	Bidder#prace0	877,{
 	set .@prace_zeny, 50000;
 	if( $prace_random < 1 ) callsub OnInit;
 	if( $prace_race_active == 0 && $prace_countdown_active == 0 && prace_playing == 1 ) {
@@ -199,31 +279,33 @@ p_track01,58,41,3	script	Bidder#prace0	877,{
 	mes "Eu tenho "+ $prace_bets +" apostas.";
 	if ( $prace_countdown_active != 1 ) {
 		set $prace_countdown_active, 1;
-		stopnpctimer;
-		setnpctimer 60000;
-		startnpctimer;
-		mapannounce "p_track01","[Corrida dos Porings]: A corrida vai comecar em 2 minutos.", bc_all|bc_blue;
+		set $prace_countdown_id, $prace_countdown_id + 1;
+		donpcevent "PRaceCountdown#prace0::OnStartCountdown";
 	}
 	npctalk ""+ strcharinfo(0) +" ja fez sua aposta!";
 	close;
 
-Start1:
+OnStartRaceNow:
+	callsub S_StartRaceNow;
+	end;
+
+S_StartRaceNow:
+	if ( $prace_race_active == 1 ) return;
 	set $prace_countdown_active, 0;
 	set $prace_race_active, 1;
 	callsub ReturnRace;
 	stopnpctimer;
 	initnpctimer;
 	startnpctimer;
-	end;
+	return;
 
 OnGMStartCountdown:
 	if ( $prace_race_active == 1 ) end;
 	if ( $prace_countdown_active == 1 ) end;
+	set $accessPrace, 1;
 	set $prace_countdown_active, 1;
-	stopnpctimer;
-	setnpctimer 60000;
-	startnpctimer;
-	mapannounce "p_track01","[Corrida dos Porings]: A corrida vai comecar em 2 minutos.", bc_all|bc_blue;
+	set $prace_countdown_id, $prace_countdown_id + 1;
+	donpcevent "PRaceCountdown#prace0::OnStartCountdown";
 	end;
 
 OnGMResetTrack:
@@ -243,6 +325,7 @@ OnGMResetTrack:
 	donpcevent "Checker#prace0::OnResetBettors";
 	set $prace_winner$, "";
 	set $prace_countdown_active, 0;
+	set $prace_countdown_id, $prace_countdown_id + 1;
 	set $prace_race_active, 0;
 	end;
 
@@ -301,6 +384,7 @@ OnInit:
 	deletearray $prace_bidder_ips$[0], getarraysize($prace_bidder_ips$);
 	set $prace_countdown_active, 0;
 	set $prace_race_active, 0;
+	set $accessPrace, 0;
 	end;
 
 OnTimer500:
@@ -332,23 +416,11 @@ OnTimer35000:
 	set $prace_race_active, 0;
 	stopnpctimer;
 	callsub ReturnRace;
+	mapannounce "p_track01","[Corrida dos Porings]: A corrida terminou sem vencedor.", bc_all|bc_blue;
+	mapwarp "p_track01","prontera", 156, 191;
+	donpcevent "PRace#Evt::OnPraceEnd";
 	end;
 
-OnTimer60000:
-	npctalk "Eu tenho "+$prace_bets+" apostas. Alguem mais?"; 
-	end;
-		
-OnTimer90000:
-	npctalk "A corrida ira iniciar em 30 segundos."; 
-	end;
-	
-OnTimer110000:
-	npctalk "A corrida ira iniciar em 10 segundos. Ultima chance."; 
-	end;
-
-OnTimer120000:
-	goto Start1;
-	end;
 }
 //-----------------------------------
 // Racer NPC's
