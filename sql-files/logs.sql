@@ -320,6 +320,62 @@ CREATE TABLE IF NOT EXISTS `refine_log` (
 ) ENGINE=MyISAM AUTO_INCREMENT=1;
 
 --
+-- Table structure for table `enchantgrade_log`
+--
+
+CREATE TABLE IF NOT EXISTS `enchantgrade_log` (
+  `id` bigint(20) unsigned NOT NULL auto_increment,
+  `time` datetime NOT NULL,
+  `account_id` int(11) unsigned NOT NULL default '0',
+  `char_id` int(11) unsigned NOT NULL default '0',
+  `char_name` varchar(25) NOT NULL default '',
+  `map` varchar(11) NOT NULL default '',
+  `result` enum('success','failure','break','downgrade') NOT NULL default 'failure',
+  `item_id` int(10) unsigned NOT NULL default '0',
+  `item_name` varchar(50) NOT NULL default '',
+  `unique_id` bigint(20) unsigned NOT NULL default '0',
+  `grade_before` tinyint unsigned NOT NULL default '0',
+  `grade_after` tinyint unsigned NOT NULL default '0',
+  `refine_before` tinyint(3) unsigned NOT NULL default '0',
+  `refine_after` tinyint(3) unsigned NOT NULL default '0',
+  `material_item_id` int(10) unsigned NOT NULL default '0',
+  `material_amount` smallint(5) unsigned NOT NULL default '0',
+  `catalyst_item_id` int(10) unsigned NOT NULL default '0',
+  `catalyst_amount` smallint(5) unsigned NOT NULL default '0',
+  `zeny` int(11) unsigned NOT NULL default '0',
+  `chance` smallint(5) unsigned NOT NULL default '0',
+  `bound` tinyint(1) unsigned NOT NULL default '0',
+  `attribute` tinyint(3) unsigned NOT NULL default '0',
+  `identify` tinyint(3) unsigned NOT NULL default '0',
+  `card0` int(10) unsigned NOT NULL default '0',
+  `card1` int(10) unsigned NOT NULL default '0',
+  `card2` int(10) unsigned NOT NULL default '0',
+  `card3` int(10) unsigned NOT NULL default '0',
+  `option_id0` smallint(5) NOT NULL default '0',
+  `option_val0` smallint(5) NOT NULL default '0',
+  `option_parm0` tinyint(3) NOT NULL default '0',
+  `option_id1` smallint(5) NOT NULL default '0',
+  `option_val1` smallint(5) NOT NULL default '0',
+  `option_parm1` tinyint(3) NOT NULL default '0',
+  `option_id2` smallint(5) NOT NULL default '0',
+  `option_val2` smallint(5) NOT NULL default '0',
+  `option_parm2` tinyint(3) NOT NULL default '0',
+  `option_id3` smallint(5) NOT NULL default '0',
+  `option_val3` smallint(5) NOT NULL default '0',
+  `option_parm3` tinyint(3) NOT NULL default '0',
+  `option_id4` smallint(5) NOT NULL default '0',
+  `option_val4` smallint(5) NOT NULL default '0',
+  `option_parm4` tinyint(3) NOT NULL default '0',
+  PRIMARY KEY (`id`),
+  INDEX (`time`),
+  INDEX (`account_id`),
+  INDEX (`char_id`),
+  INDEX (`item_id`),
+  INDEX (`result`),
+  INDEX (`unique_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1;
+
+--
 -- Table structure for table `zenylog`
 --
 # ZenyLog types

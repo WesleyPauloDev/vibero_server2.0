@@ -83,6 +83,14 @@ enum e_log_refine_result : uint8
 	LOG_REFINE_DOWNGRADE,
 };
 
+enum e_log_enchantgrade_result : uint8
+{
+	LOG_ENCHANTGRADE_SUCCESS,
+	LOG_ENCHANTGRADE_FAILURE,
+	LOG_ENCHANTGRADE_BREAK,
+	LOG_ENCHANTGRADE_DOWNGRADE,
+};
+
 /// new logs
 void log_pick_pc(map_session_data* sd, e_log_pick_type type, int32 amount, struct item* itm);
 void log_pick_mob(struct mob_data* md, e_log_pick_type type, int32 amount, struct item* itm);
@@ -91,6 +99,7 @@ void log_cash( map_session_data* sd, e_log_pick_type type, e_log_cash_type cash_
 void log_cashshop_purchase( map_session_data* sd, t_itemid nameid, uint32 unit_price, uint32 amount, uint32 total_price, int32 cash_points_used, int32 kafra_points_used, const char* source );
 void log_shop_transaction( map_session_data* sd, const char* source, const char* npc_name, const char* shop_name, t_itemid item_id, uint32 amount, int32 zeny, t_itemid required_item_id, uint32 required_item_amount, const char* point_type, int32 point_amount );
 void log_refine_event( map_session_data* sd, e_log_refine_result result, struct item* itm, uint8 refine_before, uint8 refine_after, t_itemid material_item_id, uint16 material_amount, t_itemid blessing_item_id, uint16 blessing_amount );
+void log_enchantgrade_event( map_session_data* sd, e_log_enchantgrade_result result, struct item* itm, uint8 grade_before, uint8 grade_after, uint8 refine_before, uint8 refine_after, t_itemid material_item_id, uint16 material_amount, t_itemid catalyst_item_id, uint16 catalyst_amount, uint32 zeny, uint16 chance );
 void log_npc( struct npc_data* nd, const char* message );
 void log_npc(map_session_data* sd, const char *message);
 void log_chat(e_log_chat_type type, int32 type_id, int32 src_charid, int32 src_accid, const char* map, int32 x, int32 y, const char* dst_charname, const char* message);

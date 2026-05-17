@@ -24462,6 +24462,14 @@ void clif_parse_enchantgrade_start( int32 fd, map_session_data* sd ){
 		return;
 	}
 
+	struct item enchantgrade_log_item = sd->inventory.u.items_inventory[index];
+	uint8 grade_before = enchantgrade_log_item.enchantgrade;
+	uint8 grade_after = grade_before;
+	uint8 refine_before = enchantgrade_log_item.refine;
+	uint8 refine_after = refine_before;
+	t_itemid catalyst_item_id = ( p->blessing_flag && steps > 0 ) ? enchantgradelevel->catalyst.item : 0;
+	uint16 catalyst_amount = ( p->blessing_flag && steps > 0 ) ? enchantgradelevel->catalyst.amountPerStep * steps : 0;
+
 	if( rnd()%10000 < totalChance ){
 		// Log removal of item
 		log_pick_pc( sd, LOG_TYPE_ENCHANTGRADE, -1, &sd->inventory.u.items_inventory[index] );
@@ -24469,6 +24477,9 @@ void clif_parse_enchantgrade_start( int32 fd, map_session_data* sd ){
 		sd->inventory.u.items_inventory[index].enchantgrade = min( sd->inventory.u.items_inventory[index].enchantgrade + 1, MAX_ENCHANTGRADE );
 		// On successful enchantgrade increase the refine is reset
 		sd->inventory.u.items_inventory[index].refine = 0;
+		grade_after = sd->inventory.u.items_inventory[index].enchantgrade;
+		refine_after = sd->inventory.u.items_inventory[index].refine;
+		log_enchantgrade_event( sd, LOG_ENCHANTGRADE_SUCCESS, &enchantgrade_log_item, grade_before, grade_after, refine_before, refine_after, option->item, option->amount, catalyst_item_id, catalyst_amount, option->zeny, totalChance );
 		// Log retrieving the item again -> with the new refine and enchantgrade
 		log_pick_pc( sd, LOG_TYPE_ENCHANTGRADE, 1, &sd->inventory.u.items_inventory[index] );
 		// Show success
@@ -24486,6 +24497,7 @@ void clif_parse_enchantgrade_start( int32 fd, map_session_data* sd ){
 
 		// Delete the item if it is breakable
 		if( option->breaking_rate > 0 && ( rnd() % 10000 ) < option->breaking_rate ){
+			log_enchantgrade_event( sd, LOG_ENCHANTGRADE_BREAK, &enchantgrade_log_item, grade_before, grade_after, refine_before, refine_after, option->item, option->amount, catalyst_item_id, catalyst_amount, option->zeny, totalChance );
 			// Delete the item
 			pc_delitem( sd, index, 1, 0, 0, LOG_TYPE_ENCHANTGRADE );
 			// Show failure
@@ -24496,12 +24508,15 @@ void clif_parse_enchantgrade_start( int32 fd, map_session_data* sd ){
 			log_pick_pc( sd, LOG_TYPE_ENCHANTGRADE, -1, &sd->inventory.u.items_inventory[index] );
 			// Decrease refine level
 			sd->inventory.u.items_inventory[index].refine = cap_value( sd->inventory.u.items_inventory[index].refine - option->downgrade_amount, 0, MAX_REFINE );
+			refine_after = sd->inventory.u.items_inventory[index].refine;
+			log_enchantgrade_event( sd, LOG_ENCHANTGRADE_DOWNGRADE, &enchantgrade_log_item, grade_before, grade_after, refine_before, refine_after, option->item, option->amount, catalyst_item_id, catalyst_amount, option->zeny, totalChance );
 			// Log retrieving the item again -> with the new refine
 			log_pick_pc( sd, LOG_TYPE_ENCHANTGRADE, 1, &sd->inventory.u.items_inventory[index] );
 			// Show downgrade
 			clif_enchantgrade_result( *sd, index, ENCHANTGRADE_UPGRADE_DOWNGRADE );
 		// Only show failure, but dont do anything
 		}else{
+			log_enchantgrade_event( sd, LOG_ENCHANTGRADE_FAILURE, &enchantgrade_log_item, grade_before, grade_after, refine_before, refine_after, option->item, option->amount, catalyst_item_id, catalyst_amount, option->zeny, totalChance );
 			clif_enchantgrade_result( *sd, index, ENCHANTGRADE_UPGRADE_FAILED );
 		}
 	}
