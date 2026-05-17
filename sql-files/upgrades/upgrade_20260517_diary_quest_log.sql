@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS `diary_quest_reward_log` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `account_id` INT UNSIGNED NOT NULL DEFAULT 0,
+  `char_id` INT UNSIGNED NOT NULL DEFAULT 0,
+  `char_name` VARCHAR(30) NOT NULL DEFAULT '',
+  `quest_type` VARCHAR(10) NOT NULL DEFAULT '',
+  `quest_key` VARCHAR(32) NOT NULL DEFAULT '',
+  `quest_name` VARCHAR(80) NOT NULL DEFAULT '',
+  `period_key` VARCHAR(10) NOT NULL DEFAULT '',
+  `reward_item_id` INT UNSIGNED NOT NULL DEFAULT 0,
+  `reward_item_name` VARCHAR(50) NOT NULL DEFAULT '',
+  `reward_amount` INT UNSIGNED NOT NULL DEFAULT 0,
+  `progress_value` INT UNSIGNED NOT NULL DEFAULT 0,
+  `progress_goal` INT UNSIGNED NOT NULL DEFAULT 0,
+  `map` VARCHAR(24) NOT NULL DEFAULT '',
+  `claimed_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_diary_reward_once` (`account_id`, `quest_type`, `quest_key`, `period_key`),
+  KEY `idx_claimed_at` (`claimed_at`),
+  KEY `idx_quest_period` (`quest_type`, `quest_key`, `period_key`),
+  KEY `idx_char_id` (`char_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
