@@ -244,7 +244,7 @@ moc_para01,42,36,3	script	Operador OS	4_M_REPAIR,{
 	mes "Posso trocar equipamentos e modulos usando Componentes Misteriosos e Cor Cores.";
 	next;
 
-	switch(select("Equipamentos Grace:Modulo de Arma:Modulo de Armadura:Arma OS:Equipamentos OS:Armadura Ilusional:Automatic:Cancelar")) {
+	switch(select("Equipamentos Grace:Modulo de Arma:Modulo de Armadura:Arma OS:Equipamentos OS:Armadura Ilusional:Armas Illusion:Automatic:Cancelar")) {
 	case 1:
 		callsub L_Grace;
 		end;
@@ -264,6 +264,9 @@ moc_para01,42,36,3	script	Operador OS	4_M_REPAIR,{
 		callsub L_IllusionArmor;
 		end;
 	case 7:
+		callsub L_IllusionWeapons;
+		end;
+	case 8:
 		callsub L_Automatic;
 		end;
 	default:
@@ -443,6 +446,55 @@ L_IllusionArmor:
 	next;
 	close2;
 	callshop "barter_illusion_armor";
+	end;
+
+L_IllusionWeapons:
+	mes "[Operador OS]";
+	mes "Posso abrir as trocas oficiais de equipamentos Illusion.";
+	mes "Cada loja mostra os itens e materiais exigidos visualmente.";
+	next;
+
+	switch(select(
+		"Illusion Moonlight:" +
+		"Illusion Frozen:" +
+		"Illusion Vampire:" +
+		"Illusion Turtle:" +
+		"Illusion Luanda:" +
+		"Illusion Underwater:" +
+		"Illusion Twins:" +
+		"Illusion Teddy Bear:" +
+		"Cancelar"
+	)) {
+	case 1:
+		.@shop$ = "barter_ill_moonlight";
+		break;
+	case 2:
+		.@shop$ = "barter_ill_frozen";
+		break;
+	case 3:
+		.@shop$ = "barter_ill_vampire";
+		break;
+	case 4:
+		.@shop$ = "barter_ill_turtle";
+		break;
+	case 5:
+		.@shop$ = "barter_ill_luanda";
+		break;
+	case 6:
+		.@shop$ = "barter_ill_underwater";
+		break;
+	case 7:
+		.@shop$ = "barter_ill_twins";
+		break;
+	case 8:
+		.@shop$ = "barter_ill_teddy";
+		break;
+	default:
+		close;
+	}
+
+	close2;
+	callshop .@shop$;
 	end;
 
 L_Automatic:
