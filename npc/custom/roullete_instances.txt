@@ -5,29 +5,67 @@ prontera,164,169,3	script	Roleta das Instâncias	563,{
 	// ===========================
 
 	setarray .inst_60$, 
-        "[30+] Vila dos Porings",
-        "[40+] Batalha dos Orcs",
-        "[50+] Torre Sem Fim",
-        "[55+] Ninho de Nidhog",
-        "[60+] Maldição de Glast Heim";
+        "Vila dos Porings",
+        "Batalha dos Orcs",
+        "Torre Sem Fim",
+        "Ninho de Nidhog",
+        "Maldicao de Glast Heim";
 
     setarray .inst_120$,  
-        "[75+] Santuário Selado",
-        "[90+] Laboratório Werner",
-        "[95+] Memórias de Sara",
-        "[100+] Espaço Infinito",
-        "[120+] Lago Bakonawa";
+        "Caverna do Polvo",
+        "Altar do Selo",
+        "Laboratório Werner",
+        "Torneio da Magia",
+        "Esgoto de Malangdo",
+        "Memórias de Sara",
+        "Espaço Infinito",
+        "Wave Mode - Floresta",
+        "Wave Mode - Ceu",
+        "Floresta Nebulosa",
+        "Ritual da Bencao",
+        "Hospital Abandonado",
+        "Lago Bakonawa",
+        "Palacio das Magoas";
 
     setarray .inst_175$,  
-        "[125+] Assalto ao Dirigível",
-        "[130+] Torre do Demônio",
-        "[135+] Laboratório Central",
-        "[140+] Fábrica de Brinquedos de Terror",
-        "[150+] Laboratório Wolfchev",
-        "[160+] Templo do Rei Demônio",
-        "[175+] Jardim Aquático";
-
-
+        "Assalto ao Dirigivel",
+        "Caverna Buwaya",
+        "Tumulo do Monarca",
+        "Charleston em Crise",
+        "Edda do Quarto Crescente",
+        "Queda de Glast Heim",
+        "Purificacao de Glast Heim",
+        "Purificacao de Glast Heim Hard",
+        "Torre do Demônio",
+        "Laboratório Central",
+        "Interior de Eclage",
+        "Fábrica de Brinquedos de Terror",
+        "Salao de Ymir",
+        "Base da Guerra Heart Hunter",
+        "Sarah e Fenrir",
+        "Jardim de Vermuth",
+        "Fazenda de Pitayas",
+        "Laboratório Wolfchev",
+        "Templo do Rei Demônio",
+        "Ilha de Bios",
+        "Caverna do Morse",
+        "Operacao OS",
+        "Memorial COR",
+        "Base Militar",
+        "Labirinto de Oz",
+        "Vila da Decepcao",
+        "Vila da Decepcao Avancada",
+        "Fortaleza Celeste",
+        "Duelo com Sweety",
+        "Jardim Aquatico",
+        "Covil da Rainha Verme",
+        "Pesadelo Musical",
+        "Floresta Profunda",
+        "Tumba do Remorso",
+        "Edda do Laboratorio",
+        "Geffen Night Arena",
+        "Constellation Tower",
+        "Glast Heim Modo Desafio";
 	setarray .inst_60_reward[0], 12259,12210,7621;
 	setarray .inst_120_reward[0], 22818,12223,12224;
 	setarray .inst_175_reward[0], 9609,12103,12214;
@@ -61,7 +99,7 @@ prontera,164,169,3	script	Roleta das Instâncias	563,{
 	mes "[Roleta das Instâncias]";
 	mes "Saudações, aventureiro!";
 	mes "Você pode realizar até ^00FF003 missões de instância diárias^000000:";
-	mes "? Uma de cada categoria de nível.";
+	mes "Uma de cada categoria de nível.";
 	next;
 
 	mes "Escolha a categoria de missão que deseja roletar:";
@@ -81,10 +119,12 @@ prontera,164,169,3	script	Roleta das Instâncias	563,{
 		"Lv 30~60 " + .@lv30_60$,
 		"Lv 60~120 " + .@lv60_120$,
 		"Lv 120~175 " + .@lv120_175$,
+		"Informações dos prêmios",
 		"Sair"
 	);
 
-	if (.@sel == 4) close;
+	if (.@sel == 4) goto L_InfoRewards;
+	if (.@sel == 5) close;
 
 	// ===============================
 	// CHECAGEM DE NÍVEL MÍNIMO
@@ -97,6 +137,7 @@ prontera,164,169,3	script	Roleta das Instâncias	563,{
 				close;
 			} 
 			if(#inst60_status == 2) {
+				set .@reward_cat$, "60";
 				goto L_Rewards;
 				break;
 			}
@@ -116,6 +157,7 @@ prontera,164,169,3	script	Roleta das Instâncias	563,{
 				close;
 			} 
 			if(#inst120_status == 2) {
+				set .@reward_cat$, "120";
 				goto L_Rewards;
 				break;
 			}
@@ -135,6 +177,7 @@ prontera,164,169,3	script	Roleta das Instâncias	563,{
 				close;
 			} 
 			if(#inst175_status == 2) {
+				set .@reward_cat$, "175";
 				goto L_Rewards;
 				break;
 			}
@@ -188,29 +231,64 @@ prontera,164,169,3	script	Roleta das Instâncias	563,{
 	mes "Complete-a e volte aqui para sua recompensa.";
 	close;
 
+L_InfoRewards:
+	mes "[Roleta das Instâncias]";
+	mes "Ao completar a missão sorteada, você recebe:";
+	mes "- ^00AA002 unidades^000000 de 1 item aleatório da categoria.";
+	mes "- ^00AA001x " + getitemname(40111) + "^000000 garantido.";
+	mes "- ^FF99005%^000000 de chance de receber ^00AA001x " + getitemname(9592) + "^000000.";
+	next;
+	mes "[Lv 30~60]";
+	mes "Sorteia 1 destes, com chances iguais:";
+	mes "- " + getitemname(12259) + " (12259)";
+	mes "- " + getitemname(12210) + " (12210)";
+	mes "- " + getitemname(7621) + " (7621)";
+	next;
+	mes "[Lv 60~120]";
+	mes "Sorteia 1 destes, com chances iguais:";
+	mes "- " + getitemname(22818) + " (22818)";
+	mes "- " + getitemname(12223) + " (12223)";
+	mes "- " + getitemname(12224) + " (12224)";
+	next;
+	mes "[Lv 120~175]";
+	mes "Sorteia 1 destes, com chances iguais:";
+	mes "- " + getitemname(9609) + " (9609)";
+	mes "- " + getitemname(12103) + " (12103)";
+	mes "- " + getitemname(12214) + " (12214)";
+	next;
+	mes "[Bônus diário]";
+	mes "Ao resgatar as 3 categorias no mesmo dia, você recebe ^00AA001x " + getitemname(12412) + "^000000.";
+	close;
+
 	// ===============================
 	// ENTREGA DE RECOMPENSAS
 	// ===============================
 L_Rewards:
 	mes "[Roleta das Instâncias]";	
 
-	if (#inst60_status == 2) {
-		getitem .inst_60_reward[rand(0,2)],1;
+	if (.@reward_cat$ == "60" && #inst60_status == 2) {
+		getitem .inst_60_reward[rand(0,2)],2;
+		getitem 40111,1;
+		if (rand(100) < 5) getitem 9592,1;
 		set #inst60_status,3;
 		mes "Recompensa da missão Lv 60 entregue!";
 		#recs++;
 		close;
 	}
-	if (#inst120_status == 2) {
-		getitem .inst_120_reward[rand(0,2)],1;
+	if (.@reward_cat$ == "120" && #inst120_status == 2) {
+		getitem .inst_120_reward[rand(0,2)],2;
+		getitem 40111,1;
+		if (rand(100) < 5) getitem 9592,1;
 		set #inst120_status,3;
 		mes "Recompensa da missão Lv 120 entregue!";
 		#recs++;
 		close;
 
 	}
-	if (#inst175_status == 2) {
-		getitem .inst_175_reward[rand(0,2)],1;
+	if (.@reward_cat$ == "175" && #inst175_status == 2) {
+		getitem .inst_175_reward[rand(0,2)],2;
+		getitem 40111,1;
+		if (rand(100) < 5) getitem 9592,1;
 		set #inst175_status,3;
 		mes "Recompensa da missão Lv 175 entregue!";
 		#recs++;

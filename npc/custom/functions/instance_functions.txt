@@ -323,6 +323,8 @@ function	script	F_InstanceHistoryCode	{
 		return "ThorGunsuBase";
 	if (.@key$ == "MazeofOz" || .@key$ == "Oz Labyrinth" || .@key$ == "Maze of Oz" || .@key$ == "Labirinto de Oz")
 		return "MazeofOz";
+	if (.@key$ == "SkyFortress" || .@key$ == "Sky Fortress" || .@key$ == "Fortaleza Celeste")
+		return "SkyFortress";
 	if (.@key$ == "OctopusCave" || .@key$ == "Octopus Cave" || .@key$ == "Caverna do Polvo")
 		return "OctopusCave";
 	if (.@key$ == "Regenschirm")
@@ -335,6 +337,39 @@ function	script	F_InstanceHistoryCode	{
 		return "SealedOs";
 
 	return .@key$;
+}
+
+function	script	F_InstanceRouletteComplete	{
+	.@finish_name$ = getarg(0, "");
+	.@finish_match$ = getarg(1, .@finish_name$);
+	.@finish_code$ = callfunc("F_InstanceHistoryCode", .@finish_name$);
+	.@match_code$ = callfunc("F_InstanceHistoryCode", .@finish_match$);
+
+	for (.@i = 0; .@i < 3; .@i++) {
+		if (.@i == 0) {
+			.@roulette_name_var$ = "#inst60_name$";
+			.@roulette_status_var$ = "#inst60_status";
+		}
+		else if (.@i == 1) {
+			.@roulette_name_var$ = "#inst120_name$";
+			.@roulette_status_var$ = "#inst120_status";
+		}
+		else {
+			.@roulette_name_var$ = "#inst175_name$";
+			.@roulette_status_var$ = "#inst175_status";
+		}
+
+		.@roulette_name$ = getd(.@roulette_name_var$);
+		if (.@roulette_name$ == "")
+			continue;
+
+		.@roulette_code$ = callfunc("F_InstanceHistoryCode", .@roulette_name$);
+		if (.@roulette_name$ == .@finish_name$ || .@roulette_name$ == .@finish_match$ || .@roulette_code$ == .@finish_code$ || .@roulette_code$ == .@match_code$) {
+			if (getd(.@roulette_status_var$) == 1)
+				setd(.@roulette_status_var$, 2);
+		}
+	}
+	return;
 }
 function	script	F_InstanceGetOpenLogId	{
 	.@instance_name$ = callfunc("F_InstanceHistoryCode", getarg(0, ""));
@@ -421,6 +456,7 @@ function	script	F_InstanceLogFinish	{
 function	script	F_InstanceFinishAnnounce	{
 	.@db_name$ = getarg(0);
 	callfunc("F_InstanceLogFinish", .@db_name$);
+	callfunc("F_InstanceRouletteComplete", .@db_name$);
 	if (#instancia == 1)
 		#instancia = 2;
 	announce "[Instancias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
@@ -461,6 +497,7 @@ function	script	F_InstanceFinishBase	{
 		if (.@roulette_name_value$ == .@roulette_match_name$)
 			setd(.@roulette_status_var$, 2);
 	}
+	callfunc("F_InstanceRouletteComplete", .@instance_name$, .@roulette_match_name$);
 	if (.@coin_amount > 0)
 		getitem 9608, .@coin_amount;
 	if (.@ticket_amount > 0)
