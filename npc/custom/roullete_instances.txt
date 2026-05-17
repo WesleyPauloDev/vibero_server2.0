@@ -10,19 +10,21 @@ function	script	F_InstanceRouletteLog	{
 	.@rare_amount = getarg(8, 0);
 	.@period_expr$ = "DATE_FORMAT(CURDATE(), '%Y-%m-%d')";
 
-	.@already_logged = 0;
-	query_logsql(
-		"SELECT COUNT(*) FROM `instance_roulette_log` " +
-		"WHERE `account_id` = " + getcharid(3) + " " +
-		"AND `event_type` = '" + escape_sql(.@event_type$) + "' " +
-		"AND `category` = '" + escape_sql(.@category$) + "' " +
-		"AND `period_key` = " + .@period_expr$,
-		.@already_logged
-	);
+	if (.@event_type$ == "reward" || .@event_type$ == "bonus") {
+		.@already_logged = 0;
+		query_logsql(
+			"SELECT COUNT(*) FROM `instance_roulette_log` " +
+			"WHERE `account_id` = " + getcharid(3) + " " +
+			"AND `event_type` = '" + escape_sql(.@event_type$) + "' " +
+			"AND `category` = '" + escape_sql(.@category$) + "' " +
+			"AND `period_key` = " + .@period_expr$,
+			.@already_logged
+		);
 
-	if (.@already_logged > 0) {
-		logmes "[INSTANCE_ROULETTE_DUPLICATE_BLOCK] acc=" + getcharid(3) + " char=" + getcharid(0) + " event=" + .@event_type$ + " category=" + .@category$;
-		return 0;
+		if (.@already_logged > 0) {
+			logmes "[INSTANCE_ROULETTE_DUPLICATE_BLOCK] acc=" + getcharid(3) + " char=" + getcharid(0) + " event=" + .@event_type$ + " category=" + .@category$;
+			return 0;
+		}
 	}
 
 	query_logsql(
@@ -76,7 +78,7 @@ OnInit:
 		"`map` VARCHAR(24) NOT NULL DEFAULT '', " +
 		"`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
 		"PRIMARY KEY (`id`), " +
-		"UNIQUE KEY `uq_instance_roulette_once` (`account_id`, `event_type`, `category`, `period_key`), " +
+
 		"KEY `idx_created_at` (`created_at`), " +
 		"KEY `idx_event_category_period` (`event_type`, `category`, `period_key`), " +
 		"KEY `idx_char_id` (`char_id`) " +
@@ -290,13 +292,26 @@ prontera,164,169,3	script	Roleta das Instâncias	563,{
 		mes "[Roleta das Instâncias]";
 		mes "Você já tem uma missão ativa nesta categoria (LV-" + .@cat$ + ").";
 		mes "Sua missão é ^0000FF" + getd("#inst"+.@cat$+"_name$") + "^000000.";
-		close;
+		next;
+		mes "Deseja girar novamente por ^FFAA0050.000 Zeny^000000?";
+		next;
+		if (select("Girar novamente:Manter missão atual") == 2)
+			close;
+		if (Zeny < 50000) {
+			mes "[Roleta das Instâncias]";
+			mes "Você precisa de ^FF000050.000 Zeny^000000 para girar novamente.";
+			close;
+		}
+		Zeny -= 50000;
+		.@reroll = 1;
 	}
 
-	mes "[Roleta das Instâncias]";
-	mes "Preparado para girar a roleta da categoria ^FFA500Lv " + .@cat$ + "^000000?";
-	next;
-	if (select("Sim:Não") == 2) close;
+	if (!.@reroll) {
+		mes "[Roleta das Instâncias]";
+		mes "Preparado para girar a roleta da categoria ^FFA500Lv " + .@cat$ + "^000000?";
+		next;
+		if (select("Sim:Não") == 2) close;
+	}
 
 	// ===============================
 	// ANIMAÇÃO DE ROLETA ??
@@ -316,8 +331,8 @@ prontera,164,169,3	script	Roleta das Instâncias	563,{
 	.@sorteada$ = getd(.@var$+"["+.@final+"]");
     .@inst_name$ = "#inst" + .@cat$ + "_name$";
     .@inst_status$ = "#inst" + .@cat$ + "_status";
-	if (!callfunc("F_InstanceRouletteLog", "roll", .@cat$, .@sorteada$, 0, 0, 0, 0, 0, 0)) {
-		mes "Voce ja possui uma roleta registrada hoje para esta categoria.";
+	if (!callfunc("F_InstanceRouletteLog", ((.@reroll) ? "reroll" : "roll"), .@cat$, .@sorteada$, 0, 0, 0, 0, 0, 0)) {
+		mes "Nao foi possivel registrar esta roleta no banco.";
 		close;
 	}
     setd(.@inst_name$, .@sorteada$);
@@ -330,29 +345,30 @@ L_InfoRewards:
 	mes "[Roleta das Instâncias]";
 	mes "Ao completar a missão sorteada, você recebe:";
 	mes "- ^00AA002 unidades^000000 de 1 item aleatório da categoria.";
-	mes "- ^00AA001x " + getitemname(40111) + "^000000 garantido.";
-	mes "- ^FF99005%^000000 de chance de receber ^00AA001x " + getitemname(9592) + "^000000.";
+	mes "- ^00AA001x Caixa de Encanto Visual^000000 garantido.";
+	mes "- ^FF99005%^000000 de chance de receber ^00AA001x Ticket de Refino Shadow Garantido^000000.";
+	mes "- Você pode girar novamente uma missão ativa por ^FFAA0050.000 Zeny^000000.";
 	next;
 	mes "[Lv 30~60]";
 	mes "Sorteia 1 destes, com chances iguais:";
-	mes "- " + getitemname(12259) + " (12259)";
-	mes "- " + getitemname(12210) + " (12210)";
-	mes "- " + getitemname(7621) + " (7621)";
+	mes "- Medicina Milagrosa";
+	mes "- Goma de Mascar";
+	mes "- Amuleto de Ziegfried";
 	next;
 	mes "[Lv 60~120]";
 	mes "Sorteia 1 destes, com chances iguais:";
-	mes "- " + getitemname(22818) + " (22818)";
-	mes "- " + getitemname(12223) + " (12223)";
-	mes "- " + getitemname(12224) + " (12224)";
+	mes "- Super Poção Média de Vida";
+	mes "- Macaroons Sortidos";
+	mes "- Taça da Felicidade";
 	next;
 	mes "[Lv 120~175]";
 	mes "Sorteia 1 destes, com chances iguais:";
-	mes "- " + getitemname(9609) + " (9609)";
-	mes "- " + getitemname(12103) + " (12103)";
-	mes "- " + getitemname(12214) + " (12214)";
+	mes "- Perg. de Proteção Química T.";
+	mes "- Galho Sangrento";
+	mes "- Espelho Convexo";
 	next;
 	mes "[Bônus diário]";
-	mes "Ao resgatar as 3 categorias no mesmo dia, você recebe ^00AA001x " + getitemname(12412) + "^000000.";
+	mes "Ao resgatar as 3 categorias no mesmo dia, você recebe ^00AA001x Chicle de Bola^000000.";
 	close;
 
 	// ===============================

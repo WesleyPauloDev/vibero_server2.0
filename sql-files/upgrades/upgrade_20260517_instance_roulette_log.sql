@@ -20,8 +20,11 @@ CREATE TABLE IF NOT EXISTS `instance_roulette_log` (
   `map` VARCHAR(24) NOT NULL DEFAULT '',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_instance_roulette_once` (`account_id`, `event_type`, `category`, `period_key`),
   KEY `idx_created_at` (`created_at`),
   KEY `idx_event_category_period` (`event_type`, `category`, `period_key`),
   KEY `idx_char_id` (`char_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- If this table was created by the previous version, run this once to allow
+-- multiple roll/reroll records per day:
+-- ALTER TABLE `instance_roulette_log` DROP INDEX `uq_instance_roulette_once`;
