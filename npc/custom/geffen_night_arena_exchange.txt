@@ -32,6 +32,20 @@ L_EnchantMenu:
 	mes "O equipamento precisa estar equipado.";
 	next;
 
+	switch(select("Encantar equipamento:Informacoes dos bonus:Cancelar")) {
+	case 1:
+		break;
+	case 2:
+		callsub L_EnchantInfo;
+		goto L_EnchantMenu;
+	default:
+		close;
+	}
+
+	mes "[Arena de Geffen]";
+	mes "Escolha a parte equipada que deseja encantar.";
+	next;
+
 	switch(select("Armadura:Capa:Acessorio esquerdo:Acessorio direito:Escudo:Cancelar")) {
 	case 1:
 		.@part = EQI_ARMOR;
@@ -113,6 +127,119 @@ L_EnchantMenu:
 	mes "[Arena de Geffen]";
 	mes "Encantamento aplicado.";
 	close;
+
+L_EnchantInfo:
+	mes "[Arena de Geffen]";
+	mes "Cada joia substitui as opcoes aleatorias atuais do equipamento.";
+	mes "Escolha o tipo para ver os bonus possiveis.";
+	next;
+
+	switch(select("Armadura:Capa:Acessorios:Escudo:Voltar")) {
+	case 1:
+		mes "[Armadura]";
+		mes "Linha 1:";
+		mes "- MaxHP +100~1500";
+		mes "- MaxSP +100~500";
+		mes "- MaxHP +1%~10%";
+		mes "- MaxSP +1%~10%";
+		next;
+		mes "[Armadura]";
+		mes "Linha 2:";
+		mes "- Recuperacao de HP +30%~65%";
+		mes "- Recuperacao de SP +30%~65%";
+		mes "- Esquiva +2~30";
+		mes "- DEF +10~55";
+		mes "- MDEF +1~6";
+		next;
+		mes "[Armadura]";
+		mes "Linha 2 tambem pode vir:";
+		mes "- Cura recebida +5%~10%";
+		mes "- Conjuracao variavel -1%~10%";
+		mes "- Reducao fisica ou magica contra monstros de elemento especifico +5%~10%";
+		next;
+		mes "[Armadura]";
+		mes "Linha 3:";
+		mes "- MaxHP +100~1500";
+		mes "- MaxSP +100~500";
+		break;
+	case 2:
+		mes "[Capa]";
+		mes "Linha 1:";
+		mes "- MaxHP +100~1000";
+		mes "- MaxSP +10~300";
+		mes "- MaxHP +1%~5%";
+		mes "- MaxSP +1%~5%";
+		next;
+		mes "[Capa]";
+		mes "Linha 2:";
+		mes "- Esquiva +5~20";
+		mes "- DEF +5~60";
+		mes "- MDEF +1~6";
+		mes "- Cura recebida +5%~10%";
+		mes "- Conjuracao variavel -1%~10%";
+		next;
+		mes "[Capa]";
+		mes "Linha 2 tambem pode vir:";
+		mes "- Reducao fisica ou magica contra monstros de elemento especifico +5%~10%";
+		mes "- Resistencia elemental +1%~5%";
+		next;
+		mes "[Capa]";
+		mes "Linha 3:";
+		mes "- MaxHP +200~800";
+		mes "- MaxSP +50~300";
+		break;
+	case 3:
+		mes "[Acessorios]";
+		mes "Linha 1:";
+		mes "- Velocidade de ataque +3%~7%";
+		mes "- Conjuracao variavel -5%~10%";
+		mes "- Critico +5~10";
+		mes "- Resistencia fogo/agua/terra/vento +3%~5%";
+		next;
+		mes "[Acessorios]";
+		mes "Linha 1 tambem pode vir:";
+		mes "- Consumo de SP -3%~5%";
+		mes "- MaxHP +1%~5%";
+		mes "- MaxSP +1%~5%";
+		mes "- ATK +1%~5%";
+		mes "- MATK +1%~5%";
+		next;
+		mes "[Acessorios]";
+		mes "Linha 2:";
+		mes "- Mesmos tipos da linha 1";
+		mes "- Velocidade de ataque +3%~5%";
+		mes "- Conjuracao variavel -5%~8%";
+		mes "- Critico +5~8";
+		mes "- MaxHP/MaxSP/ATK/MATK +1%~3%";
+		break;
+	case 4:
+		mes "[Escudo]";
+		mes "Linhas 1 e 2:";
+		mes "- MDEF +3~10";
+		mes "- DEF +30~100";
+		mes "- MaxHP +100~1000";
+		mes "- MaxSP +20~200";
+		mes "- Cura recebida +5%~10%";
+		mes "- Conjuracao variavel -1%~5%";
+		next;
+		mes "[Escudo]";
+		mes "Linhas 1 e 2 tambem podem vir:";
+		mes "- Resistencia contra raca especifica +2%~7%";
+		mes "- Dano fisico ou magico contra raca especifica +1%~5%";
+		mes "- Linha 2 pode vir com velocidade de ataque -1%~5%";
+		next;
+		mes "[Escudo]";
+		mes "Linha 3:";
+		mes "- ASPD +1";
+		mes "- Dano fisico ou magico contra raca especifica +5%~10%";
+		mes "- Ignora DEF/MDEF de raca, normal ou chefe +30%~60%";
+		mes "- Pos-conjuracao -1%~3%";
+		break;
+	default:
+		return;
+	}
+	next;
+	return;
 
 L_SetOpt:
 	setrandomoption getarg(0),getarg(1),getarg(2),rand(getarg(3),getarg(4)),0;
