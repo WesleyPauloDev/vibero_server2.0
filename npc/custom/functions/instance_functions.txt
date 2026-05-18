@@ -22,6 +22,15 @@ function	script	F_InstanceEntry	{
 
     .@cooldown_name$ = "#cooldown_" + .@cooldown_var$;
     .@status_name$ = "#" + .@status_var$ + "_STATUS";
+	.@shared_vdec = (.@status_var$ == "VillaDeception" || .@status_var$ == "VillaDeceptionAdvanced");
+	if (.@status_var$ == "VillaDeception") {
+		.@shared_cooldown_name$ = "#cooldown_vdec_adv";
+		.@shared_status_name$ = "#VillaDeceptionAdvanced_STATUS";
+	}
+	else if (.@status_var$ == "VillaDeceptionAdvanced") {
+		.@shared_cooldown_name$ = "#cooldown_vdec";
+		.@shared_status_name$ = "#VillaDeception_STATUS";
+	}
 
     // debugmes ".@db_name$: " + .@db_name$;
     // debugmes ".@npc_name$: " + .@npc_name$;
@@ -62,11 +71,14 @@ function	script	F_InstanceEntry	{
 	if (getd(.@cooldown_name$) < gettimetick(2) && getd(.@status_name$) != 0) {
         setd(.@status_name$, 0);
     }
+	if (.@shared_vdec && getd(.@shared_cooldown_name$) < gettimetick(2) && getd(.@shared_status_name$) != 0) {
+		setd(.@shared_status_name$, 0);
+	}
 
 	// ============================
 	// 4. Se ja completou hoje
 	// ============================
-	if (getd(.@status_name$) == 3) {
+	if (getd(.@status_name$) == 3 || (.@shared_vdec && getd(.@shared_status_name$) == 3)) {
 		mes "[" + .@npc_name$ + "]";
 		mes "Voce nao pode mais entrar nesta instancia hoje.";
 		mes "Volte amanha apos o reset diario.";
@@ -75,7 +87,7 @@ function	script	F_InstanceEntry	{
 
 	.@live_iid = instance_id(IM_PARTY);
 	.@same_live_instance = (.@live_iid > 0 && instance_live_info(ILI_NAME, .@live_iid) == .@db_name$);
-	if (getd(.@status_name$) > 0 && !.@same_live_instance) {
+	if ((getd(.@status_name$) > 0 || (.@shared_vdec && getd(.@shared_status_name$) > 0)) && !.@same_live_instance) {
 		mes "[" + .@npc_name$ + "]";
 		mes "Voce nao pode mais entrar nesta instancia hoje.";
 		mes "Volte amanha apos o reset diario.";
@@ -124,6 +136,10 @@ function	script	F_InstanceEntry	{
 
 					setd(.@cooldown_name$, gettimetick(2) + callfunc("get_daily_reset"));
 					setd(.@status_name$, 1);
+					if (.@shared_vdec) {
+						setd(.@shared_cooldown_name$, getd(.@cooldown_name$));
+						setd(.@shared_status_name$, 1);
+					}
 				} else {
 					mes "Falha ao criar a instancia.";
 				}
@@ -140,6 +156,10 @@ function	script	F_InstanceEntry	{
 				case IE_OK:
 					setd(.@cooldown_name$, gettimetick(2) + callfunc("get_daily_reset"));
 					setd(.@status_name$, 2);
+					if (.@shared_vdec) {
+						setd(.@shared_cooldown_name$, getd(.@cooldown_name$));
+						setd(.@shared_status_name$, 2);
+					}
 					if (.@hunt_quest > 0) {
 						if (isbegin_quest(.@hunt_quest))
 							erasequest .@hunt_quest;
@@ -514,12 +534,18 @@ function	script	F_InstanceMenuHistoryState	{
 		.@where$ = .@where$ + " OR `instance_code` IN ('Ghost Palace','Palacio das Magoas') OR `instance_name` IN ('Ghost Palace','Palacio das Magoas')";
 	else if (.@instance_code$ == "TombRemorse")
 		.@where$ = .@where$ + " OR `instance_code` IN ('Tomb of Remorse','Tumba do Remorso') OR `instance_name` IN ('Tomb of Remorse','Tumba do Remorso')";
-	query_sql("SELECT COALESCE(MAX(`completed_count`), 0), COALESCE(MAX(`tried_count`), 0) FROM `instance_monitor_member_state` WHERE `account_id` = "
-		+ getcharid(3) + " AND (" + .@where$ + ")", .@completed, .@entries);
+	query_sql("SELECT COUNT(*) FROM `instance_monitor_member_state` WHERE `account_id` = "
+		+ getcharid(3) + " AND (" + .@where$ + ") AND `completed_count` > 0 AND DATE(`last_completed_at`) = CURDATE()", .@completed);
 	if (.@completed > 0)
 		return 2;
+	query_sql("SELECT COUNT(*) FROM `instance_monitor_member_state` WHERE `account_id` = "
+		+ getcharid(3) + " AND (" + .@where$ + ") AND DATE(`last_try_at`) = CURDATE()", .@entries);
 	if (.@entries > 0)
 		return 1;
+	query_sql("SELECT COALESCE(MAX(`completed_count`), 0), COALESCE(MAX(`tried_count`), 0) FROM `instance_monitor_member_state` WHERE `account_id` = "
+		+ getcharid(3) + " AND (" + .@where$ + ")", .@completed, .@entries);
+	if (.@completed > 0 || .@entries > 0)
+		return 3;
 	return 0;
 }
 
@@ -548,10 +574,13 @@ function	script	F_InstanceMenuOption	{
 		return "^6CFF6C" + .@label$ + "^000000";
 
 	if (.@history == 2)
-		return "^FFD166" + .@label$ + "^000000";
+		return "^6CFF6C" + .@label$ + "^000000";
 
 	if (.@history == 1)
 		return "^FF5A5A" + .@label$ + "^000000";
+
+	if (.@history == 3)
+		return "^FFD166" + .@label$ + "^000000";
 
 	if (.@status > 0)
 		return "^FF5A5A" + .@label$ + "^000000";
@@ -562,7 +591,7 @@ function	script	F_InstanceMenuOption	{
 function	script	F_InstanceMenuResetStatus	{
 	.@cooldown_name$ = "#cooldown_" + getarg(0);
 	.@status_name$ = "#" + getarg(1) + "_STATUS";
-	if (getd(.@cooldown_name$) > 0 && getd(.@cooldown_name$) <= gettimetick(2) && getd(.@status_name$) > 0) {
+	if (getd(.@cooldown_name$) <= gettimetick(2) && getd(.@status_name$) > 0) {
 		callfunc("F_InstanceEnsureAttemptState", getarg(1), getarg(1));
 		setd(.@status_name$, 0);
 	}
@@ -582,10 +611,13 @@ function	script	F_InstanceMenuOptionRaw	{
 		return "^6CFF6C" + .@label$ + "^000000";
 
 	if (.@history == 2)
-		return "^FFD166" + .@label$ + "^000000";
+		return "^6CFF6C" + .@label$ + "^000000";
 
 	if (.@history == 1)
 		return "^FF5A5A" + .@label$ + "^000000";
+
+	if (.@history == 3)
+		return "^FFD166" + .@label$ + "^000000";
 
 	if (.@status == .@status_complete_1 || .@status == .@status_complete_2 || .@status > 0)
 		return "^FF5A5A" + .@label$ + "^000000";
@@ -596,9 +628,22 @@ function	script	F_InstanceMenuOptionRaw	{
 function	script	F_InstanceMenuResetStatusRaw	{
 	.@cooldown_name$ = getarg(0);
 	.@status_name$ = getarg(1);
-	if (getd(.@cooldown_name$) > 0 && getd(.@cooldown_name$) <= gettimetick(2) && getd(.@status_name$) > 0) {
+	if (getd(.@cooldown_name$) <= gettimetick(2) && getd(.@status_name$) > 0) {
 		callfunc("F_InstanceEnsureAttemptState", getarg(2), getarg(2));
 		setd(.@status_name$, 0);
+	}
+	return;
+}
+
+function	script	F_InstanceSyncVillaDeception	{
+	.@now = gettimetick(2);
+	if (#VillaDeception_STATUS > 0 && #cooldown_vdec > .@now && #VillaDeceptionAdvanced_STATUS == 0) {
+		#VillaDeceptionAdvanced_STATUS = #VillaDeception_STATUS;
+		#cooldown_vdec_adv = #cooldown_vdec;
+	}
+	if (#VillaDeceptionAdvanced_STATUS > 0 && #cooldown_vdec_adv > .@now && #VillaDeception_STATUS == 0) {
+		#VillaDeception_STATUS = #VillaDeceptionAdvanced_STATUS;
+		#cooldown_vdec = #cooldown_vdec_adv;
 	}
 	return;
 }
