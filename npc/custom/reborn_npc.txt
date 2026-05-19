@@ -41,6 +41,17 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 
 		.@was_second_visual = (getlook(LOOK_BODY2) >= 4332 && getlook(LOOK_BODY2) <= 4344);
 
+		.@mail_sender$ = "Reborn Master";
+		.@mail_title$ = "Recompensa de Reborn";
+		.@mail_body$ = "Parabens pelo renascimento. Seus tickets foram enviados como anexo deste RodEx.";
+		setarray .@mail_item[0], 9616;
+		setarray .@mail_amount[0], 1;
+		if (.@was_second_visual) {
+			set .@mail_item[1], 6959; // devolve ticket caso o jogador estivesse usando visual 2ND
+			set .@mail_amount[1], 1;
+		}
+		mail getcharid(0), .@mail_sender$, .@mail_title$, .@mail_body$, 0, .@mail_item, .@mail_amount;
+
 		// ===== Aplicar renascimento =====
 		// Mesmo fluxo do Job Master:
 		// salva a classe atual para manter a progressão linear no Job Master.
@@ -70,12 +81,6 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 		specialeffect2 EF_ELECTRIC;
 
 		setpcblock(0,0);
-
-		getitem 9616, 1; // item de renascimento, pode ser usado para futuras quests ou eventos
-		if (.@was_second_visual) {
-			getitem 6959, 1; // devolve ticket caso o jogador estivesse usando visual 2ND
-		}
-
 		mes "[Reborn Master]";
 		mes "Parabéns, você renasceu!";
 		close;
