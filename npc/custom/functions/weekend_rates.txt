@@ -13,6 +13,7 @@ OnInit:
 	.weekend_base_exp_rate = 200;
 	.weekend_job_exp_rate = 200;
 	.weekend_drop_rate = 150;
+	.bonus_week_active = 1; // Evento temporario: rates ativos a semana inteira.
 
 	bindatcmd "weekendrates", strnpcinfo(3)+"::OnAtcommand", 99, 99;
 	callsub S_ApplyRates, 0;
@@ -70,6 +71,9 @@ S_IsWeekendEvent:
 	.@day = gettime(DT_DAYOFWEEK);
 	.@hour = gettime(DT_HOUR);
 
+	if (.bonus_week_active)
+		return 1;
+
 	// Sexta a partir de 12:00.
 	if (.@day == 5 && .@hour >= 12)
 		return 1;
@@ -78,8 +82,8 @@ S_IsWeekendEvent:
 	if (.@day == 6 || .@day == 0)
 		return 1;
 
-	// Segunda inteira.
-	if (.@day == 1)
+	// Segunda ate 02:00.
+	if (.@day == 1 && .@hour < 2)
 		return 1;
 
 	return 0;
