@@ -454,21 +454,21 @@ L_Reset:
 	mes "[Oscar]";
 	mes "Posso remover os 3 encantamentos do Circlet equipado.";
 	mes "A carta real do item sera preservada.";
-	mes "Custo: ^0055FF2x " + getitemname(6909) + "^000000.";
+	mes "Custo: ^0055FF20x " + getitemname(25866) + "^000000.";
 	next;
 	if (select("Confirmar reset:Cancelar") == 2)
 		close;
 
-	if (countitem(6909) < 2) {
+	if (countitem(25866) < 20) {
 		mes "[Oscar]";
-		mes "Voce nao possui " + getitemname(6909) + " suficiente.";
+		mes "Voce nao possui " + getitemname(25866) + " suficiente.";
 		close;
 	}
 
 	if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@card[0], .@card[1], .@card[2], .@card[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine))
 		close;
 
-	delitem 6909,2;
+	delitem 25866,20;
 	progressbar "ff8080",2;
 	setitemcard(.@part,1,0);
 	setitemcard(.@part,2,0);

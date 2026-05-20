@@ -15,8 +15,7 @@ OnInit:
     end;
 
 OnClock2000:
-OnClock2330:
-    // verifica quarta (3) ou sexta (5) às 21h
+    // verifica quarta (3) ou sexta (5) às 20h
     .@day  = gettime(DT_DAYOFWEEK);
 	
     if (.@day == 3 || .@day == 5) {   
@@ -49,6 +48,8 @@ OnStartEvent:
     end;
 
 OnBossDead:   
+    getitem 9676, 1;
+    announce "[Evento] " + strcharinfo(0) + " recebeu " + getitemname(9676) + " por derrotar o Boss Global!", bc_all, 0xFF0000;
     enablenpc "Recompensa do Boss"; 
     announce "[Evento] O Boss Global foi derrotado!", bc_all, 0xFF0000;
 
@@ -58,6 +59,7 @@ OnBossDead:
 OnClock2030:
     if (.active == 2) {
         announce "[Evento Boss Global] O tempo acabou! O Boss fugiu.", bc_all, 0xFF0000;
+        killmonsterall .map$;
         .active = 0;
     }
     end;
@@ -85,22 +87,27 @@ boss_global,50,50,4	script	Recompensa do Boss	10403,{
     mes "[Parabéns!]";
     mes "Você venceu o Evento Boss Global!";
     
-    // Dá a recompensa
+    // Dá a recompensa. Os valores abaixo funcionam como pesos do sorteio.
     setarray .@rewards[0], 12259,12210,22818,12224,12223,7621,7776,9617,9642,9199, 9198;
     setarray .@chance[0],   30,   20,   10,   10,   10,  10,   5,   5,   5,  10,    10;
 
-    .@rand = rand(100);
+    .@total_chance = 0;
+    for (.@i = 0; .@i < getarraysize(.@chance); .@i++)
+        .@total_chance += .@chance[.@i];
+
+    .@rand = rand(.@total_chance);
     .@sum = 0;
+    .@rewardID = .@rewards[0];
 
     for (.@i = 0; .@i < getarraysize(.@rewards); .@i++) {
         .@sum += .@chance[.@i];
         if (.@rand < .@sum) {
-            .rewardID = .@rewards[.@i];
+            .@rewardID = .@rewards[.@i];
             break;
         }
     }
     getitem 9608, 20;
-    getitem .rewardID, 1;
+    getitem .@rewardID, 1;
     callfunc("F_DiaryRefreshDaily");
     callfunc("F_DiaryRefreshWeekly");
     if (#evento == 1)
