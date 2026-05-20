@@ -12,11 +12,14 @@ OnTalk:
 	mes "Saudacoes, guerreiro.";
 	mes "Eu sou o guardiao do ^FFCC00Dominio das Classes^000000.";
 	mes "Aqui, cada vez que voce atingir o nivel maximo com uma classe diferente sendo rate 1X,";
+	mes "e sendo classe transcendente ou classe expandida,";
 	mes "sua reputacao perante os deuses aumentara!";
 	next;
 
 	mes "[Dominio das Classes]";
-	mes "Cada classe nova que atingir o nivel maximo sendo rate 1X lhe dara ^00FF00pontos de reputacao^000000.";
+	mes "Cada classe nova aceita, em rate 1X e com classe trans ou expandidas,";
+	mes "Expandidas são: Super Aprendiz | Doram | Ninja | Justiceiro e Taekwon e evolucoes,";
+	mes "lhe dara ^00FF00pontos de reputacao^000000.";
 	mes "Ao alcancar certos niveis de reputacao, voce ganhara bonus especiais permanentes!";
 	next;
 
@@ -62,9 +65,9 @@ OnTalk:
 			}
 
 			.@required_job = (.@class_id == Job_Summoner ? 60 : 70);
-			if (BaseLevel < 175 || JobLevel < .@required_job) {
+			if (BaseLevel < 200 || JobLevel < .@required_job) {
 				mes "[Dominio das Classes]";
-				mes "Voce ainda nao alcancou o nivel necessario (175/" + .@required_job + ").";
+				mes "Voce ainda nao alcancou o nivel necessario (200/" + .@required_job + ").";
 				close;
 			}
 
@@ -82,6 +85,7 @@ OnTalk:
 			if (!.@eligible) {
 				mes "[Dominio das Classes]";
 				mes "Voce nao pode receber esta conquista com a classe atual.";
+				mes "Classes nao expandidas precisam ser do set transcendente.";
 				close;
 				end;
 			}

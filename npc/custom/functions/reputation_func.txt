@@ -4,12 +4,15 @@ function	script	F_AddRep	{
 	// 0: rep_id        (Id em reputation.yml)
 	// 1: add_points    (quanto vai adicionar)
 	// 2: ach_id        (achievement id, ex: 110002)
-	// 3: max_points    (Maximum em reputation.yml, ex: 3000)
+	// 3: max_points    (Maximum em reputation.yml)
 
 	.@rep_id     = getarg(0);
 	.@add_points = getarg(1);
 	.@ach_id     = getarg(2);
 	.@max_points = getarg(3);
+	.@db_max = callfunc("F_GetRepMax", .@rep_id);
+	if (.@db_max > .@max_points)
+		.@max_points = .@db_max;
 
 	// adiciona reputacao
 	if (.@rep_id == 7) {
@@ -53,6 +56,9 @@ function	script	F_SyncRepAchievement	{
 	.@rep_id     = getarg(0);
 	.@ach_id     = getarg(1);
 	.@max_points = getarg(2);
+	.@db_max = callfunc("F_GetRepMax", .@rep_id);
+	if (.@db_max > .@max_points)
+		.@max_points = .@db_max;
 
 	if (.@rep_id == 7)
 		return;
@@ -64,6 +70,24 @@ function	script	F_SyncRepAchievement	{
 	return;
 }
 
+
+function	script	F_GetRepMax	{
+	switch (getarg(0)) {
+		case 1:
+			return 10000;
+		case 2:
+			return 3000;
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+			return 10000;
+		case 7:
+		case 8:
+			return 5000;
+	}
+	return getarg(1, 0);
+}
 function	script	F_PartyNearbyKillReward	{
 
 	// 0: map$               mapa valido para a recompensa

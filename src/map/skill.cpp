@@ -16828,6 +16828,12 @@ static int32 skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, 
 				status_change_clear_buffs(bl, SCCB_HERMODE); //Should dispell only allies.
 			[[fallthrough]];
 		case UNT_RICHMANKIM:
+			if (sg->skill_id == BD_RICHMANKIM) {
+				if (!sce)
+					sc_start4(ss, bl, type, 100, sg->skill_lv, sg->val1, sg->src_id, ss->m, sg->limit);
+				break;
+			}
+			[[fallthrough]];
 		case UNT_ETERNALCHAOS:
 		case UNT_DRUMBATTLEFIELD:
 		case UNT_RINGNIBELUNGEN:

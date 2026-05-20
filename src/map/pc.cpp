@@ -6924,6 +6924,29 @@ int32 pc_steal_coin(map_session_data *sd,struct block_list *target)
 	return 0;
 }
 
+static int32 pc_richmankim_end_by_caster_sub(struct block_list *bl, va_list ap)
+{
+	map_session_data *sd = (map_session_data *)bl;
+	int32 caster_id = va_arg(ap, int32);
+	bool clear_unlinked = va_arg(ap, int32) != 0;
+	status_change_entry *sce = sd->sc.getSCE(SC_RICHMANKIM);
+
+	if (sce && (sce->val3 == caster_id || (clear_unlinked && sce->val3 == 0)))
+		status_change_end(sd, SC_RICHMANKIM);
+
+	return 0;
+}
+
+void pc_richmankim_end_by_caster(map_session_data *sd, bool clear_unlinked)
+{
+	if (sd != nullptr) {
+		if (clear_unlinked && pc_checkskill(sd, BD_RICHMANKIM) == 0)
+			clear_unlinked = false;
+
+		map_foreachinmap(pc_richmankim_end_by_caster_sub, sd->m, BL_PC, sd->id, clear_unlinked ? 1 : 0);
+	}
+}
+
 /*==========================================
  * Set's a player position.
  * @param sd
@@ -7007,6 +7030,13 @@ enum e_setpos pc_setpos(map_session_data* sd, uint16 mapindex, int32 x, int32 y,
 						sce->timer = add_timer(gettick() + skill_get_time(it.second->skill_id, sce->val1), status_change_timer, sd->id, it.first);
 					}
 				}
+			}
+
+			if (status_change_entry *sce = sc->getSCE(SC_RICHMANKIM)) {
+				if (sce->val3 == sd->id)
+					pc_richmankim_end_by_caster(sd, false);
+				else
+					status_change_end(sd, SC_RICHMANKIM);
 			}
 		}
 		for(int32 i = 0; i < EQI_MAX; i++ ) {
@@ -9819,6 +9849,8 @@ int32 pc_dead(map_session_data *sd,struct block_list *src)
 			return 0;
 		}
 	}
+
+	pc_richmankim_end_by_caster(sd, true);
 
 	for(k = 0; k < MAX_DEVOTION; k++) {
 		if (sd->devotion[k]){

@@ -1411,6 +1411,7 @@ bool pc_has_permission( map_session_data* sd, e_pc_permission permission );
 bool pc_should_log_commands(map_session_data *sd);
 
 void pc_setrestartvalue(map_session_data *sd, char type);
+void pc_richmankim_end_by_caster(map_session_data *sd, bool clear_unlinked);
 void pc_makesavestatus(map_session_data *sd);
 void pc_respawn(map_session_data* sd, clr_type clrtype);
 void pc_setnewpc(map_session_data *sd, uint32 account_id, uint32 char_id, int32 login_id1, t_tick client_tick, int32 sex, int32 fd);
