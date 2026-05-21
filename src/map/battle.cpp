@@ -2041,8 +2041,8 @@ int64 battle_calc_damage(struct block_list *src,struct block_list *bl,struct Dam
 			damage = div_;
 	}
 
-	if (sd && pc_ismadogear(sd)) {
-		pc_overheat(*sd, (battle_get_weapon_element(d, src, bl, skill_id, skill_lv, EQI_HAND_R, false) == ELE_FIRE ? 3 : 1));
+	if (tsd && pc_ismadogear(tsd)) {
+		pc_overheat(*tsd, (battle_get_weapon_element(d, src, bl, skill_id, skill_lv, EQI_HAND_R, false) == ELE_FIRE ? 3 : 1));
 	}
 
 	// Target status (again), required for RELIEVE
