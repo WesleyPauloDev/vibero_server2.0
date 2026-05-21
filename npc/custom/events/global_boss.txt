@@ -10,6 +10,8 @@ OnInit:
     .map$      = "boss_global";
     .active    = 0;    
     disablenpc "Recompensa do Boss";
+    stopnpctimer;
+    killmonsterall .map$;
 
     // Checa a cada minuto se precisa iniciar
     end;
@@ -18,7 +20,9 @@ OnClock2000:
     // verifica quarta (3) ou sexta (5) às 20h
     .@day  = gettime(DT_DAYOFWEEK);
 	
-    if (.@day == 3 || .@day == 5) {   
+    if (.@day == 3 || .@day == 5) {
+        stopnpctimer;
+        killmonsterall .map$;
         disablenpc "Recompensa do Boss";     
 		.active = 1;
 		initnpctimer;
@@ -38,11 +42,19 @@ OnTimer240000:
 OnTimer300000:
     announce "[Evento Boss Global Começou]", bc_all, 0xFF0000;
     .active = 2;
-    stopnpctimer;
     donpcevent .npc_name$ + "::OnStartEvent";
     end;
 
+OnTimer1800000:
+    if (.active == 2) {
+        announce "[Evento Boss Global] O tempo acabou! O Boss fugiu.", bc_all, 0xFF0000;
+        callsub S_EndEvent;
+    }
+    stopnpctimer;
+    end;
+
 OnStartEvent:	
+    killmonsterall .map$;
     mapannounce .map$, "[Evento] O Boss Global apareceu!", bc_all;
     monster .map$, 50, 50, "Boss Global", 21401, 1, .npc_name$ + "::OnBossDead";    
     end;
@@ -54,15 +66,31 @@ OnBossDead:
     announce "[Evento] O Boss Global foi derrotado!", bc_all, 0xFF0000;
 
     .active = 0;	
+    stopnpctimer;
     end;
 
 OnClock2030:
     if (.active == 2) {
         announce "[Evento Boss Global] O tempo acabou! O Boss fugiu.", bc_all, 0xFF0000;
-        killmonsterall .map$;
-        .active = 0;
+        callsub S_EndEvent;
     }
     end;
+
+S_EndEvent:
+    .active = 0;
+    disablenpc "Recompensa do Boss";
+
+    getmapunits(BL_PC, .map$, .@units);
+    for (.@i = 0; .@i < getarraysize(.@units); .@i++) {
+        if (attachrid(.@units[.@i])) {
+            warp "SavePoint", 0, 0;
+            detachrid;
+        }
+    }
+
+    sleep 1000;
+    killmonsterall .map$;
+    return;
 }
 
 //-----------------------------------------------------------
