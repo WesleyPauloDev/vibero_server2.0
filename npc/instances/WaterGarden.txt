@@ -13,7 +13,16 @@
 -	script	WATERGARDEN_Instance#Custom	-1,{
 
 	OnStartInstance:
+		callsub S_ResetSharedDailyLock;
+
 		if (#WATERGARDEN_MODE == 1) {
+			if (#WATERGARDEN_STATUS > 0) {
+				mes "[Harad]";
+				mes "Voce ja acessou o Jardim Aquatico normal hoje.";
+				mes "O modo normal e o modo hard compartilham o mesmo limite diario.";
+				mes "Volte amanha apos o reset diario.";
+				close;
+			}
 			callfunc("F_InstanceEntry",
 				"Water Garden Hard",
 				"Harad",
@@ -24,6 +33,13 @@
 			);
 		}
 		else {
+			if (#WATERGARDEN_HARD_STATUS > 0) {
+				mes "[Harad]";
+				mes "Voce ja acessou o Water Garden Hard hoje.";
+				mes "O modo normal e o modo hard compartilham o mesmo limite diario.";
+				mes "Volte amanha apos o reset diario.";
+				close;
+			}
 			callfunc("F_InstanceEntry",
 				"Jardim Aquatico",
 				"Harad",
@@ -34,6 +50,13 @@
 			);
 		}
 	end;
+
+S_ResetSharedDailyLock:
+	if (#cooldown_water_garden < gettimetick(2) && #WATERGARDEN_STATUS != 0)
+		#WATERGARDEN_STATUS = 0;
+	if (#cooldown_water_garden_hard < gettimetick(2) && #WATERGARDEN_HARD_STATUS != 0)
+		#WATERGARDEN_HARD_STATUS = 0;
+	return;
 }
 
 // ba_maison,238,44,5	script	Harad#jh_ba1	4_EP17_BASIC_B,{
