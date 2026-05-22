@@ -79,6 +79,8 @@ function	script	F_mobidle	{
 	.@dist_min = 300;
 	.@size = getarg(1);
 	.@dx = getarg(3);
+	if (!unitexists(.@game_id))
+		return 0;
 	getunitdata .@game_id, .@data;
 
 	for ( .@i = 0; .@i < .@size; .@i++ ) {
@@ -111,6 +113,8 @@ function	script	F_mobidle	{
 		unitwalk .@game_id, (getelementofarray( getarg(2),.@index ) + .@dx), getelementofarray( getarg(4),.@index );
 		sleep2 50;	// for now a delay between unitwalk and mob_setidleevent is needed
 	}
+	if (!unitexists(.@game_id))
+		return 0;
 	mob_setidleevent .@game_id, getarg(0);
 	return 0;
 }
@@ -536,10 +540,14 @@ S_Spawn:
 	.@x = 48 + getarg(0);
 	monster 'map_def01$,.@x,74, "Invasor!", 'mob_id,1, 'npc_name$ + "::OnMobDead";
 	.@gid = $@mobid[0];
+	if (!unitexists(.@gid))
+		end;
 	setunitdata .@gid, UMOB_MODE, ( MD_CANMOVE|MD_NORANDOMWALK );
 	setunitdata .@gid, UMOB_IGNORE_CELL_STACK_LIMIT, true;
 	unitwalk .@gid, ('x_mob[1] + getarg(0)), 'y_mob[1];
 	sleep 50;
+	if (!unitexists(.@gid))
+		end;
 	mob_setidleevent .@gid, 'npc_name$ + "::OnIdle" + getarg(0);
 	end;
 OnMobDead:
@@ -784,10 +792,14 @@ OnStop:
 OnStart:
 	monster 'map_def02$,29,35, "Mercenario", 3086,1, "",0,AI_WAVEMODE;	// WA_MERCENARY
 	.@gid = $@mobid[0];
+	if (!unitexists(.@gid))
+		end;
 	emotion ET_SURPRISE, .@gid;
 	setunitdata .@gid, UMOB_IGNORE_CELL_STACK_LIMIT, true;
 	unitwalk .@gid, 'x_merc[1], 'y_merc[1];
 	sleep 50;
+	if (!unitexists(.@gid))
+		end;
 	mob_setidleevent .@gid, 'npc_name_mercenary$ + "::OnIdle";
 	sleep 45000;
 	if (unitexists(.@gid))
@@ -848,13 +860,17 @@ OnTimer8500:
 
 S_Spawn:
 	monster 'map_def02$,48,67, (('wave_num % 5) ? "Avance!" : "Campeao!"), 'mob_id,1, 'npc_name_mob$ + "::OnMobDead";
-	if (getarg(0) == true || ('wave_num % 5) == 0)
-		setunitdata $@mobid[0], UMOB_MODE, ( MD_CANMOVE|MD_NORANDOMWALK|MD_AGGRESSIVE|MD_CANATTACK );
 	.@gid = $@mobid[0];
+	if (!unitexists(.@gid))
+		end;
+	if (getarg(0) == true || ('wave_num % 5) == 0)
+		setunitdata .@gid, UMOB_MODE, ( MD_CANMOVE|MD_NORANDOMWALK|MD_AGGRESSIVE|MD_CANATTACK );
 	emotion ET_SURPRISE, .@gid;
 	setunitdata .@gid, UMOB_IGNORE_CELL_STACK_LIMIT, true;
 	unitwalk .@gid, 'x_mob[1], 'y_mob[1];
 	sleep 50;
+	if (!unitexists(.@gid))
+		end;
 	mob_setidleevent .@gid, 'npc_name_mob$ + "::OnIdle";
 	end;
 OnMobDead:
