@@ -56,6 +56,11 @@ static DBMap* bowling_db = nullptr; // int32 mob_id -> struct mob_data*
 
 DBMap* skillunit_db = nullptr; // int32 id -> struct skill_unit*
 
+static bool skill_is_mechanic_faw_mob(mob_data* md)
+{
+	return md != nullptr && (mob_is_mechanic_faw(md->mob_id) || (md->special_state.ai == AI_FAW && md->master_id > 0));
+}
+
 /**
  * Skill Unit Persistency during endack routes (mostly for songs see bugreport:4574)
  */
@@ -3609,6 +3614,13 @@ int64 skill_attack (int32 attack_type, struct block_list* src, struct block_list
 	nullpo_ret(src);	//Source is the master behind the attack (player/mob/pet)
 	nullpo_ret(dsrc);	//dsrc is the actual originator of the damage, can be the same as src, or a skill casted by src.
 	nullpo_ret(bl);		//Target to be attacked.
+
+	if (skill_id != NC_DISJOINT && bl->type == BL_MOB) {
+		mob_data* md = BL_CAST(BL_MOB, bl);
+
+		if (skill_is_mechanic_faw_mob(md))
+			return 0;
+	}
 
 	if (status_bl_has_mode(bl,MD_SKILLIMMUNE) || (status_get_class(bl) == MOBID_EMPERIUM && !skill_get_inf2(skill_id, INF2_TARGETEMPERIUM)))
 		return 0;
@@ -11971,7 +11983,7 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 		{
 			if( bl->type != BL_MOB ) break;
 			md = map_id2md(bl->id);
-			if( md && md->mob_id >= MOBID_SILVERSNIPER && md->mob_id <= MOBID_MAGICDECOY_WIND )
+			if( skill_is_mechanic_faw_mob(md) && md->master_id == src->id )
 				status_kill(bl);
 			clif_skill_nodamage(src, *bl, skill_id, skill_lv);
 		}
@@ -13922,6 +13934,13 @@ static int8 skill_castend_id_check(struct block_list *src, struct block_list *ta
 			break;
 	}
 
+	if (skill_id == NC_DISJOINT && target->type == BL_MOB) {
+		mob_data* md = BL_CAST(BL_MOB, target);
+
+		if (skill_is_mechanic_faw_mob(md) && md->master_id == src->id)
+			return -1;
+	}
+
 	if (inf && battle_check_target(src, target, inf) <= 0) {
 		switch(skill_id) {
 			case RK_PHANTOMTHRUST:
@@ -14018,6 +14037,8 @@ TIMER_FUNC(skill_castend_id){
 
 		// These actions happen even if the skill fails except when the caster is already dead
 		unit_set_attackdelay(*src, tick, DELAY_EVENT_CASTEND);
+
+
 		if (md != nullptr) {
 			if (md->skill_idx >= 0 && md->db->skill[md->skill_idx]->emotion >= ET_SURPRISE && md->db->skill[md->skill_idx]->emotion < ET_MAX)
 				clif_emotion(*src, static_cast<emotion_type>(md->db->skill[md->skill_idx]->emotion));
@@ -14261,7 +14282,9 @@ TIMER_FUNC(skill_castend_id){
 
 		map_freeblock_lock();
 
-		if (skill_get_casttype(ud->skill_id) == CAST_NODAMAGE)
+		if (ud->skill_id == NC_DISJOINT)
+			skill_castend_nodamage_id(src,target,ud->skill_id,ud->skill_lv,tick,flag);
+		else if (skill_get_casttype(ud->skill_id) == CAST_NODAMAGE)
 			skill_castend_nodamage_id(src,target,ud->skill_id,ud->skill_lv,tick,flag);
 		else
 			skill_castend_damage_id(src,target,ud->skill_id,ud->skill_lv,tick,flag);
@@ -14390,6 +14413,7 @@ TIMER_FUNC(skill_castend_pos){
 
 		// These actions happen even if the skill fails except when the caster is already dead
 		unit_set_attackdelay(*src, tick, DELAY_EVENT_CASTEND);
+
 		if (md != nullptr) {
 			if (md->skill_idx >= 0 && md->db->skill[md->skill_idx]->emotion >= ET_SURPRISE && md->db->skill[md->skill_idx]->emotion < ET_MAX)
 				clif_emotion(*src, static_cast<emotion_type>(md->db->skill[md->skill_idx]->emotion));

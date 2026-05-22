@@ -89,6 +89,11 @@ enum MOBID {
 	MOBID_BIONIC_HELLTREE,
 };
 
+inline bool mob_is_mechanic_faw(uint32 mob_id)
+{
+	return mob_id >= MOBID_SILVERSNIPER && mob_id <= MOBID_MAGICDECOY_WIND;
+}
+
 ///Mob skill states.
 enum MobSkillState {
 	MSS_ANY = -1,

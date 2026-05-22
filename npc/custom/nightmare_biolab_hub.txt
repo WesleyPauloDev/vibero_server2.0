@@ -425,73 +425,49 @@ L_Victimized:
 	mes "[Sombra do Pesar]";
 	mes "Entregue uma arma preenchida por ressentimento, e eu a restaurarei em " + getitemname(6820) + ".";
 	mes "Chance: 70% para 1, 20% para 2 e 10% para 3 " + getitemname(6820) + ".";
-	while (true) {
-		next;
-		if (checkweight(2677,5) == 0) {
-			mes "[Sombra do Pesar]";
-			mes "Sua mochila esta cheia.";
-			close;
-		}
-		.@menu_main = select("Entregar arma.","Voltar ao menu principal.","Encerrar");
-		if (.@menu_main == 2)
-			goto L_MainMenu;
-		else if (.@menu_main == 3)
-			close;
-		mes "[Sombra do Pesar]";
-		mes "Que tipo de arma voce quer entregar?";
-		next;
-		while (true) {
-			switch (select("Voltar","Katar","Arco","Machado, Maca, Livro","Cajado","Espada, Adaga","Lanca, Espada de duas maos","Instrumento musical, Chicote, Soqueira")) {
-			case 1:
-				goto L_Victimized;
-			case 2:
-				callsub L_Exchange,1284,1290,1285,1291;
-				continue;
-			case 3:
-				callsub L_Exchange,18109,18110,1745,18103,18111;
-				continue;
-			case 4:
-				callsub L_Exchange,1311,1392,1393,16017,16010,2161,1584,16000,16001;
-				continue;
-			case 5:
-				callsub L_Exchange,2005,2004,1647,1659,1646,1654;
-				continue;
-			case 6:
-				callsub L_Exchange,13431,13421,13061,13062,13070,13069,13046,13047;
-				continue;
-			case 7:
-				callsub L_Exchange,1433,1435,1490,1196,1189;
-				continue;
-			case 8:
-				callsub L_Exchange,1930,1984,1985,1830;
-				continue;
-			}
-		}
-	}
 
-L_Exchange:
-	.@size = getargcount();
-	.@menu$ = "Voltar:";
-	for (.@i = 0; .@i < .@size; .@i++) {
-		if (countitem(getarg(.@i)) < 1)
-			.@menu$ += "^999999Falta " + getitemname(getarg(.@i)) + ".^000000:";
-		else
-			.@menu$ += "Entregar " + getitemname(getarg(.@i)) + ".:";
-	}
-	.@s = select(.@menu$) - 2;
-	if (.@s == -1)
-		return;
-	mes "[Sombra do Pesar]";
-	mes "Vou restaurar esta arma em " + getitemname(6820) + ". Voce concorda?";
+L_Victimized_Menu:
 	next;
-	if (select("Cancelar.","Adquirir " + getitemname(6820) + ".") == 1)
-		return;
-	if (countitem(getarg(.@s)) < 1) {
+	if (checkweight(2677,5) == 0) {
 		mes "[Sombra do Pesar]";
-		mes "Voce nao possui ^006400" + getitemname(getarg(.@s)) + "^000000.";
-		return;
+		mes "Sua mochila esta cheia.";
+		close;
 	}
-	progressbar "000000",5;
+	setarray .@item[0],1284,1290,1285,1291,18109,18110,1745,18103,18111,1311,1392,1393,16017,16010,2161,1584,16000,16001,2005,2004,1647,1659,1646,1654,13431,13421,13061,13062,13070,13069,13046,13047,1433,1435,1490,1196,1189,1930,1984,1985,1830;
+	.@menu$ = "";
+	.@count = 0;
+	for (.@i = 0; .@i < getarraysize(.@item); .@i++) {
+		.@amount = countitem(.@item[.@i]);
+		if (.@amount < 1)
+			continue;
+		.@weapon[.@count] = .@item[.@i];
+		.@menu$ += "Entregar " + getitemname(.@item[.@i]) + " [" + .@amount + "]" + ":";
+		.@count++;
+	}
+	mes "[Sombra do Pesar]";
+	if (.@count < 1) {
+		mes "Voce nao possui nenhuma arma elegivel para troca.";
+		next;
+		switch (select("Voltar ao menu principal.","Encerrar")) {
+		case 1:
+			goto L_MainMenu;
+		default:
+			close;
+		}
+	}
+	mes "Escolha a arma que deseja entregar.";
+	.@s = select(.@menu$ + "Voltar ao menu principal.:Encerrar") - 1;
+	if (.@s == .@count)
+		goto L_MainMenu;
+	else if (.@s == .@count + 1)
+		close;
+	.@weapon_id = .@weapon[.@s];
+	if (countitem(.@weapon_id) < 1) {
+		mes "[Sombra do Pesar]";
+		mes "Voce nao possui ^006400" + getitemname(.@weapon_id) + "^000000.";
+		goto L_Victimized_Menu;
+	}
+	progressbar "000000",2;
 	specialeffect EF_BLACKBODY;
 	specialeffect EF_GUMGANG4;
 	specialeffect EF_DARKCASTING2;
@@ -499,7 +475,7 @@ L_Exchange:
 	percentheal -50,-50;
 	specialeffect2 EF_POISONSMOKE;
 	specialeffect2 EF_NPC_BURNT;
-	delitem getarg(.@s),1;
+	delitem .@weapon_id,1;
 	.@r = rand(100);
 	if (.@r < 70)
 		.@amount = 1;
@@ -512,7 +488,15 @@ L_Exchange:
 	mes "A arma foi restaurada em " + .@amount + " " + getitemname(6820) + ".";
 	next;
 	mes "- Recebi dano critico da poderosa onda mental que invadiu meu corpo. -";
-	return;
+	next;
+	switch (select("Continuar trocando.","Voltar ao menu principal.","Encerrar")) {
+	case 1:
+		goto L_Victimized_Menu;
+	case 2:
+		goto L_MainMenu;
+	default:
+		close;
+	}
 
 L_Sorrowful:
 	mes "[Sombra do Remorso]";

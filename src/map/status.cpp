@@ -1494,6 +1494,13 @@ int32 status_damage(struct block_list *src,struct block_list *target,int64 dhp, 
 
 	nullpo_ret(target);
 
+	if (target->type == BL_MOB) {
+		mob_data* md = BL_CAST(BL_MOB, target);
+
+		if (md != nullptr && (mob_is_mechanic_faw(md->mob_id) || (md->special_state.ai == AI_FAW && md->master_id > 0)) && skill_id != NC_DISJOINT && dhp > 0 && !(flag&4))
+			return 0;
+	}
+
 	if(sp && !(target->type&BL_CONSUME))
 		sp = 0; // Not a valid SP target.
 

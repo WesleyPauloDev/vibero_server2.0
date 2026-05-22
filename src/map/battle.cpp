@@ -332,6 +332,13 @@ int32 battle_damage(struct block_list *src, struct block_list *target, int64 dam
 	if (target == nullptr)
 		return 0;
 
+	if (target->type == BL_MOB && damage > 0 && skill_id != NC_DISJOINT) {
+		mob_data* md = BL_CAST(BL_MOB, target);
+
+		if (md != nullptr && (mob_is_mechanic_faw(md->mob_id) || (md->special_state.ai == AI_FAW && md->master_id > 0)))
+			return 0;
+	}
+
 	// SP damage does not trigger anything, just substracts SP
 	if (isspdamage)
 		return status_zap(target, 0, damage, 0);
@@ -10530,6 +10537,13 @@ enum damage_lv battle_weapon_attack(struct block_list* src, struct block_list* t
 
 	if (src->prev == nullptr || target->prev == nullptr)
 		return ATK_NONE;
+
+	if (target->type == BL_MOB) {
+		mob_data* md = BL_CAST(BL_MOB, target);
+
+		if (md != nullptr && (mob_is_mechanic_faw(md->mob_id) || (md->special_state.ai == AI_FAW && md->master_id > 0)))
+			return ATK_NONE;
+	}
 
 	sd = BL_CAST(BL_PC, src);
 	tsd = BL_CAST(BL_PC, target);
