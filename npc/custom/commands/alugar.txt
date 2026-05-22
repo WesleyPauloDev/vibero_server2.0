@@ -43,10 +43,6 @@ function	script	alugar_function	{
 				setmadogear true,MADO_SUIT;
 				break;
 			}
-		// Se nao esta com Madogear e tem a skill para usar Madogear
-		} else if (!checkmadogear() && getskilllv("NC_MADOLICENCE")) {
-			if (select(" ~ Carrinho: ~ Madogear") == 1) setcart;
-			else setmadogear;
 		} else setcart;
 
 	// Se tem a skill de carrinho e nao tem carrinho
@@ -61,7 +57,10 @@ function	script	alugar_function	{
 		else setriding;
 
 	// Se tem a skill de usar Madogear e nao esta com um
-	} else if (!checkmadogear() && getskilllv("NC_MADOLICENCE")) setmadogear;
+	} else if (!checkmadogear() && getskilllv("NC_MADOLICENCE")) {
+		if (select(" ~ Madogear01: ~ Madogear02") == 1) setmadogear true;
+		else setmadogear true,MADO_SUIT;
+	}
 
 	// Se nao atende nenhum criterio
 	else {

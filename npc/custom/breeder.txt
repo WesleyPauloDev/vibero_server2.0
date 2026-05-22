@@ -38,10 +38,19 @@
 
 	// Se for um Mecânico e tem a skill carrinho mas ainda não tem um
 	} else if (((eaclass() & EAJ_THIRDMASK) == EAJ_MECHANIC) && !checkcart() && getskilllv("MC_PUSHCART")) {
-		// Se não está com Madogear e tem a skill para usar Madogear
+		// Mecânico pode escolher entre carrinho, Madogear 01 e Madogear 02
 		if (!checkmadogear() && getskilllv("NC_MADOLICENCE")) {
-			if (select(" ~ Carrinho: ~ Madogear") == 1) setcart;
-			else setmadogear;
+			switch (select(" ~ Carrinho: ~ Madogear01: ~ Madogear02")) {
+			case 1:
+				setcart;
+				break;
+			case 2:
+				setmadogear true;
+				break;
+			case 3:
+				setmadogear true,MADO_SUIT;
+				break;
+			}
 		} else setcart;
 
 	// Se tem a skill de carrinho e não tem carrinho
@@ -56,7 +65,10 @@
 		else setriding;
 
 	// Se tem a skill de usar Madogear e não está com um
-	} else if (!checkmadogear() && getskilllv("NC_MADOLICENCE")) setmadogear;
+	} else if (!checkmadogear() && getskilllv("NC_MADOLICENCE")) {
+		if (select(" ~ Madogear01: ~ Madogear02") == 1) setmadogear true;
+		else setmadogear true,MADO_SUIT;
+	}
 
 	// Se não atende nenhum critério
 	else {
