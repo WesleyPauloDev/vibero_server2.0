@@ -64,6 +64,7 @@ OnAgitStart:
 OnInit:
     // Nome do castelo (1 castelo)
     .Castle$ = "prtg_cas03";
+    donpcevent "Bandeira do Castelo#prontera::OnRefresh";
 	setmapflag .Castle$, mf_loadevent;
 	setmapflag .Castle$, mf_gvg_castle;
     MapRespawnGuildID .Castle$, GetCastleData(.Castle$,CD_GUILD_ID), 6;
@@ -384,6 +385,7 @@ OnReward:
         $WOE_WEEK_WIN_GID = .@winner;
         $WOE_WEEK_WIN_GNAME$ = getguildname(.@winner);
         $WOE_WEEK_CASTLE$ = .Castle$;
+        donpcevent "Bandeira do Castelo#prontera::OnRefresh";
         debugmes "Vencedor da WOE: " + .@winner;
         if (!$WOE_END_SUMMARY_ANNOUNCED)
             announce "[WoE] A guilda "+getguildname(.@winner)+" Conquistou o castelo ("+.Castle$+")!", bc_all|bc_woe;
@@ -598,5 +600,4 @@ function	script	ClearCastle	{
 
 	return;
 }
-
 

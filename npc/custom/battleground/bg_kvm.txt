@@ -93,13 +93,16 @@ OnJoin:
 
 	callsub S_CleanupQueue;
 
+	.@my_cid = .@cid;
 	.@my_ip$ = getcharip();
 	for (.@i = 0; .@i < getarraysize($@KvM01_CMD_CID); .@i++) {
+		if (.@my_cid && $@KvM01_CMD_CID[.@i] == .@my_cid)
+			continue;
 		if (!isloggedin($@KvM01_CMD_AID[.@i], $@KvM01_CMD_CID[.@i]))
 			continue;
 
 		.@other_ip$ = getcharip($@KvM01_CMD_AID[.@i]);
-		if (.@other_ip$ != "" && .@other_ip$ == .@my_ip$) {
+		if (.@my_ip$ != "" && .@other_ip$ != "" && .@other_ip$ == .@my_ip$) {
 			dispbottom "Entrada bloqueada: ja existe uma conta com o mesmo IP na fila do KVM.";
 			end;
 		}
@@ -147,18 +150,6 @@ OnPCLogoutEvent:
 S_CheckStart:
 	callsub S_CleanupQueue;
 
-	.@my_ip$ = getcharip();
-	for (.@i = 0; .@i < getarraysize($@KvM01_CMD_CID); .@i++) {
-		if (!isloggedin($@KvM01_CMD_AID[.@i], $@KvM01_CMD_CID[.@i]))
-			continue;
-
-		.@other_ip$ = getcharip($@KvM01_CMD_AID[.@i]);
-		if (.@other_ip$ != "" && .@other_ip$ == .@my_ip$) {
-			dispbottom "Entrada bloqueada: ja existe uma conta com o mesmo IP na fila do KVM.";
-			end;
-		}
-	}
-
 	.@team1 = callsub(S_CountQueue, 1);
 	.@team2 = callsub(S_CountQueue, 2);
 
@@ -183,18 +174,6 @@ OnTimer30000:
 	stopnpctimer;
 	$@KvM01_CMD_Ready = 0;
 	callsub S_CleanupQueue;
-
-	.@my_ip$ = getcharip();
-	for (.@i = 0; .@i < getarraysize($@KvM01_CMD_CID); .@i++) {
-		if (!isloggedin($@KvM01_CMD_AID[.@i], $@KvM01_CMD_CID[.@i]))
-			continue;
-
-		.@other_ip$ = getcharip($@KvM01_CMD_AID[.@i]);
-		if (.@other_ip$ != "" && .@other_ip$ == .@my_ip$) {
-			dispbottom "Entrada bloqueada: ja existe uma conta com o mesmo IP na fila do KVM.";
-			end;
-		}
-	}
 
 	.@team1 = callsub(S_CountQueue, 1);
 	.@team2 = callsub(S_CountQueue, 2);

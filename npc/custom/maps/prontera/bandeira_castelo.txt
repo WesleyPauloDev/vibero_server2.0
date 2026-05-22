@@ -1,13 +1,24 @@
 -	script	Bandeira do Castelo#base	-1,{
 	.@castle$ = "prtg_cas03";
-	.@gid = getcastledata(.@castle$,1);
+	.@gid = $WOE_WEEK_WIN_GID;
+	if (.@gid <= 0)
+		.@gid = getcastledata(.@castle$,1);
+
 	mes "[Bandeira da WoE]";
 	if (.@gid > 0) {
-		mes "Guild Campeã da semana:";
+		mes "Guild Campea da semana:";
 		mes "^0055FF" + getguildname(.@gid) + "^000000";
 		mes "Castelo: ^777777" + getcastlename(.@castle$) + "^000000";
 	} else {
-		mes "Ainda não ha uma guild registrada para este castelo.";
+		mes "Ainda nao ha uma guild registrada para este castelo.";
 	}
 	close;
+
+OnRefresh:
+	.@gid = $WOE_WEEK_WIN_GID;
+	if (.@gid <= 0)
+		.@gid = getcastledata("prtg_cas03",CD_GUILD_ID);
+	flagemblem .@gid;
+	end;
 }
+
