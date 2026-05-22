@@ -82,7 +82,10 @@ OnInit:
 		"KEY `idx_created_at` (`created_at`), " +
 		"KEY `idx_event_category_period` (`event_type`, `category`, `period_key`), " +
 		"KEY `idx_char_id` (`char_id`) " +
-		") ENGINE=InnoDB DEFAULT CHARSET=utf8"
+		") ENGINE=InnoDB DEFAULT CHARSET=latin1"
+	);
+	query_logsql(
+		"ALTER TABLE `instance_roulette_log` CONVERT TO CHARACTER SET latin1"
 	);
 	end;
 }
