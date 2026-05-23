@@ -1,0 +1,297 @@
+//==================================================
+// Guia de receitas de criacao
+//==================================================
+
+prontera,198,188,3	script	Guia de Criacao	4_M_ALCHE_A,{
+	disable_items;
+
+	mes "[Guia de Criacao]";
+	mes "Posso mostrar receitas de criacao.";
+	next;
+
+	while (1) {
+		switch(select("Reacao Alquimica:Comidas Mixed Cooking:Sair")) {
+		case 1:
+			callsub L_ReacaoMenu;
+			break;
+		case 2:
+			callsub L_CookMenu;
+			break;
+		default:
+			close;
+		}
+	}
+
+L_ReacaoMenu:
+	while (1) {
+		switch(select("Ver receitas:Buscar por ID do produto:Como usar:Sair")) {
+		case 1:
+			callsub L_List;
+			break;
+		case 2:
+			callsub L_Search;
+			break;
+		case 3:
+			mes "[Guia de Criacao]";
+			mes "Use Reacao Alquimica e selecione os materiais exatos no inventario.";
+			mes "Nao coloque item a mais, item a menos ou quantidade diferente.";
+			mes "Se a combinacao bater com uma receita, o item sera produzido.";
+			mes "A quantidade final pode variar conforme a receita.";
+			mes "As chances e quantidades finais seguem a base skill_changematerial_db.txt.";
+			next;
+			break;
+		default:
+			return;
+		}
+	}
+
+L_List:
+	.@page = 0;
+	.@per_page = 12;
+	.@total = getarraysize(.product);
+	.@pages = (.@total + .@per_page - 1) / .@per_page;
+
+	while (1) {
+		.@start = .@page * .@per_page;
+		.@end = .@start + .@per_page;
+		if (.@end > .@total)
+			.@end = .@total;
+
+		.@menu$ = "";
+		for (.@i = .@start; .@i < .@end; .@i++)
+			.@menu$ += .product_name$[.@i] + " [" + .product[.@i] + "]:";
+		.@menu$ += "Proxima pagina:Pagina anterior:Buscar por ID:Voltar";
+
+		mes "[Guia de Criacao]";
+		mes "Pagina " + (.@page + 1) + " de " + .@pages + ".";
+		mes "Escolha um produto para ver os materiais.";
+		next;
+
+		.@pick = select(.@menu$);
+		.@visible = .@end - .@start;
+
+		if (.@pick <= .@visible) {
+			callsub L_ShowRecipe, .@start + .@pick - 1;
+			next;
+		} else if (.@pick == .@visible + 1) {
+			.@page++;
+			if (.@page >= .@pages)
+				.@page = 0;
+		} else if (.@pick == .@visible + 2) {
+			.@page--;
+			if (.@page < 0)
+				.@page = .@pages - 1;
+		} else if (.@pick == .@visible + 3) {
+			callsub L_Search;
+		} else {
+			return;
+		}
+	}
+
+L_Search:
+	mes "[Guia de Criacao]";
+	mes "Digite o ID do produto final.";
+	mes "Exemplo: 999 para Aco.";
+	next;
+	input .@id;
+
+	.@found = 0;
+	for (.@i = 0; .@i < getarraysize(.product); .@i++) {
+		if (.product[.@i] == .@id) {
+			callsub L_ShowRecipe, .@i;
+			.@found++;
+			next;
+		}
+	}
+
+	if (!.@found) {
+		mes "[Guia de Criacao]";
+		mes "Nao encontrei receita para esse produto.";
+		next;
+	}
+	return;
+
+L_ShowRecipe:
+	.@i = getarg(0);
+	mes "[Guia de Criacao]";
+	mes "^0000CD" + .product_name$[.@i] + "^000000 [" + .product[.@i] + "]";
+	mes "Use exatamente os materiais abaixo.";
+	if (.out_min[.@i] == .out_max[.@i])
+		mes "Resultado: " + .out_min[.@i] + "x se der certo.";
+	else
+		mes "Resultado: de " + .out_min[.@i] + " a " + .out_max[.@i] + "x se der certo.";
+	mes "Chance base: " + (.out_rate[.@i] / 10) + "%.";
+	mes "Materiais:";
+	callsub L_ShowMaterial, .mat1[.@i], .amt1[.@i], .mat1_name$[.@i];
+	callsub L_ShowMaterial, .mat2[.@i], .amt2[.@i], .mat2_name$[.@i];
+	callsub L_ShowMaterial, .mat3[.@i], .amt3[.@i], .mat3_name$[.@i];
+	return;
+
+L_ShowMaterial:
+	.@item = getarg(0);
+	.@amount = getarg(1);
+	.@name$ = getarg(2);
+	if (.@item > 0)
+		mes " - " + .@amount + "x " + .@name$ + " [" + .@item + "]";
+	return;
+
+L_CookMenu:
+	while (1) {
+		switch(select("Ver receitas:Como funciona:Simular meu resultado:Voltar")) {
+		case 1:
+			callsub L_CookList;
+			break;
+		case 2:
+			callsub L_CookHelp;
+			break;
+		case 3:
+			callsub L_CookSimulate;
+			break;
+		default:
+			return;
+		}
+	}
+
+L_CookList:
+	.@menu$ = "";
+	for (.@i = 0; .@i < getarraysize(.cook_product); .@i++)
+		.@menu$ += .cook_product_name$[.@i] + " [" + .cook_product[.@i] + "]:";
+	.@menu$ += "Voltar";
+
+	mes "[Guia de Criacao]";
+	mes "Escolha uma comida para ver a receita.";
+	next;
+
+	.@pick = select(.@menu$);
+	if (.@pick > getarraysize(.cook_product))
+		return;
+
+	callsub L_CookShowRecipe, .@pick - 1;
+	next;
+	return;
+
+L_CookShowRecipe:
+	.@i = getarg(0);
+	mes "[Guia de Criacao]";
+	mes "^0000CD" + .cook_product_name$[.@i] + "^000000 [" + .cook_product[.@i] + "]";
+	mes "Efeito: " + .cook_effect$[.@i];
+	mes "Livro necessario:";
+	mes " - Livro de Culinaria Avancado [11022]";
+	mes "O livro precisa estar no inventario e nao e consumido.";
+	mes "Materiais consumidos:";
+	callsub L_ShowMaterial, .cook_mat1[.@i], .cook_amt1[.@i], .cook_mat1_name$[.@i];
+	callsub L_ShowMaterial, .cook_mat2[.@i], .cook_amt2[.@i], .cook_mat2_name$[.@i];
+	callsub L_ShowMaterial, .cook_mat3[.@i], .cook_amt3[.@i], .cook_mat3_name$[.@i];
+	callsub L_ShowMaterial, .cook_mat4[.@i], .cook_amt4[.@i], .cook_mat4_name$[.@i];
+	callsub L_ShowMaterial, .cook_mat5[.@i], .cook_amt5[.@i], .cook_mat5_name$[.@i];
+	callsub L_ShowMaterial, .cook_mat6[.@i], .cook_amt6[.@i], .cook_mat6_name$[.@i];
+	mes "Use exatamente estes materiais.";
+	mes "Lv1: tenta criar 1 unidade.";
+	mes "Lv2: pode criar 5, 8, 10 ou 10~11 unidades.";
+	return;
+
+L_CookHelp:
+	mes "[Guia de Criacao]";
+	mes "Todas precisam do Livro de Culinaria Avancado no inventario.";
+	mes "O livro  nao e consumido.";
+	next;
+	mes "[Guia de Criacao]";
+	mes "A chance e a quantidade dependem de Job Level, DEX e LUK.";
+	mes "Formula base: JobLevel/4 + LUK/2 + DEX/3.";
+	mes "A dificuldade aleatoria da comida fica entre 46 e 165.";
+	next;
+	mes "[Guia de Criacao]";
+	mes "Lv1: se a formula vencer a dificuldade, cria 1 unidade.";
+	mes "Lv2: usa a diferenca entre formula e dificuldade.";
+	mes "Quanto maior a diferenca, mais comidas saem.";
+	mes "Se falhar, pode sair comida queimada ou po misterioso.";
+	next;
+	return;
+
+L_CookSimulate:
+	.@base = JobLevel / 4 + readparam(bLuk) / 2 + readparam(bDex) / 3;
+	if (.@base < 46)
+		.@lv1 = 0;
+	else if (.@base >= 165)
+		.@lv1 = 100;
+	else
+		.@lv1 = ((.@base - 45) * 100) / 120;
+
+	.@result$ = "";
+	if (.@base <= 134)
+		.@result$ = "falha";
+	if (.@base >= 16 && .@base <= 154) {
+		if (.@result$ != "")
+			.@result$ += ", ";
+		.@result$ += "5 comidas";
+	}
+	if (.@base >= 36 && .@base <= 174) {
+		if (.@result$ != "")
+			.@result$ += ", ";
+		.@result$ += "8 comidas";
+	}
+	if (.@base >= 56 && .@base <= 194) {
+		if (.@result$ != "")
+			.@result$ += ", ";
+		.@result$ += "10 comidas";
+	}
+	if (.@base >= 76) {
+		if (.@result$ != "")
+			.@result$ += ", ";
+		.@result$ += "10 ou 11 comidas";
+	}
+
+	mes "[Guia de Criacao]";
+	mes "Pontuacao atual: " + .@base + ".";
+	mes "Quanto maior a pontuacao, melhor o resultado.";
+	mes "Lv1: chance aproximada de " + .@lv1 + "% para criar 1 comida.";
+	mes "Lv2: pode resultar em " + .@result$ + ".";
+	mes "DEX, LUK e Job Level aumentam essa pontuacao.";
+	next;
+	return;
+
+OnInit:
+	setarray .product[0],1045,1020,1010,1041,1026,1008,958,971,1051,1046,1038,1033,961,959,1040,1012,1011,1024,1025,1064,1019,962,974,1013,1058,960,967,1043,1035,1049,1037,1021,1056,963,1042,1061,1022,1034,1014,968,1009,970,964,1050,1030,703,973,1053,1016,1003,999,2267,1615,2267,1061,7063,992,991,7166,1059,13269,13270,13271,13272,13273,13274,13275,13276,13277,13278,13279,13280,13281,13282,13283;
+	setarray .out_rate[0],800,1000,800,800,800,800,800,800,800,800,1000,1000,800,800,1000,800,800,800,800,800,800,1000,1000,1000,800,1000,800,800,1000,800,800,800,800,800,800,800,1000,1000,1000,800,800,800,800,800,800,1000,800,1000,1000,500,1000,1000,200,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000;
+	setarray .out_min[0],8,4,8,3,4,6,9,5,7,4,1,4,3,7,8,3,4,4,8,8,2,4,4,9,5,6,4,6,8,6,6,4,8,3,6,2,2,6,4,5,4,9,8,3,2,2,4,6,7,1,10,1,1,1,1,1,1,1,2,5,1,1,1,1,1,1,10,10,10,10,10,10,10,10,10;
+	setarray .out_max[0],8,10,8,3,4,6,9,5,7,4,1,10,3,7,20,3,4,4,8,8,2,10,10,22,5,15,4,6,20,6,6,4,8,3,6,2,5,15,10,5,4,9,8,3,2,6,4,15,17,1,10,1,1,1,1,3,2,2,2,5,8,8,8,8,8,8,10,10,10,10,10,10,10,10,10;
+	setarray .product_name$[0],"Mascara Ritualistica","Cabelos Morenos","Fracon","Lampiao","Avela","Colar do Oblivio","Mandibula Horrenda","Detrimindexta","Neuronio","Garra de Escorpiao","Pequeno Chifre Maligno","Raiz de Planta Carnivora","Concha","Escama Fetida","Bigode de Anao Anciao","Crista","Emveretarcon","Tinta de Polvo","Teia de Aranha","Redeas","Tronco","Tentaculo","Mistura","Casco Arco-Iris","Asas de Traca","Garra de Crustaceo","Casco de Tartaruga","Garra de Orc","Canino de Dragao","Saia Virginal","Cauda de Dragao","Chifre de Dokebi","Torrao de Areia","Escama Aquatica","Pata de Inseto","Areia Estrelar de Bruxa","Nove-Caudas","Cabelo Azul","Mandibula de Formiga","Insignia do Heroi","Mao Divina","Alcool","Casco de Caranguejo","Tendoes","Pata de Tigre","Hinalle","Antigeno","Dente Fossilizado","Cauda de Rato","Carvao","Aco","Acessorio","Cajado","Acessorio","Areia Estrelar de Bruxa","Pena Macia","Frescor do Vento","Cristal Azul","Seda Macia","Tecido","Boost500 para Arremessar","Atirador","Atirador Magico","Pocao de Recuperacao para Arremessar","Muramura M para Arremessar","Falmons F para Arremessar","Pocao Pequena de HP para Arremessar","Pocao Media de HP para Arremessar","Pocao Grande de HP para Arremessar","Pocao Pequena de SP para Arremessar","Pocao Media de SP para Arremessar","Pocao Grande de SP para Arremessar","Pocao Branca Especial para Arremessar","Pocao Vitata 500 para Arremessar","Suco Celular Enriquecido para Arremessar";
+	setarray .mat1[0],940,738,908,943,952,754,905,915,941,955,953,917,956,935,939,926,950,948,951,742,930,957,937,947,749,938,914,945,751,936,913,954,747,944,920,928,919,909,743,902,904,931,750,922,906,744,923,925,921,2101,1119,1304,7752,1304,1057,949,7066,920,1059,7166,1093,1093,1093,1093,1093,1093,6297,6297,6297,6297,6297,6297,6297,6297,6297;
+	setarray .mat1_name$[0],"Perna de Gafanhoto","Estojo de Lapis","Ova de Sapo","Casca Rija","Espinho de Cacto","Boneco de Fumacento","Caule","Crisalida","Argola","Pele de Verme","Coracao de Pedra","Garra de Ave","Guelra","Casca","Ferrao de Abelha","Escamas de Cobra","Coracao de Sereia","Pata de Urso","Nadadeira","Boneco de Chonchon","Bandagem Estragada","Unha Apodrecida","Canino Venenoso","Chifre","Rosa de Gelo","Muco Pegajoso","Felpa","Folha de Fumacento","Boneco de Osiris","Casca Escamada","Dente de Morcego","Escama Brilhante","Espelho de Cristal","Ferradura","Garra de Lobo","Antenas de Inseto","Couro de Animal","Jellopy","Boneco de Esporo","Raiz de Arvore","Cauda de Escorpiao","Amuleto dos Orcs","Boneco de Bafome","Presa de Orc","Escama Afiada","Buque","Chifre Diabolico","Bico de Ave","Esporo de Cogumelo","Escudo","Espada","Machado","Cranio Atordoante","Machado","Po de Traca","Pluma","Cubo de Gelo","Garra de Lobo","Tecido","Seda Macia","Garrafa de Pocao","Garrafa de Pocao","Garrafa de Pocao","Garrafa de Pocao","Garrafa de Pocao","Garrafa de Pocao","Garrafa de Arremesso","Garrafa de Arremesso","Garrafa de Arremesso","Garrafa de Arremesso","Garrafa de Arremesso","Garrafa de Arremesso","Garrafa de Arremesso","Garrafa de Arremesso","Garrafa de Arremesso";
+	setarray .amt1[0],45,40,45,10,30,25,45,40,45,40,5,25,5,20,35,20,5,20,50,30,10,40,15,50,20,25,5,50,50,30,25,15,35,10,20,10,10,45,20,5,10,50,50,25,5,45,15,35,35,1,1,1,100,1,100,30,100,100,10,2,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10;
+	setarray .mat2[0],942,1029,746,1032,946,1057,1036,966,916,753,907,1044,929,1015,1039,972,752,737,1048,740,1052,1028,924,912,903,1055,741,910,918,1047,1063,1054,1031,965,911,735,739,745,748,1018,1062,932,1023,949,736,1017,934,1059,1060,0,0,0,7753,931,911,916,0,0,0,0,12417,12418,12419,12475,12420,12421,12422,12423,12424,12425,12426,12427,12428,12436,12437;
+	setarray .mat2_name$[0],"Cauda de Yoyo","Pele de Tigre","Bolinha de Gude","Flor de Planta Carnivora","Casco de Caramujo","Po de Traca","Escama de Dragao","Carne de Ostra","Plumas de Ave","Boneco de Yoyo","Resina","Presa de Zenorc","Coracao Imortal","Lingua","Pequena Asa Maligna","Karvodailnirol","Boneco de Rocker","Concha Preta","Cabelo Horrendo","Boneco de Pelucia","Celula Unica","Crina","Po de Borboleta","Zargonio","Lingua de Reptil","Pele de Minhoca","Boneco de Poring","Garleta","Pata Pegajosa","Cabeca de Medusa","Presa","Labios Fossilizados","Foice de Louva-a-Deus","Casco de Ostra","Scell","Chung Jah","Batom","Buque de Casamento","Rosa Eterna","Garras de Toupeira","Ze-Lanterna","Osso","Cauda de Peixe","Pluma","Prato de Porcelana","Bigodes de Toupeira","Espolio","Tecido","Cabelos Dourados","","","","Utensilio Rural Quebrado","Amuleto dos Orcs","Scell","Plumas de Ave","","","","","Boost500","Pocao do Furor Fisico","Pocao do Furor Magico","Pocao de Recuperacao","Stamina Up M","Falmons F","Pocao Pequena de HP","Pocao Media de HP","Pocao Grande de HP","Pocao Pequena de SP","Pocao Media de SP","Pocao Grande de SP","Pocao Branca Especial","Pocao Vitata 500","Suco Celular Enriquecido";
+	setarray .amt2[0],35,5,40,20,10,35,45,10,25,5,10,20,25,50,45,15,40,25,35,50,10,5,30,45,30,40,40,10,35,35,35,25,50,20,45,15,15,20,20,45,30,40,30,5,20,40,30,30,40,0,0,0,100,100,100,30,0,0,0,0,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10;
+	setarray .mat3[0],0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7200,7200,7200,7200,7200,7200,0,0,0,0,0,0,0,0,0;
+	setarray .mat3_name$[0],"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Elastico","Elastico","Elastico","Elastico","Elastico","Elastico","","","","","","","","","";
+	setarray .amt3[0],0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,10,10,10,10,10,0,0,0,0,0,0,0,0,0;
+
+	setarray .cook_product[0],12429,12430,12431,12432,12433,12434;
+	setarray .cook_product_name$[0],"Churrasco de Selvagem","Coquetel Uivante","Carne ao Vinho","Cha Gelado de Siroma","Cozido de Drosera","Macarrao com Petite";
+	setarray .cook_effect$[0],"STR +20 por 5 minutos","INT +20 por 5 minutos","VIT +20 por 5 minutos","DEX +20 por 5 minutos","AGI +20 por 5 minutos","LUK +20 por 5 minutos";
+
+	setarray .cook_mat1[0],6248,6248,6248,6248,507,6248;
+	setarray .cook_amt1[0],1,1,1,1,3,1;
+	setarray .cook_mat1_name$[0],"Vasilha Melange","Vasilha Melange","Vasilha Melange","Vasilha Melange","Erva Vermelha","Vasilha Melange";
+
+	setarray .cook_mat2[0],6249,6252,6254,6256,509,6260;
+	setarray .cook_amt2[0],1,3,2,3,3,2;
+	setarray .cook_mat2_name$[0],"Carne de Selvagem","Sangue de Lobo","Medalhoes de Carne","Raspadinha","Erva Branca","Rabo de Petite";
+
+	setarray .cook_mat3[0],6250,6253,6255,6257,510,6261;
+	setarray .cook_amt3[0],1,2,1,2,3,1;
+	setarray .cook_mat3_name$[0],"Espeto de Cozinha","Gelo","Vasilha Grande","Gelo Cristalino","Erva Azul","Macarrao Fino";
+
+	setarray .cook_mat4[0],6251,0,0,6258,6248,6262;
+	setarray .cook_amt4[0],1,0,0,1,1,1;
+	setarray .cook_mat4_name$[0],"Carvao Negro","","","Fruta de Comodo","Vasilha Melange","Molho Especial";
+
+	setarray .cook_mat5[0],0,0,0,0,6255,0;
+	setarray .cook_amt5[0],0,0,0,0,1,0;
+	setarray .cook_mat5_name$[0],"","","","","Vasilha Grande","";
+
+	setarray .cook_mat6[0],0,0,0,0,6259,0;
+	setarray .cook_amt6[0],0,0,0,0,3,0;
+	setarray .cook_mat6_name$[0],"","","","","Tentaculo de Drosera","";
+	end;
+}

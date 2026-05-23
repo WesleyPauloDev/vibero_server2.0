@@ -89,6 +89,73 @@ Header:
   Version: 3
 
 Body:
+  - Id: 26141
+    AegisName: WitchsBroomStick_
+    Name: Witch's Broom
+    Type: Weapon
+    SubType: Staff
+    Weight: 300
+    Attack: 200
+    MagicAttack: 200
+    Range: 1
+    Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Jobs:
+      Acolyte: true
+      Priest: true
+      Mage: true
+      Wizard: true
+      Sage: true
+      Novice: true
+      SuperNovice: true
+      SoulLinker: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 175
+    Refineable: true
+    Gradable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bMAtkRate,20 * .@r;
+        bonus bMAtk,20 * .@r;
+        bonus bHealPower,30 * .@r;
+      }
+      bonus bVariableCastrate,-30;
+      bonus bDelayRate,-35;
+      bonus bMAtkRate,150;
+      bonus bHealPower,300;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bMAtkRate,50;
+          bonus bMAtk,50;
+          bonus bHealPower,30;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bMAtkRate,50;
+              bonus bMAtk,50;
+              bonus bHealPower,30;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bMAtkRate,50;
+                  bonus bMAtk,50;
+                  bonus bHealPower,30;
+                  bonus bCastRate, -.@r;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bMAtkRate,50;
+                      bonus bMAtk,50;
+                      bonus bHealPower,30;
+                      bonus bDelayRate, -.@r;
+                  }
+              }
+          }
+      }
   - Id: 23927
     AegisName: Shadow_7_Refine_Hammer
     Name: Shadow 7 Refine Hammer
