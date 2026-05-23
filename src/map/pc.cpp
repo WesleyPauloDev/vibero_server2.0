@@ -77,6 +77,7 @@ static inline bool pc_attendance_rewarded_today( map_session_data* sd );
 #define PVP_CALCRANK_INTERVAL 1000	// PVP calculation interval
 
 PlayerStatPointDatabase statpoint_db;
+EmotionDatabase emotion_db;
 
 SkillTreeDatabase skill_tree_db;
 
@@ -14596,6 +14597,285 @@ void PlayerStatPointDatabase::loadingFinished(){
 	TypesafeCachedYamlDatabase::loadingFinished();
 }
 
+const std::string EmotionDatabase::getDefaultLocation() {
+	return std::string(db_path) + "/emotion_db.yml";
+}
+
+static uint32 pc_emotion_today_yyyymmdd() {
+	time_t now = time(nullptr);
+	struct tm* lt = localtime(&now);
+
+	return static_cast<uint32>((lt->tm_year + 1900) * 10000 + (lt->tm_mon + 1) * 100 + lt->tm_mday);
+}
+
+uint64 EmotionDatabase::parseBodyNode(const ryml::NodeRef& node) {
+	uint16 Id;
+
+	if (!this->asUInt16(node, "Id", Id))
+		return 0;
+
+	std::shared_ptr<s_emotion_db> entry = this->find(Id);
+	bool exists = entry != nullptr;
+
+	if (!exists) {
+		entry = std::make_shared<s_emotion_db>();
+		entry->Id = Id;
+	}
+
+	if (this->nodeExists(node, "Price")) {
+		uint16 Price;
+
+		if (!this->asUInt16(node, "Price", Price))
+			return 0;
+
+		if (Price > MAX_AMOUNT) {
+			this->invalidWarning(node["Price"], "Emotion expantion '%hu' amount is too high, capping it to MAX_AMOUNT...\n", Id);
+			Price = MAX_AMOUNT;
+		}
+
+		entry->Price = Price;
+	} else
+		entry->Price = 0;
+
+	if (this->nodeExists(node, "Type")) {
+		uint16 Type;
+
+		if (!this->asUInt16(node, "Type", Type))
+			return 0;
+
+		if (Type > 1) {
+			this->invalidWarning(node["Type"], "Emotion expantion '%hu' type is invalid, capping it to 1...\n", Id);
+			Type = 1;
+		}
+
+		entry->Type = Type;
+	} else
+		entry->Type = 0;
+
+	if (this->nodeExists(node, "SaleStart")) {
+		uint32 SaleStart;
+
+		if (!this->asUInt32(node, "SaleStart", SaleStart))
+			return 0;
+
+		if (SaleStart != 0 && (SaleStart < 20020000 || SaleStart > 29990000)) {
+			this->invalidWarning(node["SaleStart"], "Emotion expantion '%hu' sale start is invalid, capping it to 0...\n", Id);
+			SaleStart = 0;
+		}
+
+		entry->SaleStart = SaleStart;
+	} else
+		entry->SaleStart = 0;
+
+	if (this->nodeExists(node, "SaleEnd")) {
+		uint32 SaleEnd;
+
+		if (!this->asUInt32(node, "SaleEnd", SaleEnd))
+			return 0;
+
+		if (SaleEnd != 0 && (SaleEnd < 20020000 || SaleEnd > 29990000 || (entry->SaleStart != 0 && entry->SaleStart > SaleEnd))) {
+			this->invalidWarning(node["SaleEnd"], "Emotion expantion '%hu' sale end is invalid, capping sale dates to 0...\n", Id);
+			entry->SaleStart = 0;
+			SaleEnd = 0;
+		}
+
+		entry->SaleEnd = SaleEnd;
+	} else
+		entry->SaleEnd = 0;
+
+	if (this->nodeExists(node, "SaleRentalPeriod")) {
+		uint32 SaleRentalPeriod;
+
+		if (!this->asUInt32(node, "SaleRentalPeriod", SaleRentalPeriod))
+			return 0;
+
+		entry->SaleRentalPeriod = SaleRentalPeriod * 60 * 60 * 24;
+	} else
+		entry->SaleRentalPeriod = 0;
+
+	entry->Emotions.clear();
+
+	if (!this->nodesExist(node, { "Emotions" }))
+		return 0;
+
+	for (const ryml::NodeRef& emotionNode : node["Emotions"]) {
+		std::string EmotionName;
+		c4::from_chars(emotionNode.val(), &EmotionName);
+
+		int64 EmotionId;
+		if (!script_get_constant(EmotionName.c_str(), &EmotionId) || EmotionId < 0 || EmotionId >= ET_MAX) {
+			this->invalidWarning(node["Emotions"], "Invalid emotion constant with name '%s'.\n", EmotionName.c_str());
+			return 0;
+		}
+
+		entry->Emotions.push_back(static_cast<emotion_type>(EmotionId));
+	}
+
+	if (!exists)
+		this->put(Id, entry);
+
+	return 1;
+}
+
+void do_init_emotions() {
+	emotion_db.load();
+}
+
+void do_final_emotions() {
+	emotion_db.clear();
+}
+
+static void pc_emotion_reg_names(const std::shared_ptr<s_emotion_db>& entry, char* bought, size_t bought_len, char* expire, size_t expire_len) {
+	const char* bought_fmt = entry->Type ? "emotion_%hu" : "#emotion_%hu";
+	const char* expire_fmt = entry->Type ? "emotion_expire_%hu" : "#emotion_expire_%hu";
+
+	safesnprintf(bought, bought_len, bought_fmt, entry->Id);
+	safesnprintf(expire, expire_len, expire_fmt, entry->Id);
+}
+
+void pc_use_emotion(map_session_data* const sd, const uint16 Id, const uint16 EmotionId) {
+	nullpo_retv(sd);
+
+	if (battle_config.basic_skill_check != 0 && pc_checkskill(sd, NV_BASIC) < 2 && pc_checkskill(sd, SU_BASIC_SKILL) < 1) {
+		clif_emotion2_fail(sd, Id, EmotionId, EMSG_EMOTION_USE_FAIL_SKILL_LEVEL);
+		return;
+	}
+
+	if (EmotionId == ET_CHAT_PROHIBIT || sd->emotionlasttime + 1 >= time(nullptr)) {
+		sd->emotionlasttime = time(nullptr);
+		clif_emotion2_fail(sd, Id, EmotionId, EMSG_EMOTION_EXPANTION_USE_FAIL_UNKNOWN);
+		return;
+	}
+
+	sd->emotionlasttime = time(nullptr);
+
+	if (battle_config.idletime_option & IDLE_EMOTION)
+		sd->idletime = last_tick;
+	if (battle_config.hom_idle_no_share && sd->hd && battle_config.idletime_hom_option & IDLE_EMOTION)
+		sd->idletime_hom = last_tick;
+	if (battle_config.mer_idle_no_share && sd->md && battle_config.idletime_mer_option & IDLE_EMOTION)
+		sd->idletime_mer = last_tick;
+
+	if (sd->state.block_action & PCBLOCK_EMOTION) {
+		clif_emotion2_fail(sd, Id, EmotionId, EMSG_EMOTION_EXPANTION_USE_FAIL_UNKNOWN);
+		return;
+	}
+
+	if (battle_config.client_reshuffle_dice && EmotionId >= ET_DICE1 && EmotionId <= ET_DICE6) {
+		clif_emotion2(sd, 0, rnd() % 6 + ET_DICE1);
+		return;
+	}
+
+	std::shared_ptr<s_emotion_db> entry = emotion_db.find(Id);
+
+	if (entry == nullptr || !util::vector_exists(entry->Emotions, static_cast<emotion_type>(EmotionId))) {
+		clif_emotion2_fail(sd, Id, EmotionId, EMSG_EMOTION_EXPANTION_USE_FAIL_UNKNOWN);
+		return;
+	}
+
+	if (entry->Id != 0) {
+		char bought[32], expire[32];
+		pc_emotion_reg_names(entry, bought, sizeof(bought), expire, sizeof(expire));
+
+		if (!static_cast<bool>(pc_readglobalreg(sd, add_str(bought)))) {
+			clif_emotion2_fail(sd, Id, EmotionId, EMSG_EMOTION_EXPANTION_USE_FAIL_UNPURCHASED);
+			return;
+		}
+
+		int64 ExpireTime = pc_readglobalreg(sd, add_str(expire));
+		if (entry->SaleRentalPeriod != 0 && time(nullptr) > static_cast<time_t>(ExpireTime)) {
+			clif_emotion2_fail(sd, Id, EmotionId, EMSG_EMOTION_EXPANTION_USE_FAIL_DATE);
+			return;
+		}
+	}
+
+	clif_emotion2(sd, Id, EmotionId);
+}
+
+void pc_buy_emotion_expantion(map_session_data* const sd, const uint16 Id, const uint16 ItemId, const uint8 Amount) {
+	nullpo_retv(sd);
+
+	if (battle_config.basic_skill_check != 0 && pc_checkskill(sd, NV_BASIC) < 2 && pc_checkskill(sd, SU_BASIC_SKILL) < 1) {
+		clif_emotion2_expantion_fail(sd, Id, EMSG_EMOTION_EXPANTION_NOT_ENOUGH_BASICSKILL_LEVEL);
+		return;
+	}
+
+	std::shared_ptr<s_emotion_db> entry = emotion_db.find(Id);
+
+	if (entry == nullptr) {
+		clif_emotion2_expantion_fail(sd, Id, EMSG_EMOTION_EXPANTION_FAIL_UNKNOWN);
+		return;
+	}
+
+	uint32 today = pc_emotion_today_yyyymmdd();
+	if (entry->SaleEnd != 0 && entry->SaleEnd < today) {
+		clif_emotion2_expantion_fail(sd, Id, EMSG_EMOTION_EXPANTION_FAIL_DATE);
+		return;
+	}
+
+	if (entry->SaleStart != 0 && entry->SaleStart > today) {
+		clif_emotion2_expantion_fail(sd, Id, EMSG_NOT_YET_SALE_START_TIME);
+		return;
+	}
+
+	char bought[32], expire[32];
+	pc_emotion_reg_names(entry, bought, sizeof(bought), expire, sizeof(expire));
+
+	if (static_cast<bool>(pc_readglobalreg(sd, add_str(bought)))) {
+		clif_emotion2_expantion_fail(sd, Id, EMSG_EMOTION_EXPANTION_FAIL_ALREADY_BUY);
+		return;
+	}
+
+	if (ItemId != 6909 || entry->Price != Amount) {
+		clif_emotion2_expantion_fail(sd, Id, EMSG_EMOTION_EXPANTION_FAIL_UNKNOWN);
+		return;
+	}
+
+	int32 NyangvineIndex = pc_search_inventory(sd, ItemId);
+	if (NyangvineIndex < 0 || sd->inventory.u.items_inventory[NyangvineIndex].amount < Amount) {
+		clif_emotion2_expantion_fail(sd, Id, EMSG_EMOTION_EXPANTION_NOT_ENOUGH_NYANGVINE);
+		return;
+	}
+
+	pc_delitem(sd, NyangvineIndex, Amount, 0, 0, LOG_TYPE_CONSUME);
+	pc_setglobalreg(sd, add_str(bought), 1);
+
+	if (entry->SaleRentalPeriod != 0) {
+		int64 ExpireTime = time(nullptr) + entry->SaleRentalPeriod;
+		pc_setglobalreg(sd, add_str(expire), ExpireTime);
+		clif_emotion2_expantion(sd, Id, true, static_cast<uint32>(ExpireTime));
+		return;
+	}
+
+	clif_emotion2_expantion(sd, Id, false, 0);
+}
+
+void pc_load_emotion_expantion_list(map_session_data* const sd) {
+	nullpo_retv(sd);
+
+	std::vector<PACKET_ZC_EMOTION2_EXPANTION_LIST_SUB> list;
+
+	for (const std::pair<uint16, std::shared_ptr<s_emotion_db>>& pair : emotion_db) {
+		const std::shared_ptr<s_emotion_db>& entry = pair.second;
+		char bought[32], expire[32];
+		pc_emotion_reg_names(entry, bought, sizeof(bought), expire, sizeof(expire));
+
+		bool rental = entry->SaleRentalPeriod != 0;
+		bool bought_flag = static_cast<bool>(pc_readglobalreg(sd, add_str(bought)));
+		int64 ExpireTime = pc_readglobalreg(sd, add_str(expire));
+
+		if (bought_flag && rental && time(nullptr) > static_cast<time_t>(ExpireTime)) {
+			pc_setglobalreg(sd, add_str(bought), 0);
+			pc_setglobalreg(sd, add_str(expire), 0);
+			continue;
+		}
+
+		if (bought_flag)
+			list.push_back({ pair.first, static_cast<uint8>(rental), static_cast<uint32>(ExpireTime) });
+	}
+
+	clif_emotion2_expantion_list(sd, list);
+}
 /*==========================================
  * pc DB reading.
  * job_stats.yml	- Job values

@@ -118224,6 +118224,40 @@ Body:
     Type: Weapon
     SubType: 2hSword
     Weight: 2500
+    Attack: 280
+    Range: 1
+    Slots: 2
+    Jobs:
+      Knight: true
+    Classes:
+      Fourth: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bSkillAtk,"DK_STORMSLASH",6*(.@r/2);
+      bonus2 bSkillAtk,"DK_HACKANDSLASHER",5*(.@r/3);
+      bonus bShortAtkRate,3*(.@r/4);
+      if (.@g >= ENCHANTGRADE_D) {
+         bonus bPow,2;
+         if (.@g >= ENCHANTGRADE_C) {
+            bonus2 bSkillAtk,"DK_STORMSLASH",10;
+            if (.@g >= ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+            }
+         }
+      }
+  - Id: 21067
+    AegisName: Solid_Claymore_Copy
+    Name: Solid Claymore
+    Type: Weapon
+    SubType: 2hSword
+    Weight: 2500
     Attack: 250
     Range: 1
     Slots: 2
@@ -139934,6 +139968,73 @@ Body:
       bonus2 bMagicAtkEle,Ele_Holy,.@val;
   - Id: 26140
     AegisName: WitchsBroomStick
+    Name: Witch's Broom
+    Type: Weapon
+    SubType: Staff
+    Weight: 300
+    Attack: 200
+    MagicAttack: 200
+    Range: 1
+    Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Jobs:
+      Acolyte: true
+      Priest: true
+      Mage: true
+      Wizard: true
+      Sage: true
+      Novice: true
+      SuperNovice: true
+      SoulLinker: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 175
+    Refineable: true
+    Gradable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bMAtkRate,20 * .@r;
+        bonus bMAtk,20 * .@r;
+        bonus bHealPower,30 * .@r;
+      }
+      bonus bVariableCastrate,-30;
+      bonus bDelayRate,-35;
+      bonus bMAtkRate,150;
+      bonus bHealPower,300;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bMAtkRate,50;
+          bonus bMAtk,50;
+          bonus bHealPower,30;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bMAtkRate,50;
+              bonus bMAtk,50;
+              bonus bHealPower,30;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bMAtkRate,50;
+                  bonus bMAtk,50;
+                  bonus bHealPower,30;
+                  bonus bCastRate, -.@r;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bMAtkRate,50;
+                      bonus bMAtk,50;
+                      bonus bHealPower,30;
+                      bonus bDelayRate, -.@r;
+                  }
+              }
+          }
+      }
+  - Id: 26141
+    AegisName: WitchsBroomStick_
     Name: Witch's Broom
     Type: Weapon
     SubType: Staff
@@ -260725,6 +260826,40 @@ Body:
     Attack: 250
     Range: 7
     Slots: 2
+    Jobs:
+      Rebellion: true
+    Classes:
+      Fourth: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bSkillAtk,"NW_ONLY_ONE_BULLET",7*(.@r/2);
+      bonus2 bSkillAtk,"RL_FIREDANCE",10*(.@r/3);
+      bonus bLongAtkRate,4*(.@r/4);
+      if (.@g >= ENCHANTGRADE_D) {
+         bonus bCon,2;
+         if (.@g >= ENCHANTGRADE_C) {
+            bonus2 bSkillAtk,"NW_ONLY_ONE_BULLET",10;
+            if (.@g >= ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+            }
+         }
+      }
+  - Id: 800018
+    AegisName: Precision_Pistol_Copy
+    Name: Precision Pistol
+    Type: Weapon
+    SubType: Revolver
+    Weight: 1400
+    Attack: 250
+    Range: 7
+    Slots: 2
     Trade:
       NoDrop: true
       NoSell: true
@@ -262422,6 +262557,41 @@ Body:
     Type: Weapon
     SubType: Shotgun
     Weight: 2200
+    Attack: 330
+    Range: 9
+    Slots: 2
+    Jobs:
+      Rebellion: true
+    Classes:
+      Fourth: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bSplashRange,1;
+      bonus2 bSkillAtk,"NW_THE_VIGILANTE_AT_NIGHT",7*(.@r/2);
+      bonus2 bSkillAtk,"RL_BANISHING_BUSTER",10*(.@r/3);
+      bonus bLongAtkRate,4*(.@r/4);
+      if (.@g >= ENCHANTGRADE_D) {
+         bonus bCon,2;
+         if (.@g >= ENCHANTGRADE_C) {
+            bonus2 bSkillAtk,"NW_THE_VIGILANTE_AT_NIGHT",10;
+            if (.@g >= ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+            }
+         }
+      }
+  - Id: 820032
+    AegisName: Precision_Shotgun_Copy
+    Name: Precision Shatter
+    Type: Weapon
+    SubType: Shotgun
+    Weight: 2200
     Attack: 250
     Range: 9
     Slots: 2
@@ -263245,6 +263415,40 @@ Body:
     Type: Weapon
     SubType: Gatling
     Weight: 2600
+    Attack: 290
+    Range: 9
+    Slots: 2
+    Jobs:
+      Rebellion: true
+    Classes:
+      Fourth: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bSkillAtk,"NW_MAGAZINE_FOR_ONE",7*(.@r/2);
+      bonus2 bSkillAtk,"RL_R_TRIP",10*(.@r/3);
+      bonus bLongAtkRate,4*(.@r/4);
+      if (.@g >= ENCHANTGRADE_D) {
+         bonus bCon,2;
+         if (.@g >= ENCHANTGRADE_C) {
+            bonus2 bSkillAtk,"NW_MAGAZINE_FOR_ONE",10;
+            if (.@g >= ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+            }
+         }
+      }
+  - Id: 830039
+    AegisName: Precision_Gatling_Copy
+    Name: Precision Splatter
+    Type: Weapon
+    SubType: Gatling
+    Weight: 2600
     Attack: 250
     Range: 9
     Slots: 2
@@ -264047,6 +264251,40 @@ Body:
       }
   - Id: 840004
     AegisName: Precision_Grenade
+    Name: Precision Bomber
+    Type: Weapon
+    SubType: Grenade
+    Weight: 3300
+    Attack: 370
+    Range: 9
+    Slots: 2
+    Jobs:
+      Rebellion: true
+    Classes:
+      Fourth: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bSkillAtk,"NW_WILD_FIRE",7*(.@r/2);
+      bonus2 bSkillAtk,"RL_H_MINE",10*(.@r/3);
+      bonus bLongAtkRate,4*(.@r/4);
+      if (.@g >= ENCHANTGRADE_D) {
+         bonus bCon,2;
+         if (.@g >= ENCHANTGRADE_C) {
+            bonus2 bSkillAtk,"NW_WILD_FIRE",10;
+            if (.@g >= ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+            }
+         }
+      }
+  - Id: 840033
+    AegisName: Precision_Grenade_Copy
     Name: Precision Bomber
     Type: Weapon
     SubType: Grenade
@@ -265409,4 +265647,3 @@ Body:
       bonus bMatk,10*(.@r/2);
 
       
-
