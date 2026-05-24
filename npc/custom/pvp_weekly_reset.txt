@@ -29,11 +29,18 @@
 
 		sleep 10000;
 
+		// Guarda o ranking encerrado para consulta como semana passada.
+		query_sql("DELETE FROM char_reg_num WHERE `key` IN ('pvp_kills_last_week','pvp_deaths_last_week') AND `index` = 0");
+		query_sql("INSERT INTO char_reg_num (`char_id`, `key`, `index`, `value`) SELECT `char_id`, 'pvp_kills_last_week', 0, `value` FROM char_reg_num WHERE `key` = 'pvp_kills' AND `index` = 0");
+		query_sql("INSERT INTO char_reg_num (`char_id`, `key`, `index`, `value`) SELECT `char_id`, 'pvp_deaths_last_week', 0, `value` FROM char_reg_num WHERE `key` = 'pvp_deaths' AND `index` = 0");
+
 		// Pega top 3
 		query_sql(" SELECT MAX(COALESCE(k.value,0)) FROM `char` c LEFT JOIN `char_reg_num` k ON k.char_id = c.char_id AND k.`key` = 'pvp_kills' AND k.`index` = 0", .@max_kills);
 
 		if (.@max_kills <= 0) {
 			announce "PvP Semanal: Nenhum jogador fez kills esta semana. Premiacao cancelada.", bc_all;
+			query_sql("DELETE FROM char_reg_num WHERE `key` = 'pvp_kills' AND `index` = 0");
+			query_sql("DELETE FROM char_reg_num WHERE `key` = 'pvp_deaths' AND `index` = 0");
 			end;
 		}
 

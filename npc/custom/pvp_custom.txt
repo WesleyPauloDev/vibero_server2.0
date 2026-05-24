@@ -120,7 +120,7 @@ prontera,145,203,4	script	PvP Warper	468,{
 
 S_RankingSemanal:
 	mes "[PvP Ranking Semanal]";
-	mes "TOP 10 Jogadores:";
+	mes "Semana Atual - TOP 10 Jogadores:";
 	mes "---------------------------------";
 
 	query_sql("SELECT c.name, COALESCE(k.value,0) AS kills, COALESCE(d.value,0) AS deaths FROM `char` c LEFT JOIN `char_reg_num` k  ON k.char_id = c.char_id AND k.`key` = 'pvp_kills' AND k.`index` = 0 LEFT JOIN `char_reg_num` d  ON d.char_id = c.char_id AND d.`key` = 'pvp_deaths' AND d.`index` = 0 ORDER BY kills DESC LIMIT 10", .@name$, .@kills, .@deaths);
@@ -129,6 +129,21 @@ S_RankingSemanal:
         mes (.@i+1)+". "+.@name$[.@i]
             +"  -  ^00FF00Kills:^000000 "+.@kills[.@i]
             +"  |  ^FF0000Mortes:^000000 "+.@deaths[.@i];
+    }
+
+	mes "---------------------------------";
+	next;
+
+	mes "[PvP Ranking Semanal]";
+	mes "Semana Passada - TOP 10 Jogadores:";
+	mes "---------------------------------";
+
+	query_sql("SELECT c.name, COALESCE(k.value,0) AS kills, COALESCE(d.value,0) AS deaths FROM `char` c LEFT JOIN `char_reg_num` k  ON k.char_id = c.char_id AND k.`key` = 'pvp_kills_last_week' AND k.`index` = 0 LEFT JOIN `char_reg_num` d  ON d.char_id = c.char_id AND d.`key` = 'pvp_deaths_last_week' AND d.`index` = 0 ORDER BY kills DESC LIMIT 10", .@last_name$, .@last_kills, .@last_deaths);
+
+    for (.@i = 0; .@i < getarraysize(.@last_name$); .@i++) {
+        mes (.@i+1)+". "+.@last_name$[.@i]
+            +"  -  ^00FF00Kills:^000000 "+.@last_kills[.@i]
+            +"  |  ^FF0000Mortes:^000000 "+.@last_deaths[.@i];
     }
 
 	mes "---------------------------------";

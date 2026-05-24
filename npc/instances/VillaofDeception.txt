@@ -198,7 +198,7 @@ OnInstanceInit:
 		'advs_difficult = 1;
 		'sanare_id = 21377;	// EP18_MD_SANARE_L
 		'hunter_id = 21378;	// EP18_MD_HEARTHUNTER_L
-		'monster_relieve = 10;	// need check but the damages are very low compared to normal mode
+		'monster_relieve = 5;	// resistencia reduzida pela metade
 
 		// Total of monster to kill in step 1, 2, 3
 		'total_monster_step_1 = 80;
@@ -221,7 +221,7 @@ OnInstanceInit:
 		'advs_difficult = 0;
 		'sanare_id = 21318;	// EP18_MD_SANARE_R
 		'hunter_id = 21319;	// EP18_MD_HEARTHUNTER_R2
-		'monster_relieve = 9;
+		'monster_relieve = 5;
 
 		// Total of monster to kill in step 1, 2, 3
 		'total_monster_step_1 = 35;
@@ -381,6 +381,7 @@ S_Spawn:
 	next;
 	if (select( "Parar", "Libertar" ) == 1)
 		end;
+	progressbar "",3;
 	if ('advs_step != 0)
 		end;
 	disablenpc instance_npcname("#sw_1");
@@ -400,6 +401,7 @@ OnTouch_:
 	next;
 	if (select( "Parar", "Libertar" ) == 1)
 		end;
+	progressbar "",3;
 	if ('advs_step != 0)
 		end;
 	disablenpc instance_npcname("#sw_2");
@@ -848,7 +850,8 @@ OnStart:
 	getunitdata 'freyja_gid, .@data;
 	.@d = distance(124,356,.@data[UMOB_X],.@data[UMOB_Y]);
 	.@lv = (.@d / 2) + 1;	// level 6 on spawn
-	.@lv = min(10,.@lv);
+	.@lv = (.@lv + 1) / 2;	// resistencia reduzida pela metade
+	.@lv = min(5,.@lv);
 	.@lv = max(1,.@lv);
 	unitskilluseid 'freyja_gid, 772, 1;	// NPC_RELIEVE_OFF
 	unitskilluseid 'freyja_gid, 771, .@lv;	// NPC_RELIEVE_ON
@@ -871,10 +874,7 @@ OnTouch:	// note: warp dead player
 	specialeffect2 EF_FIREHIT;
 	specialeffect2 EF_ACIDDEMON;
 	percentheal -10,0;	// deal some damage
-	if (rand(2))
-		warp 'map_advs$,67,182;
-	else
-		warp 'map_advs$,180,182;
+	warp 'map_advs$,124,295;
 	end;
 
 OnEnable:
@@ -988,6 +988,7 @@ OnTouch:	// effect ?
 		.@coin = 30;
 		.@ticket = 3;
 		.@rep = 30;
+		.@fragment = 80;
 	}
 	else {
 		.@display_name$ = "Vila da Decepcao";
@@ -997,6 +998,14 @@ OnTouch:	// effect ?
 		.@coin = 20;
 		.@ticket = 2;
 		.@rep = 20;
+		.@fragment = 50;
+	}
+
+	if (!checkweight(1000405, .@fragment)) {
+		mes "[Aira]";
+		mes "Voce esta carregando peso demais para receber as recompensas.";
+		mes "Libere espaco no inventario e toque no brilho novamente.";
+		close;
 	}
 
 	.@announce = (!'vdec_done && getcharid(1) > 0);
@@ -1010,6 +1019,7 @@ OnTouch:	// effect ?
 	if (.@finish_result == 1) {
 		setd(.@shared_status_var$, 3);
 		'vdec_reward[.@aid] = 1;
+		getitem 1000405, .@fragment;
 		if (!'vdec_done) {
 			'vdec_done = 1;
 			if (getcharid(1) < 1) {
