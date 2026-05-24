@@ -2546,10 +2546,13 @@ int32 unit_skilluse_id2(struct block_list *src, int32 target_id, uint16 skill_id
 
 	// Set attack and act delays
 	// Please note that the call below relies on ud->skill_id being set!
-	if (!unit_should_skip_skill_motion_delay(src, skill_id, skill_lv, casttime))
+	bool skip_motion_delay = unit_should_skip_skill_motion_delay(src, skill_id, skill_lv, casttime);
+
+	if (!skip_motion_delay)
 		unit_set_attackdelay(*src, tick, DELAY_EVENT_CASTBEGIN_ID);
 	// Apply cast time and general delays
-	unit_set_castdelay(*ud, tick, (skill_get_cast(skill_id, skill_lv) != 0) ? casttime : 0);
+	if (!skip_motion_delay)
+		unit_set_castdelay(*ud, tick, (skill_get_cast(skill_id, skill_lv) != 0) ? casttime : 0);
 
 	if( sc ) {
 		// These 3 status do not stack, so it's efficient to use if-else
@@ -2735,10 +2738,13 @@ int32 unit_skilluse_pos2( struct block_list *src, int16 skill_x, int16 skill_y, 
 
 	// Set attack and act delays
 	// Please note that the call below relies on ud->skill_id being set!
-	if (!unit_should_skip_skill_motion_delay(src, skill_id, skill_lv, casttime))
+	bool skip_motion_delay = unit_should_skip_skill_motion_delay(src, skill_id, skill_lv, casttime);
+
+	if (!skip_motion_delay)
 		unit_set_attackdelay(*src, tick, DELAY_EVENT_CASTBEGIN_POS);
 	// Apply cast time and general delays
-	unit_set_castdelay(*ud, tick, (skill_get_cast(skill_id, skill_lv) != 0) ? casttime : 0);
+	if (!skip_motion_delay)
+		unit_set_castdelay(*ud, tick, (skill_get_cast(skill_id, skill_lv) != 0) ? casttime : 0);
 
 	if( sc ) {
 		// These 3 status do not stack, so it's efficient to use if-else
