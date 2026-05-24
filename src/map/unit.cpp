@@ -1973,10 +1973,70 @@ void unit_set_attackdelay(block_list& bl, t_tick tick, e_delay_event event)
 static bool unit_should_skip_skill_motion_delay(struct block_list *src, uint16 skill_id, uint16 skill_lv, int32 casttime)
 {
 	switch (skill_id) {
+		case SM_MAGNUM:
+		case WZ_METEOR:
+		case WZ_VERMILION:
+		case WZ_STORMGUST:
+		case WZ_HEAVENDRIVE:
+		case AS_SONICBLOW:
+		case CR_GRANDCROSS:
+		case ASC_BREAKER:
+		case CG_ARROWVULCAN:
+		case ASC_METEORASSAULT:
+		case GC_CROSSIMPACT:
+		case AB_ADORAMUS:
+		case RK_SONICWAVE:
 		case RK_DRAGONBREATH:
 		case RK_DRAGONBREATH_WATER:
 		case RK_HUNDREDSPEAR:
+		case RK_WINDCUTTER:
+		case RK_IGNITIONBREAK:
+		case WL_FROSTMISTY:
+		case WL_JACKFROST:
+		case WL_CRIMSONROCK:
+		case WL_HELLINFERNO:
 		case WL_COMET:
+		case WL_EARTHSTRAIN:
+		case WL_TETRAVORTEX:
+		case RA_ARROWSTORM:
+		case RA_AIMEDBOLT:
+		case NC_AXEBOOMERANG:
+		case NC_AXETORNADO:
+		case LG_CANNONSPEAR:
+		case LG_SHIELDPRESS:
+		case LG_OVERBRAND:
+		case LG_MOONSLASHER:
+		case LG_RAYOFGENESIS:
+		case SR_TIGERCANNON:
+		case SR_RAMPAGEBLASTER:
+		case SR_HOWLINGOFLION:
+		case WM_METALICSOUND:
+		case WM_SEVERE_RAINSTORM:
+		case WM_GREAT_ECHO:
+		case SO_EARTHGRAVE:
+		case SO_DIAMONDDUST:
+		case SO_POISON_BUSTER:
+		case SO_PSYCHIC_WAVE:
+		case SO_VARETYR_SPEAR:
+		case GN_SPORE_EXPLOSION:
+		case GN_DEMONIC_FIRE:
+		case RL_MASS_SPIRAL:
+		case RL_R_TRIP:
+		case RL_D_TAIL:
+		case RL_SLUGSHOT:
+		case RL_HAMMER_OF_GOD:
+		case SJ_FULLMOONKICK:
+		case SJ_NEWMOONKICK:
+		case SP_CURSEEXPLOSION:
+		case SP_SWHOO:
+		case KO_BAKURETSU:
+		case KO_MUCHANAGE:
+		case KO_HUUMARANKA:
+		case SU_CN_METEOR:
+		case SU_SCAROFTAROU:
+		case SU_PICKYPECK:
+		case SU_LUNATICCARROTBEAT:
+		case SU_SVG_SPIRIT:
 			return casttime <= 0 && skill_delayfix(src, skill_id, skill_lv) <= 0;
 	}
 
