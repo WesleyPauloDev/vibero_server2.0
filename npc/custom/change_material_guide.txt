@@ -10,13 +10,19 @@ prontera,198,188,3	script	Guia de Criacao	4_M_ALCHE_A,{
 	next;
 
 	while (1) {
-		switch(select("Reacao Alquimica:Comidas Mixed Cooking:Sair")) {
+		switch(select("Reacao Alquimica:Culinaria Avancada:Preparar Pocao:Comprar manuais:Sair")) {
 		case 1:
 			callsub L_ReacaoMenu;
 			break;
 		case 2:
 			callsub L_CookMenu;
 			break;
+		case 3:
+			callsub L_PharmMenu;
+			break;
+		case 4:
+			callshop "shop_guia_criacao_manuais", 1;
+			close;
 		default:
 			close;
 		}
@@ -64,7 +70,10 @@ L_List:
 
 		mes "[Guia de Criacao]";
 		mes "Pagina " + (.@page + 1) + " de " + .@pages + ".";
-		mes "Escolha um produto para ver os materiais.";
+		mes "Clique no item para ver a descricao.";
+		for (.@i = .@start; .@i < .@end; .@i++)
+			mes " - " + mesitemlink(.product[.@i], false, .product_name$[.@i]) + " [" + .product[.@i] + "]";
+		mes "Depois escolha a receita.";
 		next;
 
 		.@pick = select(.@menu$);
@@ -114,7 +123,7 @@ L_Search:
 L_ShowRecipe:
 	.@i = getarg(0);
 	mes "[Guia de Criacao]";
-	mes "^0000CD" + .product_name$[.@i] + "^000000 [" + .product[.@i] + "]";
+	mes "^0000CD" + mesitemlink(.product[.@i], false, .product_name$[.@i]) + "^000000 [" + .product[.@i] + "]";
 	mes "Use exatamente os materiais abaixo.";
 	if (.out_min[.@i] == .out_max[.@i])
 		mes "Resultado: " + .out_min[.@i] + "x se der certo.";
@@ -132,7 +141,7 @@ L_ShowMaterial:
 	.@amount = getarg(1);
 	.@name$ = getarg(2);
 	if (.@item > 0)
-		mes " - " + .@amount + "x " + .@name$ + " [" + .@item + "]";
+		mes " - " + .@amount + "x " + mesitemlink(.@item, false, .@name$) + " [" + .@item + "]";
 	return;
 
 L_CookMenu:
@@ -159,7 +168,10 @@ L_CookList:
 	.@menu$ += "Voltar";
 
 	mes "[Guia de Criacao]";
-	mes "Escolha uma comida para ver a receita.";
+	mes "Clique no item para ver a descricao.";
+	for (.@i = 0; .@i < getarraysize(.cook_product); .@i++)
+		mes " - " + mesitemlink(.cook_product[.@i], false, .cook_product_name$[.@i]) + " [" + .cook_product[.@i] + "]";
+	mes "Depois escolha a receita.";
 	next;
 
 	.@pick = select(.@menu$);
@@ -173,11 +185,8 @@ L_CookList:
 L_CookShowRecipe:
 	.@i = getarg(0);
 	mes "[Guia de Criacao]";
-	mes "^0000CD" + .cook_product_name$[.@i] + "^000000 [" + .cook_product[.@i] + "]";
+	mes "^0000CD" + mesitemlink(.cook_product[.@i], false, .cook_product_name$[.@i]) + "^000000 [" + .cook_product[.@i] + "]";
 	mes "Efeito: " + .cook_effect$[.@i];
-	mes "Livro necessario:";
-	mes " - Livro de Culinaria Avancado [11022]";
-	mes "O livro precisa estar no inventario e nao e consumido.";
 	mes "Materiais consumidos:";
 	callsub L_ShowMaterial, .cook_mat1[.@i], .cook_amt1[.@i], .cook_mat1_name$[.@i];
 	callsub L_ShowMaterial, .cook_mat2[.@i], .cook_amt2[.@i], .cook_mat2_name$[.@i];
@@ -192,8 +201,8 @@ L_CookShowRecipe:
 
 L_CookHelp:
 	mes "[Guia de Criacao]";
-	mes "Todas precisam do Livro de Culinaria Avancado no inventario.";
-	mes "O livro  nao e consumido.";
+	mes "As receitas nao precisam de livro.";
+	mes "Basta ter os materiais consumidos da receita.";
 	next;
 	mes "[Guia de Criacao]";
 	mes "A chance e a quantidade dependem de Job Level, DEX e LUK.";
@@ -250,6 +259,117 @@ L_CookSimulate:
 	next;
 	return;
 
+L_PharmMenu:
+	mes "[Guia de Criacao]";
+	mes "Aqui ficam as receitas de Preparar Pocao.";
+	mes "Alquimistas usam Preparar Pocao para criar uma pocao por tentativa.";
+	mes "Bioquimicos tambem podem usar Farmacologia Avancada para fazer algumas receitas em lote.";
+	mes "Na criacao em lote, a quantidade criada depende dos atributos e do nivel da skill.";
+	next;
+	while (1) {
+		switch(select("Ver receitas:Como funciona:Voltar")) {
+		case 1:
+			callsub L_PharmList;
+			break;
+		case 2:
+			callsub L_PharmHelp;
+			break;
+		default:
+			return;
+		}
+	}
+
+L_PharmList:
+	.@page = 0;
+	.@per_page = 8;
+	.@total = getarraysize(.pharm_product);
+	.@pages = (.@total + .@per_page - 1) / .@per_page;
+
+	while (1) {
+		.@start = .@page * .@per_page;
+		.@end = .@start + .@per_page;
+		if (.@end > .@total)
+			.@end = .@total;
+
+		.@menu$ = "";
+		for (.@i = .@start; .@i < .@end; .@i++)
+			.@menu$ += .pharm_product_name$[.@i] + " [" + .pharm_product[.@i] + "]:";
+		.@menu$ += "Proxima pagina:Pagina anterior:Voltar";
+
+		mes "[Guia de Criacao]";
+		mes "Pagina " + (.@page + 1) + " de " + .@pages + ".";
+		mes "Clique no item para ver a descricao.";
+		for (.@i = .@start; .@i < .@end; .@i++)
+			mes " - " + mesitemlink(.pharm_product[.@i], false, .pharm_product_name$[.@i]) + " [" + .pharm_product[.@i] + "]";
+		mes "Depois escolha a receita.";
+		next;
+
+		.@pick = select(.@menu$);
+		.@visible = .@end - .@start;
+
+		if (.@pick <= .@visible) {
+			callsub L_PharmShowRecipe, .@start + .@pick - 1;
+			next;
+		} else if (.@pick == .@visible + 1) {
+			.@page++;
+			if (.@page >= .@pages)
+				.@page = 0;
+		} else if (.@pick == .@visible + 2) {
+			.@page--;
+			if (.@page < 0)
+				.@page = .@pages - 1;
+		} else {
+			return;
+		}
+	}
+
+L_PharmShowRecipe:
+	.@i = getarg(0);
+	mes "[Guia de Criacao]";
+	mes "^0000CD" + mesitemlink(.pharm_product[.@i], false, .pharm_product_name$[.@i]) + "^000000 [" + .pharm_product[.@i] + "]";
+	if (.pharm_guide[.@i] > 0) {
+		mes "Guia necessario:";
+		mes " - " + mesitemlink(.pharm_guide[.@i], false, .pharm_guide_name$[.@i]) + " [" + .pharm_guide[.@i] + "]";
+		mes "O guia precisa estar no inventario e nao e consumido.";
+	}
+	mes "Materiais consumidos:";
+	callsub L_ShowMaterial, .pharm_mat1[.@i], .pharm_amt1[.@i], .pharm_mat1_name$[.@i];
+	callsub L_ShowMaterial, .pharm_mat2[.@i], .pharm_amt2[.@i], .pharm_mat2_name$[.@i];
+	callsub L_ShowMaterial, .pharm_mat3[.@i], .pharm_amt3[.@i], .pharm_mat3_name$[.@i];
+	callsub L_ShowMaterial, .pharm_mat4[.@i], .pharm_amt4[.@i], .pharm_mat4_name$[.@i];
+	mes "Use exatamente estes materiais.";
+	return;
+
+L_PharmHelp:
+	mes "[Guia de Criacao]";
+	mes "Preparar Pocao usa a skill Preparar Pocao do Alquimista.";
+	mes "Algumas receitas precisam de guia no inventario.";
+	mes "Guias com quantidade 0 nao sao consumidos.";
+	next;
+	mes "[Guia de Criacao]";
+	mes "A chance melhora com:";
+	mes " - Nivel da skill Preparar Pocao";
+	mes " - Pesquisa de Pocoes";
+	mes " - Job Level";
+	mes " - INT, DEX e LUK";
+	mes "Vanilmirth com Instruction Change tambem ajuda.";
+	next;
+	mes "[Guia de Criacao]";
+	mes "Bioquimicos possuem Farmacologia Avancada.";
+	mes "Ela cria em lote usando receitas proprias.";
+	mes "Os materiais sao consumidos de acordo com a receita.";
+	mes "Manuais exigidos precisam estar no inventario e nao sao consumidos.";
+	next;
+	mes "[Guia de Criacao]";
+	mes "Na Farmacologia Avancada, o resultado varia pela quantidade criada.";
+	mes "A quantidade base depende do nivel da skill:";
+	mes "Lv1: ate 7 unidades.";
+	mes "Lv10: ate 12 unidades.";
+	mes "Se a pontuacao ficar baixa, a quantidade pode cair.";
+	mes "INT, DEX, LUK, Base Level e Job Level ajudam no resultado.";
+	next;
+	return;
+
 OnInit:
 	setarray .product[0],1045,1020,1010,1041,1026,1008,958,971,1051,1046,1038,1033,961,959,1040,1012,1011,1024,1025,1064,1019,962,974,1013,1058,960,967,1043,1035,1049,1037,1021,1056,963,1042,1061,1022,1034,1014,968,1009,970,964,1050,1030,703,973,1053,1016,1003,999,2267,1615,2267,1061,7063,992,991,7166,1059,13269,13270,13271,13272,13273,13274,13275,13276,13277,13278,13279,13280,13281,13282,13283;
 	setarray .out_rate[0],800,1000,800,800,800,800,800,800,800,800,1000,1000,800,800,1000,800,800,800,800,800,800,1000,1000,1000,800,1000,800,800,1000,800,800,800,800,800,800,800,1000,1000,1000,800,800,800,800,800,800,1000,800,1000,1000,500,1000,1000,200,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000;
@@ -293,5 +413,24 @@ OnInit:
 	setarray .cook_mat6[0],0,0,0,0,6259,0;
 	setarray .cook_amt6[0],0,0,0,0,3,0;
 	setarray .cook_mat6_name$[0],"","","","","Tentaculo de Drosera","";
+
+	setarray .pharm_product[0],501,503,504,505,545,546,547,7135,7136,7137,7138,7139,12118,12119,12120,12121,605,606,970,7142,100371;
+	setarray .pharm_product_name$[0],"Pocao Vermelha","Pocao Amarela","Pocao Branca","Pocao Azul","Pocao Vermelha Compacta","Pocao Amarela Compacta","Pocao Branca Compacta","Frasco de Fogo Grego","Frasco de Acido","Frasco de Planta Carnivora","Frasco de Esfera Marinha","Frasco de Revestimento","Pocao Antifogo","Pocao Antiagua","Pocao Antiterra","Pocao Antivento","Analgesico","Aloe Vera","Alcool","Embriao","Suplemento para Homunculus";
+	setarray .pharm_guide[0],7144,7144,7144,7144,7133,7133,0,7128,7129,7130,7131,7132,7434,7434,7434,7434,7144,7144,7127,7144,7144;
+	setarray .pharm_guide_name$[0],"Manual de Criacao: Vol.8: Pocoes Comuns","Manual de Criacao: Vol.8: Pocoes Comuns","Manual de Criacao: Vol.8: Pocoes Comuns","Manual de Criacao: Vol.8: Pocoes Comuns","Manual de Criacao: Vol.8: Pocoes Compactas","Manual de Criacao: Vol.8: Pocoes Compactas","","Manual de Criacao: Vol.3: Fogo Grego","Manual de Criacao: Vol.4: Acidos","Manual de Criacao: Vol.5: Plantas","Manual de Criacao: Vol.6: Explosivos","Manual de Criacao: Vol.7: Revestimentos","Guia de Criacao de Pocoes Elementais","Guia de Criacao de Pocoes Elementais","Guia de Criacao de Pocoes Elementais","Guia de Criacao de Pocoes Elementais","Manual de Criacao: Vol.8: Pocoes Comuns","Manual de Criacao: Vol.8: Pocoes Comuns","Manual de Criacao Vol.2: Alcool","Manual de Criacao: Vol.8: Pocoes Comuns","Manual de Criacao: Vol.8: Pocoes Comuns";
+	setarray .pharm_mat1[0],507,508,509,510,501,503,504,970,713,713,713,970,1012,950,7126,1057,708,704,713,7140,7140;
+	setarray .pharm_amt1[0],1,1,1,1,1,1,1,1,1,1,1,1,2,3,2,3,1,1,1,1,1;
+	setarray .pharm_mat1_name$[0],"Erva Vermelha","Erva Amarela","Erva Branca","Erva Azul","Pocao Vermelha","Pocao Amarela","Pocao Branca","Alcool","Garrafa Vazia","Garrafa Vazia","Garrafa Vazia","Alcool","Crista","Coracao de Sereia","Jellopy Tamanho Familia","Po de Traca","Menta","Aloes","Garrafa Vazia","Semente da Vida","Semente da Vida";
+	setarray .pharm_mat2[0],1093,1093,1093,911,1092,1092,1092,1059,929,1032,1050,950,716,717,715,717,970,518,7033,7141,508;
+	setarray .pharm_amt2[0],1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,5,1,1;
+	setarray .pharm_mat2_name$[0],"Garrafa de Pocao","Garrafa de Pocao","Garrafa de Pocao","Scell","Tubo de Ensaio","Tubo de Ensaio","Tubo de Ensaio","Tecido","Coracao Imortal","Flor de Planta Carnivora","Tendoes","Coracao de Sereia","Gema Vermelha","Gema Azul","Gema Amarela","Gema Azul","Alcool","Mel","Esporo Venenoso","Orvalho da Yggdrasil","Erva Amarela";
+	setarray .pharm_mat3[0],0,0,0,1093,952,1017,1061,713,0,0,1051,1044,1093,1093,1093,1093,713,713,905,7143,713;
+	setarray .pharm_amt3[0],0,0,0,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,5,1,1;
+	setarray .pharm_mat3_name$[0],"","","","Garrafa de Pocao","Espinho de Cacto","Bigodes de Toupeira","Areia Estrelar de Bruxa","Garrafa Vazia","","","Neuronio","Presa de Zenorc","Garrafa de Pocao","Garrafa de Pocao","Garrafa de Pocao","Garrafa de Pocao","Garrafa Vazia","Garrafa Vazia","Caule","Capsula da Criacao","Garrafa Vazia";
+	setarray .pharm_mat4[0],0,0,0,0,0,0,0,0,0,0,0,713,0,0,0,0,0,0,1092,0,0;
+	setarray .pharm_amt4[0],0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0;
+	setarray .pharm_mat4_name$[0],"","","","","","","","","","","","Garrafa Vazia","","","","","","","Tubo de Ensaio","","";
 	end;
 }
+
+-	shop	shop_guia_criacao_manuais	-1,6279:10000,6280:10000,6281:10000,6282:10000,6283:10000,6284:10000,6285:10000,7127:10000,7128:10000,7129:10000,7130:10000,7131:10000,7132:10000,7133:10000,7144:10000,7434:10000,11022:10000,11023:10000,11024:10000
