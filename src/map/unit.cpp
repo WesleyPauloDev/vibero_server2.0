@@ -1970,6 +1970,19 @@ void unit_set_attackdelay(block_list& bl, t_tick tick, e_delay_event event)
 		ud->canact_tick = i64max(tick + act_delay, ud->canact_tick);
 }
 
+static bool unit_should_skip_skill_motion_delay(struct block_list *src, uint16 skill_id, uint16 skill_lv, int32 casttime)
+{
+	switch (skill_id) {
+		case RK_DRAGONBREATH:
+		case RK_DRAGONBREATH_WATER:
+		case RK_HUNDREDSPEAR:
+		case WL_COMET:
+			return casttime <= 0 && skill_delayfix(src, skill_id, skill_lv) <= 0;
+	}
+
+	return false;
+}
+
 /**
  * Updates skill delays according to cast time and minimum delay, and applies security casttime
  * @param bl Object to apply update delay for
@@ -2533,7 +2546,8 @@ int32 unit_skilluse_id2(struct block_list *src, int32 target_id, uint16 skill_id
 
 	// Set attack and act delays
 	// Please note that the call below relies on ud->skill_id being set!
-	unit_set_attackdelay(*src, tick, DELAY_EVENT_CASTBEGIN_ID);
+	if (!unit_should_skip_skill_motion_delay(src, skill_id, skill_lv, casttime))
+		unit_set_attackdelay(*src, tick, DELAY_EVENT_CASTBEGIN_ID);
 	// Apply cast time and general delays
 	unit_set_castdelay(*ud, tick, (skill_get_cast(skill_id, skill_lv) != 0) ? casttime : 0);
 
@@ -2721,7 +2735,8 @@ int32 unit_skilluse_pos2( struct block_list *src, int16 skill_x, int16 skill_y, 
 
 	// Set attack and act delays
 	// Please note that the call below relies on ud->skill_id being set!
-	unit_set_attackdelay(*src, tick, DELAY_EVENT_CASTBEGIN_POS);
+	if (!unit_should_skip_skill_motion_delay(src, skill_id, skill_lv, casttime))
+		unit_set_attackdelay(*src, tick, DELAY_EVENT_CASTBEGIN_POS);
 	// Apply cast time and general delays
 	unit_set_castdelay(*ud, tick, (skill_get_cast(skill_id, skill_lv) != 0) ? casttime : 0);
 
