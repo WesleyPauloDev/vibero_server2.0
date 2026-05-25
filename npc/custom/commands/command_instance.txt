@@ -25,6 +25,12 @@ OnAtcommand:
 			doevent "PoringVillage_Instance#Custom::OnStartInstance";
 			end;
 		}
+		if (.@live_name$ == "Jardim Aquatico" || .@live_name$ == "Water Garden Hard") {
+			#INSTANCENAME$ = "WATERGARDEN";
+			#WATERGARDEN_MODE = (.@live_name$ == "Water Garden Hard");
+			doevent "WATERGARDEN_Instance#Custom::OnStartInstance";
+			end;
+		}
 		if (#INSTANCENAME$ == "Wolves" || .@live_name$ == "Wolves Gathering Place" || .@live_name$ == "Sanctuary Purification") {
 			if (.@live_name$ == "Wolves Gathering Place") {
 				#INSTANCENAME$ = "WolvesGathering";
@@ -58,11 +64,7 @@ OnAtcommand:
 			doevent "VillaDeception_Instance#Custom::OnStartInstance";
 			end;
 		}
-		if (getcharid(1) && getpartyleader(getcharid(1), 2) == getcharid(0) && #INSTANCENAME$ != "") {
-			debugmes #INSTANCENAME$;
-			doevent #INSTANCENAME$ + "_Instance#Custom::OnStartInstance";
-			end;
-		}
+		#INSTANCENAME$ = "";
 	}
 
 	.@now = gettimetick(2);

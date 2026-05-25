@@ -23498,80 +23498,80 @@ Body:
       }
   - Combos:
       - Combo:
-          - Scaraba_High_Heels    # 22174
+          - Scaraba_High_Heels    # 15368
           - Elven_Bow    # 1746
     Script: |
       .@eq = getequiprefinerycnt(EQI_SHOES);
       .@weapon = getequiprefinerycnt(EQI_HAND_R);
-      if (.@eq >= 7) {
-         bonus2 bSkillCooldown,"WM_SEVERE_RAINSTORM",-2000;
+      if (.@eq >= 8) {
+         bonus2 bSkillCooldown,"RA_ARROWSTORM",-2000;
       }
-      if (.@eq >= 7 && .@weapon >= 8) {
+      if (.@weapon >= 9) {
          bonus2 bAddClass,Class_Boss,20;
-         bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM_MELEE",8;
+         bonus2 bSkillAtk,"RA_ARROWSTORM",8;
       }
-      if (.@eq >= 7 && .@weapon >= 10) {
-         bonus2 bAddClass,Class_Boss,30;
-         bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM_MELEE",12;
+      if (.@weapon >= 11) {
+         bonus2 bAddClass,Class_Boss,10;
+         bonus2 bSkillAtk,"RA_ARROWSTORM",4;
       }
   - Combos:
       - Combo:
-          - Scaraba_High_Heels    # 22174
+          - Scaraba_High_Heels    # 15368
           - Carga_Mace    # 16003
     Script: |
       .@r = getequiprefinerycnt(EQI_HAND_R);
       bonus bNoCastCancel;
-      if (.@r >= 7) {
+      if (.@r >= 10) {
          bonus bMaxSP,400;
          bonus2 bAddClass,Class_Boss,20;
       }
-      if (.@r >= 9) {
-         bonus bMaxSP,600;
-         bonus2 bAddClass,Class_Boss,30;
+      if (.@r >= 12) {
+         bonus bMaxSP,200;
+         bonus2 bAddClass,Class_Boss,10;
       }
   - Combos:
       - Combo:
-          - Scaraba_High_Heels    # 22174
+          - Scaraba_High_Heels    # 15368
           - Durga    # 1287
     Script: |
       .@r = getequiprefinerycnt(EQI_HAND_R);
       bonus2 bIgnoreDefClassRate,Class_Boss,100;
-      if (.@r >= 7) {
+      if (.@r >= 10) {
          bonus2 bAddClass,Class_Boss,20;
          bonus2 bSkillAtk,"GC_ROLLINGCUTTER",8;
       }
-      if (.@r >= 9) {
-         bonus2 bAddClass,Class_Boss,30;
-         bonus2 bSkillAtk,"GC_ROLLINGCUTTER",12;
+      if (.@r >= 12) {
+         bonus2 bAddClass,Class_Boss,10;
+         bonus2 bSkillAtk,"GC_ROLLINGCUTTER",4;
       }
   - Combos:
       - Combo:
-          - Scaraba_High_Heels    # 22174
+          - Scaraba_High_Heels    # 15368
           - Rafini_Staff_S    # 1679
       - Combo:
-          - Scaraba_High_Heels    # 22174
+          - Scaraba_High_Heels    # 15368
           - Rafini_Staff    # 1649
     Script: |
       .@eq = getequiprefinerycnt(EQI_SHOES);
       .@weapon = getequiprefinerycnt(EQI_HAND_R);
-      if (.@eq >= 7) {
+      if (.@eq >= 8) {
          bonus bVariableCastrate,-20;
       }
-      if (.@eq >= 7 && .@weapon >= 8) {
-         bonus2 bMagicAddClass,Class_Boss,30;
+      if (.@weapon >= 9) {
+         bonus2 bMagicAddClass,Class_Boss,20;
          bonus2 bIgnoreMdefRaceRate,RC_All,20;
       }
-      if (.@eq >= 7 && .@weapon >= 10) {
-         bonus2 bMagicAddClass,Class_Boss,40;
-         bonus2 bIgnoreMdefRaceRate,RC_All,30;
+      if (.@weapon >= 11) {
+         bonus2 bMagicAddClass,Class_Boss,10;
+         bonus2 bIgnoreMdefRaceRate,RC_All,10;
       }
   - Combos:
       - Combo:
-          - Scaraba_High_Heels    # 22174
+          - Scaraba_High_Heels    # 15368
           - Storm_Muffler    # 480064
           - Elven_Bow    # 1746
       - Combo:
-          - Scaraba_High_Heels    # 22174
+          - Scaraba_High_Heels    # 15368
           - Grace_Severe_Suit    # 450092
           - Elven_Bow    # 1746
     Script: |
@@ -23583,7 +23583,7 @@ Body:
       }
   - Combos:
       - Combo:
-          - Scaraba_High_Heels    # 22174
+          - Scaraba_High_Heels    # 15368
           - Grace_Severe_Suit    # 450092
       - Combo:
           - Bow_Of_Storm    # 18123
@@ -26744,7 +26744,7 @@ Body:
     Script: |
       .@agi = (readparam(bAgi)/20);
       .@luk = (readparam(bLuk)/20);
-      bonus3 bAutoSpell,"MG_SAFETYWALL",10,50 + (.@agi * 20);
+      bonus4 bAutoSpell,"MG_SAFETYWALL",10,50 + (.@agi * 20),0;
       bonus bCritical,5 * .@luk;
       bonus bBaseAtk,20 * .@luk;
       bonus bMatk,20 * .@luk;
