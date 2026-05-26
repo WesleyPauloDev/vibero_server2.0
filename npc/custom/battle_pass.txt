@@ -291,6 +291,9 @@ function	script	F_BattlePassSync	{
 OnInit:
 	bindatcmd "battlepass", strnpcinfo(3) + "::OnAtcommand";
 	bindatcmd "passe", strnpcinfo(3) + "::OnAtcommand";
+	bindatcmd "bp_setpoint", strnpcinfo(3) + "::OnSetPoint", 99, 99;
+	bindatcmd "bp_addpoint", strnpcinfo(3) + "::OnAddPoint", 99, 99;
+	bindatcmd "bp_reset_temporada", strnpcinfo(3) + "::OnResetSeason", 99, 99;
 	end;
 
 OnPCLoginEvent:
@@ -343,5 +346,50 @@ OnAtcommand:
 		case 4:
 			close;
 	}
+	end;
+
+OnSetPoint:
+	if (getgroupid() < 99) {
+		dispbottom "Comando exclusivo para GM.";
+		end;
+	}
+	if (.@atcmd_numparameters < 1) {
+		dispbottom "Uso: @bp_setpoint <pontos>";
+		dispbottom "Exemplo: @bp_setpoint 2000";
+		end;
+	}
+	#BP_Points = atoi(.@atcmd_parameters$[0]);
+	if (#BP_Points < 0)
+		#BP_Points = 0;
+	callfunc("F_BattlePassEnsureSeason");
+	callfunc("F_BattlePassCheckMilestones");
+	dispbottom "Passe de Batalha: pontos definidos para " + #BP_Points + ".";
+	end;
+
+OnAddPoint:
+	if (getgroupid() < 99) {
+		dispbottom "Comando exclusivo para GM.";
+		end;
+	}
+	if (.@atcmd_numparameters < 1) {
+		dispbottom "Uso: @bp_addpoint <pontos>";
+		dispbottom "Exemplo: @bp_addpoint 50";
+		end;
+	}
+	callfunc("F_BattlePassEnsureSeason");
+	#BP_Points += atoi(.@atcmd_parameters$[0]);
+	if (#BP_Points < 0)
+		#BP_Points = 0;
+	callfunc("F_BattlePassCheckMilestones");
+	dispbottom "Passe de Batalha: pontos somados. Total: " + #BP_Points + ".";
+	end;
+
+OnResetSeason:
+	if (getgroupid() < 99) {
+		dispbottom "Comando exclusivo para GM.";
+		end;
+	}
+	callfunc("F_BattlePassReset");
+	dispbottom "Passe de Batalha: temporada reiniciada.";
 	end;
 }
