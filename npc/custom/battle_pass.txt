@@ -1,0 +1,347 @@
+// Battle Pass - first pass
+// Quest UI tracks missions. Achievement UI delivers rewards.
+
+function	script	F_BattlePassSeason	{
+	return (gettime(DT_YEAR) * 100) + gettime(DT_MONTH);
+}
+
+
+function	script	F_BattlePassResetDaily	{
+	setarray .@quest[0], 69100, 69101, 69102, 69103, 69105, 69106, 69107, 69108, 69109;
+	for (.@i = 0; .@i < getarraysize(.@quest); .@i++) {
+		if (checkquest(.@quest[.@i]) != -1)
+			erasequest .@quest[.@i];
+	}
+
+	setarray .@ach[0], 910000, 910001, 910002, 910003, 910004, 910005, 910006, 910007, 910008;
+	for (.@i = 0; .@i < getarraysize(.@ach); .@i++) {
+		if (achievementexists(.@ach[.@i]))
+			achievementremove .@ach[.@i];
+	}
+
+	#BP_DONE_battle_royale = 0;
+	#BP_DONE_poring_race = 0;
+	#BP_DONE_fake_poring = 0;
+	#BP_DONE_devil_square = 0;
+	#BP_DONE_bg = 0;
+	#BP_DONE_pvp = 0;
+	#BP_DONE_vote = 0;
+	#BP_DONE_instance = 0;
+	#BP_DONE_mvp = 0;
+	#BP_DAY_bg = 0;
+	#BP_DailyResetTick = gettimetick(2) + callfunc("get_daily_reset");
+
+	setquest 69100;
+	setquest 69101;
+	setquest 69102;
+	setquest 69103;
+	setquest 69105;
+	setquest 69106;
+	setquest 69107;
+	setquest 69108;
+	setquest 69109;
+	return;
+}
+function	script	F_BattlePassReset	{
+	setarray .@quest[0], 69100, 69101, 69102, 69103, 69104, 69105, 69106, 69107, 69108, 69109, 69110, 69111, 69112, 69113;
+	for (.@i = 0; .@i < getarraysize(.@quest); .@i++) {
+		if (checkquest(.@quest[.@i]) != -1)
+			erasequest .@quest[.@i];
+	}
+
+	setarray .@ach[0], 910000, 910001, 910002, 910003, 910004, 910005, 910006, 910007, 910008, 910100, 910101, 910102, 910103;
+	for (.@i = 0; .@i < getarraysize(.@ach); .@i++) {
+		if (achievementexists(.@ach[.@i]))
+			achievementremove .@ach[.@i];
+	}
+	for (.@id = 910010; .@id <= 910029; .@id++) {
+		if (achievementexists(.@id))
+			achievementremove .@id;
+	}
+
+	#BP_Points = 0;
+	#BP_DONE_season = 0;
+	#BP_SeasonKey = callfunc("F_BattlePassSeason");
+	#BP_WeeklyResetTick = 0;
+	#BP_DailyResetTick = 0;
+
+	setquest 69104;
+	callfunc("F_BattlePassResetDaily");
+	callfunc("F_BattlePassResetWeekly");
+	return;
+}
+
+function	script	F_BattlePassResetWeekly	{
+	setarray .@quest[0], 69110, 69111, 69112, 69113;
+	for (.@i = 0; .@i < getarraysize(.@quest); .@i++) {
+		if (checkquest(.@quest[.@i]) != -1)
+			erasequest .@quest[.@i];
+	}
+
+	setarray .@ach[0], 910100, 910101, 910102, 910103;
+	for (.@i = 0; .@i < getarraysize(.@ach); .@i++) {
+		if (achievementexists(.@ach[.@i]))
+			achievementremove .@ach[.@i];
+	}
+
+	#BP_WEEK_cheffenia = 0;
+	#BP_WEEK_bio5 = 0;
+	#BP_DONE_weekly_cheffenia = 0;
+	#BP_DONE_weekly_bio5 = 0;
+	#BP_DONE_weekly_global_boss = 0;
+	#BP_DONE_weekly_woe = 0;
+	#BP_WeeklyResetTick = gettimetick(2) + callfunc("get_weekly_reset");
+
+	setquest 69110;
+	setquest 69111;
+	setquest 69112;
+	setquest 69113;
+	return;
+}
+
+function	script	F_BattlePassEnsureSeason	{
+	.@season = callfunc("F_BattlePassSeason");
+	if (#BP_SeasonKey != .@season) {
+		callfunc("F_BattlePassReset");
+		return;
+	}
+
+	if (#BP_WeeklyResetTick <= gettimetick(2))
+		callfunc("F_BattlePassResetWeekly");
+	if (#BP_DailyResetTick <= gettimetick(2))
+		callfunc("F_BattlePassResetDaily");
+
+	if (!#BP_DONE_battle_royale && checkquest(69100) == -1)
+		setquest 69100;
+	if (!#BP_DONE_poring_race && checkquest(69101) == -1)
+		setquest 69101;
+	if (!#BP_DONE_fake_poring && checkquest(69102) == -1)
+		setquest 69102;
+	if (!#BP_DONE_devil_square && checkquest(69103) == -1)
+		setquest 69103;
+	if (!#BP_DONE_bg && checkquest(69105) == -1)
+		setquest 69105;
+	if (!#BP_DONE_pvp && checkquest(69106) == -1)
+		setquest 69106;
+	if (!#BP_DONE_vote && checkquest(69107) == -1)
+		setquest 69107;
+	if (!#BP_DONE_instance && checkquest(69108) == -1)
+		setquest 69108;
+	if (!#BP_DONE_mvp && checkquest(69109) == -1)
+		setquest 69109;
+	if (!#BP_DONE_season && checkquest(69104) == -1)
+		setquest 69104;
+
+	if (!#BP_DONE_weekly_cheffenia && checkquest(69110) == -1)
+		setquest 69110;
+	if (!#BP_DONE_weekly_bio5 && checkquest(69111) == -1)
+		setquest 69111;
+	if (!#BP_DONE_weekly_global_boss && checkquest(69112) == -1)
+		setquest 69112;
+	if (!#BP_DONE_weekly_woe && checkquest(69113) == -1)
+		setquest 69113;
+	return;
+}
+
+function	script	F_BattlePassCheckMilestones	{
+	for (.@i = 0; .@i < 20; .@i++) {
+		.@points = (.@i + 1) * 100;
+		.@ach_id = 910010 + .@i;
+		if (#BP_Points >= .@points && !achievementexists(.@ach_id))
+			achievementcomplete .@ach_id;
+	}
+
+	if (#BP_Points >= 2000 && !#BP_DONE_season) {
+		#BP_DONE_season = 1;
+		completequest 69104;
+	}
+	return;
+}
+
+function	script	F_BattlePassCheckWeeklyAll	{
+	return;
+}
+
+function	script	F_BattlePassAddDailyProgress	{
+	// Args: key$, quest_id, achievement_id, points, goal
+	.@key$ = getarg(0);
+	.@quest_id = getarg(1);
+	.@ach_id = getarg(2);
+	.@points = getarg(3);
+	.@goal = getarg(4, 1);
+	.@count_var$ = "#BP_DAY_" + .@key$;
+
+	callfunc("F_BattlePassEnsureSeason");
+
+	if (getd("#BP_DONE_" + .@key$))
+		return 0;
+
+	setd(.@count_var$, getd(.@count_var$) + 1);
+	dispbottom "[Passe] Progresso diario: " + getd(.@count_var$) + "/" + .@goal + ".";
+
+	if (getd(.@count_var$) >= .@goal)
+		return callfunc("F_BattlePassCompleteMission", .@key$, .@quest_id, .@ach_id, .@points);
+
+	return 0;
+}
+
+function	script	F_BattlePassRegisterDaily	{
+	.@key$ = getarg(0);
+
+	if (.@key$ == "battle_royale")
+		return callfunc("F_BattlePassCompleteMission", "battle_royale", 69100, 910000, 5);
+	else if (.@key$ == "poring_race")
+		return callfunc("F_BattlePassCompleteMission", "poring_race", 69101, 910001, 5);
+	else if (.@key$ == "fake_poring")
+		return callfunc("F_BattlePassCompleteMission", "fake_poring", 69102, 910002, 5);
+	else if (.@key$ == "devil_square")
+		return callfunc("F_BattlePassCompleteMission", "devil_square", 69103, 910003, 5);
+	else if (.@key$ == "bg")
+		return callfunc("F_BattlePassAddDailyProgress", "bg", 69105, 910004, 10, 3);
+	else if (.@key$ == "pvp")
+		return callfunc("F_BattlePassCompleteMission", "pvp", 69106, 910005, 5);
+	else if (.@key$ == "vote")
+		return callfunc("F_BattlePassCompleteMission", "vote", 69107, 910006, 5);
+	else if (.@key$ == "instance")
+		return callfunc("F_BattlePassCompleteMission", "instance", 69108, 910007, 5);
+	else if (.@key$ == "mvp")
+		return callfunc("F_BattlePassCompleteMission", "mvp", 69109, 910008, 5);
+
+	return 0;
+}
+
+function	script	F_BattlePassCompleteMission	{
+	// Args: key$, quest_id, achievement_id, points
+	.@key$ = getarg(0);
+	.@quest_id = getarg(1);
+	.@ach_id = getarg(2);
+	.@points = getarg(3);
+	.@done_var$ = "#BP_DONE_" + .@key$;
+
+	callfunc("F_BattlePassEnsureSeason");
+
+	if (getd(.@done_var$))
+		return 0;
+
+	setd(.@done_var$, 1);
+	if (checkquest(.@quest_id) == -1)
+		setquest .@quest_id;
+	completequest .@quest_id;
+
+	if (!achievementexists(.@ach_id))
+		achievementcomplete .@ach_id;
+
+	#BP_Points += .@points;
+	callfunc("F_BattlePassCheckMilestones");
+
+	dispbottom "[Passe] Missao concluida. +" + .@points + " pontos. Total: " + #BP_Points + " ponto(s).";
+	return 1;
+}
+
+function	script	F_BattlePassAddWeeklyProgress	{
+	// Args: key$, quest_id, achievement_id, points, goal
+	.@key$ = getarg(0);
+	.@quest_id = getarg(1);
+	.@ach_id = getarg(2);
+	.@points = getarg(3);
+	.@goal = getarg(4, 5);
+	.@count_var$ = "#BP_WEEK_" + .@key$;
+
+	callfunc("F_BattlePassEnsureSeason");
+
+	if (getd("#BP_DONE_weekly_" + .@key$))
+		return 0;
+
+	setd(.@count_var$, getd(.@count_var$) + 1);
+	dispbottom "[Passe] Progresso semanal: " + getd(.@count_var$) + "/" + .@goal + ".";
+
+	if (getd(.@count_var$) >= .@goal) {
+		callfunc("F_BattlePassCompleteMission", "weekly_" + .@key$, .@quest_id, .@ach_id, .@points);
+		callfunc("F_BattlePassCheckWeeklyAll");
+		return 1;
+	}
+	return 0;
+}
+
+
+function	script	F_BattlePassRegisterWeekly	{
+	.@key$ = getarg(0);
+
+	if (.@key$ == "cheffenia")
+		return callfunc("F_BattlePassAddWeeklyProgress", "cheffenia", 69110, 910100, 60, 100);
+	else if (.@key$ == "bio5")
+		return callfunc("F_BattlePassAddWeeklyProgress", "bio5", 69111, 910101, 60, 100);
+	else if (.@key$ == "global_boss")
+		return callfunc("F_BattlePassCompleteMission", "weekly_global_boss", 69112, 910102, 70);
+	else if (.@key$ == "woe")
+		return callfunc("F_BattlePassCompleteMission", "weekly_woe", 69113, 910103, 60);
+
+	return 0;
+}
+function	script	F_BattlePassSync	{
+	callfunc("F_BattlePassEnsureSeason");
+
+
+	callfunc("F_BattlePassCheckMilestones");
+	return;
+}
+
+-	script	Battle_Pass_Controller	-1,{
+
+OnInit:
+	bindatcmd "battlepass", strnpcinfo(3) + "::OnAtcommand";
+	bindatcmd "passe", strnpcinfo(3) + "::OnAtcommand";
+	end;
+
+OnPCLoginEvent:
+	addtimer 1000, strnpcinfo(3) + "::OnSync";
+	end;
+
+OnNPCKillEvent:
+	addtimer 100, strnpcinfo(3) + "::OnSync";
+	end;
+
+OnSync:
+	if (!getattachedrid())
+		end;
+	callfunc("F_BattlePassSync");
+	end;
+
+OnAtcommand:
+	callfunc("F_BattlePassSync");
+	mes "[Passe de Batalha]";
+	mes "Temporada: " + #BP_SeasonKey;
+	mes "Pontos: " + #BP_Points + " / 2000";
+	next;
+	mes "[Passe de Batalha]";
+	mes "Acompanhe as missoes pela janela de Quest.";
+	mes "Resgate premios pela janela de Conquistas.";
+	next;
+	.@menu$ = "Abrir Quest UI:Sincronizar progresso:";
+	if (getgroupid() >= 99)
+		.@menu$ += "Resetar minha temporada:";
+	.@menu$ += "Sair";
+	switch(select(.@menu$)) {
+		case 1:
+			open_quest_ui 69100;
+			close;
+		case 2:
+			callfunc("F_BattlePassSync");
+			mes "[Passe de Batalha]";
+			mes "Progresso sincronizado.";
+			close;
+		case 3:
+			if (getgroupid() < 99)
+				close;
+			if (select("Confirmar reset:Cancelar") == 1) {
+				callfunc("F_BattlePassReset");
+				mes "[Passe de Batalha]";
+				mes "Sua temporada foi reiniciada.";
+				close;
+			}
+			close;
+		case 4:
+			close;
+	}
+	end;
+}

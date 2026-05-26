@@ -137,26 +137,33 @@ prontera,147,173,5	script	Mural de Missões	888,{
 L_Diarias:
 	callfunc("F_DiaryRefreshDaily");
 
-	// Valida voto do dia pela tabela cp_votes.
+	// Valida voto do dia pela tabela cp_votes, se o painel estiver usando essa tabela.
 	// 1 = pendente, 2 = pode resgatar, 0 = recompensa já recebida hoje.
 	if (#voto == 1) {
 		.@votes_today = 0;
 		.@last_vote$ = "";
 		.@login_user$ = "";
+		.@has_vote_table = 0;
 		query_sql(
-			"SELECT `userid` FROM `login` WHERE `account_id` = " + getcharid(3) + " LIMIT 1",
-			.@login_user$
+			"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cp_votes'",
+			.@has_vote_table
 		);
-		query_sql(
-			"SELECT COUNT(*), COALESCE(DATE_FORMAT(MAX(`vote_date`), '%Y-%m-%d %H:%i:%s'), '') " +
-			"FROM `cp_votes` " +
-			"WHERE (`account_id` = " + getcharid(3) + " OR `username` = '" + escape_sql(.@login_user$) + "') " +
-			"AND `vote_date` >= CURDATE() " +
-			"AND `vote_date` < CURDATE() + INTERVAL 1 DAY",
-			.@votes_today, .@last_vote$
-		);
-		if (.@votes_today > 0)
-			#voto = 2;
+		if (.@has_vote_table) {
+			query_sql(
+				"SELECT `userid` FROM `login` WHERE `account_id` = " + getcharid(3) + " LIMIT 1",
+				.@login_user$
+			);
+			query_sql(
+				"SELECT COUNT(*), COALESCE(DATE_FORMAT(MAX(`vote_date`), '%Y-%m-%d %H:%i:%s'), '') " +
+				"FROM `cp_votes` " +
+				"WHERE (`account_id` = " + getcharid(3) + " OR `username` = '" + escape_sql(.@login_user$) + "') " +
+				"AND `vote_date` >= CURDATE() " +
+				"AND `vote_date` < CURDATE() + INTERVAL 1 DAY",
+				.@votes_today, .@last_vote$
+			);
+			if (.@votes_today > 0)
+				#voto = 2;
+		}
 	}
 
 	if (#todas == 1 && #instancia == 0 && #d_monstros == 0 && #voto == 0 && #evento == 0)
@@ -270,6 +277,7 @@ L_Diarias:
 				if (#todas_count < 4)
 					#todas_count++;
 				getitem 607, 50;
+				callfunc("F_BattlePassRegisterDaily", "vote");
 				close;
 			} else if (#voto == 0) {
 				mes "[Mural de Missões]";

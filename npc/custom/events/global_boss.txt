@@ -62,7 +62,14 @@ OnStartEvent:
 OnBossDead:   
     getitem 9676, 1;
     announce "[Evento] " + strcharinfo(0) + " recebeu " + getitemname(9676) + " por derrotar o Boss Global!", bc_all, 0xFF0000;
-    enablenpc "Recompensa do Boss"; 
+    enablenpc "Recompensa do Boss";
+    getmapunits(BL_PC, .map$, .@units);
+    for (.@i = 0; .@i < getarraysize(.@units); .@i++) {
+        if (attachrid(.@units[.@i])) {
+            callfunc("F_BattlePassRegisterWeekly", "global_boss");
+            detachrid;
+        }
+    }
     announce "[Evento] O Boss Global foi derrotado!", bc_all, 0xFF0000;
 
     .active = 0;	

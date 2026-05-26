@@ -343,6 +343,7 @@ S_Ranking:
 		setd(.@cd_time$, .@now + 300);
 
 		pvp_lastkill_time = .@now;
+		callfunc("F_BattlePassRegisterDaily", "pvp");
 
 		// incrementa contador por vitima
 		setd(.@var$, .@count + 1);
@@ -399,6 +400,7 @@ S_Ranking:
 		pvp_deaths++;
 		pvp_deaths_month++;
 		pvp_deaths_total++;
+		callfunc("F_BattlePassRegisterDaily", "pvp");
 
 		dispbottom "Voce morreu. Total de mortes esta Semana: ^FF0000"+pvp_deaths+"^000000.";
 	end;
