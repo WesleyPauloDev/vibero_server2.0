@@ -36,9 +36,9 @@ REPLACE INTO `item_db_re` (`id`,`name_aegis`,`name_english`,`type`,`price_buy`,`
 REPLACE INTO `item_db_re` (`id`,`name_aegis`,`name_english`,`type`,`price_buy`,`weight`,`flag_buyingstore`) VALUES (727,'White_Jewel','Opal','Etc',6000,100,true);
 REPLACE INTO `item_db_re` (`id`,`name_aegis`,`name_english`,`type`,`price_buy`,`weight`,`flag_buyingstore`) VALUES (728,'Golden_Jewel','Topaz','Etc',6000,100,true);
 REPLACE INTO `item_db_re` (`id`,`name_aegis`,`name_english`,`type`,`price_buy`,`weight`,`flag_buyingstore`) VALUES (729,'Bluish_Green_Jewel','Zircon','Etc',6000,100,true);
-REPLACE INTO `item_db_re` (`id`,`name_aegis`,`name_english`,`type`,`price_buy`,`weight`,`flag_buyingstore`) VALUES (730,'Crystal_Jewel','1carat Diamond','Etc',10000,100,true);
-REPLACE INTO `item_db_re` (`id`,`name_aegis`,`name_english`,`type`,`price_buy`,`weight`,`flag_buyingstore`) VALUES (731,'Crystal_Jewel_','2carat Diamond','Etc',25000,100,true);
-REPLACE INTO `item_db_re` (`id`,`name_aegis`,`name_english`,`type`,`price_buy`,`weight`,`flag_buyingstore`) VALUES (732,'Crystal_Jewel__','3carat Diamond','Etc',55000,100,true);
+REPLACE INTO `item_db_re` (`id`,`name_aegis`,`name_english`,`type`,`price_buy`,`weight`,`flag_buyingstore`) VALUES (730,'Crystal_Jewel','1 Carat Diamond','Etc',10000,100,true);
+REPLACE INTO `item_db_re` (`id`,`name_aegis`,`name_english`,`type`,`price_buy`,`weight`,`flag_buyingstore`) VALUES (731,'Crystal_Jewel_','2 Carat Diamond','Etc',25000,100,true);
+REPLACE INTO `item_db_re` (`id`,`name_aegis`,`name_english`,`type`,`price_buy`,`weight`,`flag_buyingstore`) VALUES (732,'Crystal_Jewel__','3 Carat Diamond','Etc',55000,100,true);
 REPLACE INTO `item_db_re` (`id`,`name_aegis`,`name_english`,`type`,`price_buy`,`weight`,`flag_buyingstore`) VALUES (733,'Crystal_Jewel___','Cracked Diamond','Etc',10,100,true);
 REPLACE INTO `item_db_re` (`id`,`name_aegis`,`name_english`,`type`,`price_buy`,`weight`,`flag_buyingstore`) VALUES (734,'Red_Frame','Red Frame','Etc',3000,200,true);
 REPLACE INTO `item_db_re` (`id`,`name_aegis`,`name_english`,`type`,`price_buy`,`weight`,`flag_buyingstore`) VALUES (735,'Blue_Porcelain','Chung Jah','Etc',5000,500,true);

@@ -16,7 +16,7 @@
 
 // Main NPC :: 2012_hat_quest
 //============================================================
-moc_para01,40,19,3	script	Reno#2012hat	64,{
+moc_para01,21,35,3	script	Reno#2012hat	64,{
 
 	// iRO has (very) minor differences in dialogue from the original script.
 	// To use iRO's version, uncomment the line below.
@@ -229,39 +229,42 @@ moc_para01,40,19,3	script	Reno#2012hat	64,{
 			next;
 			mes "[Reno]";
 			mes "Funciona assim:";
-			mes "^0000FFCristal de Energia Bruto^000000: apos 3 horas voce recebe de ^0000FF2 a 4^000000 unidades e ganha ^0000FFATQ e ATQM +5^000000 durante esse periodo.";
+			mes "^0000FFCristal de Energia Bruto^000000: apos 12 horas voce recebe de ^0000FF2 a 4^000000 unidades e ganha ^0000FFATQ e ATQM +20^000000 durante esse periodo.";
 			next;
 			mes "[Reno]";
-			mes "^0000FFCristal de Energia Purificado^000000: apos 3 horas voce recebe de ^0000FF2 a 4^000000 unidades e ganha ^0000FFATQ e ATQM +10^000000 durante esse periodo.";
+			mes "^0000FFCristal de Energia Purificado^000000: apos 12 horas voce recebe de ^0000FF2 a 4^000000 unidades e ganha ^0000FFATQ e ATQM +50^000000 durante esse periodo.";
 			next;
 			mes "[Reno]";
-			mes "^0000FFCristal de Energia Superior^000000: apos 3 horas voce recebe de ^0000FF2 a 4^000000 unidades e ganha ^0000FFATQ e ATQM +15^000000 durante esse periodo.";
+			mes "^0000FFCristal de Energia Superior^000000: apos 12 horas voce recebe de ^0000FF2 a 4^000000 unidades e ganha ^0000FFATQ e ATQM +100^000000 durante esse periodo.";
 			next;
 			mes "[Reno]";
-			mes "O bonus dura ^0000FF3 horas^000000, e no inicio do processo seu corpo perde uma pequena quantidade de HP: ^0000FF5%^000000 no Bruto, ^0000FF10%^000000 no Purificado e ^0000FF15%^000000 no Superior.";
+			mes "O bonus dura ^0000FF12 horas^000000, e no inicio do processo seu corpo perde uma pequena quantidade de HP: ^0000FF5%^000000 no Bruto, ^0000FF10%^000000 no Purificado e ^0000FF15%^000000 no Superior.";
 			next;
 			mes "[Reno]";
-			mes "Voce so pode acumular ^0000FFum tipo por vez^000000 e precisa voltar depois das 3 horas para receber os cristais gerados.";
+			mes "Voce so pode acumular ^0000FFum tipo por vez^000000 e precisa voltar depois das 12 horas para receber os cristais gerados.";
 			close;
 		case 2:
 			set .@playtime, checkquest(5225,PLAYTIME);
 			set .@quest,5222;
 			set .@min_level,60;
-			set .@rate,1;
+			set .@rate,4;
+			set .@hp_loss,5;
 			set .@buff, SC_QUEST_BUFF1;
 			break;
 		case 3:
 			set .@playtime, checkquest(5226,PLAYTIME);
 			set .@quest,5223;
 			set .@min_level,80;
-			set .@rate,2;
+			set .@rate,10;
+			set .@hp_loss,10;
 			set .@buff, SC_QUEST_BUFF2;
 			break;
 		case 4:
 			set .@playtime, checkquest(5227,PLAYTIME);
 			set .@quest,5224;
 			set .@min_level,90;
-			set .@rate,3;
+			set .@rate,20;
+			set .@hp_loss,15;
 			set .@buff, SC_QUEST_BUFF3;
 			break;
 		}
@@ -287,7 +290,7 @@ moc_para01,40,19,3	script	Reno#2012hat	64,{
 			close;
 		}
 		mes "[Reno]";
-		mes "Seu corpo leva 3 horas para acumular de 2 a 4 Cristais de Energia "+.@crystal$[.@select-2]+". Deseja comecar?";
+		mes "Seu corpo leva 12 horas para acumular de 2 a 4 Cristais de Energia "+.@crystal$[.@select-2]+". Deseja comecar?";
 		next;
 		if(select("Cancelar:Comecar") == 1) {
 			mes "[Reno]";
@@ -298,15 +301,15 @@ moc_para01,40,19,3	script	Reno#2012hat	64,{
 		mes "Voce pode sentir um leve formigamento.";
 		next;
 		specialeffect2 EF_BASH3D;
-		percentheal .@rate * -5,0;
+		percentheal -.@hp_loss,0;
 		//consumeitem ??; //Keep_Connection_[.@rate]
-		sc_start .@buff,10800000,.@rate;	// Atk/Matk + 5*rate (+5, +10, +15)
+		sc_start .@buff,43200000,.@rate;	// Atk/Matk + 5*rate (+20, +50, +100)
 		setquest .@quest;
 		mes "[Reno]";
 		mes "- Puck -";
 		next;
 		mes "[Reno]";
-		mes "Parece que esta tudo em ordem. Vamos comecar a acumular Cristais de Energia "+.@crystal$[.@select-2]+". Lembre-se de voltar ate mim depois de 3 horas para receber seus Cristais de Energia "+.@crystal$[.@select-2]+".";
+		mes "Parece que esta tudo em ordem. Vamos comecar a acumular Cristais de Energia "+.@crystal$[.@select-2]+". Lembre-se de voltar ate mim depois de 12 horas para receber seus Cristais de Energia "+.@crystal$[.@select-2]+".";
 		close;
 	case 4:
 		mes "[Reno]";
