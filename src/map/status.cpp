@@ -2993,6 +2993,10 @@ int32 status_calc_mob_(struct mob_data* md, uint8 opt)
 
 					status->max_hp = (1000 * ((TBL_PC*)mbl)->menuskill_val) + (mstatus->sp * 4) + (status_get_lv(mbl) * 12);
 					status->matk_min = status->matk_max = 250 + 50*((TBL_PC*)mbl)->menuskill_val;
+					if (md->mob_id == MOBID_MAGICDECOY_EARTH)
+						status->matk_min = status->matk_max = status->matk_min * 3 / 4;
+					else
+						status->matk_min = status->matk_max = status->matk_min * 5;
 					break;
 				}
 				case MT_SUMMON_ABR_BATTLE_WARIOR:
