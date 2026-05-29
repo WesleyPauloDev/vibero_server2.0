@@ -34,8 +34,14 @@ e_tower,72,115,2	script	Oscar#Con1	4_ED_OSCAR,{
 	mes "Ola, ^0000ff"+strcharinfo(0)+"^000000. Quer comecar? Entao vamos la!";
 	cutin "oscar01",2;
 	next;
-	if (#cooldown_constellation_tower < gettimetick(2) && #ConstellationTower_STATUS != 0)
+	.@now = gettimetick(2);
+	.@daily_reset = callfunc("get_daily_reset");
+	if (#cooldown_constellation_tower > .@now + .@daily_reset && #ConstellationTower_STATUS != 0)
+		#cooldown_constellation_tower = .@now - 1;
+	if (#cooldown_constellation_tower <= .@now && #ConstellationTower_STATUS != 0)
 		#ConstellationTower_STATUS = 0;
+	if (#ConstellationTower_STATUS == 0 && checkquest(30059) > -1)
+		erasequest 30059;
 	if (#ConstellationTower_STATUS == 3) {
 		mes "[Constellation Tower]";
 		mes "Voce nao pode mais entrar nesta instancia hoje.";
@@ -2163,6 +2169,8 @@ OnKillBOSS3:
 			continue;
 		if (!attachrid($@partymemberaid[.@i]))
 			continue;
+		if (#ConstellationTower_STATUS != 2)
+			continue;
 		#cooldown_constellation_tower = gettimetick(2) + callfunc("get_daily_reset");
 		#ConstellationTower_STATUS = 3;
 	}
@@ -2919,8 +2927,6 @@ OnInstanceInit:
 3@ch_t,161,76,4	duplicate(#win_1)	#win_10	10405
 
 3@ch_t,155,85,4	duplicate(#win_1)	#win_11	10403 
-
-
 
 
 

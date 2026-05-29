@@ -462,6 +462,11 @@ function	script	F_InstanceLogFinish	{
 	for (.@i = 0; .@i < $@partymembercount; .@i++) {
 		if (!isloggedin($@partymemberaid[.@i], $@partymembercid[.@i]))
 			continue;
+		.@entered = 0;
+		query_sql("SELECT COUNT(*) FROM `instance_monitor_member_log` WHERE `instance_log_id` = "
+			+ .@log_id + " AND `account_id` = " + $@partymemberaid[.@i] + " AND `entered_at` IS NOT NULL", .@entered);
+		if (.@entered < 1)
+			continue;
 		query_sql("UPDATE `instance_monitor_member_log` SET `completed` = 1, `completed_at` = NOW() WHERE `instance_log_id` = "
 			+ .@log_id + " AND `account_id` = " + $@partymemberaid[.@i] + " AND `entered_at` IS NOT NULL");
 		callfunc("F_InstanceProgressComplete", $@partymemberaid[.@i], .@instance_code$, .@instance_name$);
