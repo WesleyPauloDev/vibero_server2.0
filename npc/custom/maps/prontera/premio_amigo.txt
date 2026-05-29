@@ -59,7 +59,7 @@
 
 		// Impedir indicação de quem joga do mesmo IP
 		query_sql("SELECT last_ip FROM `login` WHERE account_id = "+.@friend_aid[0], .@friend_ip$);
-		if (getarraysize(.@friend_ip$) > 0 && .@friend_ip$[0] == .@ip$) {
+		if (getgroupid() < 99 && getarraysize(.@friend_ip$) > 0 && .@friend_ip$[0] == .@ip$) {
 			mes "Você não pode indicar alguém que joga do mesmo IP.";
 			break;
 		}
@@ -85,6 +85,7 @@
 		// Premia imediatamente quem foi indicado com 1 unidade de cada item.
 		for (.@i = 0; .@i < getarraysize(.@reward_item_id); .@i++)
 			getitem .@reward_item_id[.@i], .@small_reward_amount[.@i];
+		#friend_ref_reward_time = gettimetick(2);
 
 		next;
 		mes "[Prêmio do Amigo]";
@@ -119,6 +120,7 @@ S_ClaimReferralReward:
 
 	for (.@i = 0; .@i < getarraysize(.@reward_item_id); .@i++)
 		getitem .@reward_item_id[.@i], .@reward_item_amount[.@i];
+	#friend_ref_claim_time = gettimetick(2);
 
 	setd .@pending_var$, .@pending - 1;
 	mes "Prêmio de indicação resgatado com sucesso.";
