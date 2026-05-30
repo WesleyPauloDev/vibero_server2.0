@@ -9489,7 +9489,7 @@ void status_set_viewdata(struct block_list *bl, int32 class_)
 		{
 			TBL_PC* sd = (TBL_PC*)bl;
 			if (pcdb_checkid(class_)) {
-				if (sd->sc.option&OPTION_RIDING) {
+				if (!sd->state.hidemount && sd->sc.option&OPTION_RIDING) {
 					switch (class_) { // Adapt class to a Mounted one.
 						case JOB_KNIGHT:
 							class_ = JOB_KNIGHT2;

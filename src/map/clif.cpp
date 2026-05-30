@@ -1055,6 +1055,20 @@ static int32 clif_setlevel(struct block_list* bl) {
 	return lv;
 }
 
+static uint32 clif_visual_option(struct block_list* bl, status_change* sc) {
+	uint32 option = (sc) ? sc->option : 0;
+	map_session_data* sd = BL_CAST(BL_PC, bl);
+
+	if (sd && sd->state.hidemount)
+		option &= ~(OPTION_RIDING | OPTION_DRAGON | OPTION_WUGRIDER | OPTION_MADOGEAR);
+
+	return option;
+}
+
+static uint32 clif_visual_option(struct block_list& bl, status_change* sc) {
+	return clif_visual_option(&bl, sc);
+}
+
 /*==========================================
  * Prepares 'unit standing/spawning' packet
  *------------------------------------------*/
@@ -1078,7 +1092,7 @@ static void clif_set_unit_idle( struct block_list* bl, bool walking, send_target
 		p.speed = status_get_speed( bl );
 		p.bodyState = ( sc ) ? sc->opt1 : 0;
 		p.healthState = ( sc ) ? sc->opt2 : 0;
-		p.effectState = ( sc ) ? sc->option : 0;
+		p.effectState = clif_visual_option(bl, sc);
 		p.job = vd->look[LOOK_BASE];
 		p.head = vd->look[LOOK_HAIR];
 		p.weapon = vd->look[LOOK_WEAPON];
@@ -1144,7 +1158,7 @@ static void clif_set_unit_idle( struct block_list* bl, bool walking, send_target
 
 		p.effectState = option;
 	}else{
-		p.effectState = (sc) ? sc->option : 0;
+		p.effectState = clif_visual_option(bl, sc);
 	}
 	p.job = vd->look[LOOK_BASE];
 	p.head = vd->look[LOOK_HAIR];
@@ -1243,7 +1257,7 @@ static void clif_spawn_unit( struct block_list *bl, enum send_target target ){
 		p.speed = status_get_speed( bl );
 		p.bodyState = ( sc ) ? sc->opt1 : 0;
 		p.healthState = ( sc ) ? sc->opt2 : 0;
-		p.effectState = ( sc ) ? sc->option : 0;
+		p.effectState = clif_visual_option(bl, sc);
 		p.head = vd->look[LOOK_HAIR];
 		p.weapon = vd->look[LOOK_WEAPON];
 		p.accessory = vd->look[LOOK_HEAD_BOTTOM];
@@ -1287,7 +1301,7 @@ static void clif_spawn_unit( struct block_list *bl, enum send_target target ){
 	p.speed = status_get_speed( bl );
 	p.bodyState = (sc) ? sc->opt1 : 0;
 	p.healthState = (sc) ? sc->opt2 : 0;
-	p.effectState = (sc) ? sc->option : 0;
+	p.effectState = clif_visual_option(bl, sc);
 	p.job = vd->look[LOOK_BASE];
 	p.head = vd->look[LOOK_HAIR];
 	p.weapon = vd->look[LOOK_WEAPON];
@@ -1394,7 +1408,7 @@ static void clif_set_unit_walking( struct block_list& bl, map_session_data* tsd,
 	status_change* sc = status_get_sc( &bl );
 	p.bodyState = (sc) ? sc->opt1 : 0;
 	p.healthState = (sc) ? sc->opt2 : 0;
-	p.effectState = (sc) ? sc->option : 0;
+	p.effectState = clif_visual_option(bl, sc);
 	struct view_data* vd = status_get_viewdata( &bl );
 	p.job = vd->look[LOOK_BASE];
 	p.head = vd->look[LOOK_HAIR];
@@ -4383,7 +4397,7 @@ void clif_changeoption_target( struct block_list* bl, struct block_list* target 
 	p.AID = bl->id;
 	p.bodyState = sc->opt1;
 	p.healthState = sc->opt2;
-	p.effectState = sc->option;
+	p.effectState = clif_visual_option(bl, sc);
 	p.isPKModeON = sd ? sd->status.karma : false;
 
 	if( target == nullptr ){
@@ -4416,6 +4430,18 @@ void clif_changeoption_target( struct block_list* bl, struct block_list* target 
 			clif_send( &p, sizeof( p ), target, SELF );
 		}
 	}
+}
+
+
+void clif_refresh_mount(map_session_data* sd) {
+	nullpo_retv(sd);
+
+	status_set_viewdata(sd, sd->status.class_);
+	clif_changeoption(sd);
+	clif_changelook(sd, LOOK_BASE, sd->vd.look[LOOK_BASE]);
+
+	if (sd->sc.getSCE(SC_ALL_RIDING))
+		clif_status_change(sd, EFST_ALL_RIDING, sd->state.hidemount ? 0 : 1, INFINITE_TICK, 1, 0, 0);
 }
 
 
@@ -6515,6 +6541,9 @@ void clif_status_change(struct block_list *bl, int32 type, int32 flag, t_tick ti
 
 	sd = BL_CAST(BL_PC, bl);
 
+	if (sd && sd->state.hidemount && type == EFST_ALL_RIDING && flag)
+		return;
+
 	// Check if current bl type is in the returned bitmask and only send status changes that actually matter to the client
 	if (!(status_efst_get_bl_type(static_cast<efst_type>(type)) & bl->type))
 		return;
@@ -6528,6 +6557,11 @@ void clif_status_change(struct block_list *bl, int32 type, int32 flag, t_tick ti
 void clif_efst_status_change( block_list& bl, block_list& tbl, enum send_target target, efst_type type, t_tick tick, int32 val1, int32 val2, int32 val3 ){
 #if PACKETVER >= 20111108
 	if (type == EFST_BLANK)
+		return;
+
+	map_session_data* sd = BL_CAST(BL_PC, &tbl);
+
+	if (sd && sd->state.hidemount && type == EFST_ALL_RIDING)
 		return;
 
 	if (tick <= 0)

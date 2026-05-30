@@ -177,6 +177,10 @@ function	script	F_OGH_HardManaDrop	{
 			mes "Jogadores com mesmo IP so podem participar de mais de uma instancia ao mesmo tempo se estiverem em grupos diferentes.";
 			close;
 		}
+		if (#INSTANCE_MENU_RESUME > 0 && #INSTANCE_MENU_RESUME == instance_id(IM_PARTY)) {
+			#INSTANCE_MENU_RESUME = 0;
+			goto S_Enter;
+		}
 		while (true) {
 			mes "[Hugin]";
 			mes "Deseja criar ou entrar na instancia ^0055FF" + .@display_name$ + "^000000?";
@@ -200,10 +204,14 @@ function	script	F_OGH_HardManaDrop	{
 					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");
 					setd(.@status_name$), 1;
 					$OGH_HARD_PENDING[getcharid(1)] = 1;
+					next;
+					if (select("Entrar na instancia", "Fechar") == 1)
+						goto S_Enter;
 				} else
 					mes "Falha ao criar a instancia.";
 				close;
 			case 2:
+S_Enter:
 				switch(instance_enter(.@db_name$)) {
 				case IE_OK:
 					setd(.@cooldown_name$), gettimetick(2) + callfunc("get_daily_reset");

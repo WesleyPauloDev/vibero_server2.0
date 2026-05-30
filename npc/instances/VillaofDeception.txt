@@ -114,8 +114,12 @@ S_Entry:
 		setd(.@shared_status_name$, 1);
 		mes "[Aira]";
 		mes "A instancia esta se abrindo...";
+		next;
+		if (select("Entrar na instancia", "Fechar") == 1)
+			goto S_Enter;
 		close;
 	case 2:
+S_Enter:
 		.@iid = instance_id(IM_CHAR);
 		switch(instance_enter(.@db_name$, -1, -1, getcharid(0), .@iid)) {
 		case IE_OK:

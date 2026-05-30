@@ -946,6 +946,7 @@ void clif_unequipitemack( map_session_data& sd, uint16 server_index, int32 pos, 
 void clif_misceffect( block_list& bl, e_notify_effect type );
 void clif_changeoption_target(struct block_list* bl, struct block_list* target);
 #define clif_changeoption(bl) clif_changeoption_target(bl, nullptr)	// area
+void clif_refresh_mount(map_session_data* sd);
 void clif_changeoption2( block_list& bl );
 void clif_useitemack(map_session_data *sd,int32 index,int32 amount,bool ok);	// self
 void clif_GlobalMessage( block_list& bl, const char* message, enum send_target target );

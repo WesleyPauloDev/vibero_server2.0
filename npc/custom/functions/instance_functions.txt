@@ -103,6 +103,10 @@ function	script	F_InstanceEntry	{
 		mes "instancia simultaneamente, se estiverem em grupos diferentes.";
 		close;
 	}
+	if (#INSTANCE_MENU_RESUME > 0 && #INSTANCE_MENU_RESUME == instance_id(IM_PARTY)) {
+		#INSTANCE_MENU_RESUME = 0;
+		goto S_Enter;
+	}
 
 	// ============================
 	// 5. Dialogo inicial
@@ -140,6 +144,9 @@ function	script	F_InstanceEntry	{
 						setd(.@shared_cooldown_name$, getd(.@cooldown_name$));
 						setd(.@shared_status_name$, 1);
 					}
+					next;
+					if (select("Entrar na instancia", "Fechar") == 1)
+						goto S_Enter;
 				} else {
 					mes "Falha ao criar a instancia.";
 				}
@@ -152,6 +159,7 @@ function	script	F_InstanceEntry	{
 		// 7. Entrar na instancia
 		// ============================
 		case 2:
+S_Enter:
 			switch(instance_enter(.@db_name$)) {
 				case IE_OK:
 					setd(.@cooldown_name$, gettimetick(2) + callfunc("get_daily_reset"));

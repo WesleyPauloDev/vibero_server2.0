@@ -15,56 +15,19 @@ OnAtcommand:
 	if (.@iid > 0) {
 		#INSTANCERID = getcharid(3);
 		.@live_name$ = instance_live_info(ILI_NAME, .@iid);
-		if (.@live_name$ == "Edda do Laboratorio") {
-			#INSTANCENAME$ = "EddaBiolabs";
-			doevent "EddaBiolabs_Instance#Custom::OnStartInstance";
+		mes "[Instancias]";
+		mes "Seu grupo ja possui uma instancia aberta:";
+		mes "^0055FF" + .@live_name$ + "^000000";
+		next;
+		if (select("Entrar na instancia", "Cancelar") == 2)
 			end;
-		}
-		if (.@live_name$ == "Poring Village") {
-			#INSTANCENAME$ = "PoringVillage";
-			doevent "PoringVillage_Instance#Custom::OnStartInstance";
+		#INSTANCE_MENU_RESUME = .@iid;
+		if (callsub(S_ResumeActiveInstance, .@live_name$))
 			end;
-		}
-		if (.@live_name$ == "Jardim Aquatico" || .@live_name$ == "Water Garden Hard") {
-			#INSTANCENAME$ = "WATERGARDEN";
-			#WATERGARDEN_MODE = (.@live_name$ == "Water Garden Hard");
-			doevent "WATERGARDEN_Instance#Custom::OnStartInstance";
-			end;
-		}
-		if (#INSTANCENAME$ == "Wolves" || .@live_name$ == "Wolves Gathering Place" || .@live_name$ == "Sanctuary Purification") {
-			if (.@live_name$ == "Wolves Gathering Place") {
-				#INSTANCENAME$ = "WolvesGathering";
-				callfunc("F_InstanceEntry", "Wolves Gathering Place", "Suad", "wolves_gathering", "WolvesGathering", 170, "Encontro dos Lobos");
-				end;
-			}
-			if (.@live_name$ == "Sanctuary Purification") {
-				#INSTANCENAME$ = "SanctuaryPurification";
-				callfunc("F_InstanceEntry", "Sanctuary Purification", "Sacerdote", "sanctuary_purification", "SanctuaryPurification", 170, "Purificacao");
-				end;
-			}
-			#INSTANCENAME$ = "WolvesGathering";
-			callfunc("F_InstanceEntry", "Wolves Gathering Place", "Suad", "wolves_gathering", "WolvesGathering", 170, "Encontro dos Lobos");
-			end;
-		}
-		if (#INSTANCENAME$ == "WolvesGathering") {
-			callfunc("F_InstanceEntry", "Wolves Gathering Place", "Suad", "wolves_gathering", "WolvesGathering", 170, "Encontro dos Lobos");
-			end;
-		}
-		if (#INSTANCENAME$ == "SanctuaryPurification") {
-			callfunc("F_InstanceEntry", "Sanctuary Purification", "Sacerdote", "sanctuary_purification", "SanctuaryPurification", 170, "Purificacao");
-			end;
-		}
-		if (#INSTANCENAME$ == "VillaDeception") {
-			#VILLA_DECEPTION_MODE = 1;
-			doevent "VillaDeception_Instance#Custom::OnStartInstance";
-			end;
-		}
-		if (#INSTANCENAME$ == "VillaDeceptionAdvanced") {
-			#VILLA_DECEPTION_MODE = 2;
-			doevent "VillaDeception_Instance#Custom::OnStartInstance";
-			end;
-		}
-		#INSTANCENAME$ = "";
+		#INSTANCE_MENU_RESUME = 0;
+		mes "[Instancias]";
+		mes "Nao foi possivel localizar o controlador desta instancia.";
+		close;
 	}
 
 	.@now = gettimetick(2);
@@ -538,4 +501,78 @@ OnAtcommand:
 			end;
 	}
 	end;
+
+S_ResumeActiveInstance:
+	.@live_name$ = getarg(0);
+
+	if (.@live_name$ == "Water Garden Hard") {
+		#INSTANCENAME$ = "WATERGARDEN";
+		#WATERGARDEN_MODE = 1;
+		doevent "WATERGARDEN_Instance#Custom::OnStartInstance";
+		return 1;
+	}
+	if (.@live_name$ == "Jardim Aquatico") {
+		#INSTANCENAME$ = "WATERGARDEN";
+		#WATERGARDEN_MODE = 0;
+		doevent "WATERGARDEN_Instance#Custom::OnStartInstance";
+		return 1;
+	}
+	if (.@live_name$ == "Security Area 1" || .@live_name$ == "Security Area 2") {
+		#INSTANCENAME$ = "HiddenGarden";
+		#HiddenGarden_MODE = (.@live_name$ == "Security Area 1" ? 1 : 2);
+		doevent "HiddenGarden_Instance#Custom::OnStartInstance";
+		return 1;
+	}
+	if (.@live_name$ == "Villa of Deception" || .@live_name$ == "Villa of Deception Advanced") {
+		#INSTANCENAME$ = (.@live_name$ == "Villa of Deception" ? "VillaDeception" : "VillaDeceptionAdvanced");
+		#VILLA_DECEPTION_MODE = (.@live_name$ == "Villa of Deception" ? 1 : 2);
+		doevent "VillaDeception_Instance#Custom::OnStartInstance";
+		return 1;
+	}
+	if (.@live_name$ == "Maldicao de Glast Heim" && (#INSTANCENAME$ == "MGH_Hard" || $OGH_HARD_PENDING[getcharid(1)] || $OGH_HARD_MODE[instance_id(IM_PARTY)])) {
+		doevent "MGH_Hard_Instance#Custom::OnStartInstance";
+		return 1;
+	}
+
+	setarray .@db_name$[0],
+		"Poring Village", "Batalha dos Orcs", "Endless Tower", "Nidhoggur's Nest",
+		"Maldicao de Glast Heim", "Old Glast Heim (Challenge Mode)", "Octopus Cave", "Altar do Selo",
+		"Laboratorio Werner", "Torneio da Magia", "Memorias de Sara", "Espaco Infinito",
+		"Wave Mode - Forest", "Wave Mode - Sky", "Regenschirm", "Ritual of Blessing",
+		"Mistwood Maze", "Lago Bakonawa", "Ghost Palace", "Assalto ao Dirigivel",
+		"Buwaya Cave", "Tumulo do Monarca", "Charleston in Distress", "Edda do Quarto Crescente",
+		"Glastheim Fall", "Glastheim Purification", "Glastheim Purification Hard", "Torre do Demonio",
+		"Laboratorio Central", "Eclage Interior", "Fabrica de Brinquedos de Terror", "Room of Consciousness",
+		"Heart Hunter War Base 1", "Heart Hunter War Base 2", "Fenrir and Sarah", "Security Area 1", "Security Area 2",
+		"Farm Lost in Time", "Laboratorio Wolfchev", "Templo do Rei Demonio", "Isle of Bios",
+		"Morse's Cave", "Sealed OS", "OS Occupation", "Cor Memorial",
+		"Base Militar", "Oz Labyrinth", "Sky Fortress Invasion", "Duelo com Sweety",
+		"Faceworm's Nest", "Nightmarish Jitterbug", "Deep Forest", "Tomb of Remorse",
+		"Edda do Laboratorio", "Bangungot Hospital 2F", "Geffen Night Arena", "Constellation Tower",
+		"Culvert", "Wolves Gathering Place", "Sanctuary Purification";
+	setarray .@event_name$[0],
+		"PoringVillage", "BatalhaOrcs", "ET", "Nyd",
+		"MGH", "OGHC", "OctopusCave", "SantuarioSelado",
+		"WLCR", "GeffenMagicTournament", "SaraMemory", "InfiniteSpace",
+		"WaveModeForest", "WaveModeSky", "Regenschirm", "RitualOfBlessing",
+		"HazyForest", "BakonawaLake", "GhostPalace", "AirshipAssault",
+		"BuwayaCave", "FridayDungeon", "CharlestonCrisis", "EddaHalfMoonInTheDaylight",
+		"EddaGlastheimFall", "EddaGlastheimPurification", "EddaGlastheimPurificationHard", "DevilTower",
+		"LaboratorioCentral", "EclageInterior", "HTF", "RoomOfConsciousness",
+		"HeartHunterWarBase", "HeartHunterWarBase", "SarahAndFenrir", "HiddenGarden", "HiddenGarden",
+		"LostFarm", "WolfchevLaboratory", "TRG", "IsleOfBios",
+		"MorseCave", "SealedOs", "OSOccupation", "CorOperation",
+		"ThorGunsuBase", "MazeofOz", "SkyFortress", "TwilightGarden",
+		"FacewormsNest", "NightmarishJitterbug", "DeepForest", "TombOfRemorse",
+		"EddaBiolabs", "BangungotHospital", "GeffenNightArena", "ConstellationTower",
+		"MalangdoCulvert", "WolvesGathering", "SanctuaryPurification";
+
+	for (.@i = 0; .@i < getarraysize(.@db_name$); ++.@i) {
+		if (.@db_name$[.@i] != .@live_name$)
+			continue;
+		#INSTANCENAME$ = .@event_name$[.@i];
+		doevent .@event_name$[.@i] + "_Instance#Custom::OnStartInstance";
+		return 1;
+	}
+	return 0;
 }

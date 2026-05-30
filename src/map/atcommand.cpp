@@ -9221,6 +9221,19 @@ ACMD_FUNC(hidepet)
 	return 0;
 }
 
+ACMD_FUNC(hidemount)
+{
+	sd->state.hidemount = !sd->state.hidemount;
+
+	if (sd->state.hidemount)
+		clif_displaymessage(fd, "Montaria ocultada visualmente.");
+	else
+		clif_displaymessage(fd, "Montaria voltou a ser exibida.");
+
+	clif_refresh_mount(sd);
+	return 0;
+}
+
 /*==========================================
  * Duel organizing functions [LuzZza]
  *
@@ -12081,6 +12094,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(showzeny),
 		ACMD_DEF(showdelay),
 		ACMD_DEF(hidepet),
+		ACMD_DEF(hidemount),
 		ACMD_DEF(autotrade),
 		ACMD_DEF(changegm),
 		ACMD_DEF(changeleader),
@@ -12448,9 +12462,9 @@ bool is_atcommand(const int32 fd, map_session_data* sd, const char* message, int
 
 	// type == 1 : player invoked
 	if (type == 1) {
-		bool public_hidepet = is_atcommand && strcmpi(info->command, "hidepet") == 0;
+		bool public_visual_command = is_atcommand && (strcmpi(info->command, "hidepet") == 0 || strcmpi(info->command, "hidemount") == 0);
 
-		if (!public_hidepet && ((is_atcommand && info->at_groups[sd->group->index] == 0) ||
+		if (!public_visual_command && ((is_atcommand && info->at_groups[sd->group->index] == 0) ||
 			(!is_atcommand && info->char_groups[sd->group->index] == 0) ))
 			return false;
 

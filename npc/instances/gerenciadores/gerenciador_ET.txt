@@ -197,6 +197,11 @@ OnStartInstance:
 
 	
 
+	if (#INSTANCE_MENU_RESUME > 0 && #INSTANCE_MENU_RESUME == instance_id(IM_PARTY)) {
+		#INSTANCE_MENU_RESUME = 0;
+		goto S_Enter;
+	}
+
 	// .@instance_id = instance_id(IM_PARTY); // ID da instância
 
 	// if (.@instance_id > 0) {		
@@ -351,12 +356,19 @@ OnStartInstance:
 
 			mes "Instância criada! Use '^0000FFEntrar na Instância^000000' para começar.";
 
+			next;
+
+			if (select("Entrar na Instância", "Fechar") == 1)
+				goto S_Enter;
+
 			close;
 
 
 
 		case 2: // Entrar
 
+		S_Enter:
+
 			.@party_id = getcharid(1);			
 
 

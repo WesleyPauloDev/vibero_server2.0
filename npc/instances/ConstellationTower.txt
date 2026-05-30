@@ -103,6 +103,9 @@ e_tower,72,115,2	script	Oscar#Con1	4_ED_OSCAR,{
 	case 1:
 			mes "Sua instancia foi criada no modo facil.";
 			instance_create(.@md_name$);
+			next;
+			if (select("Entrar na instancia", "Fechar") == 1)
+				goto S_Enter;
 			end;
 
 	case 2:       	mes "Tudo bem. Se quiser, tente um modo mais dificil.";
@@ -122,6 +125,9 @@ e_tower,72,115,2	script	Oscar#Con1	4_ED_OSCAR,{
 	case 1:
 			mes "Sua instancia foi criada no modo normal.";
 			instance_create(.@md_name$);
+			next;
+			if (select("Entrar na instancia", "Fechar") == 1)
+				goto S_Enter;
 			end;
 
 	case 2:       	mes "Tudo bem. Se quiser, tente um modo mais dificil.";
@@ -143,6 +149,9 @@ e_tower,72,115,2	script	Oscar#Con1	4_ED_OSCAR,{
 	case 1:
 			mes "Sua instancia foi criada no modo dificil.";
 			instance_create(.@md_name$);
+			next;
+			if (select("Entrar na instancia", "Fechar") == 1)
+				goto S_Enter;
 			end;
 
 	case 2:
@@ -166,6 +175,9 @@ e_tower,72,115,2	script	Oscar#Con1	4_ED_OSCAR,{
 			mes "Sua instancia foi criada no modo insano.";
 			announce "O grupo [ "+ getpartyname(.@party_id) +" ] definiu a dificuldade da " + .@md_name$ + " para o modo Insano.",bc_all;
 			instance_create(.@md_name$);
+			next;
+			if (select("Entrar na instancia", "Fechar") == 1)
+				goto S_Enter;
 			end;
 
 	case 2:
@@ -186,6 +198,7 @@ e_tower,72,115,2	script	Oscar#Con1	4_ED_OSCAR,{
 					mes "^ff0000Voce ja pode entrar na Torre das Constelacoes.^000000";
 					close;
 				case 2:
+S_Enter:
 						if(!instance_id(IM_PARTY)){
 							mes "Nenhuma instancia foi criada ainda.";
 							close;
@@ -2927,7 +2940,6 @@ OnInstanceInit:
 3@ch_t,161,76,4	duplicate(#win_1)	#win_10	10405
 
 3@ch_t,155,85,4	duplicate(#win_1)	#win_11	10403 
-
 
 
 
