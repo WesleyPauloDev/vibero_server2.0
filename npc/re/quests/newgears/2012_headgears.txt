@@ -386,6 +386,7 @@ moc_para01,21,35,5	script	Reno#2012hat	64,{
 			mes "[Reno]";
 			mes "Cada item desta loja custa a mesma quantidade em Zeny e em Cristais de Energia Brutos.";
 			close2;
+			@reno_shop_crystal = 6623;
 			npcshopattach "Reno_Rough_Shop";
 			callshop "Reno_Rough_Shop",1;
 			end;
@@ -393,6 +394,7 @@ moc_para01,21,35,5	script	Reno#2012hat	64,{
 			mes "[Reno]";
 			mes "Cada item desta loja custa a mesma quantidade em Zeny e em Cristais de Energia Purificados.";
 			close2;
+			@reno_shop_crystal = 6624;
 			npcshopattach "Reno_Purified_Shop";
 			callshop "Reno_Purified_Shop",1;
 			end;
@@ -400,6 +402,7 @@ moc_para01,21,35,5	script	Reno#2012hat	64,{
 			mes "[Reno]";
 			mes "Cada item desta loja custa a mesma quantidade em Zeny e em Cristais de Energia Superiores.";
 			close2;
+			@reno_shop_crystal = 6625;
 			npcshopattach "Reno_High_Shop";
 			callshop "Reno_High_Shop",1;
 			end;
@@ -517,15 +520,15 @@ moc_para01,21,35,5	script	Reno#2012hat	64,{
 
 OnBuyItem:
 	setarray .@shop_items[0],
-		18760,18761,18762,18763,18764,18769,18770,18771,
+		9662,18760,18761,18762,18763,18764,18769,18770,18771,
 		15068,2183,22015,20710,18776,18772,18774,18775,2956,
 		15068,2183,22015,20710,18776,18767,18765,18768,18766,22014,2957,2958;
 	setarray .@shop_prices[0],
-		100,100,100,100,100,100,100,100,
+		100,100,100,100,100,100,100,100,100,
 		100,100,100,100,100,200,200,200,200,
 		20,20,20,20,20,100,300,300,300,300,300,300;
 	setarray .@shop_crystals[0],
-		6623,6623,6623,6623,6623,6623,6623,6623,
+		6623,6623,6623,6623,6623,6623,6623,6623,6623,
 		6624,6624,6624,6624,6624,6624,6624,6624,6624,
 		6625,6625,6625,6625,6625,6625,6625,6625,6625,6625,6625,6625;
 
@@ -537,7 +540,7 @@ OnBuyItem:
 	for (.@i = 0; .@i < getarraysize(@bought_nameid); .@i++) {
 		.@found = 0;
 		for (.@j = 0; .@j < getarraysize(.@shop_items); .@j++) {
-			if (@bought_nameid[.@i] == .@shop_items[.@j] && @bought_price[.@i] == .@shop_prices[.@j]) {
+			if (@bought_nameid[.@i] == .@shop_items[.@j] && @reno_shop_crystal == .@shop_crystals[.@j]) {
 				.@found = 1;
 				.@unit_price = .@shop_prices[.@j];
 				.@crystal_id = .@shop_crystals[.@j];
