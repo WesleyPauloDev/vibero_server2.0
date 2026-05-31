@@ -2754,6 +2754,23 @@ ACMD_FUNC(displaystatus)
 	return 0;
 }
 
+ACMD_FUNC(displaystatusraw)
+{
+	int32 i, type, flag, tick, val1 = 0, val2 = 0, val3 = 0;
+	nullpo_retr(-1, sd);
+
+	if (!message || !*message || (i = sscanf(message, "%11d %11d %11d %11d %11d %11d", &type, &flag, &tick, &val1, &val2, &val3)) < 1) {
+		clif_displaymessage(fd, "Usage: @displaystatusraw <status type> <flag> <tick> {<val1> {<val2> {<val3>}}}");
+		return -1;
+	}
+	if (i < 2)
+		flag = 1;
+	if (i < 3)
+		tick = 0;
+
+	clif_status_change_sub(sd, sd->id, type, flag, tick, val1, val2, val3, AREA);
+	return 0;
+}
 /*==========================================
  * @stpoint (Rewritten by [Yor])
  *------------------------------------------*/
@@ -11923,6 +11940,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(memo),
 		ACMD_DEF(gat),
 		ACMD_DEF(displaystatus),
+		ACMD_DEF(displaystatusraw),
 		ACMD_DEF(statuspoint),
 		ACMD_DEF(traitpoint),
 		ACMD_DEF(skillpoint),

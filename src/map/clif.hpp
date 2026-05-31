@@ -1193,6 +1193,7 @@ void clif_friendslist_send( map_session_data& sd );
 void clif_friendslist_reqack(map_session_data *sd, map_session_data *f_sd, int32 type);
 
 void clif_weather(int16 m); // [Valaris]
+void clif_status_change_sub(struct block_list *bl, int32 id, int32 type, int32 flag, t_tick tick, int32 val1, int32 val2, int32 val3, enum send_target target_type);
 void clif_specialeffect(struct block_list* bl, int32 type, enum send_target target); // special effects [Valaris]
 void clif_specialeffect_single(struct block_list* bl, int32 type, int32 fd);
 void clif_specialeffect_remove(struct block_list* bl_src, int32 effect, enum send_target e_target, struct block_list* bl_target);

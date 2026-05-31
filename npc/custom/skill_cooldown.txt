@@ -184,24 +184,14 @@ S_SelectSkill:
 	.skill_cd = callfunc("F_ShadowSkillData", SHADOW_CLASS, .@sel, 2);
 	.@cd_str$ = callfunc("Show_cd_skill", .skill_cd);
 
-	if (getequipid(EQI_SHADOW_ARMOR) > 0)
-		unequip EQI_SHADOW_ARMOR;
-
-	if (getequipid(EQI_SHADOW_WEAPON) > 0)
-		unequip EQI_SHADOW_WEAPON;
-
-	if (getequipid(EQI_SHADOW_SHIELD) > 0)
-		unequip EQI_SHADOW_SHIELD;
-
-	if (getequipid(EQI_SHADOW_SHOES) > 0)
-		unequip EQI_SHADOW_SHOES;
+	recalculatestat;
 
 	mes "[Shadow Master]";
 	mes "Configuracao salva!";
 	mes "Classe: ^00FF00" + jobname(SHADOW_CLASS) + "^000000";
 	mes "Skill: ^00FF00" + .@name$ + "^000000";
 	mes "Cooldown base: ^00FF00" + .@cd_str$ + "s^000000";
-	mes "Reequipe seu Shadow principal.";
+	mes "Os bonus dos seus Shadows foram atualizados.";
 	close;
 }
 

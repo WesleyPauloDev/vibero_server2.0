@@ -85,7 +85,8 @@ OnTalk:
 			setarray .@stone_id[0],
 				29463,310257,29520,310184,29484,310007,29467,310261,29524,310188,29480,29618,29471,310180,29435,29614,29516,310011,29426,29427,29431,310003,29488,310265,29658,29654,29667,29671,29662,29663,
 				29358,29361,29056,310661,310667,310660,310662,310663,
-				25448,25449,25456;
+				25448,25449,25456,
+				25067;
 			break;
 		default:
 			mes "Slot invalido.";
@@ -174,6 +175,11 @@ OnTalk:
 		close;
 
 	.@stone = .@owned_ids[.@choice];
+	.@enchant = .@stone;
+
+	// CastingStone_Robe is the consumable stone; FixedCasting05 is the enchant stored in the costume.
+	if (.@stone == 25067)
+		.@enchant = 29056;
 
 	mes "[Encantador Visual]";
 	mes "Aplicar ^0055FF" + getitemname(.@stone) + "^000000 em ^0055FF" + getitemname(.@equip_id) + "^000000?";
@@ -192,7 +198,7 @@ OnTalk:
 	progressbar "66CCFF",3;
 	specialeffect2 EF_ENHANCE;
 
-	.@card[.@slot] = .@stone;
+	.@card[.@slot] = .@enchant;
 	delitem .@stone, 1;
 	delequip .@part;
 	getitem2 .@equip_id,1,1,.@equip_refine,0,.@card[0],.@card[1],.@card[2],.@card[3];
