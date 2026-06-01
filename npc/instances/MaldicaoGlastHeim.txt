@@ -2091,11 +2091,19 @@ OnTimer10000:
 		.@crystal_amt = callfunc("F_OGH_FinalCrystalReward");
 		.@spell_amt = callfunc("F_OGH_FinalSpellReward");
 		.@polluted_amt = callfunc("F_OGH_FinalPollutedReward");
-		if (.@give_custom_reward && checkweight(6607,.@crystal_amt, 6608,.@spell_amt, 6755,.@polluted_amt, 9608,10, 9198,2) == 0) {
-			mes "^ff0000Parece que voce possui muitos tipos ou peso de itens. Organize seu inventario.^000000";
-			close;
+		if (.@give_custom_reward) {
+			if (.@polluted_amt > 0)
+				.@can_carry = checkweight(6607,.@crystal_amt, 6608,.@spell_amt, 6755,.@polluted_amt, 9608,10, 9198,2);
+			else
+				.@can_carry = checkweight(6607,.@crystal_amt, 6608,.@spell_amt, 9608,10, 9198,2);
 		}
-		if (.@give_custom_reward == 0 && checkweight(6607,.@crystal_amt, 6608,.@spell_amt, 6755,.@polluted_amt) == 0) {
+		else {
+			if (.@polluted_amt > 0)
+				.@can_carry = checkweight(6607,.@crystal_amt, 6608,.@spell_amt, 6755,.@polluted_amt);
+			else
+				.@can_carry = checkweight(6607,.@crystal_amt, 6608,.@spell_amt);
+		}
+		if (.@can_carry == 0) {
 			mes "^ff0000Parece que voce possui muitos tipos ou peso de itens. Organize seu inventario.^000000";
 			close;
 		}
