@@ -120,7 +120,7 @@ OnChequeo:
 				dispbottom "O vencedor e "+ $prace_winner$ +" e voce apostou em "+ prace_winner$ +"." ,0x00FF00;
 				if( prace_winner$ == $prace_winner$ && prace_winner$ != "") {
 					dispbottom "Parabens, voce acertou!" ,0x00FF00;
-					announce "[Corrida dos Porings]: A aposta de "+strcharinfo(0)+" venceu a corrida!", bc_all|bc_blue;
+					announce "[Corrida dos Porings]: "+strcharinfo(0)+" ganhou apostando em "+$prace_winner$+"!", bc_all|bc_blue;
 					getitem 9608, 10;
 					getitem 25274, 1;
 					query_sql( "INSERT INTO `rank_evento` SET `char_id`='"+ getcharid(0) +"',`name`='"+ strcharinfo(0) +"',`count`='1' ON DUPLICATE KEY UPDATE `count`=`count`+1" );
@@ -364,7 +364,7 @@ ReturnRace:
 	end;
 
 WinRace:
-	mapannounce "p_track01","[Corrida dos Porings]: O vencedor e "+ $prace_winner$ +".", bc_all|bc_blue;
+	announce "[Corrida dos Porings]: O vencedor da corrida foi "+ $prace_winner$ +".", bc_all|bc_blue;
 	donpcevent "Checker#prace0::OnChequeo";
 	mapannounce "p_track01","[Corrida dos Porings]: O mapa sera fechado em 10 segundos.", bc_all|bc_blue;
 	sleep 10000;
