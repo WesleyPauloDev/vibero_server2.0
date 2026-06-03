@@ -16,15 +16,15 @@
 //============================================================ 
 
 //============================================================
-// Cheffenia Warp NPC – Português
+// Cheffenia Warp NPC ï¿½ Portuguï¿½s
 //============================================================
 
 prontera,145,230,6	script	Porteiro de Cheffenia	908,{
 OnTalk:
 	mes "[Cheffenia]";
-	mes "Olá aventureiro!";
+	mes "Olï¿½ aventureiro!";
 	mes "Deseja participar da Cheffenia?";	
-	if (select("Sim, quero participar:Não, obrigado") == 2) close;
+	if (select("Sim, quero participar:Nï¿½o, obrigado") == 2) close;
 
 	next;
 	mes "Escolha a dificuldade:";
@@ -32,11 +32,11 @@ OnTalk:
 
 	if (.@dificuldade == 1) {
 
-		mes "Isso lhe custará ^FF0000 50.000 zeny ^000000.";
+		mes "Isso lhe custarï¿½ ^FF0000 50.000 zeny ^000000.";
 		next;
 		// Verifica zeny
 		if (Zeny < 50000) {
-			mes "Você precisa de pelo menos ^FF0000 50.000 zeny ^000000 para entrar.";
+			mes "Vocï¿½ precisa de pelo menos ^FF0000 50.000 zeny ^000000 para entrar.";
 			close;
 		}
 
@@ -45,11 +45,11 @@ OnTalk:
 		next;
 		set .@mapa, select("Mapa 1:Mapa 2");
 	} else {
-		mes "Isso lhe custará ^FF0000 100.000 zeny ^000000.";
+		mes "Isso lhe custarï¿½ ^FF0000 100.000 zeny ^000000.";
 		next;
 
 		if (Zeny < 100000) {
-			mes "Você precisa de pelo menos ^FF0000 100.000 zeny ^000000 para entrar.";
+			mes "Vocï¿½ precisa de pelo menos ^FF0000 100.000 zeny ^000000 para entrar.";
 			close;
 		}
 
@@ -97,10 +97,10 @@ OnTalk:
 	OnInit:
 
 		// Lista de mobs e quantidade de spawn
-		setarray .@mob_list[0], 21402,21403,21404,21405,21406,21407,21408,21409,21410,
-							21411,21413,21414,21415,21416,21417,21418,21419,21420,21421,
-							21422,21423,21424,21425,21426,21427,21428,21429,21430,21431,
-							21432,21433,21434,21435,21438,21440,21441;
+		setarray .@mob_list[0], 21403,21408,21414,21415,21420,21423,21424,21425,21427,
+							21428,21431,21434,21435,21438,21440,21441,21461,21462,21463,
+							21464,21465,21466,21467,21468,21469,21470,21471,21472,21473,
+							21474,21475,21476,21477,21478,21479;
 
 		 set .@spawn_count, 4; // quantidade de cada mob
 
@@ -108,7 +108,7 @@ OnTalk:
 			for (.@q = 0; .@q < .@spawn_count; .@q++) {
 				monster "bossnia_03",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffeniaHard_1::OnBossDead";
 
-				// Aplica setunitdata ao último GID spawnado
+				// Aplica setunitdata ao ultimo GID spawnado
 				.@gid = $@mobid[0];
 				getunitdata .@gid, .@info, 1;
 
@@ -128,7 +128,7 @@ OnTalk:
     	end;
 
 	OnBossDead:
-		callfunc("F_PartyNearbyKillReward", "bossnia_03", 9647, 20, "#cheffenia_hardkills", 5, 4, 1, 110005, 10000, "[Reputação] Você recebeu +1 ponto de reputação Cheffenia Hard!", 30);
+		callfunc("F_PartyNearbyKillReward", "bossnia_03", 9647, 20, "#cheffenia_hardkills", 5, 4, 1, 110005, 10000, "[Reputaï¿½ï¿½o] Vocï¿½ recebeu +1 ponto de reputaï¿½ï¿½o Cheffenia Hard!", 30);
 		callfunc("F_BattlePassRegisterWeekly", "cheffenia");
 
         // GID do mob morto
@@ -156,10 +156,10 @@ OnTalk:
 	OnInit:	
 
 		// Lista de mobs e quantidade de spawn
-		setarray .@mob_list[0], 21402,21403,21404,21405,21406,21407,21408,21409,21410,
-							21411,21413,21414,21415,21416,21417,21418,21419,21420,21421,
-							21422,21423,21424,21425,21426,21427,21428,21429,21430,21431,
-							21432,21433,21434,21435,21438,21440,21441;
+		setarray .@mob_list[0], 21403,21408,21414,21415,21420,21423,21424,21425,21427,
+							21428,21431,21434,21435,21438,21440,21441,21461,21462,21463,
+							21464,21465,21466,21467,21468,21469,21470,21471,21472,21473,
+							21474,21475,21476,21477,21478,21479;
 
 		 set .@spawn_count, 4; // quantidade de cada mob
 		
@@ -169,7 +169,7 @@ OnTalk:
 			for (.@q = 0; .@q < .@spawn_count; .@q++) {
 				monster "bossnia_04",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffeniaHard_2::OnBossDead";
 
-				// Aplica setunitdata ao último GID spawnado
+				// Aplica setunitdata ao ï¿½ltimo GID spawnado
 				.@gid = $@mobid[0];
 				getunitdata .@gid, .@info, 1;
 
@@ -190,7 +190,7 @@ OnTalk:
 
 	OnBossDead:
 		
-		callfunc("F_PartyNearbyKillReward", "bossnia_04", 9647, 20, "#cheffenia_hardkills", 5, 4, 1, 110005, 10000, "[Reputação] Você recebeu +1 ponto de reputação Cheffenia Hard!", 30);
+		callfunc("F_PartyNearbyKillReward", "bossnia_04", 9647, 20, "#cheffenia_hardkills", 5, 4, 1, 110005, 10000, "[Reputaï¿½ï¿½o] Vocï¿½ recebeu +1 ponto de reputaï¿½ï¿½o Cheffenia Hard!", 30);
 		callfunc("F_BattlePassRegisterWeekly", "cheffenia");
 
         // GID do mob morto
@@ -227,7 +227,7 @@ OnTalk:
 			for (.@q = 0; .@q < .@spawn_count; .@q++) {
 				monster "bossnia_01",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffenia::OnBossDead";
 
-				// Aplica setunitdata ao último GID spawnado
+				// Aplica setunitdata ao ï¿½ltimo GID spawnado
 				.@gid = $@mobid[0];
 				getunitdata .@gid, .@info, 1;
 
@@ -243,7 +243,7 @@ OnTalk:
 			for (.@q = 0; .@q < .@spawn_count; .@q++) {
 				monster "bossnia_02",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffenia::OnBossDead2";
 
-				// Aplica setunitdata ao último GID spawnado
+				// Aplica setunitdata ao ï¿½ltimo GID spawnado
 				.@gid = $@mobid[0];
 				getunitdata .@gid, .@info, 1;
 
@@ -259,7 +259,7 @@ OnTalk:
     	end;
 
 	OnBossDead:
-		callfunc("F_PartyNearbyKillReward", "bossnia_01", 9646, 20, "#cheffenia_kills", 5, 3, 1, 110004, 10000, "[Reputação] Você recebeu +1 ponto de reputação Cheffenia Normal!", 30);
+		callfunc("F_PartyNearbyKillReward", "bossnia_01", 9646, 20, "#cheffenia_kills", 5, 3, 1, 110004, 10000, "[Reputaï¿½ï¿½o] Vocï¿½ recebeu +1 ponto de reputaï¿½ï¿½o Cheffenia Normal!", 30);
 		callfunc("F_BattlePassRegisterWeekly", "cheffenia");
 
 		.@gid = killedrid;
@@ -277,7 +277,7 @@ OnTalk:
 
 		end;	
 	OnBossDead2:
-		callfunc("F_PartyNearbyKillReward", "bossnia_02", 9646, 20, "#cheffenia_kills", 5, 3, 1, 110004, 10000, "[Reputação] Você recebeu +1 ponto de reputação Cheffenia Normal!", 30);
+		callfunc("F_PartyNearbyKillReward", "bossnia_02", 9646, 20, "#cheffenia_kills", 5, 3, 1, 110004, 10000, "[Reputaï¿½ï¿½o] Vocï¿½ recebeu +1 ponto de reputaï¿½ï¿½o Cheffenia Normal!", 30);
 		callfunc("F_BattlePassRegisterWeekly", "cheffenia");
 		
 		.@gid = killedrid;

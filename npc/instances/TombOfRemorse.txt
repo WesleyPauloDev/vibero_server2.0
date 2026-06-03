@@ -374,7 +374,7 @@ dali02,78,112,3	script	Marquis of Remorse#remorse	4_M_SAKRAY,{
 			mes "Se voce tiver uma joia dada pela princesa, uma pedra onde o remorso dela se reuniu,";
 			mes "isso nao tera utilidade para voce, heroi. Se precisar de algo, posso trocar por ela.";
 			next;
-			switch(select("Troca de Joias.:Troca de Armas.:Cancelar")){
+			switch(select("Troca de Joias.:Troca de Armas.:Comprar Nebula.:Cancelar")){
 				case 1:
 					callshop "remorse_item",1;
 					break;
@@ -384,6 +384,10 @@ dali02,78,112,3	script	Marquis of Remorse#remorse	4_M_SAKRAY,{
 					break;
 					
 				case 3:
+					callshop "remorse_nebula",1;
+					break;
+					
+				case 4:
 					break;
 			}
 			end;
@@ -427,12 +431,15 @@ moc_para01,52,33,4	script	Marques do Remorso#eden	4_M_SAKRAY,{
 	mes "[ Marques do Remorso ]";
 	mes "Se voce trouxe Mineas, eu posso troca-las por itens ou armas da Tumba do Remorso.";
 	next;
-	switch(select("Troca de Itens.:Troca de Armas.:Cancelar.")){
+	switch(select("Troca de Itens.:Troca de Armas.:Comprar Nebula.:Cancelar.")){
 		case 1:
 			callshop "remorse_item",1;
 			end;
 		case 2:
 			callshop "remorse_weapon",1;
+			end;
+		case 3:
+			callshop "remorse_nebula",1;
 			end;
 		default:
 			close;
@@ -972,6 +979,8 @@ end;
 OnMobKill_F1:
 	.@id = getarg(0);
 	.@map$ = 'map$;
+	if(rand(100) < 5)
+		getitem 1000367,1;
 	if(mobcount(.@map$,instance_npcname(strnpcinfo(0)) + "::OnKillF1_" + .@id)) end;
 	if(getd("'F1_" + .@id))
 		donpcevent instance_npcname(strnpcinfo(0)) + "::OnCheck_F1";
@@ -1033,6 +1042,8 @@ end;
 OnMobKill_F2:
 	.@id = getarg(0);
 	.@map$ = 'map$;
+	if(rand(100) < 5)
+		getitem 1000367,1;
 	if(mobcount(.@map$,instance_npcname(strnpcinfo(0)) + "::OnKillF2_" + .@id)) end;
 	if(getd("'F2_" + .@id))
 		donpcevent instance_npcname(strnpcinfo(0)) + "::OnCheck_F2";
@@ -1113,6 +1124,8 @@ end;
 OnMobKill_F3:
 	.@id = getarg(0);
 	.@map$ = 'map$;
+	if(rand(100) < 5)
+		getitem 1000367,1;
 	if(mobcount(.@map$,instance_npcname(strnpcinfo(0)) + "::OnKillF3_" + .@id)) end;
 	if(getd("'F3_" + .@id))
 		donpcevent instance_npcname(strnpcinfo(0)) + "::OnCheck_F3";
@@ -1143,6 +1156,8 @@ OnKillF3_6: callsub OnMobKill_F3,6;
 	end;
 	
 OnTiaraDead:
+	if(rand(100) < 5)
+		getitem 1000367,1;
 	mapannounce 'map$,"Marques do Remorso : Se voce for para o lado esquerdo do trono, ha uma passagem secreta para a tumba subterranea.",bc_map,0x00FFFF;
 	enablenpc instance_npcname("#rms_warp_1");
 	enablenpc instance_npcname("Memory Piece#rms_1");
@@ -1172,6 +1187,8 @@ OnDisableShield:
 end;
 
 OnSakrayDead:
+	if(rand(100) < 5)
+		getitem 1000367,1;
 	'final_ready = 1;
 	enablenpc instance_npcname("Sakray#rms_0");
 	stopnpctimer instance_npcname(strnpcinfo(0));
@@ -1267,7 +1284,7 @@ end;
 	mes "Eu estava esperando por voce, como prometi.";
 	mes "Heroi, voce e mesmo alguem em quem podemos confiar?";
 	next;
-	switch(select("Fios quebrados do destino.:Derramando lagrimas.:Fragmentos de memoria.:Fragmentos do passado.")){
+	switch(select("Fios quebrados do destino.:Derramando lagrimas.:Fragmentos de memoria.:Fragmentos do passado.:Comprar Nebula.")){
 		case 1:
 			.@qid = 16465;
 			if(checkquest(.@qid,HUNTING) < 2){
@@ -1386,6 +1403,10 @@ end;
 				getitem 1000367,1;
 			}
 			close;
+		
+		case 5:
+			callshop "remorse_nebula",1;
+			end;
 	}
 	end;
 }

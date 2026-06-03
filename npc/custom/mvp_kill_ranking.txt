@@ -178,7 +178,7 @@ prontera,140,175,5	script	Ranking MVP	615,{
 	next;
 
 	while (true) {
-		.@opt = select("Ranking semanal:Ranking mensal:Ranking global:MVPs mais cacados:Premio semanal:Fechar");
+		.@opt = select("Ranking semanal:Ranking mensal:Ranking global:MVPs mais cacados:Premio semanal:Converter pontos em moedas:Fechar");
 		switch (.@opt) {
 			case 1:
 				callsub S_ShowWeekly;
@@ -194,6 +194,9 @@ prontera,140,175,5	script	Ranking MVP	615,{
 				break;
 			case 5:
 				callsub S_WeeklyReward;
+				break;
+			case 6:
+				callsub S_ConvertPointsToCoins;
 				break;
 			default:
 				close;
@@ -447,5 +450,45 @@ S_WeeklyReward:
 
 	MVP_Kills_RewardedWeek = .@w;
 	mes "Premio entregue. Parabens!";
+	return;
+
+S_ConvertPointsToCoins:
+	mes "[Ranking MVP]";
+	mes "Cada Moeda MVP equivale a 10 pontos MVP.";
+	mes "Seus pontos atuais: " + #mvp_points;
+
+	if (#mvp_points < 10) {
+		mes "Voce precisa de pelo menos 10 pontos MVP para converter.";
+		return;
+	}
+
+	.@max = #mvp_points / 10;
+	mes "Voce pode converter ate " + .@max + " moeda(s).";
+	next;
+	mes "[Ranking MVP]";
+	mes "Digite a quantidade de moedas que deseja receber.";
+	input .@amount, 1, .@max;
+
+	.@cost = .@amount * 10;
+	mes "Converter " + .@cost + " ponto(s) MVP em " + .@amount + " Moeda(s) MVP?";
+	if (select("Confirmar:Cancelar") == 2)
+		return;
+
+	if (#mvp_points < .@cost) {
+		mes "Voce nao possui pontos MVP suficientes.";
+		return;
+	}
+
+	if (!checkweight(9759, .@amount)) {
+		mes "Voce esta carregando muito peso ou muitos itens.";
+		mes "Libere espaco no inventario e tente novamente.";
+		return;
+	}
+
+	#mvp_points -= .@cost;
+	getitem 9759, .@amount;
+	mes "Conversao concluida.";
+	dispbottom "[Pontos MVP] -" + .@cost + " ponto(s) de MVP. Restam: " + #mvp_points + ".";
+	dispbottom "[Pontos MVP] Voce recebeu " + .@amount + " Moeda(s) MVP.";
 	return;
 }
