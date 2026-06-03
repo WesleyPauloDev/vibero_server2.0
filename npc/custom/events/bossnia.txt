@@ -16,15 +16,15 @@
 //============================================================ 
 
 //============================================================
-// Cheffenia Warp NPC � Portugu�s
+// Cheffenia Warp NPC - Portugues
 //============================================================
 
 prontera,145,230,6	script	Porteiro de Cheffenia	908,{
 OnTalk:
 	mes "[Cheffenia]";
-	mes "Ol� aventureiro!";
+	mes "Ola aventureiro!";
 	mes "Deseja participar da Cheffenia?";	
-	if (select("Sim, quero participar:N�o, obrigado") == 2) close;
+	if (select("Sim, quero participar:Nao, obrigado") == 2) close;
 
 	next;
 	mes "Escolha a dificuldade:";
@@ -32,11 +32,11 @@ OnTalk:
 
 	if (.@dificuldade == 1) {
 
-		mes "Isso lhe custar� ^FF0000 50.000 zeny ^000000.";
+		mes "Isso lhe custara ^FF0000 50.000 zeny ^000000.";
 		next;
 		// Verifica zeny
 		if (Zeny < 50000) {
-			mes "Voc� precisa de pelo menos ^FF0000 50.000 zeny ^000000 para entrar.";
+			mes "Voce precisa de pelo menos ^FF0000 50.000 zeny ^000000 para entrar.";
 			close;
 		}
 
@@ -45,11 +45,11 @@ OnTalk:
 		next;
 		set .@mapa, select("Mapa 1:Mapa 2");
 	} else {
-		mes "Isso lhe custar� ^FF0000 100.000 zeny ^000000.";
+		mes "Isso lhe custara ^FF0000 100.000 zeny ^000000.";
 		next;
 
 		if (Zeny < 100000) {
-			mes "Voc� precisa de pelo menos ^FF0000 100.000 zeny ^000000 para entrar.";
+			mes "Voce precisa de pelo menos ^FF0000 100.000 zeny ^000000 para entrar.";
 			close;
 		}
 
@@ -128,7 +128,7 @@ OnTalk:
     	end;
 
 	OnBossDead:
-		callfunc("F_PartyNearbyKillReward", "bossnia_03", 9647, 20, "#cheffenia_hardkills", 5, 4, 1, 110005, 10000, "[Reputa��o] Voc� recebeu +1 ponto de reputa��o Cheffenia Hard!", 30);
+		callfunc("F_PartyNearbyKillReward", "bossnia_03", 9647, 20, "#cheffenia_hardkills", 5, 4, 1, 110005, 10000, "[Reputacao] Voce recebeu +1 ponto de reputacao Cheffenia Hard!", 30);
 		callfunc("F_BattlePassRegisterWeekly", "cheffenia");
 
         // GID do mob morto
@@ -169,7 +169,7 @@ OnTalk:
 			for (.@q = 0; .@q < .@spawn_count; .@q++) {
 				monster "bossnia_04",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffeniaHard_2::OnBossDead";
 
-				// Aplica setunitdata ao �ltimo GID spawnado
+				// Aplica setunitdata ao ultimo GID spawnado
 				.@gid = $@mobid[0];
 				getunitdata .@gid, .@info, 1;
 
@@ -190,7 +190,7 @@ OnTalk:
 
 	OnBossDead:
 		
-		callfunc("F_PartyNearbyKillReward", "bossnia_04", 9647, 20, "#cheffenia_hardkills", 5, 4, 1, 110005, 10000, "[Reputa��o] Voc� recebeu +1 ponto de reputa��o Cheffenia Hard!", 30);
+		callfunc("F_PartyNearbyKillReward", "bossnia_04", 9647, 20, "#cheffenia_hardkills", 5, 4, 1, 110005, 10000, "[Reputacao] Voce recebeu +1 ponto de reputacao Cheffenia Hard!", 30);
 		callfunc("F_BattlePassRegisterWeekly", "cheffenia");
 
         // GID do mob morto
@@ -227,7 +227,7 @@ OnTalk:
 			for (.@q = 0; .@q < .@spawn_count; .@q++) {
 				monster "bossnia_01",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffenia::OnBossDead";
 
-				// Aplica setunitdata ao �ltimo GID spawnado
+				// Aplica setunitdata ao ultimo GID spawnado
 				.@gid = $@mobid[0];
 				getunitdata .@gid, .@info, 1;
 
@@ -243,7 +243,7 @@ OnTalk:
 			for (.@q = 0; .@q < .@spawn_count; .@q++) {
 				monster "bossnia_02",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffenia::OnBossDead2";
 
-				// Aplica setunitdata ao �ltimo GID spawnado
+				// Aplica setunitdata ao ultimo GID spawnado
 				.@gid = $@mobid[0];
 				getunitdata .@gid, .@info, 1;
 
@@ -259,7 +259,7 @@ OnTalk:
     	end;
 
 	OnBossDead:
-		callfunc("F_PartyNearbyKillReward", "bossnia_01", 9646, 20, "#cheffenia_kills", 5, 3, 1, 110004, 10000, "[Reputa��o] Voc� recebeu +1 ponto de reputa��o Cheffenia Normal!", 30);
+		callfunc("F_PartyNearbyKillReward", "bossnia_01", 9646, 20, "#cheffenia_kills", 5, 3, 1, 110004, 10000, "[Reputacao] Voce recebeu +1 ponto de reputacao Cheffenia Normal!", 30);
 		callfunc("F_BattlePassRegisterWeekly", "cheffenia");
 
 		.@gid = killedrid;
@@ -277,7 +277,7 @@ OnTalk:
 
 		end;	
 	OnBossDead2:
-		callfunc("F_PartyNearbyKillReward", "bossnia_02", 9646, 20, "#cheffenia_kills", 5, 3, 1, 110004, 10000, "[Reputa��o] Voc� recebeu +1 ponto de reputa��o Cheffenia Normal!", 30);
+		callfunc("F_PartyNearbyKillReward", "bossnia_02", 9646, 20, "#cheffenia_kills", 5, 3, 1, 110004, 10000, "[Reputacao] Voce recebeu +1 ponto de reputacao Cheffenia Normal!", 30);
 		callfunc("F_BattlePassRegisterWeekly", "cheffenia");
 		
 		.@gid = killedrid;
