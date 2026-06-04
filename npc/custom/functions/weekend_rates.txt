@@ -9,13 +9,17 @@ OnInit:
 	.normal_base_exp_rate = 100;
 	.normal_job_exp_rate = 100;
 	.normal_drop_rate = 100;
+	.normal_mvp_card_rate = 100;
 
 	.weekend_base_exp_rate = 200;
 	.weekend_job_exp_rate = 200;
 	.weekend_drop_rate = 150;
+	.weekend_mvp_card_rate = 500;
 	.bonus_week_active = 0; // Evento temporario: rates ativos a semana inteira.
 
 	bindatcmd "weekendrates", strnpcinfo(3)+"::OnAtcommand", 99, 99;
+	bindatcmd "ratesferiado", strnpcinfo(3)+"::OnHolidayAtcommand", 99, 99;
+	bindatcmd "mvpcard5x", strnpcinfo(3)+"::OnMvpCardAtcommand", 99, 99;
 	callsub S_ApplyRates, 0;
 	end;
 
@@ -47,6 +51,8 @@ OnPCLoginEvent:
 OnLoginNotice:
 	if (callsub(S_IsWeekendEvent)) {
 		dispbottom "[Evento] Rates de fim de semana ativas: Base EXP " + .weekend_base_exp_rate + "% / Job EXP " + .weekend_job_exp_rate + "% / Drop " + .weekend_drop_rate + "%.";
+		if (callsub(S_IsMvpCardEvent))
+			dispbottom "[Evento] Drop de carta MVP 5x ativo ate segunda-feira as 02:00.";
 	}
 	end;
 
@@ -58,20 +64,72 @@ OnAtcommand:
 		mes "Base EXP: " + .weekend_base_exp_rate + "%";
 		mes "Job EXP: " + .weekend_job_exp_rate + "%";
 		mes "Drop: " + .weekend_drop_rate + "%";
+		mes "Carta MVP: " + .current_mvp_card_rate + "%";
 	}
 	else {
 		mes "Status: ^777777inativo^000000.";
 		mes "Base EXP: " + .normal_base_exp_rate + "%";
 		mes "Job EXP: " + .normal_job_exp_rate + "%";
 		mes "Drop: " + .normal_drop_rate + "%";
+		mes "Carta MVP: " + .normal_mvp_card_rate + "%";
 	}
+	mes "Feriado antecipado: " + ($Weekend_Rates_Early ? "^00AA00ativo^000000" : "^777777inativo^000000") + ".";
+	mes "Carta MVP 5x armada: " + ($Weekend_Rates_MvpCard5x ? "^00AA00sim^000000" : "^777777nao^000000") + ".";
+	mes "Comandos: @ratesferiado ativar/desativar";
+	mes "Comandos: @mvpcard5x ativar/desativar";
 	close;
+
+OnHolidayAtcommand:
+	.@cmd$ = (.@atcmd_numparameters > 0 ? strtolower(.@atcmd_parameters$[0]) : "ativar");
+	if (.@cmd$ == "on" || .@cmd$ == "ativar" || .@cmd$ == "1") {
+		$Weekend_Rates_Early = 1;
+		$Weekend_Rates_MvpCard5x = 1;
+		callsub S_ApplyRates, 1;
+		announce "[Evento] Feriado: rates especiais e carta MVP 5x ativados ate segunda-feira as 02:00.", bc_all, 0x00FF00;
+		dispbottom "[Weekend Rates] Feriado ativado. Carta MVP 5x tambem foi armada.";
+		end;
+	}
+	if (.@cmd$ == "off" || .@cmd$ == "desativar" || .@cmd$ == "0") {
+		$Weekend_Rates_Early = 0;
+		$Weekend_Rates_MvpCard5x = 0;
+		callsub S_ApplyRates, 1;
+		announce "[Evento] Feriado encerrado: rates normais restauradas.", bc_all, 0x00AAFF;
+		dispbottom "[Weekend Rates] Feriado e carta MVP 5x desativados.";
+		end;
+	}
+	dispbottom "[Weekend Rates] Use: @ratesferiado ativar ou @ratesferiado desativar.";
+	end;
+
+OnMvpCardAtcommand:
+	.@cmd$ = (.@atcmd_numparameters > 0 ? strtolower(.@atcmd_parameters$[0]) : "ativar");
+	if (.@cmd$ == "on" || .@cmd$ == "ativar" || .@cmd$ == "1") {
+		$Weekend_Rates_MvpCard5x = 1;
+		callsub S_ApplyRates, 1;
+		dispbottom "[Weekend Rates] Carta MVP 5x armada. Ela fica ativa enquanto as rates de fim de semana/feriado estiverem ativas.";
+		end;
+	}
+	if (.@cmd$ == "off" || .@cmd$ == "desativar" || .@cmd$ == "0") {
+		$Weekend_Rates_MvpCard5x = 0;
+		callsub S_ApplyRates, 1;
+		dispbottom "[Weekend Rates] Carta MVP 5x desativada.";
+		end;
+	}
+	dispbottom "[Weekend Rates] Use: @mvpcard5x ativar ou @mvpcard5x desativar.";
+	end;
 
 S_IsWeekendEvent:
 	.@day = gettime(DT_DAYOFWEEK);
 	.@hour = gettime(DT_HOUR);
 
+	if (.@day == 1 && .@hour >= 2) {
+		$Weekend_Rates_Early = 0;
+		$Weekend_Rates_MvpCard5x = 0;
+	}
+
 	if (.bonus_week_active)
+		return 1;
+
+	if ($Weekend_Rates_Early)
 		return 1;
 
 	// Sexta a partir de 12:00.
@@ -88,10 +146,18 @@ S_IsWeekendEvent:
 
 	return 0;
 
+S_IsMvpCardEvent:
+	if (!$Weekend_Rates_MvpCard5x)
+		return 0;
+	if (!callsub(S_IsWeekendEvent))
+		return 0;
+	return 1;
+
 S_ApplyRates:
 	.@announce = getarg(0);
 	.@old_state = .weekend_rates_active;
 	.@weekend = callsub(S_IsWeekendEvent);
+	.@mvp_card_event = callsub(S_IsMvpCardEvent);
 
 	if (.@weekend) {
 		.@base_exp_rate = .weekend_base_exp_rate;
@@ -103,9 +169,11 @@ S_ApplyRates:
 		.@job_exp_rate = .normal_job_exp_rate;
 		.@drop_rate = .normal_drop_rate;
 	}
+	.@mvp_card_rate = (.@mvp_card_event ? .weekend_mvp_card_rate : .normal_mvp_card_rate);
 
-	callsub S_SetRates, .@base_exp_rate, .@job_exp_rate, .@drop_rate;
+	callsub S_SetRates, .@base_exp_rate, .@job_exp_rate, .@drop_rate, .@mvp_card_rate;
 	.weekend_rates_active = .@weekend;
+	.current_mvp_card_rate = .@mvp_card_rate;
 
 	if (.@announce && .@old_state != .weekend_rates_active) {
 		if (.weekend_rates_active)
@@ -119,6 +187,7 @@ S_SetRates:
 	.@base_exp_rate = getarg(0);
 	.@job_exp_rate = getarg(1);
 	.@drop_rate = getarg(2);
+	.@mvp_card_rate = getarg(3);
 
 	setbattleflag("base_exp_rate", .@base_exp_rate);
 	setbattleflag("job_exp_rate", .@job_exp_rate);
@@ -137,7 +206,7 @@ S_SetRates:
 	setbattleflag("item_rate_equip_mvp", .@drop_rate);
 	setbattleflag("item_rate_card", .@drop_rate);
 	setbattleflag("item_rate_card_boss", .@drop_rate);
-	setbattleflag("item_rate_card_mvp", .@drop_rate);
+	setbattleflag("item_rate_card_mvp", .@mvp_card_rate);
 	setbattleflag("item_rate_mvp", .@drop_rate);
 	setbattleflag("item_rate_adddrop", .@drop_rate);
 	setbattleflag("item_rate_treasure", .@drop_rate, true);
@@ -147,6 +216,6 @@ S_AnnounceActiveRates:
 	if (!callsub(S_IsWeekendEvent))
 		return;
 
-	announce "[Evento] Rates de fim de semana ativas: Base EXP " + .weekend_base_exp_rate + "% / Job EXP " + .weekend_job_exp_rate + "% / Drop " + .weekend_drop_rate + "%.", bc_all, 0x00FF00;
+	announce "[Evento] Rates de fim de semana ativas: Base EXP " + .weekend_base_exp_rate + "% / Job EXP " + .weekend_job_exp_rate + "% / Drop " + .weekend_drop_rate + "%." + (callsub(S_IsMvpCardEvent) ? " Carta MVP 5x ativa." : ""), bc_all, 0x00FF00;
 	return;
 }
