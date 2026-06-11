@@ -1,19 +1,19 @@
 -	script	Premio do Amigo#base	-1,{
 
-	mes "[Prêmio do Amigo]";
-	switch(select("Quero saber sobre o prêmio!","Um amigo me indicou!","Resgatar prêmio por indicação","Sair")) {
+	mes "[Premio do Amigo]";
+	switch(select("Quero saber sobre o premio!","Um amigo me indicou!","Resgatar premio por indicacao","Sair")) {
 		case 1:
 			mes "Uma caixa especial recebida ao indicar um amigo.";
-			mes "Contém os seguintes itens para quem indicou:";
+			mes "Contem os seguintes itens para quem indicou:";
 			mes "^0055FF10x Goma de Mascar^000000";
 			mes "^0055FF10x Super Pocao Media de Vida^000000";
 			mes "^0055FF10x Macaroons Sortidos^000000";
-			mes "^0055FF10x Taça da Felicidade^000000";
+			mes "^0055FF10x Taca da Felicidade^000000";
 			mes "^0055FF4x Diario de Aventuras^000000";
 			next;
 			mes "Ao informar o nome de quem te indicou,";
-			mes "você recebe ^0055FF1 unidade de cada item^000000.";
-			mes "Quem te indicou poderá resgatar o pacote maior neste NPC.";
+			mes "voce recebe ^0055FF1 unidade de cada item^000000.";
+			mes "Quem te indicou podera resgatar o pacote maior neste NPC.";
 			close;
 		case 2:
 			break;
@@ -24,15 +24,17 @@
 			close;
 	}
 
-	if (BaseLevel < 20) {
-		mes "É necessário mais experiência no jogo.";
-		mes "Volte quando alcançar o nível 20.";
+	.@is_gm = (getgroupid() >= 99);
+
+	if (!.@is_gm && BaseLevel < 20) {
+		mes "E necessario mais experiencia no jogo.";
+		mes "Volte quando alcancar o nivel 20.";
 		close;
 	}
 
-	// Cada conta só pode informar quem indicou uma única vez.
-	if (#friend_ref_set) {
-		mes "Você já nos informou quem te indicou.";
+	// Cada conta so pode informar quem indicou uma unica vez.
+	if (!.@is_gm && #friend_ref_set) {
+		mes "Voce ja nos informou quem te indicou.";
 		close;
 	}
 
@@ -44,39 +46,39 @@
 
 		query_sql("SELECT char_id, account_id, name FROM `char` WHERE name = '"+escape_sql(.@friend$)+"'", .@friend_id, .@friend_aid, .@friend_name$);
 		if (!getarraysize(.@friend_id)) {
-			mes "Nick não encontrado. Deseja tentar novamente?";
+			mes "Nick nao encontrado. Deseja tentar novamente?";
 			if (select("Tentar novamente","Cancelar") == 1)
 				next;
-			mes "Indicação cancelada.";
+			mes "Indicacao cancelada.";
 			break;
 		}
 
-		// Impedir auto-indicação (mesma conta)
-		if (.@friend_aid[0] == getcharid(2)) {
-			mes "Você não pode indicar a si próprio.";
+		// Impedir auto-indicacao (mesma conta)
+		if (!.@is_gm && .@friend_aid[0] == getcharid(2)) {
+			mes "Voce nao pode indicar a si proprio.";
 			break;
 		}
 
-		// Impedir indicação de quem joga do mesmo IP
+		// Impedir indicacao de quem joga do mesmo IP
 		query_sql("SELECT last_ip FROM `login` WHERE account_id = "+.@friend_aid[0], .@friend_ip$);
-		if (getgroupid() < 99 && getarraysize(.@friend_ip$) > 0 && .@friend_ip$[0] == .@ip$) {
-			mes "Você não pode indicar alguém que joga do mesmo IP.";
+		if (!.@is_gm && getarraysize(.@friend_ip$) > 0 && .@friend_ip$[0] == .@ip$) {
+			mes "Voce nao pode indicar alguem que joga do mesmo IP.";
 			break;
 		}
 
 		setarray .@reward_item_id[0], 12210, 22818, 12223, 12224, 14545;
 		setarray .@small_reward_amount[0], 1, 1, 1, 1, 1;
 		if (!checkweight2(.@reward_item_id, .@small_reward_amount)) {
-			mes "Você precisa liberar espaço ou peso no inventário antes de receber seu prêmio.";
+			mes "Voce precisa liberar espaco ou peso no inventario antes de receber seu premio.";
 			close;
 		}
 
-		// Registra quem indicou para bloquear novas alterações nesta conta.
+		// Registra quem indicou para bloquear novas alteracoes nesta conta.
 		#friend_ref_set = 1;
 		#friend_ref_name$ = .@friend_name$[0];
 		#friend_ref_time = gettimetick(2);
 
-		// Deixa o prêmio maior pendente para o indicador resgatar no NPC.
+		// Deixa o premio maior pendente para o indicador resgatar no NPC.
 		.@pending_var$ = "$friend_ref_pending_"+.@friend_id[0];
 		.@last_ref_var$ = "$friend_ref_last_"+.@friend_id[0]+"$";
 		setd .@pending_var$, getd(.@pending_var$) + 1;
@@ -88,10 +90,10 @@
 		#friend_ref_reward_time = gettimetick(2);
 
 		next;
-		mes "[Prêmio do Amigo]";
-		mes "Nick encontrado! Sua indicação foi registrada.";
-		mes "Você recebeu seu prêmio agora.";
-		mes "Seu amigo poderá resgatar o prêmio maior neste NPC.";
+		mes "[Premio do Amigo]";
+		mes "Nick encontrado! Sua indicacao foi registrada.";
+		mes "Voce recebeu seu premio agora.";
+		mes "Seu amigo podera resgatar o premio maior neste NPC.";
 		break;
 	}
 	close;
@@ -102,19 +104,19 @@ S_ClaimReferralReward:
 	.@pending = getd(.@pending_var$);
 
 	if (.@pending <= 0) {
-		mes "Você não possui prêmios de indicação para resgatar.";
+		mes "Voce nao possui premios de indicacao para resgatar.";
 		return;
 	}
 
-	mes "Você possui ^0055FF"+.@pending+"^000000 prêmio(s) de indicação pendente(s).";
+	mes "Voce possui ^0055FF"+.@pending+"^000000 premio(s) de indicacao pendente(s).";
 	if (getd(.@last_ref_var$) != "")
-		mes "Último indicado: ^0055FF"+getd(.@last_ref_var$)+"^000000.";
+		mes "Ultimo indicado: ^0055FF"+getd(.@last_ref_var$)+"^000000.";
 	next;
 
 	setarray .@reward_item_id[0], 12210, 22818, 12223, 12224, 14545;
 	setarray .@reward_item_amount[0], 10, 10, 10, 10, 4;
 	if (!checkweight2(.@reward_item_id, .@reward_item_amount)) {
-		mes "Você precisa liberar espaço ou peso no inventário antes de receber seu prêmio.";
+		mes "Voce precisa liberar espaco ou peso no inventario antes de receber seu premio.";
 		return;
 	}
 
@@ -123,8 +125,8 @@ S_ClaimReferralReward:
 	#friend_ref_claim_time = gettimetick(2);
 
 	setd .@pending_var$, .@pending - 1;
-	mes "Prêmio de indicação resgatado com sucesso.";
+	mes "Premio de indicacao resgatado com sucesso.";
 	if (.@pending - 1 > 0)
-		mes "Ainda resta(m) ^0055FF"+(.@pending - 1)+"^000000 prêmio(s) para resgatar.";
+		mes "Ainda resta(m) ^0055FF"+(.@pending - 1)+"^000000 premio(s) para resgatar.";
 	return;
 }
