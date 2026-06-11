@@ -1996,6 +1996,7 @@ static bool unit_should_skip_skill_motion_delay(struct block_list *src, uint16 s
 		case WL_CRIMSONROCK:
 		case WL_HELLINFERNO:
 		case WL_COMET:
+		case WL_CHAINLIGHTNING:
 		case WL_EARTHSTRAIN:
 		case WL_TETRAVORTEX:
 		case RA_ARROWSTORM:
