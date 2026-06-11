@@ -2007,6 +2007,8 @@ static bool unit_should_skip_skill_motion_delay(struct block_list *src, uint16 s
 		case LG_OVERBRAND:
 		case LG_MOONSLASHER:
 		case LG_RAYOFGENESIS:
+		case SN_SHARPSHOOTING:
+		case MA_SHARPSHOOTING:
 		case SR_TIGERCANNON:
 		case SR_RAMPAGEBLASTER:
 		case SR_HOWLINGOFLION:

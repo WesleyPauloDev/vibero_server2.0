@@ -14292,7 +14292,8 @@ TIMER_FUNC(skill_castend_id){
 			skill_castend_damage_id(src,target,ud->skill_id,ud->skill_lv,tick,flag);
 
 		if( sd && sd->skill_keep_using.tid == INVALID_TIMER && sd->skill_keep_using.skill_id > 0 && sd->skill_keep_using.skill_id == ud->skill_id && !skill_isNotOk(ud->skill_id, *sd) && skill_check_condition_castbegin(*sd, ud->skill_id, ud->skill_lv) ){
-			sd->skill_keep_using.tid = add_timer( sd->ud.canact_tick + 100, skill_keep_using, sd->id, 0 );
+			t_tick keep_using_delay = (ud->skill_id == SN_SHARPSHOOTING || ud->skill_id == MA_SHARPSHOOTING) ? 0 : 100;
+			sd->skill_keep_using.tid = add_timer( sd->ud.canact_tick + keep_using_delay, skill_keep_using, sd->id, 0 );
 		}
 
 		if(sc != nullptr && !sc->empty()) {
