@@ -1,0 +1,264 @@
+// Weekend MVP invasion event.
+// Auto: Friday 12:00 until Sunday 00:00.
+// GM command: @flag_evento 1 / @flag_evento 0
+
+-	script	WeekendMVPInvasion	-1,{
+
+OnInit:
+	.npc$ = strnpcinfo(3);
+	.spawn_count = 30;
+	.lhz_count = 3;
+	.manual = 0;
+	.force_off = 0;
+	.active = 0;
+	.alive = 0;
+	.cleaning = 0;
+	.event_map$ = "";
+	.event_city$ = "";
+	.last_spawn_time$ = "";
+	.event_gid_count = 0;
+	.manual_interval_ms = 0;
+	.next_spawn_tick = 0;
+
+	setarray .maps$[0], "payon", "morocc", "alberta", "geffen", "aldebaran", "hugel", "comodo", "izlude";
+	setarray .map_names$[0], "Payon", "Morroc", "Alberta", "Geffen", "Aldebaran", "Hugel", "Comodo", "Izlude";
+	setarray .mvp_ids[0],
+		1038,1039,1046,1059,1086,1087,1112,1115,1147,1150,
+		1157,1159,1190,1251,1252,1272,1312,1373,1389,1399,
+		1418,1492,1502,1511,1583,1623,1630,1646,1647,1648,
+		1649,1650,1651,1658,1685,1688,1708,1719,1734,1751,
+		1768,1779,1785,1832,1871,1874,1885,1917,
+		2022,2068,2087,2131,2156,2165;
+	setarray .lhz_mvp_ids[0], 2235,2236,2237,2238,2239,2240,2241;
+
+	bindatcmd "flag_evento", .npc$ + "::OnAtcommand", 99, 99;
+	bindatcmd "evento_mvp", .npc$ + "::OnAtcommand", 99, 99;
+	disablenpc "Chefe da Guarda";
+	end;
+
+OnAtcommand:
+	if (.@atcmd_numparameters < 1) {
+		dispbottom "Uso: @flag_evento 1 para ligar, @flag_evento 0 para desligar.";
+		end;
+	}
+
+	.@flag = atoi(.@atcmd_parameters$[0]);
+	if (.@flag != 0 && .@flag != 1) {
+		dispbottom "Uso: @flag_evento 1 para ligar, @flag_evento 0 para desligar.";
+		end;
+	}
+
+	if (.@flag) {
+		.manual = 1;
+		.force_off = 0;
+		.active = 1;
+		stopnpctimer;
+		.manual_interval_ms = 0;
+		.next_spawn_tick = 0;
+		if (.@atcmd_numparameters >= 2) {
+			.@minutes = atoi(.@atcmd_parameters$[1]);
+			if (.@minutes > 0) {
+				.manual_interval_ms = .@minutes * 60000;
+				.next_spawn_tick = gettimetick(2) + (.manual_interval_ms / 1000);
+			}
+		}
+		dispbottom "[Evento MVP] Evento ligado manualmente.";
+		if (.manual_interval_ms > 0) {
+			dispbottom "[Evento MVP] Modo teste: nova horda a cada " + (.manual_interval_ms / 60000) + " minuto(s).";
+			initnpctimer;
+		}
+		announce "[Evento MVP] Evento MVP ativado por GM.", bc_all, 0xFF6600;
+		callsub S_SpawnWave;
+		end;
+	}
+
+	stopnpctimer;
+	.manual = 0;
+	.force_off = 1;
+	.active = 0;
+	.manual_interval_ms = 0;
+	.next_spawn_tick = 0;
+	callsub S_Clean;
+	dispbottom "[Evento MVP] Evento desligado manualmente.";
+	announce "[Evento MVP] Evento MVP desativado por GM.", bc_all, 0xFF6600;
+	end;
+
+OnTimer1000:
+	if (!.manual || .manual_interval_ms <= 0) {
+		stopnpctimer;
+		end;
+	}
+	if (gettimetick(2) >= .next_spawn_tick) {
+		callsub S_SpawnWave;
+		.next_spawn_tick = gettimetick(2) + (.manual_interval_ms / 1000);
+	}
+	stopnpctimer;
+	initnpctimer;
+	end;
+
+OnClock0000:
+	if (gettime(DT_DAYOFWEEK) == 0 && !.manual) {
+		.force_off = 0;
+		.active = 0;
+		callsub S_Clean;
+		announce "[Evento MVP] Evento de fim de semana encerrado.", bc_all, 0xFF6600;
+		end;
+	}
+	callsub S_TrySpawn;
+	end;
+
+OnClock0300:
+OnClock0600:
+OnClock0900:
+OnClock1200:
+	if (gettime(DT_DAYOFWEEK) == 5)
+		.force_off = 0;
+	callsub S_TrySpawn;
+	end;
+
+OnClock1500:
+OnClock1800:
+OnClock2100:
+	callsub S_TrySpawn;
+	end;
+
+S_TrySpawn:
+	if (.force_off && !.manual)
+		return;
+
+	if (!.manual) {
+		.@day = gettime(DT_DAYOFWEEK);
+		.@hour = gettime(DT_HOUR);
+		if (!((.@day == 5 && .@hour >= 12) || .@day == 6))
+			return;
+	}
+
+	.active = 1;
+	callsub S_SpawnWave;
+	return;
+
+S_SpawnWave:
+	callsub S_Clean;
+	.@map_i = rand(getarraysize(.maps$));
+	.active = 1;
+	.event_map$ = .maps$[.@map_i];
+	.event_city$ = .map_names$[.@map_i];
+	.last_spawn_time$ = gettimestr("%H:%M", 21);
+	deletearray .event_gid[0], getarraysize(.event_gid);
+	deletearray .event_mob_id[0], getarraysize(.event_mob_id);
+	.event_gid_count = 0;
+	.alive = .spawn_count;
+	enablenpc "Chefe da Guarda";
+
+	for (.@i = 0; .@i < .lhz_count; .@i++) {
+		.@mob = .lhz_mvp_ids[rand(getarraysize(.lhz_mvp_ids))];
+		callsub S_SpawnOne, .@mob, .@map_i;
+	}
+
+	for (.@i = .lhz_count; .@i < .spawn_count; .@i++) {
+		.@mob = .mvp_ids[rand(getarraysize(.mvp_ids))];
+		callsub S_SpawnOne, .@mob, .@map_i;
+	}
+
+	announce "[Evento MVP] Monstros chefes invadiram " + .map_names$[.@map_i] + "! Aventureiros, ajudem a defende-la!", bc_all, 0xFF6600;
+	return;
+
+S_SpawnOne:
+	.@mob = getarg(0);
+	.@map_i = getarg(1);
+	monster .maps$[.@map_i], 0, 0, "--ja--", .@mob, 1, .npc$ + "::OnMVPDead";
+	.event_gid[.event_gid_count] = $@mobid[0];
+	.event_mob_id[.event_gid_count] = .@mob;
+	.event_gid_count++;
+	return;
+
+S_Clean:
+	.cleaning = 1;
+	.active = 0;
+	for (.@i = 0; .@i < getarraysize(.maps$); .@i++)
+		// Sem o terceiro parametro: remove sem disparar evento de morte/pontos.
+		killmonster .maps$[.@i], .npc$ + "::OnMVPDead";
+	.cleaning = 0;
+	.alive = 0;
+	.event_map$ = "";
+	.event_city$ = "";
+	.last_spawn_time$ = "";
+	deletearray .event_gid[0], getarraysize(.event_gid);
+	deletearray .event_mob_id[0], getarraysize(.event_mob_id);
+	.event_gid_count = 0;
+	disablenpc "Chefe da Guarda";
+	return;
+
+OnMVPDead:
+	if (.cleaning || !.active)
+		end;
+
+	if (callfunc("F_MVP_PointsRegister", killedrid))
+		callfunc("F_MVP_KillsRegister", killedrid);
+
+	.alive--;
+	if (.alive < 0)
+		.alive = 0;
+
+	announce "[Evento MVP] Ainda restam " + .alive + " MVPs invasores.", bc_all, 0xFF6600;
+	if (.alive == 0) {
+		.active = 0;
+		.event_map$ = "";
+		.event_city$ = "";
+		deletearray .event_gid[0], getarraysize(.event_gid);
+		deletearray .event_mob_id[0], getarraysize(.event_mob_id);
+		.event_gid_count = 0;
+		disablenpc "Chefe da Guarda";
+		announce "[Evento MVP] A cidade foi defendida com sucesso!", bc_all, 0xFF6600;
+	}
+	end;
+}
+
+prontera,149,178,5	script	Chefe da Guarda	586,{
+	mes "[Chefe da Guarda]";
+
+	.@active = getvariableofnpc(.active, "WeekendMVPInvasion");
+	.@alive = getvariableofnpc(.alive, "WeekendMVPInvasion");
+	.@city$ = getvariableofnpc(.event_city$, "WeekendMVPInvasion");
+	.@time$ = getvariableofnpc(.last_spawn_time$, "WeekendMVPInvasion");
+
+	if (!.@active || .@alive <= 0 || .@city$ == "") {
+		mes "Nenhuma invasao MVP esta ativa agora.";
+		mes "Fique atento aos anuncios globais.";
+		close;
+	}
+
+	mes "Aventureiro, preciso de ajuda para defender a cidade.";
+	mes "Monstros chefes invadiram " + .@city$ + ".";
+	if (.@time$ != "")
+		mes "Horario da invasao: " + .@time$ + ".";
+	mes "MVPs restantes: " + .@alive + ".";
+	next;
+
+	.@count = getvariableofnpc(.event_gid_count, "WeekendMVPInvasion");
+	.@found = 0;
+	if (.@count > 0) {
+		.@start = rand(.@count);
+		for (.@i = 0; .@i < .@count; .@i++) {
+			.@idx = (.@start + .@i) % .@count;
+			.@gid = getvariableofnpc(.event_gid[.@idx], "WeekendMVPInvasion");
+			if (!unitexists(.@gid))
+				continue;
+
+			getunitdata .@gid, .@data;
+			.@mob_id = getvariableofnpc(.event_mob_id[.@idx], "WeekendMVPInvasion");
+			.@found = 1;
+			break;
+		}
+	}
+
+	mes "[Chefe da Guarda]";
+	if (.@found) {
+		mes "Ha boatos de que viram " + getmonsterinfo(.@mob_id, MOB_NAME) + " andando por " + .@city$ + " " + .@data[UMOB_X] + " " + .@data[UMOB_Y] + ".";
+		mes "Se apresse antes que ele va para longe.";
+	} else {
+		mes "Ainda estou recebendo relatos confusos.";
+		mes "Procure pela cidade invadida e volte se encontrar novas pistas.";
+	}
+	close;
+}

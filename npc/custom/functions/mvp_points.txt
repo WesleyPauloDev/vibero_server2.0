@@ -1,35 +1,33 @@
+function	script	F_MVP_PointsRegister	{
+	.@mob_id = getarg(0, killedrid);
+	.@map$ = strcharinfo(3);
+
+	// Nao contabiliza pontos no gs_room e nem nas instancias dele.
+	if (.@map$ == "gs_room" || compare(.@map$, "0336#"))
+		return 0;
+
+	// Dentro de instancia nao ganha pontos.
+	if (instance_id() > 0)
+		return 0;
+
+	// Apenas MVPs com MvpExp.
+	if (getmonsterinfo(.@mob_id, MOB_MVPEXP) <= 0)
+		return 0;
+
+	callfunc("F_BattlePassRegisterDaily", "mvp");
+
+	#mvp_points += 1;
+
+	dispbottom "[MVP] Voce derrotou um MVP e ganhou 1 ponto de MVP!";
+	dispbottom "[MVP] Pontos acumulados: " + #mvp_points;
+
+	announce strcharinfo(0) + " derrotou o MVP " + getmonsterinfo(.@mob_id, MOB_NAME) + "!", bc_all | bc_yellow;
+	return 1;
+}
+
 -	script	MVP_Points_System	-1,{
 
 OnNPCKillEvent:
-
-	// Pega o ID do monstro morto
-	.@mob_id = killedrid;
-
-	.@map$ = strcharinfo(3);
-
-	// Nao contabiliza pontos no gs_room e nem nas instancias dele
-	if (.@map$ == "gs_room" || compare(.@map$, "0336#"))
-		end;
-
-    // Verifica se o jogador está dentro de uma instância
-	if (instance_id() > 0)
-		end; // Dentro de instância, não ganha pontos
-
-	// Verifica se é um MVP
-	if (getmonsterinfo(.@mob_id, MOB_MVPEXP) > 0) {
-
-		callfunc("F_BattlePassRegisterDaily", "mvp");
-
-		// Adiciona 1 ponto
-		#mvp_points += 1;
-
-		dispbottom "[MVP] Você derrotou um MVP e ganhou 1 ponto de MVP!";
-		dispbottom "[MVP] Pontos acumulados: " + #mvp_points;
-
-		// Mensagem global opcional
-		announce strcharinfo(0) + " derrotou o MVP " + getmonsterinfo(.@mob_id, MOB_NAME) + "!", bc_all | bc_yellow;
-
-	}
-
+	callfunc("F_MVP_PointsRegister", killedrid);
 	end;
 }

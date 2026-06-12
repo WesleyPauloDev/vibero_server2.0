@@ -24,6 +24,49 @@ function	script	F_MVP_MonthId	{
 	return (gettime(DT_YEAR) * 100) + gettime(DT_MONTH);
 }
 
+function	script	F_MVP_KillsRegister	{
+	.@mob_id = getarg(0, killedrid);
+	.@map$ = strcharinfo(3);
+
+	// Nao contabiliza kills no gs_room e nem nas instancias dele.
+	if (.@map$ == "gs_room" || compare(.@map$, "0336#"))
+		return 0;
+
+	// Mantem o mesmo comportamento do sistema atual: instancias nao contam.
+	if (instance_id() > 0)
+		return 0;
+
+	// Apenas MVP.
+	if (getmonsterinfo(.@mob_id, MOB_MVPEXP) <= 0)
+		return 0;
+
+	MVP_Kills_Total += 1;
+
+	.@week_id = $MVP_Kills_CurrentWeekId;
+	if (.@week_id == 0)
+		.@week_id = callfunc("F_MVP_WeekId");
+	MVP_Kills_Week[.@week_id] += 1;
+
+	.@month_id = $MVP_Kills_CurrentMonthId;
+	if (.@month_id == 0)
+		.@month_id = callfunc("F_MVP_MonthId");
+	MVP_Kills_Month[.@month_id] += 1;
+
+	query_sql(
+		"INSERT INTO `mvp_kill_log` " +
+		"(`account_id`, `char_id`, `char_name`, `mob_id`, `mob_name`, `map`, `week_id`, `month_id`, `killed_at`) VALUES (" +
+		getcharid(3) + ", " +
+		getcharid(0) + ", '" +
+		escape_sql(strcharinfo(0)) + "', " +
+		.@mob_id + ", '" +
+		escape_sql(getmonsterinfo(.@mob_id, MOB_NAME)) + "', '" +
+		escape_sql(strcharinfo(3)) + "', " +
+		.@week_id + ", " +
+		.@month_id + ", NOW())"
+	);
+	return 1;
+}
+
 // ------------------------------------------------------------
 // Contador de MVP kills (roda em paralelo ao sistema de pontos)
 // ------------------------------------------------------------
@@ -51,45 +94,7 @@ OnInit:
 	end;
 
 OnNPCKillEvent:
-	.@mob_id = killedrid;
-	.@map$ = strcharinfo(3);
-
-	// Nao contabiliza kills no gs_room e nem nas instancias dele.
-	if (.@map$ == "gs_room" || compare(.@map$, "0336#"))
-		end;
-
-	// Mantem o mesmo comportamento do sistema atual: instancias nao contam.
-	if (instance_id() > 0)
-		end;
-
-	// Apenas MVP.
-	if (getmonsterinfo(.@mob_id, MOB_MVPEXP) <= 0)
-		end;
-
-	MVP_Kills_Total += 1;
-
-	.@week_id = $MVP_Kills_CurrentWeekId;
-	if (.@week_id == 0)
-		.@week_id = callfunc("F_MVP_WeekId");
-	MVP_Kills_Week[.@week_id] += 1;
-
-	.@month_id = $MVP_Kills_CurrentMonthId;
-	if (.@month_id == 0)
-		.@month_id = callfunc("F_MVP_MonthId");
-	MVP_Kills_Month[.@month_id] += 1;
-
-	query_sql(
-		"INSERT INTO `mvp_kill_log` " +
-		"(`account_id`, `char_id`, `char_name`, `mob_id`, `mob_name`, `map`, `week_id`, `month_id`, `killed_at`) VALUES (" +
-		getcharid(3) + ", " +
-		getcharid(0) + ", '" +
-		escape_sql(strcharinfo(0)) + "', " +
-		.@mob_id + ", '" +
-		escape_sql(getmonsterinfo(.@mob_id, MOB_NAME)) + "', '" +
-		escape_sql(strcharinfo(3)) + "', " +
-		.@week_id + ", " +
-		.@month_id + ", NOW())"
-	);
+	callfunc("F_MVP_KillsRegister", killedrid);
 	end;
 }
 

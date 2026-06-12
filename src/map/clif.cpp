@@ -7012,7 +7012,9 @@ void clif_wis_message(map_session_data* sd, const char* nick, const char* mes, s
 		gmlvl = pc_get_group_level(ssd);
 	}
 
-	p->isAdmin = (gmlvl == 99) ? 1 : 0;
+	// Keep GM whispers in the normal PM window only. Some clients render admin
+	// whispers as an additional yellow top-screen notice.
+	p->isAdmin = 0;
 
 #if PACKETVER_MAIN_NUM >= 20131204 || PACKETVER_RE_NUM >= 20131120 || defined(PACKETVER_ZERO)
 	if( ssd != nullptr ){
