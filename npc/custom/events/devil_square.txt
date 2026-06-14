@@ -2,21 +2,21 @@
 //= Devil Square
 //===== Traduzido por: ======================================
 //= ChatGPT (PT-BR)
-//===== Vers�o Atual: =======================================
+//===== Versao Atual: =======================================
 //= 1.0
-//===== Compat�vel com: =====================================
+//===== Compativel com: =====================================
 //= rAthena Project
-//===== Descri��o: ==========================================
+//===== Descricao: ==========================================
 //= Devil Square, baseado no evento do MU Online.
 //= Derrote cinco ondas de monstros para ganhar tesouros.
 //============================================================
 
-prontera,147,154,7	script	Guardi�o do Devil Square#1	406,{
-	set .@gm_level, 99; // N�vel de GM necess�rio para iniciar/parar o evento
+prontera,147,154,7	script	Guardiao do Devil Square#1	406,{
+	set .@gm_level, 99; // Nivel de GM necessario para iniciar/parar o evento
 
-	mes "[Guardi�o do Devil Square]";
-	mes "Esta � a entrada do ^FF0000Devil Square^000000.";
-	mes "Se voc� falhar ou morrer, o port�o ser� fechado e voc� dever� aguardar at� o pr�ximo evento para entrar novamente.";
+	mes "[Guardiao do Devil Square]";
+	mes "Esta e a entrada do ^FF0000Devil Square^000000.";
+	mes "Se voce falhar ou morrer, o portao sera fechado e voce devera aguardar ate o proximo evento para entrar novamente.";
 	next;
 		.@is_gm_menu = (getgmlevel() >= .@gm_level);
 		.@menu$ = "Entrar.:Informacoes.:Cancelar.";
@@ -26,23 +26,23 @@ prontera,147,154,7	script	Guardi�o do Devil Square#1	406,{
 
 	case 1:
 		if (.start == 0) {
-			mes "[Guardi�o do Devil Square]";
-			mes "O Devil Square est� fechado no momento.";
-			mes "Ele abrir� nos seguintes hor�rios:";
+			mes "[Guardiao do Devil Square]";
+			mes "O Devil Square esta fechado no momento.";
+			mes "Ele abrira nos seguintes horarios:";
 			mes "00:00 , 12:00 , 18:00";
 			close;
 		}
 		if (.start == 2) {
-			mes "[Guardi�o do Devil Square]";
-			mes "O Devil Square j� iniciou.";
+			mes "[Guardiao do Devil Square]";
+			mes "O Devil Square ja iniciou.";
 			close;
 		}
 		if (BaseLevel < 70) {
-			mes "[Guardi�o do Devil Square]";
-			mes "Voc� n�o atende aos requisitos para entrar no Devil Square.";
+			mes "[Guardiao do Devil Square]";
+			mes "Voce nao atende aos requisitos para entrar no Devil Square.";
 			mes " ";
 			mes "Requisitos:";
-			mes " - N�vel Base 70";
+			mes " - Nivel Base 70";
 			close;
 		}
 		// =========================
@@ -66,12 +66,12 @@ prontera,147,154,7	script	Guardi�o do Devil Square#1	406,{
 		close;
 
 	case 2:
-		mes "[Guardi�o do Devil Square]";
-		mes "L� dentro, voc� enfrentar� 5 ondas de monstros.";
+		mes "[Guardiao do Devil Square]";
+		mes "La dentro, voce enfrentara 5 ondas de monstros.";
 		mes "A cada rodada, os inimigos ficam mais fortes.";
 		next;
-		mes "[Guardi�o do Devil Square]";
-		mes "Se derrotar todos os inimigos, voc� poder� abrir 10 Ba�s do Tesouro contendo itens, equipamentos e cartas raras!";
+		mes "[Guardiao do Devil Square]";
+		mes "Se derrotar todos os inimigos, voce podera abrir 10 Baus do Tesouro contendo itens, equipamentos e cartas raras!";
 		close;
 		case 3:
 			if (!.@is_gm_menu)
@@ -103,8 +103,8 @@ prontera,147,154,7	script	Guardi�o do Devil Square#1	406,{
 		break;
 	}
 
-	mes "[Guardi�o do Devil Square]";
-	mes "At� breve.";
+	mes "[Guardiao do Devil Square]";
+	mes "Ate breve.";
 	close;
 
 OnStartEvent:
@@ -113,10 +113,10 @@ OnClock1200:
 OnClock1800:
 
 	.start = 1;
-	// disablenpc "Guardi�o do Devil Square#2";
+	// disablenpc "Guardiao do Devil Square#2";
 	disablenpc "Devil Square Reward Box";
 	disablenpc "ord11-12";
-	// mapannounce "ordeal_1-1","O Devil Square est� fechado.", bc_map;
+	// mapannounce "ordeal_1-1","O Devil Square esta fechado.", bc_map;
 
 	// getmapxy .@map$, .@x, .@y, BL_NPC;
 	// mapwarp "ordeal_1-1", .@map$, .@x, .@y;
@@ -159,7 +159,7 @@ OnDevilDead:
 	if (.mob > 0)
 		announce "Devil Square: Restam "+ .mob +" monstros na rodada 1.", bc_map;
 	else if (.mob <= 0) {
-		announce "Devil Square est� entrando na rodada 2...", bc_map,"0xFF0000";
+		announce "Devil Square esta entrando na rodada 2...", bc_map,"0xFF0000";
 		sleep 5000;
 		goto OnDevil2;
 	}
@@ -185,7 +185,7 @@ OnDevilDead2:
 	if (.mob > 0)
 		announce "Devil Square: Restam "+ .mob +" monstros na rodada 2.", bc_map;
 	else if (.mob <= 0) {
-		announce "Devil Square est� entrando na rodada 3...", bc_map,"0xFF0000";
+		announce "Devil Square esta entrando na rodada 3...", bc_map,"0xFF0000";
 		sleep 5000;
 		goto OnDevil3;
 	}
@@ -196,7 +196,7 @@ OnDevil3:
 	.mob = 62;
 
 	areamonster "ordeal_1-1",183,182,246,244,"[DS] INJUSTICE",1257,10,strnpcinfo(0)+"::OnDevilDead3";
-	areamonster "ordeal_1-1",183,182,246,244,"[DS] G�RGULA",1253,10,strnpcinfo(0)+"::OnDevilDead3";
+	areamonster "ordeal_1-1",183,182,246,244,"[DS] GARGULA",1253,10,strnpcinfo(0)+"::OnDevilDead3";
 	areamonster "ordeal_1-1",183,182,246,244,"[DS] ANOLIAN",1206,10,strnpcinfo(0)+"::OnDevilDead3";
 	areamonster "ordeal_1-1",183,182,246,244,"[DS] WANDERER",1208,10,strnpcinfo(0)+"::OnDevilDead3";
 	areamonster "ordeal_1-1",183,182,246,244,"[DS] LUCIOLA VESPA",2160,10,strnpcinfo(0)+"::OnDevilDead3";
@@ -210,7 +210,7 @@ OnDevilDead3:
 	if (.mob > 0)
 		announce "Devil Square: Restam "+ .mob +" monstros na rodada 3.", bc_map;
 	else if (.mob <= 0) {
-		announce "Devil Square est� entrando na rodada 4...", bc_map,"0xFF0000";
+		announce "Devil Square esta entrando na rodada 4...", bc_map,"0xFF0000";
 		sleep 5000;
 		goto OnDevil4;
 	}
@@ -235,7 +235,7 @@ OnDevilDead4:
 	if (.mob > 0)
 		announce "Devil Square: Restam "+ .mob +" monstros na rodada 4.", bc_map;
 	else if (.mob <= 0) {
-		announce "Devil Square est� entrando na rodada final...", bc_map,"0xFF0000";
+		announce "Devil Square esta entrando na rodada final...", bc_map,"0xFF0000";
 		sleep 5000;
 		goto OnDevil5;
 	}
@@ -277,7 +277,7 @@ OnClock0030:
 OnClock1230:
 OnClock1830:
 	if (.start == 2 && .mob > 0)
-		announce "O Devil Square foi encerrado. Ningu�m foi capaz de Dominar os Monstros", bc_all;
+		announce "O Devil Square foi encerrado. Ninguem foi capaz de Dominar os Monstros", bc_all;
 	.start = .round = .mob = 0;
 	killmonsterall "ordeal_1-1";
 	if (getmapusers("ordeal_1-1"))
@@ -330,11 +330,11 @@ ordeal_1-1,246,245,3	script	Devil Square Reward Box	10404,{
 	end;
 }
 
-// ordeal_1-1,246,245,7	script	Guardi�o do Devil Square#2	406,{
-// 	mes "[Sa�da]";
+// ordeal_1-1,246,245,7	script	Guardiao do Devil Square#2	406,{
+// 	mes "[Saida]";
 // 	select("Sair do Devil Square.:Cancelar.");
 // 	if (select == 1) {
-// 		mes "At� a pr�xima.";
+// 		mes "Ate a proxima.";
 // 		close2;
 // 		warp "SavePoint",0,0;
 // 		end;
