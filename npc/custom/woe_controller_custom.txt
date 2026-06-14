@@ -1,14 +1,14 @@
 //============================================================
-//   WoE Control — Versão Ultra Simplificada
+//   WoE Control - Versao Ultra Simplificada
 //   Autor: Wesley
-//   Compatível: rAthena 2021~2025
+//   Compativel: rAthena 2021~2025
 //============================================================
 
 //============================================================
-//   NPC de Informações (menu principal)
+//   NPC de Informacoes (menu principal)
 //============================================================
-prontera,156,197,4	script	Informações de Guerra	111,{
-	mes "[WoE – Informações]";
+prontera,156,197,4	script	Informacoes de Guerra	111,{
+	mes "[WoE - Informacoes]";
 	.Castle$ = "prtg_cas03";
 
     if (agitcheck())
@@ -23,7 +23,7 @@ prontera,156,197,4	script	Informações de Guerra	111,{
 
 		case 1:
             if (getcharid(2) == 0) {
-                mes "Você precisa estar em uma guild para entrar no castelo.";
+                mes "Voce precisa estar em uma guild para entrar no castelo.";
                 close;
             }
             
@@ -59,7 +59,7 @@ OnAgitStart:
 -	script	WOE_CONTROL#Custom	-1,{
 
 //------------------------------------------------------------
-//  CONFIGURAÇÃO GERAL
+//  CONFIGURACAO GERAL
 //------------------------------------------------------------
 OnInit:
     // Nome do castelo (1 castelo)
@@ -100,6 +100,7 @@ OnPCLoadMapEvent:
     if (inarray($WOE_ENTRY_CID, .@cid) >= 0) end;
 
     $WOE_ENTRY_CID[getarraysize($WOE_ENTRY_CID)] = .@cid;
+    $WOE_ENTRY_GID[getarraysize($WOE_ENTRY_GID)] = .@gid;
     $WOE_ENTRY_COUNT[.@gid] = $WOE_ENTRY_COUNT[.@gid] + 1;
     if (inarray($WOE_ENTRY_LIST, .@gid) < 0)
         $WOE_ENTRY_LIST[getarraysize($WOE_ENTRY_LIST)] = .@gid;
@@ -116,14 +117,14 @@ OnKvmPointMinute:
     end;
 
 //============================================================
-//   CONTROLE DE HORÁRIO (a cada minuto)
+//   CONTROLE DE HORARIO (a cada minuto)
 //============================================================
 OnClock2200:
 
     .@day  = gettime(DT_DAYOFWEEK);
 
-    // Início
-    .woe_day   = 0;   // 0=Domingo … 6=Sábado
+    // Inicio
+    .woe_day   = 0;   // 0=Domingo ... 6=Sabado
     if (.@day != .woe_day) end;
 
     // Resetar dono do castelo ao carregar script
@@ -131,6 +132,7 @@ OnClock2200:
 	setcastledata(.Castle$, 2, 0); // Remove economia
 	setcastledata(.Castle$, 3, 0); // Remove defesa
     deletearray $WOE_ENTRY_CID;
+    deletearray $WOE_ENTRY_GID;
     deletearray $WOE_ENTRY_LIST;
     deletearray $WOE_ENTRY_COUNT;
     deletearray $WOE_TIME;
@@ -190,7 +192,7 @@ OnClock2230:
     stopnpctimer;
 
     AgitEnd;
-    sleep 100; // aguarda atualização do estado
+    sleep 100; // aguarda atualizacao do estado
     donpcevent strnpcinfo(3) + "::OnReward";
 
     end;
@@ -203,7 +205,7 @@ OnEVENT:
 
     monster .Castle$, .MapX, .MapY, "Emperium", 1905, 1, strnpcinfo(3)+"::OnEmpDie";
 
-    announce "[WoE] A Guerra do Emperium começou!", bc_all|bc_woe;
+    announce "[WoE] A Guerra do Emperium comecou!", bc_all|bc_woe;
     end;
 
 // ======================================================================
@@ -219,7 +221,7 @@ OnEmpDie:
     announce "[WoE] "+.@gname$+" quebrou o Emperium em "+.Castle$+"!", bc_all|bc_woe;
 
 	sleep 1000;
-	// Expulsar todos que não são da guild vencedora
+	// Expulsar todos que nao sao da guild vencedora
 	callfunc("ClearCastle", .Castle$, .@gid);
 
     killmonster .Castle$, strnpcinfo(3)+"::OnEmpDie";
@@ -244,7 +246,7 @@ OnTimer60000:
 		// Soma 1 minuto ao dono atual
 		$WOE_TIME[.@gid] = $WOE_TIME[.@gid] + 1;
 
-		// Se ainda não existe na lista de participantes, adiciona
+		// Se ainda nao existe na lista de participantes, adiciona
 		if (inarray($WOE_LIST, .@gid) < 0) {
 			$WOE_LIST[getarraysize($WOE_LIST)] = .@gid;
 		}
@@ -411,9 +413,9 @@ OnReward:
         .@winner_participants = $WOE_ENTRY_COUNT[.@winner];
         if (.@winner_participants < 1)
             .@winner_participants = 1;
-        .@winner_coin_reward = .@winner_participants * 100;
-        if (.@winner_coin_reward > 500)
-            .@winner_coin_reward = 500;
+        .@winner_coin_reward = .@winner_participants * 200;
+        if (.@winner_coin_reward > 1000)
+            .@winner_coin_reward = 1000;
 
         setarray .@item_id[0], 9647;
         setarray .@amount[0], .@winner_coin_reward;
@@ -489,9 +491,9 @@ OnReward:
         .@best_participants = $WOE_ENTRY_COUNT[.@best_gid];
         if (.@best_participants < 1)
             .@best_participants = 1;
-        .@best_coin_reward = .@best_participants * 100;
-        if (.@best_coin_reward > 500)
-            .@best_coin_reward = 500;
+        .@best_coin_reward = .@best_participants * 200;
+        if (.@best_coin_reward > 1000)
+            .@best_coin_reward = 1000;
 
         setarray .@item_id[0], 9646;
         setarray .@amount[0], .@best_coin_reward;
@@ -555,7 +557,7 @@ OnReward:
             .@second_participants = 1;
         if (.@second_participants > 5)
             .@second_participants = 5;
-        .@second_coin_reward = .@second_participants * 50;
+        .@second_coin_reward = .@second_participants * 100;
 
         setarray .@item_id[0], 9646;
         setarray .@amount[0], .@second_coin_reward;
@@ -565,10 +567,46 @@ OnReward:
             .@card0, .@card1, .@card2, .@card3;
     }
 
+    //-----------------------------------------
+    // 4. PREMIO DE PARTICIPACAO (SEM CASTELO)
+    //-----------------------------------------
+    for (.@i = 0; .@i < getarraysize($WOE_ENTRY_LIST); .@i++) {
+        .@participant_gid = $WOE_ENTRY_LIST[.@i];
+
+        if (.@participant_gid <= 0)
+            continue;
+        if (.@participant_gid == .@winner || .@participant_gid == .@best_gid || .@participant_gid == .@second_gid)
+            continue;
+        if (inarray($WOE_LIST, .@participant_gid) >= 0)
+            continue;
+
+        .@title$ = "Recompensa de Participacao (WoE)";
+        .@body$  = "Sua guild participou da WoE, mas nao conseguiu ficar com o castelo. Reforce a equipe e tente novamente na proxima batalha.";
+
+        setarray .@item_id[0], 9198;
+        setarray .@amount[0], 10;
+        setarray .@refine[0], 0;
+        setarray .@bound[0], 0;
+        setarray .@card0[0], 0;
+        setarray .@card1[0], 0;
+        setarray .@card2[0], 0;
+        setarray .@card3[0], 0;
+
+        for (.@j = 0; .@j < getarraysize($WOE_ENTRY_CID); .@j++) {
+            if ($WOE_ENTRY_GID[.@j] != .@participant_gid)
+                continue;
+
+            mail $WOE_ENTRY_CID[.@j], .@sender$, .@title$, .@body$, 0,
+                .@item_id, .@amount, .@refine, .@bound,
+                .@card0, .@card1, .@card2, .@card3;
+        }
+    }
+
     // reset para proxima WoE
     deletearray $WOE_TIME;
     deletearray $WOE_LIST;
     deletearray $WOE_ENTRY_CID;
+    deletearray $WOE_ENTRY_GID;
     deletearray $WOE_ENTRY_LIST;
     deletearray $WOE_ENTRY_COUNT;
     $WOE_WIN_TIME = 0;
@@ -577,7 +615,7 @@ end;
 }
 
 //============================================================
-// Expulsar TODOS que não são da guild vencedora
+// Expulsar TODOS que nao sao da guild vencedora
 //============================================================
 function	script	ClearCastle	{	
 
@@ -591,7 +629,7 @@ function	script	ClearCastle	{
 
 		if (attachrid(.@list[.@i])) {
 
-			// se não é da guild dona ? expulsa
+			// se nao e da guild dona ? expulsa
 			if (getcharid(2) != .@owner_gid) {
 				warp "SavePoint", 0, 0;
 			}
