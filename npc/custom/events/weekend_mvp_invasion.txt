@@ -1,5 +1,5 @@
 // Weekend MVP invasion event.
-// Auto: Friday 12:00 until Sunday 00:00.
+// Auto: Friday 12:00 until Monday 00:00.
 // GM command: @flag_evento 1 / @flag_evento 0
 
 -	script	WeekendMVPInvasion	-1,{
@@ -97,7 +97,7 @@ OnTimer1000:
 	end;
 
 OnClock0000:
-	if (gettime(DT_DAYOFWEEK) == 0 && !.manual) {
+	if (gettime(DT_DAYOFWEEK) == 1 && !.manual) {
 		.force_off = 0;
 		.active = 0;
 		callsub S_Clean;
@@ -129,7 +129,7 @@ S_TrySpawn:
 	if (!.manual) {
 		.@day = gettime(DT_DAYOFWEEK);
 		.@hour = gettime(DT_HOUR);
-		if (!((.@day == 5 && .@hour >= 12) || .@day == 6))
+		if (!((.@day == 5 && .@hour >= 12) || .@day == 6 || .@day == 0))
 			return;
 	}
 
