@@ -10,8 +10,10 @@ inter01,0,0,0,0	boss_monster	Guia da Morte	22404,1,10800000,300000,1
     	end;
 
 	OnNPCKillEvent:
-		
-		// Exemplo de chamada da função
+		if (strcharinfo(3) != "inter01")
+			end;
+
+		// Exemplo de chamada da funcao
 		// Mapa: prt_fild08
 		// Itens: 607, 501
 		// Rates: 1%, 1%
@@ -19,20 +21,18 @@ inter01,0,0,0,0	boss_monster	Guia da Morte	22404,1,10800000,300000,1
         callfunc("CustomMapDrop", "inter01", 9611, 1);
 
 		// Mapa: inter01
-        // Bônus: +50% BaseExp e +20% JobExp
+        // Bonus: +50% BaseExp e +20% JobExp
         callfunc("MapExpBonus", "inter01", 100, 20);
 
 
-		if (strcharinfo(3) == "inter01" &&
-			killedrid == 21400 &&
-			#d_monstros == 1) {
+		if (killedrid == 21400 && #d_monstros == 1) {
 			#d_monstros_count++;
 			// quando chegar a 100, marca como completa
 			if (#d_monstros_count >= 100) {
 				#d_monstros = 2;
-				dispbottom "[Diária] Você derrotou 100 Anubis! Fale com o Mural para receber a recompensa.";
+				dispbottom "[Diaria] Voce derrotou 100 Anubis! Fale com o Mural para receber a recompensa.";
 			} else {
-				dispbottom "[Diária] Anubis mortos: " + #d_monstros_count + "/100";
+				dispbottom "[Diaria] Anubis mortos: " + #d_monstros_count + "/100";
 			}
 		}
 		end;
