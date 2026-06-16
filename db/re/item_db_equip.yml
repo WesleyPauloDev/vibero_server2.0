@@ -200867,6 +200867,79 @@ Body:
          bonus bPerfectHitAddRate,20;
       if (.@r>=9)
          bonus bPerfectHitAddRate,20;
+  - Id: 470050
+    AegisName: TenguShoes_
+    Name: Chinela de Pau
+    Type: Armor
+    Buy: 20
+    Weight: 400
+    Defense: 12
+    Slots: 1
+    Locations:
+      Shoes: true
+    ArmorLevel: 1
+    EquipLevelMin: 100
+    Refineable: true
+    Script: |
+      .@r = getrefine();
+      .@a = getskilllv("SR_GENTLETOUCH_REVITALIZE");
+      .@b = getskilllv("SR_GENTLETOUCH_CURE");
+      .@c = getskilllv("SR_GENTLETOUCH_ENERGYGAIN");
+      .@hpsp = 3;
+      if (.@r >= 5) {
+         .@hpsp += 7;
+         .@red = 5;
+         if (.@r >= 7) {
+            .@hpsp += 10;
+            .@red += 5;
+         }
+         bonus2 bSkillUseSP,"MO_BODYRELOCATION",.@red;
+      }
+      bonus bMdef,10;
+      bonus bMaxHPrate,.@hpsp+(2*.@b);
+      bonus bMaxSPrate,.@hpsp;
+      skill "SA_CASTCANCEL",1;
+      bonus bDef,30*.@a;
+      bonus2 bSubRace,RC_DemiHuman,.@a;
+      bonus2 bSubRace,RC_Player_Doram,.@a;
+      bonus2 bSubRace,RC_Player_Human,.@a;
+      bonus2 bVariableCastrate,"MO_CALLSPIRITS",-.@c*10;
+      bonus2 bVariableCastrate,"MO_STEELBODY",-.@c*10;
+      bonus bAspdRate,2*getskilllv("SR_GENTLETOUCH_CHANGE");
+      bonus bAtkRate,4*getskilllv("SR_GENTLETOUCH_QUIET");
+  - Id: 470051
+    AegisName: Gray_Wing_Boots_
+    Name: Gray Wing Boots
+    Type: Armor
+    Buy: 20
+    Weight: 500
+    Defense: 15
+    Slots: 1
+    Locations:
+      Shoes: true
+    ArmorLevel: 1
+    EquipLevelMin: 100
+    Refineable: true
+    Script: |
+      .@r = getrefine();
+      bonus bMaxHPrate,3;
+      bonus bMaxSPrate,3;
+      bonus bMdef,15;
+      bonus bLongAtkRate,2;
+      bonus bCritAtkRate,2;
+      skill "TF_HIDING",1;
+      if (.@r>=5) {
+         bonus bMaxHPrate,7;
+         bonus bMaxSPrate,7;
+         bonus bLongAtkRate,3;
+         bonus bCritAtkRate,3;
+      }
+      if (.@r>=7) {
+         bonus bMaxHPrate,10;
+         bonus bMaxSPrate,10;
+         bonus bLongAtkRate,5;
+         bonus bCritAtkRate,5;
+      }
   - Id: 470052
     AegisName: Shoes_Of_Pilgrim_
     Name: Pilgrim Shoes
@@ -200901,39 +200974,6 @@ Body:
          bonus bMaxHPrate,10;
          bonus bMaxSPrate,10;
          bonus bUseSPrate,-5;
-      }
-  - Id: 470051
-    AegisName: Gray_Wing_Boots_
-    Name: Gray Wing Boots
-    Type: Armor
-    Buy: 20
-    Weight: 500
-    Defense: 15
-    Slots: 1
-    Locations:
-      Shoes: true
-    ArmorLevel: 1
-    EquipLevelMin: 100
-    Refineable: true
-    Script: |
-      .@r = getrefine();
-      bonus bMaxHPrate,3;
-      bonus bMaxSPrate,3;
-      bonus bMdef,15;
-      bonus bLongAtkRate,2;
-      bonus bCritAtkRate,2;
-      skill "TF_HIDING",1;
-      if (.@r>=5) {
-         bonus bMaxHPrate,7;
-         bonus bMaxSPrate,7;
-         bonus bLongAtkRate,3;
-         bonus bCritAtkRate,3;
-      }
-      if (.@r>=7) {
-         bonus bMaxHPrate,10;
-         bonus bMaxSPrate,10;
-         bonus bLongAtkRate,5;
-         bonus bCritAtkRate,5;
       }
   - Id: 470054
     AegisName: E_Illusion_Leg_A

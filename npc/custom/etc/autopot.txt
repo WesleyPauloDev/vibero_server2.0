@@ -20,6 +20,8 @@ OnInit:
 		end;
 	}
 	bindatcmd("autopot",strnpcinfo(0)+"::OnCommand",0,99);
+	bindatcmd("autopothp",strnpcinfo(0)+"::OnCommandHP",0,99);
+	bindatcmd("autopotsp",strnpcinfo(0)+"::OnCommandSP",0,99);
 end;
 
 L_Help:
@@ -111,7 +113,7 @@ OnCommand:
 		if(.@command$[1] == "off"){
 			message strcharinfo(0), "Auto-Potion " + strtoupper(.@command$[0]) + " disabled.";
 			setd "@autopot_" + .@command$[0] + "_Active",false;
-			if(!@autopot_hp_Active || !@autopot_sp_Active)
+			if(!@autopot_hp_Active && !@autopot_sp_Active)
 				deltimer strnpcinfo(3) + "::OnStart";
 			end;
 		}
@@ -173,6 +175,48 @@ OnCommand:
 	message strcharinfo(0), "Invalid syntax.";
 	callsub L_Help;
 end;
+
+OnCommandHP:
+	if (!.HP_Option) {
+		message strcharinfo(0), "Auto-Potion HP is Disabled from The Server.";
+		end;
+	}
+	if (!getarraysize(.@atcmd_parameters$)) {
+		message strcharinfo(0), "Invalid syntax.";
+		dispbottom "Usage: @autopothp <item id> {<min hp % [1..100]> {<delay [" + .MinDelay + ".."+.MaxDelay+"]>}}";
+		dispbottom "       @autopothp list";
+		dispbottom "       @autopothp <on|off>";
+		end;
+	}
+	.@arg0$ = .@atcmd_parameters$[0];
+	.@arg1$ = .@atcmd_parameters$[1];
+	.@arg2$ = .@atcmd_parameters$[2];
+	.@atcmd_parameters$[0] = "hp";
+	.@atcmd_parameters$[1] = .@arg0$;
+	.@atcmd_parameters$[2] = .@arg1$;
+	.@atcmd_parameters$[3] = .@arg2$;
+	goto OnCommand;
+
+OnCommandSP:
+	if (!.SP_Option) {
+		message strcharinfo(0), "Auto-Potion SP is Disabled from The Server.";
+		end;
+	}
+	if (!getarraysize(.@atcmd_parameters$)) {
+		message strcharinfo(0), "Invalid syntax.";
+		dispbottom "Usage: @autopotsp <item id> {<min sp % [1..100]> {<delay [" + .MinDelay + ".."+.MaxDelay+"]>}}";
+		dispbottom "       @autopotsp list";
+		dispbottom "       @autopotsp <on|off>";
+		end;
+	}
+	.@arg0$ = .@atcmd_parameters$[0];
+	.@arg1$ = .@atcmd_parameters$[1];
+	.@arg2$ = .@atcmd_parameters$[2];
+	.@atcmd_parameters$[0] = "sp";
+	.@atcmd_parameters$[1] = .@arg0$;
+	.@atcmd_parameters$[2] = .@arg1$;
+	.@atcmd_parameters$[3] = .@arg2$;
+	goto OnCommand;
 
 OnStart:
 	if (!getstatus(SC_BERSERK) && !getstatus(SC_SATURDAYNIGHTFEVER) && !getstatus(SC_GRAVITATION) &&
