@@ -10655,6 +10655,25 @@ Example:
 
 ---------------------------------------
 
+*setpetsprite(<mob_id>{,<char_id>})
+
+Changes only the visible sprite of the invoking character's active pet. It does
+not change the pet class, saved pet data, or pet_db bonuses. The target monster
+must exist in 'db/(pre-)re/mob_db.yml'.
+
+Returns 1 on success and 0 if the character has no active pet or the target mob
+does not exist.
+
+Example:
+	if (!setpetsprite(1002)) {
+		mes "[Pet Stylist]";
+		mes "Bring an active pet first.";
+		close;
+	}
+	dispbottom "Your pet sprite has been changed.";
+
+---------------------------------------
+
 =============================
 |10.1.- The Pet AI commands.|
 =============================

@@ -459,8 +459,8 @@ OnGuillaumeDie:
 		bg_updatescore "bat_c01",.Guillaume_Count,.Croix_Count;
 		if( .Guillaume_Count < 1 ) donpcevent "KvM01_BG::OnCroixWin";
 		else {
-			mapannounce "bat_c01", "Número de jogadores do time Guillaume: "+.Guillaume_Count+".",bc_map,"0x00ff00";
-			mapannounce "bat_c01", "Número de jogadores do time Croix: "+.Croix_Count+".",bc_map,"0x00ff00";
+			mapannounce "bat_c01", "Nï¿½mero de jogadores do time Guillaume: "+.Guillaume_Count+".",bc_map,"0x00ff00";
+			mapannounce "bat_c01", "Nï¿½mero de jogadores do time Croix: "+.Croix_Count+".",bc_map,"0x00ff00";
 		}
 	}
 	end;
@@ -477,8 +477,8 @@ OnCroixDie:
 		bg_updatescore "bat_c01",.Guillaume_Count,.Croix_Count;
 		if( .Croix_Count < 1 ) donpcevent "KvM01_BG::OnGuillaumeWin";
 		else {
-			mapannounce "bat_c01", "Número de jogadores do time Guillaume: "+.Guillaume_Count+".",bc_map,"0x00ff00";
-			mapannounce "bat_c01", "Número de jogadores do time Croix: "+.Croix_Count+".",bc_map,"0x00ff00";
+			mapannounce "bat_c01", "Nï¿½mero de jogadores do time Guillaume: "+.Guillaume_Count+".",bc_map,"0x00ff00";
+			mapannounce "bat_c01", "Nï¿½mero de jogadores do time Croix: "+.Croix_Count+".",bc_map,"0x00ff00";
 		}
 	}
 	end;
@@ -505,16 +505,16 @@ OnTimer1000:
 	set .Guillaume_Count, bg_get_data($@KvM01BG_id1, 0);
 	set .Croix_Count, bg_get_data($@KvM01BG_id2, 0);
 	bg_updatescore "bat_c01",.Guillaume_Count,.Croix_Count;
-	mapannounce "bat_c01", "Em 1 minuto, a batalha irá começar.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Em 1 minuto, a batalha irï¿½ comeï¿½ar.",bc_map,"0x00ff00";
 	end;
 
 OnTimer3000:
-	mapannounce "bat_c01", "O tempo máximo da batalha KVM é de 5 minutos.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "O tempo mï¿½ximo da batalha KVM ï¿½ de 5 minutos.",bc_map,"0x00ff00";
 	end;
 
 OnTimer6000:
 	mapannounce "bat_c01", "Preparem-se para a batalha!",bc_map,"0x00ff00";
-	mapannounce "bat_c01", "Vocês podem se buffar livremente.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Vocï¿½s podem se buffar livremente.",bc_map,"0x00ff00";
 	donpcevent "#A_camp_start01::OnEnable";
 	donpcevent "#B_camp_start01::OnEnable";
 	end;
@@ -525,26 +525,26 @@ OnTimer13000:
 	end;
 
 OnTimer30000:
-	mapannounce "bat_c01", "Faltam 30 segundos para o início da batalha.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Faltam 30 segundos para o inï¿½cio da batalha.",bc_map,"0x00ff00";
 	end;
 
 OnTimer45000:
-	mapannounce "bat_c01", "Faltam 15 segundos para o início da batalha.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Faltam 15 segundos para o inï¿½cio da batalha.",bc_map,"0x00ff00";
 	donpcevent "::OnKvM01One";
 	end;
 
 OnTimer50000:
-	mapannounce "bat_c01", "Faltam 10 segundos para o início da batalha.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Faltam 10 segundos para o inï¿½cio da batalha.",bc_map,"0x00ff00";
 	donpcevent "::OnKvM01Two";
 	end;
 
 OnTimer55000:
-	mapannounce "bat_c01", "Faltam 5 segundos para o início da batalha.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Faltam 5 segundos para o inï¿½cio da batalha.",bc_map,"0x00ff00";
 	donpcevent "::OnKvM01One";
 	end;
 
 OnTimer59000:
-	mapannounce "bat_c01", "A batalha está começando!",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "A batalha estï¿½ comeï¿½ando!",bc_map,"0x00ff00";
 	donpcevent "::OnKvM01Two";
 	end;
 
@@ -554,7 +554,7 @@ OnTimer61000:
 		if (.Guillaume_Count < 1 || .Croix_Count < 1) {
 			set $@KvM01BG_Victory, 3;
 			set $@KvM01BG, 3;
-			mapannounce "bat_c01","Não há jogadores suficientes para iniciar a batalha.",1,0x696969;
+			mapannounce "bat_c01","Nï¿½o hï¿½ jogadores suficientes para iniciar a batalha.",1,0x696969;
 			stopnpctimer;
 			donpcevent "KvM01_BG::OnStop";
 			end;
@@ -596,8 +596,8 @@ OnTimer360000:
 	{ // Draw Game
 		set $@KvM01BG, 3;
 		set $@KvM01BG_Victory, 3;
-		mapannounce "bat_c01", "O número de Guillaumes é"+.Guillaume_Count+".",bc_map,"0x00ff00";
-		mapannounce "bat_c01", "O número de Croixes é"+.Croix_Count+".",bc_map,"0x00ff00";
+		mapannounce "bat_c01", "O nï¿½mero de Guillaumes ï¿½"+.Guillaume_Count+".",bc_map,"0x00ff00";
+		mapannounce "bat_c01", "O nï¿½mero de Croixes ï¿½"+.Croix_Count+".",bc_map,"0x00ff00";
 		mapannounce "bat_c01", "Esta batalha terminou em empate.",bc_map,"0x00ff00";
 		donpcevent "KvM01_BG::OnStop";
 	}
@@ -607,8 +607,8 @@ OnGuillaumeWin:
 	set $@KvM01BG, 3;
 	set $@KvM01BG_Victory, 1;
 	mapannounce "bat_c01", "Guillaume venceu!",bc_map,"0x00ff00";
-	mapannounce "bat_c01", "Parabéns aos membros de Guillaume.",bc_map,"0x00ff00";
-	mapannounce "bat_c01", "Todos serão levados ao ponto de partida.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Parabï¿½ns aos membros de Guillaume.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Todos serï¿½o levados ao ponto de partida.",bc_map,"0x00ff00";
 	donpcevent "KvM01_BG::OnStop";
 	end;
 
@@ -616,8 +616,8 @@ OnCroixWin:
 	set $@KvM01BG, 3;
 	set $@KvM01BG_Victory, 2;
 	mapannounce "bat_c01", "Croix venceu!",bc_map,"0x00ff00";
-	mapannounce "bat_c01", "Parabéns aos membros da Croix.",bc_map,"0x00ff00";
-	mapannounce "bat_c01", "Todos serão levados ao ponto de partida.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Parabï¿½ns aos membros da Croix.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Todos serï¿½o levados ao ponto de partida.",bc_map,"0x00ff00";
 	donpcevent "KvM01_BG::OnStop";
 	end;
 
@@ -642,21 +642,21 @@ OnBegin:
 	end;
 
 OnTimer1000:
-	mapannounce "bat_c01", "Por favor, dirija-se ao responsável para obter pontos.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Por favor, dirija-se ao responsï¿½vel para obter pontos.",bc_map,"0x00ff00";
 	end;
 
 OnTimer3000:
-	mapannounce "bat_c01", "O agente concederá os pontos por 30 segundos.",bc_map,"0x00ff00";
-	mapannounce "bat_c01", "Em 30 segundos, o agente será dispensado.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "O agente concederï¿½ os pontos por 30 segundos.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Em 30 segundos, o agente serï¿½ dispensado.",bc_map,"0x00ff00";
 	end;
 
 OnTimer5000:
-	mapannounce "bat_c01", "A menos que você fale com o oficial, você não poderá ganhar os pontos.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "A menos que vocï¿½ fale com o oficial, vocï¿½ nï¿½o poderï¿½ ganhar os pontos.",bc_map,"0x00ff00";
 	mapannounce "bat_c01", "Por favor, tenha cuidado.",bc_map,"0x00ff00";
 	end;
 
 OnTimer55000:
-	mapannounce "bat_c01", "Você será mandado de volta.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Vocï¿½ serï¿½ mandado de volta.",bc_map,"0x00ff00";
 	end;
 
 OnTimer60000:
@@ -768,15 +768,15 @@ bat_c01,51,130,5	script	KVM Officer#KVM01A	419,{
 		mes "[KVM Officer]";
 		if( $@KvM01BG_Victory == Bat_Team ) {
 			mes "Bom jogo.";
-            mes "Você conquistou os pontos da vitória: 5";
+            mes "Vocï¿½ conquistou os pontos da vitï¿½ria: 5";
 			getitem 9608,3;
 			close2;
 			set kvm_point,kvm_point + 5;
 		}
 		else {
 			mes "Sinto muito.";
-            mes "Desejo-lhe melhor sorte da próxima vez.";
-            mes "Você adquire os pontos da derrota: 1";
+            mes "Desejo-lhe melhor sorte da prï¿½xima vez.";
+            mes "Vocï¿½ adquire os pontos da derrota: 1";
 			getitem 9608,1;
 			close2;
 			set kvm_point,kvm_point + 1;
@@ -861,7 +861,7 @@ OnBuyItem:
 
 // Estes itens devem acompanhar o array shop_items e shop_prices
 -	pointshop	BG_Bravura_Shop	-1,kvm_point,400024:100,400025:100,400026:100,400027:100,400028:100,400029:100,5170:100,300040:100
--	pointshop	BG_Items_Shop	-1,kvm_point,9593:100,9199:100,9198:50,12596:10,12210:50,14545:200,14536:10,12375:20,12710:20,9675:50,9676:100,9682:1,9683:1
+-	pointshop	BG_Items_Shop	-1,kvm_point,9593:100,9199:100,9198:50,12596:10,12210:50,14545:200,14536:10,12375:20,12710:20,9675:50,9676:100,9682:1,9683:1,100231:30,12214:30
 
 function	script	BG_KVM_Shop_Process	{
 
@@ -869,8 +869,8 @@ function	script	BG_KVM_Shop_Process	{
 	// CONFIGURACAO DA LOJA
 	// =============================
 	// Itens e precos em pontos KVM/BG
-	setarray .@shop_items[0], 400024, 400025, 400026, 400027, 400028, 400029, 5170, 300040, 9593, 9199, 9198, 12596, 12210, 14545, 14536, 12375, 12710, 9675, 9676, 9682, 9683;
-	setarray .@shop_prices[0],   100,    100,    100,    100,    100,    100,  100,    100,  100,  100,   50,    10,    50,   200,    10,    20,    20,   50,  100,    1,    1; // preco por item em pontos
+	setarray .@shop_items[0], 400024, 400025, 400026, 400027, 400028, 400029, 5170, 300040, 9593, 9199, 9198, 12596, 12210, 14545, 14536, 12375, 12710, 9675, 9676, 9682, 9683,100231,12214;
+	setarray .@shop_prices[0],   100,    100,    100,    100,    100,    100,  100,    100,  100,  100,   50,    10,    50,   200,    10,    20,    20,   50,  100,    1,    1,    30,   30; // preco por item em pontos
 
 	// =============================
 	// PARAMETROS DA FUNCAO

@@ -16082,6 +16082,51 @@ BUILDIN_FUNC(getpetinfo)
 }
 
 /*==========================================
+ * Change the active pet sprite: setpetsprite <mob_id>{,<char_id>}
+ * This is visual-only and does not change the pet class or pet_db bonuses.
+ * Returns 1 on success, 0 on failure.
+ *------------------------------------------*/
+BUILDIN_FUNC(setpetsprite)
+{
+	TBL_PC *sd;
+	TBL_PET *pd;
+	int32 class_ = script_getnum(st, 2);
+
+	if( !script_charid2sd(3, sd) || !(pd = sd->pd) ){
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	if( class_ < 0 || class_ > UINT16_MAX ){
+		ShowWarning("buildin_setpetsprite: Invalid mob id %d.\n", class_);
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	std::shared_ptr<s_mob_db> mob = mob_db.find(class_);
+
+	if( mob == nullptr ){
+		ShowWarning("buildin_setpetsprite: Mob %d does not exist.\n", class_);
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	if( pd->pet.class_ == class_ ){
+		status_set_viewdata(pd, class_);
+		clif_class_change(*pd, class_);
+		script_pushint(st, 1);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	status_set_viewdata(pd, class_);
+	clif_class_change(*pd, class_);
+	clif_send_petdata(nullptr, *pd, CHANGESTATEPET_ACCESSORY);
+
+	script_pushint(st, 1);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/*==========================================
  * Get your homunculus info: gethominfo <type>{,<char_id>};
  * type -> 0:hom_id 1:class 2:name
  * 3:friendly 4:hungry, 5: rename flag.
@@ -28507,6 +28552,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(dispbottom,"s??"), //added from jA [Lupus]
 	BUILDIN_DEF(recovery,"i???"),
 	BUILDIN_DEF(getpetinfo,"i?"),
+	BUILDIN_DEF(setpetsprite,"i?"),
 	BUILDIN_DEF(gethominfo,"i?"),
 	BUILDIN_DEF(addhomintimacy,"i?"),
 	BUILDIN_DEF(getmercinfo,"i?"),
