@@ -27,7 +27,7 @@ OnAtcommand:
 	}
 
 	mes "[Pet Stylist]";
-	mes "Digite o Mob ID do sprite que deseja usar no seu pet.";
+	mes "Digite o ID do sprite que deseja usar no seu pet.";
 	mes "A troca e apenas visual; os bonus do pet original continuam.";
 	next;
 
@@ -35,12 +35,12 @@ OnAtcommand:
 
 	if (.@mob_id <= 0) {
 		mes "[Pet Stylist]";
-		mes "Mob ID invalido.";
+		mes "ID invalido.";
 		close;
 	}
 
 	mes "[Pet Stylist]";
-	mes "Deseja alterar o sprite do seu pet para o Mob ID ^0055FF" + .@mob_id + "^000000?";
+	mes "Deseja alterar o sprite do seu pet para o ID ^0055FF" + .@mob_id + "^000000?";
 	next;
 
 	if (select("Sim:Nao") == 2)
@@ -49,7 +49,7 @@ OnAtcommand:
 	if (!setpetsprite(.@mob_id)) {
 		mes "[Pet Stylist]";
 		mes "Nao foi possivel alterar o sprite.";
-		mes "Confira se o Mob ID existe no mob_db.yml.";
+		mes "Confira se o ID existe.";
 		close;
 	}
 
