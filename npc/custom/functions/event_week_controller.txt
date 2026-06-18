@@ -1,0 +1,222 @@
+//=====================================================
+// Rotacao semanal de eventos
+// 1 = Carta MVP 5x
+// 2 = Invasao MVP
+// 3 = Instancia 2x
+//=====================================================
+
+-	script	EventWeekController	-1,{
+
+OnInit:
+	if ($event_week < 1 || $event_week > 3)
+		$event_week = 3;
+
+	bindatcmd "eventweek", strnpcinfo(3)+"::OnAtcommand", 99, 99;
+	bindatcmd "evento_semana", strnpcinfo(3)+"::OnAtcommand", 99, 99;
+	callsub S_Sync;
+	end;
+
+OnClock0000:
+	if (gettime(DT_DAYOFWEEK) == 4)
+		callsub S_StartAuto;
+	else
+		callsub S_Sync;
+	end;
+
+OnClock2359:
+	if (gettime(DT_DAYOFWEEK) == 3)
+		callsub S_EndAuto;
+	end;
+
+OnClock0045:
+OnClock0245:
+OnClock0445:
+OnClock0645:
+OnClock0845:
+OnClock1045:
+OnClock1245:
+OnClock1445:
+OnClock1645:
+OnClock1845:
+OnClock2045:
+OnClock2245:
+	callsub S_AnnounceActiveEvent;
+	end;
+
+OnPCLoginEvent:
+	addtimer 2500, strnpcinfo(3)+"::OnLoginNotice";
+	end;
+
+OnLoginNotice:
+	if ($event_week_active >= 1 && $event_week_active <= 3)
+		dispbottom "[Evento Semana] " + callfunc("F_EventWeekDescription$", $event_week_active) + " Ativo ate quarta-feira as 23:59.";
+	end;
+
+OnAtcommand:
+	.@cmd$ = (.@atcmd_numparameters > 0 ? strtolower(.@atcmd_parameters$[0]) : "status");
+
+	if (.@cmd$ == "status") {
+		dispbottom "[Evento Semana] Ativo: " + callfunc("F_EventWeekName$", $event_week_active) + ". Proximo: " + callfunc("F_EventWeekName$", $event_week) + ". Modo: " + (($event_week_manual == 1) ? "manual" : (($event_week_manual == 2) ? "desligado" : "automatico")) + ".";
+		end;
+	}
+
+	if (.@cmd$ == "start" || .@cmd$ == "ativar" || .@cmd$ == "on") {
+		if (.@atcmd_numparameters < 2) {
+			dispbottom "[Evento Semana] Use: @eventweek ativar <1-3>";
+			end;
+		}
+		.@event = atoi(.@atcmd_parameters$[1]);
+		if (.@event < 1 || .@event > 3) {
+			dispbottom "[Evento Semana] Eventos: 1 Carta MVP 5x, 2 Invasao MVP, 3 Instancia 2x.";
+			end;
+		}
+		$event_week_manual = 1;
+		$event_week_auto_active = 0;
+		$event_week_active = .@event;
+		callsub S_Apply;
+		announce "[Evento] " + callfunc("F_EventWeekName$", .@event) + " ativado manualmente por GM.", bc_all, 0x00FF00;
+		end;
+	}
+
+	if (.@cmd$ == "stop" || .@cmd$ == "desativar" || .@cmd$ == "off") {
+		$event_week_manual = 2;
+		$event_week_auto_active = 0;
+		$event_week_active = 0;
+		callsub S_Apply;
+		announce "[Evento] Evento semanal desativado manualmente por GM.", bc_all, 0x00AAFF;
+		end;
+	}
+
+	if (.@cmd$ == "auto" || .@cmd$ == "automatico") {
+		$event_week_manual = 0;
+		callsub S_Sync;
+		dispbottom "[Evento Semana] Modo automatico restaurado.";
+		end;
+	}
+
+	if (.@cmd$ == "next" || .@cmd$ == "proximo") {
+		if (.@atcmd_numparameters < 2) {
+			dispbottom "[Evento Semana] Use: @eventweek proximo <1-3>";
+			end;
+		}
+		.@event = atoi(.@atcmd_parameters$[1]);
+		if (.@event < 1 || .@event > 3) {
+			dispbottom "[Evento Semana] Eventos: 1 Carta MVP 5x, 2 Invasao MVP, 3 Instancia 2x.";
+			end;
+		}
+		$event_week = .@event;
+		dispbottom "[Evento Semana] Proximo evento definido como: " + callfunc("F_EventWeekName$", .@event) + ".";
+		end;
+	}
+
+	if (.@cmd$ == "rotate" || .@cmd$ == "rodar") {
+		callsub S_StartAuto;
+		end;
+	}
+
+	dispbottom "[Evento Semana] Comandos: status, ativar <1-3>, desativar, auto, proximo <1-3>, rodar.";
+	end;
+
+S_Sync:
+	if ($event_week_manual == 2) {
+		$event_week_active = 0;
+		callsub S_Apply;
+		return;
+	}
+
+	if ($event_week_manual == 1) {
+		callsub S_Apply;
+		return;
+	}
+
+	if (!callsub(S_IsAutoWindow)) {
+		$event_week_active = 0;
+		$event_week_auto_active = 0;
+	}
+	callsub S_Apply;
+	return;
+
+S_StartAuto:
+	if ($event_week_manual)
+		return;
+
+	.@event = $event_week;
+	if (.@event < 1 || .@event > 3)
+		.@event = 1;
+
+	$event_week_active = .@event;
+	$event_week_auto_active = 1;
+	$event_week = callfunc("F_EventWeekNext", .@event);
+	callsub S_Apply;
+	announce "[Evento] Semana iniciada: " + callfunc("F_EventWeekName$", .@event) + " ativo ate quarta-feira 23:59.", bc_all, 0x00FF00;
+	return;
+
+S_EndAuto:
+	if (!$event_week_auto_active || $event_week_manual)
+		return;
+
+	.@event = $event_week_active;
+	$event_week_active = 0;
+	$event_week_auto_active = 0;
+	callsub S_Apply;
+	announce "[Evento] Semana encerrada: " + callfunc("F_EventWeekName$", .@event) + " finalizado. Proximo: " + callfunc("F_EventWeekName$", $event_week) + ".", bc_all, 0x00AAFF;
+	return;
+
+S_Apply:
+	$Event_MvpCard5x = ($event_week_active == 1);
+	$Event_MVPInvasion_Auto = ($event_week_active == 2);
+	$Event_Instance2x = ($event_week_active == 3);
+
+	donpcevent "Weekend_Rates::OnEventWeekSync";
+	donpcevent "WeekendMVPInvasion::OnEventWeekSync";
+	return;
+
+S_IsAutoWindow:
+	.@day = gettime(DT_DAYOFWEEK);
+	if (.@day == 3 && gettime(DT_HOUR) == 23 && gettime(DT_MINUTE) >= 59)
+		return 0;
+	return 1;
+
+S_AnnounceActiveEvent:
+	if ($event_week_active < 1 || $event_week_active > 3)
+		return;
+	announce "[Evento Semana] " + callfunc("F_EventWeekDescription$", $event_week_active) + " Ativo ate quarta-feira as 23:59.", bc_all, 0x00FF00;
+	return;
+}
+
+function	script	F_EventWeekName$	{
+	switch (getarg(0, 0)) {
+	case 1:
+		return "Carta MVP 5x";
+	case 2:
+		return "Invasao MVP";
+	case 3:
+		return "Instancia 2x";
+	default:
+		return "Nenhum";
+	}
+}
+
+function	script	F_EventWeekDescription$	{
+	switch (getarg(0, 0)) {
+	case 1:
+		return "Carta MVP 5x ativa: drop de cartas MVP multiplicado por 5.";
+	case 2:
+		return "Invasao MVP ativa: chefes invadem os mapas do evento.";
+	case 3:
+		return "Instancia 2x ativa: premios de conclusao de instancias dobrados.";
+	default:
+		return "Nenhum evento semanal ativo.";
+	}
+}
+
+function	script	F_EventWeekNext	{
+	.@event = getarg(0, 1) + 1;
+	if (.@event > 3)
+		.@event = 1;
+	return .@event;
+}
+
+function	script	F_EventWeekInstanceRewardMultiplier	{
+	return ($Event_Instance2x ? 2 : 1);
+}

@@ -36,6 +36,21 @@ OnInit:
 	disablenpc "Chefe da Guarda";
 	end;
 
+OnEventWeekSync:
+	if (.manual)
+		end;
+
+	if ($Event_MVPInvasion_Auto) {
+		.force_off = 0;
+		callsub S_TrySpawn;
+	}
+	else {
+		.force_off = 0;
+		if (.active || .alive > 0)
+			callsub S_Clean;
+	}
+	end;
+
 OnAtcommand:
 	if (.@atcmd_numparameters < 1) {
 		dispbottom "Uso: @flag_evento 1 para ligar, @flag_evento 0 para desligar.";
@@ -97,13 +112,6 @@ OnTimer1000:
 	end;
 
 OnClock0000:
-	if (gettime(DT_DAYOFWEEK) == 1 && !.manual) {
-		.force_off = 0;
-		.active = 0;
-		callsub S_Clean;
-		announce "[Evento MVP] Evento de fim de semana encerrado.", bc_all, 0xFF6600;
-		end;
-	}
 	callsub S_TrySpawn;
 	end;
 
@@ -111,8 +119,6 @@ OnClock0300:
 OnClock0600:
 OnClock0900:
 OnClock1200:
-	if (gettime(DT_DAYOFWEEK) == 5)
-		.force_off = 0;
 	callsub S_TrySpawn;
 	end;
 
@@ -126,12 +132,8 @@ S_TrySpawn:
 	if (.force_off && !.manual)
 		return;
 
-	if (!.manual) {
-		.@day = gettime(DT_DAYOFWEEK);
-		.@hour = gettime(DT_HOUR);
-		if (!((.@day == 5 && .@hour >= 12) || .@day == 6 || .@day == 0))
-			return;
-	}
+	if (!.manual && !$Event_MVPInvasion_Auto)
+		return;
 
 	.active = 1;
 	callsub S_SpawnWave;

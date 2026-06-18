@@ -511,6 +511,11 @@ function	script	F_InstanceFinishBase	{
 	.@refresh_weekly = getarg(11, 0);
 	.@roulette_match_name$ = getarg(12, .@instance_name$);
 	.@announce_finish = getarg(13, 1);
+	.@reward_multiplier = callfunc("F_EventWeekInstanceRewardMultiplier");
+	if (.@reward_multiplier > 1) {
+		.@coin_amount *= .@reward_multiplier;
+		.@ticket_amount *= .@reward_multiplier;
+	}
 
 	if (.@status_var$ == "")
 		return 0;
@@ -536,6 +541,8 @@ function	script	F_InstanceFinishBase	{
 		getitem 9608, .@coin_amount;
 	if (.@ticket_amount > 0)
 		getitem 9198, .@ticket_amount;
+	if (.@reward_multiplier > 1)
+		dispbottom "[Evento] Instancia 2x: premios de conclusao dobrados.";
 	setd(.@status_var$, .@final_status);
 	return 1;
 }
