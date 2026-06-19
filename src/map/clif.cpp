@@ -20304,10 +20304,10 @@ void clif_ranklist( map_session_data& sd, e_rank rankingtype ){
 		p.points[i] = list[i].fame;
 
 		// Newer clients receive only character IDs for fame rankings.
-		// Proactively resolve and push the nick so the client can display names
-		// even when these rankers are offline or unknown locally.
+		// Push the known name immediately so the rank window does not show
+		// unresolved entries as anonymous while waiting for an async lookup.
 		if( p.CIDs[i] > 0 ){
-			map_reqnickdb(&sd, p.CIDs[i]);
+			clif_solved_charname( sd, p.CIDs[i], list[i].name );
 		}
 	}
 
