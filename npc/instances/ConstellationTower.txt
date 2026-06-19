@@ -540,8 +540,6 @@ function	script	CT_DeployFloorMvpMob	{
 	
 OnInstanceInit:	
 		callfunc "CT_DeployFloorMob",0,'mob_count,instance_npcname("#1F_Controller")+"::OnMyMobDead";
-		sleep 10000;
-		mapannounce strnpcinfo(4), "Aviso: o grupo chegou ao andar 24. A entrada sera fechada em breve. Quem ainda nao entrou na instancia nao podera entrar depois.",bc_map,"0xffff00";
 	end;
 	
 OnMyMobDead:
@@ -590,7 +588,7 @@ OnTimer1000:
 		.@name$ = "Desafiar ^ff0000Naght Sieger^000000";
 		break;
 	case 50:
-		.@name$ = "Desafiar ^ff0000Bebe^000000";
+		.@name$ = "Desafiar ^ff0000Betelgeuse^000000";
 		break;
 	default:
 		.@name$ = "";
@@ -742,9 +740,10 @@ OnEnable:
 	end;
 OnMyMVPMobDead:
 	callfunc "get_item";
-		end;
+	goto L_CheckFloorClear;
 OnMyMobDead:
 	callfunc "get_item";
+L_CheckFloorClear:
 	.@floorcount=atoi(replacestr(strnpcinfo(0),"FJumping Device",""));
 	
 	if(getd("'warpselect"+replacestr(strnpcinfo(0),"Jumping Device",""))==1)
@@ -753,11 +752,10 @@ OnMyMobDead:
 		set .@level,5-.@floorcount%5 + atoi(replacestr(strnpcinfo(0),"FJumping Device",""));
 	
 	
-	set .@mob_dead_num,mobcount('map_1$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead");
-	if (.@mob_dead_num < 1) {
-		initnpctimer;
-	}
-	else
+	set .@mob_dead_num,mobcount('map_1$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead")
+		+ mobcount('map_1$,instance_npcname(strnpcinfo(0))+"::OnMyMVPMobDead");
+	initnpctimer;
+	if (.@mob_dead_num > 0)
 		mapannounce 'map_1$, "Andar "+.@level+": monstros restantes - " + .@mob_dead_num,bc_map,"0x00ff99";
 	end;
 	
@@ -767,6 +765,12 @@ OnTimer1000:
 	if(getd("'warpselect"+replacestr(strnpcinfo(0),"Jumping Device",""))==2)
 		set .@level,5-atoi(replacestr(strnpcinfo(0),"FJumping Device",""))%5 + atoi(replacestr(strnpcinfo(0),"FJumping Device",""));
 	
+	set .@mob_dead_num,mobcount('map_1$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead")
+		+ mobcount('map_1$,instance_npcname(strnpcinfo(0))+"::OnMyMVPMobDead");
+	if (.@mob_dead_num > 0) {
+		initnpctimer;
+		end;
+	}
 	mapannounce strnpcinfo(4), "Andar "+.@level+": todos os monstros foram eliminados.",bc_map,"0xffff00";
 	donpcevent instance_npcname(.@level+"FJumping Device")+"::OnEnable";
 	stopnpctimer;
@@ -1282,7 +1286,6 @@ OnTimer10500:
 }
 
 2@ch_t,91,94,5	script	Leticia#101	4_4JOB_LETICIA,{
-	cutin "4job_leticia_02",2;
 	if('reward25){
 	mes "[Leticia]";	
 	mes "Voce nao consegue descer sozinho daqui. Segure minha mao que eu levo voce.";	
@@ -1304,7 +1307,6 @@ OnTimer10500:
 	close2;
 	callfunc "CT_25LevelAwards";	
 	'reward25=1;
-	cutin "4job_leticia_02",255;
 	end;	
 OnInstanceInit:
 	'reward25=0;
@@ -2940,14 +2942,6 @@ OnInstanceInit:
 3@ch_t,161,76,4	duplicate(#win_1)	#win_10	10405
 
 3@ch_t,155,85,4	duplicate(#win_1)	#win_11	10403 
-
-
-
-
-
-
-
-
 
 
 

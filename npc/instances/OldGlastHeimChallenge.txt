@@ -834,7 +834,6 @@ OnTopGuide:
 
 	close2;
 	'oghc_boss_started = 1;
-	progressbar_npc "00FF00",10, instance_npcname(strnpcinfo(0));
 	donpcevent instance_npcname("Controlador#OGHC") + "::OnBoss";
 	end;
 
@@ -892,6 +891,60 @@ OnGuideTopArrive:
 	'oghc_guide_busy = 0;
 	'oghc_guide_done = 1;
 	mapannounce 'oghc_map$, "Oscar: A fonte da corrupcao esta logo adiante. Falem comigo quando estiverem prontos.", bc_map, "0xFFCE00";
+	end;
+}
+
+1@gl_he,158,240,0	script	#OGHC_AmdaraisEffect	-1,{
+	end;
+
+OnStartEffect:
+	specialeffect EF_PORTAL3, AREA, instance_npcname(strnpcinfo(0));
+	specialeffect EF_DARKCASTING2, AREA, instance_npcname(strnpcinfo(0));
+	sleep 1000;
+	specialeffect EF_BLACKBODY, AREA, instance_npcname(strnpcinfo(0));
+	specialeffect EF_MAPPILLAR2, AREA, instance_npcname(strnpcinfo(0));
+	sleep 1000;
+	specialeffect EF_PURPLEBODY, AREA, instance_npcname(strnpcinfo(0));
+	specialeffect EF_PORTAL2, AREA, instance_npcname(strnpcinfo(0));
+	sleep 1000;
+	specialeffect EF_DARKCASTING2, AREA, instance_npcname(strnpcinfo(0));
+	sleep 1000;
+	specialeffect EF_BLACKBODY, AREA, instance_npcname(strnpcinfo(0));
+	sleep 1000;
+	end;
+
+OnOscarProgress:
+	progressbar_npc "00FF00",10, instance_npcname("Oscar#OGHC_CorridorTop");
+	end;
+}
+
+1@gl_he,158,240,0	script	Fantasma de Amdarais#OGHC_Intro	20573,{
+	end;
+
+OnInstanceInit:
+	disablenpc instance_npcname(strnpcinfo(0));
+	end;
+
+OnMaterialize:
+	enablenpc instance_npcname(strnpcinfo(0));
+	specialeffect EF_PORTAL3, AREA, instance_npcname(strnpcinfo(0));
+	mapannounce 'oghc_boss_map$, "Challenge ...", bc_map, "0xFF99FF";
+	donpcevent instance_npcname(strnpcinfo(0)) + "::OnPulse";
+	sleep 4000;
+	disablenpc instance_npcname(strnpcinfo(0));
+	end;
+
+OnPulse:
+	specialeffect EF_REDBODY, AREA, instance_npcname(strnpcinfo(0));
+	specialeffect EF_PINKBODY, AREA, instance_npcname(strnpcinfo(0));
+	sleep 700;
+	specialeffect EF_REDBODY, AREA, instance_npcname(strnpcinfo(0));
+	sleep 700;
+	specialeffect EF_PINKBODY, AREA, instance_npcname(strnpcinfo(0));
+	sleep 700;
+	specialeffect EF_REDBODY, AREA, instance_npcname(strnpcinfo(0));
+	sleep 700;
+	specialeffect EF_PINKBODY, AREA, instance_npcname(strnpcinfo(0));
 	end;
 }
 
@@ -1112,12 +1165,23 @@ OnWaveMobDead:
 
 OnBoss:
 	instance_announce 0, "A batalha final comecara em instantes.", bc_map, "0xFFCE00";
-	.@label$ = instance_npcname(strnpcinfo(0)) + "::OnBossDead";
-	if ('oghc_level > 5 && rand(100) < 10)
-		monster 'oghc_boss_map$,158,240,"Espectro da Himmelmez",20572,1,.@label$;
-	else
-		monster 'oghc_boss_map$,158,240,"Fantasma de Amdarais",20573,1,.@label$;
+	donpcevent instance_npcname("#OGHC_AmdaraisEffect") + "::OnOscarProgress";
+	.@is_amdarais = !('oghc_level > 5 && rand(100) < 10);
+	if (.@is_amdarais) {
+		donpcevent instance_npcname("#OGHC_AmdaraisEffect") + "::OnStartEffect";
+		sleep 5000;
+		donpcevent instance_npcname("Fantasma de Amdarais#OGHC_Intro") + "::OnMaterialize";
+		sleep 5000;
+	} else {
+		sleep 10000;
+	}
 	disablenpc instance_npcname("Oscar#OGHC_CorridorTop");
+	.@label$ = instance_npcname(strnpcinfo(0)) + "::OnBossDead";
+	if (.@is_amdarais) {
+		monster 'oghc_boss_map$,158,240,"Fantasma de Amdarais",20573,1,.@label$;
+	} else {
+		monster 'oghc_boss_map$,158,240,"Espectro da Himmelmez",20572,1,.@label$;
+	}
 	sleep 5000;
 	donpcevent instance_npcname(strnpcinfo(0)) + "::OnBossThorns";
 	end;
