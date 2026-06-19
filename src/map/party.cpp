@@ -1135,8 +1135,6 @@ int32 party_skill_check(map_session_data *sd, int32 party_id, uint16 skill_id, u
 		case MO_COMBOFINISH: //Increase Counter rate of Star Gladiators
 			if (!p->state.sg) return 0;
 			break;
-		case AM_TWILIGHT2: //Twilight Pharmacy, requires Super Novice
-			return p->state.snovice;
 		case AM_TWILIGHT3: //Twilight Pharmacy, Requires Taekwon
 			return p->state.tk;
 		default:
