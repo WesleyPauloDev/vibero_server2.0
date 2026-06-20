@@ -27563,6 +27563,30 @@ BUILDIN_FUNC(set_bonus_hpsp)
     return SCRIPT_CMD_SUCCESS;
 }
 
+BUILDIN_FUNC(set_bonus_patk_smatk)
+{
+    map_session_data* sd = nullptr;
+    int charid = script_getnum(st, 2);
+    int val_patk = script_getnum(st, 3);
+    int val_smatk = script_hasdata(st, 4) ? script_getnum(st, 4) : val_patk;
+
+	if (charid > 0) {
+		if (!script_charid2sd(2, sd))
+			return SCRIPT_CMD_FAILURE;
+	} else {
+		if (!script_rid2sd(sd))
+			return SCRIPT_CMD_FAILURE;
+	}
+
+    sd->bonus_patk = val_patk;
+    sd->bonus_smatk = val_smatk;
+    status_calc_pc(sd, SCO_FORCE);
+
+    clif_updatestatus(*sd, SP_PATK);
+    clif_updatestatus(*sd, SP_SMATK);
+
+    return SCRIPT_CMD_SUCCESS;
+}
 BUILDIN_FUNC(set_bonus_allstats)
 {
     map_session_data* sd = nullptr;
@@ -28939,6 +28963,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(set_reborn_exp, "i"),
 	BUILDIN_DEF(set_bonus_hpsp, "iii"),
 	BUILDIN_DEF(set_bonus_allstats, "ii"),
+	BUILDIN_DEF(set_bonus_patk_smatk, "ii?"),
 
 	BUILDIN_DEF(set_reputation_points, "ii?"),
 	BUILDIN_DEF(get_reputation_points, "i?"),

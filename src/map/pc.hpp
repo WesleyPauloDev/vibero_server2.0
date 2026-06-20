@@ -698,6 +698,8 @@ public:
 	int bonus_hp;
 	int bonus_sp;
 	int bonus_allstats;
+	int bonus_patk;
+	int bonus_smatk;
 
 
 	int32 castrate,hprate,sprate,aprate,dsprate;

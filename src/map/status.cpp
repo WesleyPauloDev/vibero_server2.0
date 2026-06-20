@@ -4496,6 +4496,11 @@ int32 status_calc_pc_sub(map_session_data* sd, uint8 opt)
 	if(sd->flee2_rate != 100)
 		base_status->flee2 = base_status->flee2 * sd->flee2_rate/100;
 
+	if (sd->bonus_patk > 0)
+		base_status->patk += sd->bonus_patk;
+	if (sd->bonus_smatk > 0)
+		base_status->smatk += sd->bonus_smatk;
+
 	if (sd->patk_rate < 0)
 		sd->patk_rate = 0;
 	if (sd->patk_rate != 100)

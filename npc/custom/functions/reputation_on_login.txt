@@ -70,11 +70,15 @@ S_UpdateBonus:
 	set rep_bonus_total_hp, 0;
 	set rep_bonus_total_sp, 0;
 	set rep_bonus_total_allstats, 0;
+	set rep_bonus_total_patk, 0;
+	set rep_bonus_total_smatk, 0;
 
 	set rep_bonus_votes_allstats, 0;
 
 	set rep_bonus_reborn_exp, 0;
 	set rep_bonus_reborn_drop, 0;
+	set rep_bonus_reborn_patk, 0;
+	set rep_bonus_reborn_smatk, 0;
 
 	set rep_bonus_instance_exp, 0;
 
@@ -180,6 +184,8 @@ S_UpdateBonus:
 	// Reborn (penalidade de XP e bonus de DROP)
 	set rep_bonus_reborn_exp, -.@reborn_exp;
 	set rep_bonus_reborn_drop, .@reborn_drop;
+	set rep_bonus_reborn_patk, .@reborn_count * 10;
+	set rep_bonus_reborn_smatk, .@reborn_count * 10;
 
 	// Totais consolidados para exibicao
 	set rep_bonus_total_exp,
@@ -197,18 +203,22 @@ S_UpdateBonus:
 	set rep_bonus_total_allstats,
 		rep_bonus_votes_allstats + rep_bonus_cheff_h_allstats + rep_bonus_bio5_hard_allstats;
 
+	set rep_bonus_total_patk, rep_bonus_reborn_patk;
+	set rep_bonus_total_smatk, rep_bonus_reborn_smatk;
+
 	set_reborn_exp(exp_final);
 	set_reborn_drop(drop_final);
 
 	set_bonus_hpsp(getcharid(0), #hp_final, #sp_final);
 	set_bonus_allstats(getcharid(0), #allstats_final);
+	set_bonus_patk_smatk(getcharid(0), rep_bonus_reborn_patk, rep_bonus_reborn_smatk);
 	return;
 
 OnAtcommand:
 	callsub S_UpdateBonus;
 	mes "[Bonus de Reputacao]";
 	mes "Votos: " + sprintf("%+d", rep_bonus_votes_allstats) + " AllStats";
-	mes "Reborn: " + sprintf("%+d", rep_bonus_reborn_drop) + "% Drop / " + sprintf("%+d", rep_bonus_reborn_exp) + "% XP";
+	mes "Reborn: " + sprintf("%+d", rep_bonus_reborn_drop) + "% Drop / " + sprintf("%+d", rep_bonus_reborn_exp) + "% XP / " + sprintf("%+d", rep_bonus_reborn_patk) + " P.Atk / " + sprintf("%+d", rep_bonus_reborn_smatk) + " S.Matk";
 	mes "Instancias: " + sprintf("%+d", rep_bonus_instance_exp) + "% XP";
 	mes "Cheffenia Normal: " + sprintf("%+d", rep_bonus_cheffenia_hp) + " HP / " + sprintf("%+d", rep_bonus_cheffenia_sp) + " SP";
 	mes "Cheffenia Hard: " + sprintf("%+d", rep_bonus_cheff_h_allstats) + " AllStats";
@@ -222,6 +232,8 @@ OnAtcommand:
 		+ sprintf("%+d", rep_bonus_total_drop) + "% Drop / "
 		+ sprintf("%+d", rep_bonus_total_hp) + "% HP / "
 		+ sprintf("%+d", rep_bonus_total_sp) + "% SP / "
-		+ sprintf("%+d", rep_bonus_total_allstats) + " AllStats";
+		+ sprintf("%+d", rep_bonus_total_allstats) + " AllStats / "
+		+ sprintf("%+d", rep_bonus_total_patk) + " P.Atk / "
+		+ sprintf("%+d", rep_bonus_total_smatk) + " S.Matk";
 	close;
 }

@@ -1442,6 +1442,8 @@ void pc_setnewpc(map_session_data *sd, uint32 account_id, uint32 char_id, int32 
 
 	sd->reborn_drop = 0;
 	sd->reborn_exp = 0;
+	sd->bonus_patk = 0;
+	sd->bonus_smatk = 0;
 	// sd->bonus_hpsp = 0;
 
 	sd->id = account_id;
