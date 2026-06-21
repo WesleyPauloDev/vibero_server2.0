@@ -147,6 +147,7 @@ OnInstanceInit:
 	deletearray 'x_reaper[0], 'size_reaper;
 	deletearray 'y_reaper[0], 'size_reaper;
 	'size_reaper = 0;
+	'reaper_event_active = 0;
 
 	//--------------------------------------------
 	// Optional settings
@@ -560,31 +561,36 @@ OnStart:
 	if ('advs_step != 1)
 		end;
 	'advs_step = 2;
+	'reaper_event_active = 1;
 	enablenpc instance_npcname("#wp2");
 	disablenpc instance_npcname("#advs_step_2");
 	donpcevent instance_npcname("#advs_step_3_A") + "::OnEvent";
 	donpcevent instance_npcname("#advs_step_3_B") + "::OnEvent";
 	end;
 OnEvent:
+	stopnpctimer;
+	if ('advs_step != 2 || 'reaper_event_active == 0 || 'size_reaper <= 0)
+		end;
 	.@label$ = instance_npcname("#advs_step_3_A") + "::OnMobDead";
 		
-	copyarray .@x[0], 'x_reaper[0], 'size_reaper;
-	copyarray .@y[0], 'y_reaper[0], 'size_reaper;
-	.@size = 'size_reaper;
+	.@spawn_count = min('total_reaper, 'size_reaper);
 
-	for ( .@i = 0; .@i < 'total_reaper; ++.@i ) {
-		.@r = rand(.@size);
-		
-		monster 'map_advs$,.@x[.@r],.@y[.@r],"--en--",20846,1, .@label$;	// MD_HIDDEN_GROUND01
-		deletearray .@x[.@r],1;
-		deletearray .@y[.@r],1;
-		.@size--;
+	for ( .@i = 0; .@i < .@spawn_count; ++.@i ) {
+		monster 'map_advs$,'x_reaper[.@i],'y_reaper[.@i],"--en--",20846,1, .@label$;	// MD_HIDDEN_GROUND01
 	}
 	initnpctimer;
 	end;
 OnTimer10000:
+	stopnpctimer;
+	if ('advs_step != 2 || 'reaper_event_active == 0)
+		end;
 	killmonster 'map_advs$, instance_npcname("#advs_step_3_A") + "::OnMobDead";
 	donpcevent instance_npcname("#advs_step_3_A") + "::OnEvent";	// this event never stop
+	end;
+OnStop:
+	'reaper_event_active = 0;
+	stopnpctimer;
+	killmonster 'map_advs$, instance_npcname("#advs_step_3_A") + "::OnMobDead";
 	end;
 OnMobDead:
 	end;
@@ -645,17 +651,21 @@ S_Spawn:
 OnStart:
 	if ('advs_step != 2)
 		end;
+	'reaper_event_active = 0;
 	'advs_step = 3;
 	enablenpc instance_npcname("#wp3");
 	disablenpc instance_npcname("#advs_step_3_B");
+	donpcevent instance_npcname("#advs_step_3_A") + "::OnStop";
 	enablenpc instance_npcname("#boss1");
 	end;
 OnMobDead:
 	if ('advs_step != 4)
 		end;
+	'reaper_event_active = 0;
 	'advs_step = 5;
 	enablenpc instance_npcname("#wp4");
 	enablenpc instance_npcname("#boss2_sw");
+	donpcevent instance_npcname("#advs_step_3_A") + "::OnStop";
 	donpcevent instance_npcname("#boss1_advs_skill_1") + "::OnStop";
 	end;
 }
@@ -677,8 +687,6 @@ OnMove:
 	'schulang_gid = $@mobid[0];
 	unitskilluseid $@mobid[0], 771, 1;	// NPC_RELIEVE_ON
 	unittalk 'schulang_gid, "I'm in a bit of trouble if I approach this more than that!!!";
-	monster 'map_advs$,123,285,"--en--",21319,1;	// EP18_MD_HEARTHUNTER_R2
-	unitskilluseid $@mobid[0], 771, 'monster_relieve;	// NPC_RELIEVE_ON
 	donpcevent instance_npcname("#boss1_advs_skill_1") + "::OnStart";
 	end;
 // OnTouch:	// effect ?
@@ -857,7 +865,6 @@ OnMove:
 
 OnStop:
 	'circle_move = 0;	// double check just because
-	unitstopwalk getnpcid(0);
 	end;
 }
 1@advs,124,337,5	duplicate(#b_tr1)	#b_tr2	MD_HIDDEN_GROUND02,2,2
@@ -956,4 +963,3 @@ OnTouch:	// effect ?
 	warp "wolfvill",77,258;
 	end;
 }
-
