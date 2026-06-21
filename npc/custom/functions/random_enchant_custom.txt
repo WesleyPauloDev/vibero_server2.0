@@ -63,7 +63,13 @@ function	script	F_CustomRandomEnchant	{
 
 		if (.@allow_any_equip) {
 			.@item_type = getiteminfo(.@item_id, ITEMINFO_TYPE);
-			if (.@item_type != IT_WEAPON && .@item_type != IT_ARMOR && .@item_type != IT_SHADOWGEAR)
+			if (.@item_type != IT_WEAPON && .@item_type != IT_ARMOR)
+				continue;
+
+			.@item_location = getiteminfo(.@item_id, ITEMINFO_LOCATIONS);
+			if ((.@item_location & EQP_COSTUME_HEAD_TOP) || (.@item_location & EQP_COSTUME_HEAD_MID) || (.@item_location & EQP_COSTUME_HEAD_LOW) || (.@item_location & EQP_COSTUME_GARMENT))
+				continue;
+			if ((.@item_location & EQP_SHADOW_ARMOR) || (.@item_location & EQP_SHADOW_WEAPON) || (.@item_location & EQP_SHADOW_SHIELD) || (.@item_location & EQP_SHADOW_SHOES) || (.@item_location & EQP_SHADOW_ACC_R) || (.@item_location & EQP_SHADOW_ACC_L))
 				continue;
 		} else if (inarray(.@target_items[0], .@item_id) == -1) {
 			continue;
