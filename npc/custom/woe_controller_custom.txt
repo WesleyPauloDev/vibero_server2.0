@@ -81,6 +81,19 @@ OnInit:
 
     end;
 
+OnAgitInit:
+    if (gettime(DT_DAYOFWEEK) != SUNDAY) end;
+
+    if (gettime(DT_HOUR) == 22 && gettime(DT_MINUTE) >= 30) {
+        if (!$WOE_CUSTOM_ACTIVE && !agitcheck())
+            donpcevent strnpcinfo(3)+"::OnStartWoE";
+        end;
+    }
+
+    if ($WOE_CUSTOM_ACTIVE && gettime(DT_HOUR) >= 23)
+        donpcevent strnpcinfo(3)+"::OnEndWoE";
+    end;
+
 OnPCLoadMapEvent:
     if (strcharinfo(3) != .Castle$) end;
     if (!agitcheck()) end;
@@ -119,13 +132,16 @@ OnKvmPointMinute:
 //============================================================
 //   CONTROLE DE HORARIO (a cada minuto)
 //============================================================
-OnClock2200:
+OnClock2230:
 
     .@day  = gettime(DT_DAYOFWEEK);
 
     // Inicio
-    .woe_day   = 0;   // 0=Domingo ... 6=Sabado
+    .woe_day   = SUNDAY;   // Domingo
     if (.@day != .woe_day) end;
+    if ($WOE_CUSTOM_ACTIVE || agitcheck()) end;
+
+OnStartWoE:
 
     // Resetar dono do castelo ao carregar script
 	setcastledata(.Castle$, 1, 0); // 0 = sem guild
@@ -152,10 +168,12 @@ OnClock2200:
     end;
 
     // Fim
-OnClock2230:
+OnClock2300:
     .@day = gettime(DT_DAYOFWEEK);
-    .woe_day = 0; // 0=Domingo ... 6=Sabado
+    .woe_day = SUNDAY; // Domingo
     if (.@day != .woe_day) end;
+
+OnEndWoE:
     if ($WOE_CUSTOM_ENDED) end;
     if (!agitcheck() && !$WOE_CUSTOM_ACTIVE) end;
 
