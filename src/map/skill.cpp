@@ -15117,6 +15117,11 @@ int32 skill_castend_pos2(struct block_list* src, int32 x, int32 y, uint16 skill_
 	case SG_SUN_WARM:
 	case SG_MOON_WARM:
 	case SG_STAR_WARM:
+		if (sce) {
+			status_change_end(src, SC_WARM);
+			flag|=1;
+			break;
+		}
 		skill_clear_unitgroup(src);
 		if ((sg = skill_unitsetting(src,skill_id,skill_lv,src->x,src->y,0)))
 			sc_start4(src,src,type,100,skill_lv,0,0,sg->group_id,skill_get_time(skill_id,skill_lv));
@@ -19714,11 +19719,8 @@ bool skill_check_condition_castend( map_session_data& sd, uint16 skill_id, uint1
 		case SG_MOON_WARM:
 		case SG_STAR_WARM:
 			if (sc != nullptr) {
-				// Skill fails when already active
-				if (sc->getSCE(SC_WARM)) {
-					clif_skill_nodamage(&sd, sd, skill_id, skill_lv, 0);
-					return false;
-				}
+				if (sc->getSCE(SC_WARM))
+					break;
 				// When having Miracle, skill succeeds regardless of map
 				if (sc->getSCE(SC_MIRACLE))
 					break;
