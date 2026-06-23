@@ -1,12 +1,12 @@
 //==================================================
-// Estilista com menu de opções
+// Estilista com menu de opcoes
 // Autor: Wesley
 //==================================================
 -	script	Estilista	122,{
 	mes "[Estilista]";
-	mes "Olá! Deseja mudar seu visual?";
+	mes "Ola! Deseja mudar seu visual?";
 	next;
-	switch(select("Sim:Não")) {
+	switch(select("Sim:Nao")) {
 	case 1:
 		mes "[Estilista]";
 		mes "Vamos escolher seu estilo manualmente!";
@@ -23,12 +23,12 @@
 	end;
 
 //----------------------------------------------
-// Sub-NPC Stylist (versão gratuita)
+// Sub-NPC Stylist (versao gratuita)
 //----------------------------------------------
 S_FreeStylist:
 	set .@max_cloth_color, getbattleflag("max_cloth_color");
-	if (.@max_cloth_color > 4)
-		set .@max_cloth_color, 4;
+	if (.@max_cloth_color < 1)
+		set .@max_cloth_color, 1;
 
 	setarray .@Styles[1],
 		.@max_cloth_color,
@@ -39,42 +39,73 @@ S_FreeStylist:
 		LOOK_HAIR,
 		LOOK_HAIR_COLOR;
 	set .@s, select(" ~ Cor da Roupa: ~ Estilo de Cabelo: ~ Cor do Cabelo");
+	if (.@s == 1 && (checkriding() || checkdragon() || checkwug() || checkmadogear()) && .@Styles[.@s] > 8) {
+		set .@Styles[.@s], 8;
+		message strcharinfo(0),"Cores de roupa acima de #8 foram ocultadas enquanto voce estiver montado.";
+	}
 	set .@Revert, getlook(.@Look[.@s]);
 	set .@Style,1;
+	set .@Dir,1;
 
 	while(1) {
 		if (.@Style < 1 || .@Style > .@Styles[.@s])
 			set .@Style, 1;
 
-		setlook .@Look[.@s], .@Style;
-		message strcharinfo(0),"Este estilo é #"+.@Style+".";
+		set .@Style, callsub(S_ApplyValidStyle, .@Look[.@s], .@Style, .@Styles[.@s], .@Dir);
+		message strcharinfo(0),"Este estilo e #"+.@Style+".";
 
-		set .@menu$, " ~ Próximo (^0055FF"+((.@Style!=.@Styles[.@s])?.@Style+1:1)+"^000000): ~ Anterior (^0055FF"+((.@Style!=1)?.@Style-1:.@Styles[.@s])+"^000000): ~ Pular para...: ~ Voltar para a Original (^0055FF"+.@Revert+"^000000): ~ Sair";
+		set .@menu$, " ~ Proximo (^0055FF"+((.@Style!=.@Styles[.@s])?.@Style+1:1)+"^000000): ~ Anterior (^0055FF"+((.@Style!=1)?.@Style-1:.@Styles[.@s])+"^000000): ~ Pular para...: ~ Voltar para a Original (^0055FF"+.@Revert+"^000000): ~ Sair";
 		
 		switch(select(.@menu$)) {
 		case 1:
+			set .@Dir, 1;
 			set .@Style, .@Style + 1;
 			if (.@Style > .@Styles[.@s])
 				set .@Style, 1;
 			break;
 		case 2:
+			set .@Dir, -1;
 			set .@Style, .@Style - 1;
 			if (.@Style < 1)
 				set .@Style, .@Styles[.@s];
 			break;
 		case 3:
+			set .@Dir, 1;
 			message strcharinfo(0),"Escolha um estilo entre 1 - "+.@Styles[.@s]+"."; input .@Style,1,.@Styles[.@s];
 			if (!.@Style)
 				set .@Style, rand(1,.@Styles[.@s]);
 			break;
 		case 4:
-			set .@Style, .@Revert;
-			setlook .@Look[.@s], .@Revert;
+			set .@Dir, 1;
+			set .@Style, callsub(S_ApplyValidStyle, .@Look[.@s], .@Revert, .@Styles[.@s], 1);
 			break;
 		case 5:
 			close;
 		}
 	}
+
+S_ApplyValidStyle:
+	set .@look, getarg(0);
+	set .@style, getarg(1);
+	set .@max, getarg(2);
+	set .@dir, getarg(3);
+
+	for (set .@i, 0; .@i < .@max; set .@i, .@i + 1) {
+		if (.@style < 1)
+			set .@style, .@max;
+		if (.@style > .@max)
+			set .@style, 1;
+
+		setlook .@look, .@style;
+		if (getlook(.@look) == .@style)
+			return .@style;
+
+		if (.@dir < 0)
+			set .@style, .@style - 1;
+		else
+			set .@style, .@style + 1;
+	}
+	return getlook(.@look);
 	end;
 }
 
@@ -330,7 +361,7 @@ S_FreeStylist:
 // 	}
 
 // 	//------------------------------------------------
-// 	// EXECUÇÃO DO TESTE
+// 	// EXECUCAO DO TESTE
 // 	//------------------------------------------------
 // 	for (.@i = 0; .@i < getarraysize(.@joblist); .@i++) {
 
@@ -355,4 +386,94 @@ S_FreeStylist:
 // 	end;
 // }
 
+//==================================================
+// TEMP: teste rapido de paletas de roupa 1..8
+// Uso: @testpal8 [indice_inicial] [quantidade]
+//==================================================
+-	script	PaletteTestCommands	-1,{
+OnInit:
+	bindatcmd "testpal8", strnpcinfo(3) + "::OnTestPal8", 99, 99;
+	end;
 
+OnTestPal8:
+	set .@original_job, Class;
+	set .@original_color, getlook(LOOK_CLOTHES_COLOR);
+
+	setarray .@jobs[0],
+		JOB_NOVICE,
+		JOB_SWORDMAN, JOB_MAGE, JOB_ARCHER, JOB_ACOLYTE, JOB_MERCHANT, JOB_THIEF,
+		JOB_KNIGHT, JOB_PRIEST, JOB_WIZARD, JOB_BLACKSMITH, JOB_HUNTER, JOB_ASSASSIN,
+		JOB_CRUSADER, JOB_MONK, JOB_SAGE, JOB_ROGUE, JOB_ALCHEMIST, JOB_BARD, JOB_DANCER,
+		JOB_NOVICE_HIGH,
+		JOB_SWORDMAN_HIGH, JOB_MAGE_HIGH, JOB_ARCHER_HIGH, JOB_ACOLYTE_HIGH, JOB_MERCHANT_HIGH, JOB_THIEF_HIGH,
+		JOB_LORD_KNIGHT, JOB_HIGH_PRIEST, JOB_HIGH_WIZARD, JOB_WHITESMITH, JOB_SNIPER, JOB_ASSASSIN_CROSS,
+		JOB_PALADIN, JOB_CHAMPION, JOB_PROFESSOR, JOB_STALKER, JOB_CREATOR, JOB_CLOWN, JOB_GYPSY,
+		JOB_RUNE_KNIGHT, JOB_WARLOCK, JOB_RANGER, JOB_ARCH_BISHOP, JOB_MECHANIC, JOB_GUILLOTINE_CROSS,
+		JOB_ROYAL_GUARD, JOB_SORCERER, JOB_MINSTREL, JOB_WANDERER, JOB_SURA, JOB_GENETIC, JOB_SHADOW_CHASER,
+		JOB_RUNE_KNIGHT_T, JOB_WARLOCK_T, JOB_RANGER_T, JOB_ARCH_BISHOP_T, JOB_MECHANIC_T, JOB_GUILLOTINE_CROSS_T,
+		JOB_ROYAL_GUARD_T, JOB_SORCERER_T, JOB_MINSTREL_T, JOB_WANDERER_T, JOB_SURA_T, JOB_GENETIC_T, JOB_SHADOW_CHASER_T,
+		JOB_DRAGON_KNIGHT, JOB_MEISTER, JOB_SHADOW_CROSS, JOB_ARCH_MAGE, JOB_CARDINAL, JOB_WINDHAWK,
+		JOB_IMPERIAL_GUARD, JOB_BIOLO, JOB_ABYSS_CHASER, JOB_ELEMENTAL_MASTER, JOB_INQUISITOR, JOB_TROUBADOUR, JOB_TROUVERE,
+		JOB_TAEKWON, JOB_STAR_GLADIATOR, JOB_STAR_EMPEROR, JOB_SKY_EMPEROR,
+		JOB_SOUL_LINKER, JOB_SOUL_REAPER, JOB_SOUL_ASCETIC,
+		JOB_NINJA, JOB_KAGEROU, JOB_OBORO, JOB_SHINKIRO, JOB_SHIRANUI,
+		JOB_GUNSLINGER, JOB_REBELLION, JOB_NIGHT_WATCH,
+		JOB_SUPER_NOVICE, JOB_SUPER_NOVICE_E, JOB_HYPER_NOVICE,
+		JOB_SUMMONER, JOB_SPIRIT_HANDLER,
+		JOB_BABY,
+		JOB_BABY_SWORDMAN, JOB_BABY_MAGE, JOB_BABY_ARCHER, JOB_BABY_ACOLYTE, JOB_BABY_MERCHANT, JOB_BABY_THIEF,
+		JOB_BABY_KNIGHT, JOB_BABY_PRIEST, JOB_BABY_WIZARD, JOB_BABY_BLACKSMITH, JOB_BABY_HUNTER, JOB_BABY_ASSASSIN,
+		JOB_BABY_CRUSADER, JOB_BABY_MONK, JOB_BABY_SAGE, JOB_BABY_ROGUE, JOB_BABY_ALCHEMIST, JOB_BABY_BARD, JOB_BABY_DANCER,
+		JOB_SUPER_BABY, JOB_BABY_NINJA, JOB_BABY_KAGEROU, JOB_BABY_OBORO,
+		JOB_BABY_TAEKWON, JOB_BABY_STAR_GLADIATOR, JOB_BABY_STAR_EMPEROR,
+		JOB_BABY_SOUL_LINKER, JOB_BABY_GUNSLINGER, JOB_BABY_REBELLION, JOB_BABY_SOUL_REAPER, JOB_SUPER_BABY_E,
+		JOB_BABY_RUNE_KNIGHT, JOB_BABY_WARLOCK, JOB_BABY_RANGER, JOB_BABY_ARCH_BISHOP, JOB_BABY_MECHANIC, JOB_BABY_GUILLOTINE_CROSS,
+		JOB_BABY_ROYAL_GUARD, JOB_BABY_SORCERER, JOB_BABY_MINSTREL, JOB_BABY_WANDERER, JOB_BABY_SURA, JOB_BABY_GENETIC, JOB_BABY_SHADOW_CHASER;
+
+	set .@total_jobs, getarraysize(.@jobs);
+	set .@start, (.@atcmd_numparameters >= 1 ? atoi(.@atcmd_parameters$[0]) : 0);
+	set .@count, (.@atcmd_numparameters >= 2 ? atoi(.@atcmd_parameters$[1]) : .@total_jobs);
+
+	if (.@start < 0)
+		set .@start, 0;
+	if (.@start >= .@total_jobs) {
+		dispbottom "Indice inicial invalido. Use 0 ate "+(.@total_jobs - 1)+".";
+		end;
+	}
+	if (.@count < 1)
+		set .@count, 1;
+
+	set .@end, .@start + .@count;
+	if (.@end > .@total_jobs)
+		set .@end, .@total_jobs;
+
+	dispbottom "Teste de paletas iniciado: jobs "+.@start+" ate "+(.@end - 1)+" de "+.@total_jobs+".";
+	dispbottom "Se o client cair, veja o ultimo 'PROXIMO JOB' para identificar o sprite faltante.";
+
+	for (set .@i, .@start; .@i < .@end; set .@i, .@i + 1) {
+		dispbottom "PROXIMO JOB -> Indice: "+.@i+" | Job: "+.@jobs[.@i];
+		callsub S_TestPalResetLook;
+		sleep2 500;
+		jobchange .@jobs[.@i];
+		callsub S_TestPalResetLook;
+		sleep2 150;
+
+		for (set .@pal, 1; .@pal <= 8; set .@pal, .@pal + 1) {
+			setlook LOOK_CLOTHES_COLOR, .@pal;
+			dispbottom "TESTE PALETA -> Job: "+.@jobs[.@i]+" | Cor: "+.@pal;
+			sleep2 150;
+		}
+	}
+
+	jobchange .@original_job;
+	setlook LOOK_CLOTHES_COLOR, .@original_color;
+	dispbottom "Teste de paletas finalizado. Classe e cor restauradas.";
+	end;
+
+S_TestPalResetLook:
+	setlook LOOK_CLOTHES_COLOR, 0;
+	setlook LOOK_WEAPON, 0;
+	setlook LOOK_SHIELD, 0;
+	setlook LOOK_ROBE, 0;
+	return;
+}
