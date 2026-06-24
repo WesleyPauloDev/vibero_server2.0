@@ -387,11 +387,13 @@ S_ApplyValidStyle:
 // }
 
 //==================================================
-// TEMP: teste rapido de paletas de roupa 1..8
-// Uso: @testpal8 [indice_inicial] [quantidade]
+// TEMP: teste rapido de paletas de roupa
+// Uso: @testpalall [indice_inicial] [quantidade] [cor_max]
+// Atalho antigo: @testpal8 [indice_inicial] [quantidade] [cor_max]
 //==================================================
 -	script	PaletteTestCommands	-1,{
 OnInit:
+	bindatcmd "testpalall", strnpcinfo(3) + "::OnTestPal8", 99, 99;
 	bindatcmd "testpal8", strnpcinfo(3) + "::OnTestPal8", 99, 99;
 	end;
 
@@ -433,6 +435,7 @@ OnTestPal8:
 	set .@total_jobs, getarraysize(.@jobs);
 	set .@start, (.@atcmd_numparameters >= 1 ? atoi(.@atcmd_parameters$[0]) : 0);
 	set .@count, (.@atcmd_numparameters >= 2 ? atoi(.@atcmd_parameters$[1]) : .@total_jobs);
+	set .@max_pal, (.@atcmd_numparameters >= 3 ? atoi(.@atcmd_parameters$[2]) : getbattleflag("max_cloth_color"));
 
 	if (.@start < 0)
 		set .@start, 0;
@@ -442,12 +445,14 @@ OnTestPal8:
 	}
 	if (.@count < 1)
 		set .@count, 1;
+	if (.@max_pal < 1)
+		set .@max_pal, 1;
 
 	set .@end, .@start + .@count;
 	if (.@end > .@total_jobs)
 		set .@end, .@total_jobs;
 
-	dispbottom "Teste de paletas iniciado: jobs "+.@start+" ate "+(.@end - 1)+" de "+.@total_jobs+".";
+	dispbottom "Teste de paletas iniciado: jobs "+.@start+" ate "+(.@end - 1)+" de "+.@total_jobs+" | cores 1 ate "+.@max_pal+".";
 	dispbottom "Se o client cair, veja o ultimo 'PROXIMO JOB' para identificar o sprite faltante.";
 
 	for (set .@i, .@start; .@i < .@end; set .@i, .@i + 1) {
@@ -458,7 +463,7 @@ OnTestPal8:
 		callsub S_TestPalResetLook;
 		sleep2 150;
 
-		for (set .@pal, 1; .@pal <= 8; set .@pal, .@pal + 1) {
+		for (set .@pal, 1; .@pal <= .@max_pal; set .@pal, .@pal + 1) {
 			setlook LOOK_CLOTHES_COLOR, .@pal;
 			dispbottom "TESTE PALETA -> Job: "+.@jobs[.@i]+" | Cor: "+.@pal;
 			sleep2 150;
