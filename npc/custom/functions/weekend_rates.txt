@@ -55,7 +55,7 @@ OnPCLoginEvent:
 
 OnLoginNotice:
 	if (callsub(S_IsWeekendEvent)) {
-		dispbottom "[Evento] Rates de fim de semana ativas: Base EXP " + .weekend_base_exp_rate + "% / Job EXP " + .weekend_job_exp_rate + "% / Drop " + .weekend_drop_rate + "%.";
+		dispbottom "[Evento] Rates especiais ativas: Base EXP " + .weekend_base_exp_rate + "% / Job EXP " + .weekend_job_exp_rate + "% / Drop " + .weekend_drop_rate + "%.";
 		if ($Weekend_Rates_MvpCard5x)
 			dispbottom "[Evento] Drop de carta MVP 5x ativo ate domingo as 23:59.";
 	}
@@ -81,6 +81,7 @@ OnAtcommand:
 	mes "Feriado antecipado: " + ($Weekend_Rates_Early ? "^00AA00ativo^000000" : "^777777inativo^000000") + ".";
 	mes "Carta MVP 5x armada: " + ($Weekend_Rates_MvpCard5x ? "^00AA00sim^000000" : "^777777nao^000000") + ".";
 	mes "Carta MVP 5x evento semanal: " + ($Event_MvpCard5x ? "^00AA00sim^000000" : "^777777nao^000000") + ".";
+	mes "EXP dobrado evento semanal: " + ($Event_Exp2x ? "^00AA00sim^000000" : "^777777nao^000000") + ".";
 	mes "Comandos: @ratesferiado ativar/desativar";
 	mes "Comandos: @mvpcard5x ativar/desativar";
 	close;
@@ -135,6 +136,9 @@ S_IsWeekendEvent:
 	if (.bonus_week_active)
 		return 1;
 
+	if ($Event_Exp2x)
+		return 1;
+
 	if ($Weekend_Rates_Early)
 		return 1;
 
@@ -181,9 +185,9 @@ S_ApplyRates:
 
 	if (.@announce && .@old_state != .weekend_rates_active) {
 		if (.weekend_rates_active)
-			announce "[Evento] Fim de semana iniciado: rates especiais ativadas!", bc_all, 0x00FF00;
+			announce "[Evento] Rates especiais ativadas!", bc_all, 0x00FF00;
 		else
-			announce "[Evento] Fim de semana encerrado: rates normais restauradas.", bc_all, 0x00AAFF;
+			announce "[Evento] Rates especiais encerradas: rates normais restauradas.", bc_all, 0x00AAFF;
 	}
 	return;
 
@@ -220,6 +224,6 @@ S_AnnounceActiveRates:
 	if (!callsub(S_IsWeekendEvent))
 		return;
 
-	announce "[Evento] Rates de fim de semana ativas: Base EXP " + .weekend_base_exp_rate + "% / Job EXP " + .weekend_job_exp_rate + "% / Drop " + .weekend_drop_rate + "%." + ($Weekend_Rates_MvpCard5x ? " Carta MVP 5x ativa." : ""), bc_all, 0x00FF00;
+	announce "[Evento] Rates especiais ativas: Base EXP " + .weekend_base_exp_rate + "% / Job EXP " + .weekend_job_exp_rate + "% / Drop " + .weekend_drop_rate + "%." + ($Weekend_Rates_MvpCard5x ? " Carta MVP 5x ativa." : ""), bc_all, 0x00FF00;
 	return;
 }
