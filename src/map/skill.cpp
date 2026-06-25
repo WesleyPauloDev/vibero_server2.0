@@ -10134,6 +10134,8 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 				if (it.second->flag[SCF_NODISPELL])
 					continue;
 				switch (status) {
+					case SC_MIRACLE:
+						continue;
 					// bugreport:4888 these songs may only be dispelled if you're not in their song area anymore
 					case SC_WHISTLE:		case SC_ASSNCROS:		case SC_POEMBRAGI:
 					case SC_APPLEIDUN:		case SC_HUMMING:		case SC_DONTFORGETME:
