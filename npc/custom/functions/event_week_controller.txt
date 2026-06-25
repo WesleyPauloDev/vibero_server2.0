@@ -74,6 +74,7 @@ OnAtcommand:
 		$event_week_manual = 1;
 		$event_week_auto_active = 0;
 		$event_week_active = .@event;
+		$Weekend_Rates_ForceOff = 0;
 		callsub S_Apply;
 		announce "[Evento] " + callfunc("F_EventWeekName$", .@event) + " ativado manualmente por GM.", bc_all, 0x00FF00;
 		end;
@@ -83,6 +84,7 @@ OnAtcommand:
 		$event_week_manual = 2;
 		$event_week_auto_active = 0;
 		$event_week_active = 0;
+		$Weekend_Rates_ForceOff = 1;
 		callsub S_Apply;
 		announce "[Evento] Evento semanal desativado manualmente por GM.", bc_all, 0x00AAFF;
 		end;
@@ -90,6 +92,7 @@ OnAtcommand:
 
 	if (.@cmd$ == "auto" || .@cmd$ == "automatico") {
 		$event_week_manual = 0;
+		$Weekend_Rates_ForceOff = 0;
 		callsub S_Sync;
 		dispbottom "[Evento Semana] Modo automatico restaurado.";
 		end;
@@ -121,6 +124,7 @@ OnAtcommand:
 S_Sync:
 	if ($event_week_manual == 2) {
 		$event_week_active = 0;
+		$Weekend_Rates_ForceOff = 1;
 		callsub S_Apply;
 		return;
 	}
@@ -148,6 +152,7 @@ S_StartAuto:
 	$event_week_active = .@event;
 	$event_week_auto_active = 1;
 	$event_week = callfunc("F_EventWeekNext", .@event);
+	$Weekend_Rates_ForceOff = 0;
 	callsub S_Apply;
 	announce "[Evento] Semana iniciada: " + callfunc("F_EventWeekName$", .@event) + " ativo ate quarta-feira 23:59.", bc_all, 0x00FF00;
 	return;

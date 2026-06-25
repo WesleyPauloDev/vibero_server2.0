@@ -79,6 +79,7 @@ OnAtcommand:
 		mes "Carta MVP: " + .normal_mvp_card_rate + "%";
 	}
 	mes "Feriado antecipado: " + ($Weekend_Rates_Early ? "^00AA00ativo^000000" : "^777777inativo^000000") + ".";
+	mes "Rates forçadas off: " + ($Weekend_Rates_ForceOff ? "^00AA00sim^000000" : "^777777nao^000000") + ".";
 	mes "Carta MVP 5x armada: " + ($Weekend_Rates_MvpCard5x ? "^00AA00sim^000000" : "^777777nao^000000") + ".";
 	mes "Carta MVP 5x evento semanal: " + ($Event_MvpCard5x ? "^00AA00sim^000000" : "^777777nao^000000") + ".";
 	mes "EXP dobrado evento semanal: " + ($Event_Exp2x ? "^00AA00sim^000000" : "^777777nao^000000") + ".";
@@ -91,6 +92,7 @@ OnHolidayAtcommand:
 	if (.@cmd$ == "on" || .@cmd$ == "ativar" || .@cmd$ == "1") {
 		$Weekend_Rates_Early = 1;
 		$Weekend_Rates_MvpCard5x = 1;
+		$Weekend_Rates_ForceOff = 0;
 		callsub S_ApplyRates, 1;
 		announce "[Evento] Feriado: rates especiais e carta MVP 5x ativados ate domingo as 23:59.", bc_all, 0x00FF00;
 		dispbottom "[Weekend Rates] Feriado ativado. Carta MVP 5x tambem foi armada.";
@@ -122,6 +124,7 @@ OnMvpCardAtcommand:
 			$event_week_auto_active = 0;
 			$event_week_manual = 2;
 			$Event_MvpCard5x = 0;
+			$Weekend_Rates_ForceOff = 1;
 		}
 		callsub S_ApplyRates, 1;
 		dispbottom "[Weekend Rates] Carta MVP 5x desativada.";
@@ -138,6 +141,9 @@ S_IsWeekendEvent:
 		$Weekend_Rates_Early = 0;
 		$Weekend_Rates_MvpCard5x = 0;
 	}
+
+	if ($Weekend_Rates_ForceOff)
+		return 0;
 
 	if (.bonus_week_active)
 		return 1;
