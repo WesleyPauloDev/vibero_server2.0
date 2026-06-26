@@ -7718,7 +7718,8 @@ void battle_do_reflect(int32 attack_type, struct Damage *wd, struct block_list* 
 		auto * sce = tsc->getSCE(SC_MAXPAIN);
 		if (sce) {
 			sce->val2 = (int32)damage;
-			if (!tsc->getSCE(SC_KYOMU) && !(tsc->getSCE(SC_DARKCROW) && (wd->flag&BF_SHORT))) //SC_KYOMU invalidates reflecting ability. SC_DARKCROW also does, but only for short weapon attack.
+			status_change *ssc = status_get_sc(src);
+			if (!tsc->getSCE(SC_KYOMU) && !(tsc->getSCE(SC_DARKCROW) && (wd->flag&BF_SHORT)) && !(ssc && ssc->getSCE(SC_REF_T_POTION))) // SC_KYOMU invalidates reflecting ability. SC_DARKCROW also does, but only for short weapon attack. Ref T Potion blocks Max Pain's reflected physical hit.
 				skill_castend_damage_id(target, src, NPC_MAXPAIN_ATK, sce->val1, tick, ((wd->flag & 1) ? wd->flag - 1 : wd->flag));
 		}
 		

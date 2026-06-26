@@ -13,17 +13,26 @@ OnInit:
 	// === CONFIGURACAO =========================================
 	// mapas onde quer repetir
 	setarray .@maps$[0], "lhz_dun_n", "lhz_dun_n2", "lhz_dun_n3", "lhz_dun_n4";	
-	setarray .@mob[0], 3208, 3209, 3210, 3211, 3212, 3213, 3226, 3227, 3228, 3229, 3230, 3231, 3232;	
+	setarray .@normal_mob[0], 3208, 3209, 3210, 3211, 3212, 3213, 3226, 3227, 3228, 3229, 3230, 3231, 3232;
+	setarray .@hard_mob[0], 25000, 25001, 25002, 25003, 25004, 25005, 25006, 25007, 25008, 25009, 25010, 25011, 25012;
+	setarray .@hard_view[0], 3220, 3221, 3224, 3222, 3223, 3225, 3240, 3241, 3242, 3243, 3244, 3245, 3246;
 
 	.@quant = 20; // quantidade de cada mob por mapa
 	// ===========================================================
 
+	killmonsterall "lhz_dun_n3";
+	killmonsterall "lhz_dun_n4";
+
 	for ( .@m = 0; .@m < getarraysize(.@maps$); .@m++ ) {
+		.@is_hard = (.@maps$[.@m] == "lhz_dun_n3" || .@maps$[.@m] == "lhz_dun_n4");
+		.@mob_size = (.@is_hard ? getarraysize(.@hard_mob) : getarraysize(.@normal_mob));
+
 		for ( .@q = 0; .@q < .@quant; .@q++ ) {
-			for ( .@i = 0; .@i < getarraysize(.@mob); .@i++ ) {
+			for ( .@i = 0; .@i < .@mob_size; .@i++ ) {
+				.@mob_id = (.@is_hard ? .@hard_mob[.@i] : .@normal_mob[.@i]);
 
 				// spawna 1 mob
-				monster .@maps$[.@m],0,0,"--ja--",.@mob[.@i],1,"lhz_dun_n::OnRegularDead";
+				monster .@maps$[.@m],0,0,"--ja--",.@mob_id,1,"lhz_dun_n::OnRegularDead";
 
 				if (.@maps$[.@m] == "lhz_dun_n" || .@maps$[.@m] == "lhz_dun_n2") {
 
@@ -42,13 +51,14 @@ OnInit:
 
 					getunitdata .@gid, .@info, 1;
 
-					setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] * 4;
-					setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] * 4;
-					setunitdata .@gid, UMOB_STR, .@info[UMOB_STR] * 4;
-					setunitdata .@gid, UMOB_DEX, .@info[UMOB_DEX] * 4;
-					setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] * 4;
-					setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] * 4;
-					setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] * 4;
+					setunitdata .@gid, UMOB_CLASS, .@hard_view[.@i];
+					// setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] * 4;
+					// setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] * 4;
+					// setunitdata .@gid, UMOB_STR, .@info[UMOB_STR] * 4;
+					// setunitdata .@gid, UMOB_DEX, .@info[UMOB_DEX] * 4;
+					// setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] * 4;
+					// setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] * 4;
+					// setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] * 4;
 
 				}
 			}
@@ -76,17 +86,36 @@ OnRegularDead:
 
 		getunitdata .@gid, .@info, 1;
 
-		setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] * 4;
-		setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] * 4;
-		setunitdata .@gid, UMOB_STR, .@info[UMOB_STR] * 4;
-		setunitdata .@gid, UMOB_DEX, .@info[UMOB_DEX] * 4;
-		setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] * 4;
-		setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] * 4;
-		setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] * 4;
+		setunitdata .@gid, UMOB_CLASS, callsub(S_HardViewId, killedrid);
+		// setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] * 4;
+		// setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] * 4;
+		// setunitdata .@gid, UMOB_STR, .@info[UMOB_STR] * 4;
+		// setunitdata .@gid, UMOB_DEX, .@info[UMOB_DEX] * 4;
+		// setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] * 4;
+		// setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] * 4;
+		// setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] * 4;
 	}
 	callsub( OnNPCKillEvent, strcharinfo(3) );
 
 	end;
+
+S_HardViewId:
+	switch (getarg(0)) {
+		case 25000: return 3220;
+		case 25001: return 3221;
+		case 25002: return 3224;
+		case 25003: return 3222;
+		case 25004: return 3223;
+		case 25005: return 3225;
+		case 25006: return 3240;
+		case 25007: return 3241;
+		case 25008: return 3242;
+		case 25009: return 3243;
+		case 25010: return 3244;
+		case 25011: return 3245;
+		case 25012: return 3246;
+	}
+	return getarg(0);
 
 S_Regular:
 	if (strcharinfo(3) != "lhz_dun_n" || strcharinfo(3) != "lhz_dun_n2" ||
@@ -125,13 +154,13 @@ S_Regular:
 		
 				getunitdata .@gid, .@info, 1;
 		
-				setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] * 4;
-				setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] * 4;
-				setunitdata .@gid, UMOB_STR, .@info[UMOB_STR] * 4;
-				setunitdata .@gid, UMOB_DEX, .@info[UMOB_DEX] * 4;
-				setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] * 4;
-				setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] * 4;
-				setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] * 4;
+				// setunitdata .@gid, UMOB_MAXHP, .@info[UMOB_MAXHP] * 4;
+				// setunitdata .@gid, UMOB_HP, .@info[UMOB_HP] * 4;
+				// setunitdata .@gid, UMOB_STR, .@info[UMOB_STR] * 4;
+				// setunitdata .@gid, UMOB_DEX, .@info[UMOB_DEX] * 4;
+				// setunitdata .@gid, UMOB_INT, .@info[UMOB_INT] * 4;
+				// setunitdata .@gid, UMOB_DEF,.@info[UMOB_DEF] * 4;
+				// setunitdata .@gid, UMOB_MDEF,.@info[UMOB_MDEF] * 4;
 			}
 		}
 	}
@@ -176,6 +205,7 @@ OnTimer60000: // a cada 60 segundos
 		if (.@map$ == "lhz_dun_n3" || .@map$ == "lhz_dun_n4") {
 			callfunc("F_PartyNearbyKillReward", .@map$, 9649, 20, "#bio_hardkills", 5, 6, 1, 110007, 10000, "[Reputacao] Voce recebeu +1 ponto de reputacao Bio5 Hard!", 30);
 			callfunc("F_BattlePassRegisterWeekly", "bio5");
+			end;
 		}
 		callsub( S_Regular, killedrid );
 
