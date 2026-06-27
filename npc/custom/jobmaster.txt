@@ -471,6 +471,8 @@ function	Job_Change	{
 	mes "Você agora é " + callfunc("F_InsertArticle", jobname(.@to_cls)) + "!";
 	if (.@to_cls == Job_Novice_High && .LastJob)
 		lastJob = Class; // Saves the lastJob for rebirth
+	if (.@to_cls == Job_Novice_High)
+		callfunc "F_ClearResetBuilds";
 	jobchange .@to_cls;
 	if (.@to_cls == Job_Novice_High)
 		resetlvl(1);

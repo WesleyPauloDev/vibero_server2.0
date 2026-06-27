@@ -111,8 +111,6 @@ L_SaveBuild:
 	setd(.@prefix$+"status_point",StatusPoint);
 	setd(.@prefix$+"skill_point",SkillPoint);
 	setd(.@prefix$+"job",Class);
-	setd(.@prefix$+"base_level",BaseLevel);
-	setd(.@prefix$+"job_level",JobLevel);
 	setd(.@prefix$+"skill_count",@skilllist_count);
 	for(set .@i,0; .@i < @skilllist_count && .@i < .MaxSkillSlots; set .@i,.@i+1) {
 		setd(.@prefix$+"skill_id["+.@i+"]",@skilllist_id[.@i]);
@@ -142,16 +140,6 @@ L_LoadBuild:
 		mes "Essa build foi salva em outra classe.";
 		return;
 	}
-	if (getd(.@prefix$+"base_level") > BaseLevel) {
-		mes "Voce nao pode carregar os atributos dessa build ainda.";
-		mes "Ela foi salva no Base Level "+getd(.@prefix$+"base_level")+", mas seu Base Level atual e "+BaseLevel+".";
-		return;
-	}
-	if (getd(.@prefix$+"job_level") > JobLevel) {
-		mes "Voce nao pode carregar as habilidades dessa build ainda.";
-		mes "Ela foi salva no Job Level "+getd(.@prefix$+"job_level")+", mas seu Job Level atual e "+JobLevel+".";
-		return;
-	}
 	mes "Seus atributos e habilidades atuais serao substituidos.";
 	next;
 	if(select("Cancelar:Carregar") == 1) return;
@@ -179,4 +167,30 @@ OnInit:
 	set .MaxBuilds,10;
 	set .MaxSkillSlots,1634;
 	end;
+}
+
+function	script	F_ClearResetBuilds	{
+	for(set .@slot,0; .@slot < reset_build_count; set .@slot,.@slot+1) {
+		set .@prefix$,"reset_build_"+.@slot+"_";
+		for(set .@i,0; .@i < getd(.@prefix$+"skill_count"); set .@i,.@i+1) {
+			setd(.@prefix$+"skill_id["+.@i+"]",0);
+			setd(.@prefix$+"skill_lv["+.@i+"]",0);
+			setd(.@prefix$+"skill_flag["+.@i+"]",0);
+		}
+		setd("reset_build_name$["+.@slot+"]","");
+		setd(.@prefix$+"str",0);
+		setd(.@prefix$+"agi",0);
+		setd(.@prefix$+"vit",0);
+		setd(.@prefix$+"int",0);
+		setd(.@prefix$+"dex",0);
+		setd(.@prefix$+"luk",0);
+		setd(.@prefix$+"status_point",0);
+		setd(.@prefix$+"skill_point",0);
+		setd(.@prefix$+"job",0);
+		setd(.@prefix$+"base_level",0);
+		setd(.@prefix$+"job_level",0);
+		setd(.@prefix$+"skill_count",0);
+	}
+	set reset_build_count,0;
+	return;
 }
