@@ -111,6 +111,8 @@ L_SaveBuild:
 	setd(.@prefix$+"status_point",StatusPoint);
 	setd(.@prefix$+"skill_point",SkillPoint);
 	setd(.@prefix$+"job",Class);
+	setd(.@prefix$+"base_level",BaseLevel);
+	setd(.@prefix$+"job_level",JobLevel);
 	setd(.@prefix$+"skill_count",@skilllist_count);
 	for(set .@i,0; .@i < @skilllist_count && .@i < .MaxSkillSlots; set .@i,.@i+1) {
 		setd(.@prefix$+"skill_id["+.@i+"]",@skilllist_id[.@i]);
@@ -138,6 +140,16 @@ L_LoadBuild:
 	mes "Carregar a build ^0055FF"+getd("reset_build_name$["+.@slot+"]")+"^000000?";
 	if (getd(.@prefix$+"job") != Class) {
 		mes "Essa build foi salva em outra classe.";
+		return;
+	}
+	if (getd(.@prefix$+"base_level") > BaseLevel) {
+		mes "Voce nao pode carregar os atributos dessa build ainda.";
+		mes "Ela foi salva no Base Level "+getd(.@prefix$+"base_level")+", mas seu Base Level atual e "+BaseLevel+".";
+		return;
+	}
+	if (getd(.@prefix$+"job_level") > JobLevel) {
+		mes "Voce nao pode carregar as habilidades dessa build ainda.";
+		mes "Ela foi salva no Job Level "+getd(.@prefix$+"job_level")+", mas seu Job Level atual e "+JobLevel+".";
 		return;
 	}
 	mes "Seus atributos e habilidades atuais serao substituidos.";
