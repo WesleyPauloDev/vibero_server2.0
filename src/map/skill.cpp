@@ -6547,7 +6547,6 @@ int32 skill_castend_damage_id (struct block_list* src, struct block_list *bl, ui
 	case AB_HIGHNESSHEAL:
 	case AB_DUPLELIGHT_MAGIC:
 	case WM_METALICSOUND:
-	case KO_KAIHOU:
 	case MH_ERASER_CUTTER:
 	case AG_ASTRAL_STRIKE:
 	case AG_ASTRAL_STRIKE_ATK:
@@ -6555,6 +6554,16 @@ int32 skill_castend_damage_id (struct block_list* src, struct block_list *bl, ui
 	case CD_ARBITRIUM:
 	case HN_METEOR_STORM_BUSTER:
 		skill_attack(BF_MAGIC,src,src,bl,skill_id,skill_lv,tick,flag);
+		break;
+
+	case KO_KAIHOU:
+		if (flag & 1) {
+			skill_attack(BF_MAGIC,src,src,bl,skill_id,skill_lv,tick,flag);
+		} else {
+			map_foreachinrange(skill_area_sub, bl, max(2, skill_get_splash(skill_id, skill_lv)), BL_CHAR, src, skill_id, skill_lv, tick, flag|BCT_ENEMY|SD_SPLASH|1, skill_castend_damage_id);
+			if (sd && sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0)
+				pc_delspiritcharm(sd,1,sd->spiritcharm_type);
+		}
 		break;
 
 	case IG_JUDGEMENT_CROSS:
@@ -16434,7 +16443,7 @@ std::shared_ptr<s_skill_unit_group> skill_unitsetting(struct block_list *src, ui
 			val2 = sd->spiritcharm_type;
 			limit = 6000 * val1;
 			subunt = sd->spiritcharm_type - 1;
-			pc_delspiritcharm(sd,sd->spiritcharm,sd->spiritcharm_type);
+			pc_delspiritcharm(sd,1,sd->spiritcharm_type);
 		}
 		break;
 #ifndef RENEWAL

@@ -8509,6 +8509,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 						skillratio += 50 + 150 * skill_lv;
 						if(sd && sd->spiritcharm_type == CHARM_TYPE_FIRE && sd->spiritcharm > 0)
 							skillratio += 100 * sd->spiritcharm;
+						skillratio = skillratio * status_get_lv(src) / 100;
 						break;
 					case NJ_HYOUSENSOU:
 #ifdef RENEWAL
@@ -8523,6 +8524,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 						skillratio += 50 * skill_lv;
 						if(sd && sd->spiritcharm_type == CHARM_TYPE_WATER && sd->spiritcharm > 0)
 							skillratio += 100 * sd->spiritcharm;
+						skillratio = skillratio * status_get_lv(src) / 100;
 						break;
 					case NJ_RAIGEKISAI:
 #ifdef RENEWAL
@@ -8532,6 +8534,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 #endif
 						if(sd && sd->spiritcharm_type == CHARM_TYPE_WIND && sd->spiritcharm > 0)
 							skillratio += 20 * sd->spiritcharm;
+						skillratio = skillratio * status_get_lv(src) / 100;
 						break;
 					case NJ_KAMAITACHI:
 						skillratio += 100 * skill_lv;
@@ -8770,7 +8773,6 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 						if(sd && sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0) {
 							skillratio += -100 + 200 * sd->spiritcharm;
 							RE_LVL_DMOD(100);
-							pc_delspiritcharm(sd, sd->spiritcharm, sd->spiritcharm_type);
 						}
 						break;
 					// Magical Elemental Spirits Attack Skills
