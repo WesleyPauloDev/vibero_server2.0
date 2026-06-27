@@ -1,0 +1,91 @@
+// Anti-bot quiz triggered by repeated random teleports.
+// The trigger is set in pc_setpos through @ab_tp_quiz_active.
+
+-	script	AntiBotTeleportQuiz	-1,{
+	end;
+
+OnChallenge:
+	if (!@ab_tp_quiz_active)
+		end;
+
+	setpcblock PCBLOCK_ALL|PCBLOCK_IMMUNE, false;
+	setpcblock PCBLOCK_IMMUNE, true;
+
+	.@month = gettime(DT_MONTH);
+	setarray .@months$[1],
+		"janeiro", "fevereiro", "marco", "abril", "maio", "junho",
+		"julho", "agosto", "setembro", "outubro", "novembro", "dezembro";
+
+	switch (rand(6)) {
+	case 0:
+		.@question$ = "Escolha o mes atual.";
+		.@answer$ = .@months$[.@month];
+		.@wrong1$ = .@months$[(.@month % 12) + 1];
+		.@wrong2$ = .@months$[((.@month + 5) % 12) + 1];
+		break;
+	case 1:
+		.@question$ = "Quanto e 2 + 3?";
+		.@answer$ = "5";
+		.@wrong1$ = "4";
+		.@wrong2$ = "6";
+		break;
+	case 2:
+		.@question$ = "Qual numero vem depois do 7?";
+		.@answer$ = "8";
+		.@wrong1$ = "6";
+		.@wrong2$ = "9";
+		break;
+	case 3:
+		.@question$ = "Quanto e 10 - 4?";
+		.@answer$ = "6";
+		.@wrong1$ = "5";
+		.@wrong2$ = "7";
+		break;
+	case 4:
+		.@question$ = "Qual e o primeiro mes do ano?";
+		.@answer$ = "janeiro";
+		.@wrong1$ = "junho";
+		.@wrong2$ = "dezembro";
+		break;
+	default:
+		.@question$ = "Qual numero aparece nesta frase: numero 9?";
+		.@answer$ = "9";
+		.@wrong1$ = "6";
+		.@wrong2$ = "3";
+		break;
+	}
+
+	.@correct = rand(1, 3);
+
+	mes "[Verificacao]";
+	mes "Para continuar, responda:";
+	mes "^0055FF" + .@question$ + "^000000";
+
+	if (.@correct == 1)
+		.@choice = prompt(.@answer$, .@wrong1$, .@wrong2$);
+	else if (.@correct == 2)
+		.@choice = prompt(.@wrong1$, .@answer$, .@wrong2$);
+	else
+		.@choice = prompt(.@wrong1$, .@wrong2$, .@answer$);
+
+	if (.@choice == .@correct) {
+		callsub S_ClearChallenge;
+		dispbottom "Verificacao anti-bot concluida.";
+		close;
+	}
+
+	callsub S_ClearChallenge;
+	dispbottom "Voce errou a verificacao anti-bot.";
+	addtimer 100, strnpcinfo(3) + "::OnKick";
+	close;
+
+OnKick:
+	kick;
+	end;
+
+S_ClearChallenge:
+	@ab_tp_quiz_active = 0;
+	@ab_tp_quiz_timeout = 0;
+	setpcblock PCBLOCK_ALL|PCBLOCK_IMMUNE, false;
+	return;
+}

@@ -2129,6 +2129,7 @@ bool pc_authok(map_session_data *sd, uint32 login_id2, time_t expiration_time, i
 	sd->respawn_tid = INVALID_TIMER;
 	sd->tid_queue_active = INVALID_TIMER;
 	sd->macro_detect.timer = INVALID_TIMER;
+	sd->antibot_teleport.quiz_timer = INVALID_TIMER;
 
 	sd->skill_keep_using.tid = INVALID_TIMER;
 	sd->skill_keep_using.skill_id = 0;
@@ -6950,6 +6951,63 @@ void pc_richmankim_end_by_caster(map_session_data *sd, bool clear_unlinked)
 	}
 }
 
+static TIMER_FUNC(pc_antibot_teleport_quiz_timeout)
+{
+	map_session_data *sd = map_id2sd(id);
+
+	if (sd == nullptr)
+		return 0;
+
+	if (sd->antibot_teleport.quiz_timer != tid)
+		return 0;
+
+	sd->antibot_teleport.quiz_timer = INVALID_TIMER;
+
+	if (pc_readreg(sd, add_str("@ab_tp_quiz_active")) == 0)
+		return 0;
+
+	pc_setreg(sd, add_str("@ab_tp_quiz_active"), 0);
+	pc_setreg(sd, add_str("@ab_tp_quiz_timeout"), 0);
+	sd->state.block_action &= ~(PCBLOCK_ALL | PCBLOCK_IMMUNE);
+	clif_GM_kick(nullptr, sd);
+	return 0;
+}
+static void pc_antibot_teleport_check(map_session_data& sd, clr_type clrtype, bool changed_map)
+{
+	if (!battle_config.antibot_teleport_quiz_enable || battle_config.antibot_teleport_quiz_count <= 0)
+		return;
+
+	if (clrtype != CLR_TELEPORT || changed_map || sd.state.autotrade)
+		return;
+
+	if (pc_readreg(&sd, add_str("@ab_tp_quiz_active")) != 0)
+		return;
+
+	t_tick tick = gettick();
+
+	if (sd.antibot_teleport.window_tick == 0 || DIFF_TICK(tick, sd.antibot_teleport.window_tick) > battle_config.antibot_teleport_quiz_window) {
+		sd.antibot_teleport.window_tick = tick;
+		sd.antibot_teleport.count = 0;
+	}
+
+	sd.antibot_teleport.count++;
+
+	if (sd.antibot_teleport.count < battle_config.antibot_teleport_quiz_count)
+		return;
+
+	sd.antibot_teleport.window_tick = tick;
+	sd.antibot_teleport.count = 0;
+
+	pc_setreg(&sd, add_str("@ab_tp_quiz_active"), 1);
+	pc_setreg(&sd, add_str("@ab_tp_quiz_timeout"), battle_config.antibot_teleport_quiz_timeout);
+
+	if (sd.antibot_teleport.quiz_timer != INVALID_TIMER)
+		delete_timer(sd.antibot_teleport.quiz_timer, pc_antibot_teleport_quiz_timeout);
+	sd.antibot_teleport.quiz_timer = add_timer(tick + battle_config.antibot_teleport_quiz_timeout, pc_antibot_teleport_quiz_timeout, sd.id, 0);
+
+	pc_addeventtimer(&sd, 1000, "AntiBotTeleportQuiz::OnChallenge");
+}
+
 /*==========================================
  * Set's a player position.
  * @param sd
@@ -7226,6 +7284,8 @@ enum e_setpos pc_setpos(map_session_data* sd, uint16 mapindex, int32 x, int32 y,
 		vending_update(*sd);
 	if (sd->state.buyingstore)
 		buyingstore_update(*sd);
+
+	pc_antibot_teleport_check(*sd, clrtype, sd->state.changemap != 0);
 	
 	return SETPOS_OK;
 }
@@ -16441,6 +16501,7 @@ void do_init_pc(void) {
 	add_timer_func_list(pc_autotrade_timer, "pc_autotrade_timer");
 	add_timer_func_list(pc_on_expire_active, "pc_on_expire_active");
 	add_timer_func_list(pc_macro_detector_timeout, "pc_macro_detector_timeout");
+	add_timer_func_list(pc_antibot_teleport_quiz_timeout, "pc_antibot_teleport_quiz_timeout");
 
 	add_timer(gettick() + autosave_interval, pc_autosave, 0, 0);
 

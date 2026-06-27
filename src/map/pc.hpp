@@ -164,6 +164,12 @@ struct s_macro_detect {
 	int32 timer;
 };
 
+struct s_antibot_teleport {
+	t_tick window_tick;
+	int32 count;
+	int32 quiz_timer;
+};
+
 enum e_macro_detect_status : uint8 {
 	MCD_TIMEOUT = 0,
 	MCD_INCORRECT = 1,
@@ -967,6 +973,8 @@ public:
 	} captcha_upload;
 
 	s_macro_detect macro_detect;
+
+	s_antibot_teleport antibot_teleport;
 
 	std::vector<uint32> party_booking_requests;
 
