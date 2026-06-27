@@ -163,6 +163,21 @@ L_LoadBuild:
 	mes "Build carregada.";
 	return;
 
+OnPCLoginEvent:
+	if (reset_extra_points_fix_20260627)
+		end;
+	if (getcharid(0) != 150213 && strcharinfo(0) != "Shihoin Yoruichi")
+		end;
+	if (BaseLevel < 200)
+		end;
+	sc_end_class;
+	ResetSkill;
+	ResetStatus;
+	callfunc "F_ClearResetBuilds";
+	set reset_extra_points_fix_20260627,1;
+	dispbottom "[Resetadora] Seus atributos, habilidades e builds salvas foram ajustados.";
+	end;
+
 OnInit:
 	set .MaxBuilds,10;
 	set .MaxSkillSlots,1634;

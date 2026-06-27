@@ -25,7 +25,7 @@ function Get_Job_Equip;
 function	Require_Level	{
 
 	if ( eaclass() & EAJL_THIRD || Class == 4215 || Class == 4211 || Class == 4212 || Class == 4218) {
-		mes "Não há mais classes disponíveis para este tipo.";
+		mes "Nao ha mais classes disponiveis para este tipo.";
 		close;
 		end;
 	}
@@ -37,7 +37,7 @@ function	Require_Level	{
 		mes ((getarg(0)>1)? 
 			"^bb0000"+getarg(0)+"^000000 (^bb0000Base^000000) / ":"")+"^00bb00"+
 			getarg(1)+"^000000 (^00bb00Classe^000000)";
-		mes "Você precisa de " +
+		mes "Voce precisa de " +
 			((.@blvl > 0) ? "^bb0000"+.@blvl+"^000000 niveis de base a mais" + 
 				((.@jlvl > 0) ? " e " : "") : "") +
 			((.@jlvl > 0) ? "^00bb00"+.@jlvl+"^000000 niveis de classe a mais" : "") +
@@ -113,12 +113,12 @@ function	Is_First_Cls	{
 
 function	Check_Riding	{
 	// Nota: Por que sempre devemos verificar se esta montado:
-	// Montarias são consideradas como outra classe,
+	// Montarias sao consideradas como outra classe,
 	// o que tornaria esse NPC mais complexo para lidar
 	// com esses casos especiais.
 	if (checkfalcon() || checkcart() || checkriding() || ismounting()) {
 		mes "Por favor, remova o seu " +
-			((checkfalcon()) ? "falcão" : "") +
+			((checkfalcon()) ? "falcao" : "") +
 			((checkcart()) ? "carrinho" : "") +
 			((checkriding()) ? "Peco Peco" : "") +
 			((ismounting()) ? "montaria" : "") +
@@ -358,7 +358,7 @@ function	Job_Menu	{
 	while(true) {
 		.@opt_cnt =  getarraysize(getarg(0));
 		if( .@opt_cnt <= 0 ) {
-			mes "Não ha mais classes disponiveis.";
+			mes "Nao ha mais classes disponiveis.";
 			close;
 		}
 
@@ -389,7 +389,7 @@ function	Job_Menu	{
 						case Job_Priest:         .@jobname$ = "Sacerdote"; break;
 						case Job_Wizard:         .@jobname$ = "Bruxo"; break;
 						case Job_Blacksmith:     .@jobname$ = "Ferreiro"; break;
-						case Job_Hunter:         .@jobname$ = "Caçador"; break;
+						case Job_Hunter:         .@jobname$ = "Cacador"; break;
 						case Job_Assassin:       .@jobname$ = "Algoz"; break;
 						case Job_Crusader:       .@jobname$ = "Templario"; break;
 						case Job_Monk:           .@jobname$ = "Monge"; break;
@@ -448,7 +448,7 @@ function	Job_Menu	{
 			// Super Baby can both be selected in one of the first class
 			// changes. That's why the Level Requirement is after and not before
 			// the selection.
-			mes "é necessario ter nivel base " + .SNovice +
+			mes "e necessario ter nivel base " + .SNovice +
     		" para se tornar um " + jobname(.@class) + ".";
 
 			return;
@@ -468,7 +468,7 @@ function	Job_Change	{
 	.@to_cls = getarg(0);
 	next;
 	mes .NPCName$;
-	mes "Você agora é " + callfunc("F_InsertArticle", jobname(.@to_cls)) + "!";
+	mes "Voce agora e " + callfunc("F_InsertArticle", jobname(.@to_cls)) + "!";
 	if (.@to_cls == Job_Novice_High && .LastJob)
 		lastJob = Class; // Saves the lastJob for rebirth
 	if (.@to_cls == Job_Novice_High)
@@ -500,7 +500,7 @@ function	Confirm_Change	{
 		close;
 	}
 	debugmes "Confirm_Change";
-	mes "Você quer mudar para a classe ^0055FF"+jobname(.@class)+"^000000?";
+	mes "Voce quer mudar para a classe ^0055FF"+jobname(.@class)+"^000000?";
 	.@job_option$ = " ~ Mudar para a classe ^0055FF"+jobname(.@class)+"^000000";
 
 	if( .@class == Job_Novice_High)
@@ -676,9 +676,9 @@ OnInit:
 	// Setting adjustments by PACKETVER
 	if( PACKETVER < 20161207 ) {
 		if( .BabyExpanded )
-			debugmes "Mestre de Classes: BabyExpanded esta desativado devido versão de pacote desatualizada.";
+			debugmes "Mestre de Classes: BabyExpanded esta desativado devido versao de pacote desatualizada.";
 		if( .BabySummoner )
-			debugmes "Mestre de Classes: BabySummoner esta desativado devido versão de pacote desatualizada.";
+			debugmes "Mestre de Classes: BabySummoner esta desativado devido versao de pacote desatualizada.";
 		.BabyExpanded = false;
 		.BabySummoner = false;
 	}

@@ -1,10 +1,10 @@
 //=============================================================
-// NPC: Reborn Master/// Função: Resetar Stats/Skills, reduzir EXP e aumentar Drop
+// NPC: Reborn Master/// Funcao: Resetar Stats/Skills, reduzir EXP e aumentar Drop
 //=============================================================
 prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
-	// ===== Configurações =====
-	.@req_base = 200;        // Nível base mínimo
-	.@req_job  = 70;        // Nível de classe mínimo
+	// ===== Configuracoes =====
+	.@req_base = 200;        // Nivel base minimo
+	.@req_job  = 70;        // Nivel de classe minimo
 	.@eac = eaclass();
 	.@base_eac = .@eac&(~EAJL_BABY);
 	.@is_doram = (.@base_eac == EAJ_SUMMONER || .@base_eac == EAJ_SPIRIT_HANDLER);
@@ -20,24 +20,24 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 	set_reputation_points(7, reborn_count * 1000);
 
 	if(reborn_count < 5) {
-		mes "Eu posso guiá-lo pelo renascimento.";
-		mes "Você perderá seus status e habilidades, voltara ao nível 1, mas ganhará ^00FF00"
+		mes "Eu posso guia-lo pelo renascimento.";
+		mes "Voce perdera seus status e habilidades, voltara ao nivel 1, mas ganhara ^00FF00"
 			+.@drop_bonus + "%^000000 de taxa de drop e reduzira ^FF0000"
-			+.@exp_penalty + "%^000000 da ganho de experiência.";
+			+.@exp_penalty + "%^000000 da ganho de experiencia.";
 		next;
 
 		if (BaseLevel < .@req_base || JobLevel < .@req_job) {
-			mes "Você precisa ter pelo menos Nível Base "+.@req_base+
-				" e Nível de Classe "+.@req_job+" para renascer.";
+			mes "Voce precisa ter pelo menos Nivel Base "+.@req_base+
+				" e Nivel de Classe "+.@req_job+" para renascer.";
 			close;
 		}
 
 		if (select("Quero renascer","Cancelar") == 2) close;
 
-		// Confirmação
+		// Confirmacao
 		mes "[Reborn Master]";
-		mes "Tem certeza? Isso não pode ser desfeito.";
-		if (select("Sim, estou pronto","Não, cancelar") == 2) close;
+		mes "Tem certeza? Isso nao pode ser desfeito.";
+		if (select("Sim, estou pronto","Nao, cancelar") == 2) close;
 
 		.@was_second_visual = (getlook(LOOK_BODY2) >= 4332 && getlook(LOOK_BODY2) <= 4344);
 
@@ -54,7 +54,7 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 
 		// ===== Aplicar renascimento =====
 		// Mesmo fluxo do Job Master:
-		// salva a classe atual para manter a progressão linear no Job Master.
+		// salva a classe atual para manter a progressao linear no Job Master.
 		lastJob = Class;
 		callfunc "F_ClearResetBuilds";
 		if (.@is_doram)
@@ -66,7 +66,7 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 			StatusPoint = 100;
 		setpcblock(0,1); // evita movimentos durante ajustes
 
-		// Guarda em variáveis de personagem		
+		// Guarda em variaveis de personagem		
 		
 		set reborn_count, reborn_count + 1;
 		if (reborn_count < 0) set reborn_count, 0;
@@ -83,10 +83,10 @@ prontera,170,226,4	script	Reborn Master	4_M_GUNSLINGER,{
 
 		setpcblock(0,0);
 		mes "[Reborn Master]";
-		mes "Parabéns, você renasceu!";
+		mes "Parabens, voce renasceu!";
 		close;
 	} else {
-		mes "Você já atingiu máximo de Reborn!";
+		mes "Voce ja atingiu maximo de Reborn!";
 		close;
 	}
 }
