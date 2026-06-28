@@ -129,6 +129,28 @@ OnKvmPointMinute:
 //============================================================
 //   CONTROLE DE HORARIO (a cada minuto)
 //============================================================
+OnClock1800:
+OnClock1830:
+OnClock1900:
+OnClock1930:
+OnClock2000:
+OnClock2030:
+OnClock2100:
+OnClock2130:
+    if (gettime(DT_DAYOFWEEK) != SUNDAY) end;
+    if ($WOE_CUSTOM_ACTIVE || agitcheck()) end;
+
+    .@minutes_left = (22 - gettime(DT_HOUR)) * 60 - gettime(DT_MINUTE);
+    if (.@minutes_left <= 0) end;
+
+    if (.@minutes_left >= 60)
+        .@time_left$ = (.@minutes_left / 60) + " hora(s)";
+    else
+        .@time_left$ = .@minutes_left + " minuto(s)";
+
+    announce "[WoE] A Guerra do Emperium acontece hoje as 22:00! Prepare sua guild.", bc_all;
+    end;
+
 OnClock2200:
 
     .@day  = gettime(DT_DAYOFWEEK);
