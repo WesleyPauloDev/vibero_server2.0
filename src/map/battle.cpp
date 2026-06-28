@@ -12282,6 +12282,7 @@ static const struct _battle_data {
 	{ "antibot_teleport_quiz_count",        &battle_config.antibot_teleport_quiz_count,     10,     1,      INT_MAX,        },
 	{ "antibot_teleport_quiz_window",       &battle_config.antibot_teleport_quiz_window,    600000, 1000,   INT_MAX,        },
 	{ "antibot_teleport_quiz_timeout",      &battle_config.antibot_teleport_quiz_timeout,   60000,  1000,   INT_MAX,        },
+	{ "antibot_teleport_quiz_cooldown",     &battle_config.antibot_teleport_quiz_cooldown,  600000, 0,      INT_MAX,        },
 
 	{ "feature.dynamicnpc_timeout",         &battle_config.feature_dynamicnpc_timeout,      1000,   60000,  INT_MAX,        },
 	{ "feature.dynamicnpc_rangex",          &battle_config.feature_dynamicnpc_rangex,       2,      0,      INT_MAX,        },

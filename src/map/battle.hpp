@@ -764,6 +764,7 @@ struct Battle_Config
 	int32 antibot_teleport_quiz_count;
 	int32 antibot_teleport_quiz_window;
 	int32 antibot_teleport_quiz_timeout;
+	int32 antibot_teleport_quiz_cooldown;
 
 	int32 feature_dynamicnpc_timeout;
 	int32 feature_dynamicnpc_rangex;

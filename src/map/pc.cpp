@@ -6983,6 +6983,16 @@ static void pc_antibot_teleport_check(map_session_data& sd, clr_type clrtype, bo
 	if (pc_readreg(&sd, add_str("@ab_tp_quiz_active")) != 0)
 		return;
 
+	if (battle_config.antibot_teleport_quiz_cooldown > 0) {
+		int64 cooldown_until = pc_readreg(&sd, add_str("@ab_tp_quiz_cooldown_until"));
+
+		if (cooldown_until > time(nullptr)) {
+			sd.antibot_teleport.window_tick = 0;
+			sd.antibot_teleport.count = 0;
+			return;
+		}
+	}
+
 	t_tick tick = gettick();
 
 	if (sd.antibot_teleport.window_tick == 0 || DIFF_TICK(tick, sd.antibot_teleport.window_tick) > battle_config.antibot_teleport_quiz_window) {
@@ -7000,6 +7010,7 @@ static void pc_antibot_teleport_check(map_session_data& sd, clr_type clrtype, bo
 
 	pc_setreg(&sd, add_str("@ab_tp_quiz_active"), 1);
 	pc_setreg(&sd, add_str("@ab_tp_quiz_timeout"), battle_config.antibot_teleport_quiz_timeout);
+	pc_setreg(&sd, add_str("@ab_tp_quiz_cooldown"), battle_config.antibot_teleport_quiz_cooldown / 1000);
 
 	if (sd.antibot_teleport.quiz_timer != INVALID_TIMER)
 		delete_timer(sd.antibot_teleport.quiz_timer, pc_antibot_teleport_quiz_timeout);
