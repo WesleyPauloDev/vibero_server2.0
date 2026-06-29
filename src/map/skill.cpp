@@ -5382,7 +5382,6 @@ int32 skill_castend_damage_id (struct block_list* src, struct block_list *bl, ui
 	case NC_MAGMA_ERUPTION:
 	case GC_WEAPONCRUSH:
 	case GC_VENOMPRESSURE:
-	case SC_TRIANGLESHOT:
 	case SC_FEINTBOMB:
 	case LG_BANISHINGPOINT:
 	case LG_SHIELDPRESS:
@@ -5824,6 +5823,7 @@ int32 skill_castend_damage_id (struct block_list* src, struct block_list *bl, ui
 	case SP_CURSEEXPLOSION:
 	case SP_SHA:
 	case SP_SWHOO:
+	case SC_TRIANGLESHOT:
 	case DK_SERVANTWEAPON_ATK:
 	case DK_SERVANT_W_PHANTOM:
 	case DK_SERVANT_W_DEMOL:
