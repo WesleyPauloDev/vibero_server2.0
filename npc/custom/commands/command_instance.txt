@@ -31,7 +31,7 @@ OnAtcommand:
 	}
 
 	.@now = gettimetick(2);
-	.@reset_ver = 23;
+	.@reset_ver = 24;
 	if (#INSTANCE_MENU_RESET_VER != .@reset_ver || #INSTANCE_MENU_RESET_TICK <= .@now) {
 		callfunc("F_InstanceMenuResetStatus", "poringvillage", "PORING");
 		callfunc("F_InstanceMenuResetStatus", "orcMemory", "ORCMEMORY");
@@ -92,6 +92,7 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatus", "water_garden", "WATERGARDEN");
 		callfunc("F_InstanceMenuResetStatus", "faceworms_nest", "FacewormsNest");
 		callfunc("F_InstanceMenuResetStatus", "nightmarish_jitterbug", "NightmarishJitterbug");
+		callfunc("F_InstanceMenuResetStatus", "confused_snake_nest", "ConfusedSnakeNest");
 		callfunc("F_InstanceMenuResetStatus", "hazy_forest", "HazyForest");
 		callfunc("F_InstanceMenuResetStatus", "deep_forest", "DeepForest");
 		callfunc("F_InstanceMenuResetStatus", "tomb_remorse", "TombRemorse");
@@ -115,6 +116,7 @@ OnAtcommand:
 	if (.@oghc_level > 10)
 		.@oghc_level = 10;
 	.@opt55$ = callfunc("F_InstanceMenuOption", "[175] Glast Heim Challenge", "ogh_challenge", "OldGlastHeimChallenge");
+	.@opt56$ = callfunc("F_InstanceMenuOption", "[200] Ninho da Serpente", "confused_snake_nest", "ConfusedSnakeNest");
 	.@opt6$ = callfunc("F_InstanceMenuOption", "[75] Santuario Selado", "santuario_selado", "SANTUARIOSELADO");
 	.@opt7$ = callfunc("F_InstanceMenuOption", "[90] Lab. Werner", "wlcr", "WLCR");
 	.@opt8$ = callfunc("F_InstanceMenuOption", "[90] Torneio da Magia", "gmt", "GMT");
@@ -215,7 +217,8 @@ OnAtcommand:
 		.@opt40$,
 		.@opt44$,
 		.@opt45$,
-		.@opt55$
+		.@opt55$,
+		.@opt56$
 	);	close2;
 
 	setarray .@case_map[1],
@@ -224,7 +227,7 @@ OnAtcommand:
 		15,16,17,18,19,20,21,22,23,24,
 		25,51,26,27,28,29,30,31,32,
 		33,34,47,53,35,36,37,38,39,
-		40,41,42,44,45,55;
+		40,41,42,44,45,55,56;
 	.@s = .@case_map[.@s];
 
 	switch(.@s) {
@@ -262,6 +265,10 @@ OnAtcommand:
 		case 55:
 			#INSTANCENAME$ = "OGHC";
 			doevent "OGHC_Instance#Custom::OnStartInstance";
+			end;
+		case 56:
+			#INSTANCENAME$ = "ConfusedSnakeNest";
+			doevent "ChaoticSnakeNest_Instance#Custom::OnStartInstance";
 			end;
 		case 48:
 			#INSTANCENAME$ = "OctopusCave";
@@ -547,7 +554,7 @@ S_ResumeActiveInstance:
 		"Farm Lost in Time", "Laboratorio Wolfchev", "Templo do Rei Demonio", "Isle of Bios",
 		"Morse's Cave", "Sealed OS", "OS Occupation", "Cor Memorial",
 		"Base Militar", "Oz Labyrinth", "Sky Fortress Invasion", "Duelo com Sweety",
-		"Faceworm's Nest", "Nightmarish Jitterbug", "Deep Forest", "Tomb of Remorse",
+		"Faceworm's Nest", "Nightmarish Jitterbug", "Confused Snake's Nest", "Deep Forest", "Tomb of Remorse",
 		"Edda do Laboratorio", "Bangungot Hospital 2F", "Geffen Night Arena", "Constellation Tower",
 		"Culvert", "Wolves Gathering Place", "Sanctuary Purification";
 	setarray .@event_name$[0],
@@ -563,7 +570,7 @@ S_ResumeActiveInstance:
 		"LostFarm", "WolfchevLaboratory", "TRG", "IsleOfBios",
 		"MorseCave", "SealedOs", "OSOccupation", "CorOperation",
 		"ThorGunsuBase", "MazeofOz", "SkyFortress", "TwilightGarden",
-		"FacewormsNest", "NightmarishJitterbug", "DeepForest", "TombOfRemorse",
+		"FacewormsNest", "NightmarishJitterbug", "ConfusedSnakeNest", "DeepForest", "TombOfRemorse",
 		"EddaBiolabs", "BangungotHospital", "GeffenNightArena", "ConstellationTower",
 		"MalangdoCulvert", "WolvesGathering", "SanctuaryPurification";
 
