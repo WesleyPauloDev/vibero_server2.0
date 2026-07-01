@@ -29,8 +29,8 @@ OnTalk:
 		" ~ Masmorras",Dungeons,
 		// " ~ Castelos de Guilda",Castles,
 		" ~ Masmorras de Guilda",Guild_Dungeons,
-		" ~ Masmorras da Ilusão",Illusion_Dungeons,
-		// " ~ Instâncias",Instances,
+		" ~ Masmorras da Ilusao",Illusion_Dungeons,
+		// " ~ Instancias",Instances,
 		" ~ Mapa do Anubis",Anubis,
 		// " ~ Cheffenia",Cheffenia,
 		// " ~ Bio Lab 5",Bio5,
@@ -38,7 +38,7 @@ OnTalk:
 
 
         if (lastwarp$ == "")
-            message strcharinfo(0),"Você ainda não se teletransportou para lugar nenhum.";
+            message strcharinfo(0),"Voce ainda nao se teletransportou para lugar nenhum.";
         else
             warp lastwarp$,lastwarpx,lastwarpy;
         end;
@@ -83,7 +83,7 @@ OnTalk:
             set .@map$, getarg(0)+((.@i<10)?"0":"")+.@i;
         }
         if (.@warp_block & (1<<.@select)) {
-            message strcharinfo(0),"Este mapa não está habilitado em "+((checkre(0))?"":"Pre-")+"Renewal.";
+            message strcharinfo(0),"Este mapa nao esta habilitado em "+((checkre(0))?"":"Pre-")+"Renewal.";
             end;
         }
         set .@x, @c[.@i*2];
@@ -125,7 +125,7 @@ OnTalk:
     menu	"[0~20]Iniciante",GUIA0,"[20+]Grupo Eden",GUIA01,"[99+]Roween",GUIA1, "[100+]Magdun 02",GUIA2, "[105+]Vento da Colina",GUIA3, "[110+]Kobold",GUIA4,
             "[115+]Lobo do Deserto",GUIA5, "[120+]Siroma",GUIA6, "[125+]Magmaring",GUIA7, "[130+]Juperos",GUIA8, "[135+]",GUIA9, "[140+]Abyss 01",GUIA10,
             "[145+]Torre de Thanatos 08",GUIA11, "[150+]El Dicastes 01",GUIA12, "[155+]Scaraba",GUIA13, "[160+]Monasterio 03",GUIA14, "[165+]",GUIA15,
-            "[170+]",GUIA16, "[175+]Glast Heim Abismo",GUIA17, "[180+]Mina Einbech 3",GUIA18, "[185+]Ilusão Subaquática 2",GUIA19,
+            "[170+]",GUIA16, "[175+]Glast Heim Abismo",GUIA17, "[180+]Mina Einbech 3",GUIA18, "[185+]Ilusao Subaquatica 2",GUIA19,
             "[190+]Abyss 04",GUIA20, "[195+]Thanatos 12",GUIA21;
     
     GUIA0: setarray @c[2],170,375,157,208,156,187,195,191,344,371;
@@ -148,9 +148,9 @@ OnTalk:
     GUIA14: Go("abbey03",119,9);
 
     GUIA15: setarray @c[2],247,40,282,153,140,133;
-        Disp("Templo de Odin:Biolaboratório (2)"); Pick("","odin_tem03","lhz_dun02");
+        Disp("Templo de Odin:Biolaboratorio (2)"); Pick("","odin_tem03","lhz_dun02");
     GUIA16: setarray @c[2],21,229,145,86,140,133;
-        Disp("Vulcão de Thor:Nifflheim Dungeon:Biolaboratório (3)"); Pick("","thor_v01","nif_dun01","lhz_dun03");
+        Disp("Vulcao de Thor:Nifflheim Dungeon:Biolaboratorio (3)"); Pick("","thor_v01","nif_dun01","lhz_dun03");
     GUIA17: Go("gl_cas01_",199,29);
     GUIA18: Go("ein_dun03",269,279);
     GUIA19: Go("iz_d05_i",141,188);
@@ -237,7 +237,7 @@ OnTalk:
     menu	"Campos de Amatsu",F1, "Campos de Ayothaya",F2, "Campos de Bifrost", F3,
             "Campos de Brasilis",F4, "Campos de Comodo",F5, "Campos de Dewata",F6,
             "Campos de Eclage",F7, "Campos de Einbroch",F8, "Campos de El Dicastes",F9,
-            // "Campos de Frozen Scale",F10,
+            "Campos de Frozen Scale",F10,
             "Campos de Geffen",F11, "Floresta do Lobo Cinzento",F12,
             "Campos de Hugel",F13, "Campos de Juno",F14, "Deserto de Kiwawa",F15,
             "Campos de Kunlun",F16, "Campos de Lasagna",F17, "Campos de Lighthalzen",F18,
@@ -274,7 +274,7 @@ OnTalk:
         Disp("Campo de El Dicastes",1,2); Pick("dic_fild");
     F10: Restrict("RE");
         setarray @c[2],378,223,223,18,365,241,140,280;
-        Disp("Colina Frozen Scale:Planícies Frozen Scale:Glaciar Frozen Scale:Frozen Tail"); Pick("","jor_back1","jor_back2","jor_back3","jor_tail");
+        Disp("Colina Frozen Scale:Planicies Frozen Scale:Glaciar Frozen Scale:Frozen Tail"); Pick("","jor_back1","jor_back2","jor_back3","jor_tail");
     F11: Restrict("Pre-RE",13,15);
         setarray @c[0],46,199,213,204,195,212,257,192,188,171,166,263,248,158,195,191,186,183,221,117,178,218,136,328,240,181,235,235,211,185;
         Disp("Campo de Geffen",0,14); Pick("gef_fild",1);
@@ -341,31 +341,31 @@ OnTalk:
     Dungeons:
     // --------------------------------------------------
     @d = true;
-    menu	"Laboratório Abandonado Amicitia",D1, "Lagos do Abismo",D2, "Calabouço de Amatsu",D3,
-            "Formigueiro (Anthell)",D4, "Calabouço de Ayothaya",D5, "Calabouço da Praia",D6,
-            "Torre de Bifrost",D7, "Laboratórios de Bioquímicos",D8, "Calabouço de Brasilis",D9,
-            "Calabouço de Byalan",D10, "Torre do Relógio",D11, "Minas de Carvão",D12,
-            "Esgoto (Culvert)",D13, "Abadia Amaldiçoada",D14, "Calabouço de Dewata",D15,
-            "Calabouço de Einbroch",D16, "Bacia das Chamas",D17, "Gefenia",D18,
-            "Calabouço de Geffen",D19, "Glast Heim",D20, "Calabouço Oculto",D21,
-            "Calabouço de Gelo",D22,
-            // "Calabouços da Ilusão", D23, 
-            // "Calabouço de Issgard",D24,
-            "Juperos",D25, "Calabouço de Kiel",D26, "Calabouço de Kunlun",D27,
-            "Calabouço de Lasagna",D28, "Calabouço de Luoyang",D29, "Calabouço de Magma",D30,
-            "Calabouço de Malangdo",D31, "Calabouço de Moscovia",D32, "Calabouço de Nidhogg",D33,
-            "Calabouço de Niflheim",D34, "Templo de Odin",D35, "Calabouço dos Orcs",D36,
-            "Labirinto de Oz",D37, "Calabouço de Payon",D38, "Subsolo de Prontera",D39,
-            "Pirâmides",D40, "Santuário de Rachel",D41, "Calabouço de Rock Ridge",D42,
-            "Calabouço de Rudus",D43, "Buraco dos Escaravelhos",D44, "Esfinge",D45,
-            "Navio Afundado",D46, "Torre de Thanatos",D47, "Vulcão de Thor",D48,
-            "Fábrica de Brinquedos",D49, "Calabouço das Tartarugas",D50,
-            //  "Calabouço de Umbala",D51,
-            "Calabouço de Varmundt",D52, "Area de Verus",D53, "Laboratório Werner",D54;
+    menu	"Laboratorio Abandonado Amicitia",D1, "Lagos do Abismo",D2, "Calabouco de Amatsu",D3,
+            "Formigueiro (Anthell)",D4, "Calabouco de Ayothaya",D5, "Calabouco da Praia",D6,
+            "Torre de Bifrost",D7, "Laboratorios de Bioquimicos",D8, "Calabouco de Brasilis",D9,
+            "Calabouco de Byalan",D10, "Torre do Relogio",D11, "Minas de Carvao",D12,
+            "Esgoto (Culvert)",D13, "Abadia Amaldicoada",D14, "Calabouco de Dewata",D15,
+            "Calabouco de Einbroch",D16, "Bacia das Chamas",D17, "Gefenia",D18,
+            "Calabouco de Geffen",D19, "Glast Heim",D20, "Calabouco Oculto",D21,
+            "Calabouco de Gelo",D22,
+            // "Calaboucos da Ilusao", D23, 
+            // "Calabouco de Issgard",D24,
+            "Juperos",D25, "Calabouco de Kiel",D26, "Calabouco de Kunlun",D27,
+            "Calabouco de Lasagna",D28, "Calabouco de Luoyang",D29, "Calabouco de Magma",D30,
+            "Calabouco de Malangdo",D31, "Calabouco de Moscovia",D32, "Calabouco de Nidhogg",D33,
+            "Calabouco de Niflheim",D34, "Templo de Odin",D35, "Calabouco dos Orcs",D36,
+            "Labirinto de Oz",D37, "Calabouco de Payon",D38, "Subsolo de Prontera",D39,
+            "Piramides",D40, "Santuario de Rachel",D41, "Calabouco de Rock Ridge",D42,
+            "Calabouco de Rudus",D43, "Buraco dos Escaravelhos",D44, "Esfinge",D45,
+            "Navio Afundado",D46, "Torre de Thanatos",D47, "Vulcao de Thor",D48,
+            "Fabrica de Brinquedos",D49, "Calabouco das Tartarugas",D50,
+            //  "Calabouco de Umbala",D51,
+            "Calabouco de Varmundt",D52, "Area de Verus",D53, "Laboratorio Werner",D54;
 
     D1: Restrict("RE");
         setarray @c[2],253,244,145,278;
-        Disp("1º Andar - Laboratório Geral:2º Andar - Sala de Cultura Intensiva"); Pick("","amicitia1","amicitia2");
+        Disp("1ï¿½ Andar - Laboratorio Geral:2ï¿½ Andar - Sala de Cultura Intensiva"); Pick("","amicitia1","amicitia2");
     D2: Restrict("RE",4);
         setarray @c[2],261,272,275,270,116,27,169,159;
         Disp("Lagos de Abismo",1,4); Pick("abyss_");
@@ -374,57 +374,57 @@ OnTalk:
     D4: setarray @c[2],35,262,168,170;
         Disp("Formigueiro",1,2); Pick("anthell");
     D5: setarray @c[2],275,19,24,26;
-        Disp("Labirinto do Santuário Antigo:Interior do Santuário Antigo"); Pick("ayo_dun");
+        Disp("Labirinto do Santuario Antigo:Interior do Santuario Antigo"); Pick("ayo_dun");
     D6: setarray @c[2],266,67,255,244,23,260;
-        Disp("Calabouço da Praia",1,3); Pick("","beach_dun","beach_dun2","beach_dun3");
+        Disp("Calabouco da Praia",1,3); Pick("","beach_dun","beach_dun2","beach_dun3");
     D7: Restrict("RE");
         setarray @c[2],57,13,64,88,45,14,26,23;
         Disp("Torre de Bifrost",1,4); Pick("ecl_tdun");
     D8: Restrict("RE",4,5);
         setarray @c[2],150,288,150,18,140,134,244,52,100,202;
-        Disp("Laboratório Biológico 1:Laboratório Biológico 2:Laboratório Biológico 3:Laboratório Biológico 4"); Pick("","lhz_dun01","lhz_dun02","lhz_dun03","lhz_dun04");
+        Disp("Laboratorio Biologico 1:Laboratorio Biologico 2:Laboratorio Biologico 3:Laboratorio Biologico 4"); Pick("","lhz_dun01","lhz_dun02","lhz_dun03","lhz_dun04");
     D9: Restrict("Brasilis");
         setarray @c[2],87,47,262,262;
-        Disp("Calabouço de Brasilis",1,2); Pick("bra_dun");
+        Disp("Calabouco de Brasilis",1,2); Pick("bra_dun");
     D10: Restrict("RE",6);
         setarray @c[0],168,168,253,252,236,204,32,63,26,27,141,187;
-        Disp("Calabouço de Byalan",1,6); Pick("iz_dun",1);
+        Disp("Calabouco de Byalan",1,6); Pick("iz_dun",1);
     D11: Restrict("RE",9,10,11);
         setarray @c[2],199,159,148,283,65,147,56,155,297,25,127,169,277,178,268,74,266,27,60,142,79,39;
-        Disp("Torre do Relógio 1:Torre do Relógio 2:Torre do Relógio 3:Torre do Relógio 4:Porão 1:Porão 2:Porão 3:Porão 4:Torre do Relógio Pesadelo 2º Andar:Torre do Relógio Pesadelo 3º Andar:Porão Desconhecido");
+        Disp("Torre do Relogio 1:Torre do Relogio 2:Torre do Relogio 3:Torre do Relogio 4:Porao 1:Porao 2:Porao 3:Porao 4:Torre do Relogio Pesadelo 2ï¿½ Andar:Torre do Relogio Pesadelo 3ï¿½ Andar:Porao Desconhecido");
         Pick("","c_tower1","c_tower2","c_tower3","c_tower4","alde_dun01","alde_dun02","alde_dun03","alde_dun04","c_tower2_","c_tower3_","clock_01");
     D12: setarray @c[2],52,17,381,343,302,262;
-        Disp("Minas de Carvão",1,3); Pick("mjo_dun");
+        Disp("Minas de Carvao",1,3); Pick("mjo_dun");
     D13: setarray @c[2],131,247,19,19,180,169,100,92;
         Disp("Esgoto de Prontera",1,4); Pick("","prt_sewb1","prt_sewb2","prt_sewb3","prt_sewb4");
     D14: setarray @c[2],51,14,150,11,120,10;
-        Disp("Abadia Amaldiçoada",1,3); Pick("abbey");
+        Disp("Abadia Amaldicoada",1,3); Pick("abbey");
     D15: Restrict("RE");
         setarray @c[2],285,160,299,29;
-        Disp("Calabouço de Dewata",1,2); Pick("dew_dun");
+        Disp("Calabouco de Dewata",1,2); Pick("dew_dun");
     D16: Restrict("RE",3);
         setarray @c[2],22,14,292,290,269,279;
-        Disp("Calabouço de Einbroch",1,3); Pick("ein_dun");
+        Disp("Calabouco de Einbroch",1,3); Pick("ein_dun");
     D17: Restrict("RE");
         Go("moro_vol",97,107);
     D18: setarray @c[2],40,103,203,34,266,168,130,272;
-        Disp("Gefênia",1,4); Pick("gefenia",0);
+        Disp("Gefenia",1,4); Pick("gefenia",0);
     D19: setarray @c[0],104,99,115,236,106,132,203,200;
-        Disp("Calabouço de Geffen",1,4); Pick("gef_dun",1);
+        Disp("Calabouco de Geffen",1,4); Pick("gef_dun",1);
     D20: Restrict("RE",17,18,19);
         setarray @c[2],370,304,199,29,104,25,150,15,157,287,147,15,258,255,108,291,171,283,68,277,156,7,12,7,133,271,224,274,14,70,150,14,104,31,148,144,199,29;
-        Disp("Entrada:Castelo 1:Castelo 2:Cavalaria 1:Cavalaria 2:Cemitério:Igreja 1:Igreja 2:Igreja 3:Igreja 4:Abadia:Escadaria:Caverna Subterrânea 1:Caverna Subterrânea 2:Prisão Subterrânea 1:Prisão Subterrânea 2:Castelo 2 - Modo Pesadelo:Cemitério - Modo Pesadelo:Glastheim Abismo Castelo F1");
+        Disp("Entrada:Castelo 1:Castelo 2:Cavalaria 1:Cavalaria 2:Cemiterio:Igreja 1:Igreja 2:Igreja 3:Igreja 4:Abadia:Escadaria:Caverna Subterranea 1:Caverna Subterranea 2:Prisao Subterranea 1:Prisao Subterranea 2:Castelo 2 - Modo Pesadelo:Cemiterio - Modo Pesadelo:Glastheim Abismo Castelo F1");
         Pick("","glast_01","gl_cas01","gl_cas02","gl_knt01","gl_knt02","gl_chyard","gl_sew01","gl_sew02","gl_sew03","gl_sew04","gl_church","gl_step","gl_dun01","gl_dun02","gl_prison","gl_prison1","gl_cas02_","gl_chyard_","gl_cas01_");
     D21: setarray @c[2],99,31,93,20,182,88;
-        Disp("Calabouço Oculto",1,3); Pick("prt_maze");
+        Disp("Calabouco Oculto",1,3); Pick("prt_maze");
     D22: setarray @c[2],157,14,151,155,149,22,33,158;
-        Disp("Calabouço de Gelo",1,4); Pick("ice_dun");
-    // D23: menu "Ilusão do Abismo",SubD1, "Ilusão do Congelado",SubD2, "Ilusão do Labirinto",SubD3,
-    //         "Ilusão de Luanda",SubD4, "Ilusão da Luz da Lua",SubD5, "Ilusão do Urso de Pelúcia",SubD6,
-    //         "Ilusão dos Gemeos",SubD7, "Ilusão Subaquática",SubD8, "Ilusão do Vampiro",SubD9;
+        Disp("Calabouco de Gelo",1,4); Pick("ice_dun");
+    // D23: menu "Ilusao do Abismo",SubD1, "Ilusao do Congelado",SubD2, "Ilusao do Labirinto",SubD3,
+    //         "Ilusao de Luanda",SubD4, "Ilusao da Luz da Lua",SubD5, "Ilusao do Urso de Pelucia",SubD6,
+    //         "Ilusao dos Gemeos",SubD7, "Ilusao Subaquatica",SubD8, "Ilusao do Vampiro",SubD9;
     //     SubD1: Restrict("RE");
     //         setarray @c[2],132,189,99,186;
-    //         Disp("Aldeia Desolada:Palácio da Tartaruga Sombria"); Pick("","tur_d03_i","tur_d04_i");
+    //         Disp("Aldeia Desolada:Palacio da Tartaruga Sombria"); Pick("","tur_d03_i","tur_d04_i");
     //     SubD2: Restrict("RE");
     //         Go("ice_d03_i",149,22);
     //     SubD3: Restrict("RE");
@@ -444,10 +444,10 @@ OnTalk:
     //         Go("gef_d01_i",114,216);
     D24: Restrict("RE");
         setarray @c[2],112,15,280,87,112,12,274,85;
-        Disp("Porão Abandonado 1:Porão Abandonado 2:Calor do Deus Serpente 1º Andar:Calor do Deus Serpente 2º Andar"); Pick("","jor_ab01","jor_ab02","jor_dun01","jor_dun02");
+        Disp("Porao Abandonado 1:Porao Abandonado 2:Calor do Deus Serpente 1ï¿½ Andar:Calor do Deus Serpente 2ï¿½ Andar"); Pick("","jor_ab01","jor_ab02","jor_dun01","jor_dun02");
     D25: Restrict("RE",5);
         setarray @c[2],140,51,53,247,37,63,150,285,146,215;
-        Disp("Entrada:Juperos 1:Juperos 2:Núcleo:Ruínas do Leste de Juperos");
+        Disp("Entrada:Juperos 1:Juperos 2:Nucleo:Ruinas do Leste de Juperos");
         Pick("","jupe_cave","juperos_01","juperos_02","jupe_core","ver_eju");
 
     D26: setarray @c[2],28,226,41,198;
@@ -471,7 +471,7 @@ OnTalk:
         Disp("Masmorra de Nidhogg",1,2); Pick("nyd_dun");
     D34: Restrict("RE");
         setarray @c[2],145,90,150,20;
-        Disp("Masmorra de Niflheim - 1º Andar:Masmorra de Niflheim - 2º Andar"); Pick("nif_dun");
+        Disp("Masmorra de Niflheim - 1ï¿½ Andar:Masmorra de Niflheim - 2ï¿½ Andar"); Pick("nif_dun");
     D35: Restrict("RE",4);
         setarray @c[2],298,167,224,149,266,280,276,236;
         Disp("Templo de Odin 1:Templo de Odin 2:Templo de Odin 3:Odin do Passado"); Pick("","odin_tem01","odin_tem02","odin_tem03","odin_past");
@@ -484,16 +484,16 @@ OnTalk:
         Disp("Masmorra de Payon",1,5); Pick("pay_dun",1);
     D39: Restrict("RE");
         setarray @c[2],159,289,155,353;
-        Disp("Prisão Subterrânea de Prontera:Invasão de Prontera"); Pick("","prt_prison","prt_q");
+        Disp("Prisao Subterranea de Prontera:Invasao de Prontera"); Pick("","prt_prison","prt_q");
     D40: Restrict("RE",7,8);
         setarray @c[2],192,9,10,192,100,92,181,11,94,96,192,8,94,96,192,8;
-        Disp("Pirâmide 1:Pirâmide 2:Pirâmide 3:Pirâmide 4:Subsolo 1:Subsolo 2:Subsolo 1 - Modo Pesadelo:Subsolo 2 - Modo Pesadelo");
+        Disp("Piramide 1:Piramide 2:Piramide 3:Piramide 4:Subsolo 1:Subsolo 2:Subsolo 1 - Modo Pesadelo:Subsolo 2 - Modo Pesadelo");
         Pick("","moc_pryd01","moc_pryd02","moc_pryd03","moc_pryd04","moc_pryd05","moc_pryd06","moc_prydn1","moc_prydn2");
     D41: setarray @c[2],140,11,32,21,8,149,204,218,150,9;
-        Disp("Santuário de Rachel",1,5); Pick("ra_san");
+        Disp("Santuario de Rachel",1,5); Pick("ra_san");
     D42: Restrict("RE");
         setarray @c[2],247,19,281,104;
-        Disp("Mina de Rock Ridge:Canal Subterrâneo"); Pick("","rockmi1","harboro2");
+        Disp("Mina de Rock Ridge:Canal Subterraneo"); Pick("","rockmi1","harboro2");
     D43: Restrict("RE");
         setarray @c[2],200,377,185,258,366,207,378,178;
         Disp("Masmorra de Rudus",1,4); Pick("","sp_rudus","sp_rudus2","sp_rudus3","sp_rudus4");
@@ -507,24 +507,24 @@ OnTalk:
     D47: setarray @c[2],150,39,150,136,220,158,59,143,62,11,89,221,35,166,93,148,29,107,159,138,19,20,130,52;
         Disp("Torre de Thanatos",1,12); Pick("tha_t");
     D48: setarray @c[2],21,228,75,205,34,272;
-        Disp("Vulcão de Thor",1,3); Pick("thor_v");
+        Disp("Vulcao de Thor",1,3); Pick("thor_v");
     D49: setarray @c[2],205,15,129,133;
-        Disp("Fábrica de Brinquedos",1,2); Pick("xmas_dun");
+        Disp("Fabrica de Brinquedos",1,2); Pick("xmas_dun");
     D50: setarray @c[2],154,49,148,261,132,189,100,192;
         Disp("Entrada:Masmorra das Tartarugas 1:Masmorra das Tartarugas 2:Masmorra das Tartarugas 3"); Pick("tur_dun");
     D51: Restrict("Pre-RE",1,2);
         setarray @c[2],42,31,48,30,204,78;
-        Disp("Oficina na Árvore:Passagem para Outro Mundo:Fonte de Hvergermil");
+        Disp("Oficina na Arvore:Passagem para Outro Mundo:Fonte de Hvergermil");
         Pick("","um_dun01","um_dun02","yggdrasil01");
     D52: Restrict("RE");
         setarray @c[2],275,21,15,115,15,115,159,27,162,36,159,11,156,33,337,333,314,64,163,18,156,20,39,81,52,91,156,21,146,26;
-        Disp("Usina de Tratamento de Esgoto:Usina de Energia 1:Usina de Energia 2:Grande Banho Meditathio:Vale da Fazenda Perdida:Corredor da Memórias da Biblioteca:Andar Superior do Armazém Tártaro:Andar Inferior do Armazém Tártaro:Runa da Morte:Runa do Fogo:Runa da Grama:Runa do Gelo:Runa do Templo:Runa da Alma:Runa do Veneno"); Pick("","ba_pw02","ba_pw01","ba_pw03","ba_bath","ba_lost","ba_lib","ba_2whs01","ba_2whs02","bl_death","bl_lava","bl_grass","bl_ice","bl_temple","bl_soul","bl_venom");
+        Disp("Usina de Tratamento de Esgoto:Usina de Energia 1:Usina de Energia 2:Grande Banho Meditathio:Vale da Fazenda Perdida:Corredor da Memorias da Biblioteca:Andar Superior do Armazem Tartaro:Andar Inferior do Armazem Tartaro:Runa da Morte:Runa do Fogo:Runa da Grama:Runa do Gelo:Runa do Templo:Runa da Alma:Runa do Veneno"); Pick("","ba_pw02","ba_pw01","ba_pw03","ba_bath","ba_lost","ba_lib","ba_2whs01","ba_2whs02","bl_death","bl_lava","bl_grass","bl_ice","bl_temple","bl_soul","bl_venom");
     D53: Restrict("RE");
         setarray @c[2],244,61,72,20,122,22;
-        Disp("Laboratório OPTATIO:P&D WISH:Praça Central de Verus"); Pick("verus");
+        Disp("Laboratorio OPTATIO:P&D WISH:Praca Central de Verus"); Pick("verus");
     D54: Restrict("RE");
         setarray @c[2],14,88;
-        Disp("Laboratório Werner"); Pick("","slabw01");
+        Disp("Laboratorio Werner"); Pick("","slabw01");
 
     // // --------------------------------------------------
     //     Castles:
@@ -593,12 +593,12 @@ OnTalk:
     // --------------------------------------------------
     Illusion_Dungeons:
     // --------------------------------------------------
-    menu "Ilusão do Abismo",IllusionD1, "Ilusão do Congelado",IllusionD2, "Ilusão do Labirinto",IllusionD3,
-            "Ilusão de Luanda",IllusionD4, "Ilusão da Luz da Lua",IllusionD5, "Ilusão do Urso de Pelúcia",IllusionD6,
-            "Ilusão dos Gemeos",IllusionD7, "Ilusão Subaquática",IllusionD8, "Ilusão do Vampiro",IllusionD9;
+    menu "Ilusao do Abismo",IllusionD1, "Ilusao do Congelado",IllusionD2, "Ilusao do Labirinto",IllusionD3,
+            "Ilusao de Luanda",IllusionD4, "Ilusao da Luz da Lua",IllusionD5, "Ilusao do Urso de Pelucia",IllusionD6,
+            "Ilusao dos Gemeos",IllusionD7, "Ilusao Subaquatica",IllusionD8, "Ilusao do Vampiro",IllusionD9;
     IllusionD1: Restrict("RE");
         setarray @c[2],132,189,99,186;
-        Disp("Aldeia Desolada:Palácio da Tartaruga Sombria"); Pick("","tur_d03_i","tur_d04_i");
+        Disp("Aldeia Desolada:Palacio da Tartaruga Sombria"); Pick("","tur_d03_i","tur_d04_i");
     IllusionD2: Restrict("RE");
         Go("ice_d03_i",149,22);
     IllusionD3: Restrict("RE");
@@ -624,8 +624,8 @@ OnTalk:
     // --------------------------------------------------
     // Special:
     
-    //     menu	"Salão de Leilões",S1, "Campos de Batalha",S2, "Cassino",S3, "Fenda Dimensional",S4,
-    //             "Sede do Grupo Éden",S5, "Arena de Kunlun",S6, "Arena de Izlude",S7, 
+    //     menu	"Salao de Leiloes",S1, "Campos de Batalha",S2, "Cassino",S3, "Fenda Dimensional",S4,
+    //             "Sede do Grupo Eden",S5, "Arena de Kunlun",S6, "Arena de Izlude",S7, 
     //             "Arena da Corrida de Monstros",S8, "Mercado Para",S9, "Pista Turbo",S10;
 
     //     S1: Go("auction_01",22,68);
