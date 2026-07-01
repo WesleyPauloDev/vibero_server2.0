@@ -24960,6 +24960,35 @@ bool clif_parse_enchant_basecheck( struct item& selected_item, std::shared_ptr<s
 	return true;
 }
 
+static bool clif_enchant_add_confirm_item( map_session_data* sd, uint64 enchant_group, std::unordered_map<uint16, uint16>& materials ){
+	constexpr uint64 snow_flower_armor_enchant_group = 26;
+	constexpr t_itemid snow_flower_enchant_box = 101185;
+
+	if( enchant_group != snow_flower_armor_enchant_group ){
+		return true;
+	}
+
+	int16 idx = pc_search_inventory( sd, snow_flower_enchant_box );
+
+	if( idx < 0 ){
+		return false;
+	}
+
+	uint16 required_amount = 1;
+	auto material = materials.find( idx );
+
+	if( material != materials.end() ){
+		required_amount += material->second;
+	}
+
+	if( sd->inventory.u.items_inventory[idx].amount < required_amount ){
+		return false;
+	}
+
+	materials[idx] = required_amount;
+	return true;
+}
+
 void clif_parse_enchantwindow_general( int32 fd, map_session_data* sd ){
 #if PACKETVER_MAIN_NUM >= 20201118 || PACKETVER_RE_NUM >= 20211103 || PACKETVER_ZERO_NUM >= 20221024
 	const PACKET_CZ_REQUEST_RANDOM_ENCHANT* p = reinterpret_cast<PACKET_CZ_REQUEST_RANDOM_ENCHANT*>( RFIFOP( fd, 0 ) );
@@ -25038,6 +25067,10 @@ void clif_parse_enchantwindow_general( int32 fd, map_session_data* sd ){
 		}
 
 		materials[idx] = entry.second;
+	}
+
+	if( !clif_enchant_add_confirm_item( sd, p->enchant_group, materials ) ){
+		return;
 	}
 
 	if( pc_payzeny( sd, enchant_slot->normal.zeny, LOG_TYPE_ENCHANT ) != 0 ){
@@ -25167,6 +25200,10 @@ void clif_parse_enchantwindow_perfect( int32 fd, map_session_data* sd ){
 		materials[idx] = entry.second;
 	}
 
+	if( !clif_enchant_add_confirm_item( sd, p->enchant_group, materials ) ){
+		return;
+	}
+
 	if( pc_payzeny( sd, perfect_enchant->zeny, LOG_TYPE_ENCHANT ) != 0 ){
 		return;
 	}
@@ -25262,6 +25299,10 @@ void clif_parse_enchantwindow_upgrade( int32 fd, map_session_data* sd ){
 		}
 
 		materials[idx] = entry.second;
+	}
+
+	if( !clif_enchant_add_confirm_item( sd, p->enchant_group, materials ) ){
+		return;
 	}
 
 	if( pc_payzeny( sd, upgrade->zeny, LOG_TYPE_ENCHANT ) != 0 ){
@@ -25369,6 +25410,10 @@ void clif_parse_enchantwindow_reset( int32 fd, map_session_data* sd ){
 		materials[idx] = entry.second;
 	}
 
+	if( !clif_enchant_add_confirm_item( sd, p->enchant_group, materials ) ){
+		return;
+	}
+
 	if( pc_payzeny( sd, enchant->reset.zeny, LOG_TYPE_ENCHANT ) != 0 ){
 		return;
 	}
@@ -25400,6 +25445,7 @@ void clif_parse_enchantwindow_reset( int32 fd, map_session_data* sd ){
 	// Log retrieving the item again -> with the new enchant
 	log_pick_pc( sd, LOG_TYPE_ENCHANT, 1, &selected_item );
 
+	clif_additem( sd, index, 1, 0 );
 	clif_enchantwindow_result( *sd, true );
 #endif
 }

@@ -917,13 +917,20 @@ end;
 	
 OnTouch:
 	.@announce = (!'csn_done && getcharid(1) > 0);
+	if (#ConfusedSnakeNest_STATUS == 2 && !checkweight(101183, 1)) {
+		dispbottom "[Instancia] Voce esta carregando peso demais para receber as recompensas. Libere espaco e passe pelo portal novamente.";
+		end;
+	}
 	.@finish_result = callfunc("F_InstanceFinishBase", "Ninho da Serpente Confusa", "#ConfusedSnakeNest_STATUS", 30, 6, "", "", 1, 30, 110002, 3000, 3, 0, "Ninho da Serpente Confusa", .@announce);
 	if (.@finish_result == -1) {
 		dispbottom "[Instancia] Voce esta carregando peso demais para receber as recompensas. Libere espaco e passe pelo portal novamente.";
 		end;
 	}
-	if (.@finish_result == 1 && !'csn_done)
-		'csn_done =1;
+	if (.@finish_result == 1) {
+		getitem 101183, 1;
+		if (!'csn_done)
+			'csn_done =1;
+	}
 	warp "SavePoint",0,0;
 end;
 }
