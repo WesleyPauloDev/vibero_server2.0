@@ -933,6 +933,10 @@ OnTouch:
 	}
 	warp "SavePoint",0,0;
 end;
+
+OnInstanceInit:
+	disablenpc instance_npcname(strnpcinfo(0));
+	end;
 }
 
 1@jorchs,37,274,5	script	Central Door#19m61	4_ENERGY_BLUE,3,3,{
@@ -1007,17 +1011,54 @@ end;
 		sleep2 2000;
 		npctalk "Nao gosto muito dessa ideia, mas nao tem jeito. Teremos que reforcar a vigilancia aqui.",instance_npcname("Horuru#19m60");
 		sleep2 2000;
-		npctalk "Vamos. Vou abrir um portal la embaixo para voltarmos com conforto.",instance_npcname("Aurelie#19m60");
-		enablenpc instance_npcname("#19m60");
-		specialeffect EF_ELECTRIC4,AREA,instance_npcname("#19m60");
-		specialeffect EF_YELLOWFLY3,AREA,instance_npcname("#19m60");
+		npctalk "Vamos. Mas antes precisamos lidar com algo se movendo la embaixo.",instance_npcname("Aurelie#19m60");
 		if(isbegin_quest(17648) == 1){
 			completequest 17648;
 			setquest 17649;
 		}
 		setpcblock PCBLOCK_NPC,false;
+		donpcevent instance_npcname("#csn_faceworm_queen") + "::OnStart";
 		end;
 	}
+	end;
+}
+
+1@jorchs,1,1,0	script	#csn_faceworm_queen	-1,{
+	end;
+
+OnStart:
+	killmonster 'map$, instance_npcname(strnpcinfo(0)) + "::OnMyMobDead";
+	mapannounce 'map$, "Uma Rainha Faceworm enfurecida surgiu no fundo do ninho!",bc_map,"0xff7777";
+	monster 'map$,39,260,"Faceworm Queen",2529,1,instance_npcname(strnpcinfo(0)) + "::OnMyMobDead";
+	'csn_final_boss = $@mobid[0];
+	setunitdata 'csn_final_boss, UMOB_LEVEL, 180;
+	setunitdata 'csn_final_boss, UMOB_MAXHP, 650000000;
+	setunitdata 'csn_final_boss, UMOB_HP, 650000000;
+	setunitdata 'csn_final_boss, UMOB_ATKMIN, 55000;
+	setunitdata 'csn_final_boss, UMOB_ATKMAX, 65000;
+	setunitdata 'csn_final_boss, UMOB_MATKMIN, 55000;
+	setunitdata 'csn_final_boss, UMOB_MATKMAX, 65000;
+	setunitdata 'csn_final_boss, UMOB_DEF, 150;
+	setunitdata 'csn_final_boss, UMOB_MDEF, 90;
+	setunitdata 'csn_final_boss, UMOB_STR, 2500;
+	setunitdata 'csn_final_boss, UMOB_AGI, 120;
+	setunitdata 'csn_final_boss, UMOB_VIT, 250;
+	setunitdata 'csn_final_boss, UMOB_INT, 5000;
+	setunitdata 'csn_final_boss, UMOB_DEX, 2500;
+	setunitdata 'csn_final_boss, UMOB_LUK, 150;
+	specialeffect EF_DUSTSTORM,AREA,instance_npcname("Central Door#19m61");
+	end;
+
+OnMyMobDead:
+	if(mobcount('map$,instance_npcname(strnpcinfo(0)) + "::OnMyMobDead")) end;
+	mapannounce 'map$, "A Rainha Faceworm foi derrotada. O portal de saida foi aberto.",bc_map,"0xffff66";
+	enablenpc instance_npcname("#19m60");
+	specialeffect EF_ELECTRIC4,AREA,instance_npcname("#19m60");
+	specialeffect EF_YELLOWFLY3,AREA,instance_npcname("#19m60");
+	end;
+
+OnInstanceInit:
+	'csn_final_boss = 0;
 	end;
 }
 
