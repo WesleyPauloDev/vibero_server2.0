@@ -215,17 +215,24 @@ function	script	F_EventWeekDescription$	{
 	case 3:
 		return "Instancia 2x ativa: premios de conclusao de instancias dobrados.";
 	case 4:
-		return "Rates Especiais ativas: Base EXP e Job EXP dobrados, com Drop 1.5x.";
+		return "Rates Especiais ativas: Base EXP e Job EXP 300%, com Drop 1.5x.";
 	default:
 		return "Nenhum evento semanal ativo.";
 	}
 }
 
 function	script	F_EventWeekNext	{
-	.@event = getarg(0, 1) + 1;
-	if (.@event > 4)
-		.@event = 1;
-	return .@event;
+	switch (getarg(0, 1)) {
+	case 4: // XP 300 -> Carta MVP 5x
+		return 1;
+	case 1: // Carta MVP 5x -> Invasao MVP
+		return 2;
+	case 2: // Invasao MVP -> Instancia 2x
+		return 3;
+	case 3: // Instancia 2x -> XP 300
+	default:
+		return 4;
+	}
 }
 
 function	script	F_EventWeekInstanceRewardMultiplier	{
