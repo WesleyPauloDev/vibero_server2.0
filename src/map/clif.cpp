@@ -24961,14 +24961,32 @@ bool clif_parse_enchant_basecheck( struct item& selected_item, std::shared_ptr<s
 }
 
 static bool clif_enchant_add_confirm_item( map_session_data* sd, uint64 enchant_group, std::unordered_map<uint16, uint16>& materials ){
-	constexpr uint64 snow_flower_armor_enchant_group = 26;
-	constexpr t_itemid snow_flower_enchant_box = 101185;
+	t_itemid required_box = 0;
 
-	if( enchant_group != snow_flower_armor_enchant_group ){
-		return true;
+	switch( enchant_group ){
+		case 26:
+			required_box = 101185;
+			break;
+		case 27:
+			required_box = 101217;
+			break;
+		case 28:
+			required_box = 101218;
+			break;
+		case 29:
+			required_box = 101219;
+			break;
+		case 30:
+			required_box = 101220;
+			break;
+		case 47:
+			required_box = 101186;
+			break;
+		default:
+			return true;
 	}
 
-	int16 idx = pc_search_inventory( sd, snow_flower_enchant_box );
+	int16 idx = pc_search_inventory( sd, required_box );
 
 	if( idx < 0 ){
 		return false;
