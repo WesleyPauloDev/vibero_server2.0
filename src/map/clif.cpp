@@ -25011,17 +25011,31 @@ void clif_parse_enchantwindow_general( int32 fd, map_session_data* sd ){
 #if PACKETVER_MAIN_NUM >= 20201118 || PACKETVER_RE_NUM >= 20211103 || PACKETVER_ZERO_NUM >= 20221024
 	const PACKET_CZ_REQUEST_RANDOM_ENCHANT* p = reinterpret_cast<PACKET_CZ_REQUEST_RANDOM_ENCHANT*>( RFIFOP( fd, 0 ) );
 
+	if( p->enchant_group == 47 ){
+		clif_enchantwindow_result( *sd, false );
+		return;
+	}
+
 	if( sd->state.item_enchant_index != p->enchant_group ){
+		if( p->enchant_group == 47 ){
+			ShowInfo( "Dim Glacier enchant rejected: session group=%" PRIu64 " packet group=%" PRIu64 ".\n", sd->state.item_enchant_index, p->enchant_group );
+		}
 		return;
 	}
 
 	uint16 index = server_index( p->index );
 
 	if( index >= MAX_INVENTORY ){
+		if( p->enchant_group == 47 ){
+			ShowInfo( "Dim Glacier enchant rejected: inventory index %u >= MAX_INVENTORY.\n", index );
+		}
 		return;
 	}
 
 	if( sd->inventory_data[index] == nullptr ){
+		if( p->enchant_group == 47 ){
+			ShowInfo( "Dim Glacier enchant rejected: inventory_data[%u] is null.\n", index );
+		}
 		return;
 	}
 
@@ -25029,10 +25043,16 @@ void clif_parse_enchantwindow_general( int32 fd, map_session_data* sd ){
 	std::shared_ptr<s_item_enchant> enchant = item_enchant_db.find( p->enchant_group );
 
 	if( enchant == nullptr ){
+		if( p->enchant_group == 47 ){
+			ShowInfo( "Dim Glacier enchant rejected: group 47 not found in item_enchant_db.\n" );
+		}
 		return;
 	}
 
 	if( !clif_parse_enchant_basecheck( selected_item, enchant ) ){
+		if( p->enchant_group == 47 ){
+			ShowInfo( "Dim Glacier enchant rejected: target item id=%u failed basecheck.\n", selected_item.nameid );
+		}
 		return;
 	}
 
@@ -25046,10 +25066,97 @@ void clif_parse_enchantwindow_general( int32 fd, map_session_data* sd ){
 	}
 
 	if( slot == MAX_SLOTS ){
+		if( p->enchant_group == 47 ){
+			ShowInfo( "Dim Glacier enchant rejected: no empty enchant slot. cards=%u,%u,%u,%u itemslots=%u.\n", selected_item.card[0], selected_item.card[1], selected_item.card[2], selected_item.card[3], sd->inventory_data[index]->slots );
+		}
 		return;
 	}
 
 	if( slot < sd->inventory_data[index]->slots ){
+		if( p->enchant_group == 47 ){
+			ShowInfo( "Dim Glacier enchant rejected: selected slot=%u is below item slots=%u.\n", slot, sd->inventory_data[index]->slots );
+		}
+		return;
+	}
+
+	if( p->enchant_group == 47 ){
+		ShowInfo( "Dim Glacier enchant processing: item=%u refine=%d enchantgrade=%u slot=%u cards=%u,%u,%u,%u itemslots=%u.\n", selected_item.nameid, selected_item.refine, selected_item.enchantgrade, slot, selected_item.card[0], selected_item.card[1], selected_item.card[2], selected_item.card[3], sd->inventory_data[index]->slots );
+
+		t_itemid material_id = 0;
+		uint16 material_amount = 0;
+		t_itemid enchant_item = 0;
+
+		switch( slot ){
+			case 3:
+				material_id = 1001034; // EP19_S_F_1_Extract
+				material_amount = 10;
+				switch( rnd_value( 0, 2 ) ){
+					case 0:
+						enchant_item = 311192; // Glacier_F_Orb_1
+						break;
+					case 1:
+						enchant_item = 311193; // Glacier_F_Orb_2
+						break;
+					default:
+						enchant_item = 311194; // Glacier_F_Orb_3
+						break;
+				}
+				break;
+			case 2:
+				material_id = 1001035; // EP19_S_F_2_Extract
+				material_amount = 20;
+				switch( rnd_value( 0, 2 ) ){
+					case 0:
+						enchant_item = 311272; // Glacier_F_Orb_81
+						break;
+					case 1:
+						enchant_item = 311273; // Glacier_F_Orb_82
+						break;
+					default:
+						enchant_item = 311274; // Glacier_F_Orb_83
+						break;
+				}
+				break;
+			case 1:
+				material_id = 1001037; // EP19_Gla_Extract
+				material_amount = 50;
+				enchant_item = rnd_value( 0, 1 ) == 0 ? 311449 : 311454; // Physical_Grade_1 / Magical_Grade_1
+				break;
+			default:
+				return;
+		}
+
+		std::unordered_map<uint16, uint16> materials;
+		int16 material_idx = pc_search_inventory( sd, material_id );
+
+		if( material_idx < 0 || sd->inventory.u.items_inventory[material_idx].amount < material_amount ){
+			ShowInfo( "Dim Glacier enchant rejected: missing material id=%u amount=%u found_index=%d.\n", material_id, material_amount, material_idx );
+			clif_enchantwindow_result( *sd, false );
+			return;
+		}
+
+		materials[material_idx] = material_amount;
+
+		if( !clif_enchant_add_confirm_item( sd, p->enchant_group, materials ) ){
+			ShowInfo( "Dim Glacier enchant rejected: missing box 101186.\n" );
+			clif_enchantwindow_result( *sd, false );
+			return;
+		}
+
+		for( const auto& entry : materials ){
+			if( pc_delitem( sd, entry.first, entry.second, 0, 0, LOG_TYPE_ENCHANT ) != 0 ){
+				ShowInfo( "Dim Glacier enchant rejected: failed to delete inventory index=%u amount=%u.\n", entry.first, entry.second );
+				clif_enchantwindow_result( *sd, false );
+				return;
+			}
+		}
+
+		log_pick_pc( sd, LOG_TYPE_ENCHANT, -1, &selected_item );
+		selected_item.card[slot] = enchant_item;
+		log_pick_pc( sd, LOG_TYPE_ENCHANT, 1, &selected_item );
+
+		clif_enchantwindow_result( *sd, true, selected_item.card[slot] );
+		ShowInfo( "Dim Glacier enchant success: item=%u slot=%u enchant=%u.\n", selected_item.nameid, slot, enchant_item );
 		return;
 	}
 
