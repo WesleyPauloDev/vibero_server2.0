@@ -89,6 +89,61 @@ Header:
   Version: 3
 
 Body:
+  - Id: 810014
+    AegisName: Precision_Rifle_Copy
+    Name: Precision Piercer
+    Type: Weapon
+    SubType: Rifle
+    Weight: 1800
+    Attack: 250
+    Range: 9
+    Slots: 2
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Jobs:
+      Rebellion: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 175
+    Refineable: true
+    Gradable: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bVariableCastrate,-25;
+      bonus bDelayRate,-30;
+      bonus bLongAtkRate,100;
+      bonus bCritical,30;
+      bonus bCritAtkRate,20;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bLongAtkRate,25;
+          bonus bAtk,25;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bLongAtkRate,25;
+              bonus bAtk,25;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bLongAtkRate,25;
+                  bonus bAtk,25;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bLongAtkRate,25;
+                      bonus bAtk,25;
+                  }
+              }
+          }
+      }
   - Id: 26141
     AegisName: WitchsBroomStick_
     Name: Witch's Broom

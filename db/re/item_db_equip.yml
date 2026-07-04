@@ -261921,55 +261921,34 @@ Body:
     Type: Weapon
     SubType: Rifle
     Weight: 1800
-    Attack: 250
+    Attack: 300
     Range: 9
     Slots: 2
-    Trade:
-      NoDrop: true
-      NoSell: true
     Jobs:
       Rebellion: true
+    Classes:
+      Fourth: true
     Locations:
       Both_Hand: true
     WeaponLevel: 5
-    EquipLevelMin: 175
+    EquipLevelMin: 220
     Refineable: true
     Gradable: true
     Script: |
-      .@r = getrefine();
-      if (.@r>0) {
-        bonus bLongAtkRate,10 * .@r;
-        bonus bAtk,10 * .@r;
-      }
-      bonus bVariableCastrate,-25;
-      bonus bDelayRate,-30;
-      bonus bLongAtkRate,100;
-      bonus bCritical,30;
-      bonus bCritAtkRate,20;
-
-      bonus bMaxHPRate,20;
-      bonus bMaxSPRate,20;
-
       .@g = getenchantgrade();
-
+      .@r = getrefine();
+      bonus2 bSkillAtk,"NW_SPIRAL_SHOOTING",7*(.@r/2);
+      bonus2 bSkillAtk,"RL_HAMMER_OF_GOD",10*(.@r/3);
+      bonus bLongAtkRate,4*(.@r/4);
       if (.@g >= ENCHANTGRADE_D) {
-          bonus bLongAtkRate,25;
-          bonus bAtk,25;
-          if (.@g >= ENCHANTGRADE_C) {
-              bonus bLongAtkRate,25;
-              bonus bAtk,25;
-              if (.@g >= ENCHANTGRADE_B) {
-                  bonus bCastRate, -.@r;
-                  bonus bLongAtkRate,25;
-                  bonus bAtk,25;
-                  if (.@g >= ENCHANTGRADE_A) {
-                      bonus bDelayRate, -.@r;
-                      bonus bLongAtkRate,25;
-                      bonus bAtk,25;
-                  }
-              }
-          }
-      }
+         bonus bCon,2;
+         if (.@g >= ENCHANTGRADE_C) {
+            bonus2 bSkillAtk,"NW_SPIRAL_SHOOTING",10;
+            if (.@g >= ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+            }
+         }
+      }  
   - Id: 810006
     AegisName: Fourth_Rifle
     Name: Scrap Piercer
