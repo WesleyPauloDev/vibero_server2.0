@@ -337,7 +337,7 @@ geffen_in,175,112,4	script	Lea	2_F_MAGICMASTER,{
 				mes "No problem.";
 				close;
 			}
-			setarray .@Books[0],100068,100069,100070,100071,100072;
+			setarray .@Books[0],100068,100069,100073,100070,100072;
 			if (countitem(.@Books[.@i-1])) {
 				mes "You already have that Magic Book. You can't borrow a new book until you return the current one.";
 				next;
@@ -516,7 +516,7 @@ mid_camp,255,244,4	script	Galfos	4_M_JOB_WIZARD,{
 		next;
 		set .@i, select("I've discovered everything about Comet.:I've mastered the zenith of Tetra Vortex.");
 		mes "[Galfos]";
-		if ((.@i == 1 && countitem(100073)) || (.@i == 2 && countitem(100074))) {
+		if ((.@i == 1 && countitem(100071)) || (.@i == 2 && countitem(100074))) {
 			mes "Are you kidding me? You already have the book!";
 			close;
 		}
@@ -542,7 +542,7 @@ mid_camp,255,244,4	script	Galfos	4_M_JOB_WIZARD,{
 				progressbar "ffff00",4;
 				specialeffect2 EF_LORD;
 				set Zeny, Zeny - 500000;
-				getitem 100072+.@i,1; //WL_MB_CM, WL_MB_TV
+				getitem ((.@i == 1) ? 100071 : 100074),1; //WL_MB_CM, WL_MB_TV
 				mes "[Galfos]";
 				mes "Man, I almost lost my control to the incredible magic energy! Here's your Magic Book.";
 				next;
