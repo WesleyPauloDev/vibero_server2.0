@@ -202121,14 +202121,17 @@ Body:
     Refineable: true
     Script: |
       .@r = getrefine();
+      .@dmg = ((.@r>=9)?40:(.@r>=7?25:10));
       bonus bUnbreakableShoes;
       bonus bMdef,15;
-      bonus bAtkRate,((.@r>=9)?40:(.@r>=7?25:10));
+      bonus bShortAtkRate,.@dmg;
+      bonus bLongAtkRate,.@dmg;
       bonus2 bSubClass,Class_Normal,5;
       bonus2 bSubClass,Class_Boss,5;
       bonus bMaxHPrate,4*.@r;
-      if (.@r>=9)
+      if (.@r >= 9) {
          bonus bDefRatioAtkClass,Class_All;
+      }
   - Id: 470098
     AegisName: EC_Boots_TW
     Name: Jade Crystal Boots
@@ -261931,7 +261934,7 @@ Body:
     Locations:
       Both_Hand: true
     WeaponLevel: 5
-    EquipLevelMin: 220
+    EquipLevelMin: 200
     Refineable: true
     Gradable: true
     Script: |
