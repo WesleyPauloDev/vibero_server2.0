@@ -57317,10 +57317,13 @@ Body:
       NoAuction: true
     Script: |
       .@r = getrefine();
-      bonus5 bAutoSpellOnSkill,"CR_HOLYCROSS","LG_RAYOFGENESIS",max(1,getskilllv("LG_RAYOFGENESIS")),1000,AUTOSPELL_FORCE_TARGET;
-      bonus5 bAutoSpellOnSkill,"LG_RAYOFGENESIS","SU_TUNABELLY",2,1000,AUTOSPELL_FORCE_SELF;
+      bonus2 bSubSize,Size_All,5;
+      if (.@r>=7) {
+         .@level = getskilllv("AL_HEAL");
+         bonus3 bAutoSpellWhenHit,"AL_HEAL",(.@level ? .@level : 5),10;
+      }
       if (.@r>=9) {
-         bonus2 bSkillAtk,"LG_RAYOFGENESIS",10*(getskilllv("CR_HOLYCROSS")/2);
+         bonus2 bSkillAtk,"LG_RAYOFGENESIS",20;
       }
   - Id: 5901
     AegisName: Focus_Beret_
