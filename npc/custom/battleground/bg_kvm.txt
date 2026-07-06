@@ -459,8 +459,8 @@ OnGuillaumeDie:
 		bg_updatescore "bat_c01",.Guillaume_Count,.Croix_Count;
 		if( .Guillaume_Count < 1 ) donpcevent "KvM01_BG::OnCroixWin";
 		else {
-			mapannounce "bat_c01", "N�mero de jogadores do time Guillaume: "+.Guillaume_Count+".",bc_map,"0x00ff00";
-			mapannounce "bat_c01", "N�mero de jogadores do time Croix: "+.Croix_Count+".",bc_map,"0x00ff00";
+			mapannounce "bat_c01", "Numero de jogadores do time Guillaume: "+.Guillaume_Count+".",bc_map,"0x00ff00";
+			mapannounce "bat_c01", "Numero de jogadores do time Croix: "+.Croix_Count+".",bc_map,"0x00ff00";
 		}
 	}
 	end;
@@ -477,8 +477,8 @@ OnCroixDie:
 		bg_updatescore "bat_c01",.Guillaume_Count,.Croix_Count;
 		if( .Croix_Count < 1 ) donpcevent "KvM01_BG::OnGuillaumeWin";
 		else {
-			mapannounce "bat_c01", "N�mero de jogadores do time Guillaume: "+.Guillaume_Count+".",bc_map,"0x00ff00";
-			mapannounce "bat_c01", "N�mero de jogadores do time Croix: "+.Croix_Count+".",bc_map,"0x00ff00";
+			mapannounce "bat_c01", "Numero de jogadores do time Guillaume: "+.Guillaume_Count+".",bc_map,"0x00ff00";
+			mapannounce "bat_c01", "Numero de jogadores do time Croix: "+.Croix_Count+".",bc_map,"0x00ff00";
 		}
 	}
 	end;
@@ -505,16 +505,16 @@ OnTimer1000:
 	set .Guillaume_Count, bg_get_data($@KvM01BG_id1, 0);
 	set .Croix_Count, bg_get_data($@KvM01BG_id2, 0);
 	bg_updatescore "bat_c01",.Guillaume_Count,.Croix_Count;
-	mapannounce "bat_c01", "Em 1 minuto, a batalha ir� come�ar.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Em 1 minuto, a batalha ira comecar.",bc_map,"0x00ff00";
 	end;
 
 OnTimer3000:
-	mapannounce "bat_c01", "O tempo m�ximo da batalha KVM � de 5 minutos.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "O tempo maximo da batalha KVM e de 5 minutos.",bc_map,"0x00ff00";
 	end;
 
 OnTimer6000:
 	mapannounce "bat_c01", "Preparem-se para a batalha!",bc_map,"0x00ff00";
-	mapannounce "bat_c01", "Voc�s podem se buffar livremente.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Voces podem se buffar livremente.",bc_map,"0x00ff00";
 	donpcevent "#A_camp_start01::OnEnable";
 	donpcevent "#B_camp_start01::OnEnable";
 	end;
@@ -525,26 +525,26 @@ OnTimer13000:
 	end;
 
 OnTimer30000:
-	mapannounce "bat_c01", "Faltam 30 segundos para o in�cio da batalha.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Faltam 30 segundos para o inicio da batalha.",bc_map,"0x00ff00";
 	end;
 
 OnTimer45000:
-	mapannounce "bat_c01", "Faltam 15 segundos para o in�cio da batalha.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Faltam 15 segundos para o inicio da batalha.",bc_map,"0x00ff00";
 	donpcevent "::OnKvM01One";
 	end;
 
 OnTimer50000:
-	mapannounce "bat_c01", "Faltam 10 segundos para o in�cio da batalha.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Faltam 10 segundos para o inicio da batalha.",bc_map,"0x00ff00";
 	donpcevent "::OnKvM01Two";
 	end;
 
 OnTimer55000:
-	mapannounce "bat_c01", "Faltam 5 segundos para o in�cio da batalha.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Faltam 5 segundos para o inicio da batalha.",bc_map,"0x00ff00";
 	donpcevent "::OnKvM01One";
 	end;
 
 OnTimer59000:
-	mapannounce "bat_c01", "A batalha est� come�ando!",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "A batalha esta comecando!",bc_map,"0x00ff00";
 	donpcevent "::OnKvM01Two";
 	end;
 
@@ -554,7 +554,7 @@ OnTimer61000:
 		if (.Guillaume_Count < 1 || .Croix_Count < 1) {
 			set $@KvM01BG_Victory, 3;
 			set $@KvM01BG, 3;
-			mapannounce "bat_c01","N�o h� jogadores suficientes para iniciar a batalha.",1,0x696969;
+			mapannounce "bat_c01","Nao ha jogadores suficientes para iniciar a batalha.",1,0x696969;
 			stopnpctimer;
 			donpcevent "KvM01_BG::OnStop";
 			end;
@@ -596,8 +596,8 @@ OnTimer360000:
 	{ // Draw Game
 		set $@KvM01BG, 3;
 		set $@KvM01BG_Victory, 3;
-		mapannounce "bat_c01", "O n�mero de Guillaumes �"+.Guillaume_Count+".",bc_map,"0x00ff00";
-		mapannounce "bat_c01", "O n�mero de Croixes �"+.Croix_Count+".",bc_map,"0x00ff00";
+		mapannounce "bat_c01", "O numero de Guillaumes e "+.Guillaume_Count+".",bc_map,"0x00ff00";
+		mapannounce "bat_c01", "O numero de Croixes e "+.Croix_Count+".",bc_map,"0x00ff00";
 		mapannounce "bat_c01", "Esta batalha terminou em empate.",bc_map,"0x00ff00";
 		donpcevent "KvM01_BG::OnStop";
 	}
@@ -607,8 +607,8 @@ OnGuillaumeWin:
 	set $@KvM01BG, 3;
 	set $@KvM01BG_Victory, 1;
 	mapannounce "bat_c01", "Guillaume venceu!",bc_map,"0x00ff00";
-	mapannounce "bat_c01", "Parab�ns aos membros de Guillaume.",bc_map,"0x00ff00";
-	mapannounce "bat_c01", "Todos ser�o levados ao ponto de partida.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Parabens aos membros de Guillaume.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Todos serao levados ao ponto de partida.",bc_map,"0x00ff00";
 	donpcevent "KvM01_BG::OnStop";
 	end;
 
@@ -616,8 +616,8 @@ OnCroixWin:
 	set $@KvM01BG, 3;
 	set $@KvM01BG_Victory, 2;
 	mapannounce "bat_c01", "Croix venceu!",bc_map,"0x00ff00";
-	mapannounce "bat_c01", "Parab�ns aos membros da Croix.",bc_map,"0x00ff00";
-	mapannounce "bat_c01", "Todos ser�o levados ao ponto de partida.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Parabens aos membros da Croix.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Todos serao levados ao ponto de partida.",bc_map,"0x00ff00";
 	donpcevent "KvM01_BG::OnStop";
 	end;
 
@@ -642,21 +642,21 @@ OnBegin:
 	end;
 
 OnTimer1000:
-	mapannounce "bat_c01", "Por favor, dirija-se ao respons�vel para obter pontos.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Por favor, dirija-se ao responsavel para obter pontos.",bc_map,"0x00ff00";
 	end;
 
 OnTimer3000:
-	mapannounce "bat_c01", "O agente conceder� os pontos por 30 segundos.",bc_map,"0x00ff00";
-	mapannounce "bat_c01", "Em 30 segundos, o agente ser� dispensado.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "O agente concedera os pontos por 30 segundos.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Em 30 segundos, o agente sera dispensado.",bc_map,"0x00ff00";
 	end;
 
 OnTimer5000:
-	mapannounce "bat_c01", "A menos que voc� fale com o oficial, voc� n�o poder� ganhar os pontos.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "A menos que voce fale com o oficial, voce nao podera ganhar os pontos.",bc_map,"0x00ff00";
 	mapannounce "bat_c01", "Por favor, tenha cuidado.",bc_map,"0x00ff00";
 	end;
 
 OnTimer55000:
-	mapannounce "bat_c01", "Voc� ser� mandado de volta.",bc_map,"0x00ff00";
+	mapannounce "bat_c01", "Voce sera mandado de volta.",bc_map,"0x00ff00";
 	end;
 
 OnTimer60000:
@@ -768,15 +768,15 @@ bat_c01,51,130,5	script	KVM Officer#KVM01A	419,{
 		mes "[KVM Officer]";
 		if( $@KvM01BG_Victory == Bat_Team ) {
 			mes "Bom jogo.";
-            mes "Voc� conquistou os pontos da vit�ria: 5";
+            mes "Voce conquistou os pontos da vitoria: 5";
 			getitem 9608,3;
 			close2;
 			set kvm_point,kvm_point + 5;
 		}
 		else {
 			mes "Sinto muito.";
-            mes "Desejo-lhe melhor sorte da pr�xima vez.";
-            mes "Voc� adquire os pontos da derrota: 1";
+            mes "Desejo-lhe melhor sorte da proxima vez.";
+            mes "Voce adquire os pontos da derrota: 1";
 			getitem 9608,1;
 			close2;
 			set kvm_point,kvm_point + 1;
