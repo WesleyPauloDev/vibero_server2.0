@@ -726,5 +726,39 @@ Body:
       DropEffect: CLIENT
     Script: |
       getgroupitem(50008,true);
+  - Id: 470004
+    AegisName: Imperial_Boots_
+    Name: Imperial Boots
+    Type: Armor
+    Buy: 20
+    Weight: 400
+    Defense: 12
+    Slots: 1
+    Locations:
+      Shoes: true
+    ArmorLevel: 1
+    EquipLevelMin: 100
+    Refineable: true
+    Script: |
+      .@r = getrefine();
+      bonus bMdef,10;
+      bonus bMaxHPrate,3;
+      bonus bMaxSPrate,3;
+      skill "AL_INCAGI",1;
+      bonus2 bSkillAtk,"LG_BANISHINGPOINT",10*getskilllv("LG_CANNONSPEAR");
+      bonus2 bAddClass,Class_All,4*getskilllv("CR_DEVOTION");
+      if (getskilllv("LG_INSPIRATION")>=5)
+         bonus2 bSkillCooldown,"LG_SHIELDSPELL",-2000;
+      bonus2 bIgnoreDefRaceRate,RC_All,20*getskilllv("LG_PINPOINTATTACK");
+      if (.@r>=5) {
+         bonus bMaxSPrate,7;
+         bonus bMaxHPrate,7;
+         bonus bLongAtkRate,5;
+      }
+      if (.@r>=7) {
+         bonus bMaxSPrate,10;
+         bonus bMaxHPrate,10;
+         bonus bLongAtkRate,5;
+      }
 
   

@@ -4,7 +4,7 @@ function	script	F_AugerOfSpirit	{
 	.@menu$ = "";
 
 	mes "[Desentupidor]";
-	mes "Posso abrir 1 slot em um equipamento compatível que esteja equipado.";
+	mes "Posso abrir 1 slot em um equipamento compativel que esteja equipado.";
 
 	setarray .@scan_slot[0], EQI_ACC_L, EQI_ACC_R, EQI_SHOES, EQI_ARMOR, EQI_HEAD_TOP, EQI_HEAD_MID;
 	for (.@s = 0; .@s < getarraysize(.@scan_slot); .@s++) {
@@ -25,8 +25,8 @@ function	script	F_AugerOfSpirit	{
 	}
 
 	if (!.@count) {
-		mes "Você não está com nenhum equipamento compatível equipado.";
-		mes "Equipe um item compatível sem slot e tente novamente.";
+		mes "Voce nao esta com nenhum equipamento compativel equipado.";
+		mes "Equipe um item compativel sem slot e tente novamente.";
 		close;
 	}
 
@@ -62,15 +62,15 @@ function	script	F_AugerOfSpirit	{
 	}
 
 	mes "[Desentupidor]";
-	mes "Você deseja transformar ^0000FF" + getitemname(.@item_id) + "^000000 em sua versão com slot?";
-	mes "O item ^FF0000Desentupidor será consumido^000000 no processo.";
+	mes "Voce deseja transformar ^0000FF" + getitemname(.@item_id) + "^000000 em sua versao com slot?";
+	mes "O item ^FF0000Desentupidor sera consumido^000000 no processo.";
 	next;
 	if (select("Confirmar troca:Cancelar") == 2)
 		close;
 
 	if (countitem(6396) < 1) {
 		mes "[Desentupidor]";
-		mes "Você não possui um Desentupidor para concluir a troca.";
+		mes "Voce nao possui um Desentupidor para concluir a troca.";
 		close;
 	}
 
@@ -84,7 +84,7 @@ function	script	F_AugerOfSpirit	{
 
 	if (!.@found) {
 		mes "[Desentupidor]";
-		mes "Não foi possível localizar o equipamento no inventário.";
+		mes "Nao foi possivel localizar o equipamento no inventario.";
 		close;
 	}
 
@@ -138,7 +138,7 @@ function	script	F_AugerOfSpirit	{
 
 	if (.@inv_idx < 0) {
 		mes "[Desentupidor]";
-		mes "Não foi possível localizar o equipamento após removê-lo.";
+		mes "Nao foi possivel localizar o equipamento apos remove-lo.";
 		close;
 	}
 
@@ -168,6 +168,7 @@ function	script	F_AugerOfSpirit_Target	{
 
 		case 2409: return 2432; // High Heels -> High Heels_
 		case 2425: return 2434; // Black Leather Boots -> Black Leather Boots_
+		case 22207: return 470004; // Imperial Boots -> Imperial Boots [1]
 		case 15053: return 15056; // Special Ninja Suit -> Special Ninja Suit_
 		case 2256: return 5160; // Majestic Goat -> Majestic Goat_
 		case 5022: return 5353; // Hat of the Sun God -> Hat of the Sun God_
