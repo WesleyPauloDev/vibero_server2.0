@@ -25570,7 +25570,6 @@ void clif_parse_enchantwindow_reset( int32 fd, map_session_data* sd ){
 	// Log retrieving the item again -> with the new enchant
 	log_pick_pc( sd, LOG_TYPE_ENCHANT, 1, &selected_item );
 
-	clif_additem( sd, index, 1, 0 );
 	clif_enchantwindow_result( *sd, true );
 #endif
 }
