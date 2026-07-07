@@ -14,17 +14,17 @@ OnTalk:
 	// Desativa o uso de itens durante a conversa
 	disable_items;
 	
-	mes "[Artesão Aprendiz]";	
+	mes "[Artesao Aprendiz]";	
 	
 	// Verifica se o jogador tem Zeny suficiente (400.000)
 	
 	mes "Eu tenho estudado formas de aprimorar uma armadura para maximizar sua capacidade.";
 	next;
-	mes "[Artesão Aprendiz]";
-	mes "O Encantamento é uma habilidade incrível que infunde poderes de status misteriosos no slot oculto da armadura.";
+	mes "[Artesao Aprendiz]";
+	mes "O Encantamento e uma habilidade incrivel que infunde poderes de status misteriosos no slot oculto da armadura.";
 	next;	
-	mes "[Artesão Aprendiz]";
-	mes "Atenção, Para adicionar uma carta no equipamento encantado, você deverá remover os encantamentos.";
+	mes "[Artesao Aprendiz]";
+	mes "Atencao, Para adicionar uma carta no equipamento encantado, voce devera remover os encantamentos.";
 	next;	
 	
 	disable_items;
@@ -38,7 +38,7 @@ OnTalk:
 		EQI_ARMOR, EQI_HAND_R, EQI_HAND_L,
 		EQI_GARMENT, EQI_SHOES, EQI_ACC_L, EQI_ACC_R;
 
-	// Gera o menu de equipamentos disponíveis
+	// Gera o menu de equipamentos disponiveis
 	for (.@i = 0; .@i < getarraysize(.@equipId); .@i++) {
 		if (getequipid(.@equipId[.@i]) <= 0) continue;
 
@@ -46,12 +46,12 @@ OnTalk:
 		switch (.@equipId[.@i]) {
 			case EQI_HEAD_TOP:  set .@slotName$, "Topo"; break;
 			case EQI_ARMOR:     set .@slotName$, "Armadura"; break;
-			case EQI_HAND_R:    set .@slotName$, "Mão Direita"; break;
-			case EQI_HAND_L:    set .@slotName$, "Mão Esquerda"; break;
+			case EQI_HAND_R:    set .@slotName$, "Mao Direita"; break;
+			case EQI_HAND_L:    set .@slotName$, "Mao Esquerda"; break;
 			case EQI_GARMENT:   set .@slotName$, "Manto"; break;
 			case EQI_SHOES:     set .@slotName$, "Botas"; break;
-			case EQI_ACC_L:     set .@slotName$, "Acessório Esquerdo"; break;
-			case EQI_ACC_R:     set .@slotName$, "Acessório Direito"; break;
+			case EQI_ACC_L:     set .@slotName$, "Acessorio Esquerdo"; break;
+			case EQI_ACC_R:     set .@slotName$, "Acessorio Direito"; break;
 			default:            set .@slotName$, "Outro"; break;
 		}
 
@@ -61,10 +61,10 @@ OnTalk:
 		set .@menuCount, .@menuCount + 1;
 	}
 
-	// Se não há equipamento disponível
+	// Se nao ha equipamento disponivel
 	if (.@menu$ == "") {
 		mes "[Encantador]";
-		mes "Você não possui nenhum equipamento que possa ser encantado.";
+		mes "Voce nao possui nenhum equipamento que possa ser encantado.";
 		close;
 	}
 
@@ -73,10 +73,10 @@ OnTalk:
 	mes "Escolha o equipamento que deseja encantar:";
 	set .@choice, select(.@menu$) - 1;
 
-	// Validação
+	// Validacao
 	if (.@choice < 0 || .@choice >= .@menuCount) {
 		mes "[Encantador]";
-		mes "Opção inválida.";
+		mes "Opcao invalida.";
 		close;
 	}
 
@@ -95,10 +95,10 @@ OnTalk:
 	 || .@equip_id == 18979 || .@equip_id == 18980 || .@equip_id == 18981 || .@equip_id == 18982
 	 || .@equip_id == 18983 || .@equip_id == 18984) {
 		mes " ";
-		mes "Esse chapéu memorável da Nightmare Biolab não pode ser encantado neste sistema.";
+		mes "Esse chapeu memoravel da Nightmare Biolab nao pode ser encantado neste sistema.";
 		next;
-		mes "[Artesão Aprendiz]";
-		mes "Use o NPC específico da Biolab para encantar, melhorar ou resetar esse item.";
+		mes "[Artesao Aprendiz]";
+		mes "Use o NPC especifico da Biolab para encantar, melhorar ou resetar esse item.";
 		close;
 	}
 	set .@slot1, getequipcardid(.@part,0);
@@ -107,10 +107,10 @@ OnTalk:
 	set .@slot4, getequipcardid(.@part,3);	
 
 	mes "[Encantador]";
-	mes "Você selecionou: ^0055FF" + getequipname(.@part) + "^000000.";
+	mes "Voce selecionou: ^0055FF" + getequipname(.@part) + "^000000.";
 	next;
 	
-	mes "[Artesão Aprendiz]";
+	mes "[Artesao Aprendiz]";
 	.@menu = select("Remover encantamento:Encantar equipamento:Melhorar encantamento:Sair");
 	
 	switch(.@menu) {
@@ -123,19 +123,19 @@ OnTalk:
 				.@hasEnchant = 1;
 
 			if (!.@hasEnchant) {
-				mes "Este equipamento não possui encantamento.";
+				mes "Este equipamento nao possui encantamento.";
 				close;
 			}
 
 			if (.@equip_id == 15388 || .@equip_id == 15389
 			 || .@equip_id == 32228 || .@equip_id == 32229 || .@equip_id == 32230
 			 || .@equip_id == 32231 || .@equip_id == 32232 || .@equip_id == 32233) {
-				mes "[Artesão Aprendiz]";
-				mes "Encantamentos Schmidt não podem ser removidos por este NPC.";
+				mes "[Artesao Aprendiz]";
+				mes "Encantamentos Schmidt nao podem ser removidos por este NPC.";
 				close;
 			}
 
-			mes "[Artesão Aprendiz]";
+			mes "[Artesao Aprendiz]";
 			mes "Quer remover todos os encantamentos, ou apenas de um equipamento?";
 			next;
 			.@type = select("Remover um encantamento:Remover todos:Sair");
@@ -145,7 +145,7 @@ OnTalk:
 			}
 
 			if (.@type == 1) {
-				mes "[Artesão Aprendiz]";
+				mes "[Artesao Aprendiz]";
 				mes "Qual encantamento deseja remover o encantamento?";
 				next;
 				.@menu$ = "";
@@ -169,7 +169,7 @@ OnTalk:
 
 				if (.@menu$ == "Cancelar") {
 					mes "[Encantador Aprendiz]";
-					mes "Este equipamento não possui encantamentos para remover.";
+					mes "Este equipamento nao possui encantamentos para remover.";
 					close;
 				}
 				
@@ -195,7 +195,7 @@ OnTalk:
 				// Seta o item no slot do item equipado
 				setitemcard(.@part, .@realSlot, 0);						
 
-				mes "[Artesão Aprendiz]";
+				mes "[Artesao Aprendiz]";
 				mes "O encantamento do slot " + (.@slot_choice + 1) + " foi removido.";
 				close;
 			}
@@ -205,7 +205,7 @@ OnTalk:
 			// =========================================
 			if (.@type == 2) {
 
-				// Zera os três últimos slots
+				// Zera os tres ultimos slots
 				if (.@slot2 > 0) getitem callfunc("get_base_enchant", .@slot2),1;
 				if (.@slot3 > 0) getitem callfunc("get_base_enchant", .@slot3),1;
 				if (.@slot4 > 0) getitem callfunc("get_base_enchant", .@slot4),1;
@@ -215,42 +215,42 @@ OnTalk:
 				setitemcard(.@part, 2, 0);
 				setitemcard(.@part, 3, 0);				
 
-				mes "[Artesão Aprendiz]";
+				mes "[Artesao Aprendiz]";
 				mes "Todos os encantamentos foram removidos deste equipamento.";
 				close;
 			}
 			end;
 
 		case 2:
-			// O jogador já escolheu o equipamento e agora escolhe o slot
-			mes "[Artesão Aprendiz]";
+			// O jogador ja escolheu o equipamento e agora escolhe o slot
+			mes "[Artesao Aprendiz]";
 			mes "Qual slot deseja encantar?";
 			next;
 			.@slot_choice = select("Slot 2:Slot 3:Slot 4:Cancelar");
 			if (.@slot_choice == 4) close;
 
 			// -------------------------------------------
-			// 1?? Verifica se já existe encantamento no slot escolhido
+			// 1?? Verifica se ja existe encantamento no slot escolhido
 			// -------------------------------------------
 			switch (.@slot_choice) {
 				case 1:
 					if (.@slot2) {
-						mes "[Artesão Aprendiz]";
-						mes "Este slot não está disponível!";
+						mes "[Artesao Aprendiz]";
+						mes "Este slot nao esta disponivel!";
 						close;
 					}
 					break;
 				case 2:
 					if (.@slot3) {
-						mes "[Artesão Aprendiz]";
-						mes "Este slot já possui um encantamento!";
+						mes "[Artesao Aprendiz]";
+						mes "Este slot ja possui um encantamento!";
 						close;
 					}
 					break;
 				case 3:
 					if (.@slot4) {
-						mes "[Artesão Aprendiz]";
-						mes "Este slot já possui um encantamento!";
+						mes "[Artesao Aprendiz]";
+						mes "Este slot ja possui um encantamento!";
 						close;
 					}
 					break;
@@ -266,7 +266,7 @@ OnTalk:
 			}
 
 			// -------------------------------------------
-			// Verifica todos os encantamentos disponíveis na faixa e guarda em uma lista
+			// Verifica todos os encantamentos disponiveis na faixa e guarda em uma lista
 			// -------------------------------------------
 			deletearray .@hasEnchantList;
 			deletearray .@menu$;
@@ -282,15 +282,15 @@ OnTalk:
 
 			// Se a lista estiver vazia
 			if (!getarraysize(.@hasEnchantList)) {
-				mes "[Artesão Aprendiz]";
-				mes "Você não possui nenhum encantamento apropriado para este slot.";
+				mes "[Artesao Aprendiz]";
+				mes "Voce nao possui nenhum encantamento apropriado para este slot.";
 				close;
 			}
 
 			// -------------------------------------------
 			// Exibe menu de escolha
 			// -------------------------------------------
-			mes "[Artesão Aprendiz]";
+			mes "[Artesao Aprendiz]";
 			mes "Escolha o encantamento que deseja usar:";
 			next;
 
@@ -300,17 +300,17 @@ OnTalk:
 
 			// Se o jogador fechou/cancelou o menu
 			if (.@s <= 0) {
-				mes "[Artesão Aprendiz]";
-				mes "Operação cancelada.";
+				mes "[Artesao Aprendiz]";
+				mes "Operacao cancelada.";
 				close;
 			}
 
-			// Obtém o ID do encantamento escolhido
+			// Obtem o ID do encantamento escolhido
 			.@selectedEnchant = .@hasEnchantList[.@s - 1];
 
-			// Confirmação
-			mes "[Artesão Aprendiz]";
-			mes "Você escolheu ^0055FF" + getitemname(.@selectedEnchant) + "^000000.";
+			// Confirmacao
+			mes "[Artesao Aprendiz]";
+			mes "Voce escolheu ^0055FF" + getitemname(.@selectedEnchant) + "^000000.";
 			mes "Deseja realmente aplicar este encantamento?";
 			next;
 			if (select("Sim:Cancelar") == 2) close;	
@@ -332,8 +332,8 @@ OnTalk:
 			setitemcard(.@part, .@slot_choice, .@selectedEnchant);
 			delitem .@selectedEnchant, 1;
 			
-			mes "[Artesão Aprendiz]";
-			mes "Parabéns, seu equipamento foi encantado.";
+			mes "[Artesao Aprendiz]";
+			mes "Parabens, seu equipamento foi encantado.";
 			close;
 			end;
 
@@ -346,13 +346,13 @@ OnTalk:
 				.@hasEnchant = 1;
 
 			if (!.@hasEnchant) {
-				mes "[Artesão Aprendiz]";
-				mes "Este equipamento não possui encantamentos.";
+				mes "[Artesao Aprendiz]";
+				mes "Este equipamento nao possui encantamentos.";
 				close;
 			}
 
 			// Escolher qual slot melhorar
-			mes "[Artesão Aprendiz]";
+			mes "[Artesao Aprendiz]";
 			mes "Qual encantamento deseja melhorar o encantamento?";
 			next;
 
@@ -377,7 +377,7 @@ OnTalk:
 
 			.@menu$ = .@menu$ + "Cancelar";
 			if (.@menu$ == "Cancelar") {
-				mes "[Artesão Aprendiz]";
+				mes "[Artesao Aprendiz]";
 				mes "Nenhum encantamento pode ser melhorado.";
 				close;
 			}
@@ -398,12 +398,12 @@ OnTalk:
 			.@new_id = callfunc("get_next_enchant", .@old_id);			
 
 			if (.@new_id == 0) {
-				mes "[Artesão Aprendiz]";
-				mes "Este encantamento já está no nível máximo!";
+				mes "[Artesao Aprendiz]";
+				mes "Este encantamento ja esta no nivel maximo!";
 				close;
 			}
 
-			// Calcula o nível atual (baseado no ID)
+			// Calcula o nivel atual (baseado no ID)
 			.@level = (.@old_id % 10) + 1;
 
 			// Define o custo do upgrade
@@ -411,7 +411,7 @@ OnTalk:
 				case 3: // Slot 4 (encantamento comum)
 					.@cost = 20000 * .@level;
 					break;
-				case 2: // Slot 3 (encantamento intermediário)
+				case 2: // Slot 3 (encantamento intermediario)
 					.@cost = 40000 * .@level;
 					break;
 				case 1: // Slot 2 (encantamento premium)
@@ -419,8 +419,8 @@ OnTalk:
 					break;
 			}
 
-			mes "[Artesão Aprendiz]";
-			mes "Você precisara pagar uma taxa de " + F_InsertComma(.@cost) + " Zeny para realizar este upgrade.";
+			mes "[Artesao Aprendiz]";
+			mes "Voce precisara pagar uma taxa de " + F_InsertComma(.@cost) + " Zeny para realizar este upgrade.";
 			mes "Ainda assim gostaria de prosseguir?";
 			if (select("Sim:Cancelar") == 2) {
 				mes "Tudo bem, volte quando estiver pronto.";
@@ -429,7 +429,7 @@ OnTalk:
 
 			// Verifica o zeny
 			if (Zeny < .@cost) {
-				mes "Você precisa de " + F_InsertComma(.@cost) + " Zeny para realizar este upgrade.";
+				mes "Voce precisa de " + F_InsertComma(.@cost) + " Zeny para realizar este upgrade.";
 				close;
 			}
 
@@ -451,7 +451,7 @@ OnTalk:
 			// Seta o item no slot do item equipado
 			setitemcard(.@part, .@realSlot, .@new_id);
 
-			mes "[Artesão Aprendiz]";
+			mes "[Artesao Aprendiz]";
 			mes "O encantamento foi aprimorado com sucesso!";
 			specialeffect2 EF_REPAIRWEAPON;
 			close;
@@ -488,16 +488,16 @@ function	script	get_next_enchant	{
 	setarray .@aspd_ids[0],8050,8051,8052,8053,8054,8055,8056,8057,8058,8059;
 
 	// =====================================================
-	// Pedras de encantamento 8100–8149
+	// Pedras de encantamento 8100-8149
 	// =====================================================
-	setarray .@post_ids[0],8100,8101,8102,8103,8104,8105,8106,8107,8108,8109; // Pós-conjuração
-	setarray .@cast_ids[0],8110,8111,8112,8113,8114,8115,8116,8117,8118,8119; // Conjuração variável
+	setarray .@post_ids[0],8100,8101,8102,8103,8104,8105,8106,8107,8108,8109; // Pos-conjuracao
+	setarray .@cast_ids[0],8110,8111,8112,8113,8114,8115,8116,8117,8118,8119; // Conjuracao variavel
 	setarray .@def_ids[0],8120,8121,8122,8123,8124,8125,8126,8127,8128,8129; // DEF
 	setarray .@mdef_ids[0],8130,8131,8132,8133,8134,8135,8136,8137,8138,8139; // DEFM
-	setarray .@nocd_ids[0],8140,8141,8142,8143,8144,8145,8146,8147,8148,8149; // Remoção de recarga
+	setarray .@nocd_ids[0],8140,8141,8142,8143,8144,8145,8146,8147,8148,8149; // Remocao de recarga
 
 	// =====================================================
-	// Busca e devolve o próximo ID da linha correspondente
+	// Busca e devolve o proximo ID da linha correspondente
 	// =====================================================
 	for (.@i = 0; .@i < 10; .@i++) {
 		if (getarg(0) == .@str_ids[.@i])  return .@str_ids[.@i+1];
@@ -520,7 +520,7 @@ function	script	get_next_enchant	{
 		if (getarg(0) == .@mdef_ids[.@i]) return .@mdef_ids[.@i+1];
 		if (getarg(0) == .@nocd_ids[.@i]) return .@nocd_ids[.@i+1];
 	}
-	return 0; // Se já está no nível máximo ou ID não reconhecido
+	return 0; // Se ja esta no nivel maximo ou ID nao reconhecido
 }
 function	script	get_base_enchant	{
 	.@id = getarg(0);

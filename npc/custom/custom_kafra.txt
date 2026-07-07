@@ -3,24 +3,24 @@
 
 	mes "[Kafra Leilah]";
 	mes "Hm...?";  
-	mes "Oh, bem-vindo à";
-	mes "Sede da Corporação Kafra.";
-	mes "Você precisa de algo?";
+	mes "Oh, bem-vindo a";
+	mes "Sede da Corporacao Kafra.";
+	mes "Voce precisa de algo?";
 	next;
 
-	switch(select("Salvar Ponto de Retorno:Abrir Armazém:Cancelar")) {
+	switch(select("Salvar Ponto de Retorno:Abrir Armazem:Bolsa de Zeny:Cancelar")) {
 		case 1:
 			mes "[Kafra Leilah]";
 			mes "Seu ponto de respawn foi";
 			mes "salvo aqui, dentro da";
-			mes "Sede da Corporação Kafra.";
+			mes "Sede da Corporacao Kafra.";
 			mes "Obrigado.";
 			next;
 
 			savepoint "prontera",147,185,1,1;
 			mes "[Kafra Leilah]";
 			mes "Por favor, utilize os";
-			mes "Serviços Kafra disponíveis";
+			mes "Servicos Kafra disponiveis";
 			mes "por todo Midgard.";
 			mes "Obrigado por visitar a";
 			mes "Sede da Kafra.";
@@ -30,19 +30,19 @@
 		case 2:
 			if (Zeny < 0) {
 				mes "[Kafra Leilah]";
-				mes "Desculpe, mas parece que você";
-				mes "não tem os 20 zeny para pagar";
-				mes "a taxa de acesso ao Depósito...";
+				mes "Desculpe, mas parece que voce";
+				mes "nao tem os 20 zeny para pagar";
+				mes "a taxa de acesso ao Deposito...";
 				close;
 			}
 
 			mes "[Kafra Leilah]";		
-			mes "Eu acessarei seu Depósito para você.";
+			mes "Eu acessarei seu Deposito para voce.";
 
 			// set Zeny, Zeny-20;
 			// set RESRVPTS, RESRVPTS + (20/5);
 
-			// callfunc("F_CheckKafCode"); // Verifica senha do armazém, se houver
+			// callfunc("F_CheckKafCode"); // Verifica senha do armazem, se houver
 			close2;
 			cutin "",255;
 			openstorage;
@@ -51,25 +51,70 @@
 			
 		// case 3:
 			// 	mes "[Kafra Leilah]";
-			// 	mes "Minhas desculpas, mas eu não estou";
-			// 	mes "de plantão. Eu ajudaria você";
-			// 	mes "se pudesse, mas na verdade não tenho";
-			// 	mes "carrinhos de mão disponíveis.";
-			// 	mes "Por que você não pede ajuda a outro funcionário Kafra?";
+			// 	mes "Minhas desculpas, mas eu nao estou";
+			// 	mes "de plantao. Eu ajudaria voce";
+			// 	mes "se pudesse, mas na verdade nao tenho";
+			// 	mes "carrinhos de mao disponiveis.";
+			// 	mes "Por que voce nao pede ajuda a outro funcionario Kafra?";
 			// 	next;
 
 			// 	mes "[Kafra Leilah]";
-			// 	mes "Os funcionários Kafra estão";
+			// 	mes "Os funcionarios Kafra estao";
 			// 	mes "espalhados por todo o";
 			// 	mes "continente de Midgard,";
-			// 	mes "e você deve encontrar muitos";
-			// 	mes "lá fora em Al De Baran.";
+			// 	mes "e voce deve encontrar muitos";
+			// 	mes "la fora em Al De Baran.";
 			// 	close2;
 			// 	break;
 
 		case 3:
+			.@amount = Zeny / 1000000;
+			if (.@amount < 1) {
+				mes "[Kafra Leilah]";
+				mes "Voce precisa ter pelo menos";
+				mes "1.000.000 de Zeny para pegar";
+				mes "uma Bolsa de Zeny.";
+				close2;
+				break;
+			}
+
+			mes "[Kafra Leilah]";
+			mes "Voce possui Zeny suficiente para";
+			mes "pegar " + .@amount + " Bolsa(s) de Zeny.";
+			mes "Quantas deseja pegar?";
+			next;
+
+			input .@pick, 0, .@amount;
+			if (.@pick < 1) {
+				mes "[Kafra Leilah]";
+				mes "Tudo bem. Volte quando quiser.";
+				close2;
+				break;
+			}
+
+			mes "[Kafra Leilah]";
+			mes "Deseja converter " + F_InsertComma(.@pick * 1000000) + " Zeny";
+			mes "em " + .@pick + " Bolsa(s) de Zeny?";
+			next;
+
+			if (select("Sim:Cancelar") == 2) {
+				mes "[Kafra Leilah]";
+				mes "Tudo bem. Volte quando quiser.";
+				close2;
+				break;
+			}
+
+			Zeny -= .@pick * 1000000;
+			getitem 9684, .@pick;
+
+			mes "[Kafra Leilah]";
+			mes "Pronto. Entreguei " + .@pick + " Bolsa(s) de Zeny.";
+			close2;
+			break;
+
+		case 4:
 			mes "[Kafra Leilah]";		
-			mes "Muito bem. Volte se precisar dos meus serviços..";
+			mes "Muito bem. Volte se precisar dos meus servicos..";
 			close2;
 			break;
 	}
@@ -77,6 +122,4 @@
 	cutin "",255;
 	end;
 }
-
-
 
