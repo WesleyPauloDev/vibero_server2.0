@@ -37425,7 +37425,21 @@ Body:
       BuyingStore: true
       NoConsume: true
     Script: |
-      callshop "barter_bio_research_docu";
+      mes "[Documento de Pesquisa]";
+      mes "O que deseja fazer?";
+      next;
+      switch(select("Comprar hats Biolab:Encantar arma Biolab:Cancelar")) {
+         case 1:
+            close2;
+            callshop "barter_bio_research_docu";
+            end;
+         case 2:
+            close2;
+            item_enchant(163);
+            end;
+         case 3:
+            close;
+      }
   - Id: 25787
     AegisName: Bio_Test_Fragment
     Name: Fragmento Experimental de Somatologia
