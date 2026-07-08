@@ -73,8 +73,21 @@ const char *macro_allowed_answer_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKL
 
 int32 pc_split_atoui(char* str, uint32* val, char sep, int32 max);
 static inline bool pc_attendance_rewarded_today( map_session_data* sd );
+static bool pc_is_left_hand_blocked_weapon( t_itemid nameid );
 
 #define PVP_CALCRANK_INTERVAL 1000	// PVP calculation interval
+
+static bool pc_is_left_hand_blocked_weapon( t_itemid nameid ){
+	switch( nameid ){
+		case 1100: // Taurus_Sword_J
+		case 1223: // Forturn_Sword
+		case 500018: // Fourth_1h_Sword
+		case 510021: // Avd_Knife
+			return true;
+		default:
+			return false;
+	}
+}
 
 PlayerStatPointDatabase statpoint_db;
 EmotionDatabase emotion_db;
@@ -12251,6 +12264,9 @@ bool pc_equipitem(map_session_data *sd,int16 n,int32 req_pos,bool equipswitch)
 		if( pos == EQP_SHADOW_ARMS )
 			pos = (equip_index[EQI_SHADOW_WEAPON] >= 0 ? EQP_SHADOW_SHIELD : EQP_SHADOW_WEAPON);
 	}
+
+	if( (pos&EQP_HAND_L) && id->type == IT_WEAPON && pc_is_left_hand_blocked_weapon( id->nameid ) )
+		pos = EQP_HAND_R;
 
 	if (pos&EQP_HAND_R && battle_config.use_weapon_skill_range&BL_PC) {
 		//Update skill-block range database when weapon range changes. [Skotlex]
