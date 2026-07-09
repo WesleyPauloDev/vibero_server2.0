@@ -7165,7 +7165,10 @@ static void mob_drop_ratio_adjust(void) {
 					ratemax = battle_config.item_drop_equip_max;
 					break;
 				case IT_CARD:
-					rate_adjust = is_mvp ? battle_config.item_rate_card_mvp : (is_boss ? battle_config.item_rate_card_boss : battle_config.item_rate_card);
+					if (is_mvp && mob_id >= 25000 && mob_id <= 25012)
+						rate_adjust = battle_config.item_rate_card;
+					else
+						rate_adjust = is_mvp ? battle_config.item_rate_card_mvp : (is_boss ? battle_config.item_rate_card_boss : battle_config.item_rate_card);
 					ratemin = battle_config.item_drop_card_min;
 					ratemax = battle_config.item_drop_card_max;
 					break;
