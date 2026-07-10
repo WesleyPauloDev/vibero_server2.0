@@ -27248,25 +27248,42 @@ BUILDIN_FUNC( laphine_upgrade ){
 		return SCRIPT_CMD_FAILURE;
 	}
 
-	if( sd->itemid == 0 ){
-		ShowError( "buildin_laphine_upgrade: Called outside of an item script without item id.\n" );
-		return SCRIPT_CMD_FAILURE;
+	t_itemid item_id = sd->itemid;
+	item_data* data;
+
+	if( script_hasdata( st, 2 ) ){
+		item_id = script_getnum( st, 2 );
+		int16 index = pc_search_inventory( sd, item_id );
+
+		if( index < 0 ){
+			ShowError( "buildin_laphine_upgrade: Player %s does not have item %u.\n", sd->status.name, item_id );
+			return SCRIPT_CMD_FAILURE;
+		}
+
+		data = sd->inventory_data[index];
+	}else{
+		if( item_id == 0 ){
+			ShowError( "buildin_laphine_upgrade: Called outside of an item script without item id.\n" );
+			return SCRIPT_CMD_FAILURE;
+		}
+
+		data = sd->inventory_data[sd->itemindex];
 	}
 
-	if( sd->inventory_data[sd->itemindex]->flag.delay_consume == 0 ){
-		ShowError( "buildin_laphine_upgrade: Called from item %u, which is not a consumed delayed.\n", sd->itemid );
+	if( data == nullptr || data->flag.delay_consume == 0 ){
+		ShowError( "buildin_laphine_upgrade: Item %u is not a consumed delayed.\n", item_id );
 		return SCRIPT_CMD_FAILURE;
 	}
 
 	if( sd->state.laphine_upgrade != 0 ){
-		ShowError( "buildin_laphine_upgrade: Laphine Upgrade window was already open. Player %s (AID: %u, CID: %u) with item id %u.\n", sd->status.name, sd->status.account_id, sd->status.char_id, sd->itemid );
+		ShowError( "buildin_laphine_upgrade: Laphine Upgrade window was already open. Player %s (AID: %u, CID: %u) with item id %u.\n", sd->status.name, sd->status.account_id, sd->status.char_id, item_id );
 		return SCRIPT_CMD_FAILURE;
 	}
 
-	std::shared_ptr<s_laphine_upgrade> upgrade = laphine_upgrade_db.find( sd->itemid );
+	std::shared_ptr<s_laphine_upgrade> upgrade = laphine_upgrade_db.find( item_id );
 
 	if( upgrade == nullptr ){
-		ShowError( "buildin_laphine_upgrade: %u is not a valid Laphine Upgrade item.\n", sd->itemid );
+		ShowError( "buildin_laphine_upgrade: %u is not a valid Laphine Upgrade item.\n", item_id );
 		return SCRIPT_CMD_FAILURE;
 	}
 
@@ -28949,7 +28966,7 @@ struct script_function buildin_func[] = {
 
 	BUILDIN_DEF(getitempos,""),
 	BUILDIN_DEF(laphine_synthesis, "?"),
-	BUILDIN_DEF(laphine_upgrade, ""),
+	BUILDIN_DEF(laphine_upgrade, "?"),
 	BUILDIN_DEF(randomoptgroup,"i"),
 	BUILDIN_DEF(open_quest_ui, "??"),
 	BUILDIN_DEF(openbank,"?"),

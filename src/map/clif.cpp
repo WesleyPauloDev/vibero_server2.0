@@ -25103,22 +25103,22 @@ void clif_parse_enchantwindow_general( int32 fd, map_session_data* sd ){
 				}
 				break;
 			case 2:
-				material_id = 1001035; // EP19_S_F_2_Extract
-				material_amount = 20;
+				material_id = 1001034; // EP19_S_F_1_Extract
+				material_amount = 30;
 				switch( rnd_value( 0, 2 ) ){
 					case 0:
-						enchant_item = 311272; // Glacier_F_Orb_81
+						enchant_item = 311192; // Glacier_F_Orb_1
 						break;
 					case 1:
-						enchant_item = 311273; // Glacier_F_Orb_82
+						enchant_item = 311193; // Glacier_F_Orb_2
 						break;
 					default:
-						enchant_item = 311274; // Glacier_F_Orb_83
+						enchant_item = 311194; // Glacier_F_Orb_3
 						break;
 				}
 				break;
 			case 1:
-				material_id = 1001037; // EP19_Gla_Extract
+				material_id = 1001034; // EP19_S_F_1_Extract
 				material_amount = 50;
 				enchant_item = rnd_value( 0, 1 ) == 0 ? 311449 : 311454; // Physical_Grade_1 / Magical_Grade_1
 				break;

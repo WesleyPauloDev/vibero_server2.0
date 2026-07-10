@@ -11,7 +11,7 @@ moc_para01,48,22,4	script	Jardim do Tempo#custom	624,{
 	next;
 
 L_Menu:
-	switch (select("Comprar acessorios:Comprar capas:Reformar capas:Trocar meteoritos:Encantar Nebula:Encantar Signet Star:Cancelar")) {
+	switch (select("Comprar acessorios:Comprar capas:Reformar capas:Trocar meteoritos:Encantar Nebula:Encantar Signet Star:Encantar Vivatus:Cancelar")) {
 	case 1:
 		callshop("barter_t_garden_4");
 		end;
@@ -30,9 +30,29 @@ L_Menu:
 	case 6:
 		callsub S_EnchantSignetStar;
 		end;
+	case 7:
+		callsub S_EnchantVivatus;
+		end;
 	default:
 		close;
 	}
+
+S_EnchantVivatus:
+	mes "[Jardim do Tempo]";
+	mes "Este servico aplica encantamentos nos slots das armas Vivatus Fides.";
+	mes "Requisitos e custos:";
+	mes "- Arma refinada em ^0055ff+7 ou superior^000000.";
+	mes "- Fragmentos de Ametista e Zeny.";
+	mes "- Encantamento e reset com 100% de sucesso.";
+	mes "- O segundo slot possui encantamento perfeito.";
+	mes " ";
+	mes "^777777As opcoes aleatorias das pedras Pontifex sao um sistema separado.^000000";
+	next;
+	if (select("Abrir encantamento de slots:Voltar") == 2)
+		goto L_Menu;
+	close2;
+	item_enchant(164);
+	end;
 
 S_EnchantNebula:
 	mes "[Jardim do Tempo]";
