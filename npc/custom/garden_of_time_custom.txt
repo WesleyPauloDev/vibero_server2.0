@@ -11,7 +11,7 @@ moc_para01,48,22,4	script	Jardim do Tempo#custom	624,{
 	next;
 
 L_Menu:
-	switch (select("Comprar acessorios:Comprar capas:Reformar capas:Trocar meteoritos:Encantar Nebula:Encantar Signet Star:Encantar Vivatus:Cancelar")) {
+	switch (select("Comprar acessorios:Comprar capas:Reformar capas:Trocar meteoritos:Encantar Nebula:Encantar Signet Star:Encantar Vivatus:Evoluir Adulter para Vivatus:Cancelar")) {
 	case 1:
 		callshop("barter_t_garden_4");
 		end;
@@ -33,9 +33,33 @@ L_Menu:
 	case 7:
 		callsub S_EnchantVivatus;
 		end;
+	case 8:
+		callsub S_ReformVivatus;
+		end;
 	default:
 		close;
 	}
+
+S_ReformVivatus:
+	mes "[Jardim do Tempo]";
+	mes "O Ritual de Purificacao transforma uma arma Adulter Fides em sua versao Vivatus Fides.";
+	mes " ";
+	mes "Requisitos:";
+	mes "- Arma Adulter Fides ^0055ff+9 ou superior^000000.";
+	mes "- 10 projetos especificos da arma.";
+	mes "- 50 Oleos Sagrados de Purificacao.";
+	mes "- 50 Aguas Sagradas de Purificacao.";
+	mes "- 50 Mortalhas do Santuario.";
+	mes "- 200 Fragmentos de Ametista.";
+	mes " ";
+	mes "^ff0000A arma resultante perdera 5 niveis de refino.^000000";
+	next;
+	if (select("Abrir Ritual de Purificacao:Voltar") == 2)
+		goto L_Menu;
+	disable_items;
+	close2;
+	item_reform("Consecrate_Weapon_1");
+	end;
 
 S_EnchantVivatus:
 	mes "[Jardim do Tempo]";
@@ -44,7 +68,8 @@ S_EnchantVivatus:
 	mes "- Arma refinada em ^0055ff+7 ou superior^000000.";
 	mes "- Fragmentos de Ametista e Zeny.";
 	mes "- Encantamento e reset com 100% de sucesso.";
-	mes "- O segundo slot possui encantamento perfeito.";
+	mes "- Os dois slots possuem encantamento perfeito.";
+	mes "- O segundo recebe os bonus finais de skills do Gray Wolf.";
 	mes " ";
 	mes "^777777As opcoes aleatorias das pedras Pontifex sao um sistema separado.^000000";
 	next;
