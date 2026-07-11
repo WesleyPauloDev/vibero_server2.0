@@ -14,6 +14,7 @@ moc_para01,52,26,4	script	Administrador Varmundt#bio	4_M_BARMUND,{
 	switch (select(
 		"Trocar fragmentos de runa:" +
 		"Criar equipamentos Engraved:" +
+		"Criar/encantar armaduras Deep:" +
 		"Comprar set Varmundt:" +
 		"Encantar Varmundt base:" +
 		"Encantar Rune Equipment:" +
@@ -36,26 +37,119 @@ moc_para01,52,26,4	script	Administrador Varmundt#bio	4_M_BARMUND,{
 		callshop "barter_varmundt_engraved";
 		end;
 	case 3:
-		callsub L_BuyVarmundtSet;
+		callsub L_IcyStormSuit;
 		end;
 	case 4:
-		callsub L_EnchantBase;
+		callsub L_BuyVarmundtSet;
 		end;
 	case 5:
-		callsub L_EnchantRune;
+		callsub L_EnchantBase;
 		end;
 	case 6:
-		callsub L_Reform;
+		callsub L_EnchantRune;
 		end;
 	case 7:
-		callsub L_EvolutionStones;
+		callsub L_Reform;
 		end;
 	case 8:
-		callsub L_EnchantRingBase;
+		callsub L_EvolutionStones;
 		end;
 	case 9:
+		callsub L_EnchantRingBase;
+		end;
+	case 10:
 		callsub L_EnchantRingUpgraded;
 		end;
+	default:
+		close;
+	}
+	end;
+
+L_IcyStormSuit:
+	mes "[Administrador Varmundt]";
+	mes "Posso criar e encantar as armaduras especiais da Deep Biosphere.";
+	next;
+
+	switch (select("Flame/Earth Armor:Ice/Storm Suit:Soul/Purify Robe:Corrupt/Poison Cloth:Cancelar")) {
+	case 1:
+		.@item_id = 450274; // Flame_E_R_Armor
+		.@enchant_id = 99;
+		setarray .@material[0], 1001306, 1001307, 1001314, 1001315;
+		break;
+	case 2:
+		.@item_id = 450279; // Ice_S_R_Suits
+		.@enchant_id = 100;
+		setarray .@material[0], 1001308, 1001309, 1001316, 1001317;
+		break;
+	case 3:
+		.@item_id = 450280; // Soul_P_R_Robe
+		.@enchant_id = 101;
+		setarray .@material[0], 1001310, 1001311, 1001318, 1001319;
+		break;
+	case 4:
+		.@item_id = 450281; // Corrupt_P_R_Cloth
+		.@enchant_id = 102;
+		setarray .@material[0], 1001312, 1001313, 1001320, 1001321;
+		break;
+	default:
+		close;
+	}
+
+	.@price = 5000000;
+	setarray .@amount[0], 100, 100, 50, 50;
+
+	mes "[Administrador Varmundt]";
+	mes "Equipamento selecionado: " + mesitemlink(.@item_id, false) + ".";
+	next;
+	switch (select("Criar armadura:Encantar armadura:Voltar:Cancelar")) {
+	case 1:
+
+		mes "[Administrador Varmundt]";
+		mes "Para criar a " + mesitemlink(.@item_id, false) + ", preciso de:";
+		mes "- " + .@price + " zeny.";
+		for (.@i = 0; .@i < getarraysize(.@material); .@i++)
+			mes "- " + .@amount[.@i] + "x " + mesitemlink(.@material[.@i], false) + " (voce possui " + countitem(.@material[.@i]) + ").";
+		next;
+		if (select("Criar:Cancelar") == 2)
+			close;
+
+		if (Zeny < .@price) {
+			mes "[Administrador Varmundt]";
+			mes "Zeny insuficiente.";
+			close;
+		}
+
+		for (.@i = 0; .@i < getarraysize(.@material); .@i++) {
+			if (countitem(.@material[.@i]) < .@amount[.@i]) {
+				mes "[Administrador Varmundt]";
+				mes "Material insuficiente: " + .@amount[.@i] + "x " + mesitemlink(.@material[.@i], false) + ".";
+				close;
+			}
+		}
+
+		if (!checkweight(.@item_id, 1)) {
+			mes "[Administrador Varmundt]";
+			mes "Voce nao possui espaco ou capacidade de peso suficiente.";
+			close;
+		}
+
+		Zeny -= .@price;
+		for (.@i = 0; .@i < getarraysize(.@material); .@i++)
+			delitem .@material[.@i], .@amount[.@i];
+		getitem .@item_id, 1;
+
+		mes "[Administrador Varmundt]";
+		mes "Criacao concluida. Voce recebeu " + mesitemlink(.@item_id, false) + ".";
+		close;
+	case 2:
+		mes "[Administrador Varmundt]";
+		mes "A interface aceita a armadura selecionada e sua versao Engraved.";
+		mes "Desequipe a armadura antes de continuar.";
+		close2;
+		item_enchant(.@enchant_id);
+		end;
+	case 3:
+		goto L_IcyStormSuit;
 	default:
 		close;
 	}
