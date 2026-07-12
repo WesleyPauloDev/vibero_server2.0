@@ -138,7 +138,10 @@ OnCommand:
 			for(.@i = 0;.@i < @inventorylist_count;.@i++){
 				if (getiteminfo(@inventorylist_id[.@i], ITEMINFO_TYPE) == IT_HEALING && callsub(L_IsAllowed, .@command$[0], @inventorylist_id[.@i])) {
 					.@items[.@count] = @inventorylist_id[.@i];
-					.@menu$ = .@menu$ + sprintf("~ ^0055FF%s^000000 (%dx)" + (inarray(.blackList[0],@inventorylist_id[.@i]) != -1? " ^364022Black Listed^000000":"") + (BaseLevel < getiteminfo(@inventorylist_id[.@i], ITEMINFO_EQUIPLEVELMIN)? " ^E82C0CNeed Higher Level^000000":"") + ":", getitemname(@inventorylist_id[.@i]), countitem(@inventorylist_id[.@i]));
+					// AegisName usa apenas caracteres ASCII e evita nomes corrompidos
+					// quando a codificacao do item_db difere da codificacao do cliente.
+					.@item_name$ = replacestr(getiteminfo(@inventorylist_id[.@i], ITEMINFO_AEGISNAME), "_", " ");
+					.@menu$ = .@menu$ + sprintf("~ ^0055FF%s^000000 (%dx)" + (inarray(.blackList[0],@inventorylist_id[.@i]) != -1? " ^364022Black Listed^000000":"") + (BaseLevel < getiteminfo(@inventorylist_id[.@i], ITEMINFO_EQUIPLEVELMIN)? " ^E82C0CNeed Higher Level^000000":"") + ":", .@item_name$, countitem(@inventorylist_id[.@i]));
 					.@count++;
 				}
 			}
