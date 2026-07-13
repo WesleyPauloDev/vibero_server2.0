@@ -10,6 +10,7 @@ function	script	F_InstanceEntry	{
 	// getarg(4) -> Level minimo (numero)
 	// getarg(5) -> Nome amigavel da instancia (string opcional)
 	// getarg(6) -> Quest de caca iniciada ao entrar (numero opcional)
+	// getarg(7) -> Preco do reset em CashPoints (padrao: 1000; 0 = desabilitado)
 	// ==============================
 
 	.@db_name$ = getarg(0);
@@ -19,6 +20,7 @@ function	script	F_InstanceEntry	{
 	.@min_level = getarg(4);
 	.@display_name$ = getarg(5, .@db_name$);
 	.@hunt_quest = getarg(6, 0);
+	.@reset_cash_price = getarg(7, 1000);
 
     .@cooldown_name$ = "#cooldown_" + .@cooldown_var$;
     .@status_name$ = "#" + .@status_var$ + "_STATUS";
@@ -75,22 +77,56 @@ function	script	F_InstanceEntry	{
 		setd(.@shared_status_name$, 0);
 	}
 
-	// ============================
-	// 4. Se ja completou hoje
-	// ============================
-	if (getd(.@status_name$) == 3 || (.@shared_vdec && getd(.@shared_status_name$) == 3)) {
-		mes "[" + .@npc_name$ + "]";
-		mes "Voce nao pode mais entrar nesta instancia hoje.";
-		mes "Volte amanha apos o reset diario.";
-		close;
-	}
-
 	.@live_iid = instance_id(IM_PARTY);
 	.@same_live_instance = (.@live_iid > 0 && instance_live_info(ILI_NAME, .@live_iid) == .@db_name$);
-	if ((getd(.@status_name$) > 0 || (.@shared_vdec && getd(.@shared_status_name$) > 0)) && !.@same_live_instance) {
+
+	// ============================
+	// 4. Bloqueio diario e reset pago opcional
+	// ============================
+	.@daily_block = (getd(.@status_name$) == 3 || (.@shared_vdec && getd(.@shared_status_name$) == 3));
+	.@lost_instance = ((getd(.@status_name$) > 0 || (.@shared_vdec && getd(.@shared_status_name$) > 0)) && !.@same_live_instance);
+	if (.@daily_block || .@lost_instance) {
 		mes "[" + .@npc_name$ + "]";
 		mes "Voce nao pode mais entrar nesta instancia hoje.";
 		mes "Volte amanha apos o reset diario.";
+		if (.@reset_cash_price <= 0)
+			close;
+
+		next;
+		mes "[" + .@npc_name$ + "]";
+		mes "Deseja resetar somente a instancia ^0055FF" + .@display_name$ + "^000000?";
+		mes "Custo: ^FF0000" + .@reset_cash_price + " CashPoints^000000.";
+		mes "Saldo atual: ^0055FF" + #CASHPOINTS + " CashPoints^000000.";
+		next;
+		if (select("Resetar por " + .@reset_cash_price + " CashPoints", "Cancelar") != 1)
+			close;
+
+		mes "[" + .@npc_name$ + "]";
+		mes "Confirmar o reset de ^0055FF" + .@display_name$ + "^000000?";
+		mes "Esta operacao nao pode ser desfeita.";
+		next;
+		if (select("Confirmar reset", "Nao resetar") != 1)
+			close;
+
+		if (#CASHPOINTS < .@reset_cash_price) {
+			mes "[" + .@npc_name$ + "]";
+			mes "CashPoints insuficientes.";
+			mes "Voce precisa de ^FF0000" + .@reset_cash_price + "^000000, mas possui ^0055FF" + #CASHPOINTS + "^000000.";
+			close;
+		}
+
+		#CASHPOINTS -= .@reset_cash_price;
+		setd(.@cooldown_name$, 0);
+		setd(.@status_name$, 0);
+		if (.@shared_vdec) {
+			setd(.@shared_cooldown_name$, 0);
+			setd(.@shared_status_name$, 0);
+		}
+
+		mes "[" + .@npc_name$ + "]";
+		mes "A instancia ^0055FF" + .@display_name$ + "^000000 foi resetada.";
+		mes "Foram consumidos ^FF0000" + .@reset_cash_price + " CashPoints^000000.";
+		mes "Saldo restante: ^0055FF" + #CASHPOINTS + " CashPoints^000000.";
 		close;
 	}
 
