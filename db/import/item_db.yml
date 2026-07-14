@@ -89,6 +89,48 @@ Header:
   Version: 3
 
 Body:
+  # Expande permanentemente o Storage 2 da conta em 100 espacos.
+  # AliasName reutiliza o visual do Cartao Kafra sem exigir um novo sprite.
+  - Id: 900001
+    AegisName: Storage_Expansion_Coupon
+    Name: Cupom de Expansao do Armazem
+    Type: Delayconsume
+    Weight: 10
+    AliasName: Kafra_Card
+    Trade:
+      NoDrop: true
+      NoTrade: true
+      NoSell: true
+      NoCart: true
+      NoStorage: true
+      NoGuildStorage: true
+      NoMail: true
+      NoAuction: true
+    Script: |
+      mes "[Expansao do Armazem]";
+      mes "Este cupom aumenta permanentemente o ^00CC00Storage 2^000000 da sua conta em ^00CC00100 espacos^000000.";
+      mes "O Storage 2 e desbloqueado no primeiro uso e possui limite de ^FF0000300 espacos^000000.";
+      mes "Use ^00CC00@storage2^000000 para abri-lo.";
+      next;
+      if (select("Confirmar expansao:Cancelar") == 2) {
+        mes "A expansao foi cancelada. O cupom nao foi consumido.";
+        close;
+      }
+      if (countitem(900001) < 1) {
+        mes "O cupom nao foi encontrado no inventario.";
+        close;
+      }
+      delitem 900001,1;
+      if (expandstorage2(100)) {
+        mes "Seu Storage 2 foi expandido permanentemente em ^00CC00100 espacos^000000.";
+        mes "Use ^00CC00@storage2^000000 para acessa-lo.";
+      } else {
+        getitem 900001,1;
+        mes "Nao foi possivel realizar a expansao.";
+        mes "O Storage 2 desta conta ja atingiu 300 espacos.";
+      }
+      close;
+
   - Id: 810014
     AegisName: Precision_Rifle_Copy
     Name: Precision Piercer

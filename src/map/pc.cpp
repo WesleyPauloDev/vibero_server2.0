@@ -2373,6 +2373,54 @@ bool pc_set_hate_mob(map_session_data *sd, int32 pos, struct block_list *bl)
  * We didn't receive item information at this point so DO NOT attempt to do item operations here.
  * See intif_parse_StorageReceived() for item operations [lighta]
  *------------------------------------------*/
+static constexpr const char* STORAGE2_SLOTS_VAR = "#Storage2Slots";
+static constexpr int64 STORAGE2_SLOTS_MAX = 300;
+
+uint16 pc_get_storage2_capacity(map_session_data *sd)
+{
+	nullpo_retr(0, sd);
+
+	if (!sd->vars_ok)
+		return 0;
+
+	return static_cast<uint16>(cap_value(
+		pc_readaccountreg(sd, add_str(STORAGE2_SLOTS_VAR)),
+		0,
+		STORAGE2_SLOTS_MAX
+	));
+}
+
+void pc_update_storage2_capacity(map_session_data *sd)
+{
+	nullpo_retv(sd);
+
+	if (sd->premiumStorage.stor_id != 1)
+		return;
+
+	sd->premiumStorage.max_amount = pc_get_storage2_capacity(sd);
+
+	if (sd->state.storage_flag == 3)
+		clif_updatestorageamount(*sd, sd->premiumStorage.amount, sd->premiumStorage.max_amount);
+}
+
+bool pc_expand_storage2(map_session_data *sd, uint16 amount)
+{
+	nullpo_retr(false, sd);
+
+	if (!sd->vars_ok || amount == 0)
+		return false;
+
+	int64 slots = pc_get_storage2_capacity(sd);
+
+	if (slots + amount > STORAGE2_SLOTS_MAX)
+		return false;
+
+	if (!pc_setaccountreg(sd, add_str(STORAGE2_SLOTS_VAR), slots + amount))
+		return false;
+
+	pc_update_storage2_capacity(sd);
+	return true;
+}
 void pc_reg_received(map_session_data *sd)
 {
 	uint8 i;

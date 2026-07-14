@@ -10994,6 +10994,30 @@ BUILDIN_FUNC(openstorage)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/**
+ * Permanently expands Storage 2 for the attached account.
+ * Returns 1 on success or 0 when the requested increase exceeds the limit.
+ * expandstorage2(<amount>)
+ */
+BUILDIN_FUNC(expandstorage2)
+{
+	TBL_PC* sd;
+
+	if (!script_rid2sd(sd)) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	int64 amount = script_getnum(st, 2);
+
+	if (amount <= 0 || amount > UINT16_MAX) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	script_pushint(st, pc_expand_storage2(sd, static_cast<uint16>(amount)) ? 1 : 0);
+	return SCRIPT_CMD_SUCCESS;
+}
 BUILDIN_FUNC(guildopenstorage)
 {
 	TBL_PC* sd;
@@ -28411,6 +28435,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(gettime,"i"),
 	BUILDIN_DEF(gettimestr,"si?"),
 	BUILDIN_DEF(openstorage,""),
+	BUILDIN_DEF(expandstorage2,"i"),
 	BUILDIN_DEF(guildopenstorage,""),
 	BUILDIN_DEF(guildopenstorage_log,"?"),
 	BUILDIN_DEF(guild_has_permission,"i?"),

@@ -1675,6 +1675,10 @@ bool pc_setregistry_str(map_session_data *sd, int64 reg, const char *val);
 bool pc_setreg2(map_session_data *sd, const char *reg, int64 val);
 int64 pc_readreg2(map_session_data *sd, const char *reg);
 
+uint16 pc_get_storage2_capacity(map_session_data *sd);
+void pc_update_storage2_capacity(map_session_data *sd);
+bool pc_expand_storage2(map_session_data *sd, uint16 amount);
+
 bool pc_addeventtimer(map_session_data *sd,int32 tick,const char *name);
 bool pc_deleventtimer(map_session_data *sd,const char *name);
 void pc_cleareventtimer(map_session_data *sd);

@@ -3526,9 +3526,11 @@ static bool intif_parse_StorageReceived(int32 fd)
 			break;
 
 		case TABLE_STORAGE:
-			if (stor->stor_id)
+			if (stor->stor_id) {
+				if (stor->stor_id == 1)
+					pc_update_storage2_capacity(sd);
 				storage_premiumStorage_open(sd);
-			else {
+			} else {
 #ifdef VIP_ENABLE
 				if (!pc_isvip(sd))
 					stor->max_amount = MIN_STORAGE;
