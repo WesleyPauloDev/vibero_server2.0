@@ -250,10 +250,18 @@ fase futura pode adicionar hashes por blocos.
 
 ## Publicacao em producao
 
-O pacote de producao usa `VibeRO.exe`, a URL configurada em
-`assets/vibeguard-launcher-production.json` e a politica
+No pacote de producao, o cliente original e preservado como
+`VibeRO-Client.exe` e o VibeGuard ocupa o nome `VibeRO.exe`. Dessa forma, tanto
+o atalho do jogador quanto o `Atualizador.exe`, ao chamarem `VibeRO.exe`, passam
+primeiro pela verificacao. A URL fica em
+`assets/vibeguard-launcher-production.json` e os dois executaveis fazem parte de
 `guard-policy-production.json`. O hash do manifesto precisa ser identico em
 `vibeguard-web.conf.production.example` e no cliente distribuido.
+
+Se o atualizador distribuir uma nova versao do proprio `VibeRO.exe`, ele podera
+sobrescrever o wrapper. Esse comportamento deve ser validado em uma copia antes
+de cada mudanca do atualizador; nesse caso, o pacote precisa reinstalar o wrapper
+e reassinar o cliente depois da atualizacao.
 
 Ordem segura de ativacao:
 
