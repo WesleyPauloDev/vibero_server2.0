@@ -202,7 +202,7 @@ endif()
 #
 # networking library (Solaris/MinGW)
 #
-if( NOT MSVC )
+if( MINGW OR CMAKE_SYSTEM_NAME STREQUAL "SunOS" )
 message( STATUS "Detecting networking library (socket/nsl/ws2_32)" )
 #set( CMAKE_REQUIRED_LIBRARIES ${GLOBAL_LIBRARIES} )
 #find_function_library( bind FUNCTION_BIND_LIBRARIES socket ws2_32 )
