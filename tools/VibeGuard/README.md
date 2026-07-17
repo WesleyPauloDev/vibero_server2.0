@@ -251,9 +251,10 @@ fase futura pode adicionar hashes por blocos.
 ## Publicacao em producao
 
 No pacote de producao, o cliente original e preservado como
-`VibeRO-Client.exe` e o VibeGuard ocupa o nome `VibeRO.exe`. Dessa forma, tanto
-o atalho do jogador quanto o `Atualizador.exe`, ao chamarem `VibeRO.exe`, passam
-primeiro pela verificacao. A URL fica em
+`System/VibeRO-Client.exe` e o VibeGuard ocupa o nome `VibeRO.exe`, usando o
+icone original do jogo. `start.exe` nao e distribuido em producao. Dessa forma,
+tanto o atalho do jogador quanto o `Atualizador.exe`, ao chamarem `VibeRO.exe`,
+passam primeiro pela verificacao. A URL fica em
 `assets/vibeguard-launcher-production.json` e os dois executaveis fazem parte de
 `guard-policy-production.json`. O hash do manifesto precisa ser identico em
 `vibeguard-web.conf.production.example` e no cliente distribuido.
