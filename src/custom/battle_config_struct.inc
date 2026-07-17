@@ -12,3 +12,9 @@
  *	 <datatype> name;
  **/
 
+int32 vibeguard_enforcement_mode;
+int32 vibeguard_warning_seconds;
+int32 vibeguard_grace_seconds;
+int32 vibeguard_heartbeat_ttl_seconds;
+int32 vibeguard_exempt_group_level;
+

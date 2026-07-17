@@ -58,6 +58,7 @@
 #include "storage.hpp"
 #include "unit.hpp"
 #include "vending.hpp"
+#include "vibeguard_observer.hpp"
 
 using namespace rathena;
 
@@ -11515,6 +11516,7 @@ void clif_parse_WalkToXY(int32 fd, map_session_data *sd)
 	status_change_end(sd, SC_KI_SUL_RAMPAGE);
 
 	pc_delinvincibletimer(sd);
+	vibeguard_observe_action(*sd, e_vibeguard_action::MOVE);
 
 	//Set last idle time... [Skotlex]
 	if (battle_config.idletime_option&IDLE_WALK)
@@ -11832,6 +11834,7 @@ void clif_parse_ActionRequest_sub( map_session_data& sd, uint8 action_type, int3
 		}
 
 		pc_delinvincibletimer(&sd);
+		vibeguard_observe_action(sd, e_vibeguard_action::ATTACK);
 		if (battle_config.idletime_option&IDLE_ATTACK)
 			sd.idletime = last_tick;
 		if (battle_config.hom_idle_no_share && sd.hd && battle_config.idletime_hom_option&IDLE_ATTACK)
@@ -12130,6 +12133,7 @@ void clif_parse_TakeItem(int32 fd, map_session_data *sd)
 
 		if (!pc_takeitem(sd, fitem))
 			break;
+		vibeguard_observe_action(*sd, e_vibeguard_action::PICKUP);
 
 		return;
 	} while (0);
@@ -13168,6 +13172,7 @@ void clif_parse_skill_toid( map_session_data* sd, uint16 skill_id, uint16 skill_
 /// 0438 <skill lv>.W <skill id>.W <target id>.L (CZ_USE_SKILL2)
 /// There are various variants of this packet, some of them have padding between fields.
 void clif_parse_UseSkillToId( int32 fd, map_session_data *sd ){
+	vibeguard_observe_action(*sd, e_vibeguard_action::SKILL);
 	// TODO: shuffle packet
 	struct s_packet_db* info = &packet_db[RFIFOW(fd, 0)];
 
@@ -26564,8 +26569,10 @@ void do_init_clif(void) {
 #endif
 
 	delay_clearunit_ers = ers_new(sizeof(struct block_list),"clif.cpp::delay_clearunit_ers",ERS_OPT_CLEAR);
+	vibeguard_observer_init();
 }
 
 void do_final_clif(void) {
+	vibeguard_observer_final();
 	ers_destroy(delay_clearunit_ers);
 }

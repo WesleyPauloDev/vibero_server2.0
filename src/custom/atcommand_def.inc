@@ -8,4 +8,8 @@
  *	ACMD_DEF(command_name),
  **/
 
+ACMD_DEF(guard),
+ACMD_DEF(guardstatus),
+ACMD_DEF(guardtest),
+
 //ACMD_DEF(newcommand),

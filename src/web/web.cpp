@@ -31,6 +31,7 @@
 #include "merchantstore_controller.hpp"
 #include "partybooking_controller.hpp"
 #include "userconfig_controller.hpp"
+#include "vibeguard_controller.hpp"
 
 
 using namespace rathena;
@@ -152,6 +153,16 @@ bool web_config_read(const char* cfgName, bool normal) {
 			web_config_read(w2, normal);
 		else if (!strcmpi(w1, "allow_gifs"))
 			web_config.allow_gifs = config_switch(w2) == 1;
+		else if (!strcmpi(w1, "vibeguard_observation_enabled"))
+			web_config.vibeguard_observation_enabled = config_switch(w2) == 1;
+		else if (!strcmpi(w1, "vibeguard_manifest_sha256"))
+			web_config.vibeguard_manifest_sha256 = w2;
+		else if (!strcmpi(w1, "vibeguard_heartbeat_seconds"))
+			web_config.vibeguard_heartbeat_seconds = (uint32)strtoul(w2, nullptr, 10);
+		else if (!strcmpi(w1, "vibeguard_session_ttl_seconds"))
+			web_config.vibeguard_session_ttl_seconds = (uint32)strtoul(w2, nullptr, 10);
+		else if (!strcmpi(w1, "vibeguard_log_path"))
+			web_config.vibeguard_log_path = w2;
 	}
 	fclose(fp);
 	ShowInfo("Finished reading %s.\n", cfgName);
@@ -262,6 +273,11 @@ void web_set_defaults() {
 	safestrncpy(web_config.webconf_name, "conf/web_athena.conf", sizeof(web_config.webconf_name));
 	safestrncpy(web_config.msgconf_name, "conf/msg_conf/web_msg.conf", sizeof(web_config.msgconf_name));
 	web_config.print_req_res = false;
+	web_config.vibeguard_observation_enabled = false;
+	web_config.vibeguard_manifest_sha256.clear();
+	web_config.vibeguard_heartbeat_seconds = 10;
+	web_config.vibeguard_session_ttl_seconds = 45;
+	web_config.vibeguard_log_path = "./log/vibeguard-observation.log";
 
 	inter_config.emblem_transparency_limit = 100;
 	inter_config.emblem_woe_change = true;
@@ -401,6 +417,10 @@ void display_helpscreen(bool do_exit)
 
 // called just before sending repsonse
 void logger(const Request & req, const Response & res) {
+	if (req.path.rfind("/vibeguard/", 0) == 0) {
+		ShowInfo("[redacted] [%s %s] %d\n", req.method.c_str(), req.path.c_str(), res.status);
+		return;
+	}
 	// make this a config
 	if (web_config.print_req_res) {
 		ShowDebug("Incoming Headers are:\n");
@@ -442,6 +462,10 @@ bool WebServer::initialize( int32 argc, char* argv[] ){
 	// end config
 
 	web_sql_init();
+	if (web_config.vibeguard_observation_enabled && !vibeguard_storage_initialize()) {
+		ShowWarning("VibeGuard storage initialization failed; observation disabled.\n");
+		web_config.vibeguard_observation_enabled = false;
+	}
 
 	ShowStatus("Starting server...\n");
 
@@ -461,6 +485,11 @@ bool WebServer::initialize( int32 argc, char* argv[] ){
 	http_server->Post("/party/search", partybooking_search);
 	http_server->Post("/userconfig/load", userconfig_load);
 	http_server->Post("/userconfig/save", userconfig_save);
+	http_server->Post("/vibeguard/v1/session/open", vibeguard_session_open);
+	http_server->Post("/vibeguard/v1/session/claim", vibeguard_session_claim);
+	http_server->Post("/vibeguard/v1/session/auto-claim", vibeguard_session_auto_claim);
+	http_server->Post("/vibeguard/v1/session/heartbeat", vibeguard_session_heartbeat);
+	http_server->Post("/vibeguard/v1/session/close", vibeguard_session_close);
 
 	// set up logger
 	http_server->set_logger(logger);

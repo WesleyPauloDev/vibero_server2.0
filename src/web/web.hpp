@@ -44,6 +44,11 @@ struct Web_Config {
 	char webconf_name[256];						/// name of main config file
 	char msgconf_name[256];							/// name of msg_conf config file
 	bool allow_gifs;
+	bool vibeguard_observation_enabled;
+	std::string vibeguard_manifest_sha256;
+	uint32 vibeguard_heartbeat_seconds;
+	uint32 vibeguard_session_ttl_seconds;
+	std::string vibeguard_log_path;
 };
 
 struct Inter_Config {
@@ -52,8 +57,13 @@ struct Inter_Config {
 };
 
 enum e_http_status{
+	HTTP_UNAUTHORIZED = 401,
+	HTTP_FORBIDDEN = 403,
 	HTTP_BAD_REQUEST = 400,
 	HTTP_NOT_FOUND = 404,
+	HTTP_CONFLICT = 409,
+	HTTP_TOO_MANY_REQUESTS = 429,
+	HTTP_SERVICE_UNAVAILABLE = 503,
 };
 
 extern struct Web_Config web_config;
