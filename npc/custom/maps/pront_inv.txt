@@ -155,13 +155,13 @@ function	script	Mob_Damage	{
 	next;
 	.@s_idx = select(
         "Pequeno",
-        "Médio",
+        "Mï¿½dio",
         "Grande"
     ) - 1;
 
     // Nome
     setarray .@size_name$,
-        "Pequeno","Médio","Grande";
+        "Pequeno","Mï¿½dio","Grande";
 
     // Valor real
     setarray .@size_value,
@@ -173,10 +173,10 @@ function	script	Mob_Damage	{
 
 
 	// =========================
-	// RAÇA
+	// RAï¿½A
 	// =========================
-	mes "[Raça]";
-	mes "Escolha a raça do alvo:";
+	mes "[Raï¿½a]";
+	mes "Escolha a raï¿½a do alvo:";
 	next;
 	.@r_idx = select(
         "Amorfo",
@@ -185,16 +185,16 @@ function	script	Mob_Damage	{
         "Planta",
         "Inseto",
         "Peixe",
-        "Demônio",
+        "Demï¿½nio",
         "Humanoide",
         "Anjo",
-        "Dragão"
+        "Dragï¿½o"
     ) - 1;
 
     // Nome (visual)
     setarray .@race_name$,
         "Amorfo","Morto-Vivo","Bruto","Planta","Inseto",
-        "Peixe","Demônio","Humanoide","Anjo","Dragão";
+        "Peixe","Demï¿½nio","Humanoide","Anjo","Dragï¿½o";
 
     // Valor real rAthena
     setarray .@race_value,
@@ -214,7 +214,7 @@ function	script	Mob_Damage	{
 	// Menu (PT-BR)
     .@e_idx = select(
         "Neutro",
-        "Água",
+        "ï¿½gua",
         "Terra",
         "Fogo",
         "Vento",
@@ -227,7 +227,7 @@ function	script	Mob_Damage	{
 
     // Nome (visual)
     setarray .@ele_name$,
-        "Neutro","Água","Terra","Fogo","Vento",
+        "Neutro","ï¿½gua","Terra","Fogo","Vento",
         "Veneno","Sombrio","Sagrado","Fantasma","Morto-Vivo";
 
     // Valor real rAthena
@@ -240,19 +240,47 @@ function	script	Mob_Damage	{
     set .@dummy_ele, .@ele_value[.@e_idx];
 
 
-	// Nível do elemento (fixo por enquanto)
+	// Nï¿½vel do elemento (fixo por enquanto)
 	set .@dummy_ele_level, 4;
+
+	// =========================
+	// RESISTï¿½NCIA
+	// =========================
+	mes "[Resistï¿½ncia]";
+	mes "Escolha a resistï¿½ncia do alvo:";
+	next;
+	.@res_idx = select(
+		"0%",
+		"50%",
+		"90%",
+		"99%"
+	) - 1;
+
+	setarray .@res_name$,
+		"0%","50%","90%","99%";
+
+	// Zero mantï¿½m o DamageTaken padrï¿½o do monstro
+	setarray .@damage_taken,
+		0, 50, 10, 1;
+
+	set .@dummy_res_name$, .@res_name$[.@res_idx];
+	set .@dummy_damage_taken, .@damage_taken[.@res_idx];
 
 	// =========================
 	// RESUMO
 	// =========================
 	mes "[Resumo]";
 	mes "Tamanho : " + .@dummy_size_name$;
-	mes "Raça    : " + .@dummy_race_name$;
+	mes "Raï¿½a    : " + .@dummy_race_name$;
 	mes "Elemento: " + .@dummy_ele_name$;
+	mes "Resistï¿½ncia: " + .@dummy_res_name$;
 	next;
 
     .npc$ = .npc;
+
+    // Remove os dummies anteriores deste configurador antes de recriï¿½-los
+    killmonster .map$, strnpcinfo(3) + "::OnMobDead1_" + .npc$;
+    killmonster .map$, strnpcinfo(3) + "::OnMobDead2_" + .npc$;
 
     monster .map$,.x1,.y1,"Boneco de Treino",2408,1,strnpcinfo(3) + "::OnMobDead1_" + .npc$;    
     
@@ -265,6 +293,8 @@ function	script	Mob_Damage	{
     setunitdata .@gid, UMOB_RACE, .@dummy_race;
     setunitdata .@gid, UMOB_ELETYPE,.@dummy_ele;
     setunitdata .@gid, UMOB_ELELEVEL, 4;
+	if (.@dummy_damage_taken)
+		setunitdata .@gid, UMOB_DAMAGETAKEN, .@dummy_damage_taken;
     setunitdata .@gid, UMOB_LOOKDIR, 5;
 
     monster .map$,.x2,.y2,"Boneco de Treino",2408,1,strnpcinfo(3) + "::OnMobDead2_" + .npc$; 
@@ -278,6 +308,8 @@ function	script	Mob_Damage	{
     setunitdata .@gid, UMOB_RACE, .@dummy_race;
     setunitdata .@gid, UMOB_ELETYPE,.@dummy_ele;
     setunitdata .@gid, UMOB_ELELEVEL, 4;
+	if (.@dummy_damage_taken)
+		setunitdata .@gid, UMOB_DAMAGETAKEN, .@dummy_damage_taken;
     setunitdata .@gid, UMOB_LOOKDIR, 5;
 	end;
 }
@@ -319,7 +351,7 @@ pront_inv,166,200,6	duplicate(Removedora de Cartas)	Removedora de Cartas#pront_i
 
 pront_inv,146,204,3	duplicate(Aluguel Universal)	Aluguel Universal#pront_inv	950
 
-pront_inv,152,193,3	duplicate(Servico Kafra)	Serviço Kafra#pront_inv	1433
+pront_inv,152,193,3	duplicate(Servico Kafra)	Serviï¿½o Kafra#pront_inv	1433
 
 pront_inv,148,195,3	duplicate(Resetadora)	Resetador#pront_inv	998
 

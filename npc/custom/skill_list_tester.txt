@@ -2,7 +2,7 @@
 // Fluxo simplificado:
 // - Debuff opcional
 // - Dano fisico ou magico
-// - Fisico usa skill neutra fixa
+// - Fisico permite escolher entre ataque melee e ranged
 // - Magico escolhe a skill pelo elemento
 // - Mantem filtros de tamanho, raca e modo do mob
 
@@ -62,6 +62,7 @@ prontera,156,278,4	script	Resistence Tester	627,{
 	.@real_skill_lv = 0;
 	.@skill_cap = 5;
 	.@damage_type = 0;
+	.@physical_range = 0;
 	.@mob_ele_name$ = "Neutro";
 	.@mob_ele = ELE_NEUTRAL;
 	.@e_idx = 0;
@@ -89,6 +90,7 @@ prontera,156,278,4	script	Resistence Tester	627,{
 		.@debuff_mode = SkillTest_Last_DebuffMode;
 		.@d_idx = SkillTest_Last_DebuffIdx;
 		.@damage_type = SkillTest_Last_DamageType;
+		.@physical_range = SkillTest_Last_PhysicalRange;
 		.@skill_lv = SkillTest_Last_SkillLv;
 		.@mode_sel = SkillTest_Last_ModeSel;
 		.@s_idx = SkillTest_Last_SizeIdx;
@@ -135,6 +137,14 @@ prontera,156,278,4	script	Resistence Tester	627,{
 
 			.@damage_type = select("Fisico","Magico") - 1;
 		}
+
+		if (.@damage_type == 0 && !.@reuse_last) {
+			mes "[Skill Tester]";
+			mes "Escolha o alcance do ataque fisico.";
+			next;
+
+			.@physical_range = select("Melee","Ranged") - 1;
+		}
 		.@skill_max_lv = 5;
 
 		if (!.@reuse_last) {
@@ -150,10 +160,16 @@ prontera,156,278,4	script	Resistence Tester	627,{
 		}
 
 		if (.@damage_type == 0) {
-			.@skill_label$ = "Earthquake";
-			.@skill_name$ = "NPC_EARTHQUAKE";
-			.@skill_id = 653;
-			.@skill_cap = 10;
+			.@skill_id = 0;
+			if (.@physical_range == 0) {
+				.@skill_label$ = "Bash (Melee)";
+				.@skill_name$ = "SM_BASH";
+				.@skill_cap = 10;
+			} else {
+				.@skill_label$ = "Spear Boomerang (Ranged)";
+				.@skill_name$ = "KN_SPEARBOOMERANG";
+				.@skill_cap = 5;
+			}
 		} else {
 			.@skill_id = 0;
 			if (!.@reuse_last) {
@@ -308,6 +324,12 @@ prontera,156,278,4	script	Resistence Tester	627,{
 		mes "Dano     : Nenhum";
 	if (.@damage_enabled) {
 		mes "Tipo     : " + .@mob_mode_name$;
+		if (.@damage_type == 0) {
+			if (.@physical_range == 0)
+				mes "Alcance  : Melee";
+			else
+				mes "Alcance  : Ranged";
+		}
 		mes "Tamanho  : " + .@mob_size_name$;
 		mes "Raca     : " + .@mob_race_name$;
 	}
@@ -324,6 +346,7 @@ prontera,156,278,4	script	Resistence Tester	627,{
 	SkillTest_Last_DebuffMode = .@debuff_mode;
 	SkillTest_Last_DebuffIdx = .@d_idx;
 	SkillTest_Last_DamageType = .@damage_type;
+	SkillTest_Last_PhysicalRange = .@physical_range;
 	SkillTest_Last_SkillLv = .@skill_lv;
 	if (.@damage_enabled) {
 		SkillTest_Last_ModeSel = .@mode_sel;
@@ -363,7 +386,14 @@ prontera,156,278,4	script	Resistence Tester	627,{
 				.@spawn_mob_id = .debuff_mob_id;
 		}
 
-		monster .@map$, .@x, .@y, "Atacante de Teste", .@spawn_mob_id, 1;
+		.@spawn_x = .@x;
+		.@spawn_y = .@y;
+		// O servidor classifica skills de mobs pela distância real.
+		// Manter mais de 3 células garante BF_LONG no teste ranged.
+		if (.@damage_enabled && .@damage_type == 0 && .@physical_range == 1)
+			.@spawn_x = .@x + 5;
+
+		monster .@map$, .@spawn_x, .@spawn_y, "Atacante de Teste", .@spawn_mob_id, 1;
 		.@gid = $@mobid[0];
 
 		if (!.@gid) {

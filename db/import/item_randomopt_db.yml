@@ -30,3 +30,12 @@
 Header:
   Type: RANDOM_OPTION_DB
   Version: 1
+
+Body:
+  # Estende a opção oficial somente quando ROA_PARAM for 1.
+  # Sem parâmetro, ela continua concedendo apenas dano físico.
+  - Id: 148
+    Script: |
+      bonus2 bAddClass,Class_Boss,getrandomoptinfo(ROA_VALUE);
+      if (getrandomoptinfo(ROA_PARAM))
+         bonus2 bMagicAddClass,Class_Boss,getrandomoptinfo(ROA_VALUE);

@@ -70,13 +70,14 @@ function	script	F_CustomRandomEnchant	{
 			.@allow_existing_random = true;
 			.@required_random_options = 0;
 			.@allow_any_equip = true;
-			// Tier 3: dois bonus aleatorios fortes e dano fisico em chefe no terceiro slot.
+			// Tier 3: dois bonus aleatorios fortes e dano fisico/magico em chefe no terceiro slot.
 			setarray .@pool_opt[0], 3, 4, 5, 6, 7, 8, 16, 24;
 			setarray .@pool_min[0], 8, 8, 8, 8, 8, 8, 1, 4;
 			setarray .@pool_max[0], 12, 12, 12, 12, 12, 12, 2, 6;
 			.@fixed_opt_id[2] = 148;
 			.@fixed_opt_min[2] = 5;
 			.@fixed_opt_max[2] = 20;
+			.@fixed_opt_param[2] = 1;
 			break;
 		default:
 			dispbottom "[Encantamento] Item de encantamento nao configurado.";
@@ -256,7 +257,7 @@ function	script	F_CustomRandomEnchant	{
 					.@opt_value[.@target_slot] = .@fixed_opt_min[.@target_slot];
 				else
 					.@opt_value[.@target_slot] = rand((.@fixed_opt_max[.@target_slot] - .@fixed_opt_min[.@target_slot]) + 1) + .@fixed_opt_min[.@target_slot];
-				.@opt_param[.@target_slot] = 0;
+				.@opt_param[.@target_slot] = .@fixed_opt_param[.@target_slot];
 			} else {
 				while (true) {
 					.@pick = rand(.@pool_size);
@@ -309,7 +310,7 @@ function	script	F_CustomRandomEnchant	{
 						.@new_opt_value[.@slot] = .@fixed_opt_min[.@slot];
 					else
 						.@new_opt_value[.@slot] = rand((.@fixed_opt_max[.@slot] - .@fixed_opt_min[.@slot]) + 1) + .@fixed_opt_min[.@slot];
-					.@new_opt_param[.@slot] = 0;
+					.@new_opt_param[.@slot] = .@fixed_opt_param[.@slot];
 					continue;
 				}
 
