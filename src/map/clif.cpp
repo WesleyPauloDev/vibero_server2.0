@@ -5702,6 +5702,14 @@ int32 clif_insight(struct block_list *bl,va_list ap)
 
 /// Updates whole skill tree (ZC_SKILLINFO_LIST).
 /// 010f <packet len>.W { <skill id>.W <type>.L <level>.W <sp cost>.W <attack range>.W <skill name>.24B <upgradable>.B }*
+static int32 clif_skill_inf_for_client(uint16 skill_id)
+{
+	if (skill_id == RK_DRAGONBREATH || skill_id == RK_DRAGONBREATH_WATER)
+		return INF_SELF_SKILL;
+
+	return skill_get_inf(skill_id);
+}
+
 void clif_skillinfoblock(map_session_data *sd)
 {
 	int32 fd;
@@ -5730,7 +5738,7 @@ void clif_skillinfoblock(map_session_data *sd)
 				continue;
 			}
 			WFIFOW(fd,len)   = id;
-			WFIFOL(fd,len+2) = skill_get_inf(id);
+			WFIFOL(fd,len+2) = clif_skill_inf_for_client(id);
 			WFIFOW(fd,len+6) = sd->status.skill[i].lv;
 			WFIFOW(fd,len+8) = skill_get_sp(id,sd->status.skill[i].lv);
 			WFIFOW(fd,len+10)= skill_get_range2(sd,id,sd->status.skill[i].lv,false);
@@ -5782,7 +5790,7 @@ void clif_addskill(map_session_data &sd, uint16 skill_id){
 
 	p.packetType = HEADER_ZC_ADD_SKILL;
 	p.skill.id = skill_id;
-	p.skill.inf = skill_get_inf(skill_id);
+	p.skill.inf = clif_skill_inf_for_client(skill_id);
 	p.skill.level = sd.status.skill[idx].lv;
 	p.skill.sp = static_cast<decltype(p.skill.sp)>( skill_get_sp(skill_id,sd.status.skill[idx].lv) );
 	p.skill.range2 = static_cast<decltype(p.skill.range2)>( skill_get_range2(&sd,skill_id,sd.status.skill[idx].lv,false) );
@@ -5864,7 +5872,7 @@ void clif_skillinfo( map_session_data& sd, uint16 skill_id, int32 inf ){
 	p.sp = static_cast<decltype(p.sp)>( skill_get_sp( skill_id,sd.status.skill[idx].lv ) );
 	p.range2 = static_cast<decltype(p.range2)>( skill_get_range2( &sd,skill_id,sd.status.skill[idx].lv,false ) );
 	if( inf == INF_PASSIVE_SKILL ){
-		p.inf = skill_get_inf( skill_id );
+		p.inf = clif_skill_inf_for_client( skill_id );
 	}else{
 		p.inf = inf;
 	}
@@ -13056,9 +13064,12 @@ void clif_parse_skill_toid( map_session_data* sd, uint16 skill_id, uint16 skill_
 
 	if( skill_lv < 1 ) skill_lv = 1; //No clue, I have seen the client do this with guild skills :/ [Skotlex]
 
+	bool dragon_breath = skill_id == RK_DRAGONBREATH || skill_id == RK_DRAGONBREATH_WATER;
 	int32 inf = skill_get_inf(skill_id);
-	if (inf&INF_GROUND_SKILL || !inf)
+	if ((inf&INF_GROUND_SKILL && !dragon_breath) || !inf)
 		return; //Using a ground/passive skill on a target? WRONG.
+	if (dragon_breath)
+		inf = INF_SELF_SKILL;
 
 	if (sd->state.block_action & PCBLOCK_SKILL) {
 		clif_msg( *sd, MSI_BUSY );
@@ -13093,7 +13104,7 @@ void clif_parse_skill_toid( map_session_data* sd, uint16 skill_id, uint16 skill_
 		}
 	}
 
-	if ((pc_cant_act2(sd) || sd->chatID) && 
+	if ((pc_cant_act2(sd) || sd->chatID) && !dragon_breath &&
 		skill_id != RK_REFRESH && 
 		!( ( skill_id == SR_GENTLETOUCH_CURE || skill_id == SU_GROOMING ) && (sd->sc.opt1 == OPT1_STONE || sd->sc.opt1 == OPT1_FREEZE || sd->sc.opt1 == OPT1_STUN)) &&
 		!(sd->state.storage_flag && (inf&INF_SELF_SKILL))) //SELF skills can be used with the storage open, issue: 8027
@@ -13162,8 +13173,12 @@ void clif_parse_skill_toid( map_session_data* sd, uint16 skill_id, uint16 skill_
 
 	pc_delinvincibletimer(sd);
 
-	if( skill_lv )
-		unit_skilluse_id(sd, target_id, skill_id, skill_lv);
+	if( skill_lv ) {
+		if (dragon_breath)
+			unit_skilluse_pos(sd, sd->x, sd->y, skill_id, skill_lv);
+		else
+			unit_skilluse_id(sd, target_id, skill_id, skill_lv);
+	}
 }
 
 
@@ -22621,11 +22636,25 @@ void clif_parse_equipswitch_request_single( int32 fd, map_session_data* sd ){
 #endif
 }
 
+static TIMER_FUNC(clif_hold_skill_timer)
+{
+	map_session_data* sd = map_id2sd(id);
+
+	if (sd == nullptr || sd->skill_keep_using.skill_id == 0 || sd->skill_keep_using.tid != tid)
+		return 0;
+
+	clif_parse_skill_toid(sd, sd->skill_keep_using.skill_id, sd->skill_keep_using.level, sd->skill_keep_using.target);
+
+	if (sd->skill_keep_using.skill_id != 0 && sd->skill_keep_using.tid == tid)
+		sd->skill_keep_using.tid = add_timer(gettick() + 100, clif_hold_skill_timer, sd->id, 0);
+
+	return 0;
+}
+
 void clif_parse_StartUseSkillToId( int32 fd, map_session_data* sd ){
 #if PACKETVER_MAIN_NUM >= 20181002 || PACKETVER_RE_NUM >= 20181002 || PACKETVER_ZERO_NUM >= 20181010
 	const PACKET_CZ_USE_SKILL_START* p = reinterpret_cast<PACKET_CZ_USE_SKILL_START*>( RFIFOP( fd, 0 ) );
 
-	// Only rolling cutter is supported for now
 	if( p->skillId != GC_ROLLINGCUTTER ){
 		return;
 	}
@@ -22635,10 +22664,10 @@ void clif_parse_StartUseSkillToId( int32 fd, map_session_data* sd ){
 		return;
 	}
 
-	sd->skill_keep_using.tid = INVALID_TIMER;
 	sd->skill_keep_using.skill_id = p->skillId;
 	sd->skill_keep_using.level = p->skillLv;
 	sd->skill_keep_using.target = p->targetId;
+	sd->skill_keep_using.tid = add_timer(gettick() + 100, clif_hold_skill_timer, sd->id, 0);
 
 	clif_parse_skill_toid( sd, sd->skill_keep_using.skill_id, sd->skill_keep_using.level, sd->skill_keep_using.target );
 #endif
@@ -22661,7 +22690,7 @@ void clif_parse_StopUseSkillToId( int32 fd, map_session_data* sd ){
 #endif
 
 	if( sd->skill_keep_using.tid != INVALID_TIMER ){
-		delete_timer( sd->skill_keep_using.tid, skill_keep_using );
+		delete_timer( sd->skill_keep_using.tid, clif_hold_skill_timer );
 		sd->skill_keep_using.tid = INVALID_TIMER;
 	}
 	sd->skill_keep_using.skill_id = 0;
@@ -26559,6 +26588,7 @@ void do_init_clif(void) {
 
 	add_timer_func_list(clif_clearunit_delayed_sub, "clif_clearunit_delayed_sub");
 	add_timer_func_list(clif_delayquit, "clif_delayquit");
+	add_timer_func_list(clif_hold_skill_timer, "clif_hold_skill_timer");
 
 #if PACKETVER_MAIN_NUM >= 20190403 || PACKETVER_RE_NUM >= 20190320
 	add_timer_func_list( clif_ping_timer, "clif_ping_timer" );
