@@ -10111,6 +10111,12 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 		if (flag&1 || (i = skill_get_splash(skill_id, skill_lv)) < 1) {
 			if (sd && dstsd && !map_flag_vs(sd->m) && (!sd->duel_group || sd->duel_group != dstsd->duel_group) && (!sd->status.party_id || sd->status.party_id != dstsd->status.party_id))
 				break; // Outside PvP it should only affect party members and no skill fail message
+			if (tsc && tsc->getSCE(SC_NODISPELL_PROTECTION)) {
+				clif_skill_nodamage(src,*bl,skill_id,skill_lv,0);
+				if (sd)
+					clif_skill_fail(*sd, skill_id);
+				break;
+			}
 			clif_skill_nodamage(src,*bl,skill_id,skill_lv);
 			if((dstsd && (dstsd->class_&MAPID_UPPERMASK) == MAPID_SOUL_LINKER)
 				|| (tsc && tsc->getSCE(SC_SPIRIT) && tsc->getSCE(SC_SPIRIT)->val2 == SL_ROGUE) //Rogue's spirit defends againt32 dispel.

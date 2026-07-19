@@ -1442,6 +1442,7 @@ enum sc_type : int16 {
 	SC_CONTENTS_20,
 
 	SC_OVERCOMING_CRISIS,
+	SC_NODISPELL_PROTECTION,
 
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds.
 };
