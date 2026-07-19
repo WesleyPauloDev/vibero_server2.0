@@ -36,6 +36,11 @@ um codigo de pareamento de uso unico. Heartbeats usam `Authorization: Bearer`,
 sequencia crescente e expiram sem atividade. Repeticao de sequencia retorna
 HTTP 409.
 
+Os tokens permanecem somente na memoria do `web-server`. Ao reiniciar o
+servico, sessoes abertas sao marcadas como `interrupted`; clientes que estavam
+abertos devem fechar e iniciar novamente o `VibeRO.exe` para obter uma nova
+sessao.
+
 O cliente envia versao do protocolo, versao do VibeGuard, hash do manifesto e
 sequencia. Nunca solicita ou envia login ou senha. Para o vinculo automatico, o
 web-server compara temporariamente o endereco da conexao com `last_ip`, que o

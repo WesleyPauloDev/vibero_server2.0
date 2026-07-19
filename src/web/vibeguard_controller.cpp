@@ -325,7 +325,7 @@ bool service_ready(Response& response) {
 } // namespace
 
 bool vibeguard_storage_initialize() {
-	return execute_map_query(
+	if (!execute_map_query(
 		"CREATE TABLE IF NOT EXISTS `vibeguard_sessions` ("
 		"`session_id` CHAR(32) NOT NULL,"
 		"`pairing_code` CHAR(12) NOT NULL,"
@@ -343,7 +343,15 @@ bool vibeguard_storage_initialize() {
 		"PRIMARY KEY (`session_id`),"
 		"UNIQUE KEY `pairing_code` (`pairing_code`),"
 		"KEY `account_state` (`account_id`,`state`)"
-		") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+		") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"))
+		return false;
+
+	// Bearer tokens intentionally live only in this process. After a web-server
+	// restart, previously open rows can no longer authenticate and must not block
+	// a new automatic claim for the same account.
+	return execute_map_query(
+		"UPDATE `vibeguard_sessions` SET `state`='interrupted', "
+		"`closed_at`=UTC_TIMESTAMP(6) WHERE `state`='open'");
 }
 
 HANDLER_FUNC(vibeguard_session_open) {
