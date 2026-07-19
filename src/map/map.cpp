@@ -70,6 +70,7 @@ int32 db_use_sqldbs = 0;
 char barter_table[32] = "barter";
 char buyingstores_table[32] = "buyingstores";
 char buyingstore_items_table[32] = "buyingstore_items";
+char buyingstore_transactions_table[32] = "buyingstore_transactions";
 #ifdef RENEWAL
 char item_table[32] = "item_db_re";
 char item2_table[32] = "item_db2_re";
@@ -4294,6 +4295,8 @@ int32 inter_config_read(const char *cfgName)
 			safestrncpy( buyingstores_table, w2, sizeof(buyingstores_table) );
 		else if( strcmpi( w1, "buyingstore_items_table" ) == 0 )
 			safestrncpy( buyingstore_items_table, w2, sizeof(buyingstore_items_table) );
+		else if( strcmpi( w1, "buyingstore_transactions_table" ) == 0 )
+			safestrncpy( buyingstore_transactions_table, w2, sizeof(buyingstore_transactions_table) );
 		else if(strcmpi(w1,"item_table")==0)
 			safestrncpy(item_table,w2,sizeof(item_table));
 		else if(strcmpi(w1,"item2_table")==0)

@@ -1299,6 +1299,7 @@ extern Sql* logmysql_handle;
 extern char barter_table[32];
 extern char buyingstores_table[32];
 extern char buyingstore_items_table[32];
+extern char buyingstore_transactions_table[32];
 extern char item_table[32];
 extern char item2_table[32];
 extern char mob_table[32];

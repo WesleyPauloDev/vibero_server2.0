@@ -479,6 +479,33 @@ void buyingstore_trade( map_session_data* sd, uint32 account_id, uint32 buyer_id
 		pc_getzeny(sd, zeny, LOG_TYPE_BUYING_STORE, pl_sd->status.char_id);
 		pl_sd->buyingstore.zenylimit-= zeny;
 
+		// Keep a permanent, query-friendly history. The regular buying store
+		// tables only describe open stores and are deleted when the store closes.
+		char escaped_buyer_name[NAME_LENGTH * 2 + 1];
+		char escaped_seller_name[NAME_LENGTH * 2 + 1];
+		Sql_EscapeString(mmysql_handle, escaped_buyer_name, pl_sd->status.name);
+		Sql_EscapeString(mmysql_handle, escaped_seller_name, sd->status.name);
+
+		if( Sql_Query(mmysql_handle,
+			"INSERT INTO `%s` (`buyingstore_id`, `buyer_account_id`, `buyer_char_id`, `buyer_name`, "
+			"`seller_account_id`, `seller_char_id`, `seller_name`, `item_id`, `amount`, `unit_price`, `total_price`, `purchased_at`) "
+			"VALUES (%u, %d, %d, '%s', %d, %d, '%s', %u, %u, %d, %d, NOW())",
+			buyingstore_transactions_table,
+			pl_sd->buyer_id,
+			pl_sd->status.account_id,
+			pl_sd->status.char_id,
+			escaped_buyer_name,
+			sd->status.account_id,
+			sd->status.char_id,
+			escaped_seller_name,
+			item->itemId,
+			item->amount,
+			pl_sd->buyingstore.items[listidx].price,
+			zeny
+		) != SQL_SUCCESS ) {
+			Sql_ShowDebug(mmysql_handle);
+		}
+
 		// notify clients
 		clif_buyingstore_delete_item(sd, index, item->amount, pl_sd->buyingstore.items[listidx].price);
 		clif_buyingstore_update_item(pl_sd, item->itemId, item->amount, sd->status.char_id, zeny);
