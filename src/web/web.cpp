@@ -418,6 +418,11 @@ void display_helpscreen(bool do_exit)
 // called just before sending repsonse
 void logger(const Request & req, const Response & res) {
 	if (req.path.rfind("/vibeguard/", 0) == 0) {
+		// Heartbeats are expected every few seconds and make the operator console
+		// unusable. Session lifecycle routes remain visible; heartbeat failures
+		// are handled by enforcement and the dedicated VibeGuard logs.
+		if (req.path == "/vibeguard/v1/session/heartbeat")
+			return;
 		ShowInfo("[redacted] [%s %s] %d\n", req.method.c_str(), req.path.c_str(), res.status);
 		return;
 	}
