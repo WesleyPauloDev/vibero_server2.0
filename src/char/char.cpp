@@ -2621,6 +2621,10 @@ void char_sql_config_read(const char* cfgName) {
 			safestrncpy(schema_config.mail_db, w2, sizeof(schema_config.mail_db));
 		else if (!strcmpi(w1, "mail_attachment_db"))
 			safestrncpy(schema_config.mail_attachment_db, w2, sizeof(schema_config.mail_attachment_db));
+		else if (!strcmpi(w1, "rodex_transactions_db"))
+			safestrncpy(schema_config.rodex_transactions_db, w2, sizeof(schema_config.rodex_transactions_db));
+		else if (!strcmpi(w1, "rodex_transaction_items_db"))
+			safestrncpy(schema_config.rodex_transaction_items_db, w2, sizeof(schema_config.rodex_transaction_items_db));
 		else if(!strcmpi(w1,"auction_db"))
 			safestrncpy(schema_config.auction_db, w2, sizeof(schema_config.auction_db));
 		else if(!strcmpi(w1,"friend_db"))
@@ -2695,6 +2699,9 @@ void char_set_default_sql(){
 	safestrncpy(schema_config.party_db,"party",sizeof(schema_config.party_db));
 	safestrncpy(schema_config.pet_db,"pet",sizeof(schema_config.pet_db));
 	safestrncpy(schema_config.mail_db,"mail",sizeof(schema_config.mail_db)); // MAIL SYSTEM
+	safestrncpy(schema_config.mail_attachment_db,"mail_attachments",sizeof(schema_config.mail_attachment_db));
+	safestrncpy(schema_config.rodex_transactions_db,"rodex_transactions",sizeof(schema_config.rodex_transactions_db));
+	safestrncpy(schema_config.rodex_transaction_items_db,"rodex_transaction_items",sizeof(schema_config.rodex_transaction_items_db));
 	safestrncpy(schema_config.auction_db,"auction",sizeof(schema_config.auction_db)); // Auctions System
 	safestrncpy(schema_config.friend_db,"friends",sizeof(schema_config.friend_db));
 	safestrncpy(schema_config.hotkey_db,"hotkey",sizeof(schema_config.hotkey_db));

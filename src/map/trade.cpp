@@ -587,6 +587,12 @@ void trade_tradecommit(map_session_data *sd)
 {
 	map_session_data *tsd;
 	int32 trade_i;
+	struct trade_history_item {
+		struct item item;
+		int16 amount;
+	};
+	trade_history_item items_from_sd[10]{};
+	trade_history_item items_from_tsd[10]{};
 
 	nullpo_retv(sd);
 
@@ -620,6 +626,20 @@ void trade_tradecommit(map_session_data *sd)
 	if (!trade_check(sd,tsd)) { // check the both players
 		trade_tradecancel(sd);
 		return;
+	}
+
+	// Preserve the accepted deal before the normal trade code clears it.
+	const int32 zeny_from_sd = sd->deal.zeny;
+	const int32 zeny_from_tsd = tsd->deal.zeny;
+	for( trade_i = 0; trade_i < 10; trade_i++ ) {
+		if( sd->deal.item[trade_i].amount ) {
+			items_from_sd[trade_i].item = sd->inventory.u.items_inventory[sd->deal.item[trade_i].index];
+			items_from_sd[trade_i].amount = sd->deal.item[trade_i].amount;
+		}
+		if( tsd->deal.item[trade_i].amount ) {
+			items_from_tsd[trade_i].item = tsd->inventory.u.items_inventory[tsd->deal.item[trade_i].index];
+			items_from_tsd[trade_i].amount = tsd->deal.item[trade_i].amount;
+		}
 	}
 
 	// trade is accepted and correct.
@@ -663,6 +683,43 @@ void trade_tradecommit(map_session_data *sd)
 		pc_payzeny(tsd,tsd->deal.zeny,LOG_TYPE_TRADE, sd->status.char_id);
 		pc_getzeny(sd ,tsd->deal.zeny,LOG_TYPE_TRADE, tsd->status.char_id);
 		tsd->deal.zeny = 0;
+	}
+
+	char escaped_sd_name[NAME_LENGTH * 2 + 1];
+	char escaped_tsd_name[NAME_LENGTH * 2 + 1];
+	Sql_EscapeString(mmysql_handle, escaped_sd_name, sd->status.name);
+	Sql_EscapeString(mmysql_handle, escaped_tsd_name, tsd->status.name);
+
+	if( Sql_Query(mmysql_handle,
+		"INSERT INTO `%s` (`party_a_account_id`, `party_a_char_id`, `party_a_name`, `party_b_account_id`, `party_b_char_id`, `party_b_name`, `zeny_a_to_b`, `zeny_b_to_a`, `completed_at`) "
+		"VALUES (%d, %d, '%s', %d, %d, '%s', %d, %d, NOW())",
+		trade_transactions_table,
+		sd->status.account_id, sd->status.char_id, escaped_sd_name,
+		tsd->status.account_id, tsd->status.char_id, escaped_tsd_name,
+		zeny_from_sd, zeny_from_tsd) == SQL_SUCCESS ) {
+		const uint64 transaction_id = Sql_LastInsertId(mmysql_handle);
+
+		for( trade_i = 0; trade_i < 10; trade_i++ ) {
+			if( items_from_sd[trade_i].amount > 0 && Sql_Query(mmysql_handle,
+				"INSERT INTO `%s` (`transaction_id`, `sender_account_id`, `sender_char_id`, `receiver_account_id`, `receiver_char_id`, `item_id`, `amount`, `refine`, `unique_id`) "
+				"VALUES (%" PRIu64 ", %d, %d, %d, %d, %u, %d, %d, %" PRIu64 ")",
+				trade_transaction_items_table, transaction_id,
+				sd->status.account_id, sd->status.char_id, tsd->status.account_id, tsd->status.char_id,
+				items_from_sd[trade_i].item.nameid, items_from_sd[trade_i].amount,
+				items_from_sd[trade_i].item.refine, items_from_sd[trade_i].item.unique_id) != SQL_SUCCESS )
+				Sql_ShowDebug(mmysql_handle);
+
+			if( items_from_tsd[trade_i].amount > 0 && Sql_Query(mmysql_handle,
+				"INSERT INTO `%s` (`transaction_id`, `sender_account_id`, `sender_char_id`, `receiver_account_id`, `receiver_char_id`, `item_id`, `amount`, `refine`, `unique_id`) "
+				"VALUES (%" PRIu64 ", %d, %d, %d, %d, %u, %d, %d, %" PRIu64 ")",
+				trade_transaction_items_table, transaction_id,
+				tsd->status.account_id, tsd->status.char_id, sd->status.account_id, sd->status.char_id,
+				items_from_tsd[trade_i].item.nameid, items_from_tsd[trade_i].amount,
+				items_from_tsd[trade_i].item.refine, items_from_tsd[trade_i].item.unique_id) != SQL_SUCCESS )
+				Sql_ShowDebug(mmysql_handle);
+		}
+	}else{
+		Sql_ShowDebug(mmysql_handle);
 	}
 
 	sd->state.deal_locked = 0;

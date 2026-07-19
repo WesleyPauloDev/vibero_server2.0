@@ -87,6 +87,8 @@ struct Schema_Config {
 	char pet_db[DB_NAME_LEN];
 	char mail_db[DB_NAME_LEN]; // MAIL SYSTEM
 	char mail_attachment_db[DB_NAME_LEN];
+	char rodex_transactions_db[DB_NAME_LEN];
+	char rodex_transaction_items_db[DB_NAME_LEN];
 	char auction_db[DB_NAME_LEN]; // Auctions System
 	char friend_db[DB_NAME_LEN];
 	char hotkey_db[DB_NAME_LEN];

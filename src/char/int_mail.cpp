@@ -158,6 +158,35 @@ int32 mail_savemessage(struct mail_message* msg)
 		return 0;
 	}
 
+	// Mail and attachment rows are mutable and may be deleted after retrieval.
+	// Keep an immutable history keyed by the original mail id for monitoring.
+	if( msg->id ){
+		char escaped_send_name[NAME_LENGTH * 2 + 1];
+		char escaped_dest_name[NAME_LENGTH * 2 + 1];
+		Sql_EscapeString(sql_handle, escaped_send_name, msg->send_name);
+		Sql_EscapeString(sql_handle, escaped_dest_name, msg->dest_name);
+
+		if( Sql_Query(sql_handle,
+			"INSERT INTO `%s` (`mail_id`, `sender_account_id`, `sender_char_id`, `sender_name`, `receiver_account_id`, `receiver_char_id`, `receiver_name`, `zeny`, `sent_at`) "
+			"VALUES (%d, COALESCE((SELECT `account_id` FROM `%s` WHERE `char_id` = %u), 0), %u, '%s', COALESCE((SELECT `account_id` FROM `%s` WHERE `char_id` = %u), 0), %u, '%s', %u, FROM_UNIXTIME(%lu))",
+			schema_config.rodex_transactions_db, msg->id,
+			schema_config.char_db, msg->send_id, msg->send_id, escaped_send_name,
+			schema_config.char_db, msg->dest_id, msg->dest_id, escaped_dest_name,
+			msg->zeny, (unsigned long)msg->timestamp) != SQL_SUCCESS ){
+			Sql_ShowDebug(sql_handle);
+		}else{
+			for( i = 0; i < MAIL_MAX_ITEM; i++ ){
+				if( msg->item[i].nameid == 0 || msg->item[i].amount == 0 )
+					continue;
+				if( Sql_Query(sql_handle,
+					"INSERT INTO `%s` (`mail_id`, `item_index`, `item_id`, `amount`, `refine`, `unique_id`) VALUES (%d, %d, %u, %d, %d, %" PRIu64 ")",
+					schema_config.rodex_transaction_items_db, msg->id, i,
+					msg->item[i].nameid, msg->item[i].amount, msg->item[i].refine, msg->item[i].unique_id) != SQL_SUCCESS )
+					Sql_ShowDebug(sql_handle);
+			}
+		}
+	}
+
 	return msg->id;
 }
 
