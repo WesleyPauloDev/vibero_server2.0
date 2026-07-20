@@ -155,13 +155,13 @@ function	script	Mob_Damage	{
 	next;
 	.@s_idx = select(
         "Pequeno",
-        "M�dio",
+        "Medio",
         "Grande"
     ) - 1;
 
     // Nome
     setarray .@size_name$,
-        "Pequeno","M�dio","Grande";
+        "Pequeno","Medio","Grande";
 
     // Valor real
     setarray .@size_value,
@@ -173,10 +173,10 @@ function	script	Mob_Damage	{
 
 
 	// =========================
-	// RA�A
+	// RACA
 	// =========================
-	mes "[Ra�a]";
-	mes "Escolha a ra�a do alvo:";
+	mes "[Raca]";
+	mes "Escolha a raca do alvo:";
 	next;
 	.@r_idx = select(
         "Amorfo",
@@ -185,16 +185,16 @@ function	script	Mob_Damage	{
         "Planta",
         "Inseto",
         "Peixe",
-        "Dem�nio",
+        "Demonio",
         "Humanoide",
         "Anjo",
-        "Drag�o"
+        "Dragao"
     ) - 1;
 
     // Nome (visual)
     setarray .@race_name$,
         "Amorfo","Morto-Vivo","Bruto","Planta","Inseto",
-        "Peixe","Dem�nio","Humanoide","Anjo","Drag�o";
+        "Peixe","Demonio","Humanoide","Anjo","Dragao";
 
     // Valor real rAthena
     setarray .@race_value,
@@ -214,7 +214,7 @@ function	script	Mob_Damage	{
 	// Menu (PT-BR)
     .@e_idx = select(
         "Neutro",
-        "�gua",
+        "Agua",
         "Terra",
         "Fogo",
         "Vento",
@@ -227,7 +227,7 @@ function	script	Mob_Damage	{
 
     // Nome (visual)
     setarray .@ele_name$,
-        "Neutro","�gua","Terra","Fogo","Vento",
+        "Neutro","Agua","Terra","Fogo","Vento",
         "Veneno","Sombrio","Sagrado","Fantasma","Morto-Vivo";
 
     // Valor real rAthena
@@ -240,14 +240,14 @@ function	script	Mob_Damage	{
     set .@dummy_ele, .@ele_value[.@e_idx];
 
 
-	// N�vel do elemento (fixo por enquanto)
+	// Nivel do elemento (fixo por enquanto)
 	set .@dummy_ele_level, 4;
 
 	// =========================
-	// RESIST�NCIA
+	// RESISTENCIA
 	// =========================
-	mes "[Resist�ncia]";
-	mes "Escolha a resist�ncia do alvo:";
+	mes "[Resistencia]";
+	mes "Escolha a resistencia do alvo:";
 	next;
 	.@res_idx = select(
 		"0%",
@@ -259,7 +259,7 @@ function	script	Mob_Damage	{
 	setarray .@res_name$,
 		"0%","50%","90%","99%";
 
-	// Zero mant�m o DamageTaken padr�o do monstro
+	// Zero mantem o DamageTaken padrao do monstro
 	setarray .@damage_taken,
 		0, 50, 10, 1;
 
@@ -271,14 +271,14 @@ function	script	Mob_Damage	{
 	// =========================
 	mes "[Resumo]";
 	mes "Tamanho : " + .@dummy_size_name$;
-	mes "Ra�a    : " + .@dummy_race_name$;
+	mes "Raca    : " + .@dummy_race_name$;
 	mes "Elemento: " + .@dummy_ele_name$;
-	mes "Resist�ncia: " + .@dummy_res_name$;
+	mes "Resistencia: " + .@dummy_res_name$;
 	next;
 
     .npc$ = .npc;
 
-    // Remove os dummies anteriores deste configurador antes de recri�-los
+    // Remove os dummies anteriores deste configurador antes de recria-los
     killmonster .map$, strnpcinfo(3) + "::OnMobDead1_" + .npc$;
     killmonster .map$, strnpcinfo(3) + "::OnMobDead2_" + .npc$;
 
@@ -351,7 +351,7 @@ pront_inv,166,200,6	duplicate(Removedora de Cartas)	Removedora de Cartas#pront_i
 
 pront_inv,146,204,3	duplicate(Aluguel Universal)	Aluguel Universal#pront_inv	950
 
-pront_inv,152,193,3	duplicate(Servico Kafra)	Servi�o Kafra#pront_inv	1433
+pront_inv,152,193,3	duplicate(Servico Kafra)	Servico Kafra#pront_inv	1433
 
 pront_inv,148,195,3	duplicate(Resetadora)	Resetador#pront_inv	998
 

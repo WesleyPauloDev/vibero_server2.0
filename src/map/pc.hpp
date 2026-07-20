@@ -415,6 +415,7 @@ public:
 		uint32 showexp :1;
 		uint32 showzeny :1;
 		uint32 hidepet :1;
+		uint32 hidevisual :1;
 		uint32 hidemount :1;
 		uint32 noask :1; // [LuzZza]
 		uint32 trading :1; //[Skotlex] is 1 only after a trade has started.

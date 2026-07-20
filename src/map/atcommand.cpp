@@ -9238,6 +9238,19 @@ ACMD_FUNC(hidepet)
 	return 0;
 }
 
+ACMD_FUNC(hidevisual)
+{
+	sd->state.hidevisual = !sd->state.hidevisual;
+
+	if (sd->state.hidevisual)
+		clif_displaymessage(fd, "Visuais dos outros jogadores foram ocultados.");
+	else
+		clif_displaymessage(fd, "Visuais dos outros jogadores voltaram a ser exibidos.");
+
+	clif_refresh(sd);
+	return 0;
+}
+
 ACMD_FUNC(hidemount)
 {
 	sd->state.hidemount = !sd->state.hidemount;
@@ -12112,6 +12125,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(showzeny),
 		ACMD_DEF(showdelay),
 		ACMD_DEF(hidepet),
+		ACMD_DEF(hidevisual),
 		ACMD_DEF(hidemount),
 		ACMD_DEF(autotrade),
 		ACMD_DEF(changegm),
@@ -12480,7 +12494,7 @@ bool is_atcommand(const int32 fd, map_session_data* sd, const char* message, int
 
 	// type == 1 : player invoked
 	if (type == 1) {
-		bool public_visual_command = is_atcommand && (strcmpi(info->command, "hidepet") == 0 || strcmpi(info->command, "hidemount") == 0);
+		bool public_visual_command = is_atcommand && (strcmpi(info->command, "hidepet") == 0 || strcmpi(info->command, "hidevisual") == 0 || strcmpi(info->command, "hidemount") == 0);
 
 		if (!public_visual_command && ((is_atcommand && info->at_groups[sd->group->index] == 0) ||
 			(!is_atcommand && info->char_groups[sd->group->index] == 0) ))

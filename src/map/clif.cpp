@@ -433,6 +433,19 @@ static int32 clif_send_sub(struct block_list *bl, va_list ap)
 	buf = va_arg(ap,unsigned char*);
 	len = va_arg(ap,int32);
 	nullpo_ret(src_bl = va_arg(ap,struct block_list*));
+
+	if (sd->state.hidevisual && src_bl->type == BL_PC && src_bl->id != sd->id) {
+		uint16 packet_type = RBUFW(buf, 0);
+
+		if (packet_type == HEADER_ZC_EQUIPMENT_EFFECT)
+			return 0;
+
+		if (packet_type == sendLookType && len >= 7) {
+			uint8 look_type = RBUFB(buf, 6);
+			if (look_type == LOOK_HEAD_BOTTOM || look_type == LOOK_HEAD_MID || look_type == LOOK_HEAD_TOP || look_type == LOOK_ROBE)
+				return 0;
+		}
+	}
 	type = va_arg(ap,int32);
 
 	switch(type) {
@@ -1482,6 +1495,79 @@ static void clif_set_unit_walking( struct block_list& bl, map_session_data* tsd,
 	}
 }
 
+static void clif_get_noncostume_look(map_session_data& sd, int32& head_bottom, int32& head_mid, int32& head_top, int32& robe)
+{
+	head_bottom = head_mid = head_top = robe = 0;
+
+	int32 index = sd.equip_index[EQI_HEAD_LOW];
+	item_data* item = index >= 0 ? sd.inventory_data[index] : nullptr;
+	if (item != nullptr && !(item->equip & (EQP_HEAD_MID | EQP_HEAD_TOP)))
+		head_bottom = item->look;
+
+	index = sd.equip_index[EQI_HEAD_MID];
+	item = index >= 0 ? sd.inventory_data[index] : nullptr;
+	if (item != nullptr && !(item->equip & EQP_HEAD_TOP))
+		head_mid = item->look;
+
+	index = sd.equip_index[EQI_HEAD_TOP];
+	item = index >= 0 ? sd.inventory_data[index] : nullptr;
+	if (item != nullptr)
+		head_top = item->look;
+
+	index = sd.equip_index[EQI_GARMENT];
+	item = index >= 0 ? sd.inventory_data[index] : nullptr;
+	if (item != nullptr)
+		robe = item->look;
+
+	if (sd.setlook_head_bottom)
+		head_bottom = sd.setlook_head_bottom;
+	if (sd.setlook_head_mid)
+		head_mid = sd.setlook_head_mid;
+	if (sd.setlook_head_top)
+		head_top = sd.setlook_head_top;
+	if (sd.setlook_robe)
+		robe = sd.setlook_robe;
+}
+
+static void clif_send_noncostume_look(map_session_data& viewer, map_session_data& source)
+{
+	if (&viewer == &source || !viewer.state.hidevisual)
+		return;
+
+	view_data* vd = status_get_viewdata(&source);
+	if (vd == nullptr)
+		return;
+
+	int32 saved_bottom = vd->look[LOOK_HEAD_BOTTOM];
+	int32 saved_mid = vd->look[LOOK_HEAD_MID];
+	int32 saved_top = vd->look[LOOK_HEAD_TOP];
+	int32 saved_robe = vd->look[LOOK_ROBE];
+
+	clif_get_noncostume_look(source, vd->look[LOOK_HEAD_BOTTOM], vd->look[LOOK_HEAD_MID], vd->look[LOOK_HEAD_TOP], vd->look[LOOK_ROBE]);
+
+	unit_data* ud = unit_bl2ud(&source);
+	if (ud != nullptr && ud->walktimer != INVALID_TIMER)
+		clif_set_unit_walking(source, &viewer, *ud, SELF);
+	else
+		clif_set_unit_idle(&source, false, SELF, &viewer);
+
+	vd->look[LOOK_HEAD_BOTTOM] = saved_bottom;
+	vd->look[LOOK_HEAD_MID] = saved_mid;
+	vd->look[LOOK_HEAD_TOP] = saved_top;
+	vd->look[LOOK_ROBE] = saved_robe;
+}
+
+static int32 clif_send_noncostume_look_sub(block_list* bl, va_list ap)
+{
+	map_session_data* viewer = BL_CAST(BL_PC, bl);
+	map_session_data* source = va_arg(ap, map_session_data*);
+
+	if (viewer != nullptr && source != nullptr)
+		clif_send_noncostume_look(*viewer, *source);
+
+	return 0;
+}
+
 /// Changes sprite of a non player object.
 /// 01b0 <id>.L <type>.B <value>.L (ZC_NPCSPRITE_CHANGE)
 void clif_class_change( block_list& bl, int32 class_, enum send_target target, map_session_data* sd ){
@@ -1714,6 +1800,9 @@ int32 clif_spawn( struct block_list *bl, bool walking ){
 	}else{
 		clif_spawn_unit( bl, AREA_WOS );
 	}
+
+	if (bl->type == BL_PC)
+		map_foreachinallrange(clif_send_noncostume_look_sub, bl, AREA_SIZE, BL_PC, BL_CAST(BL_PC, bl));
 
 	clif_refresh_clothcolor( *bl, AREA_WOS );
 
@@ -4109,6 +4198,9 @@ void clif_changelook(struct block_list *bl, int32 type, int32 val) {
 	} else
 		unit_refresh(bl);
 #endif
+
+	if (sd != nullptr && (type == LOOK_HEAD_BOTTOM || type == LOOK_HEAD_MID || type == LOOK_HEAD_TOP || type == LOOK_ROBE))
+		map_foreachinallrange(clif_send_noncostume_look_sub, bl, AREA_SIZE, BL_PC, sd);
 }
 
 
@@ -5070,7 +5162,9 @@ void clif_getareachar_unit( map_session_data* sd,struct block_list *bl ){
 
 	ud = unit_bl2ud(bl);
 
-	if( ud && ud->walktimer != INVALID_TIMER ){
+	if (bl->type == BL_PC && sd->state.hidevisual && bl->id != sd->id) {
+		clif_send_noncostume_look(*sd, *BL_CAST(BL_PC, bl));
+	} else if( ud && ud->walktimer != INVALID_TIMER ){
 		clif_set_unit_walking( *bl, sd, *ud, SELF );
 	}else{
 		clif_set_unit_idle( bl, false, SELF, sd );
@@ -21722,6 +21816,10 @@ void clif_hat_effects( map_session_data& sd, block_list& bl, enum send_target ta
 	if( tsd == nullptr ){
 		return;
 	}
+
+	map_session_data* viewer = BL_CAST(BL_PC, tbl);
+	if (viewer != nullptr && viewer->state.hidevisual && viewer->id != tsd->id)
+		return;
 
 	if( tsd->hatEffects.empty() || map_getmapdata(tbl->m)->getMapFlag(MF_NOCOSTUME) ){
 		return;
