@@ -54,6 +54,7 @@ OnAtcommand:
 		callfunc("F_InstanceMenuResetStatus", "BakonawaLake", "BakonawaLake");
 		callfunc("F_InstanceMenuResetStatus", "ghost_palace", "GhostPalace");
 		callfunc("F_InstanceMenuResetStatus", "airship_assault", "AirshipAssault");
+		callfunc("F_InstanceMenuResetStatus", "airship_sabotage", "AirshipSabotage");
 		callfunc("F_InstanceMenuResetStatus", "BuwayaCave", "BuwayaCave");
 		callfunc("F_InstanceMenuResetStatus", "friday_dungeon", "FridayDungeon");
 		callfunc("F_InstanceMenuResetStatus", "CharlestonCrisis", "CharlestonCrisis");
@@ -107,26 +108,27 @@ OnAtcommand:
 	next;
 	.@opt1$ = callfunc("F_InstanceMenuOption", "[30] Vila dos Porings", "poringvillage", "PORING");
 	.@opt2$ = callfunc("F_InstanceMenuOption", "[40] Batalha dos Orcs", "orcMemory", "ORCMEMORY");
-	.@opt3$ = callfunc("F_InstanceMenuOptionRaw", "[50] Torre Sem Fim", "#ETOWER_COOLDOWN", "#ETOWER_STATUS", 3, 4, "ETOWER");
-	.@opt4$ = callfunc("F_InstanceMenuOptionRaw", "[55] Ninho de Nidhog", "#NYD_COOLDOWN", "#NYD_STATUS", 3, 4, "NYD");
+	.@opt3$ = callfunc("F_InstanceMenuOptionRaw", "[70] Torre Sem Fim", "#ETOWER_COOLDOWN", "#ETOWER_STATUS", 3, 4, "ETOWER");
+	.@opt4$ = callfunc("F_InstanceMenuOptionRaw", "[65] Ninho de Nidhog", "#NYD_COOLDOWN", "#NYD_STATUS", 3, 4, "NYD");
 	.@opt5$ = "[60] Mal. Glast Heim";
 	.@oghc_level = #OGHC_MAX_LEVEL;
 	if (.@oghc_level < 1)
 		.@oghc_level = 1;
 	if (.@oghc_level > 10)
 		.@oghc_level = 10;
-	.@opt55$ = callfunc("F_InstanceMenuOption", "[175] Glast Heim Challenge", "ogh_challenge", "OldGlastHeimChallenge");
+	.@opt55$ = callfunc("F_InstanceMenuOption", "[180] Glast Heim Challenge", "ogh_challenge", "OldGlastHeimChallenge");
 	.@opt56$ = callfunc("F_InstanceMenuOption", "[200] Ninho da Serpente", "confused_snake_nest", "ConfusedSnakeNest");
+	.@opt57$ = callfunc("F_InstanceMenuOption", "[175] Sabotagem no Dirigivel", "airship_sabotage", "AirshipSabotage");
 	.@opt6$ = callfunc("F_InstanceMenuOption", "[75] Santuario Selado", "santuario_selado", "SANTUARIOSELADO");
 	.@opt7$ = callfunc("F_InstanceMenuOption", "[90] Lab. Werner", "wlcr", "WLCR");
 	.@opt8$ = callfunc("F_InstanceMenuOption", "[90] Torneio da Magia", "gmt", "GMT");
 	.@opt48$ = callfunc("F_InstanceMenuOption", "[70] Caverna do Polvo", "octopus_cave", "OctopusCave");
 	.@opt46$ = callfunc("F_InstanceMenuOption", "[90] Esgoto Malangdo", "malangdo_culvert", "MalangdoCulvert");
-	.@opt44$ = callfunc("F_InstanceMenuOption", "[175] Geffen Night Arena", "geffen_night_arena", "GeffenNightArena");
-	.@opt45$ = callfunc("F_InstanceMenuOption", "[175] Torre Constelacao", "constellation_tower", "ConstellationTower");
+	.@opt44$ = callfunc("F_InstanceMenuOption", "[190] Geffen Night Arena", "geffen_night_arena", "GeffenNightArena");
+	.@opt45$ = callfunc("F_InstanceMenuOption", "[200] Torre Constelacao", "constellation_tower", "ConstellationTower");
 	.@opt9$ = callfunc("F_InstanceMenuOption", "[95] Memorias de Sara", "sara_memory", "SaraMemory");
 	.@opt10$ = callfunc("F_InstanceMenuOption", "[100] Espaco Infinito", "infinite_space", "InfiniteSpace");
-	.@opt50$ = callfunc("F_InstanceMenuOption", "[100] Ritual da Bencao", "ritual_blessing", "RitualOfBlessing");
+	.@opt50$ = callfunc("F_InstanceMenuOption", "[60] Ritual da Bencao", "ritual_blessing", "RitualOfBlessing");
 	.@opt11$ = callfunc("F_InstanceMenuOption", "[100] Floresta Nebulosa", "hazy_forest", "HazyForest");
 	.@opt12$ = callfunc("F_InstanceMenuOption", "[120] Lago Bakonawa", "BakonawaLake", "BakonawaLake");
 	.@opt13$ = callfunc("F_InstanceMenuOption", "[120] Palacio das Magoas", "ghost_palace", "GhostPalace");
@@ -138,7 +140,7 @@ OnAtcommand:
 	.@opt39$ = "[130/175] Edda Glast Heim";
 	.@opt18$ = callfunc("F_InstanceMenuOption", "[130] Torre Demonio", "devil_tower", "DEVILTOWER");
 	.@opt19$ = callfunc("F_InstanceMenuOption", "[135] Lab. Central", "laboratorio_central", "LaboratorioCentral");
-	.@opt20$ = callfunc("F_InstanceMenuOption", "[140] Interior Eclage", "eclage_interior", "EclageInterior");
+	.@opt20$ = callfunc("F_InstanceMenuOption", "[55] Interior Eclage", "eclage_interior", "EclageInterior");
 	.@opt21$ = callfunc("F_InstanceMenuOption", "[140] Fabrica Terror", "htf", "HTF");
 	.@opt22$ = callfunc("F_InstanceMenuOption", "[140] Salao de Ymir", "room_consciousness", "RoomConsciousness");
 	.@opt23$ = callfunc("F_InstanceMenuOption", "[140] Base Heart Hunter", "heart_hunter_war_base", "HeartHunterWarBase");
@@ -159,7 +161,7 @@ OnAtcommand:
 	.@opt33$ = callfunc("F_InstanceMenuOption", "[175] Covil da Rainha Verme", "faceworms_nest", "FacewormsNest");
 	.@opt34$ = callfunc("F_InstanceMenuOption", "[175] Pesadelo Musical", "nightmarish_jitterbug", "NightmarishJitterbug");
 	.@opt35$ = callfunc("F_InstanceMenuOption", "[175] Floresta Profunda", "deep_forest", "DeepForest");
-	.@opt38$ = callfunc("F_InstanceMenuOption", "[175] Tumba Remorso", "tomb_remorse", "TombRemorse");
+	.@opt38$ = callfunc("F_InstanceMenuOption", "[200] Tumba Remorso", "tomb_remorse", "TombRemorse");
 	.@opt40$ = callfunc("F_InstanceMenuOption", "[175] Edda Biolab", "edda_biolab", "EddaBiolab");
 	.@opt43$ = callfunc("F_InstanceMenuOption", "[110] Hospital Abandonado", "BangungotHospital", "BangungotHospital");
 	.@opt53$ = "[170] Vila da Decepcao";
@@ -167,9 +169,11 @@ OnAtcommand:
 	.@s = select(
 		.@opt1$,
 		.@opt2$,
-		.@opt3$,
-		.@opt4$,
+		.@opt20$,
 		.@opt5$,
+		.@opt50$,
+		.@opt4$,
+		.@opt3$,
 		.@opt48$,
 		.@opt6$,
 		.@opt7$,
@@ -179,7 +183,6 @@ OnAtcommand:
 		.@opt10$,
 		.@opt54$,
 		.@opt11$,
-		.@opt50$,
 		.@opt43$,
 		.@opt12$,
 		.@opt13$,
@@ -191,7 +194,6 @@ OnAtcommand:
 		.@opt39$,
 		.@opt18$,
 		.@opt19$,
-		.@opt20$,
 		.@opt21$,
 		.@opt22$,
 		.@opt23$,
@@ -213,21 +215,22 @@ OnAtcommand:
 		.@opt33$,
 		.@opt34$,
 		.@opt35$,
-		.@opt38$,
 		.@opt40$,
-		.@opt44$,
-		.@opt45$,
+		.@opt57$,
 		.@opt55$,
+		.@opt44$,
+		.@opt38$,
+		.@opt45$,
 		.@opt56$
 	);	close2;
 
 	setarray .@case_map[1],
-		1,2,3,4,5,48,6,7,8,46,
-		9,10,54,11,50,43,12,13,14,
-		15,16,17,18,19,20,21,22,23,24,
-		25,51,26,27,28,29,30,31,32,
+		1,2,22,5,50,4,3,48,6,7,8,46,
+		9,10,54,11,43,12,13,14,
+		15,16,17,18,19,20,21,23,24,25,
+		51,26,27,28,29,30,31,32,
 		33,34,47,53,35,36,37,38,39,
-		40,41,42,44,45,55,56;
+		40,42,57,55,44,41,45,56;
 	.@s = .@case_map[.@s];
 
 	switch(.@s) {
@@ -269,6 +272,10 @@ OnAtcommand:
 		case 56:
 			#INSTANCENAME$ = "ConfusedSnakeNest";
 			doevent "ChaoticSnakeNest_Instance#Custom::OnStartInstance";
+			end;
+		case 57:
+			#INSTANCENAME$ = "AirshipSabotage";
+			doevent "AirshipSabotage_Instance#Custom::OnStartInstance";
 			end;
 		case 48:
 			#INSTANCENAME$ = "OctopusCave";
@@ -556,7 +563,7 @@ S_ResumeActiveInstance:
 		"Base Militar", "Oz Labyrinth", "Sky Fortress Invasion", "Duelo com Sweety",
 		"Faceworm's Nest", "Nightmarish Jitterbug", "Confused Snake's Nest", "Deep Forest", "Tomb of Remorse",
 		"Edda do Laboratorio", "Bangungot Hospital 2F", "Geffen Night Arena", "Constellation Tower",
-		"Culvert", "Wolves Gathering Place", "Sanctuary Purification";
+		"Culvert", "Wolves Gathering Place", "Sanctuary Purification", "Airship Destruction";
 	setarray .@event_name$[0],
 		"PoringVillage", "BatalhaOrcs", "ET", "Nyd",
 		"MGH", "OGHC", "OctopusCave", "SantuarioSelado",
@@ -572,7 +579,7 @@ S_ResumeActiveInstance:
 		"ThorGunsuBase", "MazeofOz", "SkyFortress", "TwilightGarden",
 		"FacewormsNest", "NightmarishJitterbug", "ConfusedSnakeNest", "DeepForest", "TombOfRemorse",
 		"EddaBiolabs", "BangungotHospital", "GeffenNightArena", "ConstellationTower",
-		"MalangdoCulvert", "WolvesGathering", "SanctuaryPurification";
+		"MalangdoCulvert", "WolvesGathering", "SanctuaryPurification", "AirshipSabotage";
 
 	for (.@i = 0; .@i < getarraysize(.@db_name$); ++.@i) {
 		if (.@db_name$[.@i] != .@live_name$)

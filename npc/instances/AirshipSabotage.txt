@@ -1,0 +1,272 @@
+//===== rAthena Script =======================================
+//= Sabotagem no Dirigivel (Episode 19)
+//===== Adaptacao: ===========================================
+//= Baseado em Airship_Sabotage.c, de hayakawakaki.
+//= Integrado ao menu custom, ciclo diario e recompensas locais.
+//============================================================
+
+-	script	AirshipSabotage_Instance#Custom	-1,{
+	if (!attachrid(#INSTANCERID)) end;
+	#INSTANCERID = 0;
+
+OnStartInstance:
+	callfunc("F_InstanceEntry",
+		"Airship Destruction",
+		"Coordenador da Operacao",
+		"airship_sabotage",
+		"AirshipSabotage",
+		175,
+		"Sabotagem no Dirigivel"
+	);
+	end;
+}
+
+// Controlador principal da instancia.
+1@whl,1,1,0	script	#AS_Control	-1,{
+	end;
+
+OnInstanceInit:
+	'map$ = instance_mapname("1@whl");
+	'stage = 0;
+	'remaining = 0;
+	'finished = 0;
+	'finish_announced = 0;
+	enablenpc instance_npcname("#AS_Start");
+	disablenpc instance_npcname("#AS_Gate1");
+	disablenpc instance_npcname("#AS_Gate2");
+	disablenpc instance_npcname("#AS_Gate3");
+	disablenpc instance_npcname("#AS_Gate4");
+	disablenpc instance_npcname("#AS_Reward");
+	end;
+
+OnWave1:
+	'stage = 1;
+	'remaining = 18;
+	instance_announce false, "Sistema do dirigivel: Presenca nao autorizada detectada na Zona 2. Patrulhas, iniciem a busca!", bc_map, 0xFFEE66;
+	setarray .@xy[0],
+		56,88, 51,93, 65,84, 42,96, 43,90, 48,90,
+		41,96, 67,87, 60,90, 57,85, 37,96, 54,97,
+		54,83, 56,96, 56,93, 57,87, 67,80, 60,85;
+	for (.@i = 0; .@i < 18; ++.@i) {
+		monster 'map$,.@xy[.@i * 2],.@xy[.@i * 2 + 1],"Patrulha do Dirigivel",20641,1,instance_npcname(strnpcinfo(0))+"::OnMobKill";
+		callsub S_ScaleMob, $@mobid[0];
+	}
+	end;
+
+OnWave2:
+	'stage = 2;
+	'remaining = 26;
+	instance_announce false, "Sistema do dirigivel: O invasor alcancou o compartimento de carga. Bloqueiem todas as passagens!", bc_map, 0xFFEE66;
+	setarray .@xy[0],
+		54,120, 52,120, 51,123, 56,123, 40,122, 42,123,
+		56,115, 66,122, 49,122, 52,132, 51,137, 55,139,
+		58,140, 45,141, 47,143, 58,144, 61,144, 64,144,
+		61,145, 50,148, 61,149, 60,149, 53,151, 58,151,
+		58,153, 50,153;
+	for (.@i = 0; .@i < 26; ++.@i) {
+		monster 'map$,.@xy[.@i * 2],.@xy[.@i * 2 + 1],"Patrulha do Compartimento",20639,1,instance_npcname(strnpcinfo(0))+"::OnMobKill";
+		callsub S_ScaleMob, $@mobid[0];
+	}
+	end;
+
+OnWave3:
+	'stage = 3;
+	'remaining = 16;
+	instance_announce false, "Sistema do dirigivel: O invasor entrou na sala de maquinas. Enviem reforcos imediatamente!", bc_map, 0xFFEE66;
+	setarray .@xy[0],
+		177,31, 156,34, 184,41, 187,31, 173,30, 168,34,
+		169,35, 177,37, 141,35, 163,29, 163,35, 178,31,
+		176,37, 160,31, 170,37, 150,35;
+	for (.@i = 0; .@i < 16; ++.@i) {
+		monster 'map$,.@xy[.@i * 2],.@xy[.@i * 2 + 1],"Patrulha da Sala de Maquinas",20633,1,instance_npcname(strnpcinfo(0))+"::OnMobKill";
+		callsub S_ScaleMob, $@mobid[0];
+	}
+	end;
+
+OnWave4:
+	'stage = 4;
+	'remaining = 30;
+	instance_announce false, "Sistema do dirigivel: Protejam o nucleo! Destruam todos os organismos invasores!", bc_map, 0xFF4444;
+	setarray .@xy[0],
+		154,96, 160,77, 166,76, 168,97, 173,98, 174,74,
+		146,100, 151,100, 171,100, 159,97, 159,100, 167,99,
+		155,95, 149,97, 147,97, 159,99, 160,98, 163,94,
+		151,106, 153,101, 151,92, 161,94, 153,82, 162,93,
+		155,77, 158,74, 159,73, 150,73, 154,73, 164,68;
+	for (.@i = 0; .@i < 30; ++.@i) {
+		monster 'map$,.@xy[.@i * 2],.@xy[.@i * 2 + 1],"Defensor do Nucleo",20631,1,instance_npcname(strnpcinfo(0))+"::OnMobKill";
+		callsub S_ScaleMob, $@mobid[0];
+	}
+	end;
+
+S_ScaleMob:
+	.@gid = getarg(0);
+	getunitdata .@gid, .@data;
+	setunitdata .@gid, UMOB_MAXHP, .@data[UMOB_MAXHP] * 10;
+	setunitdata .@gid, UMOB_HP, .@data[UMOB_MAXHP] * 10;
+	setunitdata .@gid, UMOB_ATKMIN, .@data[UMOB_ATKMIN] * 10;
+	setunitdata .@gid, UMOB_ATKMAX, .@data[UMOB_ATKMAX] * 10;
+	setunitdata .@gid, UMOB_STR, .@data[UMOB_STR] * 10;
+	setunitdata .@gid, UMOB_AGI, .@data[UMOB_AGI] * 10;
+	setunitdata .@gid, UMOB_VIT, .@data[UMOB_VIT] * 10;
+	setunitdata .@gid, UMOB_INT, .@data[UMOB_INT] * 10;
+	setunitdata .@gid, UMOB_DEX, .@data[UMOB_DEX] * 10;
+	setunitdata .@gid, UMOB_LUK, .@data[UMOB_LUK] * 10;
+	setunitdata .@gid, UMOB_DEF, .@data[UMOB_DEF] * 10;
+	setunitdata .@gid, UMOB_MDEF, .@data[UMOB_MDEF] * 10;
+	setunitdata .@gid, UMOB_RES, .@data[UMOB_RES] * 10;
+	setunitdata .@gid, UMOB_MRES, .@data[UMOB_MRES] * 10;
+	return;
+
+OnMobKill:
+	.@left = 'remaining - 1;
+	'remaining = .@left;
+	if (.@left > 0) {
+		if (.@left == 10)
+			instance_announce false, "Sistema do dirigivel: Restam 10 unidades de defesa nesta zona.", bc_map, 0x00CCFF;
+		end;
+	}
+
+	switch ('stage) {
+	case 1:
+		enablenpc instance_npcname("#AS_Gate1");
+		instance_announce false, "Zona 2 liberada. A passagem para o compartimento de carga foi aberta.", bc_map, 0x66FF66;
+		break;
+	case 2:
+		enablenpc instance_npcname("#AS_Gate2");
+		instance_announce false, "Compartimento de carga liberado. Avance para a sala de maquinas.", bc_map, 0x66FF66;
+		break;
+	case 3:
+		enablenpc instance_npcname("#AS_Gate3");
+		instance_announce false, "Sala de maquinas liberada. O caminho para o nucleo esta aberto.", bc_map, 0x66FF66;
+		break;
+	case 4:
+		enablenpc instance_npcname("#AS_Gate4");
+		instance_announce false, "Defesas eliminadas. Aquila aguarda na camara do nucleo.", bc_map, 0xFFAA44;
+		break;
+	}
+	end;
+
+OnBoss:
+	if ('stage >= 5) end;
+	'stage = 5;
+	instance_announce false, "Aquila: Ainda ha tempo. Interrompam a sabotagem e retornem!", bc_map, 0x00CCFF;
+	monster 'map$,160,166,"Aquila",21531,1,instance_npcname(strnpcinfo(0))+"::OnBossKill";
+	getunitdata $@mobid[0], .@aquila;
+	setunitdata $@mobid[0], UMOB_ATKMIN, .@aquila[UMOB_ATKMIN] * 10;
+	setunitdata $@mobid[0], UMOB_ATKMAX, .@aquila[UMOB_ATKMAX] * 10;
+	setunitdata $@mobid[0], UMOB_STR, .@aquila[UMOB_STR] * 10;
+	setunitdata $@mobid[0], UMOB_INT, .@aquila[UMOB_INT] * 10;
+	setunitdata $@mobid[0], UMOB_DEX, .@aquila[UMOB_DEX] * 10;
+	end;
+
+OnBossKill:
+	'stage = 6;
+	'finished = 1;
+	enablenpc instance_npcname("#AS_Reward");
+	instance_announce false, "O nucleo entrou em modo inativo. A operacao foi concluida!", bc_map, 0x66FF66;
+	end;
+}
+
+// Inicio da operacao.
+1@whl,32,53,0	script	#AS_Start	HIDDEN_WARP_NPC,3,3,{
+	end;
+OnTouch:
+	if ('stage > 0) {
+		warp 'map$,53,86;
+		end;
+	}
+	if (!is_party_leader()) {
+		dispbottom "Aguarde o lider do grupo iniciar a operacao.";
+		end;
+	}
+	disablenpc instance_npcname(strnpcinfo(0));
+	warp 'map$,53,86;
+	donpcevent instance_npcname("#AS_Control") + "::OnWave1";
+	end;
+}
+
+1@whl,53,97,0	script	#AS_Gate1	WARPNPC,2,2,{
+	end;
+OnTouch:
+	if ('stage != 1 || 'remaining > 0) end;
+	disablenpc instance_npcname(strnpcinfo(0));
+	warp 'map$,53,110;
+	donpcevent instance_npcname("#AS_Control") + "::OnWave2";
+	end;
+}
+
+1@whl,37,162,0	script	#AS_Gate2	WARPNPC,2,2,{
+	end;
+OnTouch:
+	if ('stage != 2 || 'remaining > 0) end;
+	disablenpc instance_npcname(strnpcinfo(0));
+	warp 'map$,139,24;
+	donpcevent instance_npcname("#AS_Control") + "::OnWave3";
+	end;
+}
+
+1@whl,160,43,0	script	#AS_Gate3	WARPNPC,2,2,{
+	end;
+OnTouch:
+	if ('stage != 3 || 'remaining > 0) end;
+	disablenpc instance_npcname(strnpcinfo(0));
+	warp 'map$,160,53;
+	donpcevent instance_npcname("#AS_Control") + "::OnWave4";
+	end;
+}
+
+1@whl,160,117,0	script	#AS_Gate4	WARPNPC,2,2,{
+	end;
+OnTouch:
+	if ('stage != 4 || 'remaining > 0) end;
+	disablenpc instance_npcname(strnpcinfo(0));
+	warp 'map$,160,140;
+	donpcevent instance_npcname("#AS_Control") + "::OnBoss";
+	end;
+}
+
+// Recompensa individual, liberada depois da derrota de Aquila.
+1@whl,160,160,5	script	#AS_Reward	PORTAL,{
+	if (!'finished) end;
+	mes "[Nucleo do Dirigivel]";
+	mes "O nucleo foi desativado e a rota de fuga esta aberta.";
+	next;
+	if (select("Sair do dirigivel:Continuar explorando") == 2) close;
+	.@announce = !'finish_announced;
+	.@result = callfunc("F_InstanceFinishBase",
+		"Sabotagem no Dirigivel",
+		"#AirshipSabotage_STATUS",
+		30,
+		3,
+		"",
+		"",
+		1,
+		30,
+		110002,
+		3000,
+		3,
+		0,
+		"Sabotagem no Dirigivel",
+		.@announce
+	);
+	if (.@result == -1) {
+		mes "Voce nao possui peso suficiente para receber a recompensa.";
+		close;
+	}
+	if (.@result == 0) {
+		mes "A recompensa desta operacao ja foi recebida ou sua participacao nao foi registrada.";
+		close;
+	}
+	if (.@announce)
+		'finish_announced = 1;
+	close2;
+	warp "SavePoint",0,0;
+	end;
+}
+
+1@whl	mapflag	noteleport
+1@whl	mapflag	nosave	SavePoint
+1@whl	mapflag	nobranch
+1@whl	mapflag	nopenalty
+1@whl	mapflag	noreturn
