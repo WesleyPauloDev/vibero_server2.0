@@ -29,6 +29,10 @@ constexpr int32 PERSISTENT_WARNING_SCORE = 60;
 constexpr t_tick LINK_RECHECK_MS = 30000;
 constexpr t_tick WARNING_COOLDOWN_MS = 1800000;
 constexpr t_tick ENFORCEMENT_INTERVAL_MS = 5000;
+constexpr t_tick COMBINED_SIGNAL_WINDOW_MS = 120000;
+constexpr t_tick COMBINED_SCORE_COOLDOWN_MS = 30000;
+constexpr int32 SCORE_DECAY_PER_MINUTE = 2;
+constexpr size_t SCORED_ACTION_COUNT = 3;
 
 struct TimingWindow {
 	t_tick last_tick = 0;
@@ -37,8 +41,10 @@ struct TimingWindow {
 
 struct ObserverState {
 	std::array<TimingWindow, 4> timings;
+	std::array<t_tick, SCORED_ACTION_COUNT> last_regular_signal {};
 	int32 score = 0;
 	t_tick last_decay_tick = 0;
+	t_tick last_combined_score_tick = 0;
 	t_tick last_persistent_warning = 0;
 	bool initial_warning_sent = false;
 };
@@ -79,6 +85,23 @@ void persist_score(const map_session_data& sd, int32 score, bool warning) {
 		Sql_ShowDebug(mmysql_handle);
 }
 
+void decay_score(map_session_data& sd, ObserverState& state, t_tick tick) {
+	if (state.last_decay_tick == 0) {
+		state.last_decay_tick = tick;
+		return;
+	}
+	if (DIFF_TICK(tick, state.last_decay_tick) < 60000)
+		return;
+	const auto minutes = static_cast<int32>(DIFF_TICK(tick, state.last_decay_tick) / 60000);
+	const auto previous_score = state.score;
+	state.score = std::max(0, state.score - minutes * SCORE_DECAY_PER_MINUTE);
+	state.last_decay_tick += minutes * 60000;
+	if (state.score != previous_score)
+		persist_score(sd, state.score, false);
+	if (state.score < INITIAL_WARNING_SCORE)
+		state.initial_warning_sent = false;
+}
+
 bool active_link(uint32 account_id, t_tick tick) {
 	const auto cached = linked_accounts.find(account_id);
 	if (cached != linked_accounts.end() && DIFF_TICK(cached->second, tick) > 0)
@@ -102,10 +125,9 @@ bool active_link(uint32 account_id, t_tick tick) {
 }
 
 TIMER_FUNC(vibeguard_enforcement_timer) {
-	if (battle_config.vibeguard_enforcement_mode <= 0) {
+	const bool enforce_session = battle_config.vibeguard_enforcement_mode > 0;
+	if (!enforce_session)
 		enforcement_states.clear();
-		return 0;
-	}
 
 	std::unordered_set<uint32> online_accounts;
 	auto* iterator = mapit_getallusers();
@@ -116,6 +138,11 @@ TIMER_FUNC(vibeguard_enforcement_timer) {
 			continue;
 		const auto account_id = sd->status.account_id;
 		online_accounts.insert(account_id);
+		const auto observer = observer_states.find(account_id);
+		if (observer != observer_states.end())
+			decay_score(*sd, observer->second, tick);
+		if (!enforce_session)
+			continue;
 		if (pc_get_group_level(sd) >= battle_config.vibeguard_exempt_group_level) {
 			enforcement_states.erase(account_id);
 			continue;
@@ -157,6 +184,18 @@ TIMER_FUNC(vibeguard_enforcement_timer) {
 		else
 			++state;
 	}
+	for (auto state = observer_states.begin(); state != observer_states.end();) {
+		if (online_accounts.find(state->first) == online_accounts.end())
+			state = observer_states.erase(state);
+		else
+			++state;
+	}
+	for (auto account = linked_accounts.begin(); account != linked_accounts.end();) {
+		if (online_accounts.find(account->first) == online_accounts.end())
+			account = linked_accounts.erase(account);
+		else
+			++account;
+	}
 	return 0;
 }
 
@@ -180,7 +219,18 @@ void show_persistent_warning(map_session_data& sd, ObserverState& state, t_tick 
 	persist_score(sd, state.score, true);
 }
 
-void evaluate_window(map_session_data& sd, ObserverState& state, TimingWindow& window, t_tick tick) {
+const char* action_name(e_vibeguard_action action) {
+	switch (action) {
+		case e_vibeguard_action::MOVE: return "move";
+		case e_vibeguard_action::ATTACK: return "attack";
+		case e_vibeguard_action::PICKUP: return "pickup";
+		case e_vibeguard_action::SKILL: return "skill";
+	}
+	return "unknown";
+}
+
+void evaluate_window(map_session_data& sd, ObserverState& state, TimingWindow& window,
+	e_vibeguard_action action, t_tick tick) {
 	if (window.intervals.size() < SAMPLE_COUNT)
 		return;
 
@@ -197,9 +247,27 @@ void evaluate_window(map_session_data& sd, ObserverState& state, TimingWindow& w
 	const double coefficient = mean > 0.0 ? std::sqrt(variance) / mean : 1.0;
 
 	if (mean >= 150.0 && mean <= 8000.0 && coefficient < 0.035) {
-		state.score = std::min(100, state.score + 12);
-		write_suspicion_log(sd, "regular_timing", state.score);
-		persist_score(sd, state.score, false);
+		const auto action_index = static_cast<size_t>(action);
+		state.last_regular_signal[action_index] = tick;
+		std::string signal_event = "regular_";
+		signal_event += action_name(action);
+		write_suspicion_log(sd, signal_event.c_str(), state.score);
+
+		int32 combined_signals = 0;
+		for (const auto signal_tick : state.last_regular_signal) {
+			if (signal_tick != 0 && DIFF_TICK(tick, signal_tick) <= COMBINED_SIGNAL_WINDOW_MS)
+				++combined_signals;
+		}
+		const bool cooldown_elapsed = state.last_combined_score_tick == 0
+			|| DIFF_TICK(tick, state.last_combined_score_tick) >= COMBINED_SCORE_COOLDOWN_MS;
+		if (combined_signals >= 2 && cooldown_elapsed) {
+			state.score = std::min(100, state.score + (combined_signals >= 3 ? 15 : 8));
+			state.last_combined_score_tick = tick;
+			write_suspicion_log(sd,
+				combined_signals >= 3 ? "combined_automation_3" : "combined_automation_2",
+				state.score);
+			persist_score(sd, state.score, false);
+		}
 	}
 
 	for (size_t index = 0; index < SAMPLE_COUNT / 2; ++index)
@@ -233,6 +301,10 @@ bool vibeguard_bind_session(map_session_data& sd, const char* pairing_code) {
 }
 
 void vibeguard_observe_action(map_session_data& sd, e_vibeguard_action action) {
+	// Skill repetition and autopot are accepted quality-of-life behavior on VibeRO.
+	// They must never contribute evidence or suspicion score.
+	if (action == e_vibeguard_action::SKILL)
+		return;
 	if (pc_get_group_level(&sd) > 0)
 		return;
 	const auto tick = gettick();
@@ -240,15 +312,7 @@ void vibeguard_observe_action(map_session_data& sd, e_vibeguard_action action) {
 		return;
 
 	auto& state = observer_states[sd.status.account_id];
-	if (state.last_decay_tick == 0)
-		state.last_decay_tick = tick;
-	if (DIFF_TICK(tick, state.last_decay_tick) >= 60000) {
-		const auto minutes = static_cast<int32>(DIFF_TICK(tick, state.last_decay_tick) / 60000);
-		state.score = std::max(0, state.score - minutes);
-		state.last_decay_tick = tick;
-		if (state.score < INITIAL_WARNING_SCORE)
-			state.initial_warning_sent = false;
-	}
+	decay_score(sd, state, tick);
 
 	auto& window = state.timings[static_cast<size_t>(action)];
 	if (window.last_tick != 0) {
@@ -262,7 +326,7 @@ void vibeguard_observe_action(map_session_data& sd, e_vibeguard_action action) {
 		}
 	}
 	window.last_tick = tick;
-	evaluate_window(sd, state, window, tick);
+	evaluate_window(sd, state, window, action, tick);
 }
 
 void vibeguard_show_status(map_session_data& sd) {

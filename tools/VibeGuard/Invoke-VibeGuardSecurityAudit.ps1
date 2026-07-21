@@ -10,7 +10,18 @@ param(
     [int]$StackWindowMinutes = 10,
 
     [ValidateRange(100, 30000000)]
-    [int]$StackPositiveThreshold = 10000
+    [int]$StackPositiveThreshold = 10000,
+
+    [ValidateRange(1, 168)]
+    [int]$ItemTraceWindowHours = 24,
+
+    [ValidateRange(1, 1440)]
+    [int]$LoginFailureWindowMinutes = 15,
+
+    [ValidateRange(1, 10000)]
+    [int]$LoginFailureThreshold = 25,
+
+    [int[]]$PrivilegedGroupIds = @(99)
 )
 
 $ErrorActionPreference = 'Stop'
@@ -112,10 +123,43 @@ if ($md5Passwords -match '^(yes|on|1)$') {
         'As senhas das contas usam MD5, inadequado contra vazamento offline do banco.'
 }
 
+$ipBanEnabled = Read-ConfigValue $login 'ipban_enable'
+$dynamicFailureBan = Read-ConfigValue $login 'ipban_dynamic_pass_failure_ban'
+$failureLimit = [int](Read-ConfigValue $login 'ipban_dynamic_pass_failure_ban_limit')
+$failureDuration = [int](Read-ConfigValue $login 'ipban_dynamic_pass_failure_ban_duration')
+if ($ipBanEnabled -notmatch '^(yes|on|1)$' -or $dynamicFailureBan -notmatch '^(yes|on|1)$') {
+    Add-Finding $findings high authentication login_bruteforce_protection_disabled `
+        'O bloqueio dinamico contra tentativas repetidas de login esta desativado.'
+}
+elseif ($failureLimit -gt 10 -or $failureDuration -lt 5) {
+    Add-Finding $findings medium authentication login_bruteforce_policy_weak `
+        'O bloqueio de tentativas de login esta ativo, mas os limites merecem revisao.' `
+        @{ failure_limit = $failureLimit; ban_duration_minutes = $failureDuration }
+}
+else {
+    Add-Finding $findings info authentication login_bruteforce_protection_enabled `
+        'O bloqueio dinamico contra tentativas repetidas de login esta ativo.' `
+        @{ failure_limit = $failureLimit; ban_duration_minutes = $failureDuration }
+}
+
 $pinEnabled = Read-ConfigValue $char 'pincode_enabled'
 if ($pinEnabled -notmatch '^(yes|on|1)$') {
     Add-Finding $findings medium authentication secondary_pin_disabled `
         'O PIN secundario do servidor de personagens esta desativado.'
+}
+else {
+    $pinForce = Read-ConfigValue $char 'pincode_force'
+    $pinMaxTry = [int](Read-ConfigValue $char 'pincode_maxtry')
+    if ($pinForce -notmatch '^(yes|on|1)$' -or $pinMaxTry -gt 3) {
+        Add-Finding $findings medium authentication secondary_pin_policy_weak `
+            'O PIN esta ativo, mas nao e obrigatorio ou aceita tentativas demais.' `
+            @{ forced = $pinForce; maximum_attempts = $pinMaxTry }
+    }
+    else {
+        Add-Finding $findings info authentication secondary_pin_enabled `
+            'O PIN secundario obrigatorio esta ativo.' `
+            @{ maximum_attempts = $pinMaxTry }
+    }
 }
 
 $clientHashCheck = Read-ConfigValue $login 'client_hash_check'
@@ -127,6 +171,23 @@ if ($clientHashCheck -notmatch '^(yes|on|1)$') {
 $mainHost = Read-ConfigValue $inter 'map_server_ip'
 $mainPort = [int](Read-ConfigValue $inter 'map_server_port')
 $mainDatabase = Read-ConfigValue $inter 'map_server_db'
+
+$privilegedGroups = @($PrivilegedGroupIds | Sort-Object -Unique)
+if ($privilegedGroups.Count -gt 0) {
+    $groupList = ($privilegedGroups | ForEach-Object { [int]$_ }) -join ','
+    $privilegedRows = @(Invoke-MySqlRows $mainHost $mainPort $databaseUser $databasePassword $mainDatabase `
+        "SELECT group_id, COUNT(*) FROM login WHERE group_id IN ($groupList) GROUP BY group_id ORDER BY group_id;")
+    $totalPrivileged = 0
+    $countsByGroup = @{}
+    foreach ($row in $privilegedRows) {
+        $columns = $row -split "`t", 2
+        $countsByGroup[$columns[0]] = [int]$columns[1]
+        $totalPrivileged += [int]$columns[1]
+    }
+    Add-Finding $findings $(if ($totalPrivileged -gt 3) { 'medium' } else { 'info' }) authentication privileged_account_inventory `
+        'Inventario de contas privilegiadas concluido sem registrar nomes ou senhas.' `
+        @{ configured_group_ids = $privilegedGroups; total_accounts = $totalPrivileged; counts_by_group = $countsByGroup }
+}
 
 $duplicateQuery = @'
 SELECT unique_id, COUNT(*) AS copies,
@@ -242,6 +303,63 @@ foreach ($row in $volumeRows) {
             net_amount = $columns[3]
             event_count = $columns[4]
             window_minutes = $StackWindowMinutes
+        }
+}
+
+$uniqueFlowQuery = @"
+SELECT unique_id, nameid,
+       SUM(amount) AS net_amount,
+       COUNT(DISTINCT char_id) AS character_count,
+       COUNT(*) AS event_count
+FROM picklog
+WHERE unique_id <> 0
+  AND time >= NOW() - INTERVAL $ItemTraceWindowHours HOUR
+GROUP BY unique_id, nameid
+HAVING net_amount > 1
+ORDER BY net_amount DESC
+LIMIT 200;
+"@
+$uniqueFlowRows = @(Invoke-MySqlRows $logHost $logPort $logUser $logPassword $logDatabase $uniqueFlowQuery)
+if ($uniqueFlowRows.Count -eq 0) {
+    Add-Finding $findings info item_integrity unique_item_flow_balanced `
+        'Nenhum identificador unico apresentou criacao liquida de multiplas copias na janela auditada.' `
+        @{ window_hours = $ItemTraceWindowHours }
+}
+else {
+    foreach ($row in $uniqueFlowRows) {
+        $columns = $row -split "`t", 5
+        Add-Finding $findings high item_integrity unique_item_positive_balance `
+            'Um identificador unico apresentou saldo positivo superior a uma copia; revise toda a trilha antes de agir.' `
+            @{
+                unique_id = $columns[0]
+                nameid = $columns[1]
+                net_amount = $columns[2]
+                character_count = $columns[3]
+                event_count = $columns[4]
+                window_hours = $ItemTraceWindowHours
+            }
+    }
+}
+
+$failedLoginRows = @(Invoke-MySqlRows $logHost $logPort $logUser $logPassword $logDatabase @"
+SELECT COUNT(*) AS failure_count,
+       COUNT(DISTINCT ip) AS source_count,
+       COUNT(DISTINCT user) AS account_name_count
+FROM loginlog
+WHERE rcode IN (0, 1)
+  AND time >= NOW() - INTERVAL $LoginFailureWindowMinutes MINUTE;
+"@)
+if ($failedLoginRows.Count -eq 1) {
+    $columns = $failedLoginRows[0] -split "`t", 3
+    $failureCount = [int]$columns[0]
+    Add-Finding $findings $(if ($failureCount -ge $LoginFailureThreshold) { 'medium' } else { 'info' }) authentication recent_login_failures `
+        'Tentativas de login recusadas foram resumidas sem registrar IP, usuario ou senha.' `
+        @{
+            failure_count = $failureCount
+            distinct_sources = [int]$columns[1]
+            distinct_account_names = [int]$columns[2]
+            window_minutes = $LoginFailureWindowMinutes
+            review_threshold = $LoginFailureThreshold
         }
 }
 

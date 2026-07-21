@@ -73,9 +73,11 @@ instancia de `start.exe` depois de concluir o login anterior. Cada sessao ignora
 contas ja vinculadas e aguarda o proximo login do mesmo endereco. O comando
 `@guard` acima permanece como fallback de laboratorio.
 
-O mapa mede apenas os intervalos entre movimento, ataque, coleta de item e uso de
-habilidade. Uma janela de 24 intervalos muito regulares soma suspeita; a pontuacao
-cai gradualmente quando o padrao deixa de ocorrer. Aos 30 pontos aparecem um aviso
+O mapa mede os intervalos entre movimento, ataque e coleta de item. Uso repetido
+de habilidade e autopot tem peso zero. Uma unica categoria regular gera apenas
+telemetria; a pontuacao so aumenta quando duas ou mais categorias apresentam
+regularidade na mesma janela de dois minutos. Ela cai dois pontos por minuto
+quando o jogador continua ativo sem nova evidencia composta. Aos 30 pontos aparecem um aviso
 preventivo no rodape e uma caixa `mes`. Aos 60 pontos, respeitando 30 minutos de
 intervalo, os dois avisos sao repetidos com a indicacao de suspeita persistente.
 Nenhuma dessas acoes bane, prende,
@@ -177,14 +179,23 @@ Set-Location "C:\Users\wesley\Desktop\Conf_MeuRag2"
 ```
 
 O auditor procura `unique_id` repetido entre inventario, carrinho, armazens,
-correio e leilao; verifica o mecanismo das tabelas e a saude do `picklog`; e
-aponta configuracoes fracas sem imprimir senhas. Os achados sao acrescentados em
+correio e leilao; verifica saldo anormal de itens unicos, o mecanismo das tabelas
+e a saude do `picklog`; e aponta configuracoes fracas sem imprimir senhas. Ele
+tambem resume falhas de login sem guardar IP ou nome de usuario e conta quantas
+contas pertencem aos grupos administrativos informados. Os achados sao acrescentados em
 `log/vibeguard-security.jsonl`. Ele nao bane contas, nao altera itens, nao le
 memoria e nao coleta a lista de processos do computador do jogador.
 
 Para itens empilhaveis, ele tambem sinaliza pilhas fora do limite estrutural de
 30000 unidades e volumes positivos elevados em uma janela curta. Esses alertas
 sao indicios para revisao do `picklog`, nao prova automatica de duplicacao.
+
+Os exemplos `vibeguard-login-security.conf.production.example` e
+`vibeguard-char-security.conf.production.example` deixam prontos o bloqueio
+dinamico de tentativas e o PIN obrigatorio. Copie seus valores para os arquivos
+correspondentes em `conf/import/`; eles nao contem credenciais. A troca do MD5
+por um hash moderno exige migracao separada e nao deve ser feita diretamente no
+banco, pois as senhas atuais nao podem ser recuperadas para recalcular o hash.
 
 ## Aplicacao gradual da sessao
 
