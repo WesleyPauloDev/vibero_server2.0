@@ -405,6 +405,8 @@ static bool clif_bl_is_hidden_for_target( block_list& src_bl, map_session_data& 
 	return false;
 }
 
+static void clif_get_noncostume_look(map_session_data& sd, int32& head_bottom, int32& head_mid, int32& head_top, int32& robe);
+
 /*==========================================
  * sub process of clif_send
  * Called from a map_foreachinallarea (grabs all players in specific area and subjects them to this function)
@@ -499,6 +501,42 @@ static int32 clif_send_sub(struct block_list *bl, va_list ap)
 	}
 
 	memcpy(WFIFOP(fd,0), buf, len);
+
+	// These packets contain the complete appearance. Adjust the recipient's
+	// copy so players entering the screen are created without costume visuals.
+	if (sd->state.hidevisual && src_bl->type == BL_PC && src_bl->id != sd->id) {
+		map_session_data* source = BL_CAST(BL_PC, src_bl);
+		int32 head_bottom, head_mid, head_top, robe;
+
+		clif_get_noncostume_look(*source, head_bottom, head_mid, head_top, robe);
+
+		uint16 packet_type = RBUFW(buf, 0);
+		if (packet_type == idle_unitType && len == sizeof(packet_idle_unit)) {
+			packet_idle_unit* p = reinterpret_cast<packet_idle_unit*>(WFIFOP(fd, 0));
+			p->accessory = head_bottom;
+			p->accessory2 = head_top;
+			p->accessory3 = head_mid;
+#if PACKETVER >= 20101124
+			p->robe = robe;
+#endif
+		} else if (packet_type == spawn_unitType && len == sizeof(packet_spawn_unit)) {
+			packet_spawn_unit* p = reinterpret_cast<packet_spawn_unit*>(WFIFOP(fd, 0));
+			p->accessory = head_bottom;
+			p->accessory2 = head_top;
+			p->accessory3 = head_mid;
+#if PACKETVER >= 20101124
+			p->robe = robe;
+#endif
+		} else if (packet_type == unit_walkingType && len == sizeof(packet_unit_walking)) {
+			packet_unit_walking* p = reinterpret_cast<packet_unit_walking*>(WFIFOP(fd, 0));
+			p->accessory = head_bottom;
+			p->accessory2 = head_top;
+			p->accessory3 = head_mid;
+#if PACKETVER >= 20101124
+			p->robe = robe;
+#endif
+		}
+	}
 	WFIFOSET(fd,len);
 
 	return 0;
