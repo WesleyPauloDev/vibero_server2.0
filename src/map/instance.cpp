@@ -1032,6 +1032,10 @@ bool instance_destroy(int32 instance_id)
 	if( idata->regs.arrays )
 		idata->regs.arrays->destroy(idata->regs.arrays, script_free_array_db);
 
+	// Defensive reset before releasing the instance object. New instances also
+	// start at normal speed through the s_instance_data constructor.
+	idata->npc_timer_speed = 0;
+
 	ShowInfo("[Instance] Destroyed: %s (%d)\n", instance_db.find(idata->id)->name.c_str(), instance_id);
 
 	instances.erase(instance_id);

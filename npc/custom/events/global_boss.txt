@@ -1,6 +1,6 @@
 //===========================================================
-//  Evento Boss Global - Quarta e Sexta às 20:00
-//  Comando: @evento (teleporta se ativo)
+//  Evento Boss Global - Todos os dias as 20:00
+//  Comandos: @evento (jogadores) e @globalboss (GM nivel 99)
 //===========================================================
 
 -	script	GlobalBossCtrl	-1,{
@@ -8,7 +8,10 @@
 OnInit:
     .npc_name$ = strnpcinfo(3);           // guarda o nome do NPC
     .map$      = "boss_global";
-    .active    = 0;    
+    .active    = 0;
+    if ($GlobalBossLevel < 1)
+        $GlobalBossLevel = 1;
+    bindatcmd "globalboss", .npc_name$ + "::OnGMStart", 99, 99;
     disablenpc "Recompensa do Boss";
     stopnpctimer;
     killmonsterall .map$;
@@ -17,30 +20,40 @@ OnInit:
     end;
 
 OnClock2000:
-    // verifica quarta (3) ou sexta (5) às 20h
-    .@day  = gettime(DT_DAYOFWEEK);
-	
-    if (.@day == 3 || .@day == 5) {
-        stopnpctimer;
-        killmonsterall .map$;
-        disablenpc "Recompensa do Boss";     
-		.active = 1;
-		initnpctimer;
-        announce "[Evento Boss Global] Começa em 5 minutos! Use @evento para participar.", bc_all, 0xFF0000;
+    donpcevent .npc_name$ + "::OnOpenEvent";
+    end;
+
+OnGMStart:
+    if (.active) {
+        dispbottom "O Evento Boss Global ja esta ativo.";
+        end;
     }
+    announce "[GM] " + strcharinfo(0) + " ativou o Evento Boss Global!", bc_all, 0xFF0000;
+    donpcevent .npc_name$ + "::OnOpenEvent";
+    end;
+
+OnOpenEvent:
+    if (.active)
+        end;
+    stopnpctimer;
+    killmonsterall .map$;
+    disablenpc "Recompensa do Boss";
+    .active = 1;
+    initnpctimer;
+    announce "[Evento Boss Global] Comeca em 5 minutos! Use @evento para participar.", bc_all, 0xFF0000;
 
     end;
 
 OnTimer180000:
-    announce "[Evento Boss Global] Começa em 2 minutos! Use @evento para participar.", bc_all, 0xFF0000;
+    announce "[Evento Boss Global] Comeca em 2 minutos! Use @evento para participar.", bc_all, 0xFF0000;
     end;
 
 OnTimer240000:
-    announce "[Evento Boss Global] Começa em 1 minuto! Use @evento para participar.", bc_all, 0xFF0000;
+    announce "[Evento Boss Global] Comeca em 1 minuto! Use @evento para participar.", bc_all, 0xFF0000;
     end;
 
 OnTimer300000:
-    announce "[Evento Boss Global Começou]", bc_all, 0xFF0000;
+    announce "[Evento Boss Global Comecou]", bc_all, 0xFF0000;
     .active = 2;
     donpcevent .npc_name$ + "::OnStartEvent";
     end;
@@ -55,13 +68,35 @@ OnTimer1800000:
 
 OnStartEvent:	
     killmonsterall .map$;
-    mapannounce .map$, "[Evento] O Boss Global apareceu!", bc_all;
-    monster .map$, 50, 50, "Boss Global", 21401, 1, .npc_name$ + "::OnBossDead";    
+    .boss_level = $GlobalBossLevel;
+    .@boss_name$ = "Boss Global Lv. " + .boss_level;
+    .boss_gid = monster(.map$, 50, 50, .@boss_name$, 21401, 1, .npc_name$ + "::OnBossDead");
+
+    // O nivel funciona como multiplicador dos atributos base do monstro.
+    getunitdata .boss_gid, .@status;
+    setunitdata .boss_gid, UMOB_LEVEL, .boss_level;
+    setunitdata .boss_gid, UMOB_MAXHP, min(.@status[UMOB_MAXHP] * .boss_level, 2000000000);
+    setunitdata .boss_gid, UMOB_HP, min(.@status[UMOB_MAXHP] * .boss_level, 2000000000);
+    setunitdata .boss_gid, UMOB_STR, min(.@status[UMOB_STR] * .boss_level, 65535);
+    setunitdata .boss_gid, UMOB_AGI, min(.@status[UMOB_AGI] * .boss_level, 65535);
+    setunitdata .boss_gid, UMOB_VIT, min(.@status[UMOB_VIT] * .boss_level, 65535);
+    setunitdata .boss_gid, UMOB_INT, min(.@status[UMOB_INT] * .boss_level, 65535);
+    setunitdata .boss_gid, UMOB_DEX, min(.@status[UMOB_DEX] * .boss_level, 65535);
+    setunitdata .boss_gid, UMOB_LUK, min(.@status[UMOB_LUK] * .boss_level, 65535);
+    setunitdata .boss_gid, UMOB_ATKMIN, min(.@status[UMOB_ATKMIN] * .boss_level, 65535);
+    setunitdata .boss_gid, UMOB_ATKMAX, min(.@status[UMOB_ATKMAX] * .boss_level, 65535);
+    setunitdata .boss_gid, UMOB_MATKMIN, min(.@status[UMOB_MATKMIN] * .boss_level, 65535);
+    setunitdata .boss_gid, UMOB_MATKMAX, min(.@status[UMOB_MATKMAX] * .boss_level, 65535);
+    setunitdata .boss_gid, UMOB_DEF, min(.@status[UMOB_DEF] * .boss_level, 32767);
+    setunitdata .boss_gid, UMOB_MDEF, min(.@status[UMOB_MDEF] * .boss_level, 32767);
+
+    mapannounce .map$, "[Evento] " + .@boss_name$ + " apareceu!", bc_all;
     end;
 
-OnBossDead:   
-    getitem 9676, 1;
-    announce "[Evento] " + strcharinfo(0) + " recebeu " + getitemname(9676) + " por derrotar o Boss Global!", bc_all, 0xFF0000;
+OnBossDead:
+    .@winner$ = strcharinfo(0);
+    getitem 9679, 1;
+    announce "[Boss Global Lv. " + .boss_level + "] " + .@winner$ + " Finalizou o Boss Global!", bc_all, 0xFF0000;
     enablenpc "Recompensa do Boss";
     getmapunits(BL_PC, .map$, .@units);
     for (.@i = 0; .@i < getarraysize(.@units); .@i++) {
@@ -70,9 +105,11 @@ OnBossDead:
             detachrid;
         }
     }
-    announce "[Evento] O Boss Global foi derrotado!", bc_all, 0xFF0000;
+    $GlobalBossLevel++;
+    announce "[Evento] Boss derrotado! O proximo Boss Global sera Lv. " + $GlobalBossLevel + ".", bc_all, 0xFF0000;
 
-    .active = 0;	
+    .boss_gid = 0;
+    .active = 0;
     stopnpctimer;
     end;
 
@@ -101,7 +138,7 @@ S_EndEvent:
 }
 
 //-----------------------------------------------------------
-//  Comando @evento irá Teleporta para o mapa se o evento ativo
+//  Comando @evento ira Teleporta para o mapa se o evento ativo
 //-----------------------------------------------------------
 -	script	cmd_evento	-1,{
 OnInit:
@@ -118,11 +155,11 @@ OnEnterEvent:
 }
 
 boss_global,50,50,4	script	Recompensa do Boss	10403,{
-    // Mensagem de parabenização
-    mes "[Parabéns!]";
-    mes "Você venceu o Evento Boss Global!";
+    // Mensagem de parabenizacao
+    mes "[Parabens!]";
+    mes "Voce venceu o Evento Boss Global!";
     
-    // Dá a recompensa. Os valores abaixo funcionam como pesos do sorteio.
+    // Da a recompensa. Os valores abaixo funcionam como pesos do sorteio.
     setarray .@rewards[0], 12259,12210,22818,12224,12223,7621,7776,9617,9642,9199, 9198;
     setarray .@chance[0],   30,   20,   10,   10,   10,  10,   5,   5,   5,  10,    10;
 

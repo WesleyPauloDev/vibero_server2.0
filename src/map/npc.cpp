@@ -1462,6 +1462,27 @@ struct timer_event_data {
 	int32 time; //holds total time elapsed for the script from when timer was started to when last time the event triggered.
 };
 
+/// Returns the divisor applied only to NPC OnTimer intervals inside instances.
+/// The script flag is stored in s_instance_data::npc_timer_speed by setinstancevar.
+static int32 npc_instance_timer_divisor(const struct npc_data* nd) {
+	if (nd == nullptr || nd->m < 0)
+		return 1;
+
+	int32 instance_id = map[nd->m].instance_id;
+	if (instance_id <= 0)
+		return 1;
+
+	std::shared_ptr<s_instance_data> idata = util::umap_find(instances, instance_id);
+	if (idata == nullptr || idata->state != INSTANCE_BUSY)
+		return 1;
+
+	return idata->npc_timer_speed == 2 ? 4 : (idata->npc_timer_speed == 1 ? 2 : 1);
+}
+
+static t_tick npc_instance_timer_delay(const struct npc_data* nd, t_tick delay) {
+	return std::max<t_tick>(1, delay / npc_instance_timer_divisor(nd));
+}
+
 /*==========================================
  * triger 'OnTimerXXXX' events
  *------------------------------------------*/
@@ -1504,9 +1525,9 @@ TIMER_FUNC(npc_timerevent){
 	ted->next++;
 	if( nd->u.scr.timeramount > ted->next )
 	{
-		int32 next;
-		next = nd->u.scr.timer_event[ ted->next ].timer - nd->u.scr.timer_event[ ted->next - 1 ].timer;
-		ted->time += next;
+		int32 interval = nd->u.scr.timer_event[ ted->next ].timer - nd->u.scr.timer_event[ ted->next - 1 ].timer;
+		ted->time += interval;
+		t_tick next = npc_instance_timer_delay(nd, interval);
 		if( sd )
 			sd->npc_timer_id = add_timer(tick+next,npc_timerevent,id,(intptr_t)ted);
 		else
@@ -1571,7 +1592,7 @@ int32 npc_timerevent_start(struct npc_data* nd, int32 rid)
 		ted = ers_alloc(timer_event_ers, struct timer_event_data);
 		ted->next = j; // Set event index
 		ted->time = nd->u.scr.timer_event[j].timer;
-		next = nd->u.scr.timer_event[j].timer - nd->u.scr.timer;
+		next = npc_instance_timer_delay(nd, nd->u.scr.timer_event[j].timer - nd->u.scr.timer);
 		if( sd )
 		{
 			ted->rid = sd->id; // Attach only the player if attachplayerrid was used.
@@ -1625,7 +1646,7 @@ int32 npc_timerevent_stop(struct npc_data* nd)
 
 	if( !sd && nd->u.scr.timertick )
 	{
-		nd->u.scr.timer += DIFF_TICK(gettick(),nd->u.scr.timertick); // Set 'timer' to the time that has passed since the beginning of the timers
+		nd->u.scr.timer += DIFF_TICK(gettick(),nd->u.scr.timertick) * npc_instance_timer_divisor(nd); // Convert elapsed wall time to the NPC's normal timeline.
 		nd->u.scr.timertick = 0; // Set 'tick' to zero so that we know it's off.
 	}
 
@@ -1708,7 +1729,7 @@ t_tick npc_gettimerevent_tick(struct npc_data* nd)
 
 	tick = nd->u.scr.timer; // The last time it's active(start, stop or event trigger)
 	if( nd->u.scr.timertick ) // It's a running timer
-		tick += DIFF_TICK(gettick(), nd->u.scr.timertick);
+		tick += DIFF_TICK(gettick(), nd->u.scr.timertick) * npc_instance_timer_divisor(nd);
 
 	return tick;
 }

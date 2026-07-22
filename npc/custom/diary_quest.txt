@@ -102,27 +102,27 @@ OnInit:
 	end;
 }
 
-prontera,147,173,5	script	Mural de Missões	888,{
+prontera,147,173,5	script	Mural de Missoes	888,{
 
-	// IDs fictícios para cada missão
+	// IDs ficticios para cada missao
 	// (coloque IDs unicos acima de 60000)
 	setarray .Diarias[0], 60400, 60401, 60402, 60403, 60404;
 	// 0 = Matar 100 monstros
-	// 1 = Completar 1 instância
+	// 1 = Completar 1 instancia
 	// 2 = Votar no servidor
-	// 3 = Participar de evento diário
-	// 4 = Completar todas as diárias
+	// 3 = Participar de evento diario
+	// 4 = Completar todas as diarias
 
 	setarray .Semanais[0], 60500, 60501, 60502;
 	// 0 = Completar Torre sem Fim
 	// 1 = Participar do Boss Global
 	// 2 = Completar todas as semanais
 
-	mes "[Mural de Missões]";
-	mes "Bem-vindo ao Mural de Missões!";
+	mes "[Mural de Missoes]";
+	mes "Bem-vindo ao Mural de Missoes!";
 	next;
 
-	switch(select("Missões Diárias:Missões Semanais:Sair")) {
+	switch(select("Missoes Diarias:Missoes Semanais:Sair")) {
 		case 1:
 			callsub L_Diarias; 
 			end;
@@ -130,7 +130,7 @@ prontera,147,173,5	script	Mural de Missões	888,{
 			callsub L_Semanais;
 			end;
 		case 3:
-			mes "Até mais!";
+			mes "Ate mais!";
 			close;
 	}
 
@@ -138,7 +138,7 @@ L_Diarias:
 	callfunc("F_DiaryRefreshDaily");
 
 	// Valida voto do dia pela tabela cp_votes, se o painel estiver usando essa tabela.
-	// 1 = pendente, 2 = pode resgatar, 0 = recompensa já recebida hoje.
+	// 1 = pendente, 2 = pode resgatar, 0 = recompensa ja recebida hoje.
 	if (#voto == 1) {
 		.@votes_today = 0;
 		.@last_vote$ = "";
@@ -169,8 +169,8 @@ L_Diarias:
 	if (#todas == 1 && #instancia == 0 && #d_monstros == 0 && #voto == 0 && #evento == 0)
 		#todas = 2;
 
-	mes "[Mural de Missões]";
-	mes "Missões disponíveis hoje:";
+	mes "[Mural de Missoes]";
+	mes "Missoes disponiveis hoje:";
 	next;
 
 	if (#d_monstros == 1) set .@st_monstros$, "^FF0000[Pendente]^000000";
@@ -195,7 +195,7 @@ L_Diarias:
 
 	.@opt = select(
 		"1) Derrote " + #d_monstros_count + "/100 Anubis " + .@st_monstros$,
-		"2) Complete 1 Instância " + .@st_instancia$,
+		"2) Complete 1 Instancia " + .@st_instancia$,
 		"3) Vote no Servidor " + .@st_voto$,
 		"4) Participe de um Evento " + .@st_evento$,
 		"5) Todas as Diarias " + #todas_count + "/4 " + .@st_todas$,
@@ -205,9 +205,9 @@ L_Diarias:
 	switch(.@opt) {
 		case 1:
 			if (#d_monstros == 2) {
-				mes "[Mural de Missões]";
-				mes "Você derrotou 100 Anubis!";
-				mes "Aqui está sua recompensa.";
+				mes "[Mural de Missoes]";
+				mes "Voce derrotou 100 Anubis!";
+				mes "Aqui esta sua recompensa.";
 				if (!callfunc("F_DiaryRewardLog", "daily", "d_monstros", "Derrote 100 Anubis", 12412, 1, #d_monstros_count, 100)) {
 					#d_monstros = 0;
 					mes "Este premio ja consta como recebido no banco.";
@@ -219,15 +219,15 @@ L_Diarias:
 				getitem 12412, 1;
 				close;
 			} else if (#d_monstros == 0) {
-				mes "[Mural de Missões]";
-				mes "Você já recebeu sua recompensa hoje!";
+				mes "[Mural de Missoes]";
+				mes "Voce ja recebeu sua recompensa hoje!";
 				close2;
 				goto L_Diarias;
 			} else {
-				mes "[Mural de Missões]";
-				mes "Missão: Derrote 100 Anubis no mapa de Anubis.";
+				mes "[Mural de Missoes]";
+				mes "Missao: Derrote 100 Anubis no mapa de Anubis.";
 				mes "Deseja ir ao mapa agora?";
-				if (select("Sim:Não") == 1) {
+				if (select("Sim:Nao") == 1) {
 					close2;
 					warp "inter01",220,359;
 				}
@@ -237,9 +237,9 @@ L_Diarias:
 
 		case 2:
 			if (#instancia == 2) {
-				mes "[Mural de Missões]";
-				mes "Parabéns por completar uma instância!";
-				mes "Aqui está sua recompensa.";
+				mes "[Mural de Missoes]";
+				mes "Parabens por completar uma instancia!";
+				mes "Aqui esta sua recompensa.";
 				if (!callfunc("F_DiaryRewardLog", "daily", "instancia", "Complete 1 Instancia", 22818, 2, 1, 1)) {
 					#instancia = 0;
 					mes "Este premio ja consta como recebido no banco.";
@@ -251,13 +251,13 @@ L_Diarias:
 				getitem 22818, 2;
 				close;
 			} else if (#instancia == 0) {
-				mes "[Mural de Missões]";
-				mes "Você já recebeu sua recompensa hoje!";
+				mes "[Mural de Missoes]";
+				mes "Voce ja recebeu sua recompensa hoje!";
 				close2;
 				goto L_Diarias;
 			} else {
-				mes "[Mural de Missões]";
-				mes "Missão: Complete qualquer instância do jogo.";
+				mes "[Mural de Missoes]";
+				mes "Missao: Complete qualquer instancia do jogo.";
 				mes "Entre em grupo para facilitar!";
 				close;
 			}
@@ -265,9 +265,9 @@ L_Diarias:
 
 		case 3:
 			if (#voto == 2) {
-				mes "[Mural de Missões]";
+				mes "[Mural de Missoes]";
 				mes "Obrigado por votar no servidor!";
-				mes "Aqui está sua recompensa.";
+				mes "Aqui esta sua recompensa.";
 				if (!callfunc("F_DiaryRewardLog", "daily", "voto", "Vote no Servidor", 607, 50, 1, 1)) {
 					#voto = 0;
 					mes "Este premio ja consta como recebido no banco.";
@@ -280,24 +280,24 @@ L_Diarias:
 				callfunc("F_BattlePassRegisterDaily", "vote");
 				close;
 			} else if (#voto == 0) {
-				mes "[Mural de Missões]";
-				mes "Você já recebeu sua recompensa hoje!";
+				mes "[Mural de Missoes]";
+				mes "Voce ja recebeu sua recompensa hoje!";
 				close2;
 				goto L_Diarias;
 			} else {
-				mes "[Mural de Missões]";
-				mes "Missão: Vote no servidor pelo nosso painel de controle.";
-				mes "A missão procura voto de hoje por account_id ou username.";
+				mes "[Mural de Missoes]";
+				mes "Missao: Vote no servidor pelo nosso painel de controle.";
+				mes "A missao procura voto de hoje por account_id ou username.";
 				if (.@last_vote$ != "")
-					mes "Último voto encontrado: " + .@last_vote$;
+					mes "Ultimo voto encontrado: " + .@last_vote$;
 				close;
 			}
 			break;
 
 		case 4:
 			if (#evento == 2) {
-				mes "[Mural de Missões]";
-				mes "Você participou de um evento diário!";
+				mes "[Mural de Missoes]";
+				mes "Voce participou de um evento diario!";
 				mes "Receba sua recompensa.";
 				if (!callfunc("F_DiaryRewardLog", "daily", "evento", "Participe de um Evento", 7621, 5, 1, 1)) {
 					#evento = 0;
@@ -310,13 +310,13 @@ L_Diarias:
 				getitem 7621, 5;
 				close;
 			} else if (#evento == 0) {
-				mes "[Mural de Missões]";
-				mes "Você já recebeu sua recompensa hoje!";
+				mes "[Mural de Missoes]";
+				mes "Voce ja recebeu sua recompensa hoje!";
 				close2;
 				goto L_Diarias;
 			} else {
-				mes "[Mural de Missões]";
-				mes "Missão: Participe de qualquer evento diário.";
+				mes "[Mural de Missoes]";
+				mes "Missao: Participe de qualquer evento diario.";
 				mes "Eventos como Battle Royale, etc.";
 				close;
 			}
@@ -324,8 +324,8 @@ L_Diarias:
 
 		case 5:
 			if (#todas == 2) {
-				mes "[Mural de Missões]";
-				mes "Incrível! Você completou todas as missões diárias.";
+				mes "[Mural de Missoes]";
+				mes "Incrivel! Voce completou todas as missoes diarias.";
 				mes "Recompensa especial!";
 				if (!callfunc("F_DiaryRewardLog", "daily", "todas", "Todas as Diarias", 12223, 2, #todas_count, 4)) {
 					#todas = 0;
@@ -336,27 +336,27 @@ L_Diarias:
 				getitem 12223, 2;
 				close;
 			} else if (#todas == 0) {
-				mes "[Mural de Missões]";
-				mes "Você já recebeu sua recompensa hoje!";
+				mes "[Mural de Missoes]";
+				mes "Voce ja recebeu sua recompensa hoje!";
 				close2;
 				goto L_Diarias;
 			} else {
-				mes "[Mural de Missões]";
-				mes "Missão: Conclua todas as diárias para resgatar sua recompensa.";
+				mes "[Mural de Missoes]";
+				mes "Missao: Conclua todas as diarias para resgatar sua recompensa.";
 				close;
 			}
 			break;
 
 		case 6:
-			mes "Até mais!";
+			mes "Ate mais!";
 			close;
 	}
 
 L_Semanais:
 	callfunc("F_DiaryRefreshWeekly");
 
-	mes "[Mural de Missões]";
-	mes "Missões semanais:";
+	mes "[Mural de Missoes]";
+	mes "Missoes semanais:";
 	next;
 
 	if (#todas_semanais == 1 && #torre == 0 && #boss == 0)
@@ -384,9 +384,9 @@ L_Semanais:
 	switch(.@opt) {
 		case 1:
 			if (#torre == 2) {
-				mes "[Mural de Missões]";
-				mes "Parabéns! Você já completou a Torre sem Fim.";
-				mes "Aqui está sua recompensa!";
+				mes "[Mural de Missoes]";
+				mes "Parabens! Voce ja completou a Torre sem Fim.";
+				mes "Aqui esta sua recompensa!";
 				if (!callfunc("F_DiaryRewardLog", "weekly", "torre", "Torre Sem Fim", 12223, 5, 1, 1)) {
 					#torre = 0;
 					mes "Este premio ja consta como recebido no banco.";
@@ -398,22 +398,22 @@ L_Semanais:
 				getitem 12223, 5;
 				close;
 			} else if (#torre == 0) {
-				mes "[Mural de Missões]";
-				mes "Você já recebeu sua recompensa esta semana!";
+				mes "[Mural de Missoes]";
+				mes "Voce ja recebeu sua recompensa esta semana!";
 				close2;
 				goto L_Semanais;
 			} else {
-				mes "[Mural de Missões]";
-				mes "Missão: Complete a Torre sem Fim.";
-				mes "Entre na instância e derrote os desafios até o final.";
+				mes "[Mural de Missoes]";
+				mes "Missao: Complete a Torre sem Fim.";
+				mes "Entre na instancia e derrote os desafios ate o final.";
 				close;
 			}
 			break;
 
 		case 2:
 			if (#boss == 2) {
-				mes "[Mural de Missões]";
-				mes "Ótimo! Você participou do Boss Global.";
+				mes "[Mural de Missoes]";
+				mes "Otimo! Voce participou do Boss Global.";
 				mes "Receba sua recompensa!";
 				if (!callfunc("F_DiaryRewardLog", "weekly", "boss", "Boss Global", 12224, 5, 1, 1)) {
 					#boss = 0;
@@ -426,13 +426,13 @@ L_Semanais:
 				getitem 12224, 5;
 				close;
 			} else if (#boss == 0) {
-				mes "[Mural de Missões]";
-				mes "Você já recebeu sua recompensa esta semana!";
+				mes "[Mural de Missoes]";
+				mes "Voce ja recebeu sua recompensa esta semana!";
 				close2;
 				goto L_Semanais;
 			} else {
-				mes "[Mural de Missões]";
-				mes "Missão: Participe do Boss Global.";
+				mes "[Mural de Missoes]";
+				mes "Missao: Participe do Boss Global.";
 				mes "Entre no evento especial e contribua na luta.";
 				close;
 			}
@@ -440,9 +440,9 @@ L_Semanais:
 
 		case 3:
 			if (#todas_semanais == 2) {
-				mes "[Mural de Missões]";
-				mes "Incrível! Você concluiu todas as missões semanais.";
-				mes "Recompensa épica para você!";
+				mes "[Mural de Missoes]";
+				mes "Incrivel! Voce concluiu todas as missoes semanais.";
+				mes "Recompensa epica para voce!";
 				if (!callfunc("F_DiaryRewardLog", "weekly", "todas_semanais", "Todas Semanais", 12411, 2, #semanal_count, 2)) {
 					#todas_semanais = 0;
 					mes "Este premio ja consta como recebido no banco.";
@@ -452,20 +452,20 @@ L_Semanais:
 				getitem 12411, 2;
 				close;
 			} else if (#todas_semanais == 0) {
-				mes "[Mural de Missões]";
-				mes "Você já recebeu sua recompensa esta semana!";
+				mes "[Mural de Missoes]";
+				mes "Voce ja recebeu sua recompensa esta semana!";
 				close2;
 				goto L_Semanais;
 			} else {
-				mes "[Mural de Missões]";
-				mes "Missão: Concluir todas as semanais.";
+				mes "[Mural de Missoes]";
+				mes "Missao: Concluir todas as semanais.";
 				mes "Finalize Torre sem Fim e Boss Global para liberar esta.";
 				close;
 			}
 			break;
 
 		case 4:
-			mes "Até mais!";
+			mes "Ate mais!";
 			close;
 	}
 }

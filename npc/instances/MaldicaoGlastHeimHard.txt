@@ -4,6 +4,55 @@
 //= Wrapper e configuracoes do modo hard custom da OGH
 //============================================================
 
+// Velocidade compartilhada das falas da instancia:
+// @speedinstance 0 = normal, 1 = 2x, 2 = 4x.
+-	script	InstanceSpeechSpeed#OGH	-1,{
+OnInit:
+	bindatcmd "speedinstance", strnpcinfo(3) + "::OnAtcommand", 0, 99;
+	end;
+
+OnAtcommand:
+	// Sem modo, o motor consulta o mapa atual do jogador. Isso impede o uso
+	// fora da instancia e funciona com instancias de char, grupo, guilda ou cla.
+	.@iid = instance_id();
+	if (.@iid <= 0) {
+		dispbottom "[Instancia] Este comando so pode ser usado dentro de uma instancia.";
+		end;
+	}
+	if (getcharid(1) <= 0 || !is_party_leader()) {
+		dispbottom "[Instancia] Somente o lider do grupo pode alterar a velocidade.";
+		end;
+	}
+
+	if (.@atcmd_numparameters == 0) {
+		.@speed = getinstancevar('speedinstance, .@iid);
+		dispbottom "[Instancia] Velocidade atual das falas: " + (.@speed == 1 ? "2x" : (.@speed == 2 ? "4x" : "normal")) + ".";
+		dispbottom "Uso: @speedinstance 0 (normal), 1 (2x) ou 2 (4x).";
+		end;
+	}
+
+	.@speed = atoi(.@atcmd_parameters$[0]);
+	if (.@atcmd_numparameters != 1 || .@speed < 0 || .@speed > 2 || .@atcmd_parameters$[0] != sprintf("%d", .@speed)) {
+		dispbottom "[Instancia] Flag invalida. Use 0, 1 ou 2.";
+		end;
+	}
+
+	setinstancevar 'speedinstance, .@speed, .@iid;
+	.@label$ = (.@speed == 1 ? "2x" : (.@speed == 2 ? "4x" : "normal"));
+	mapannounce strcharinfo(3), "[Instancia] " + strcharinfo(0) + " alterou a velocidade das falas para " + .@label$ + ".", bc_map, 0x66CCFF;
+	end;
+}
+
+function	script	F_OGH_SpeechSpeed	{
+	.@iid = instance_id();
+	if (.@iid <= 0)
+		return 0;
+	.@speed = getinstancevar('speedinstance, .@iid);
+	if (.@speed < 0 || .@speed > 2)
+		return 0;
+	return .@speed;
+}
+
 function	script	F_OGH_IsHardMode	{
 	.@iid = instance_id(IM_PARTY);
 	if (.@iid > 0 && $OGH_HARD_MODE[.@iid])

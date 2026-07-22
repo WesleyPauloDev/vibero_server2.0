@@ -69,6 +69,7 @@ struct s_instance_data {
 	int32 idle_timer; ///< Idle timer ID
 	bool nonpc;
 	bool nomapflag;
+	uint8 npc_timer_speed; ///< 0 normal, 1 doubles and 2 quadruples OnTimer speed
 	struct reg_db regs; ///< Instance variables for scripts
 	std::vector<s_instance_map> map; ///< Array of maps in instance
 
@@ -83,6 +84,7 @@ struct s_instance_data {
 		idle_timer(INVALID_TIMER),
 		nonpc(false),
 		nomapflag(false),
+		npc_timer_speed(0),
 		regs(),
 		map() { }
 };

@@ -20541,6 +20541,34 @@ BUILDIN_FUNC(unitskillusepos)
 
 // <--- [zBuffer] List of unit control commands
 
+/// Returns the speed divisor for delays executed by a script inside an instance.
+static int32 script_instance_delay_divisor(struct script_state* st) {
+	int32 instance_id = 0;
+	struct block_list* bl = map_id2bl(st->oid);
+
+	if (bl != nullptr && bl->m >= 0)
+		instance_id = map[bl->m].instance_id;
+
+	if (instance_id <= 0) {
+		bl = map_id2bl(st->rid);
+		if (bl != nullptr && bl->m >= 0)
+			instance_id = map[bl->m].instance_id;
+	}
+
+	if (instance_id <= 0)
+		return 1;
+
+	std::shared_ptr<s_instance_data> idata = util::umap_find(instances, instance_id);
+	if (idata == nullptr || idata->state != INSTANCE_BUSY)
+		return 1;
+
+	return idata->npc_timer_speed == 2 ? 4 : (idata->npc_timer_speed == 1 ? 2 : 1);
+}
+
+static int32 script_instance_delay(struct script_state* st, int32 ticks) {
+	return std::max<int32>(1, ticks / script_instance_delay_divisor(st));
+}
+
 /// Pauses the execution of the script, detaching the player
 ///
 /// sleep <milli seconds>;
@@ -20556,6 +20584,7 @@ BUILDIN_FUNC(sleep)
 			ShowError("buildin_sleep: negative or zero amount('%d') of milli seconds is not supported\n", ticks);
 			return SCRIPT_CMD_FAILURE;
 		}
+		ticks = script_instance_delay(st, ticks);
 
 		// detach the player
 		script_detach_rid(st);
@@ -20589,6 +20618,7 @@ BUILDIN_FUNC(sleep2)
 			ShowError( "buildin_sleep2: negative or zero amount('%d') of milli seconds is not supported\n", ticks );
 			return SCRIPT_CMD_FAILURE;
 		}
+		ticks = script_instance_delay(st, ticks);
 
 		if (map_id2bl(st->rid) == nullptr) {
 			ShowError( "buildin_sleep2: no unit is attached\n" );
@@ -21842,6 +21872,13 @@ int32 script_instancegetid(struct script_state* st, e_instance_mode mode)
 
 		if (nd && nd->instance_id > 0)
 			instance_id = nd->instance_id;
+		else {
+			// Script commands bound to a global NPC still have an attached player.
+			// In that case, resolve the instance from the player's current map.
+			map_session_data *sd = map_id2sd(st->rid);
+			if (sd && sd->m >= 0)
+				instance_id = map[sd->m].instance_id;
+		}
 	} else {
 		map_session_data *sd = map_id2sd(st->rid);
 
@@ -26826,8 +26863,12 @@ BUILDIN_FUNC(setinstancevar)
 
 	if( is_string_variable(name) )
 		set_reg_str( st, sd, reference_getuid(data), name, script_getstr( st, 3 ), &im->regs );
-	else
-		set_reg_num( st, sd, reference_getuid(data), name, script_getnum64( st, 3 ), &im->regs );
+	else {
+		int64 value = script_getnum64(st, 3);
+		set_reg_num( st, sd, reference_getuid(data), name, value, &im->regs );
+		if (strcmp(name, "'speedinstance") == 0)
+			im->npc_timer_speed = static_cast<uint8>(cap_value(value, 0, 2));
+	}
 
 	return SCRIPT_CMD_SUCCESS;
 }
