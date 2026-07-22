@@ -9,10 +9,10 @@ function	script	CustomMapDrop	{
         // mantendo uma taxa enviada como 20 = 20% real.
         .@bonus = max(get_drop_bonus(1018, 518) / 2, 100);
 
-        .@drop_final = .@rates * .@bonus;        
-        if (rand(10000) < .@drop_final) {
-            getitem .@items, 1;
-        }
+		.@drop_final = .@rates * .@bonus;
+		if (rand(10000) < .@drop_final) {
+			partylootitem .@items, 1, .@drop_final;
+		}
         
     }
 

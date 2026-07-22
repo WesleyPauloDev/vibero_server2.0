@@ -159,10 +159,12 @@ function	script	F_PartyNearbyKillReward	{
 			if (.@rep_message$ != "")
 				dispbottom .@rep_message$;
 		}
-		if (.@item_id > 0 && .@item_rate > 0)
-			callfunc("CustomMapDrop", .@map$, .@item_id, .@item_rate);
 	}
 
 	attachrid(.@killer_aid);
+	// Uma unica rolagem por monstro morto. A entrega respeita autoloot e as
+	// opcoes nativas de divisao de itens do grupo.
+	if (.@item_id > 0 && .@item_rate > 0)
+		callfunc("CustomMapDrop", .@map$, .@item_id, .@item_rate);
 	return 1;
 }

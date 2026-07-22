@@ -10431,6 +10431,52 @@ BUILDIN_FUNC(getskilllv)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/*==========================================
+ * partylootitem <item id>,<amount>,<drop rate>;
+ *
+ * Delivers one script-generated mob reward using the same party item-share
+ * path as native autoloot. Without autoloot, creates one protected floor item
+ * at the killer's position instead of duplicating it for party members.
+ *------------------------------------------*/
+BUILDIN_FUNC(partylootitem)
+{
+	map_session_data* sd;
+
+	if (!script_rid2sd(sd))
+		return SCRIPT_CMD_FAILURE;
+
+	t_itemid nameid = static_cast<t_itemid>(script_getnum(st, 2));
+	int32 amount = script_getnum(st, 3);
+	int32 drop_rate = cap_value(script_getnum(st, 4), 1, 10000);
+	std::shared_ptr<item_data> id = item_db.find(nameid);
+
+	if (id == nullptr || amount <= 0) {
+		ShowError("buildin_partylootitem: Invalid item %u or amount %d.\n", nameid, amount);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	struct item it = {};
+	it.nameid = nameid;
+	it.amount = static_cast<int16>(amount);
+	it.identify = 1;
+	it.bound = BOUND_NONE;
+
+	bool autoloot = (drop_rate <= sd->state.autoloot || pc_isautolooting(sd, nameid));
+	if (autoloot) {
+		struct party_data* p = party_search(sd->status.party_id);
+		if (party_share_loot(p, sd, &it, sd->status.char_id) != ADDITEM_SUCCESS) {
+			clif_additem(sd, 0, 0, ADDITEM_OVERWEIGHT);
+			return SCRIPT_CMD_FAILURE;
+		}
+	} else {
+		if (map_addflooritem(&it, amount, sd->m, sd->x, sd->y,
+			sd->status.char_id, 0, 0, 4, 0, true, DIR_CENTER, BL_CHAR | BL_PET) == 0)
+			return SCRIPT_CMD_FAILURE;
+	}
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
 /// Returns the current cooldown of a player skill after item bonuses.
 ///
 /// getskillcooldown(<skill id>{,<skill level>}) -> <cooldown in milliseconds>
@@ -28369,6 +28415,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(inarray,"rv"),
 	BUILDIN_DEF(countinarray,"rr"),
 	BUILDIN_DEF(getitem,"vi?"),
+	BUILDIN_DEF(partylootitem,"iii"),
 	BUILDIN_DEF(rentitem,"vi?"),
 	BUILDIN_DEF(rentitem2,"viiiiiiii?"),
 	BUILDIN_DEF(getitem2,"viiiiiiii?"),
