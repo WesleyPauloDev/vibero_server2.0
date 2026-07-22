@@ -168,6 +168,9 @@ dotnet run --project tools/VibeGuard/VibeGuard.Manifest -- launch `
 O comando `launch` nao injeta DLL nem enumera processos. Depois de verificar os
 arquivos aprovados e iniciar o executavel, ele permanece ativo apenas para enviar
 o heartbeat da sessao enquanto acompanha localmente o novo processo `Ragexe`.
+Ao abrir a sessao, o launcher tolera oscilacoes breves com tres tentativas de ate
+oito segundos. Se todas falharem, a janela mostra o motivo e oferece o botao
+`Tentar novamente`, sem ignorar a exigencia de protecao.
 
 ## Auditoria defensiva do servidor
 

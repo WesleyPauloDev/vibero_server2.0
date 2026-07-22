@@ -9,6 +9,7 @@ namespace VibeGuard.Manifest;
 internal sealed class ObservationSessionClient : IAsyncDisposable
 {
     private const string ClientVersion = "1.0.0";
+    private const int OpenAttempts = 3;
     private readonly HttpClient client;
     private readonly string token;
     private readonly int heartbeatSeconds;
@@ -44,20 +45,48 @@ internal sealed class ObservationSessionClient : IAsyncDisposable
             var client = new HttpClient(handler)
             {
                 BaseAddress = baseAddress,
-                Timeout = TimeSpan.FromSeconds(3)
+                Timeout = TimeSpan.FromSeconds(8)
             };
 
             var manifestBytes = await File.ReadAllBytesAsync(Path.GetFullPath(manifestPath));
             var manifestHash = Convert.ToHexString(SHA256.HashData(manifestBytes)).ToLowerInvariant();
-            using var response = await client.PostAsJsonAsync(
-                "vibeguard/v1/session/open",
-                new
+            var requestBody = new
+            {
+                protocolVersion = 1,
+                clientVersion = ClientVersion,
+                manifestSha256 = manifestHash
+            };
+            HttpResponseMessage? openResponse = null;
+            for (var attempt = 1; attempt <= OpenAttempts; ++attempt)
+            {
+                try
                 {
-                    protocolVersion = 1,
-                    clientVersion = ClientVersion,
-                    manifestSha256 = manifestHash
-                },
-                JsonSupport.Options);
+                    openResponse = await client.PostAsJsonAsync(
+                        "vibeguard/v1/session/open",
+                        requestBody,
+                        JsonSupport.Options);
+                    var statusCode = (int)openResponse.StatusCode;
+                    if (openResponse.IsSuccessStatusCode
+                        || (statusCode < 500 && statusCode is not 408 and not 429))
+                        break;
+                    if (attempt < OpenAttempts)
+                    {
+                        openResponse.Dispose();
+                        openResponse = null;
+                        Console.WriteLine($"Conexao temporariamente indisponivel. Nova tentativa {attempt + 1}/{OpenAttempts}...");
+                        await Task.Delay(TimeSpan.FromSeconds(attempt));
+                    }
+                }
+                catch (Exception exception) when (
+                    attempt < OpenAttempts
+                    && (exception is HttpRequestException or TaskCanceledException))
+                {
+                    Console.WriteLine($"Conexao temporariamente indisponivel. Nova tentativa {attempt + 1}/{OpenAttempts}...");
+                    await Task.Delay(TimeSpan.FromSeconds(attempt));
+                }
+            }
+            using var response = openResponse
+                ?? throw new HttpRequestException("nao houve resposta do servidor apos tres tentativas");
 
             if (!response.IsSuccessStatusCode)
                 throw new InvalidOperationException($"servidor retornou HTTP {(int)response.StatusCode}");
@@ -84,7 +113,6 @@ internal sealed class ObservationSessionClient : IAsyncDisposable
             or JsonException)
         {
             Console.Error.WriteLine($"Observacao indisponivel: {exception.Message}");
-            Console.Error.WriteLine("Modo observacao: o jogo nao sera bloqueado.");
             return null;
         }
     }

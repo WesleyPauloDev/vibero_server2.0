@@ -16,6 +16,7 @@ internal sealed class GuardWindow : Form
     private readonly System.Windows.Forms.Timer completedProgressHideTimer;
     private bool launchRunning;
     private bool allowClose;
+    private string? lastError;
 
     public int ExitCode { get; private set; } = 1;
 
@@ -85,7 +86,21 @@ internal sealed class GuardWindow : Form
         };
         hideButton = CreateButton("Ocultar", new Point(398, 338), new Size(78, 30));
         hideButton.Enabled = false;
-        hideButton.Click += (_, _) => HideToTray();
+        hideButton.Click += async (_, _) =>
+        {
+            if (launchRunning)
+            {
+                HideToTray();
+                return;
+            }
+            hideButton.Enabled = false;
+            lastError = null;
+            statusLabel.ForeColor = Color.FromArgb(89, 220, 151);
+            statusLabel.Text = "Preparando nova tentativa...";
+            detailLabel.Text = "Verificando novamente a conexao com o servidor.";
+            progressBar.Style = ProgressBarStyle.Marquee;
+            await StartGuardAsync();
+        };
         var privacyLabel = new Label
         {
             AutoSize = true,
@@ -224,7 +239,10 @@ internal sealed class GuardWindow : Form
             statusLabel.ForeColor = Color.FromArgb(248, 113, 113);
             progressBar.Style = ProgressBarStyle.Continuous;
             progressBar.Value = 0;
-            hideButton.Text = "Fechar";
+            if (!string.IsNullOrWhiteSpace(lastError))
+                detailLabel.Text = lastError;
+            bindingLabel.Text = "A conexao segura nao foi concluida";
+            hideButton.Text = "Tentar novamente";
             hideButton.Enabled = true;
             autoHideTimer.Stop();
         });
@@ -234,6 +252,10 @@ internal sealed class GuardWindow : Form
     {
         if (string.IsNullOrWhiteSpace(line))
             return;
+        if (isError
+            || line.StartsWith("[ALTERADO]", StringComparison.Ordinal)
+            || line.StartsWith("[AUSENTE]", StringComparison.Ordinal))
+            lastError = line;
         RunOnUi(() =>
         {
             if (line.StartsWith("[OK]", StringComparison.Ordinal))
@@ -250,6 +272,11 @@ internal sealed class GuardWindow : Form
             {
                 statusLabel.Text = "Sessao autenticada";
                 detailLabel.Text = "Conexao segura estabelecida com o servidor.";
+            }
+            else if (line.StartsWith("Conexao temporariamente indisponivel", StringComparison.OrdinalIgnoreCase))
+            {
+                statusLabel.Text = "Reconectando ao servidor...";
+                detailLabel.Text = line;
             }
             else if (line.StartsWith("Conta vinculada automaticamente apos", StringComparison.OrdinalIgnoreCase))
             {
