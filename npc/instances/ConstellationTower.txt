@@ -408,7 +408,10 @@ function	script	CT_FinalAward	{
 	makeitem 1000372,1,'map_3$,.@x+rand(-3,3),.@y+rand(-3,3);	
 }
 	
-	for(.@i=0;.@i<'sum_pt/100+1;.@i++){		
+	// O modo 50 sempre libera quatro baus. O modo 75 continua escalando
+	// normalmente conforme a pontuacao do desafio.
+	.@chest_count = ('boss_floor_lv == 50 ? 4 : 'sum_pt/100+1);
+	for(.@i=0;.@i<.@chest_count;.@i++){
 		enablenpc instance_npcname("#win_"+(1+.@i));
 	}
 	return;
@@ -2900,13 +2903,21 @@ OnInstanceInit:
 	setarray .@k,0;
 	setarray .@k1,0;
 	setarray .@k2,0;
-	for(.@i= 0;.@i<'sum_pt/100+3;.@i++){
+	// No andar 50 cada um dos quatro baus entrega uma porcao reduzida dos
+	// materiais disponiveis nos baus do andar 75.
+	.@reward_count = ('boss_floor_lv == 50 ? 5 : 'sum_pt/100+3);
+	for(.@i= 0;.@i<.@reward_count;.@i++){
 	makeitem rand(1000442,1000447),1,'map_3$,.@x+rand(-3,3),.@y+rand(-3,3);	
 	}
 
-	for(.@i= 0;.@i<'sum_pt/100+3;.@i++){
+	for(.@i= 0;.@i<.@reward_count;.@i++){
 	makeitem rand(1000398,1000403),1,'map_3$,.@x+rand(-3,3),.@y+rand(-3,3);	
 	
+	}
+
+	if ('boss_floor_lv == 50) {
+		makeitem 1000373,rand(1,2),'map_3$,.@x+rand(-3,3),.@y+rand(-3,3);
+		makeitem 1000372,rand(2,4),'map_3$,.@x+rand(-3,3),.@y+rand(-3,3);
 	}
 	
 	
@@ -2942,5 +2953,3 @@ OnInstanceInit:
 3@ch_t,161,76,4	duplicate(#win_1)	#win_10	10405
 
 3@ch_t,155,85,4	duplicate(#win_1)	#win_11	10403 
-
-
