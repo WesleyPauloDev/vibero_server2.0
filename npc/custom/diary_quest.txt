@@ -73,6 +73,18 @@ function	script	F_DiaryRewardLog	{
 	return 1;
 }
 
+function	script	F_DiaryCheckReward	{
+	.@item_id = getarg(0);
+	.@amount = getarg(1);
+	if (!checkweight(.@item_id, .@amount)) {
+		mes "[Mural de Missoes]";
+		mes "Nao ha espaco ou capacidade de peso suficiente para receber a recompensa.";
+		mes "Libere espaco no inventario e tente novamente.";
+		return 0;
+	}
+	return 1;
+}
+
 -	script	Diary_Quest_SQL	-1,{
 OnInit:
 	query_logsql(
@@ -208,6 +220,8 @@ L_Diarias:
 				mes "[Mural de Missoes]";
 				mes "Voce derrotou 100 Anubis!";
 				mes "Aqui esta sua recompensa.";
+				if (!callfunc("F_DiaryCheckReward", 12412, 1))
+					close;
 				if (!callfunc("F_DiaryRewardLog", "daily", "d_monstros", "Derrote 100 Anubis", 12412, 1, #d_monstros_count, 100)) {
 					#d_monstros = 0;
 					mes "Este premio ja consta como recebido no banco.";
@@ -240,6 +254,8 @@ L_Diarias:
 				mes "[Mural de Missoes]";
 				mes "Parabens por completar uma instancia!";
 				mes "Aqui esta sua recompensa.";
+				if (!callfunc("F_DiaryCheckReward", 22818, 2))
+					close;
 				if (!callfunc("F_DiaryRewardLog", "daily", "instancia", "Complete 1 Instancia", 22818, 2, 1, 1)) {
 					#instancia = 0;
 					mes "Este premio ja consta como recebido no banco.";
@@ -268,6 +284,8 @@ L_Diarias:
 				mes "[Mural de Missoes]";
 				mes "Obrigado por votar no servidor!";
 				mes "Aqui esta sua recompensa.";
+				if (!callfunc("F_DiaryCheckReward", 607, 50))
+					close;
 				if (!callfunc("F_DiaryRewardLog", "daily", "voto", "Vote no Servidor", 607, 50, 1, 1)) {
 					#voto = 0;
 					mes "Este premio ja consta como recebido no banco.";
@@ -299,7 +317,9 @@ L_Diarias:
 				mes "[Mural de Missoes]";
 				mes "Voce participou de um evento diario!";
 				mes "Receba sua recompensa.";
-				if (!callfunc("F_DiaryRewardLog", "daily", "evento", "Participe de um Evento", 7621, 5, 1, 1)) {
+				if (!callfunc("F_DiaryCheckReward", 9672, 5))
+					close;
+				if (!callfunc("F_DiaryRewardLog", "daily", "evento", "Participe de um Evento", 9672, 5, 1, 1)) {
 					#evento = 0;
 					mes "Este premio ja consta como recebido no banco.";
 					close;
@@ -307,7 +327,7 @@ L_Diarias:
 				#evento = 0;
 				if (#todas_count < 4)
 					#todas_count++;
-				getitem 7621, 5;
+				getitem 9672, 5;
 				close;
 			} else if (#evento == 0) {
 				mes "[Mural de Missoes]";
@@ -327,6 +347,8 @@ L_Diarias:
 				mes "[Mural de Missoes]";
 				mes "Incrivel! Voce completou todas as missoes diarias.";
 				mes "Recompensa especial!";
+				if (!callfunc("F_DiaryCheckReward", 12223, 2))
+					close;
 				if (!callfunc("F_DiaryRewardLog", "daily", "todas", "Todas as Diarias", 12223, 2, #todas_count, 4)) {
 					#todas = 0;
 					mes "Este premio ja consta como recebido no banco.";
@@ -387,6 +409,8 @@ L_Semanais:
 				mes "[Mural de Missoes]";
 				mes "Parabens! Voce ja completou a Torre sem Fim.";
 				mes "Aqui esta sua recompensa!";
+				if (!callfunc("F_DiaryCheckReward", 12223, 5))
+					close;
 				if (!callfunc("F_DiaryRewardLog", "weekly", "torre", "Torre Sem Fim", 12223, 5, 1, 1)) {
 					#torre = 0;
 					mes "Este premio ja consta como recebido no banco.";
@@ -415,6 +439,8 @@ L_Semanais:
 				mes "[Mural de Missoes]";
 				mes "Otimo! Voce participou do Boss Global.";
 				mes "Receba sua recompensa!";
+				if (!callfunc("F_DiaryCheckReward", 12224, 5))
+					close;
 				if (!callfunc("F_DiaryRewardLog", "weekly", "boss", "Boss Global", 12224, 5, 1, 1)) {
 					#boss = 0;
 					mes "Este premio ja consta como recebido no banco.";
@@ -443,6 +469,8 @@ L_Semanais:
 				mes "[Mural de Missoes]";
 				mes "Incrivel! Voce concluiu todas as missoes semanais.";
 				mes "Recompensa epica para voce!";
+				if (!callfunc("F_DiaryCheckReward", 12411, 2))
+					close;
 				if (!callfunc("F_DiaryRewardLog", "weekly", "todas_semanais", "Todas Semanais", 12411, 2, #semanal_count, 2)) {
 					#todas_semanais = 0;
 					mes "Este premio ja consta como recebido no banco.";
