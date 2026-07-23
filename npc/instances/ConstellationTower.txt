@@ -2022,6 +2022,11 @@ function	script	boss_skill	{
 3@ch_t,2,3,4	script	#heal_boss	-1,{
 end;
 OnTimer1000:
+	// No desafio do andar 75, Betelgeuse nao possui cura automatica.
+	if ('boss_floor_lv == 75) {
+		stopnpctimer;
+		end;
+	}
 	if(unitexists('BossID)){
 	
 		getunitdata 'BossID,.@arr;
