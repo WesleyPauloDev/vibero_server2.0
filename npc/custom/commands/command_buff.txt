@@ -12,17 +12,18 @@ OnAtcommand:
 		// Verifica tempo restante
 		if (@last_buff_time + .@delay > gettimetick(2)) {
 			.@remaining = (@last_buff_time + .@delay) - gettimetick(2);
-			message strcharinfo(0), "Você poderá usar novamente em " + .@remaining + " segundo(s).";
+			message strcharinfo(0), "Voce podera usar novamente em " + .@remaining + " segundo(s).";
 			end;
 		}
 
-		// Atualiza o tempo do último uso
+		// Atualiza o tempo do ultimo uso
 		@last_buff_time = gettimetick(2);
+		repairall;
 		doevent "Healer::OnBuffOnly";
 		end;
 	}
 	
-    message strcharinfo(0), "Este comando é exclusivo para jogadores VIP.";
+    message strcharinfo(0), "Este comando e exclusivo para jogadores VIP.";
 
 	end;
 }
