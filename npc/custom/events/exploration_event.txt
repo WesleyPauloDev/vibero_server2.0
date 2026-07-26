@@ -243,7 +243,14 @@ function	script	F_Fenda_Start	{
 	}
 
 	for (.@i = 0; .@i < 6; ++.@i)
-		enablenpc instance_npcname($Fenda_PortalNpc$[.@i]);
+		disablenpc instance_npcname($Fenda_PortalNpc$[.@i]);
+	for (.@i = 0; .@i < 3; ++.@i) {
+		.@source = 'Fenda_MapSource[.@i];
+		enablenpc instance_npcname($Fenda_PortalNpc$[.@source]);
+		mapannounce 'Fenda_Map$[.@i],
+			"[Fenda] Portal para a proxima area em " + $Fenda_AllPortalX[.@source] + "," + $Fenda_AllPortalY[.@source] + ".",
+			bc_map;
+	}
 
 	callfunc "F_Fenda_Announce", "[Fenda] A expedicao foi aberta para este grupo.";
 	return;
@@ -283,6 +290,8 @@ function	script	F_Fenda_EntryPortal	{
 	}
 
 	dispbottom "[Fenda] Primeiro mapa sorteado: " + 'Fenda_EntryMap$ + ".";
+	.@source = 'Fenda_MapSource[0];
+	dispbottom "[Fenda] Portal deste mapa: " + $Fenda_AllPortalX[.@source] + "," + $Fenda_AllPortalY[.@source] + ".";
 	warp 'Fenda_EntryMap$, 'Fenda_EntryX, 'Fenda_EntryY;
 	return;
 }
@@ -444,6 +453,15 @@ function	script	F_Fenda_Menu	{
 		mes "[Fenda]";
 		mes "Pontos da Fenda: " + #FendaShopPoints + ".";
 		next;
+		.@stage = callfunc("F_Fenda_MapIndex", strcharinfo(3));
+		if (.@stage >= 0 && .@stage < 3 && 'Fenda_Active && !'Fenda_BossPending && !'Fenda_BossSpawned && !'Fenda_BossDead) {
+			.@inst_menu = select("Avancar para proxima area:Loja da Fenda:Sair");
+			if (.@inst_menu == 1)
+				callfunc "F_Fenda_Portal";
+			else if (.@inst_menu == 2)
+				callfunc "F_Fenda_Shop";
+			close;
+		}
 		callfunc "F_Fenda_Shop";
 		close;
 	}
@@ -454,7 +472,18 @@ function	script	F_Fenda_Menu	{
 	mes "Pontos da Fenda: " + #FendaShopPoints + ".";
 	next;
 
-	.@has_instance = (.@party_id && instance_id(IM_PARTY));
+	.@old_iid = 0;
+	if (.@party_id)
+		.@old_iid = instance_id(IM_PARTY);
+	if (.@old_iid) {
+		if (getinstancevar('Fenda_BossDead, .@old_iid)) {
+			instance_destroy .@old_iid;
+			.@old_iid = 0;
+			dispbottom "[Fenda] A Fenda concluida do seu grupo foi encerrada.";
+		}
+	}
+
+	.@has_instance = (.@party_id && .@old_iid);
 	.@menu$ = "Criar Fenda:";
 	if (.@has_instance)
 		.@menu$ += "Entrar na Fenda:";
@@ -472,7 +501,7 @@ function	script	F_Fenda_Menu	{
 			mes "Somente o lider do grupo pode criar a Fenda.";
 			close;
 		}
-		if (instance_id(IM_PARTY)) {
+		if (.@old_iid) {
 			mes "[Fenda]";
 			mes "Seu grupo ja possui uma Fenda aberta.";
 			close;
@@ -517,6 +546,12 @@ function	script	F_Fenda_Menu	{
 		if (!.@iid) {
 			mes "[Fenda]";
 			mes "Seu grupo ainda nao criou uma Fenda.";
+			close;
+		}
+		if (getinstancevar('Fenda_BossDead, .@iid)) {
+			mes "[Fenda]";
+			mes "Esta Fenda ja foi concluida.";
+			mes "Crie uma nova expedicao para continuar.";
 			close;
 		}
 		switch(instance_enter("Fenda")) {
@@ -564,7 +599,7 @@ function	script	F_Fenda_MvpDead	{
 	$Fenda_LastClearSeconds = 'Fenda_ClearSeconds;
 	$Fenda_LastClearMinutes = 'Fenda_ClearMinutes;
 	if ($Fenda_MvpDropItem > 0) {
-		.@chance = 5 * 'Fenda_Level;
+		.@chance = 2 + 'Fenda_Level; // 2% base + 1% por nivel.
 		if (.@chance > 100)
 			.@chance = 100;
 		if (rand(100) < .@chance)
@@ -601,6 +636,8 @@ OnInit:
 		"evt_dun04", "evt_dun05", "evt_dun06";
 	setarray $Fenda_AllSpawnX[0], 23, 126, 132, 31, 154, 38;
 	setarray $Fenda_AllSpawnY[0], 261, 73, 192, 268, 157, 201;
+	setarray $Fenda_AllPortalX[0], 267, 242, 218, 277, 123, 187;
+	setarray $Fenda_AllPortalY[0], 57, 233, 74, 62, 62, 46;
 	setarray $Fenda_PortalNpc$[0],
 		"PortalFenda01", "PortalFenda02", "PortalFenda03",
 		"PortalFenda04", "PortalFenda05", "PortalFenda06";
@@ -633,7 +670,7 @@ OnNormalDead:
 	end;
 
 OnMiniBossDead:
-	if ($Fenda_MvpDropItem > 0 && rand(10000) < 100)
+	if ($Fenda_MvpDropItem > 0 && rand(10000) < 1)
 		getitem $Fenda_MvpDropItem, 1;
 	if (rand(100) < 50)
 		getitem 9198, 1;
@@ -731,14 +768,14 @@ OnAtcommand:
 	end;
 }
 
-evt_start,100,76,0	script	PortalInicioFenda	PORTAL,2,2,{ callfunc "F_Fenda_EntryPortal"; end; }
+evt_start,100,76,0	script	PortalInicioFenda	PORTAL,5,5,{ callfunc "F_Fenda_EntryPortal"; end; }
 
-evt_dun01,267,57,0	script	PortalFenda01	PORTAL,2,2,{ callfunc "F_Fenda_Portal"; end; }
-evt_dun02,242,233,0	script	PortalFenda02	PORTAL,2,2,{ callfunc "F_Fenda_Portal"; end; }
-evt_dun03,218,74,0	script	PortalFenda03	PORTAL,2,2,{ callfunc "F_Fenda_Portal"; end; }
-evt_dun04,277,62,0	script	PortalFenda04	PORTAL,2,2,{ callfunc "F_Fenda_Portal"; end; }
-evt_dun05,123,62,0	script	PortalFenda05	PORTAL,2,2,{ callfunc "F_Fenda_Portal"; end; }
-evt_dun06,187,46,0	script	PortalFenda06	PORTAL,2,2,{ callfunc "F_Fenda_Portal"; end; }
+evt_dun01,267,57,0	script	PortalFenda01	PORTAL,5,5,{ callfunc "F_Fenda_Portal"; end; }
+evt_dun02,242,233,0	script	PortalFenda02	PORTAL,5,5,{ callfunc "F_Fenda_Portal"; end; }
+evt_dun03,218,74,0	script	PortalFenda03	PORTAL,5,5,{ callfunc "F_Fenda_Portal"; end; }
+evt_dun04,277,62,0	script	PortalFenda04	PORTAL,5,5,{ callfunc "F_Fenda_Portal"; end; }
+evt_dun05,123,62,0	script	PortalFenda05	PORTAL,5,5,{ callfunc "F_Fenda_Portal"; end; }
+evt_dun06,187,46,0	script	PortalFenda06	PORTAL,5,5,{ callfunc "F_Fenda_Portal"; end; }
 
 evt_dun01,1,1,4	script	PremioFenda01	4_M_REDMAN,{ callfunc "F_Fenda_Reward"; end; }
 evt_dun02,1,1,4	script	PremioFenda02	4_M_REDMAN,{ callfunc "F_Fenda_Reward"; end; }
