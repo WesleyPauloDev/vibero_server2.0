@@ -1,0 +1,799 @@
+//=============================================================================
+// Fenda
+// Instancia por grupo com quatro mapas sorteados sem repeticao.
+//=============================================================================
+
+function	script	F_Fenda_MapIndex	{
+	.@map$ = getarg(0);
+	for (.@i = 0; .@i < 4; ++.@i) {
+		if ('Fenda_Map$[.@i] == .@map$)
+			return .@i;
+		if (instance_mapname($Fenda_AllMap$['Fenda_MapSource[.@i]]) == .@map$)
+			return .@i;
+		if ($Fenda_AllMap$['Fenda_MapSource[.@i]] == .@map$)
+			return .@i;
+	}
+	return -1;
+}
+
+function	script	F_Fenda_Announce	{
+	.@message$ = getarg(0);
+	for (.@i = 0; .@i < 4; ++.@i)
+		if ('Fenda_Map$[.@i] != "")
+			mapannounce 'Fenda_Map$[.@i], .@message$, bc_map;
+	return;
+}
+
+function	script	F_Fenda_Cost	{
+	.@level = getarg(0, 1);
+	.@type = getarg(1, 0);
+
+	if (.@level <= 1)
+		return (.@type == 0) ? 50 : 0;
+	if (.@level == 2)
+		return (.@type == 0) ? 100 : 0;
+	if (.@level == 3) {
+		if (.@type == 0) return 100;
+		if (.@type == 1) return 50;
+		return 0;
+	}
+	if (.@level == 4) {
+		if (.@type == 0) return 100;
+		if (.@type == 1) return 100;
+		return 0;
+	}
+	if (.@level == 5) {
+		if (.@type == 1) return 100;
+		if (.@type == 2) return 50;
+		return 0;
+	}
+	if (.@level == 6) {
+		if (.@type == 1) return 100;
+		if (.@type == 2) return 100;
+		return 0;
+	}
+	if (.@level == 7) {
+		if (.@type == 1) return 100;
+		if (.@type == 3) return 100;
+		return 0;
+	}
+
+	if (.@type == 1 || .@type == 3)
+		return 150 + ((.@level - 8) * 50);
+	return 0;
+}
+
+function	script	F_Fenda_CostText$	{
+	.@level = getarg(0, 1);
+	setarray .@name$[0],
+		"moeda cheffenia normal", "moeda cheffenia hard",
+		"moeda bio normal", "moeda bio hard";
+	.@text$ = "";
+	for (.@i = 0; .@i < 4; ++.@i) {
+		.@amount = callfunc("F_Fenda_Cost", .@level, .@i);
+		if (.@amount <= 0)
+			continue;
+		if (.@text$ != "")
+			.@text$ += " + ";
+		.@text$ += .@amount + " " + .@name$[.@i];
+	}
+	return .@text$;
+}
+
+function	script	F_Fenda_HasCost	{
+	.@level = getarg(0, 1);
+	setarray .@item[0], 9646, 9647, 9648, 9649;
+	for (.@i = 0; .@i < 4; ++.@i) {
+		.@amount = callfunc("F_Fenda_Cost", .@level, .@i);
+		if (.@amount > 0 && countitem(.@item[.@i]) < .@amount)
+			return 0;
+	}
+	return 1;
+}
+
+function	script	F_Fenda_DelCost	{
+	.@level = getarg(0, 1);
+	setarray .@item[0], 9646, 9647, 9648, 9649;
+	for (.@i = 0; .@i < 4; ++.@i) {
+		.@amount = callfunc("F_Fenda_Cost", .@level, .@i);
+		if (.@amount > 0)
+			delitem .@item[.@i], .@amount;
+	}
+	return;
+}
+
+function	script	F_Fenda_ScaleMob	{
+	.@gid = getarg(0);
+	.@level = getarg(1, 1);
+	.@mult = 1;
+	for (.@i = 1; .@i < .@level; ++.@i)
+		.@mult *= 2;
+	if (.@gid <= 0 || .@mult <= 1)
+		return;
+
+	getunitdata .@gid, .@data;
+	.@hp = .@data[UMOB_MAXHP] * .@mult;
+	if (.@hp > 2000000000)
+		.@hp = 2000000000;
+	setunitdata .@gid, UMOB_MAXHP, .@hp;
+	setunitdata .@gid, UMOB_HP, .@hp;
+	setunitdata .@gid, UMOB_ATKMIN, .@data[UMOB_ATKMIN] * .@mult;
+	setunitdata .@gid, UMOB_ATKMAX, .@data[UMOB_ATKMAX] * .@mult;
+	setunitdata .@gid, UMOB_MATKMIN, .@data[UMOB_MATKMIN] * .@mult;
+	setunitdata .@gid, UMOB_MATKMAX, .@data[UMOB_MATKMAX] * .@mult;
+	setunitdata .@gid, UMOB_DEF, min(.@data[UMOB_DEF] * .@mult, 32767);
+	setunitdata .@gid, UMOB_MDEF, min(.@data[UMOB_MDEF] * .@mult, 32767);
+	setunitdata .@gid, UMOB_RES, min(.@data[UMOB_RES] * .@mult, 32767);
+	setunitdata .@gid, UMOB_MRES, min(.@data[UMOB_MRES] * .@mult, 32767);
+	setunitdata .@gid, UMOB_STR, min(.@data[UMOB_STR] * .@mult, 32767);
+	setunitdata .@gid, UMOB_AGI, min(.@data[UMOB_AGI] * .@mult, 32767);
+	setunitdata .@gid, UMOB_VIT, min(.@data[UMOB_VIT] * .@mult, 32767);
+	setunitdata .@gid, UMOB_INT, min(.@data[UMOB_INT] * .@mult, 32767);
+	setunitdata .@gid, UMOB_DEX, min(.@data[UMOB_DEX] * .@mult, 32767);
+	setunitdata .@gid, UMOB_LUK, min(.@data[UMOB_LUK] * .@mult, 32767);
+	return;
+}
+
+function	script	F_Fenda_Reset	{
+	stopnpctimer instance_npcname("FendaController");
+	for (.@i = 0; .@i < 6; ++.@i) {
+		.@map$ = instance_mapname($Fenda_AllMap$[.@i]);
+		killmonster .@map$, instance_npcname("FendaController") + "::OnNormalDead";
+		killmonster .@map$, instance_npcname("FendaController") + "::OnMiniBossDead";
+		killmonster .@map$, instance_npcname("FendaController") + "::OnRareDead";
+		disablenpc instance_npcname($Fenda_PortalNpc$[.@i]);
+		disablenpc instance_npcname($Fenda_RewardNpc$[.@i]);
+	}
+
+	if ('Fenda_Active)
+		for (.@i = 0; .@i < 4; ++.@i)
+			if ('Fenda_Map$[.@i] != "")
+				mapwarp 'Fenda_Map$[.@i], "prontera", 150, 180;
+
+	'Fenda_Active = 0;
+	'Fenda_Points = 0;
+	'Fenda_NextAnnounce = 20;
+	'Fenda_BossPending = 0;
+	'Fenda_BossSpawned = 0;
+	'Fenda_BossDead = 0;
+	'Fenda_RewardPending = 0;
+	'Fenda_RewardSource = -1;
+	'Fenda_SpecialSpawned = 0;
+	'Fenda_Level = 1;
+	'Fenda_StartTick = 0;
+	'Fenda_ClearSeconds = 0;
+	'Fenda_ClearMinutes = 0;
+	'Fenda_LeaderName$ = "";
+	'Fenda_EntryMap$ = "";
+	'Fenda_EntryX = 0;
+	'Fenda_EntryY = 0;
+	for (.@i = 0; .@i < 4; ++.@i) {
+		'Fenda_Map$[.@i] = "";
+		'Fenda_MiniCount[.@i] = 0;
+	}
+	return;
+}
+
+function	script	F_Fenda_Start	{
+	if ('Fenda_Active)
+		return;
+
+	'Fenda_Active = 1;
+	'Fenda_Points = 0;
+	'Fenda_NextAnnounce = 20;
+	'Fenda_BossPending = 0;
+	'Fenda_BossSpawned = 0;
+	'Fenda_BossDead = 0;
+	'Fenda_RewardPending = 0;
+	'Fenda_RewardSource = -1;
+	'Fenda_SpecialSpawned = 0;
+	if (!'Fenda_StartTick)
+		'Fenda_StartTick = gettimetick(2);
+	if ('Fenda_LeaderName$ == "")
+		'Fenda_LeaderName$ = strcharinfo(0);
+	if ('Fenda_Level < 1)
+		'Fenda_Level = 1;
+
+	setarray .@pool[0], 0, 1, 2, 3, 4, 5;
+	for (.@i = 0; .@i < 4; ++.@i) {
+		.@pick = rand(.@i, 5);
+		.@swap = .@pool[.@i];
+		.@pool[.@i] = .@pool[.@pick];
+		.@pool[.@pick] = .@swap;
+		.@source = .@pool[.@i];
+		'Fenda_Map$[.@i] = instance_mapname($Fenda_AllMap$[.@source]);
+		'Fenda_SpawnX[.@i] = $Fenda_AllSpawnX[.@source];
+		'Fenda_SpawnY[.@i] = $Fenda_AllSpawnY[.@source];
+		'Fenda_MapSource[.@i] = .@source;
+		'Fenda_MiniCount[.@i] = 1;
+	}
+	'Fenda_EntryMap$ = 'Fenda_Map$[0];
+	'Fenda_EntryX = 'Fenda_SpawnX[0];
+	'Fenda_EntryY = 'Fenda_SpawnY[0];
+
+	.@remaining = 6;
+	while (.@remaining > 0) {
+		.@stage = rand(4);
+		if ('Fenda_MiniCount[.@stage] >= 3)
+			continue;
+		'Fenda_MiniCount[.@stage]++;
+		.@remaining--;
+	}
+
+	.@normal_label$ = instance_npcname("FendaController") + "::OnNormalDead";
+	.@mini_label$ = instance_npcname("FendaController") + "::OnMiniBossDead";
+	for (.@i = 0; .@i < 4; ++.@i) {
+		.@normal_count = 150;
+		if ('Fenda_MapSource[.@i] == 0)
+			.@normal_count = 200;
+		else if ('Fenda_MapSource[.@i] == 1)
+			.@normal_count = 150;
+		else if ('Fenda_MapSource[.@i] == 3)
+			.@normal_count = 300;
+		else if ('Fenda_MapSource[.@i] == 4)
+			.@normal_count = 225;
+		monster 'Fenda_Map$[.@i], 0, 0, "Errante da Fenda", 31900, .@normal_count, .@normal_label$;
+		if ('Fenda_Level > 1)
+			for (.@j = 0; .@j < .@normal_count; ++.@j)
+				callfunc "F_Fenda_ScaleMob", $@mobid[.@j], 'Fenda_Level;
+		monster 'Fenda_Map$[.@i], 0, 0, "Guardiao da Fenda", 31901, 'Fenda_MiniCount[.@i], .@mini_label$;
+		if ('Fenda_Level > 1)
+			for (.@j = 0; .@j < 'Fenda_MiniCount[.@i]; ++.@j)
+				callfunc "F_Fenda_ScaleMob", $@mobid[.@j], 'Fenda_Level;
+	}
+
+	for (.@i = 0; .@i < 6; ++.@i)
+		enablenpc instance_npcname($Fenda_PortalNpc$[.@i]);
+
+	callfunc "F_Fenda_Announce", "[Fenda] A expedicao foi aberta para este grupo.";
+	return;
+}
+
+function	script	F_Fenda_Portal	{
+	if (!instance_id()) {
+		dispbottom "[Fenda] Este portal pertence a uma instancia.";
+		return;
+	}
+	if (!'Fenda_Active) {
+		dispbottom "[Fenda] O portal esta inativo.";
+		return;
+	}
+
+	.@stage = callfunc("F_Fenda_MapIndex", strcharinfo(3));
+	if (.@stage < 0 || .@stage >= 3) {
+		dispbottom "[Fenda] Nao ha outra passagem neste mapa.";
+		return;
+	}
+
+	warp 'Fenda_Map$[.@stage + 1], 'Fenda_SpawnX[.@stage + 1], 'Fenda_SpawnY[.@stage + 1];
+	return;
+}
+
+function	script	F_Fenda_EntryPortal	{
+	if (!instance_id()) {
+		dispbottom "[Fenda] Este portal pertence a uma instancia.";
+		return;
+	}
+	if (!'Fenda_Active)
+		callfunc "F_Fenda_Start";
+
+	if ('Fenda_EntryMap$ == "") {
+		dispbottom "[Fenda] A expedicao ainda nao foi preparada.";
+		return;
+	}
+
+	dispbottom "[Fenda] Primeiro mapa sorteado: " + 'Fenda_EntryMap$ + ".";
+	warp 'Fenda_EntryMap$, 'Fenda_EntryX, 'Fenda_EntryY;
+	return;
+}
+
+function	script	F_Fenda_Reward	{
+	if (!instance_id() || !'Fenda_Active || !'Fenda_BossDead) {
+		mes "[Fenda]";
+		mes "A recompensa ainda nao esta disponivel.";
+		close;
+	}
+	if (FendaJoinedInstance != instance_id()) {
+		mes "[Fenda]";
+		mes "Voce nao participou desta expedicao.";
+		close;
+	}
+	if (FendaRewardInstance == instance_id()) {
+		mes "[Fenda]";
+		mes "Voce ja recebeu a recompensa desta expedicao.";
+		close;
+	}
+	if (!checkweight(9608, 50) || !checkweight(9198, 5)) {
+		mes "[Fenda]";
+		mes "Libere peso no inventario antes de receber os premios.";
+		close;
+	}
+
+	FendaRewardInstance = instance_id();
+	.@fenda_points = 100 + ('Fenda_Level * 10);
+	#FendaShopPoints += .@fenda_points;
+	if (FendaMaxLevel <= 'Fenda_Level)
+		FendaMaxLevel = 'Fenda_Level + 1;
+	getitem 9608, 50;
+	getitem 9198, 5;
+	mes "[Fenda]";
+	mes "Sua recompensa foi entregue.";
+	mes "Voce recebeu 50 moedas de instancia e 5 tickets de minerios.";
+	mes "Voce recebeu " + .@fenda_points + " pontos da Fenda.";
+	mes "Saldo atual: " + #FendaShopPoints + " pontos.";
+	mes "Voce sera levado de volta ao seu ponto salvo.";
+	close2;
+	warp "SavePoint", 0, 0;
+	end;
+}
+
+function	script	F_FendaHatEnchant	{
+	mes "[Encanto da Fenda]";
+	mes "Escolha o encanto que deseja aplicar.";
+	mes "O item de encanto precisa estar no inventario e sera consumido.";
+	next;
+
+	.@enchant_choice = select("Feitico da Benevolencia:Feitico da Maldade:Cancelar");
+	if (.@enchant_choice == 3)
+		close;
+
+	if (.@enchant_choice == 1)
+		.@use_item_id = 312014;
+	else
+		.@use_item_id = 312021;
+
+	if (countitem(.@use_item_id) < 1) {
+		mes "[Encanto da Fenda]";
+		mes "Voce nao possui ^FF0000" + getitemname(.@use_item_id) + "^000000 no inventario.";
+		close;
+	}
+
+	if (.@use_item_id == 312014)
+		.@enchant_id = 910300;
+	else if (.@use_item_id == 312021)
+		.@enchant_id = 910301;
+	else {
+		mes "[Encanto da Fenda]";
+		mes "Encanto invalido.";
+		close;
+	}
+
+	setarray .@hat_ids[0],
+		910200,910201,910202,910203,910204,910205,910206,910207,910208,910209,910210,
+		910211,910212,910213,910214,910215,910216,910217,910218,910219,910220,910221;
+
+	.@part = EQI_HEAD_TOP;
+	.@item_id = getequipid(.@part);
+	if (inarray(.@hat_ids[0], .@item_id) < 0) {
+		mes "[Encanto da Fenda]";
+		mes "Equipe no topo o hat da Fenda que deseja encantar.";
+		close;
+	}
+
+	setarray .@card[0],
+		getequipcardid(.@part,0),
+		getequipcardid(.@part,1),
+		getequipcardid(.@part,2),
+		getequipcardid(.@part,3);
+	.@refine = getequiprefinerycnt(.@part);
+
+	mes "[Encanto da Fenda]";
+	mes "Hat equipado:";
+	mes "^00AAFF" + getitemname(.@item_id) + " [+" + .@refine + "]^000000";
+	if (.@card[1]) {
+		mes "O slot 2 ja possui:";
+		mes "^FF0000" + getitemname(.@card[1]) + "^000000";
+		mes "Deseja substituir por ^00AAFF" + getitemname(.@enchant_id) + "^000000?";
+	} else {
+		mes "O encanto sera aplicado no slot 2.";
+	}
+	next;
+
+	if (select("Confirmar:Cancelar") == 2)
+		close;
+
+	if (countitem(.@use_item_id) < 1) {
+		mes "[Encanto da Fenda]";
+		mes "Voce nao possui mais ^FF0000" + getitemname(.@use_item_id) + "^000000 no inventario.";
+		close;
+	}
+
+	delitem .@use_item_id, 1;
+	setitemcard .@part, 1, .@enchant_id;
+
+	mes "[Encanto da Fenda]";
+	mes "Encanto aplicado com sucesso no slot 2.";
+	close;
+}
+
+function	script	F_Fenda_ShopBuy	{
+	.@title$ = getarg(0);
+	close2;
+	if (.@title$ == "Hats")
+		callshop "Fenda_Hats_Shop", 1;
+	else if (.@title$ == "Armas")
+		callshop "Fenda_Armas_Shop", 1;
+	end;
+}
+
+function	script	F_Fenda_Shop	{
+	mes "[Loja da Fenda]";
+	mes "Seus pontos: " + #FendaShopPoints + ".";
+	next;
+	switch(select("Hats:Armas:Encantar Hats:Voltar")) {
+		case 1:
+			callfunc "F_Fenda_ShopBuy", "Hats";
+			end;
+		case 2:
+			callfunc "F_Fenda_ShopBuy", "Armas";
+			end;
+		case 3:
+			callfunc "F_FendaHatEnchant";
+			end;
+		default:
+			close;
+	}
+}
+
+function	script	F_Fenda_Menu	{
+	.@party_id = getcharid(1);
+	if (FendaMaxLevel < 1)
+		FendaMaxLevel = 1;
+	if (instance_id()) {
+		mes "[Fenda]";
+		mes "Pontos da Fenda: " + #FendaShopPoints + ".";
+		next;
+		callfunc "F_Fenda_Shop";
+		close;
+	}
+
+	mes "[Fenda]";
+	mes "A expedicao precisa alcancar 1000 pontos para enfrentar o MVP.";
+	mes "Seu nivel liberado: " + FendaMaxLevel + ".";
+	mes "Pontos da Fenda: " + #FendaShopPoints + ".";
+	next;
+
+	.@has_instance = (.@party_id && instance_id(IM_PARTY));
+	.@menu$ = "Criar Fenda:";
+	if (.@has_instance)
+		.@menu$ += "Entrar na Fenda:";
+	.@menu$ += "Loja da Fenda:Sair";
+	.@menu = select(.@menu$);
+
+	if (.@menu == 1) {
+		if (!.@party_id) {
+			mes "[Fenda]";
+			mes "Crie ou entre em um grupo para acessar a Fenda.";
+			close;
+		}
+		if (!is_party_leader()) {
+			mes "[Fenda]";
+			mes "Somente o lider do grupo pode criar a Fenda.";
+			close;
+		}
+		if (instance_id(IM_PARTY)) {
+			mes "[Fenda]";
+			mes "Seu grupo ja possui uma Fenda aberta.";
+			close;
+		}
+
+		.@level_menu$ = "";
+		for (.@i = 1; .@i <= FendaMaxLevel; ++.@i)
+			.@level_menu$ += "Nivel " + .@i + " - " + callfunc("F_Fenda_CostText$", .@i) + ":";
+		.@level_menu$ += "Cancelar";
+		mes "[Fenda]";
+		mes "Escolha o nivel da Fenda.";
+		next;
+		.@level = select(.@level_menu$);
+		if (.@level > FendaMaxLevel)
+			close;
+		if (!callfunc("F_Fenda_HasCost", .@level)) {
+			mes "[Fenda]";
+			mes "Para abrir o nivel " + .@level + ", voce precisa de:";
+			mes callfunc("F_Fenda_CostText$", .@level) + ".";
+			close;
+		}
+		.@iid = instance_create("Fenda");
+		if (.@iid < 0) {
+			mes "[Fenda]";
+			mes "Falha ao criar a Fenda.";
+			close;
+		}
+		callfunc "F_Fenda_DelCost", .@level;
+		setinstancevar('Fenda_Level, .@level, .@iid);
+		setinstancevar('Fenda_LeaderName$, strcharinfo(0), .@iid);
+		mes "[Fenda]";
+		mes "A Fenda nivel " + .@level + " do seu grupo foi aberta.";
+		next;
+		if (select("Entrar agora:Fechar") == 2)
+			close;
+		.@enter_fenda = 1;
+	}
+
+	if (.@enter_fenda || (.@has_instance && .@menu == 2)) {
+		.@iid = instance_id(IM_PARTY);
+		if (!.@iid) {
+			mes "[Fenda]";
+			mes "Seu grupo ainda nao criou uma Fenda.";
+			close;
+		}
+		switch(instance_enter("Fenda")) {
+			case IE_OK:
+				FendaJoinedInstance = instance_id(IM_PARTY);
+				callfunc "F_Fenda_Start";
+				close2;
+				dispbottom "[Fenda] Entre no portal para iniciar o desafio.";
+				end;
+			case IE_NOINSTANCE:
+				mes "[Fenda]";
+				mes "Seu grupo ainda nao criou uma Fenda.";
+				close;
+			case IE_NOMEMBER:
+				mes "[Fenda]";
+				mes "Voce nao pertence ao grupo desta Fenda.";
+				close;
+			default:
+				mes "[Fenda]";
+				mes "Nao foi possivel entrar na Fenda agora.";
+				close;
+		}
+	}
+
+	if ((.@has_instance && .@menu == 3) || (!.@has_instance && .@menu == 2))
+		callfunc "F_Fenda_Shop";
+	close;
+}
+
+function	script	F_Fenda_MvpDead	{
+	if (!'Fenda_Active || 'Fenda_BossDead)
+		return;
+	'Fenda_BossDead = 1;
+	if ('Fenda_StartTick > 0) {
+		'Fenda_ClearSeconds = gettimetick(2) - 'Fenda_StartTick;
+		if ('Fenda_ClearSeconds < 0)
+			'Fenda_ClearSeconds = 0;
+		'Fenda_ClearMinutes = 'Fenda_ClearSeconds / 60;
+	} else {
+		'Fenda_ClearSeconds = 0;
+		'Fenda_ClearMinutes = 0;
+	}
+	$Fenda_LastClearLeader$ = 'Fenda_LeaderName$;
+	$Fenda_LastClearLevel = 'Fenda_Level;
+	$Fenda_LastClearSeconds = 'Fenda_ClearSeconds;
+	$Fenda_LastClearMinutes = 'Fenda_ClearMinutes;
+	if ($Fenda_MvpDropItem > 0) {
+		.@chance = 5 * 'Fenda_Level;
+		if (.@chance > 100)
+			.@chance = 100;
+		if (rand(100) < .@chance)
+			getitem $Fenda_MvpDropItem, 1;
+	}
+	getmapxy .@map$, .@x, .@y, BL_PC;
+	.@source = -1;
+	for (.@i = 0; .@i < 6; ++.@i)
+		if (instance_mapname($Fenda_AllMap$[.@i]) == .@map$)
+			.@source = .@i;
+	if (.@source < 0) {
+		.@map$ = 'Fenda_BossMap$;
+		.@x = 'Fenda_BossX;
+		.@y = 'Fenda_BossY;
+		for (.@i = 0; .@i < 6; ++.@i)
+			if (instance_mapname($Fenda_AllMap$[.@i]) == .@map$)
+				.@source = .@i;
+	}
+	'Fenda_RewardPending = 1;
+	'Fenda_RewardSource = .@source;
+	'Fenda_RewardX = .@x;
+	'Fenda_RewardY = .@y;
+	callfunc "F_Fenda_Announce",
+		"[Fenda] O Senhor da Fenda foi derrotado em " + 'Fenda_ClearMinutes + " minuto(s)! O emissario de premios aparecera em 5 segundos.";
+	stopnpctimer instance_npcname("FendaController");
+	initnpctimer instance_npcname("FendaController");
+	return;
+}
+
+evt_dun01,1,1,0	script	FendaController	-1,{
+OnInit:
+	setarray $Fenda_AllMap$[0],
+		"evt_dun01", "evt_dun02", "evt_dun03",
+		"evt_dun04", "evt_dun05", "evt_dun06";
+	setarray $Fenda_AllSpawnX[0], 23, 126, 132, 31, 154, 38;
+	setarray $Fenda_AllSpawnY[0], 261, 73, 192, 268, 157, 201;
+	setarray $Fenda_PortalNpc$[0],
+		"PortalFenda01", "PortalFenda02", "PortalFenda03",
+		"PortalFenda04", "PortalFenda05", "PortalFenda06";
+	setarray $Fenda_RewardNpc$[0],
+		"PremioFenda01", "PremioFenda02", "PremioFenda03",
+		"PremioFenda04", "PremioFenda05", "PremioFenda06";
+	$Fenda_MvpDropItem = 9691; // Caixa de Encanto Hero da Fenda.
+	for (.@i = 0; .@i < 6; ++.@i) {
+		disablenpc $Fenda_PortalNpc$[.@i];
+		disablenpc $Fenda_RewardNpc$[.@i];
+	}
+	end;
+
+OnInstanceInit:
+	callfunc "F_Fenda_Reset";
+	end;
+
+OnInstanceDestroy:
+	stopnpctimer;
+	end;
+
+OnNormalDead:
+	if (killedrid == 31902) {
+		callfunc "F_Fenda_MvpDead";
+		end;
+	}
+	if (killedrid == 31900 && rand(10000) < 1)
+		getitem 9198, 1;
+	callsub S_AddPoints, 1;
+	end;
+
+OnMiniBossDead:
+	if ($Fenda_MvpDropItem > 0 && rand(10000) < 100)
+		getitem $Fenda_MvpDropItem, 1;
+	if (rand(100) < 50)
+		getitem 9198, 1;
+	callsub S_AddPoints, 50;
+	end;
+
+OnRareDead:
+	end;
+
+S_AddPoints:
+	if (!'Fenda_Active || 'Fenda_BossPending || 'Fenda_BossSpawned)
+		return;
+	if (callfunc("F_Fenda_MapIndex", strcharinfo(3)) < 0)
+		return;
+
+	'Fenda_Points += getarg(0);
+	if ('Fenda_Points >= 'Fenda_NextAnnounce) {
+		callfunc "F_Fenda_Announce",
+			"[Fenda] A expedicao possui " + 'Fenda_Points + " pontos.";
+		'Fenda_NextAnnounce = (('Fenda_Points / 20) + 1) * 20;
+	}
+
+	if (!'Fenda_SpecialSpawned && 'Fenda_Points >= 500 && 'Fenda_Points <= 600 && rand(10000) < 10) {
+		'Fenda_SpecialSpawned = 1;
+		getmapxy .@rare_map$, .@rare_x, .@rare_y, BL_PC;
+		monster .@rare_map$, 0, 0, "Especial da Fenda", 31903, 1,
+			instance_npcname("FendaController") + "::OnRareDead";
+		mapannounce .@rare_map$, "[Fenda] Mob especial apareceu neste mapa!", bc_map;
+	}
+
+	if ('Fenda_Points < 1000)
+		return;
+
+	'Fenda_BossPending = 1;
+	getmapxy 'Fenda_BossMap$, 'Fenda_BossX, 'Fenda_BossY, BL_PC;
+	callfunc "F_Fenda_Announce",
+		"[Fenda] 1000 pontos! O Senhor da Fenda surgira em 5 segundos!";
+
+	for (.@i = 0; .@i < 4; ++.@i) {
+		killmonster 'Fenda_Map$[.@i], instance_npcname("FendaController") + "::OnNormalDead";
+		killmonster 'Fenda_Map$[.@i], instance_npcname("FendaController") + "::OnMiniBossDead";
+	}
+	for (.@i = 0; .@i < 6; ++.@i)
+		disablenpc instance_npcname($Fenda_PortalNpc$[.@i]);
+	stopnpctimer;
+	initnpctimer;
+	return;
+
+OnTimer5000:
+	if (!'Fenda_Active)
+		end;
+	if ('Fenda_BossPending && !'Fenda_BossSpawned) {
+		'Fenda_BossPending = 0;
+		'Fenda_BossSpawned = 1;
+		for (.@i = 0; .@i < 4; ++.@i)
+			mapwarp 'Fenda_Map$[.@i], 'Fenda_BossMap$, 'Fenda_BossX, 'Fenda_BossY;
+		monster 'Fenda_BossMap$, 'Fenda_BossX, 'Fenda_BossY,
+			"Senhor da Fenda", 31902, 1, instance_npcname("FendaController") + "::OnNormalDead";
+		callfunc "F_Fenda_ScaleMob", $@mobid[0], 'Fenda_Level;
+		mapannounce 'Fenda_BossMap$, "[Fenda] O Senhor da Fenda apareceu!", bc_map;
+		end;
+	}
+	if ('Fenda_RewardPending) {
+		'Fenda_RewardPending = 0;
+		if ('Fenda_RewardSource >= 0) {
+			movenpc instance_npcname($Fenda_RewardNpc$['Fenda_RewardSource]), 'Fenda_RewardX, 'Fenda_RewardY;
+			enablenpc instance_npcname($Fenda_RewardNpc$['Fenda_RewardSource]);
+		}
+		callfunc "F_Fenda_Announce", "[Fenda] O emissario de premios apareceu.";
+	}
+	end;
+
+OnTimer600000:
+	if ('Fenda_BossDead) {
+		callfunc "F_Fenda_Announce",
+			"[Fenda] O emissario partiu. A expedicao foi encerrada.";
+		instance_destroy;
+	}
+	stopnpctimer;
+	end;
+}
+
+prontera,147,235,5	script	Fenda	832,{
+	callfunc "F_Fenda_Menu";
+	end;
+}
+
+-	script	FendaAtcommand	-1,{
+OnInit:
+	bindatcmd "fenda", strnpcinfo(3) + "::OnAtcommand";
+	end;
+
+OnAtcommand:
+	callfunc "F_Fenda_Menu";
+	end;
+}
+
+evt_start,100,76,0	script	PortalInicioFenda	PORTAL,2,2,{ callfunc "F_Fenda_EntryPortal"; end; }
+
+evt_dun01,267,57,0	script	PortalFenda01	PORTAL,2,2,{ callfunc "F_Fenda_Portal"; end; }
+evt_dun02,242,233,0	script	PortalFenda02	PORTAL,2,2,{ callfunc "F_Fenda_Portal"; end; }
+evt_dun03,218,74,0	script	PortalFenda03	PORTAL,2,2,{ callfunc "F_Fenda_Portal"; end; }
+evt_dun04,277,62,0	script	PortalFenda04	PORTAL,2,2,{ callfunc "F_Fenda_Portal"; end; }
+evt_dun05,123,62,0	script	PortalFenda05	PORTAL,2,2,{ callfunc "F_Fenda_Portal"; end; }
+evt_dun06,187,46,0	script	PortalFenda06	PORTAL,2,2,{ callfunc "F_Fenda_Portal"; end; }
+
+evt_dun01,1,1,4	script	PremioFenda01	4_M_REDMAN,{ callfunc "F_Fenda_Reward"; end; }
+evt_dun02,1,1,4	script	PremioFenda02	4_M_REDMAN,{ callfunc "F_Fenda_Reward"; end; }
+evt_dun03,1,1,4	script	PremioFenda03	4_M_REDMAN,{ callfunc "F_Fenda_Reward"; end; }
+evt_dun04,1,1,4	script	PremioFenda04	4_M_REDMAN,{ callfunc "F_Fenda_Reward"; end; }
+evt_dun05,1,1,4	script	PremioFenda05	4_M_REDMAN,{ callfunc "F_Fenda_Reward"; end; }
+evt_dun06,1,1,4	script	PremioFenda06	4_M_REDMAN,{ callfunc "F_Fenda_Reward"; end; }
+
+evt_start	mapflag	noteleport
+evt_start	mapflag	noreturn
+evt_start	mapflag	nomemo
+evt_start	mapflag	nowarp
+evt_start	mapflag	nowarpto
+evt_start	mapflag	nosave	SavePoint
+
+evt_dun01	mapflag	noteleport
+evt_dun01	mapflag	noreturn
+evt_dun01	mapflag	nomemo
+evt_dun01	mapflag	nowarp
+evt_dun01	mapflag	nowarpto
+evt_dun01	mapflag	nosave	SavePoint
+
+evt_dun02	mapflag	noteleport
+evt_dun02	mapflag	noreturn
+evt_dun02	mapflag	nomemo
+evt_dun02	mapflag	nowarp
+evt_dun02	mapflag	nowarpto
+evt_dun02	mapflag	nosave	SavePoint
+
+evt_dun03	mapflag	noteleport
+evt_dun03	mapflag	noreturn
+evt_dun03	mapflag	nomemo
+evt_dun03	mapflag	nowarp
+evt_dun03	mapflag	nowarpto
+evt_dun03	mapflag	nosave	SavePoint
+
+evt_dun04	mapflag	noteleport
+evt_dun04	mapflag	noreturn
+evt_dun04	mapflag	nomemo
+evt_dun04	mapflag	nowarp
+evt_dun04	mapflag	nowarpto
+evt_dun04	mapflag	nosave	SavePoint
+
+evt_dun05	mapflag	noteleport
+evt_dun05	mapflag	noreturn
+evt_dun05	mapflag	nomemo
+evt_dun05	mapflag	nowarp
+evt_dun05	mapflag	nowarpto
+evt_dun05	mapflag	nosave	SavePoint
+
+evt_dun06	mapflag	noteleport
+evt_dun06	mapflag	noreturn
+evt_dun06	mapflag	nomemo
+evt_dun06	mapflag	nowarp
+evt_dun06	mapflag	nowarpto
+evt_dun06	mapflag	nosave	SavePoint
+
+// Lojas visuais da Fenda. Usam pontos de conta (#FendaShopPoints).
+-	pointshop	Fenda_Hats_Shop	-1,#FendaShopPoints,910200:1000,910201:1000,910202:1000,910203:1000,910204:1000,910205:1000,910206:1000,910207:1000,910208:1000,910209:1000,910210:1000,910211:1000,910212:1000,910213:1000,910214:1000,910215:1000,910216:1000,910217:1000,910218:1000,910219:1000,910220:1000,910221:1000
+-	pointshop	Fenda_Armas_Shop	-1,#FendaShopPoints,910100:2000,910101:2000,910102:2000,910103:2000,910104:2000,910105:2000,910106:2000,910107:2000,910108:2000,910109:2000,910110:2000,910111:2000,910112:2000,910113:2000,910114:2000,910115:2000,910116:2000,910117:2000,910118:2000,910119:2000,910120:2000,910121:2000,910122:2000,910123:2000,910124:2000,910125:2000,910126:2000,910127:2000,910128:2000,910129:2000,910130:2000,910131:2000,910132:2000,910133:2000,910134:2000,910135:2000,910136:2000,910137:2000,910138:2000,910139:2000,910140:2000,910141:2000,910142:2000,910143:2000,910144:2000,910145:2000

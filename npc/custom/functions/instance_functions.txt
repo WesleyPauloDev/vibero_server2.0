@@ -83,9 +83,19 @@ function	script	F_InstanceEntry	{
 	// ============================
 	// 4. Bloqueio diario e reset pago opcional
 	// ============================
+	.@has_attempt = (getd(.@status_name$) > 0 || (.@shared_vdec && getd(.@shared_status_name$) > 0));
+	.@joined_live_instance = 0;
+	if (.@same_live_instance && .@has_attempt) {
+		.@log_id = callfunc("F_InstanceGetOpenLogId", .@display_name$);
+		if (.@log_id > 0) {
+			query_sql("SELECT COUNT(*) FROM `instance_monitor_member_log` WHERE `instance_log_id` = "
+				+ .@log_id + " AND `account_id` = " + getcharid(3) + " AND `entered_at` IS NOT NULL", .@joined_live_instance);
+		}
+	}
 	.@daily_block = (getd(.@status_name$) == 3 || (.@shared_vdec && getd(.@shared_status_name$) == 3));
-	.@lost_instance = ((getd(.@status_name$) > 0 || (.@shared_vdec && getd(.@shared_status_name$) > 0)) && !.@same_live_instance);
-	if (.@daily_block || .@lost_instance) {
+	.@lost_instance = (.@has_attempt && !.@same_live_instance);
+	.@foreign_live_instance = (.@has_attempt && .@same_live_instance && !.@joined_live_instance);
+	if (.@daily_block || .@lost_instance || .@foreign_live_instance) {
 		mes "[" + .@npc_name$ + "]";
 		mes "Voce nao pode mais entrar nesta instancia hoje.";
 		mes "Volte amanha apos o reset diario.";

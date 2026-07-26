@@ -4,6 +4,18 @@ Header:
   Version: 3
 
 Body:
+  - Id: 910300
+    AegisName: Fenda_Justice_Power
+    Name: Feitico da Benevolencia
+    Type: Card
+    SubType: Enchant
+
+  - Id: 910301
+    AegisName: Fenda_Injustice_Power
+    Name: Feitico da Maldade
+    Type: Card
+    SubType: Enchant
+
 # ====================================================
   - Id: 6396
     AegisName: Auger_Of_Spirit # Desentupidor
@@ -1489,7 +1501,7 @@ Body:
     AegisName: Blue_Potion
     Name: Blue Potion
     Type: Healing
-    Buy: 5000
+    Buy: 90
     Weight: 150
     Trade:
       NoDrop: true
@@ -2745,6 +2757,4000 @@ Body:
       20602,20603,20604,20605,20607,20613,20614,20615,20727,20737,20746,20761,20762,20763,20764,20990,
       20992,31917,20988,20989,480052,20987,480055,31737,480096,480095,480093,480071,480058,480097,480107,480082,
       480108,480360,480362;
+      getitem .@items[rand(getarraysize(.@items))],1;
+
+  - Id: 910200
+    AegisName: Fenda_Circlet_RK
+    Name: Fenda Crown of Good and Evil (Rune Knight)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Knight: true
+    Classes:
+      All_Third: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      bonus bShortAtkRate,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bDelayrate,-5;
+            bonus bAspdRate,5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910201
+    AegisName: Fenda_Circlet_LG
+    Name: Fenda Crown of Good and Evil (Royal Guard)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Crusader: true
+    Classes:
+      All_Third: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus2 bMagicAddRace,RC_All,5*(.@r/3);
+      bonus bShortAtkRate,7*(.@r/4);
+      bonus2 bMagicAtkEle,Ele_Holy,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bAspdRate,5;
+            bonus bVariableCastrate,-5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bMatkRate,5;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910202
+    AegisName: Fenda_Circlet_WL
+    Name: Fenda Crown of Good and Evil (Warlock)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Wizard: true
+    Classes:
+      All_Third: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bMagicAddRace,RC_All,5*(.@r/3);
+      bonus2 bMagicAtkEle,Ele_Water,7*(.@r/4);
+      bonus2 bMagicAtkEle,Ele_Ghost,7*(.@r/4);
+      bonus2 bMagicAtkEle,Ele_Dark,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bVariableCastrate,-10;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bMatkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910203
+    AegisName: Fenda_Circlet_SO
+    Name: Fenda Crown of Good and Evil (Sorcerer)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Sage: true
+    Classes:
+      All_Third: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bMagicAddRace,RC_All,5*(.@r/3);
+      bonus2 bMagicAtkEle,Ele_Earth,7*(.@r/4);
+      bonus2 bMagicAtkEle,Ele_Fire,7*(.@r/4);
+      bonus2 bMagicAtkEle,Ele_Water,7*(.@r/4);
+      bonus2 bMagicAtkEle,Ele_Poison,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bVariableCastrate,-10;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bMatkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910204
+    AegisName: Fenda_Circlet_AB
+    Name: Fenda Crown of Good and Evil (Arch Bishop)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Priest: true
+    Classes:
+      All_Third: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus2 bMagicAddRace,RC_All,5*(.@r/3);
+      bonus bShortAtkRate,7*(.@r/4);
+      bonus2 bMagicAtkEle,Ele_Holy,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bDelayrate,-5;
+            bonus bCritical,5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bMatkRate,5;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910205
+    AegisName: Fenda_Circlet_SR
+    Name: Fenda Crown of Good and Evil (Sura)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Monk: true
+    Classes:
+      All_Third: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      bonus bShortAtkRate,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bCritical,10;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910206
+    AegisName: Fenda_Circlet_NC
+    Name: Fenda Crown of Good and Evil (Mechanic)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Blacksmith: true
+    Classes:
+      All_Third: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      bonus bShortAtkRate,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bAspdRate,5;
+            bonus bCritical,5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910207
+    AegisName: Fenda_Circlet_GN
+    Name: Fenda Crown of Good and Evil (Genetic)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Alchemist: true
+    Classes:
+      All_Third: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      bonus bShortAtkRate,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bAspdRate,5;
+            bonus bCritical,5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910208
+    AegisName: Fenda_Circlet_GC
+    Name: Fenda Crown of Good and Evil (Guillotine Cross)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Assassin: true
+    Classes:
+      All_Third: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus bShortAtkRate,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bAspdRate,10;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910209
+    AegisName: Fenda_Circlet_SC
+    Name: Fenda Crown of Good and Evil (Shadow Chaser)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Rogue: true
+    Classes:
+      All_Third: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      bonus bShortAtkRate,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bAspdRate,5;
+            bonus bCritical,5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bSpl,2;
+               bonus bCon,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910210
+    AegisName: Fenda_Circlet_RA
+    Name: Fenda Crown of Good and Evil (Ranger)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Hunter: true
+    Classes:
+      All_Third: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      bonus bShortAtkRate,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bVariableCastrate,-5;
+            bonus bCritical,5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bSpl,2;
+               bonus bCon,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910211
+    AegisName: Fenda_Circlet_WM
+    Name: Fenda Crown of Good and Evil (Minstrel/Wanderer)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      BardDancer: true
+    Classes:
+      All_Third: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus2 bMagicAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      bonus2 bMagicAtkEle,Ele_All,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bVariableCastrate,-10;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bMatkRate,5;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bSpl,2;
+               bonus bCon,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910212
+    AegisName: Fenda_Circlet_KO
+    Name: Fenda Crown of Good and Evil (Kagerou/Oboro)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      KagerouOboro: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus2 bMagicAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      bonus2 bMagicAtkEle,Ele_All,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bDelayrate,-5;
+            bonus bVariableCastrate,-5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bMatkRate,5;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910213
+    AegisName: Fenda_Circlet_SJ
+    Name: Fenda Crown of Good and Evil (Star Emperor)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      StarGladiator: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus bShortAtkRate,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bDelayrate,-5;
+            bonus bVariableCastrate,-5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910214
+    AegisName: Fenda_Circlet_SP
+    Name: Fenda Crown of Good and Evil (Soul Reaper)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      SoulLinker: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bMagicAddRace,RC_All,5*(.@r/3);
+      bonus2 bMagicAtkEle,Ele_All,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bVariableCastrate,-10;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bMatkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910215
+    AegisName: Fenda_Circlet_HN
+    Name: Fenda Crown of Good and Evil (Hyper Novice)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      SuperNovice: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus2 bMagicAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      bonus2 bMagicAtkEle,Ele_Ghost,7*(.@r/4);
+      bonus2 bMagicAtkEle,Ele_Neutral,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bDelayrate,-5;
+            bonus bVariableCastrate,-5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bMatkRate,5;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910216
+    AegisName: Fenda_Circlet_SU
+    Name: Fenda Crown of Good and Evil (Summoner)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Summoner: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus2 bMagicAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      bonus2 bMagicAtkEle,Ele_Ghost,7*(.@r/4);
+      bonus2 bMagicAtkEle,Ele_Neutral,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bVariableCastrate,-5;
+            bonus bCritical,5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bMatkRate,5;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910217
+    AegisName: Fenda_Circlet_RL_GL
+    # Name: Crown of Good and Evil (Night Watch - Grenade Launcher)
+    Name: Fenda Crown of Good and Evil (Rebellion GL)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Rebellion: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bDelayrate,-5;
+            bonus bAspdRate,5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910218
+    AegisName: Fenda_Circlet_RL_REV
+    Name: Fenda Crown of Good and Evil (Rebellion Revolver)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Rebellion: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bDelayrate,-5;
+            bonus bAspdRate,5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910219
+    AegisName: Fenda_Circlet_RL_GAT
+    Name: Fenda Crown of Good and Evil (Rebellion Gatling)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Rebellion: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bDelayrate,-5;
+            bonus bAspdRate,5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910220
+    AegisName: Fenda_Circlet_RL_SHOT
+    Name: Fenda Crown of Good and Evil (Rebellion Shotgun)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Rebellion: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bDelayrate,-5;
+            bonus bAspdRate,5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+  - Id: 910221
+    AegisName: Fenda_Circlet_RL_RIFLE
+    Name: Fenda Crown of Good and Evil (Rebellion Rifle)
+    Type: Armor
+    Weight: 100
+    Defense: 10
+    Slots: 1
+    Jobs:
+      Rebellion: true
+    Locations:
+      Head_Top: true
+    ArmorLevel: 2
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    View: 2332
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus2 bAddRace,RC_All,5*(.@r/3);
+      bonus bLongAtkRate,7*(.@r/4);
+      if (.@r>=7) {
+         bonus bRes,50;
+         if (.@r>=9) {
+            bonus bDelayrate,-5;
+            bonus bAspdRate,5;
+            if (.@r>=11) {
+               bonus bFixedCast,-300;
+               bonus bAtkRate,5;
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bMaxHPrate,5;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
+            bonus bSMatk,3;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus bPAtk,2;
+               bonus bSMatk,2;
+               bonus bPow,2;
+               bonus bSpl,2;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus bMRes,50;
+                  bonus bRes,50;
+                  if (.@r>=12) {
+                     bonus bFixedCast,-200;
+                  }
+               }
+            }
+         }
+      }
+
+
+  - Id: 910100
+    AegisName: Fenda_Holy_RK_Weapon
+    Name: Fenda Holy RK Weapon
+    Type: Weapon
+    SubType: 2hSpear
+    Weight: 5000
+    Attack: 300
+    Range: 3
+    Slots: 2
+    Jobs:
+      Knight: true
+    Classes:
+      All_Third: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bMaxHPrate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"RK_DRAGONBREATH_WATER",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"RK_DRAGONBREATH_WATER",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"RK_DRAGONBREATH_WATER",10;
+               if (.@r>=10) {
+                  bonus bDelayrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"RK_DRAGONBREATH",15;
+                     bonus2 bSkillAtk,"RK_DRAGONBREATH_WATER",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910101
+    AegisName: Fenda_Dark_RK_Weapon
+    Name: Fenda Dark RK Weapon
+    Type: Weapon
+    SubType: 2hSword
+    Weight: 4200
+    Attack: 280
+    Range: 1
+    Slots: 2
+    Jobs:
+      Knight: true
+    Classes:
+      All_Third: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"RK_IGNITIONBREAK",5;
+      bonus2 bSkillAtk,"RK_HUNDREDSPEAR",5;
+      bonus2 bSkillAtk,"RK_SONICWAVE",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"RK_IGNITIONBREAK",10;
+         if (.@r>=7) {
+            bonus bShortAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"RK_IGNITIONBREAK",10;
+               if (.@r>=10) {
+                  bonus bAspdRate,10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"RK_WINDCUTTER",15;
+                     bonus2 bSkillAtk,"RK_IGNITIONBREAK",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bShortAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910102
+    AegisName: Fenda_Holy_LG_Weapon
+    Name: Fenda Holy LG Weapon
+    Type: Weapon
+    SubType: 1hSpear
+    Weight: 2000
+    Attack: 210
+    Range: 3
+    Slots: 2
+    Jobs:
+      Crusader: true
+    Classes:
+      All_Third: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"LG_EARTHDRIVE",5;
+      bonus2 bSkillAtk,"LG_OVERBRAND",5;
+      bonus2 bSkillAtk,"LG_BANISHINGPOINT",5;
+      bonus2 bSkillAtk,"LG_CANNONSPEAR",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"LG_EARTHDRIVE",10;
+         bonus2 bSkillAtk,"LG_OVERBRAND",10;
+         bonus2 bSkillAtk,"LG_BANISHINGPOINT",10;
+         bonus2 bSkillAtk,"LG_CANNONSPEAR",10;
+         if (.@r>=7) {
+            bonus bShortAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"LG_EARTHDRIVE",10;
+               bonus2 bSkillAtk,"LG_OVERBRAND",10;
+               bonus2 bSkillAtk,"LG_BANISHINGPOINT",10;
+               bonus2 bSkillAtk,"LG_CANNONSPEAR",10;
+               if (.@r>=10) {
+                  bonus bAspdRate,10;
+                  if (.@r>=11) {
+                     bonus bShortAtkRate,15;
+                     bonus2 bSkillAtk,"LG_EARTHDRIVE",5;
+                     bonus2 bSkillAtk,"LG_OVERBRAND",5;
+                     bonus2 bSkillAtk,"LG_BANISHINGPOINT",5;
+                     bonus2 bSkillAtk,"LG_CANNONSPEAR",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bShortAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910103
+    AegisName: Fenda_Dark_LG_Weapon
+    Name: Fenda Dark LG Weapon
+    Type: Weapon
+    SubType: 1hSword
+    Weight: 1800
+    Attack: 100
+    MagicAttack: 220
+    Range: 1
+    Slots: 2
+    Jobs:
+      Crusader: true
+    Classes:
+      All_Third: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bMatkRate,5;
+      bonus bSpl,2;
+      bonus2 bSkillAtk,"LG_RAYOFGENESIS",5;
+      bonus2 bSkillAtk,"PA_PRESSURE",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"LG_RAYOFGENESIS",10;
+         bonus2 bSkillAtk,"PA_PRESSURE",10;
+         if (.@r>=7) {
+            bonus2 bMagicAtkEle,Ele_Holy,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"LG_RAYOFGENESIS",10;
+               bonus2 bSkillAtk,"PA_PRESSURE",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bMagicAtkEle,Ele_Holy,15;
+                     bonus2 bSkillAtk,"LG_RAYOFGENESIS",5;
+                     bonus2 bSkillAtk,"PA_PRESSURE",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus2 bMagicAtkEle,Ele_Holy,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bMagicAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bMagicAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bMagicAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910104
+    AegisName: Fenda_Holy_WL_Weapon
+    Name: Fenda Holy WL Weapon
+    Type: Weapon
+    SubType: 2hStaff
+    Weight: 1200
+    Attack: 110
+    MagicAttack: 290
+    Range: 1
+    Slots: 2
+    Jobs:
+      Wizard: true
+    Classes:
+      All_Third: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bMatkRate,5;
+      bonus bSpl,2;
+      bonus2 bSkillAtk,"WL_EARTHSTRAIN",5;
+      bonus2 bSkillAtk,"WL_CHAINLIGHTNING_ATK",5;
+      bonus2 bSkillAtk,"WL_JACKFROST",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"WL_EARTHSTRAIN",10;
+         if (.@r>=7) {
+            bonus2 bMagicAtkEle,Ele_Water,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"WL_EARTHSTRAIN",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"WL_CRIMSONROCK",15;
+                     bonus2 bSkillAtk,"WL_EARTHSTRAIN",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus2 bMagicAtkEle,Ele_Water,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bMagicAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bMagicAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bMagicAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910105
+    AegisName: Fenda_Dark_WL_Weapon
+    Name: Fenda Dark WL Weapon
+    Type: Weapon
+    SubType: 2hStaff
+    Weight: 1400
+    Attack: 95
+    MagicAttack: 290
+    Range: 1
+    Slots: 2
+    Jobs:
+      Wizard: true
+    Classes:
+      All_Third: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bMatkRate,5;
+      bonus bSpl,2;
+      bonus2 bSkillAtk,"WL_TETRAVORTEX",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"WL_TETRAVORTEX",10;
+         if (.@r>=7) {
+            bonus2 bMagicAtkEle,Ele_Dark,5;
+            bonus2 bMagicAtkEle,Ele_Ghost,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"WL_TETRAVORTEX",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"WL_COMET",15;
+                     bonus2 bSkillAtk,"WL_TETRAVORTEX",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus2 bMagicAtkEle,Ele_Dark,10;
+         bonus2 bMagicAtkEle,Ele_Ghost,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bMagicAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bMagicAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bMagicAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910106
+    AegisName: Fenda_Holy_SO_Weapon
+    Name: Fenda Holy SO Weapon
+    Type: Weapon
+    SubType: Book
+    Weight: 800
+    Attack: 60
+    MagicAttack: 220
+    Range: 1
+    Slots: 2
+    Jobs:
+      Sage: true
+    Classes:
+      All_Third: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bMatkRate,5;
+      bonus bSpl,2;
+      bonus2 bSkillAtk,"SO_VARETYR_SPEAR",5;
+      bonus2 bSkillAtk,"SO_DIAMONDDUST",5;
+      bonus2 bSkillAtk,"SO_EARTHGRAVE",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"SO_VARETYR_SPEAR",10;
+         if (.@r>=7) {
+            bonus2 bMagicAtkEle,Ele_Earth,5;
+            bonus2 bMagicAtkEle,Ele_Water,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"SO_VARETYR_SPEAR",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"SO_PSYCHIC_WAVE",15;
+                     bonus2 bSkillAtk,"SO_VARETYR_SPEAR",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus2 bMagicAtkEle,Ele_Earth,10;
+         bonus2 bMagicAtkEle,Ele_Water,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bMagicAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bMagicAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bMagicAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910107
+    AegisName: Fenda_Dark_SO_Weapon
+    Name: Fenda Dark SO Weapon
+    Type: Weapon
+    SubType: Book
+    Weight: 1100
+    Attack: 120
+    MagicAttack: 220
+    Range: 1
+    Slots: 2
+    Jobs:
+      Sage: true
+    Classes:
+      All_Third: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bMatkRate,5;
+      bonus bSpl,2;
+      bonus2 bSkillAtk,"SO_POISON_BUSTER",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"SO_POISON_BUSTER",10;
+         if (.@r>=7) {
+            bonus2 bMagicAtkEle,Ele_Poison,5;
+            bonus2 bMagicAtkEle,Ele_Fire,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"SO_POISON_BUSTER",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"SO_CLOUD_KILL",15;
+                     bonus2 bSkillAtk,"SO_POISON_BUSTER",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus2 bMagicAtkEle,Ele_Poison,10;
+         bonus2 bMagicAtkEle,Ele_Fire,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bMagicAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bMagicAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bMagicAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910108
+    AegisName: Fenda_Holy_AB_Weapon
+    Name: Fenda Holy AB Weapon
+    Type: Weapon
+    SubType: Staff
+    Weight: 1000
+    Attack: 60
+    MagicAttack: 220
+    Range: 1
+    Slots: 2
+    Jobs:
+      Priest: true
+    Classes:
+      All_Third: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bMatkRate,5;
+      bonus bSpl,2;
+      bonus2 bSkillAtk,"PR_MAGNUS",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"PR_MAGNUS",10;
+         if (.@r>=7) {
+            bonus2 bMagicAtkEle,Ele_Holy,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"PR_MAGNUS",10;
+               if (.@r>=10) {
+                  bonus bDelayrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"AB_ADORAMUS",15;
+                     bonus2 bSkillAtk,"AB_JUDEX",15;
+                     bonus2 bSkillAtk,"PR_MAGNUS",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus2 bMagicAtkEle,Ele_Holy,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bMagicAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bMagicAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bMagicAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910109
+    AegisName: Fenda_Dark_AB_Weapon
+    Name: Fenda Dark AB Weapon
+    Type: Weapon
+    SubType: Book
+    Weight: 1000
+    Attack: 210
+    Range: 1
+    Slots: 2
+    Jobs:
+      Priest: true
+    Classes:
+      All_Third: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"AB_DUPLELIGHT_MELEE",5;
+      bonus2 bSkillAtk,"AB_DUPLELIGHT_MAGIC",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"AB_DUPLELIGHT_MELEE",10;
+         bonus2 bSkillAtk,"AB_DUPLELIGHT_MAGIC",10;
+         if (.@r>=7) {
+            bonus bShortAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"AB_DUPLELIGHT_MELEE",10;
+               bonus2 bSkillAtk,"AB_DUPLELIGHT_MAGIC",10;
+               if (.@r>=10) {
+                  bonus bCritical,10;
+                  if (.@r>=11) {
+                     bonus bCritAtkRate,20;
+                     bonus2 bSkillAtk,"AB_DUPLELIGHT_MELEE",5;
+                     bonus2 bSkillAtk,"AB_DUPLELIGHT_MAGIC",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bShortAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910110
+    AegisName: Fenda_Holy_SR_Weapon
+    Name: Fenda Holy SR Weapon
+    Type: Weapon
+    SubType: Mace
+    Weight: 1500
+    Attack: 210
+    Range: 1
+    Slots: 2
+    Jobs:
+      Monk: true
+    Classes:
+      All_Third: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"SR_FALLENEMPIRE",5;
+      bonus2 bSkillAtk,"SR_RAMPAGEBLASTER",5;
+      bonus2 bSkillAtk,"SR_RIDEINLIGHTNING",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"SR_FALLENEMPIRE",10;
+         if (.@r>=7) {
+            bonus bShortAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"SR_FALLENEMPIRE",10;
+               if (.@r>=10) {
+                  bonus bCritical,10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"SR_TIGERCANNON",15;
+                     bonus2 bSkillAtk,"SR_FALLENEMPIRE",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bShortAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910111
+    AegisName: Fenda_Dark_SR_Weapon
+    Name: Fenda Dark SR Weapon
+    Type: Weapon
+    SubType: Knuckle
+    Weight: 1500
+    Attack: 210
+    Range: 1
+    Slots: 2
+    Jobs:
+      Monk: true
+    Classes:
+      All_Third: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"SR_GATEOFHELL",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"SR_GATEOFHELL",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"SR_GATEOFHELL",10;
+               if (.@r>=10) {
+                  bonus bCritical,10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"SR_KNUCKLEARROW",15;
+                     bonus2 bSkillAtk,"SR_GATEOFHELL",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910112
+    AegisName: Fenda_Holy_NC_Weapon
+    Name: Fenda Holy NC Weapon
+    Type: Weapon
+    SubType: 2hAxe
+    Weight: 6600
+    Attack: 330
+    Range: 1
+    Slots: 2
+    Jobs:
+      Blacksmith: true
+    Classes:
+      All_Third: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"NC_BOOSTKNUCKLE",5;
+      bonus2 bSkillAtk,"NC_AXETORNADO",5;
+      bonus2 bSkillAtk,"NC_POWERSWING",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"NC_BOOSTKNUCKLE",10;
+         if (.@r>=7) {
+            bonus bShortAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"NC_BOOSTKNUCKLE",10;
+               if (.@r>=10) {
+                  bonus bAspdRate,10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"NC_ARMSCANNON",15;
+                     bonus2 bSkillAtk,"NC_BOOSTKNUCKLE",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bShortAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910113
+    AegisName: Fenda_Dark_NC_Weapon
+    Name: Fenda Dark NC Weapon
+    Type: Weapon
+    SubType: 1hAxe
+    Weight: 4400
+    Attack: 200
+    Range: 1
+    Slots: 2
+    Jobs:
+      Alchemist: true
+      Blacksmith: true
+      Crusader: true
+      Knight: true
+      Merchant: true
+      Swordman: true
+      SuperNovice: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@r = getrefine();
+      if (.@r>0) {
+        bonus bLongAtkRate,10 * .@r;
+        bonus bShortAtkRate,10 * .@r;
+        bonus bAtk,10 * .@r;
+      }
+      bonus bCritAtkRate,20;
+      bonus bLongAtkRate,75;
+      bonus bShortAtkRate,75;
+      bonus bCritical,30;
+      bonus bAspdRate,25;
+
+      bonus bMaxHPRate,20;
+      bonus bMaxSPRate,20;
+
+      .@g = getenchantgrade();
+
+      if (.@g >= ENCHANTGRADE_D) {
+          bonus bLongAtkRate,25;
+          bonus bShortAtkRate,25;
+          bonus bAtk,25;
+          if (.@g >= ENCHANTGRADE_C) {
+              bonus bLongAtkRate,25;
+              bonus bShortAtkRate,25;
+              bonus bAtk,25;
+              if (.@g >= ENCHANTGRADE_B) {
+                  bonus bCastRate, -.@r;
+                  bonus bLongAtkRate,25;
+                  bonus bShortAtkRate,25;
+                  bonus bAtk,25;
+                  if (.@g >= ENCHANTGRADE_A) {
+                      bonus bDelayRate, -.@r;
+                      bonus bLongAtkRate,25;
+                      bonus bShortAtkRate,25;
+                      bonus bAtk,25;
+                  }
+              }
+          }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910114
+    AegisName: Fenda_Holy_GN_Weapon
+    Name: Fenda Holy GN Weapon
+    Type: Weapon
+    SubType: 1hSword
+    Weight: 1500
+    Attack: 210
+    Range: 1
+    Slots: 2
+    Jobs:
+      Alchemist: true
+    Classes:
+      All_Third: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"GN_CART_TORNADO",5;
+      bonus2 bSkillAtk,"GN_HELLS_PLANT",5;
+      bonus2 bSkillAtk,"GN_CRAZYWEED_ATK",5;
+      bonus2 bSkillAtk,"GN_CARTCANNON",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"GN_CART_TORNADO",10;
+         bonus2 bSkillAtk,"GN_HELLS_PLANT",10;
+         bonus2 bSkillAtk,"GN_CRAZYWEED_ATK",10;
+         bonus2 bSkillAtk,"GN_CARTCANNON",10;
+         if (.@r>=7) {
+            bonus bShortAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"GN_CART_TORNADO",10;
+               bonus2 bSkillAtk,"GN_HELLS_PLANT",10;
+               bonus2 bSkillAtk,"GN_CRAZYWEED_ATK",10;
+               bonus2 bSkillAtk,"GN_CARTCANNON",10;
+               if (.@r>=10) {
+                  bonus bAspdRate,10;
+                  if (.@r>=11) {
+                     bonus bShortAtkRate,15;
+                     bonus2 bSkillAtk,"GN_CART_TORNADO",5;
+                     bonus2 bSkillAtk,"GN_HELLS_PLANT",5;
+                     bonus2 bSkillAtk,"GN_CRAZYWEED_ATK",5;
+                     bonus2 bSkillAtk,"GN_CARTCANNON",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bShortAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910115
+    AegisName: Fenda_Dark_GN_Weapon
+    Name: Fenda Dark GN Weapon
+    Type: Weapon
+    SubType: 1hSword
+    Weight: 1500
+    Attack: 210
+    Range: 1
+    Slots: 2
+    Jobs:
+      Alchemist: true
+    Classes:
+      All_Third: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"CR_ACIDDEMONSTRATION",5;
+      bonus2 bSkillAtk,"GN_SPORE_EXPLOSION",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"CR_ACIDDEMONSTRATION",10;
+         bonus2 bSkillAtk,"GN_SPORE_EXPLOSION",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"CR_ACIDDEMONSTRATION",10;
+               bonus2 bSkillAtk,"GN_SPORE_EXPLOSION",10;
+               if (.@r>=10) {
+                  bonus bCritical,10;
+                  if (.@r>=11) {
+                     bonus bCritAtkRate,20;
+                     bonus2 bSkillAtk,"CR_ACIDDEMONSTRATION",5;
+                     bonus2 bSkillAtk,"GN_SPORE_EXPLOSION",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910116
+    AegisName: Fenda_Holy_GC_Weapon
+    Name: Fenda Holy GC Weapon
+    Type: Weapon
+    SubType: Katar
+    Weight: 1000
+    Attack: 290
+    Range: 1
+    Slots: 2
+    Jobs:
+      Assassin: true
+    Classes:
+      All_Third: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"GC_CROSSRIPPERSLASHER",5;
+      bonus2 bSkillAtk,"GC_COUNTERSLASH",5;
+      bonus2 bSkillAtk,"ASC_BREAKER",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"GC_CROSSRIPPERSLASHER",10;
+         if (.@r>=7) {
+            bonus bShortAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"GC_CROSSRIPPERSLASHER",10;
+               if (.@r>=10) {
+                  bonus bAspdRate,10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"GC_ROLLINGCUTTER",15;
+                     bonus2 bSkillAtk,"GC_CROSSRIPPERSLASHER",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bShortAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910117
+    AegisName: Fenda_Dark_GC_Weapon
+    Name: Fenda Dark GC Weapon
+    Type: Weapon
+    SubType: Katar
+    Weight: 1100
+    Attack: 290
+    Range: 1
+    Slots: 2
+    Jobs:
+      Assassin: true
+    Classes:
+      All_Third: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"GC_CROSSIMPACT",5;
+      bonus2 bSkillAtk,"AS_SONICBLOW",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"GC_CROSSIMPACT",10;
+         bonus2 bSkillAtk,"AS_SONICBLOW",10;
+         if (.@r>=7) {
+            bonus bShortAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"GC_CROSSIMPACT",10;
+               bonus2 bSkillAtk,"AS_SONICBLOW",10;
+               if (.@r>=10) {
+                  bonus bAspdRate,10;
+                  if (.@r>=11) {
+                     bonus bShortAtkRate,15;
+                     bonus2 bSkillAtk,"GC_CROSSIMPACT",5;
+                     bonus2 bSkillAtk,"AS_SONICBLOW",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bShortAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910118
+    AegisName: Fenda_Holy_SC_Weapon
+    Name: Fenda Holy SC Weapon
+    Type: Weapon
+    SubType: Dagger
+    Weight: 800
+    Attack: 205
+    Range: 1
+    Slots: 2
+    Jobs:
+      Rogue: true
+    Classes:
+      All_Third: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"SC_FATALMENACE",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"SC_FATALMENACE",10;
+         if (.@r>=7) {
+            bonus bShortAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"SC_FATALMENACE",10;
+               if (.@r>=10) {
+                  bonus bAspdRate,10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"RG_RAID",15;
+                     bonus2 bSkillAtk,"SC_FATALMENACE",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bShortAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910119
+    AegisName: Fenda_Dark_SC_Weapon
+    Name: Fenda Dark SC Weapon
+    Type: Weapon
+    SubType: Bow
+    Weight: 1500
+    Attack: 280
+    Range: 5
+    Slots: 2
+    Jobs:
+      Rogue: true
+    Classes:
+      All_Third: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus2 bSkillAtk,"SC_TRIANGLESHOT",5;
+      bonus2 bSkillAtk,"SC_TRIANGLESHOT",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"SC_TRIANGLESHOT",10;
+         bonus2 bSkillAtk,"SC_TRIANGLESHOT",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"SC_TRIANGLESHOT",10;
+               bonus2 bSkillAtk,"SC_TRIANGLESHOT",10;
+               if (.@r>=10) {
+                  bonus bCritical,10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"SC_TRIANGLESHOT",15;
+                     bonus2 bSkillAtk,"SC_TRIANGLESHOT",5;
+                     bonus2 bSkillAtk,"SC_TRIANGLESHOT",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910120
+    AegisName: Fenda_Holy_RA_Weapon
+    Name: Fenda Holy RA Weapon
+    Type: Weapon
+    SubType: Bow
+    Weight: 1500
+    Attack: 290
+    Range: 5
+    Slots: 2
+    Jobs:
+      Hunter: true
+    Classes:
+      All_Third: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus2 bSkillAtk,"SN_SHARPSHOOTING",5;
+      bonus2 bSkillAtk,"RA_AIMEDBOLT",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"SN_SHARPSHOOTING",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"SN_SHARPSHOOTING",10;
+               if (.@r>=10) {
+                  bonus bCritical,10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"RA_ARROWSTORM",15;
+                     bonus2 bSkillAtk,"SN_SHARPSHOOTING",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910121
+    AegisName: Fenda_Dark_RA_Weapon
+    Name: Fenda Dark RA Weapon
+    Type: Weapon
+    SubType: Dagger
+    Weight: 1000
+    Attack: 180
+    Range: 1
+    Slots: 2
+    Jobs:
+      Hunter: true
+    Classes:
+      All_Third: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus2 bSkillAtk,"RA_CLUSTERBOMB",5;
+      bonus2 bSkillAtk,"RA_CLUSTERBOMB",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"RA_CLUSTERBOMB",10;
+         bonus2 bSkillAtk,"RA_CLUSTERBOMB",10;
+         if (.@r>=7) {
+            bonus bShortAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"RA_CLUSTERBOMB",10;
+               bonus2 bSkillAtk,"RA_CLUSTERBOMB",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"RA_CLUSTERBOMB",15;
+                     bonus2 bSkillAtk,"RA_CLUSTERBOMB",15;
+                     bonus2 bSkillAtk,"RA_CLUSTERBOMB",5;
+                     bonus2 bSkillAtk,"RA_CLUSTERBOMB",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bShortAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910122
+    AegisName: Fenda_Holy_WM_HARP_Weapon
+    Name: Fenda Holy WM_HARP Weapon
+    Type: Weapon
+    SubType: Musical
+    Weight: 2000
+    Attack: 200
+    Range: 1
+    Slots: 2
+    Jobs:
+      BardDancer: true
+    Classes:
+      All_Third: true
+    Gender: Male
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM_MELEE",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM_MELEE",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM_MELEE",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"CG_ARROWVULCAN",15;
+                     bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM_MELEE",15;
+                     bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM_MELEE",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910123
+    AegisName: Fenda_Dark_WM_HARP_Weapon
+    Name: Fenda Dark WM_HARP Weapon
+    Type: Weapon
+    SubType: Musical
+    Weight: 1100
+    Attack: 120
+    MagicAttack: 220
+    Range: 1
+    Slots: 2
+    Jobs:
+      BardDancer: true
+    Classes:
+      All_Third: true
+    Gender: Male
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bMatkRate,5;
+      bonus bSpl,2;
+      bonus2 bSkillAtk,"WM_METALICSOUND",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"WM_METALICSOUND",10;
+         if (.@r>=7) {
+            bonus2 bMagicAtkEle,Ele_All,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"WM_METALICSOUND",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"WM_METALICSOUND",15;
+                     bonus2 bSkillAtk,"WM_METALICSOUND",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus2 bMagicAtkEle,Ele_All,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bMagicAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bMagicAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bMagicAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910124
+    AegisName: Fenda_Holy_WM_WHIP_Weapon
+    Name: Fenda Holy WM_WHIP Weapon
+    Type: Weapon
+    SubType: Whip
+    Weight: 2000
+    Attack: 200
+    Range: 2
+    Slots: 2
+    Jobs:
+      BardDancer: true
+    Classes:
+      All_Third: true
+    Gender: Female
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM_MELEE",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM_MELEE",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM_MELEE",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"CG_ARROWVULCAN",15;
+                     bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM_MELEE",15;
+                     bonus2 bSkillAtk,"WM_SEVERE_RAINSTORM_MELEE",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910125
+    AegisName: Fenda_Dark_WM_WHIP_Weapon
+    Name: Fenda Dark WM_WHIP Weapon
+    Type: Weapon
+    SubType: Whip
+    Weight: 1100
+    Attack: 120
+    MagicAttack: 220
+    Range: 2
+    Slots: 2
+    Jobs:
+      BardDancer: true
+    Classes:
+      All_Third: true
+    Gender: Female
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bMatkRate,5;
+      bonus bSpl,2;
+      bonus2 bSkillAtk,"WM_REVERBERATION",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"WM_REVERBERATION",10;
+         if (.@r>=7) {
+            bonus2 bMagicAtkEle,Ele_All,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"WM_REVERBERATION",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"WM_REVERBERATION",15;
+                     bonus2 bSkillAtk,"WM_REVERBERATION",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus2 bMagicAtkEle,Ele_All,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bMagicAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bMagicAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bMagicAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910126
+    AegisName: Fenda_Holy_KO_Weapon
+    Name: Fenda Holy KO Weapon
+    Type: Weapon
+    SubType: Huuma
+    Weight: 2600
+    Attack: 330
+    Range: 1
+    Slots: 2
+    Jobs:
+      KagerouOboro: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"KO_HUUMARANKA",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"KO_HUUMARANKA",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"KO_HUUMARANKA",10;
+               if (.@r>=10) {
+                  bonus bDelayrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"KO_JYUMONJIKIRI",15;
+                     bonus2 bSkillAtk,"KO_HUUMARANKA",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910127
+    AegisName: Fenda_Dark_KO_Weapon
+    Name: Fenda Dark KO Weapon
+    Type: Weapon
+    SubType: Huuma
+    Weight: 2000
+    Attack: 100
+    MagicAttack: 330
+    Range: 1
+    Slots: 2
+    Jobs:
+      KagerouOboro: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bMatkRate,5;
+      bonus bSpl,2;
+      bonus2 bSkillAtk,"NJ_KOUENKA",5;
+      bonus2 bSkillAtk,"NJ_HUUJIN",5;
+      bonus2 bSkillAtk,"NJ_BAKUENRYU",5;
+      bonus2 bSkillAtk,"NJ_HYOUSYOURAKU",5;
+      bonus2 bSkillAtk,"NJ_KAMAITACHI",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"NJ_KOUENKA",10;
+         if (.@r>=7) {
+            bonus2 bMagicAtkEle,Ele_Fire,5;
+            bonus2 bMagicAtkEle,Ele_Dark,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"NJ_KOUENKA",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"NJ_HYOUSENSOU",15;
+                     bonus2 bSkillAtk,"NJ_KOUENKA",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus2 bMagicAtkEle,Ele_Fire,10;
+         bonus2 bMagicAtkEle,Ele_Dark,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bMagicAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bMagicAddRace,RC_All,10;
+               bonus2 bMagicAddRace,RC_Player_Human,-10;
+               bonus2 bMagicAddRace,RC_Player_Doram,-10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bMagicAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910128
+    AegisName: Fenda_Holy_SJ_Weapon
+    Name: Fenda Holy SJ Weapon
+    Type: Weapon
+    SubType: Book
+    Weight: 1000
+    Attack: 200
+    Range: 1
+    Slots: 2
+    Jobs:
+      StarGladiator: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"SJ_SOLARBURST",5;
+      bonus2 bSkillAtk,"SJ_FULLMOONKICK",5;
+      bonus2 bSkillAtk,"SJ_NEWMOONKICK",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"SJ_SOLARBURST",10;
+         if (.@r>=7) {
+            bonus bShortAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"SJ_SOLARBURST",10;
+               if (.@r>=10) {
+                  bonus bDelayrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"SJ_PROMINENCEKICK",15;
+                     bonus2 bSkillAtk,"SJ_SOLARBURST",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bShortAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910129
+    AegisName: Fenda_Dark_SJ_Weapon
+    Name: Fenda Dark SJ Weapon
+    Type: Weapon
+    SubType: Book
+    Weight: 1000
+    Attack: 200
+    Range: 1
+    Slots: 2
+    Jobs:
+      StarGladiator: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"SJ_FALLINGSTAR_ATK",5;
+      bonus2 bSkillAtk,"SJ_FLASHKICK",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"SJ_FALLINGSTAR_ATK",10;
+         if (.@r>=7) {
+            bonus bShortAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"SJ_FALLINGSTAR_ATK",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"SJ_FALLINGSTAR_ATK2",15;
+                     bonus2 bSkillAtk,"SJ_FALLINGSTAR_ATK",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bShortAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910130
+    AegisName: Fenda_Holy_SP_Weapon
+    Name: Fenda Holy SP Weapon
+    Type: Weapon
+    SubType: Staff
+    Weight: 1100
+    Attack: 70
+    MagicAttack: 220
+    Range: 1
+    Slots: 2
+    Jobs:
+      SoulLinker: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bMatkRate,5;
+      bonus bSpl,2;
+      bonus2 bSkillAtk,"SL_SMA",5;
+      bonus2 bSkillAtk,"SP_SPA",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"SL_SMA",10;
+         if (.@r>=7) {
+            bonus2 bMagicAtkEle,Ele_All,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"SL_SMA",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"SP_SWHOO",15;
+                     bonus2 bSkillAtk,"SL_SMA",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus2 bMagicAtkEle,Ele_All,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bMagicAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bMagicAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bMagicAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910131
+    AegisName: Fenda_Dark_SP_Weapon
+    Name: Fenda Dark SP Weapon
+    Type: Weapon
+    SubType: Staff
+    Weight: 900
+    Attack: 100
+    MagicAttack: 220
+    Range: 1
+    Slots: 2
+    Jobs:
+      SoulLinker: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bMatkRate,5;
+      bonus bSpl,2;
+      bonus2 bSkillAtk,"SP_CURSEEXPLOSION",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"SP_CURSEEXPLOSION",10;
+         if (.@r>=7) {
+            bonus2 bMagicAtkEle,Ele_All,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"SP_CURSEEXPLOSION",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"SP_CURSEEXPLOSION",15;
+                     bonus2 bSkillAtk,"SP_CURSEEXPLOSION",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus2 bMagicAtkEle,Ele_All,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bMagicAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bMagicAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bMagicAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910132
+    AegisName: Fenda_Holy_HN_Weapon
+    Name: Fenda Holy HN Weapon
+    Type: Weapon
+    SubType: 1hSword
+    Weight: 1100
+    Attack: 210
+    Range: 1
+    Slots: 2
+    Jobs:
+      SuperNovice: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"RK_DRAGONBREATH_WATER",5;
+      bonus2 bSkillAtk,"RK_HUNDREDSPEAR",5;
+      bonus2 bSkillAtk,"RK_SONICWAVE",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"RK_DRAGONBREATH_WATER",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"RK_DRAGONBREATH_WATER",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"RK_DRAGONBREATH",15;
+                     bonus2 bSkillAtk,"RK_DRAGONBREATH_WATER",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910133
+    AegisName: Fenda_Dark_HN_Weapon
+    Name: Fenda Dark HN Weapon
+    Type: Weapon
+    SubType: 1hSword
+    Weight: 1200
+    Attack: 110
+    MagicAttack: 220
+    Range: 1
+    Slots: 2
+    Jobs:
+      SuperNovice: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bMatkRate,5;
+      bonus bSpl,2;
+      bonus2 bSkillAtk,"RK_IGNITIONBREAK",5;
+      bonus2 bSkillAtk,"WL_TETRAVORTEX",5;
+      bonus2 bSkillAtk,"WL_COMET",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"RK_IGNITIONBREAK",10;
+         if (.@r>=7) {
+            bonus2 bMagicAtkEle,Ele_Neutral,5;
+            bonus2 bMagicAtkEle,Ele_Ghost,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"RK_IGNITIONBREAK",10;
+               if (.@r>=10) {
+                  bonus bDelayrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"RK_WINDCUTTER",15;
+                     bonus2 bSkillAtk,"RK_IGNITIONBREAK",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus2 bMagicAtkEle,Ele_Neutral,10;
+         bonus2 bMagicAtkEle,Ele_Ghost,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bMagicAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bMagicAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bMagicAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910134
+    AegisName: Fenda_Holy_SU_Weapon
+    Name: Fenda Holy SU Weapon
+    Type: Weapon
+    SubType: Staff
+    Weight: 1500
+    Attack: 330
+    Range: 1
+    Slots: 2
+    Jobs:
+      Summoner: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bAtkRate,5;
+      bonus bPow,2;
+      bonus2 bSkillAtk,"SU_LUNATICCARROTBEAT",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"SU_LUNATICCARROTBEAT",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"SU_LUNATICCARROTBEAT",10;
+               if (.@r>=10) {
+                  bonus bCritical,10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"SU_LUNATICCARROTBEAT",5;
+                     bonus2 bSkillAtk,"SU_PICKYPECK",15;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910135
+    AegisName: Fenda_Dark_SU_Weapon
+    Name: Fenda Dark SU Weapon
+    Type: Weapon
+    SubType: Staff
+    Weight: 1400
+    Attack: 150
+    MagicAttack: 330
+    Range: 1
+    Slots: 2
+    Jobs:
+      Summoner: true
+    Locations:
+      Right_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bUnbreakableWeapon;
+      bonus bMatkRate,5;
+      bonus bSpl,2;
+      bonus2 bSkillAtk,"SU_SV_STEMSPEAR",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"SU_SV_STEMSPEAR",10;
+         if (.@r>=7) {
+            bonus2 bMagicAtkEle,Ele_All,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"SU_SV_STEMSPEAR",10;
+               if (.@r>=10) {
+                  bonus bVariableCastrate,-10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"SU_CN_METEOR",15;
+                     bonus2 bSkillAtk,"SU_SV_STEMSPEAR",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus2 bMagicAtkEle,Ele_All,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bMagicAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bMagicAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bMagicAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+  - Id: 910136
+    AegisName: Fenda_Holy_RL_GL_Weapon
+    Name: Fenda Holy RL_GL Weapon
+    Type: Weapon
+    SubType: Grenade
+    Weight: 2600
+    Attack: 330
+    Range: 9
+    Slots: 2
+    Jobs:
+      Rebellion: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus2 bSkillAtk,"RL_BANISHING_BUSTER",5;
+      bonus2 bSkillAtk,"RL_R_TRIP",5;
+      bonus2 bSkillAtk,"RL_S_STORM",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"RL_BANISHING_BUSTER",10;
+         bonus2 bSkillAtk,"RL_R_TRIP",10;
+         bonus2 bSkillAtk,"RL_S_STORM",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"RL_BANISHING_BUSTER",10;
+               bonus2 bSkillAtk,"RL_R_TRIP",10;
+               bonus2 bSkillAtk,"RL_S_STORM",10;
+               if (.@r>=10) {
+                  bonus bDelayrate,-10;
+                  if (.@r>=11) {
+                     bonus bLongAtkRate,15;
+                     bonus2 bSkillAtk,"RL_BANISHING_BUSTER",5;
+                     bonus2 bSkillAtk,"RL_R_TRIP",5;
+                     bonus2 bSkillAtk,"RL_S_STORM",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910137
+    AegisName: Fenda_Dark_RL_GL_Weapon
+    Name: Fenda Dark RL_GL Weapon
+    Type: Weapon
+    SubType: Grenade
+    Weight: 2500
+    Attack: 330
+    Range: 9
+    Slots: 2
+    Jobs:
+      Rebellion: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus2 bSkillAtk,"RL_FIRE_RAIN",5;
+      bonus2 bSkillAtk,"RL_D_TAIL",5;
+      bonus2 bSkillAtk,"RL_H_MINE",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"RL_FIRE_RAIN",10;
+         bonus2 bSkillAtk,"RL_D_TAIL",10;
+         bonus2 bSkillAtk,"RL_H_MINE",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"RL_FIRE_RAIN",10;
+               bonus2 bSkillAtk,"RL_D_TAIL",10;
+               bonus2 bSkillAtk,"RL_H_MINE",10;
+               if (.@r>=10) {
+                  bonus bDelayrate,-10;
+                  if (.@r>=11) {
+                     bonus bLongAtkRate,15;
+                     bonus2 bSkillAtk,"RL_FIRE_RAIN",5;
+                     bonus2 bSkillAtk,"RL_D_TAIL",5;
+                     bonus2 bSkillAtk,"RL_H_MINE",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910138
+    AegisName: Fenda_Holy_RL_REV_Weapon
+    Name: Fenda Holy RL_REV Weapon
+    Type: Weapon
+    SubType: Revolver
+    Weight: 1700
+    Attack: 250
+    Range: 7
+    Slots: 2
+    Jobs:
+      Rebellion: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus2 bSkillAtk,"GS_DESPERADO",5;
+      bonus2 bSkillAtk,"RL_FIREDANCE",5;
+      bonus2 bSkillAtk,"RL_HAMMER_OF_GOD",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"GS_DESPERADO",10;
+         bonus2 bSkillAtk,"RL_FIREDANCE",10;
+         bonus2 bSkillAtk,"RL_HAMMER_OF_GOD",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"GS_DESPERADO",10;
+               bonus2 bSkillAtk,"RL_FIREDANCE",10;
+               bonus2 bSkillAtk,"RL_HAMMER_OF_GOD",10;
+               if (.@r>=10) {
+                  bonus bCritical,10;
+                  if (.@r>=11) {
+                     bonus bCritAtkRate,20;
+                     bonus2 bSkillAtk,"GS_DESPERADO",5;
+                     bonus2 bSkillAtk,"RL_FIREDANCE",5;
+                     bonus2 bSkillAtk,"RL_HAMMER_OF_GOD",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910139
+    AegisName: Fenda_Dark_RL_REV_Weapon
+    Name: Fenda Dark RL_REV Weapon
+    Type: Weapon
+    SubType: Revolver
+    Weight: 2000
+    Attack: 250
+    Range: 7
+    Slots: 2
+    Jobs:
+      Rebellion: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus2 bSkillAtk,"RL_FIRE_RAIN",5;
+      bonus2 bSkillAtk,"RL_D_TAIL",5;
+      bonus2 bSkillAtk,"RL_H_MINE",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"RL_FIRE_RAIN",10;
+         bonus2 bSkillAtk,"RL_D_TAIL",10;
+         bonus2 bSkillAtk,"RL_H_MINE",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"RL_FIRE_RAIN",10;
+               bonus2 bSkillAtk,"RL_D_TAIL",10;
+               bonus2 bSkillAtk,"RL_H_MINE",10;
+               if (.@r>=10) {
+                  bonus bAspdRate,10;
+                  if (.@r>=11) {
+                     bonus bLongAtkRate,15;
+                     bonus2 bSkillAtk,"RL_FIRE_RAIN",5;
+                     bonus2 bSkillAtk,"RL_D_TAIL",5;
+                     bonus2 bSkillAtk,"RL_H_MINE",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910140
+    AegisName: Fenda_Holy_RL_GAT_Weapon
+    Name: Fenda Holy RL_GAT Weapon
+    Type: Weapon
+    SubType: Gatling
+    Weight: 3000
+    Attack: 295
+    Range: 9
+    Slots: 2
+    Jobs:
+      Rebellion: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus2 bSkillAtk,"GS_DESPERADO",5;
+      bonus2 bSkillAtk,"RL_FIREDANCE",5;
+      bonus2 bSkillAtk,"RL_HAMMER_OF_GOD",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"GS_DESPERADO",10;
+         bonus2 bSkillAtk,"RL_FIREDANCE",10;
+         bonus2 bSkillAtk,"RL_HAMMER_OF_GOD",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"GS_DESPERADO",10;
+               bonus2 bSkillAtk,"RL_FIREDANCE",10;
+               bonus2 bSkillAtk,"RL_HAMMER_OF_GOD",10;
+               if (.@r>=10) {
+                  bonus bDelayrate,-10;
+                  if (.@r>=11) {
+                     bonus bLongAtkRate,15;
+                     bonus2 bSkillAtk,"GS_DESPERADO",5;
+                     bonus2 bSkillAtk,"RL_FIREDANCE",5;
+                     bonus2 bSkillAtk,"RL_HAMMER_OF_GOD",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910141
+    AegisName: Fenda_Dark_RL_GAT_Weapon
+    Name: Fenda Dark RL_GAT Weapon
+    Type: Weapon
+    SubType: Gatling
+    Weight: 2900
+    Attack: 295
+    Range: 9
+    Slots: 2
+    Jobs:
+      Rebellion: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus2 bSkillAtk,"RL_BANISHING_BUSTER",5;
+      bonus2 bSkillAtk,"RL_R_TRIP",5;
+      bonus2 bSkillAtk,"RL_S_STORM",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"RL_BANISHING_BUSTER",10;
+         bonus2 bSkillAtk,"RL_R_TRIP",10;
+         bonus2 bSkillAtk,"RL_S_STORM",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"RL_BANISHING_BUSTER",10;
+               bonus2 bSkillAtk,"RL_R_TRIP",10;
+               bonus2 bSkillAtk,"RL_S_STORM",10;
+               if (.@r>=10) {
+                  bonus bDelayrate,-10;
+                  if (.@r>=11) {
+                     bonus bLongAtkRate,15;
+                     bonus2 bSkillAtk,"RL_BANISHING_BUSTER",5;
+                     bonus2 bSkillAtk,"RL_R_TRIP",5;
+                     bonus2 bSkillAtk,"RL_S_STORM",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910142
+    AegisName: Fenda_Holy_RL_SHOT_Weapon
+    Name: Fenda Holy RL_SHOT Weapon
+    Type: Weapon
+    SubType: Shotgun
+    Weight: 2300
+    Attack: 280
+    Range: 9
+    Slots: 2
+    Jobs:
+      Rebellion: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus bSplashRange,1;
+      bonus2 bSkillAtk,"RL_BANISHING_BUSTER",5;
+      bonus2 bSkillAtk,"RL_R_TRIP",5;
+      bonus2 bSkillAtk,"RL_S_STORM",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"RL_BANISHING_BUSTER",10;
+         bonus2 bSkillAtk,"RL_R_TRIP",10;
+         bonus2 bSkillAtk,"RL_S_STORM",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"RL_BANISHING_BUSTER",10;
+               bonus2 bSkillAtk,"RL_R_TRIP",10;
+               bonus2 bSkillAtk,"RL_S_STORM",10;
+               if (.@r>=10) {
+                  bonus bAspdRate,10;
+                  if (.@r>=11) {
+                     bonus bLongAtkRate,15;
+                     bonus2 bSkillAtk,"RL_BANISHING_BUSTER",5;
+                     bonus2 bSkillAtk,"RL_R_TRIP",5;
+                     bonus2 bSkillAtk,"RL_S_STORM",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910143
+    AegisName: Fenda_Dark_RL_SHOT_Weapon
+    Name: Fenda Dark RL_SHOT Weapon
+    Type: Weapon
+    SubType: Shotgun
+    Weight: 2500
+    Attack: 280
+    Range: 9
+    Slots: 2
+    Jobs:
+      Rebellion: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus bSplashRange,1;
+      bonus2 bSkillAtk,"RL_FIRE_RAIN",5;
+      bonus2 bSkillAtk,"RL_D_TAIL",5;
+      bonus2 bSkillAtk,"RL_H_MINE",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"RL_FIRE_RAIN",10;
+         bonus2 bSkillAtk,"RL_D_TAIL",10;
+         bonus2 bSkillAtk,"RL_H_MINE",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"RL_FIRE_RAIN",10;
+               bonus2 bSkillAtk,"RL_D_TAIL",10;
+               bonus2 bSkillAtk,"RL_H_MINE",10;
+               if (.@r>=10) {
+                  bonus bAspdRate,10;
+                  if (.@r>=11) {
+                     bonus bLongAtkRate,15;
+                     bonus2 bSkillAtk,"RL_FIRE_RAIN",5;
+                     bonus2 bSkillAtk,"RL_D_TAIL",5;
+                     bonus2 bSkillAtk,"RL_H_MINE",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910144
+    AegisName: Fenda_Holy_RL_RIFLE_Weapon
+    Name: Fenda Holy RL_RIFLE Weapon
+    Type: Weapon
+    SubType: Rifle
+    Weight: 2400
+    Attack: 265
+    Range: 9
+    Slots: 2
+    Jobs:
+      Rebellion: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus2 bSkillAtk,"RL_FIRE_RAIN",5;
+      bonus2 bSkillAtk,"RL_H_MINE",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"RL_FIRE_RAIN",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"RL_FIRE_RAIN",10;
+               if (.@r>=10) {
+                  bonus bCritical,10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"RL_D_TAIL",15;
+                     bonus2 bSkillAtk,"RL_FIRE_RAIN",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 910145
+    AegisName: Fenda_Dark_RL_RIFLE_Weapon
+    Name: Fenda Dark RL_RIFLE Weapon
+    Type: Weapon
+    SubType: Rifle
+    Weight: 2200
+    Attack: 265
+    Range: 9
+    Slots: 2
+    Jobs:
+      Rebellion: true
+    Locations:
+      Both_Hand: true
+    WeaponLevel: 5
+    EquipLevelMin: 200
+    Refineable: true
+    Gradable: true
+    Trade:
+      NoDrop: true
+      NoSell: true
+    Script: |
+      .@g = getenchantgrade();
+      .@r = getrefine();
+      bonus bAtkRate,5;
+      bonus bCon,2;
+      bonus2 bSkillAtk,"RL_BANISHING_BUSTER",5;
+      bonus2 bSkillAtk,"RL_S_STORM",5;
+      if (.@r>=5) {
+         bonus2 bSkillAtk,"RL_BANISHING_BUSTER",10;
+         if (.@r>=7) {
+            bonus bLongAtkRate,5;
+            if (.@r>=9) {
+               bonus2 bSkillAtk,"RL_BANISHING_BUSTER",10;
+               if (.@r>=10) {
+                  bonus bAspdRate,10;
+                  if (.@r>=11) {
+                     bonus2 bSkillAtk,"RL_R_TRIP",15;
+                     bonus2 bSkillAtk,"RL_BANISHING_BUSTER",5;
+                  }
+               }
+            }
+         }
+      }
+      if (.@g>=ENCHANTGRADE_D) {
+         bonus bLongAtkRate,10;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus2 bAddSize,Size_All,10;
+            if (.@g>=ENCHANTGRADE_B) {
+               bonus2 bAddRace,RC_All,10;
+               if (.@g>=ENCHANTGRADE_A) {
+                  bonus2 bAddEle,Ele_All,10;
+               }
+            }
+         }
+      }
+      bonus bUnbreakableWeapon;
+  - Id: 9691
+    AegisName: Fenda_Hero_Enchant_Box
+    Name: Caixa de Encanto Hero da Fenda
+    Type: Usable
+    Buy: 10
+    Weight: 10
+    Script: |
+      setarray .@items[0],
+        312014,312021;
       getitem .@items[rand(getarraysize(.@items))],1;
 
   - Id: 9690

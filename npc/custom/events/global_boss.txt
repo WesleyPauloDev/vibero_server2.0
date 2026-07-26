@@ -71,6 +71,12 @@ OnStartEvent:
     .boss_level = $GlobalBossLevel;
     .@boss_name$ = "Boss Global Lv. " + .boss_level;
     .boss_gid = monster(.map$, 50, 50, .@boss_name$, 21401, 1, .npc_name$ + "::OnBossDead");
+    if (.boss_gid < 1) {
+        debugmes "[GlobalBoss] Falha ao criar o boss " + .@boss_name$ + " no mapa " + .map$ + ".";
+        announce "[Evento Boss Global] Nao foi possivel iniciar o evento agora.", bc_all, 0xFF0000;
+        callsub S_EndEvent;
+        end;
+    }
 
     // O nivel funciona como multiplicador dos atributos base do monstro.
     getunitdata .boss_gid, .@status;
