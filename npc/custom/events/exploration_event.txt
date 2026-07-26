@@ -316,6 +316,7 @@ function	script	F_Fenda_Reward	{
 		FendaMaxLevel = 'Fenda_Level + 1;
 	getitem 9608, 50;
 	getitem 9198, 5;
+	announce "[Fenda] " + strcharinfo(0) + " concluiu a Fenda nivel " + 'Fenda_Level + ".", bc_all;
 	mes "[Fenda]";
 	mes "Sua recompensa foi entregue.";
 	mes "Voce recebeu 50 moedas de instancia e 5 tickets de minerios.";
@@ -502,6 +503,7 @@ function	script	F_Fenda_Menu	{
 		callfunc "F_Fenda_DelCost", .@level;
 		setinstancevar('Fenda_Level, .@level, .@iid);
 		setinstancevar('Fenda_LeaderName$, strcharinfo(0), .@iid);
+		announce "[Fenda] " + strcharinfo(0) + " abriu uma Fenda nivel " + .@level + ". Reuna seu grupo e prepare-se para o desafio!", bc_all;
 		mes "[Fenda]";
 		mes "A Fenda nivel " + .@level + " do seu grupo foi aberta.";
 		next;
