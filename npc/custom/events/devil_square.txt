@@ -291,40 +291,53 @@ ordeal_1-1,246,245,3	script	Devil Square Reward Box	10404,{
 	mes "Parabens por completar o Devil Square!";
 	next;
 	
-	mes "[Bau do Tesouro do Devil Square]";
-	mes "Voce abriu o Bau do Tesouro e recebeu uma recompensa!";
-
-	// Premio garantido: 50 Moedas de Instancia
-	getitem 9608,50;
-	callfunc("F_DiaryRefreshDaily");
-	if (#evento == 1)
-		#evento = 2;
+	setarray .@reward_id[0], 9608;
+	setarray .@reward_amount[0], 50;
 
 	// Premios extras garantidos: 3 itens sorteados
 	for (.@i = 0; .@i < 3; .@i++) {
 		switch (rand(1,5)) {
 		case 1:
 			// Manual de Combate
-			getitem 12263,1;
+			.@reward_id[.@i + 1] = 12263;
 			break;
 		case 2:
 			// Amuleto de Ziegfried
-			getitem 7621,1;
+			.@reward_id[.@i + 1] = 7621;
 			break;
 		case 3:
 			// Pudim de Guyak
-			getitem 12710,1;
+			.@reward_id[.@i + 1] = 12710;
 			break;
 		case 4:
 			// Chiclete
-			getitem 12264,1;
+			.@reward_id[.@i + 1] = 12264;
 			break;
 		case 5:
 			// Galho Sangrento
-			getitem 12103,1;
+			.@reward_id[.@i + 1] = 12103;
 			break;
 		}
+		.@reward_amount[.@i + 1] = 1;
 	}
+
+	if (!checkweight2(.@reward_id, .@reward_amount)) {
+		mes "[Bau do Tesouro do Devil Square]";
+		mes "Voce nao possui peso ou espaco suficiente no inventario para receber a recompensa.";
+		mes "Libere peso/slots e fale comigo novamente.";
+		close;
+	}
+
+	mes "[Bau do Tesouro do Devil Square]";
+	mes "Voce abriu o Bau do Tesouro e recebeu uma recompensa!";
+
+	for (.@i = 0; .@i < getarraysize(.@reward_id); .@i++)
+		getitem .@reward_id[.@i], .@reward_amount[.@i];
+
+	callfunc("F_DiaryRefreshDaily");
+	if (#evento == 1)
+		#evento = 2;
+
 	close2;
 	warp "SavePoint",0,0;
 	end;
