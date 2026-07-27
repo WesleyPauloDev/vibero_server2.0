@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS `fenda_log` (
+  `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `event_type` VARCHAR(20) NOT NULL,
+  `account_id` INT(11) UNSIGNED NOT NULL DEFAULT 0,
+  `char_id` INT(11) UNSIGNED NOT NULL DEFAULT 0,
+  `char_name` VARCHAR(30) NOT NULL DEFAULT '',
+  `party_id` INT(11) UNSIGNED NOT NULL DEFAULT 0,
+  `party_name` VARCHAR(24) NOT NULL DEFAULT '',
+  `instance_id` INT(11) NOT NULL DEFAULT 0,
+  `fenda_level` INT(11) NOT NULL DEFAULT 1,
+  `leader_name` VARCHAR(30) NOT NULL DEFAULT '',
+  `clear_seconds` INT(11) NOT NULL DEFAULT 0,
+  `clear_minutes` INT(11) NOT NULL DEFAULT 0,
+  `map` VARCHAR(24) NOT NULL DEFAULT '',
+  `x` SMALLINT(5) UNSIGNED NOT NULL DEFAULT 0,
+  `y` SMALLINT(5) UNSIGNED NOT NULL DEFAULT 0,
+  `created_at` DATETIME NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_event_created` (`event_type`, `created_at`),
+  KEY `idx_char_created` (`char_id`, `created_at`),
+  KEY `idx_party_instance` (`party_id`, `instance_id`),
+  KEY `idx_level_created` (`fenda_level`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

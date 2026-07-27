@@ -130,6 +130,12 @@ int32 elemental_create(map_session_data *sd, int32 class_, uint32 lifetime) {
 		ele.flee += 10 * i;
 	}
 
+	// Custom: make Sorcerer/Elemental Master elementals durable enough for
+	// high-level PvM without needing constant resummons.
+	ele.hp = ele.max_hp *= 10;
+	ele.def += 300;
+	ele.mdef += 300;
+
 	ele.life_time = lifetime;
 
 	// Request Char Server to create this elemental

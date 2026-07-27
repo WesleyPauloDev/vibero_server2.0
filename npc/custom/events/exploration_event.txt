@@ -24,6 +24,31 @@ function	script	F_Fenda_Announce	{
 	return;
 }
 
+function	script	F_Fenda_Log	{
+	.@event$ = getarg(0);
+	.@level = getarg(1, 0);
+	.@leader$ = getarg(2, "");
+	.@clear_seconds = getarg(3, 0);
+	.@clear_minutes = getarg(4, 0);
+	if (.@level < 1)
+		.@level = 'Fenda_Level;
+	if (.@leader$ == "")
+		.@leader$ = 'Fenda_LeaderName$;
+	.@iid = instance_id();
+	if (!.@iid)
+		.@iid = instance_id(IM_PARTY);
+	.@party_id = getcharid(1);
+	.@party_name$ = (.@party_id > 0) ? getpartyname(.@party_id) : "";
+	getmapxy .@map$, .@x, .@y, BL_PC;
+
+	query_sql("INSERT INTO `fenda_log` (`event_type`, `account_id`, `char_id`, `char_name`, `party_id`, `party_name`, `instance_id`, `fenda_level`, `leader_name`, `clear_seconds`, `clear_minutes`, `map`, `x`, `y`, `created_at`) VALUES ('"
+		+ escape_sql(.@event$) + "', " + getcharid(3) + ", " + getcharid(0) + ", '" + escape_sql(strcharinfo(0)) + "', "
+		+ .@party_id + ", '" + escape_sql(.@party_name$) + "', " + .@iid + ", " + .@level + ", '"
+		+ escape_sql(.@leader$) + "', " + .@clear_seconds + ", " + .@clear_minutes + ", '"
+		+ escape_sql(.@map$) + "', " + .@x + ", " + .@y + ", NOW())");
+	return;
+}
+
 function	script	F_Fenda_Cost	{
 	.@level = getarg(0, 1);
 	.@type = getarg(1, 0);
@@ -332,6 +357,7 @@ function	script	F_Fenda_Reward	{
 	mes "Voce recebeu " + .@fenda_points + " pontos da Fenda.";
 	mes "Saldo atual: " + #FendaShopPoints + " pontos.";
 	mes "Voce sera levado de volta ao seu ponto salvo.";
+	callfunc "F_Fenda_Log", "reward_exit", 'Fenda_Level, 'Fenda_LeaderName$, 'Fenda_ClearSeconds, 'Fenda_ClearMinutes;
 	close2;
 	warp "SavePoint", 0, 0;
 	end;
@@ -557,6 +583,7 @@ function	script	F_Fenda_Menu	{
 		switch(instance_enter("Fenda")) {
 			case IE_OK:
 				FendaJoinedInstance = instance_id(IM_PARTY);
+				callfunc "F_Fenda_Log", "enter", getinstancevar('Fenda_Level, .@iid), getinstancevar('Fenda_LeaderName$, .@iid), 0, 0;
 				callfunc "F_Fenda_Start";
 				close2;
 				dispbottom "[Fenda] Entre no portal para iniciar o desafio.";
@@ -598,6 +625,7 @@ function	script	F_Fenda_MvpDead	{
 	$Fenda_LastClearLevel = 'Fenda_Level;
 	$Fenda_LastClearSeconds = 'Fenda_ClearSeconds;
 	$Fenda_LastClearMinutes = 'Fenda_ClearMinutes;
+	callfunc "F_Fenda_Log", "mvp_dead", 'Fenda_Level, 'Fenda_LeaderName$, 'Fenda_ClearSeconds, 'Fenda_ClearMinutes;
 	if ($Fenda_MvpDropItem > 0) {
 		.@chance = 2 + 'Fenda_Level; // 2% base + 1% por nivel.
 		if (.@chance > 100)
@@ -631,6 +659,7 @@ function	script	F_Fenda_MvpDead	{
 
 evt_dun01,1,1,0	script	FendaController	-1,{
 OnInit:
+	query_sql("CREATE TABLE IF NOT EXISTS `fenda_log` (`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, `event_type` VARCHAR(20) NOT NULL, `account_id` INT(11) UNSIGNED NOT NULL DEFAULT 0, `char_id` INT(11) UNSIGNED NOT NULL DEFAULT 0, `char_name` VARCHAR(30) NOT NULL DEFAULT '', `party_id` INT(11) UNSIGNED NOT NULL DEFAULT 0, `party_name` VARCHAR(24) NOT NULL DEFAULT '', `instance_id` INT(11) NOT NULL DEFAULT 0, `fenda_level` INT(11) NOT NULL DEFAULT 1, `leader_name` VARCHAR(30) NOT NULL DEFAULT '', `clear_seconds` INT(11) NOT NULL DEFAULT 0, `clear_minutes` INT(11) NOT NULL DEFAULT 0, `map` VARCHAR(24) NOT NULL DEFAULT '', `x` SMALLINT(5) UNSIGNED NOT NULL DEFAULT 0, `y` SMALLINT(5) UNSIGNED NOT NULL DEFAULT 0, `created_at` DATETIME NOT NULL, PRIMARY KEY (`id`), KEY `idx_event_created` (`event_type`, `created_at`), KEY `idx_char_created` (`char_id`, `created_at`), KEY `idx_party_instance` (`party_id`, `instance_id`), KEY `idx_level_created` (`fenda_level`, `created_at`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 	setarray $Fenda_AllMap$[0],
 		"evt_dun01", "evt_dun02", "evt_dun03",
 		"evt_dun04", "evt_dun05", "evt_dun06";

@@ -15,9 +15,7 @@ internal static class Program
 
 internal sealed class MainWindow : Form
 {
-    // Launchers such as start.exe and VibeRO.exe must not appear here: their
-    // windows do not receive the in-game keyboard input.
-    private static readonly string[] ClientNames = ["Ragexe", "VibeRO-Client", "VibeRO_Local"];
+    private static readonly string[] ClientNames = ["Ragexe", "VibeRO-Client", "VibeRO_Local", "VibeRO"];
     private readonly ComboBox clients = new() { DropDownStyle = ComboBoxStyle.DropDownList };
     private readonly NumericUpDown delay = new() { Minimum = 50, Maximum = 1000, Value = 100, Increment = 10 };
     private readonly Dictionary<int, CheckBox> keyOptions = [];
