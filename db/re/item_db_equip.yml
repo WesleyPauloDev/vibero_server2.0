@@ -16631,7 +16631,11 @@ Body:
     Refineable: true
     Script: |
       .@r = getrefine();
-      bonus bDef,2+3*(.@r>5)+5*(.@r>8);
+      bonus bDef,2;
+      if (.@r>5)
+         bonus bDef,3;
+      if (.@r>8)
+         bonus bDef,5;
   - Id: 1724
     AegisName: Dragon_Wing
     Name: Dragon Wing
@@ -123690,7 +123694,7 @@ Body:
     Script: |
       .@r = getrefine();
       bonus bMaxHP,.@r*10;
-      bonus bVariableCastrate,-(.@r>=7)?2:1;
+      bonus bVariableCastrate,-(.@r>=7 ? 2 : 1);
   - Id: 24022
     AegisName: S_Magical_Weapon
     Name: Magical Weapon (Shadow)
@@ -209725,7 +209729,10 @@ Body:
          bonus2 bSubEle,Ele_Holy,.@bonus*.@a;
          bonus2 bSubEle,Ele_Dark,.@bonus*.@a;
          bonus bAspdRate,.@b;
-         bonus bMaxHPrate,(.@r>=12?2:1)*.@b;
+         if (.@r>=12)
+            bonus bMaxHPrate,2*.@b;
+         else
+            bonus bMaxHPrate,.@b;
          bonus2 bSubEle,Ele_Fire,.@bonus*.@b;
          bonus2 bSubEle,Ele_Water,.@bonus*.@b;
          bonus bVariableCastrate,-.@c;

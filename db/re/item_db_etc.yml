@@ -6652,7 +6652,7 @@ Body:
       BuyingStore: true
       DropEffect: CLIENT
     Script: |
-      bonus3 bAutoSpell,"MO_CALLSPIRITS",5,2+18*(BaseClass == Job_Acolyte);
+      bonus3 bAutoSpell,"MO_CALLSPIRITS",5,2+(BaseClass == Job_Acolyte ? 18 : 0);
   - Id: 4284
     AegisName: Chepet_Card
     Name: Chepet Card
@@ -6889,7 +6889,7 @@ Body:
       BuyingStore: true
       DropEffect: CLIENT
     Script: |
-      bonus2 bAddEffWhenHit,Eff_Poison,300+600*(BaseJob == Job_Assassin);
+      bonus2 bAddEffWhenHit,Eff_Poison,300+(BaseJob == Job_Assassin ? 600 : 0);
   - Id: 4301
     AegisName: Killer_Mantis_Card
     Name: Killer Mantis Card
@@ -8356,7 +8356,7 @@ Body:
       BuyingStore: true
       DropEffect: CLIENT
     Script: |
-      bonus3 bAutoSpellWhenHit,"DC_WINKCHARM",1,50+50*(BaseJob == Job_Dancer);
+      bonus3 bAutoSpellWhenHit,"DC_WINKCHARM",1,50+(BaseJob == Job_Dancer ? 50 : 0);
   - Id: 4401
     AegisName: Alicel_Card
     Name: Alicel Card
@@ -38122,8 +38122,8 @@ Body:
       bonus bHPrecovRate,25;
       bonus bSPrecovRate,25;
       .@r = getrefine();
-      bonus bHPGainValue,30+((.@r>=7)*10);
-      bonus bSPGainValue,3+((.@r>=7)*3);
+      bonus bHPGainValue,30+(.@r>=7 ? 10 : 0);
+      bonus bSPGainValue,3+(.@r>=7 ? 3 : 0);
   - Id: 27016
     AegisName: ExplorationRover_T_Card
     Name: Exploration Rover Turbo Card
@@ -38253,7 +38253,7 @@ Body:
       DropEffect: CLIENT
     Script: |
       .@r = getrefine();
-      bonus2 bMagicAddEle,Ele_Earth,3+((.@r>=7)*5)+((.@r>=9)*7);
+      bonus2 bMagicAddEle,Ele_Earth,3+(.@r>=7 ? 5 : 0)+(.@r>=9 ? 7 : 0);
   - Id: 27029
     AegisName: Fire_Golem_Card
     Name: Fire Golem Card
@@ -41836,7 +41836,7 @@ Body:
       DropEffect: CLIENT
     Script: |
       .@r = getrefine();
-      bonus2 bMagicAddEle,Ele_Neutral,3+((.@r>=7)*5)+((.@r>=9)*7);
+      bonus2 bMagicAddEle,Ele_Neutral,3+(.@r>=7 ? 5 : 0)+(.@r>=9 ? 7 : 0);
   - Id: 27349
     AegisName: Firm_Explosion_Card
     Name: Rigid Explosion Card
