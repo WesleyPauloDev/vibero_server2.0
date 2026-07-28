@@ -6546,7 +6546,6 @@ int32 skill_castend_damage_id (struct block_list* src, struct block_list *bl, ui
 	case NJ_HUUJIN:
 	case AB_HIGHNESSHEAL:
 	case AB_DUPLELIGHT_MAGIC:
-	case WM_METALICSOUND:
 	case MH_ERASER_CUTTER:
 	case AG_ASTRAL_STRIKE:
 	case AG_ASTRAL_STRIKE_ATK:
@@ -6554,6 +6553,13 @@ int32 skill_castend_damage_id (struct block_list* src, struct block_list *bl, ui
 	case CD_ARBITRIUM:
 	case HN_METEOR_STORM_BUSTER:
 		skill_attack(BF_MAGIC,src,src,bl,skill_id,skill_lv,tick,flag);
+		break;
+
+	case WM_METALICSOUND:
+		if (flag & 1)
+			skill_attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+		else
+			map_foreachinrange(skill_area_sub, bl, skill_get_splash(skill_id, skill_lv), BL_CHAR, src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1, skill_castend_damage_id);
 		break;
 
 	case KO_KAIHOU:
