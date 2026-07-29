@@ -10,20 +10,32 @@ moc_para01,52,30,3	script	Oscar de Glast Heim	4_ED_OSCAR,{
 	mes "Posso trocar materiais da Edda Glast Heim pelos equipamentos e Insignias do Rei Schmidt.";
 	next;
 
-	switch(select("Trocar equipamentos:Encantar equipamentos:OGH - Challenge:Cancelar")) {
+	switch(select("Trocar equipamentos:Acessorios Registro:Encantar equipamentos:OGH - Challenge:Cancelar")) {
 	case 1:
 		close2;
 		callshop "barter_edda_glastheim_insignia";
 		end;
 	case 2:
-		callsub L_SchmidtEnchant;
+		callsub L_RecordAccessories;
 		end;
 	case 3:
+		callsub L_SchmidtEnchant;
+		end;
+	case 4:
 		callfunc("F_OGHC_ChallengeMenu");
 		end;
 	default:
 		close;
 	}
+
+L_RecordAccessories:
+	mes "[Oscar de Glast Heim]";
+	mes "Tenho registros de classe para acessorios.";
+	mes "Cada registro custa 20 " + getitemname(6755) + " e 20 " + getitemname(25740) + ".";
+	next;
+	close2;
+	callshop "barter_record_accessories";
+	end;
 
 L_SchmidtEnchant:
 	mes "[Oscar de Glast Heim]";
