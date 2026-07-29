@@ -19303,10 +19303,6 @@ bool skill_check_condition_castbegin( map_session_data& sd, uint16 skill_id, uin
 				return false;
 			}
 			break;
-		case SP_SWHOO:
-			if (!(sc && sc->getSCE(SC_USE_SKILL_SP_SPA)))
-				return false;
-			break;
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
 			if (sd.servantball > 0 && sd.servantball < require.spiritball)
