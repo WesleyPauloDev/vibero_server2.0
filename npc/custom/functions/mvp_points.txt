@@ -2,12 +2,8 @@ function	script	F_MVP_PointsRegister	{
 	.@mob_id = getarg(0, killedrid);
 	.@map$ = strcharinfo(3);
 
-	// Nao contabiliza pontos no gs_room e nem nas instancias dele.
-	if (.@map$ == "gs_room" || compare(.@map$, "0336#"))
-		return 0;
-
-	// Dentro de instancia nao ganha pontos.
-	if (instance_id() > 0)
+	// Dentro de instancia nao ganha pontos, exceto na Arena MVP (gs_room).
+	if (instance_id() > 0 && .@map$ != "gs_room" && !compare(.@map$, "0336#"))
 		return 0;
 
 	// Apenas MVPs com MvpExp.
