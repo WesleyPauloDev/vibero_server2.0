@@ -238,7 +238,7 @@ void log_branch(map_session_data* sd)
 }
 
 /// logs item transactions (generic)
-void log_pick(int32 id, int16 m, e_log_pick_type type, int32 amount, struct item* itm)
+void log_pick(int32 id, int16 m, e_log_pick_type type, int32 amount, struct item* itm, bool force = false)
 {
 	nullpo_retv(itm);
 	if( ( log_config.enable_logs&type ) == 0 )
@@ -246,7 +246,7 @@ void log_pick(int32 id, int16 m, e_log_pick_type type, int32 amount, struct item
 		return;
 	}
 
-	if( !should_log_item(itm->nameid, amount, itm->refine) )
+	if( !force && !should_log_item(itm->nameid, amount, itm->refine) )
 		return; //we skip logging this item set - it doesn't meet our logging conditions [Lupus]
 
 	if( log_config.sql_logs )
@@ -302,10 +302,10 @@ void log_pick_pc(map_session_data* sd, e_log_pick_type type, int32 amount, struc
 
 
 /// logs item transactions (monsters)
-void log_pick_mob(struct mob_data* md, e_log_pick_type type, int32 amount, struct item* itm)
+void log_pick_mob(struct mob_data* md, e_log_pick_type type, int32 amount, struct item* itm, bool force)
 {
 	nullpo_retv(md);
-	log_pick(md->mob_id, md->m, type, amount, itm);
+	log_pick(md->mob_id, md->m, type, amount, itm, force);
 }
 
 /// logs zeny transactions
@@ -368,6 +368,41 @@ void log_mvpdrop(map_session_data* sd, int32 monster_id, t_itemid nameid, t_exp 
 		time(&curtime);
 		strftime(timestring, sizeof(timestring), log_timestamp_format, localtime(&curtime));
 		fprintf(logfp,"%s - %s[%d:%d]\t%d\t%u,%" PRIu64 "\n", timestring, sd->status.name, sd->status.account_id, sd->status.char_id, monster_id, nameid, exp);
+		fclose(logfp);
+	}
+}
+
+/// logs MVP cards with enough data for admin monitoring
+void log_mvp_card_drop(map_session_data* sd, mob_data* md, const std::shared_ptr<item_data>& card, int32 drop_rate)
+{
+	nullpo_retv(sd);
+	nullpo_retv(md);
+
+	if (card == nullptr)
+		return;
+
+	if (log_config.sql_logs) {
+		SqlStmt stmt{ *logmysql_handle };
+
+		if (SQL_SUCCESS != stmt.Prepare(LOG_QUERY " INTO `%s` (`drop_date`, `account_id`, `char_id`, `char_name`, `monster_id`, `monster_name`, `card_id`, `card_name`, `drop_rate`, `map`, `x`, `y`) VALUES (NOW(), '%d', '%d', ?, '%d', ?, '%u', ?, '%d', '%s', '%d', '%d')",
+			log_config.log_mvp_card, sd->status.account_id, sd->status.char_id, md->mob_id, card->nameid, drop_rate, mapindex_id2name(sd->mapindex), sd->x, sd->y)
+		|| SQL_SUCCESS != stmt.BindParam(0, SQLDT_STRING, sd->status.name, strnlen(sd->status.name, NAME_LENGTH))
+		|| SQL_SUCCESS != stmt.BindParam(1, SQLDT_STRING, md->name, strnlen(md->name, NAME_LENGTH))
+		|| SQL_SUCCESS != stmt.BindParam(2, SQLDT_STRING, const_cast<char*>(card->ename.c_str()), card->ename.length())
+		|| SQL_SUCCESS != stmt.Execute()) {
+			SqlStmt_ShowDebug(stmt);
+			return;
+		}
+	} else {
+		char timestring[255];
+		time_t curtime;
+		FILE* logfp;
+
+		if ((logfp = fopen(log_config.log_mvp_card, "a")) == nullptr)
+			return;
+		time(&curtime);
+		strftime(timestring, sizeof(timestring), log_timestamp_format, localtime(&curtime));
+		fprintf(logfp, "%s - %s[%d:%d]\t%d\t%s\t%u\t%s\t%d\t%s\t%d,%d\n", timestring, sd->status.name, sd->status.account_id, sd->status.char_id, md->mob_id, md->name, card->nameid, card->ename.c_str(), drop_rate, mapindex_id2name(sd->mapindex), sd->x, sd->y);
 		fclose(logfp);
 	}
 }
@@ -874,6 +909,7 @@ void log_set_defaults(void)
 	log_config.price_items_log  = 1000; // 1000z
 	log_config.amount_items_log = 100;
 
+	safestrncpy(log_config.log_mvp_card, "mvp_card_log", sizeof(log_config.log_mvp_card));
 	safestrncpy(log_timestamp_format, "%m/%d/%Y %H:%M:%S", sizeof(log_timestamp_format));
 }
 
@@ -942,6 +978,8 @@ int32 log_config_read(const char* cfgName)
 				safestrncpy(log_config.log_zeny, w2, sizeof(log_config.log_zeny));
 			else if( strcmpi(w1, "log_mvpdrop_db") == 0 )
 				safestrncpy(log_config.log_mvpdrop, w2, sizeof(log_config.log_mvpdrop));
+			else if( strcmpi(w1, "log_mvp_card_db") == 0 )
+				safestrncpy(log_config.log_mvp_card, w2, sizeof(log_config.log_mvp_card));
 			else if( strcmpi(w1, "log_gm_db") == 0 )
 				safestrncpy(log_config.log_gm, w2, sizeof(log_config.log_gm));
 			else if( strcmpi(w1, "log_npc_db") == 0 )

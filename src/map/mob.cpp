@@ -2757,6 +2757,10 @@ static std::shared_ptr<s_item_drop> mob_setlootitem(s_mob_lootitem& item, uint16
  * @param list: list with all items that should drop
  * @param loot: whether the items in the list are new drops or previously looted items
  */
+static bool mob_is_mvp_card_drop(struct mob_data* md, const std::shared_ptr<item_data>& item) {
+	return md != nullptr && item != nullptr && md->get_bosstype() == BOSSTYPE_MVP && item->type == IT_CARD;
+}
+
 void mob_process_drop_list(std::shared_ptr<s_item_drop_list>& list, bool loot)
 {
 	// First regular drop always drops at center
@@ -2808,14 +2812,14 @@ static TIMER_FUNC(mob_delay_item_drop) {
  * rate is the drop-rate of the item, required for autoloot.
  * flag : Killed only by homunculus/mercenary?
  *------------------------------------------*/
-static void mob_item_drop(struct mob_data* md, std::shared_ptr<s_item_drop_list>& dlist, std::shared_ptr<s_item_drop>& ditem, int32 loot, int32 drop_rate, bool flag)
+static void mob_item_drop(struct mob_data* md, std::shared_ptr<s_item_drop_list>& dlist, std::shared_ptr<s_item_drop>& ditem, int32 loot, int32 drop_rate, bool flag, bool force_log = false)
 {
 
 
 	TBL_PC* sd;
 	bool test_autoloot;
 	//Logs items, dropped by mobs [Lupus]
-	log_pick_mob(md, loot ? LOG_TYPE_LOOT : LOG_TYPE_PICKDROP_MONSTER, -ditem->item_data.amount, &ditem->item_data);
+	log_pick_mob(md, loot ? LOG_TYPE_LOOT : LOG_TYPE_PICKDROP_MONSTER, -ditem->item_data.amount, &ditem->item_data, force_log);
 
 	sd = map_charid2sd(dlist->first_charid);
 	if (sd == nullptr) sd = map_charid2sd(dlist->second_charid);
@@ -3572,16 +3576,20 @@ int32 mob_dead(struct mob_data* md, struct block_list* src, int32 type)
 
 			std::shared_ptr<s_item_drop> ditem = mob_setdropitem(entry, 1, md->mob_id);
 
+			bool is_mvp_card_drop = mob_is_mvp_card_drop(md, it);
+
 			//A Rare Drop Global Announce by Lupus
-			if (first_sd != nullptr && entry->rate <= battle_config.rare_drop_announce) {
+			if (first_sd != nullptr && (entry->rate <= battle_config.rare_drop_announce || is_mvp_card_drop)) {
 				char message[128];
 				sprintf(message, msg_txt(nullptr, 541), first_sd->status.name, md->name, it->ename.c_str(), (float)drop_rate / 100);
 				//MSG: "'%s' won %s's %s (chance: %0.02f%%)"
 				intif_broadcast(message, strlen(message) + 1, BC_DEFAULT);
 			}
+			if (first_sd != nullptr && is_mvp_card_drop)
+				log_mvp_card_drop(first_sd, md, it, drop_rate);
 			// Announce first, or else ditem will be freed. [Lance]
 			// By popular demand, use base drop rate for autoloot code. [Skotlex]
-			mob_item_drop(md, dlist, ditem, 0, battle_config.autoloot_adjust ? drop_rate : entry->rate, homkillonly || merckillonly);
+			mob_item_drop(md, dlist, ditem, 0, battle_config.autoloot_adjust ? drop_rate : entry->rate, homkillonly || merckillonly, is_mvp_card_drop);
 		}
 
 		// Ore Discovery (triggers if owner has loot priority, does not require to be the killer)
@@ -3722,13 +3730,17 @@ int32 mob_dead(struct mob_data* md, struct block_list* src, int32 type)
 				clif_mvp_item(mvp_sd, item.nameid);
 				log_mvp_nameid = item.nameid;
 
+				bool is_mvp_card_drop = mob_is_mvp_card_drop(md, i_data);
+
 				//A Rare MVP Drop Global Announce by Lupus
-				if (temp <= battle_config.rare_drop_announce) {
+				if (temp <= battle_config.rare_drop_announce || is_mvp_card_drop) {
 					char message[128];
 					sprintf(message, msg_txt(nullptr, 541), mvp_sd->status.name, md->name, i_data->ename.c_str(), temp / 100.);
 					//MSG: "'%s' won %s's %s (chance: %0.02f%%)"
 					intif_broadcast(message, strlen(message) + 1, BC_DEFAULT);
 				}
+				if (is_mvp_card_drop)
+					log_mvp_card_drop(mvp_sd, md, i_data, temp);
 
 				mob_setdropitem_option(item, entry);
 
@@ -3741,7 +3753,7 @@ int32 mob_dead(struct mob_data* md, struct block_list* src, int32 type)
 					intif_broadcast_obtain_special_item(mvp_sd, item.nameid, md->mob_id, ITEMOBTAIN_TYPE_MONSTER_ITEM);
 
 				//Logs items, MVP prizes [Lupus]
-				log_pick_mob(md, LOG_TYPE_MVP, -1, &item);
+				log_pick_mob(md, LOG_TYPE_MVP, -1, &item, is_mvp_card_drop);
 				//If item_drop_mvp_mode is not 2, then only one item should be granted
 				if (battle_config.item_drop_mvp_mode != 2) {
 					break;

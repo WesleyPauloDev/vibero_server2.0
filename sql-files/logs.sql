@@ -181,6 +181,32 @@ CREATE TABLE IF NOT EXISTS `mvplog` (
 ) ENGINE=MyISAM AUTO_INCREMENT=1;
 
 --
+-- Table structure for table `mvp_card_log`
+--
+
+CREATE TABLE IF NOT EXISTS `mvp_card_log` (
+  `id` bigint(20) unsigned NOT NULL auto_increment,
+  `drop_date` datetime NOT NULL,
+  `account_id` int(11) unsigned NOT NULL default '0',
+  `char_id` int(11) unsigned NOT NULL default '0',
+  `char_name` varchar(25) NOT NULL default '',
+  `monster_id` smallint(6) unsigned NOT NULL default '0',
+  `monster_name` varchar(50) NOT NULL default '',
+  `card_id` int(10) unsigned NOT NULL default '0',
+  `card_name` varchar(50) NOT NULL default '',
+  `drop_rate` int(11) NOT NULL default '0',
+  `map` varchar(11) NOT NULL default '',
+  `x` smallint(5) unsigned NOT NULL default '0',
+  `y` smallint(5) unsigned NOT NULL default '0',
+  PRIMARY KEY (`id`),
+  INDEX (`drop_date`),
+  INDEX (`account_id`),
+  INDEX (`char_id`),
+  INDEX (`monster_id`),
+  INDEX (`card_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1;
+
+--
 -- Table structure for table `npclog`
 --
 

@@ -7,9 +7,12 @@
 #include <common/cbasetypes.hpp>
 #include <common/mmo.hpp>
 
+#include <memory>
+
 struct block_list;
 class map_session_data;
 struct mob_data;
+struct item_data;
 struct item;
 
 enum e_log_chat_type : uint8
@@ -93,7 +96,7 @@ enum e_log_enchantgrade_result : uint8
 
 /// new logs
 void log_pick_pc(map_session_data* sd, e_log_pick_type type, int32 amount, struct item* itm);
-void log_pick_mob(struct mob_data* md, e_log_pick_type type, int32 amount, struct item* itm);
+void log_pick_mob(struct mob_data* md, e_log_pick_type type, int32 amount, struct item* itm, bool force = false);
 void log_zeny(const map_session_data &target_sd, e_log_pick_type type, uint32 src_id, int32 amount);
 void log_cash( map_session_data* sd, e_log_pick_type type, e_log_cash_type cash_type, int32 amount );
 void log_cashshop_purchase( map_session_data* sd, t_itemid nameid, uint32 unit_price, uint32 amount, uint32 total_price, int32 cash_points_used, int32 kafra_points_used, const char* source );
@@ -109,6 +112,7 @@ void log_feeding(map_session_data *sd, e_log_feeding_type type, t_itemid nameid)
 /// old, but useful logs
 void log_branch(map_session_data* sd);
 void log_mvpdrop(map_session_data* sd, int32 monster_id, t_itemid nameid, t_exp exp);
+void log_mvp_card_drop(map_session_data* sd, mob_data* md, const std::shared_ptr<item_data>& card, int32 drop_rate);
 
 int32 log_config_read(const char* cfgName);
 
@@ -122,7 +126,7 @@ extern struct Log_Config
 	int32 rare_items_log,refine_items_log,price_items_log,amount_items_log; //for filter
 	int32 branch, mvpdrop, zeny, commands, npc, chat;
 	unsigned feeding : 2;
-	char log_branch[64], log_pick[64], log_zeny[64], log_mvpdrop[64], log_gm[64], log_npc[64], log_chat[64], log_cash[64];
+	char log_branch[64], log_pick[64], log_zeny[64], log_mvpdrop[64], log_mvp_card[64], log_gm[64], log_npc[64], log_chat[64], log_cash[64];
 	char log_feeding[64];
 } log_config;
 
