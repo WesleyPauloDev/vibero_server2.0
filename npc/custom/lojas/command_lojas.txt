@@ -5,6 +5,27 @@ OnInit:
 OnAtcommand:
 	callfunc ("Menu_Lojas");
 	end;
+
+OnBuyItem:
+	switch (@lojas_shop_type) {
+	case 1:
+		for (.@i = 0; .@i < getarraysize(@bought_nameid); .@i++)
+			callfunc "Vote_Shop_Process", @bought_nameid[.@i], @bought_quantity[.@i], 0;
+		break;
+	case 2:
+	case 3:
+		for (.@i = 0; .@i < getarraysize(@bought_nameid); .@i++)
+			callfunc "MVP_Shop_Process", @bought_nameid[.@i], @bought_quantity[.@i];
+		break;
+	case 4:
+		for (.@i = 0; .@i < getarraysize(@bought_nameid); .@i++)
+			callfunc "Presence_Shop_Process", @bought_nameid[.@i], @bought_quantity[.@i];
+		break;
+	}
+	deletearray @bought_nameid[0], getarraysize(@bought_nameid);
+	deletearray @bought_quantity[0], getarraysize(@bought_quantity);
+	@lojas_shop_type = 0;
+	end;
 }
 
 function	script	Menu_Lojas	{
@@ -16,11 +37,28 @@ function	script	Menu_Lojas	{
         case 2:  // Anubis
             switch(select("Encantamentos", "Armas", "Equipamentos")) {
                 case 1:
-                    switch(select("Comprar Encantamentos", "Reciclar Encantamentos Visuais")) {
+                    switch(select("Comprar Encantamentos", "Encantamento Visual Perfeito", "Reciclar Encantamentos Visuais")) {
                         case 1:
                             callshop "enchant_anubis",1;
                             end;
                         case 2:
+                            switch(select("Topo", "Meio", "Baixo", "Capa", "Cancelar")) {
+                                case 1:
+                                    callshop "anubis_perfect_costume_top",1;
+                                    end;
+                                case 2:
+                                    callshop "anubis_perfect_costume_mid",1;
+                                    end;
+                                case 3:
+                                    callshop "anubis_perfect_costume_low",1;
+                                    end;
+                                case 4:
+                                    callshop "anubis_perfect_costume_garment",1;
+                                    end;
+                                case 5:
+                                    close;
+                            }
+                        case 3:
                             callfunc("F_Anubis_Recycle_Costume_Enchant");
                             end;
                     }
@@ -188,16 +226,39 @@ function	script	Menu_Lojas	{
                     }
             }
         case 6:  // Votos
-            next;
-            doEvent "Loja de Votos::OnTalk";
+            close2;
+            @lojas_shop_type = 1;
+            npcshopattach "Vote_Shop";
+            callshop "Vote_Shop",1;
+            dispbottom "Pontos de Votos: " + #VOTE_POINT;
             end;
         case 7:  // Pontos MVP
             next;
-            doEvent "Loja de Pontos MVP::OnTalk";
+            switch(select("Itens:Shadows:Sair")) {
+                case 1:
+                    close2;
+                    @lojas_shop_type = 2;
+                    npcshopattach "MVP_Items_Shop";
+                    callshop "MVP_Items_Shop",1;
+                    dispbottom "Pontos MVP: " + #mvp_points;
+                    end;
+                case 2:
+                    close2;
+                    @lojas_shop_type = 3;
+                    npcshopattach "MVP_Shadow_Shop";
+                    callshop "MVP_Shadow_Shop",1;
+                    dispbottom "Pontos MVP: " + #mvp_points;
+                    end;
+                case 3:
+                    close;
+            }
             end;
         case 8:  // Pontos de Presenca
-            next;
-            doEvent "Loja de Presenca::OnTalk";
+            close2;
+            @lojas_shop_type = 4;
+            npcshopattach "Presence_Shop";
+            callshop "Presence_Shop",1;
+            dispbottom "Pontos de Presença: " + #presence_points;
             end;
         case 9:  // Pets
             switch(select("Comprar Pet:Vender Pet")) {
@@ -215,6 +276,7 @@ function	script	Menu_Lojas	{
     close;
 	return;
 }
+
 
 function	script	F_Anubis_Recycle_Costume_Enchant	{
 	.@coin_id = 9650; // Anubis_Coin
