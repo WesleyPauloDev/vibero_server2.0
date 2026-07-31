@@ -1,6 +1,6 @@
 //===========================================================
 //  Evento Boss Global - Todos os dias as 20:00
-//  Comandos: @evento (jogadores) e @globalboss (GM nivel 99)
+//  Comandos: @evento (jogadores), @globalboss e @startbossglobal (GM nivel 99)
 //===========================================================
 
 -	script	GlobalBossCtrl	-1,{
@@ -8,10 +8,16 @@
 OnInit:
     .npc_name$ = strnpcinfo(3);           // guarda o nome do NPC
     .map$      = "boss_global";
+    .boss_id   = 21401;
+    .boss_x    = 50;
+    .boss_y    = 55;
+    .min_players = 1;
+    .start_minutes = 5;
     .active    = 0;
     if ($GlobalBossLevel < 1)
         $GlobalBossLevel = 1;
     bindatcmd "globalboss", .npc_name$ + "::OnGMStart", 99, 99;
+    bindatcmd "startbossglobal", .npc_name$ + "::OnGMStart", 99, 99;
     disablenpc "Recompensa do Boss";
     stopnpctimer;
     killmonsterall .map$;
@@ -20,6 +26,7 @@ OnInit:
     end;
 
 OnClock2000:
+    .start_minutes = 5;
     donpcevent .npc_name$ + "::OnOpenEvent";
     end;
 
@@ -27,6 +34,14 @@ OnGMStart:
     if (.active) {
         dispbottom "O Evento Boss Global ja esta ativo.";
         end;
+    }
+    .start_minutes = 5;
+    if (.@atcmd_numparameters >= 1) {
+        .start_minutes = atoi(.@atcmd_parameters$[0]);
+        if (.start_minutes < 1)
+            .start_minutes = 1;
+        if (.start_minutes > 5)
+            .start_minutes = 5;
     }
     announce "[GM] " + strcharinfo(0) + " ativou o Evento Boss Global!", bc_all, 0xFF0000;
     donpcevent .npc_name$ + "::OnOpenEvent";
@@ -40,8 +55,17 @@ OnOpenEvent:
     disablenpc "Recompensa do Boss";
     .active = 1;
     initnpctimer;
-    announce "[Evento Boss Global] Comeca em 5 minutos! Use @evento para participar.", bc_all, 0xFF0000;
+    setnpctimer 300000 - (.start_minutes * 60000);
+    announce "[Evento Boss Global] Comeca em " + .start_minutes + " minuto(s)! Use @evento para participar.", bc_all, 0xFF0000;
 
+    end;
+
+OnTimer60000:
+    announce "[Evento Boss Global] Comeca em 4 minutos! Use @evento para participar.", bc_all, 0xFF0000;
+    end;
+
+OnTimer120000:
+    announce "[Evento Boss Global] Comeca em 3 minutos! Use @evento para participar.", bc_all, 0xFF0000;
     end;
 
 OnTimer180000:
@@ -68,11 +92,22 @@ OnTimer1800000:
 
 OnStartEvent:	
     killmonsterall .map$;
+    getmapunits(BL_PC, .map$, .@units);
+    .@players = getarraysize(.@units);
+    if (.@players < .min_players) {
+        debugmes "[GlobalBoss] Evento cancelado: jogadores insuficientes no mapa " + .map$ + " (" + .@players + "/" + .min_players + ").";
+        announce "[Evento Boss Global] Nao ha participantes suficientes para iniciar.", bc_all, 0xFF0000;
+        callsub S_EndEvent;
+        end;
+    }
+
     .boss_level = $GlobalBossLevel;
     .@boss_name$ = "Boss Global Lv. " + .boss_level;
-    .boss_gid = monster(.map$, 50, 50, .@boss_name$, 21401, 1, .npc_name$ + "::OnBossDead");
+    $@mobid[0] = 0;
+    monster .map$, .boss_x, .boss_y, .@boss_name$, .boss_id, 1, .npc_name$ + "::OnBossDead";
+    .boss_gid = $@mobid[0];
     if (.boss_gid < 1) {
-        debugmes "[GlobalBoss] Falha ao criar o boss " + .@boss_name$ + " no mapa " + .map$ + ".";
+        debugmes "[GlobalBoss] Falha ao criar o boss " + .@boss_name$ + " mob_id " + .boss_id + " no mapa " + .map$ + " em " + .boss_x + "," + .boss_y + " com " + .@players + " jogador(es).";
         announce "[Evento Boss Global] Nao foi possivel iniciar o evento agora.", bc_all, 0xFF0000;
         callsub S_EndEvent;
         end;
