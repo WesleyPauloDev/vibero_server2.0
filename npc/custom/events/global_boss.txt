@@ -200,9 +200,10 @@ boss_global,50,50,4	script	Recompensa do Boss	10403,{
     mes "[Parabens!]";
     mes "Voce venceu o Evento Boss Global!";
     
-    // Da a recompensa. Os valores abaixo funcionam como pesos do sorteio.
+    // Da a recompensa. Chance define o peso do sorteio; amount define a quantidade entregue.
     setarray .@rewards[0], 12259,12210,22818,12224,12223,7621,7776,9617,9642,9199, 9198;
     setarray .@chance[0],   30,   20,   10,   10,   10,  10,   5,   5,   5,  10,    10;
+    setarray .@amount[0],   10,    3,    3,    5,    5,   5,   1,   1,   3,   3,    10;
 
     .@total_chance = 0;
     for (.@i = 0; .@i < getarraysize(.@chance); .@i++)
@@ -220,7 +221,7 @@ boss_global,50,50,4	script	Recompensa do Boss	10403,{
         }
     }
     getitem 9608, 20;
-    getitem .@rewardID, 1;
+    getitem .@rewardID, .@amount[.@i];
     callfunc("F_DiaryRefreshDaily");
     callfunc("F_DiaryRefreshWeekly");
     if (#evento == 1)
