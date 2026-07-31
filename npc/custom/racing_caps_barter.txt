@@ -22,7 +22,7 @@ prontera,136,168,5	script	Chapeus Racing	4_M_03,{
 	}
 
 L_UpgradeEnchant:
-	.@cost_ticket = 20;
+	.@cost_ticket = 2;
 	.@menu$ = "";
 	.@choice_count = 0;
 
@@ -59,13 +59,13 @@ L_UpgradeEnchant:
 	if (.@choice_count == 0) {
 		mes "[Chapeus Racing]";
 		mes "Voce nao possui encantamentos Racing que possam ser evoluidos.";
+		mes "Custo do upgrade: " + .@cost_ticket + "x " + mesitemlink(25274, false) + ".";
 		mes "Tambem posso evoluir encantamentos ja aplicados em Racing Caps, desde que o chapeu esteja desequipado.";
 		close;
 	}
 
 	mes "[Chapeus Racing]";
 	mes "Escolha o encantamento que deseja evoluir.";
-	mes "Custo: " + .@cost_ticket + "x " + mesitemlink(25274, false) + ".";
 	next;
 
 	.@selected = select(.@menu$ + "Cancelar") - 1;

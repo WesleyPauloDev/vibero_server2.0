@@ -23,7 +23,7 @@ moc_para01,24,13,5	duplicate(Healer)	Curandeira#eden	640
 function	script	F_Loja_Eden_Menu	{
 	mes "[Loja do Eden]";
 
-	switch(select("Consumiveis:Armas:Equipamentos:Shadows:Set Mora:Trocar Pocoes:Sair")) {
+	switch(select("Consumiveis:Armas:Equipamentos:Shadows:Set Mora:Paradise:Trocar Pocoes:Sair")) {
 		case 1:
 			callshop "consumable_eden"; // Loja de Consumiveis
 			end;
@@ -55,6 +55,29 @@ function	script	F_Loja_Eden_Menu	{
 			end;
 		
 		case 6:
+			mes "Aqui voce encontra os equipamentos Paradise.";
+			switch(select("Paradise 1:Paradise 2:Paradise 3:Equipamentos Paradise 1:Equipamentos Paradise 2:Voltar")) {
+				case 1:
+					callshop "paradise_weapons_1_eden";
+					end;
+				case 2:
+					callshop "paradise_weapons_2_eden";
+					end;
+				case 3:
+					callshop "paradise_weapons_3_eden";
+					end;
+				case 4:
+					callshop "paradise_equips_1_eden";
+					end;
+				case 5:
+					callshop "paradise_equips_2_eden";
+					end;
+				default:
+					close;
+			}
+			end;
+
+		case 7:
 			mes "Aqui voce pode trocar suas Pocoes[Iniciante] por outras do mesmo tipo.";
 			switch(select("Trocar Pocoes de HP em Pocoes de SP:Trocar Pocoes de SP em Pocoes de HP")) {
 				case 1:

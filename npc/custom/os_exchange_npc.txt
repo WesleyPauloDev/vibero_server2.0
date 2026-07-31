@@ -10,7 +10,7 @@ moc_para01,52,30,3	script	Oscar de Glast Heim	4_ED_OSCAR,{
 	mes "Posso trocar materiais da Edda Glast Heim pelos equipamentos e Insignias do Rei Schmidt.";
 	next;
 
-	switch(select("Trocar equipamentos:Acessorios Registro:Encantar equipamentos:OGH - Challenge:Cancelar")) {
+	switch(select("Trocar equipamentos:Acessorios Registro:Encantar equipamentos:Biolab:OGH - Challenge:Cancelar")) {
 	case 1:
 		close2;
 		callshop "barter_edda_glastheim_insignia";
@@ -22,6 +22,9 @@ moc_para01,52,30,3	script	Oscar de Glast Heim	4_ED_OSCAR,{
 		callsub L_SchmidtEnchant;
 		end;
 	case 4:
+		callsub L_BiolabResearch;
+		end;
+	case 5:
 		callfunc("F_OGHC_ChallengeMenu");
 		end;
 	default:
@@ -35,6 +38,76 @@ L_RecordAccessories:
 	next;
 	close2;
 	callshop "barter_record_accessories";
+	end;
+
+L_BiolabResearch:
+	mes "[Oscar de Glast Heim]";
+	mes "Tambem posso ajudar com os recursos de Pesquisa de Somatologia.";
+	next;
+
+	switch(select("Comprar hats Biolab:Reciclar hats Biolab:Encantar arma Biolab:Cancelar")) {
+	case 1:
+		close2;
+		callshop "barter_bio_research_docu";
+		end;
+	case 2:
+		callsub L_RecycleBiolabHats;
+		end;
+	case 3:
+		close2;
+		item_enchant(163);
+		end;
+	default:
+		close;
+	}
+
+L_RecycleBiolabHats:
+	setarray .@hat_ids[0], 400078, 400079, 400094, 400095, 400098, 400099,
+		400116, 400117, 400118, 400119, 400120, 400121;
+
+	while (true) {
+		.@menu$ = "";
+		.@total = 0;
+		for (.@i = 0; .@i < getarraysize(.@hat_ids); .@i++) {
+			.@amount = countitem(.@hat_ids[.@i]);
+			if (.@amount < 1)
+				continue;
+			.@available[.@total] = .@i;
+			.@menu$ += getitemname(.@hat_ids[.@i]) + " (x" + .@amount + "):";
+			.@total++;
+		}
+
+		mes "[Reciclagem Biolab]";
+		if (.@total == 0) {
+			mes "Voce nao possui nenhum hat do Bau de Elmos do Laboratorio Biologico para reciclar.";
+			close;
+		}
+		mes "Cada hat reciclado devolve 25 Documentos de Pesquisa e 25 Fragmentos Experimentais.";
+		mes "Escolha o hat que deseja reciclar.";
+		next;
+
+		.@choice = select(.@menu$ + "Cancelar") - 1;
+		if (.@choice >= .@total)
+			close;
+
+		.@hat_id = .@hat_ids[.@available[.@choice]];
+		if (countitem(.@hat_id) < 1) {
+			mes "[Reciclagem Biolab]";
+			mes "Esse hat nao esta mais no seu inventario.";
+			close;
+		}
+
+		delitem .@hat_id, 1;
+		getitem 25786, 25;
+		getitem 25787, 25;
+		mes "[Reciclagem Biolab]";
+		mes "Voce reciclou 1x " + getitemname(.@hat_id) + ".";
+		mes "Recebeu 25 Documentos de Pesquisa e 25 Fragmentos Experimentais.";
+		next;
+		if (select("Continuar reciclando:Encerrar") == 2)
+			close;
+		clear;
+	}
 	end;
 
 L_SchmidtEnchant:

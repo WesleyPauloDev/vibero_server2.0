@@ -188,7 +188,13 @@ OnInit:
 
 OnEnterEvent:
     if (getvariableofnpc(.active, "GlobalBossCtrl") == 1) {
-        warp getvariableofnpc(.map$, "GlobalBossCtrl"), 36, 38;
+        .@map$ = getvariableofnpc(.map$, "GlobalBossCtrl");
+        if (strcharinfo(3) == .@map$) {
+            dispbottom "Voce ja esta no Evento Boss Global.";
+            end;
+        }
+        announce "[Evento Boss Global] " + strcharinfo(0) + " entrou no evento!", bc_all, 0xFF0000;
+        warp .@map$, 36, 38;
     } else {
         dispbottom "Nenhum convite de evento ativo no momento.";
     }
