@@ -853,3 +853,94 @@ Body:
   - Id: 40108
     Flags:
       BuyingStore: true
+  - Id: 501000
+    AegisName: Grade_D_Stone
+    Name: Pedra de Grade D
+    Type: Usable
+    Buy: 20
+    Weight: 10
+    Flags:
+      NoConsume: true
+    Script: |
+      .@menu$ = "";
+      .@count = 0;
+
+      setarray .@equip_pos[0],
+          EQI_HEAD_TOP,
+          EQI_ARMOR,
+          EQI_HAND_R,
+          EQI_HAND_L,
+          EQI_GARMENT,
+          EQI_SHOES,
+          EQI_ACC_L,
+          EQI_ACC_R;
+
+      for (.@i = 0; .@i < getarraysize(.@equip_pos); ++.@i) {
+          .@part = .@equip_pos[.@i];
+          .@item_id = getequipid(.@part);
+          if (.@item_id <= 0)
+              continue;
+          if (getenchantgrade(.@part) != ENCHANTGRADE_NONE)
+              continue;
+          if (!getiteminfo(.@item_id, ITEMINFO_GRADABLE))
+              continue;
+
+          switch (.@part) {
+              case EQI_HEAD_TOP: .@slot_name$ = "Topo"; break;
+              case EQI_ARMOR: .@slot_name$ = "Armadura"; break;
+              case EQI_HAND_R: .@slot_name$ = "Mao Direita"; break;
+              case EQI_HAND_L: .@slot_name$ = "Mao Esquerda"; break;
+              case EQI_GARMENT: .@slot_name$ = "Manto"; break;
+              case EQI_SHOES: .@slot_name$ = "Botas"; break;
+              case EQI_ACC_L: .@slot_name$ = "Acessorio Esquerdo"; break;
+              case EQI_ACC_R: .@slot_name$ = "Acessorio Direito"; break;
+              default: .@slot_name$ = "Equipamento"; break;
+          }
+
+          .@part_menu[.@count] = .@part;
+          .@menu$ += getitemname(.@item_id) + " [" + .@slot_name$ + "]:";
+          ++.@count;
+      }
+
+      if (.@count == 0) {
+          mes "[Pedra de Grade D]";
+          mes "Equipe um item sem grade com Gradable: true para usar esta pedra.";
+          close;
+      }
+
+      mes "[Pedra de Grade D]";
+      mes "Escolha o equipamento que recebera Grade D.";
+      mes "A pedra sera consumida somente apos aplicar a grade.";
+      next;
+
+      .@choice = select(.@menu$ + "Cancelar") - 1;
+      if (.@choice >= .@count)
+          close;
+
+      .@part = .@part_menu[.@choice];
+      .@item_id = getequipid(.@part);
+      if (.@item_id <= 0 || getenchantgrade(.@part) != ENCHANTGRADE_NONE || !getiteminfo(.@item_id, ITEMINFO_GRADABLE)) {
+          mes "[Pedra de Grade D]";
+          mes "O equipamento selecionado nao esta mais valido.";
+          close;
+      }
+
+      mes "[Pedra de Grade D]";
+      mes "Voce deseja aplicar ^0000FFGrade D^000000 em:";
+      mes "^0055FF" + getitemname(.@item_id) + "^000000?";
+      mes "Esta acao consumira uma Pedra de Grade D.";
+      next;
+      if (select("Confirmar:Cancelar") == 2) {
+          mes "[Pedra de Grade D]";
+          mes "Operacao cancelada.";
+          close;
+      }
+
+      setenchantgrade(.@part, ENCHANTGRADE_D);
+      delitem 501000, 1;
+      specialeffect2 EF_REFINEOK;
+      mes "[Pedra de Grade D]";
+      mes "Concluido!";
+      mes "^0055FF" + getitemname(.@item_id) + "^000000 recebeu ^0000FFGrade D^000000.";
+      mes "A Pedra de Grade D foi consumida.";
+      close;

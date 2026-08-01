@@ -14984,6 +14984,7 @@ BUILDIN_FUNC(getiteminfo)
 		case ITEMINFO_ID: script_pushint(st, i_data->nameid); break;
 		case ITEMINFO_AEGISNAME: script_pushstrcopy(st, i_data->name.c_str()); break;
 		case ITEMINFO_SUBTYPE: script_pushint(st, i_data->subtype); break;
+		case ITEMINFO_GRADABLE: script_pushint(st, i_data->flag.gradable); break;
 		default:
 			script_pushint(st, -1);
 			break;

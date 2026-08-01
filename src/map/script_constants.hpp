@@ -10682,6 +10682,7 @@
 	export_constant(ITEMINFO_AEGISNAME);
 	export_constant(ITEMINFO_ARMORLEVEL);
 	export_constant(ITEMINFO_SUBTYPE);
+	export_constant(ITEMINFO_GRADABLE);
 
 	/* geteleminfo script command */
 	export_constant(ELEMINFO_ID);

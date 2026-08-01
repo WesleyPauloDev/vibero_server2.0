@@ -2225,6 +2225,7 @@ enum e_iteminfo : uint8 {
 	ITEMINFO_AEGISNAME,	// 18
 	ITEMINFO_ARMORLEVEL,
 	ITEMINFO_SUBTYPE,
+	ITEMINFO_GRADABLE,
 };
 
 /* geteleminfo script command */
