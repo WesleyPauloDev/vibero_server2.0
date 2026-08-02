@@ -6,13 +6,13 @@ OnTalk:
 	switch(select("Itens:Shadows:Sair")) {
 	case 1:
 		close2;
-		callshop "MVP_Items_Shop",1;
 		npcshopattach "MVP_Items_Shop";
+		callshop "MVP_Items_Shop",1;
 		break;
 	case 2:
 		close2;
-		callshop "MVP_Shadow_Shop",1;
 		npcshopattach "MVP_Shadow_Shop";
+		callshop "MVP_Shadow_Shop",1;
 		break;
 	case 3:
 		close;
@@ -26,28 +26,18 @@ OnBuyItem:
 	}
 	end;
 }
-// Estes itens devem acompanhar o array shop_items e shop_prices
--	shop	MVP_Items_Shop	-1,7621:5,12411:20,12412:30,6396:30,9617:50,23436:50,9592:50,23927:100
--	shop	MVP_Shadow_Shop	-1,24661:50,24662:50,24663:50,24664:50,24665:50,24666:50,24667:50,24668:50,24669:50,24670:50,24671:50,24672:50,24673:50,24674:50,24675:50,24676:50,24677:50,24678:50,24679:50,24680:50,24681:50,24682:50,24683:50,24734:50,24735:50,24736:50,24737:50,24746:50,24417:50,24418:50,24419:50,24420:50,24421:50,24386:50,24326:50,24327:50,24767:50,24768:50
+// Shops normais com desconto desativado pela flag "no".
+// A cobranca em pontos fica no script abaixo.
+-	shop	MVP_Items_Shop	-1,no,7621:5,12411:20,12412:30,6396:30,9617:50,23436:50,9592:50,23927:100
+-	shop	MVP_Shadow_Shop	-1,no,24661:50,24662:50,24663:50,24664:50,24665:50,24666:50,24667:50,24668:50,24669:50,24670:50,24671:50,24672:50,24673:50,24674:50,24675:50,24676:50,24677:50,24678:50,24679:50,24680:50,24681:50,24682:50,24683:50,24734:50,24735:50,24736:50,24737:50,24746:50,24417:50,24418:50,24419:50,24420:50,24421:50,24386:50,24326:50,24327:50,24767:50,24768:50
 
 function	script	MVP_Shop_Process	{
-
-	// =============================
-	// CONFIGURA��O DA LOJA
-	// =============================
-	// Itens e pre�os em Pontos MVP
 	setarray .@shop_items[0], 7621, 12411, 12412, 6396, 9617, 23436, 24661, 24662, 24663, 24664, 24665, 24666, 24667, 24668, 24669, 24670, 24671, 24672, 24673, 24674, 24675, 24676, 24677, 24678, 24679, 24680, 24681, 24682, 24683, 24734, 24735, 24736, 24737, 24746, 24417, 24418, 24419, 24420, 24421, 9592, 23927, 24386, 24326, 24327, 24767, 24768;
-	setarray .@shop_prices[0],   5,    20,    30,   30,   50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,  50,   100,    50,    50,    50,    50,    50; // pre�o por item em pontos
+	setarray .@shop_prices[0],   5,    20,    30,   30,   50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,    50,  50,   100,    50,    50,    50,    50,    50;
 
-	// =============================
-	// PAR�METROS DA FUN��O
-	// =============================
-	.@id  = getarg(0); // ID do item comprado
-	.@qtd = getarg(1); // Quantidade comprada
+	.@id = getarg(0);
+	.@qtd = getarg(1);
 
-	// =============================
-	// PROCURA O ITEM NA TABELA
-	// =============================
 	.@found = 0;
 	for (.@i = 0; .@i < getarraysize(.@shop_items); .@i++) {
 		if (.@id == .@shop_items[.@i]) {
@@ -58,32 +48,19 @@ function	script	MVP_Shop_Process	{
 	}
 
 	if (!.@found) {
-		dispbottom "[Pontos MVP] Erro: item n�o est� registrado na loja.";
+		dispbottom "[Pontos MVP] Erro: item nao esta registrado na loja.";
 		return;
 	}
 
-	// =============================
-	// CALCULA O CUSTO TOTAL
-	// =============================
 	.@total_cost = .@unit_price * .@qtd;
-
-	// =============================
-	// VERIFICA PONTOS
-	// =============================
 	if (#mvp_points < .@total_cost) {
 		dispbottom "Pontos MVP insuficiente.";
-        return;
+		return;
 	}
 
-	// =============================
-	// DESCONTA E ENTREGA
-	// =============================
 	#mvp_points -= .@total_cost;
 	getitem .@id, .@qtd;
 	logshop "SCRIPT_SHOP_BUY", "MVP_Shop", .@id, .@qtd, 0, 0, 0, "#mvp_points", .@total_cost;
-
 	dispbottom "[Pontos MVP] -" + .@total_cost + " ponto(s) de MVP. Restam: " + #mvp_points + ".";
 	return;
 }
-
-

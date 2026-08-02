@@ -192,6 +192,11 @@ function	script	F_Fenda_Reset	{
 	'Fenda_EntryMap$ = "";
 	'Fenda_EntryX = 0;
 	'Fenda_EntryY = 0;
+	'Fenda_SpawnStage = 0;
+	'Fenda_SpawnDone = 0;
+	'Fenda_SpawnPending = 0;
+	deletearray 'Fenda_NormalCount[0], getarraysize('Fenda_NormalCount);
+	deletearray 'Fenda_MiniSpawned[0], getarraysize('Fenda_MiniSpawned);
 	for (.@i = 0; .@i < 4; ++.@i) {
 		'Fenda_Map$[.@i] = "";
 		'Fenda_MiniCount[.@i] = 0;
@@ -212,6 +217,11 @@ function	script	F_Fenda_Start	{
 	'Fenda_RewardPending = 0;
 	'Fenda_RewardSource = -1;
 	'Fenda_SpecialSpawned = 0;
+	'Fenda_SpawnStage = 0;
+	'Fenda_SpawnDone = 0;
+	'Fenda_SpawnPending = 0;
+	deletearray 'Fenda_NormalCount[0], getarraysize('Fenda_NormalCount);
+	deletearray 'Fenda_MiniSpawned[0], getarraysize('Fenda_MiniSpawned);
 	if (!'Fenda_StartTick)
 		'Fenda_StartTick = gettimetick(2);
 	if ('Fenda_LeaderName$ == "")
@@ -245,8 +255,6 @@ function	script	F_Fenda_Start	{
 		.@remaining--;
 	}
 
-	.@normal_label$ = instance_npcname("FendaController") + "::OnNormalDead";
-	.@mini_label$ = instance_npcname("FendaController") + "::OnMiniBossDead";
 	for (.@i = 0; .@i < 4; ++.@i) {
 		.@normal_count = 150;
 		if ('Fenda_MapSource[.@i] == 0)
@@ -261,15 +269,11 @@ function	script	F_Fenda_Start	{
 			.@normal_count = 225;
 		else if ('Fenda_MapSource[.@i] == 5)
 			.@normal_count = 225;
-		monster 'Fenda_Map$[.@i], 0, 0, "Errante da Fenda", 31900, .@normal_count, .@normal_label$;
-		if ('Fenda_Level > 1)
-			for (.@j = 0; .@j < .@normal_count; ++.@j)
-				callfunc "F_Fenda_ScaleMob", $@mobid[.@j], 'Fenda_Level;
-		monster 'Fenda_Map$[.@i], 0, 0, "Guardiao da Fenda", 31901, 'Fenda_MiniCount[.@i], .@mini_label$;
-		if ('Fenda_Level > 1)
-			for (.@j = 0; .@j < 'Fenda_MiniCount[.@i]; ++.@j)
-				callfunc "F_Fenda_ScaleMob", $@mobid[.@j], 'Fenda_Level;
+		'Fenda_NormalCount[.@i] = .@normal_count;
+		'Fenda_MiniSpawned[.@i] = 0;
 	}
+	'Fenda_SpawnPending = 1;
+	donpcevent instance_npcname("FendaController") + "::OnSpawnBatch";
 
 	for (.@i = 0; .@i < 6; ++.@i)
 		disablenpc instance_npcname($Fenda_PortalNpc$[.@i]);
@@ -692,6 +696,46 @@ OnInstanceInit:
 
 OnInstanceDestroy:
 	stopnpctimer;
+	end;
+
+OnSpawnBatch:
+	if (!'Fenda_Active || !'Fenda_SpawnPending)
+		end;
+	if ('Fenda_SpawnStage >= 4) {
+		'Fenda_SpawnPending = 0;
+		end;
+	}
+
+	.@stage = 'Fenda_SpawnStage;
+	.@normal_label$ = instance_npcname("FendaController") + "::OnNormalDead";
+	.@mini_label$ = instance_npcname("FendaController") + "::OnMiniBossDead";
+
+	if ('Fenda_SpawnDone < 'Fenda_NormalCount[.@stage]) {
+		.@amount = 'Fenda_NormalCount[.@stage] - 'Fenda_SpawnDone;
+		if (.@amount > 25)
+			.@amount = 25;
+		monster 'Fenda_Map$[.@stage], 0, 0, "Errante da Fenda", 31900, .@amount, .@normal_label$;
+		if ('Fenda_Level > 1)
+			for (.@i = 0; .@i < .@amount; ++.@i)
+				callfunc "F_Fenda_ScaleMob", $@mobid[.@i], 'Fenda_Level;
+		'Fenda_SpawnDone += .@amount;
+		sleep 10;
+		donpcevent instance_npcname("FendaController") + "::OnSpawnBatch";
+		end;
+	}
+
+	if (!'Fenda_MiniSpawned[.@stage]) {
+		monster 'Fenda_Map$[.@stage], 0, 0, "Guardiao da Fenda", 31901, 'Fenda_MiniCount[.@stage], .@mini_label$;
+		if ('Fenda_Level > 1)
+			for (.@i = 0; .@i < 'Fenda_MiniCount[.@stage]; ++.@i)
+				callfunc "F_Fenda_ScaleMob", $@mobid[.@i], 'Fenda_Level;
+		'Fenda_MiniSpawned[.@stage] = 1;
+	}
+
+	'Fenda_SpawnStage++;
+	'Fenda_SpawnDone = 0;
+	sleep 10;
+	donpcevent instance_npcname("FendaController") + "::OnSpawnBatch";
 	end;
 
 OnNormalDead:

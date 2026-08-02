@@ -3,8 +3,8 @@ OnTalk:
 	mes "[Vendedor]";
 	mes "Confira meus produtos!";
 	npcshopattach "Presence_Shop";
+	dispbottom "Pontos de Presenca: " + #presence_points;
 	callshop "Presence_Shop",1;
-	dispbottom "Pontos de Presença: " + #presence_points;
 	end;
 
 OnBuyItem:
@@ -13,26 +13,17 @@ OnBuyItem:
 	}
 	end;
 }
-// Estes itens devem acompanhar o array shop_items e shop_prices
--	shop	Presence_Shop	-1,9670:20,9671:20,12214:20,9678:30,9673:50,9674:50,9677:50,9642:100
+// Shop normal com desconto desativado pela flag "no".
+// A cobranca em pontos fica no script abaixo.
+-	shop	Presence_Shop	-1,no,9670:20,9671:20,12214:20,9678:30,9673:50,9674:50,9677:50,9642:100
 
 function	script	Presence_Shop_Process	{
+	setarray .@shop_items[0], 9670, 9671, 12214, 9678, 9673, 9674, 9677, 9642;
+	setarray .@shop_prices[0],  20,   20,    20,   30,  50,   50,   50,   100;
 
-	// =============================
-	// CONFIGURAÇÃO DA LOJA
-	// =============================
-	// Itens e preços em pontos de presença
-	setarray .@shop_items[0], 9670, 9671, 12214, 9678, 9673, 9674, 9677, 9642; 
-	setarray .@shop_prices[0],  20,   20,    20,   30,  50,   50,   50,   100; // preço por item em pontos
+	.@id = getarg(0);
+	.@qtd = getarg(1);
 
-	// =============================
-	// PARÂMETROS DA FUNÇÃO
-	// ============================= 
-	.@id  = getarg(0); // ID do item comprado
-	.@qtd = getarg(1); // Quantidade comprada
-	// =============================
-	// PROCURA O ITEM NA TABELA
-	// =============================
 	.@found = 0;
 	for (.@i = 0; .@i < getarraysize(.@shop_items); .@i++) {
 		if (.@id == .@shop_items[.@i]) {
@@ -43,30 +34,18 @@ function	script	Presence_Shop_Process	{
 	}
 
 	if (!.@found) {
-		dispbottom "[Presença] Erro: item não está registrado na loja.";
+		dispbottom "[Presenca] Erro: item nao esta registrado na loja.";
 		return;
 	}
 
-	// =============================
-	// CALCULA O CUSTO TOTAL
-	// =============================
 	.@total_cost = .@unit_price * .@qtd;
-
-	// =============================
-	// VERIFICA PONTOS
-	// =============================
 	if (#presence_points < .@total_cost) {
-		dispbottom "Pontos de Presença insuficiente.";
-        return;
+		dispbottom "Pontos de Presenca insuficiente.";
+		return;
 	}
 
-	// =============================
-	// DESCONTA E ENTREGA
-	// =============================
 	#presence_points -= .@total_cost;
 	getitem .@id, .@qtd;
-	logshop "SCRIPT_SHOP_BUY", "Presence_Shop", .@id, .@qtd, 0, 0, 0, "#presence_points", .@total_cost;
-
-	dispbottom "[Presença] -" + .@total_cost + " ponto(s) de presença. Restam: " + #presence_points + ".";
+	dispbottom "[Presenca] -" + .@total_cost + " ponto(s) de presenca. Restam: " + #presence_points + ".";
 	return;
 }

@@ -54,10 +54,86 @@ prontera,186,210,4	duplicate(Criador de Homunculos#base)	Criador de Homunculos#p
 
 prontera,145,198,4	script	Loja de Tickets	408,{
 	mes "[Loja de Tickets]";
-    mes "Bem Vindo a nossa loja!"; 
-    next;
+	mes "Bem vindo a nossa loja!";
+	next;
 
-	callshop "luck_egg_barter_shop";
+	switch(select("Loja de Tickets:Reciclar visual da loja de cash:Sair")) {
+	case 1:
+		callshop "luck_egg_barter_shop";
+		end;
+	case 2:
+		callsub S_RecycleCashVisual;
+		close;
+	default:
+		close;
+	}
+
+S_RecycleCashVisual:
+	mes "[Loja de Tickets]";
+	mes "Eu reciclo visuais da loja de cash por ^0055FF5x " + getitemname(9643) + "^000000.";
+	mes "Escolha o visual que deseja trocar.";
+	next;
+
+	getinventorylist;
+	deletearray .@item_id[0], getarraysize(.@item_id);
+	deletearray .@inv_idx[0], getarraysize(.@inv_idx);
+	deletearray .@menu$[0], getarraysize(.@menu$);
+
+	for (.@i = 0; .@i < @inventorylist_count; .@i++) {
+		if (@inventorylist_equip[.@i] != 0)
+			continue;
+
+		.@aegis$ = getiteminfo(@inventorylist_id[.@i], ITEMINFO_AEGISNAME);
+		if (inarray(.RecycleVisual$[0], .@aegis$) == -1)
+			continue;
+
+		.@idx = getarraysize(.@item_id);
+		.@item_id[.@idx] = @inventorylist_id[.@i];
+		.@inv_idx[.@idx] = @inventorylist_idx[.@i];
+		.@menu$[.@idx] = getitemname(@inventorylist_id[.@i]);
+	}
+
+	if (!getarraysize(.@item_id)) {
+		mes "[Loja de Tickets]";
+		mes "Voce nao possui nenhum visual reciclavel da loja de cash solto no inventario.";
+		return;
+	}
+
+	.@pick = select(implode(.@menu$, ":") + ":Cancelar") - 1;
+	if (.@pick >= getarraysize(.@item_id))
+		return;
+
+	.@visual = .@item_id[.@pick];
+	.@inv_idx = .@inv_idx[.@pick];
+	mes "[Loja de Tickets]";
+	mes "Trocar ^0055FF1x " + getitemname(.@visual) + "^000000 por ^0055FF5x " + getitemname(9643) + "^000000?";
+	next;
+	if (select("Confirmar:Cancelar") == 2)
+		return;
+
+	getinventorylist;
+	.@found = 0;
+	for (.@i = 0; .@i < @inventorylist_count; .@i++) {
+		if (@inventorylist_idx[.@i] != .@inv_idx)
+			continue;
+		if (@inventorylist_id[.@i] == .@visual && @inventorylist_equip[.@i] == 0)
+			.@found = 1;
+		break;
+	}
+	if (!.@found) {
+		mes "[Loja de Tickets]";
+		mes "Esse visual nao esta mais solto no seu inventario.";
+		return;
+	}
+
+	delitemidx .@inv_idx, 1;
+	getitem 9643, 5;
+	mes "[Loja de Tickets]";
+	mes "Pronto! Voce recebeu ^0055FF5x " + getitemname(9643) + "^000000.";
+	return;
+
+OnInit:
+	explode(.RecycleVisual$, "C_Snow_Rabbit_Knit_Hat|C_Valkyrie_Circlet|C_Angel_Veil|C_Will_O_Wisp|C_VesperHeadGear_J|C_Hunters_Dinner|C_Choco_Banana|C_Rose_Crispinette|C_Hair_Of_The_Strong|C_Classical_Fhat|C_Vacation_Hat|C_Headset|C_Plaster|C_Rabbit_Magic_Hat|C_Ramen_Hat|C_Chinese_Crown|C_J_Captain_Hat|C_Minstrel_Hat|C_Gray_Fur_Hat|C_Tiraya_Bonnet|C_CatEars_Cyber_HeadP_R|C_Wildcat_Knit_Cap|C_Elder_Devil_Horn|C_Gigant_Helm|C_Drooping_Wild_Rose|C_Gemma_Hairband|C_Hyegun_Hat|C_Elder_Crown|C_Mouse_Hat5|C_Galanthus_Guard|Horse_King|C_Dragon_Turtle_Hat|C_Big_Golden_Bell|C_Pegasus_Wing_Ears|C_Dark_Knight_Mask|C_Bullock_Helm_J|C_General_Helmet|C_Dragon_Skull|C_Lightning_Speed|C_Double_Horn_Helm|C_Hat_Of_Cook|Lobster_Hat|C_Marionette_Doll|Horo_Ears|C_Zaha_Doll_Hat_J|C_Gothic_Skull_Ribbon|C_Heart_Ribbon_Band|C_BeachBall|C_Red_Beret|C_Cow_Hat1|C_Cow_Hat3|C_Bunny_Head_Dress|C_Firinto_Scarf|C_Buddhist_Priest_Crown|C_Sword_Master_Crown|C_Owlduke_Silk_Hat|Alphonse_Helmet|C_Rose_Crown|C_Hermose_Cap|C_Carmen_Miranda_Hat|C_Samambaia|C_Decoration_bluerose|C_Wind_Of_The_Prairie|C_Ph.D_Hat|C_Stop_Post|C_Notice_Board|C_White_Tiger_Hat|C_Ghost_Bandana|C_Bride_Corolla|C_Feather_Bonnet|C_Headband_Of_Power|C_Safety_Helmet|C_Nydhog_Wig|C_Evil_Druid_Hat_Black|C_Evil_Druid_Hat|C_Fire_Giant_Gold|C_Fire_Giant_Red|C_Angel_Stairs|Blue_Brain_Hat|C_Hairband_Of_Grandpeco|C_Pecopeco_Hairband|C_Blrabbit_Hband|C_Gryphon_Hairband|C_Alpaca_Hood|C_Fox_Bamboo_Hat|C_Necromencer_Hood_V|C_20Y_Anniv_Helmet|C_Balloon_Hat_Classical|C_Vanargandr_Helm_GL|C_Larva_Red|aegis_400398|C_Ribbon_Magic_Hat|C_Owlviscount_Silk_Hat|C_Smoky_TransformHat|aegis_400430|aegis_400429|aegis_400439|C_PU_EarWitchHat|C_Ally_of_the_Demons|C_Volume_Low_Twin|C_Teardrop|C_DancingButterfly_TW|C_Imperial_Feather|C_Minions_Of_Devil|C_MoonStar_Accessory|C_World_Star|C_Gemini_Eyes|C_Moon_Eyepatch|C_Shiba_Inu|C_SmartUnderRim_Glasses|C_Anemos_Mask|C_Tha_Despero_Mask|C_Cube_Mask|Heart_Eye_Patch2|Heart_Eye_Patch1|Nut_On_Head|Butterfly_Wing_Ear|T_Sunglasses|T_Mr_Smile|C_Master_Cat|C_Devil_Whisper|C_Blush|C_Elven_Ears|C_Takius_Blindfold|C_Reginleif_Wings_J|C_Black_Glasses|C_Ear_Of_Devils_Wing|C_Binoculars|C_Gas_Mask|Little_Golden_Wing|C_Observer|C_Shelter_Wing_Ears|C_YinYang_Earring|C_Ear_Of_Angel's_Wing|C_Fin_Helm|C_Tomboy_Fairy|C_Ifrit's_Ear|C_Ice_Wing_Ear|C_Filir_Wing_Ears|C_Music_Decoration|C_Pair_Of_Red_Ribbon|C_Cat_Eye|C_Odin_Mask|C_3D_Glasses|Flower_Blossom|C_Butterfly_Wing_Ear_J|C_Pray_Cherry_Blossom|C_Welding_Mask|C_Wing_Form_Spectacle|C_Blind_Glasses|C_Under_Rim_Glasses|C_Mermaid_Headphone|C_Eagle_Eyes|C_Masquerade|C_C_Tower_Manager_Incom|C_Robo_Eye|C_Bell_Pigeon|C_Maple_Which_Falls|Happy_Pierrot_Mask|C_Scratching_Cat|C_Black_Devil_Mask|C_Eyes_Of_Ifrit|C_Time_Accessory|C_Love_Cheek|C_Gryphon_Wing_Ears|C_Wing_Ear_Black|C_Poring_Sunglasses_J|C_Happy_Lunatic_Ear|C_Face_Crusher|C_Magical_Booster|C_Baron_Evil_Eye|C_New_Wave_Sunglass|C_37_Sculpt|C_Little_Aquarium|C_Mahican|C_Memories_Of_Lovers|C_Charleston_Antenna|C_PocketWatch_Hair_Orna|C_Jakk|C_Silent_Executer|C_Avenger|C_Crow_Tengu_Mask|C_Blessing_Of_Angels|C_Commandments_Of_Chain|C_Morocc_Kid_Servant|C_Glow_Of_New_Year|C_Valhalla_Idol|C_93_BloodyWing|C_Twin_Margaret|C_Pope_Ribbon|C_Wing_Headphone|C_Eat_Coin|C_Nut_Cracker|C_bullhead|C_Exploding_Wave_Red|C_Assassin_Skull_Mask|C_Vampire_Familiar|C_JP_EV02|C_Bloody_Stop_Bandage|C_Happy_Balloon_J|C_Flutter_Butterfly|C_Poker_Card_In_Mouth|C_Angel_Fluttering|C_Luna_On_Shoulder|T_Cigarette|Chicken_Beak|Charlie_Beard|C_Iron_Cane|C_Romantic_White_Flower|C_Centimental_Flower|C_Assassin_Mask_|C_Samurai_Mask|C_Pirate_Dagger|C_Invisible_Mask|C_Gang_Scarf|C_Cons_Of_Darkness|C_Flu_Mask|C_Cat_Ears_Cape_Brown|C_Poring_Letter|C_Antique_Pipe_J|C_Scarlet_Rose|C_Taboo_Curse_Scroll|C_Ifrits_Breath|C_Rainbow_Scarf|C_Bubble_Gum_In_Mouth|C_Chilly_Breath|C_Miracle_Blue_Rose|C_Red_Cherry_Blossom|C_Baby_Pacifier|C_Ganster_Mask|C_Worg_In_Mouth|C_Fish_In_Mouth|C_Smoking_Pipe|C_Jack_Castle_Bat|C_Subject_Aura|C_Long_Tongue|C_Banshee_Master_Kiss|C_Deviruchi_Balloon|C_Large_Ribbon_Muffler|C_Gift_Of_Snow|C_Blossom_Fluttering|C_BeginnerMark|C_Cute_Parrot|C_Analyze_Eye|C_Stall_Of_Bat|C_Music_Decoration_J|C_Sailor_Collar|C_Golden_Fish|C_Sugared_Fruit_S|C_Straight_Pony_BL|C_Cowlick_BL|C_Loose_Wave_Twin_BL|C_FlyingGalapago|C_Eremes_Scarf|C_Subject_Aura_Red|C_Piamette_BowTie|C_9Grade_Balloon|C_12Grade_Balloon|C_11Grade_Balloon|C_Abacus_In_Mouth|C_Tone_Of_Gold|C_L_RibbonMuff_Red|C_Feather_Fluttering|C_Cat_Ears_Cape|C_Floral_Waltz|C_Umbala_Spirit|GrimReaper_Protection|C_Blue_Rear_Ribbon|C_Poring_Soap_Pipe|C_Eremes_Scarf_Black|C_Costume01_L|C_Whistle|C_Dwarf_Beard|C_Underlamp|C_Chatty_Parrot|C_Time_Accessory_J|C_Piamette_BowTie_Red|C_Shaving_Foam|C_Brown_Stall|C_Flame_Muffler|C_Side_Pigtail_GN|C_Side_Pigtail_WH|C_Cat_Ears_Cape_Red|C_Blazing_Sun_V|C_Cat_Mouth|C_Clay_Poring_Jar|C_Soda_In_Mouth|C_Shelterwing_Ears_V|C_Warm_Cat_Muffler|C_Stall_Of_Angel|C_FlutterButterfly_BL|C_Fallen_Angel_Valletta|C_Explosion_Gum|C_Glastheim_Onlooker|C_Diabolic_Lapel|C_TW_1th_Balloon|C_SurviveOrb|C_Book_Of_Magic|C_Devil_Wing|C_Cupid_Wing_Pink|C_Wings_of_Uriel|C_SwordWing|C_Blue_Fairy_Wing|C_Thanatos_Sword|C_Magic_Circle|C_Wings_of_Michael|C_GiantCatBag_TW|C_Gerhard_Von_Devi_Bag|C_Valkyrie_Wing|C_Popping_Poring_Aura|C_HeartChocoBag|C_Backside_Ribbon_Bell|C_Halloween_Poring_Bag|C_AngelRibbonWing_TW|C_PinkButterfly_Wing_T|C_Exploding_Wave_Sca_V|C_Digital_Space|C_Full_BloomCherry_Tree|C_BlackCatBag_TW|C_Blessings_Of_Soul|C_Bloody_Wing|C_BlueAngeling_Wing|C_PinkButterfly_Wing|C_GoldButterfly_Wing|C_Wings_of_Gabriel|C_Ru_Bear_Bag|C_WingOfHeart|C_VioletHalo|C_School_Bag_RD|C_Cat_Fork|C_Balloon_Wing|C_Wings_Of_Raguel|C_T_Bear_Bag|C_Loli_Ruri_Moon|C_Light_Darkness_Wing|C_Nifl_Bloom|C_Gimmick_One_Feather|C_Evil_Druid_Cross|C_Bow_On_the_Back|C_Santa_Backpack|C_Ice_Wing|C_Big_Ribbon_Cloak|C_Big_Foxtail|C_Evil_Scythe|C_GiantCatBag_JP_BL|C_Sakura_Wing|C_Seraphim_Wing_TW|C_P_Ulysses_Feather|C_Blessed_Veil|C_Leaf_Umbrella|C_Baldr_Wing_TW|C_Wing_Of_Spider|C_Kyel_hyre_Ulti_TW|C_School_Bag_BU|Brilliant_Golden_Wings|C_Kirin_Wing|C_Rudra_Wing|C_Wing_Of_Happiness|C_GreatDevilWing|C_Amistr_Bag|C_Fallen_Angel_Wing|C_Rotating_Gears|C_Fairy_Of_Eden|C_2018_RTC_Cape4_TW_J|C_Mechanical_Butterfly|C_Mainspring_Screw|C_Sakura_Fes_TW|C_Heart_Wing_Bag_J|C_Wing_Of_Angel_Move_RD|C_Wings_Of_Lucifer|C_Put_On_Coat|C_Giant_White_Rabbit|C_Scepter|Calabash|C_Wing_Of_Angel_Move_GD|C_Snow_Powder|C_Kings_Twin_Sword|C_Sandalphon_Wing_TW|C_Poring_Basket|C_Big_Shuriken|C_Ninetail_Tail_WH|C_Adventure_Cat_Bag|C_Flower_Wing|C_Elec_Guitar_Of_Phen|C_G_DaeHyon_Sword_TW|C_Niflheim_Key|C_Striking_Mikoshi|C_Samba_Carnival|C_Giant_Shark|C_Hooked_Straw_Hat|C_Triple_Ice_Cream|C_Beer_Server|C_Swirling_Flame|C_Nydhog_Rumor|C_Filir_Bag|C_Spoon_Fork_Set|C_Lunatic_Bag", "|");
 	end;
 }
 
