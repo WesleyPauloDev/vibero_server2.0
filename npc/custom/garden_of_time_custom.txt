@@ -169,34 +169,54 @@ S_EnchantSignetStar:
 	end;
 
 S_Meteorite:
+	.@need_item = 0;
+	.@need_amount = 0;
+	.@need_item2 = 0;
+	.@need_amount2 = 0;
+	.@need_item3 = 0;
+	.@need_amount3 = 0;
+	.@need_zeny = 0;
+	.@give_item = 0;
+	.@give_amount = 0;
+
 	mes "[Jardim do Tempo]";
 	mes "Escolha a troca desejada.";
 	next;
 
 	switch (select("Po de Meteorito:Fragmento de Meteorito:Verdade da Circulacao:Voltar")) {
 	case 1:
-		setarray .@dust_ids[0],1000398,1000399,1000400,1000401,1000402,1000403;
-		setarray .@fragment_ids[0],1000442,1000443,1000444,1000445,1000446,1000447;
+		.@exchange_type = select("Po de Meteorito x5 por fragmento do mesmo atributo:Po de Meteorito x5 por outro po de atributo:Voltar");
+		if (.@exchange_type == 3)
+			goto L_Menu;
 		.@from_choice = select("Usar Po de Meteorito do Poder:Usar Po de Meteorito do Vigor:Usar Po de Meteorito da Agilidade:Usar Po de Meteorito da Sorte:Usar Po de Meteorito da Magia:Usar Po de Meteorito da Sabedoria:Voltar");
 		if (.@from_choice == 7)
 			goto L_Menu;
-		.@need_item = .@dust_ids[.@from_choice - 1];
-		.@need_amount = 10;
-		.@give_item = .@fragment_ids[.@from_choice - 1];
+		.@need_item = 1000397 + .@from_choice;
+		if (.@exchange_type == 1) {
+			.@need_amount = 5;
+			.@give_item = 1000441 + .@from_choice;
+		} else {
+			.@dust_choice = select("Po de Meteorito do Poder:Po de Meteorito do Vigor:Po de Meteorito da Agilidade:Po de Meteorito da Sorte:Po de Meteorito da Magia:Po de Meteorito da Sabedoria:Voltar");
+			if (.@dust_choice == 7)
+				goto L_Menu;
+			.@need_amount = 5;
+			.@give_item = 1000397 + .@dust_choice;
+		}
 		.@give_amount = 1;
 		break;
 	case 2:
-		setarray .@need_fragment_ids[0],1000373,1000442,1000443,1000444,1000445,1000446,1000447;
-		setarray .@give_fragment_ids[0],1000442,1000443,1000444,1000445,1000446,1000447;
 		.@from_choice = select("Usar Fragmento de Meteorito:Usar Fragmento de Meteorito do Poder:Usar Fragmento de Meteorito do Vigor:Usar Fragmento de Meteorito da Agilidade:Usar Fragmento de Meteorito da Sorte:Usar Fragmento de Meteorito da Magia:Usar Fragmento de Meteorito da Sabedoria:Voltar");
 		if (.@from_choice == 8)
 			goto L_Menu;
 		.@fragment_choice = select("Fragmento de Meteorito do Poder:Fragmento de Meteorito do Vigor:Fragmento de Meteorito da Agilidade:Fragmento de Meteorito da Sorte:Fragmento de Meteorito da Magia:Fragmento de Meteorito da Sabedoria:Voltar");
 		if (.@fragment_choice == 7)
 			goto L_Menu;
-		.@need_item = .@need_fragment_ids[.@from_choice - 1];
+		if (.@from_choice == 1)
+			.@need_item = 1000373;
+		else
+			.@need_item = 1000440 + .@from_choice;
 		.@need_amount = 5;
-		.@give_item = .@give_fragment_ids[.@fragment_choice - 1];
+		.@give_item = 1000441 + .@fragment_choice;
 		.@give_amount = 1;
 		break;
 	case 3:
@@ -212,6 +232,12 @@ S_Meteorite:
 		break;
 	default:
 		goto L_Menu;
+	}
+
+	if (.@need_item <= 0 || .@need_amount <= 0 || .@give_item <= 0 || .@give_amount <= 0) {
+		mes "[Jardim do Tempo]";
+		mes "Esta troca esta invalida. Tente novamente.";
+		close;
 	}
 
 	mes "[Jardim do Tempo]";
@@ -236,15 +262,19 @@ S_Meteorite:
 		mes "Voce nao possui "+getitemname(.@need_item)+" suficiente.";
 		close;
 	}
-	if (.@need_item2 && countitem(.@need_item2) < .@need_amount2) {
-		mes "[Jardim do Tempo]";
-		mes "Voce nao possui "+getitemname(.@need_item2)+" suficiente.";
-		close;
+	if (.@need_item2) {
+		if (countitem(.@need_item2) < .@need_amount2) {
+			mes "[Jardim do Tempo]";
+			mes "Voce nao possui "+getitemname(.@need_item2)+" suficiente.";
+			close;
+		}
 	}
-	if (.@need_item3 && countitem(.@need_item3) < .@need_amount3) {
-		mes "[Jardim do Tempo]";
-		mes "Voce nao possui "+getitemname(.@need_item3)+" suficiente.";
-		close;
+	if (.@need_item3) {
+		if (countitem(.@need_item3) < .@need_amount3) {
+			mes "[Jardim do Tempo]";
+			mes "Voce nao possui "+getitemname(.@need_item3)+" suficiente.";
+			close;
+		}
 	}
 	if (.@need_zeny && Zeny < .@need_zeny) {
 		mes "[Jardim do Tempo]";

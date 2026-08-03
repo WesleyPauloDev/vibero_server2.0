@@ -83,13 +83,13 @@ OnTalk:
 				311920;
 			break;
 		case EQI_COSTUME_GARMENT:
-			.@slot = 0;
-			.@slot_name$ = "capa";
+			.@slot = 1;
+			.@slot_name$ = "capa slot 2";
 			setarray .@stone_id[0],
 				29463,310257,29520,310184,29484,310007,29467,310261,29524,310188,29480,29618,29471,310180,29435,29614,29516,310011,29426,29427,29431,310003,29488,310265,29658,29654,29667,29671,29662,29663,
-				29358,29361,29056,310661,310667,310660,310662,310663,
+				29358,29361,29056,310654,310658,310659,310661,310667,310660,310662,310663,311014,311015,311354,311355,311425,311471,311925,
 				25448,25449,25456,
-				25067;
+				25067,1000520,1000521,1000522,1000523,1000524,1000525,1000526,1000527,1000675,1000676,1000855,1000856,1000921,1001055,1001172;
 			break;
 		default:
 			mes "Slot invalido.";
@@ -105,6 +105,20 @@ OnTalk:
 		close;
 
 	if (.@action == 2) {
+		if (.@part == EQI_COSTUME_GARMENT) {
+			mes "[Encantador Visual]";
+			mes "Qual slot de capa deseja limpar?";
+			next;
+			.@remove_slot = select("Slot 2:Slot 3:Cancelar");
+			if (.@remove_slot == 3)
+				close;
+			.@slot = .@remove_slot;
+			if (.@slot == 1)
+				.@slot_name$ = "capa slot 2";
+			else
+				.@slot_name$ = "capa slot 3";
+		}
+
 		if (.@card[.@slot] <= 0) {
 			mes "[Encantador Visual]";
 			mes "Este visual nao possui encantamento no slot de " + .@slot_name$ + ".";
@@ -146,7 +160,7 @@ OnTalk:
 		close;
 	}
 
-	if (.@card[.@slot] > 0) {
+	if (.@part != EQI_COSTUME_GARMENT && .@card[.@slot] > 0) {
 		mes "Este visual ja possui um encantamento no slot de " + .@slot_name$ + ".";
 		mes "Remova o encantamento atual antes de aplicar outro.";
 		close;
@@ -183,6 +197,53 @@ OnTalk:
 	// CastingStone_Robe is the consumable stone; FixedCasting05 is the enchant stored in the costume.
 	if (.@stone == 25067)
 		.@enchant = 29056;
+
+	// Dual garment stones are consumables; their matching enchant IDs are stored in the costume.
+	if (.@stone == 1000520)
+		.@enchant = 310654;
+	else if (.@stone == 1000521)
+		.@enchant = 310658;
+	else if (.@stone == 1000522)
+		.@enchant = 310659;
+	else if (.@stone == 1000523)
+		.@enchant = 310660;
+	else if (.@stone == 1000524)
+		.@enchant = 310661;
+	else if (.@stone == 1000525)
+		.@enchant = 310663;
+	else if (.@stone == 1000526)
+		.@enchant = 310662;
+	else if (.@stone == 1000527)
+		.@enchant = 310667;
+	else if (.@stone == 1000675)
+		.@enchant = 311014;
+	else if (.@stone == 1000676)
+		.@enchant = 311015;
+	else if (.@stone == 1000855)
+		.@enchant = 311354;
+	else if (.@stone == 1000856)
+		.@enchant = 311355;
+	else if (.@stone == 1000921)
+		.@enchant = 311425;
+	else if (.@stone == 1001055)
+		.@enchant = 311471;
+	else if (.@stone == 1001172)
+		.@enchant = 311925;
+
+	if (.@part == EQI_COSTUME_GARMENT) {
+		.@slot = 1;
+		.@slot_name$ = "capa slot 2";
+		if (.@enchant == 310654 || .@enchant == 310658 || .@enchant == 310659 || .@enchant == 310660 || .@enchant == 310661 || .@enchant == 310662 || .@enchant == 310663 || .@enchant == 310667 || .@enchant == 311014 || .@enchant == 311015 || .@enchant == 311354 || .@enchant == 311355 || .@enchant == 311425 || .@enchant == 311471 || .@enchant == 311925) {
+			.@slot = 2;
+			.@slot_name$ = "capa slot 3";
+		}
+	}
+
+	if (.@card[.@slot] > 0) {
+		mes "Este visual ja possui um encantamento no slot de " + .@slot_name$ + ".";
+		mes "Remova o encantamento atual antes de aplicar outro.";
+		close;
+	}
 
 	mes "[Encantador Visual]";
 	mes "Aplicar ^0055FF" + getitemname(.@stone) + "^000000 em ^0055FF" + getitemname(.@equip_id) + "^000000?";
