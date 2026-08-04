@@ -6853,6 +6853,74 @@ Body:
       setarray .@items[0],
         312014,312021;
       getitem .@items[rand(getarraysize(.@items))],1;
+  - Id: 9692
+    AegisName: Meteorite_Dust_Select_Box
+    Name: Caixa de Po de Meteorito
+    Type: Usable
+    Buy: 10
+    Weight: 10
+    Flags:
+      NoConsume: true
+    Script: |
+      setarray .@items[0],1000398,1000399,1000400,1000401,1000402,1000403;
+      .@menu$ = "";
+      for (.@i = 0; .@i < getarraysize(.@items); ++.@i)
+          .@menu$ += getitemname(.@items[.@i]) + ":";
+
+      mes "[Caixa de Po de Meteorito]";
+      mes "Escolha qual po de meteorito deseja receber.";
+      next;
+      .@choice = select(.@menu$ + "Cancelar") - 1;
+      if (.@choice >= getarraysize(.@items))
+          close;
+
+      mes "[Caixa de Po de Meteorito]";
+      mes "Receber:";
+      mes "^0055FF" + getitemname(.@items[.@choice]) + "^000000 x1?";
+      next;
+      if (select("Confirmar:Cancelar") == 2)
+          close;
+
+      delitem 9692,1;
+      getitem .@items[.@choice],1;
+      specialeffect2 EF_MVP;
+      mes "[Caixa de Po de Meteorito]";
+      mes "Concluido!";
+      close;
+  - Id: 9693
+    AegisName: Meteorite_Fragment_Select_Box
+    Name: Caixa de Fragmento de Meteorito
+    Type: Usable
+    Buy: 10
+    Weight: 10
+    Flags:
+      NoConsume: true
+    Script: |
+      setarray .@items[0],1000442,1000443,1000444,1000445,1000446,1000447;
+      .@menu$ = "";
+      for (.@i = 0; .@i < getarraysize(.@items); ++.@i)
+          .@menu$ += getitemname(.@items[.@i]) + ":";
+
+      mes "[Caixa de Fragmento de Meteorito]";
+      mes "Escolha qual fragmento de meteorito deseja receber.";
+      next;
+      .@choice = select(.@menu$ + "Cancelar") - 1;
+      if (.@choice >= getarraysize(.@items))
+          close;
+
+      mes "[Caixa de Fragmento de Meteorito]";
+      mes "Receber:";
+      mes "^0055FF" + getitemname(.@items[.@choice]) + "^000000 x1?";
+      next;
+      if (select("Confirmar:Cancelar") == 2)
+          close;
+
+      delitem 9693,1;
+      getitem .@items[.@choice],1;
+      specialeffect2 EF_MVP;
+      mes "[Caixa de Fragmento de Meteorito]";
+      mes "Concluido!";
+      close;
 
   - Id: 9690
     AegisName: Nodispell_Protection_30m

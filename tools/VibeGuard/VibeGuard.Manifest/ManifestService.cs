@@ -107,7 +107,9 @@ internal static class ManifestService
             foreach (var candidatePath in Directory.EnumerateFiles(root, "*", SearchOption.TopDirectoryOnly))
             {
                 var relativePath = Path.GetRelativePath(root, candidatePath);
-                if (seen.Contains(relativePath) || !IsPortableExecutable(candidatePath))
+                if (seen.Contains(relativePath)
+                    || await TrustedUpdaterComponent.RemoveOrRecognizeAsync(candidatePath)
+                    || !IsPortableExecutable(candidatePath))
                     continue;
 
                 valid = false;

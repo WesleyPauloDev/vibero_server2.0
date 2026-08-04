@@ -56,7 +56,9 @@ internal sealed class RuntimeIntegrityMonitor
         foreach (var candidate in Directory.EnumerateFiles(root, "*", SearchOption.TopDirectoryOnly))
         {
             var relativePath = Path.GetRelativePath(root, candidate);
-            if (!entries.ContainsKey(relativePath) && IsPortableExecutable(candidate))
+            if (!entries.ContainsKey(relativePath)
+                && !await TrustedUpdaterComponent.RemoveOrRecognizeAsync(candidate)
+                && IsPortableExecutable(candidate))
                 return (false, $"modulo executavel nao aprovado: {relativePath}");
         }
 

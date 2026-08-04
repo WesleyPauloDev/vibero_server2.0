@@ -192,6 +192,8 @@ internal sealed class GuardWindow : Form
         Console.SetOut(new GuardUiWriter(HandleOutputLine, isError: false));
         Console.SetError(new GuardUiWriter(HandleOutputLine, isError: true));
         var root = AppContext.BaseDirectory;
+        await TrustedUpdaterComponent.RemoveOrRecognizeAsync(
+            Path.Combine(root, "PathVibe.Patcher.c688e64d237c702c.exe"));
         LauncherSettings settings;
         try
         {
@@ -252,9 +254,7 @@ internal sealed class GuardWindow : Form
     {
         if (string.IsNullOrWhiteSpace(line))
             return;
-        if (isError
-            || line.StartsWith("[ALTERADO]", StringComparison.Ordinal)
-            || line.StartsWith("[AUSENTE]", StringComparison.Ordinal))
+        if (isError || IsVerificationFailure(line))
             lastError = line;
         RunOnUi(() =>
         {
@@ -308,7 +308,7 @@ internal sealed class GuardWindow : Form
                 progressBar.Style = ProgressBarStyle.Continuous;
                 progressBar.Value = 100;
             }
-            else if (isError || line.StartsWith("[ALTERADO]", StringComparison.Ordinal) || line.StartsWith("[AUSENTE]", StringComparison.Ordinal))
+            else if (isError || IsVerificationFailure(line))
             {
                 statusLabel.Text = "Verificacao requer atencao";
                 statusLabel.ForeColor = Color.FromArgb(248, 113, 113);
@@ -316,6 +316,11 @@ internal sealed class GuardWindow : Form
             }
         });
     }
+
+    private static bool IsVerificationFailure(string line) =>
+        line.StartsWith("[ALTERADO]", StringComparison.Ordinal)
+        || line.StartsWith("[AUSENTE]", StringComparison.Ordinal)
+        || line.StartsWith("[NAO APROVADO]", StringComparison.Ordinal);
 
     private void HideToTray()
     {
