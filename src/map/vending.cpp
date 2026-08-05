@@ -334,9 +334,12 @@ void vending_purchasereq(map_session_data* sd, int32 aid, int32 uid, const uint8
 		const int64 unit_price = vsd->vending[vend_list[i]].value;
 		const int64 total_price = unit_price * amount;
 		double z = (double)total_price;
+		struct item sold_item = vsd->cart.u.items_cart[idx];
+		const t_itemid sold_item_id = sold_item.nameid;
+		const int32 sold_cartinventory_id = sold_item.id;
 
 		// Entregar item ao comprador
-		pc_additem(sd, &vsd->cart.u.items_cart[idx], amount, LOG_TYPE_VENDING);
+		pc_additem(sd, &sold_item, amount, LOG_TYPE_VENDING);
 
 		// Atualizar quantidade do vendedor
 		vsd->vending[vend_list[i]].amount -= amount;
@@ -345,11 +348,11 @@ void vending_purchasereq(map_session_data* sd, int32 aid, int32 uid, const uint8
 			Sql_Query(mmysql_handle,
 				"UPDATE `%s` SET `amount` = %d WHERE `vending_id` = %d AND `cartinventory_id` = %d",
 				vending_items_table, vsd->vending[vend_list[i]].amount,
-				vsd->vender_id, vsd->cart.u.items_cart[idx].id);
+				vsd->vender_id, sold_cartinventory_id);
 		} else {
 			Sql_Query(mmysql_handle,
 				"DELETE FROM `%s` WHERE `vending_id` = %d AND `cartinventory_id` = %d",
-				vending_items_table, vsd->vender_id, vsd->cart.u.items_cart[idx].id);
+				vending_items_table, vsd->vender_id, sold_cartinventory_id);
 		}
 
 		pc_cart_delitem(vsd, idx, amount, 0, LOG_TYPE_VENDING);
@@ -379,7 +382,7 @@ void vending_purchasereq(map_session_data* sd, int32 aid, int32 uid, const uint8
 			sd->status.account_id,
 			sd->status.char_id,
 			esc_buyer_name,
-			vsd->cart.u.items_cart[idx].nameid,
+			sold_item_id,
 			amount,
 			coin_type_name,
 			(long long)unit_price,
@@ -398,7 +401,7 @@ void vending_purchasereq(map_session_data* sd, int32 aid, int32 uid, const uint8
 		char subject[MAIL_TITLE_LENGTH];
 		char body[MAIL_BODY_LENGTH];
 
-		struct item_data* id2 = itemdb_search(vsd->cart.u.items_cart[idx].nameid);
+		struct item_data* id2 = itemdb_search(sold_item_id);
 		const char* item_name = (id2 ? id2->name.c_str() : "Item");
 
 		time_t now = time(nullptr);

@@ -10,12 +10,12 @@ prontera,169,181,1	script	Central Biolab Sombria	3029,{
 
 L_MainMenu:
 	mes "[Central Biolab Sombria]";
-	mes "Posso assumir a função dos 4 NPCs principais da Nightmare Biolab.";
+	mes "Posso assumir a funcao dos 4 NPCs principais da Nightmare Biolab.";
 	next;
 	switch (select(
-		"Sombra do Remorso - Cria os chapéus",
+		"Sombra do Remorso - Cria os chapeus",
 		"Sombra do Pesar - Transforma armas",
-		"Espectro Vagante - Encanta os chapéus",
+		"Espectro Vagante - Encanta os chapeus",
 		"Espectro Silencioso - Troca almas por urna",
 		"Cancelar"
 	)) {
@@ -83,7 +83,7 @@ L_Wandering:
 	case 1:
 		mes "[Espectro Vagante]";
 		mes "Traga-me... o forte poder... do rancor... Eu vou colocar... um poder especial... no elmo...";
-		mes "^FF0000*Se voce trouxer " + "<ITEM>" + getitemname(23016) + "<INFO>23016</INFO></ITEM>" + ", podera encantar o chapéu memorável.*^000000";
+		mes "^FF0000*Se voce trouxer " + "<ITEM>" + getitemname(23016) + "<INFO>23016</INFO></ITEM>" + ", podera encantar o chapeu memoravel.*^000000";
 		next;
 		.@equip_id = getequipid(EQI_HEAD_TOP);
 		switch (.@equip_id) {
@@ -104,8 +104,8 @@ L_Wandering:
 			break;
 		default:
 			mes "[Espectro Vagante]";
-			mes "Nesse elmo... não existe a essência... preenchida por um poder especial...";
-			mes "^FF0000*Encantamento usando " + "<ITEM>" + getitemname(23016) + "<INFO>23016</INFO></ITEM>" + " so e possivel em chapéu memorável.*^000000";
+			mes "Nesse elmo... nao existe a essencia... preenchida por um poder especial...";
+			mes "^FF0000*Encantamento usando " + "<ITEM>" + getitemname(23016) + "<INFO>23016</INFO></ITEM>" + " so e possivel em chapeu memoravel.*^000000";
 			close;
 		}
 		.@requirement = 10;
@@ -120,10 +120,10 @@ L_Wandering:
 		 && .@card[1] != 4743 && .@card[1] != 4744 && .@card[1] != 4753 && .@card[1] != 4754
 		 && (.@card[1] < 29061 || .@card[1] > 29120) && (.@card[1] < 29706 || .@card[1] > 29715))) {
 			mes "[Espectro Vagante]";
-			mes "^FF0000*Este item possui um encantamento nos slots 2, 3 ou 4 que não pertence a este NPC.*^000000";
+			mes "^FF0000*Este item possui um encantamento nos slots 2, 3 ou 4 que nao pertence a este NPC.*^000000";
 			next;
 			mes "[Espectro Vagante]";
-			mes "^FF0000*Se você continuar assim, o fluxo pode não aplicar o encantamento correto do 2º slot, como 29101 e os demais encantamentos fortes.*^000000";
+			mes "^FF0000*Se voce continuar assim, o fluxo pode nao aplicar o encantamento correto do 2o slot, como 29101 e os demais encantamentos fortes.*^000000";
 			next;
 			mes "[Espectro Vagante]";
 			mes "^FF0000*Se quiser que o encantamento siga o fluxo normal deste NPC, resete o item antes de encantar.*^000000";
@@ -132,22 +132,92 @@ L_Wandering:
 		if (.@card[3] == 0) {
 			.@slot = 3;
 			mes "[Espectro Vagante]";
-			mes "Que tal... começarmos... de leve?...";
+			mes "Que tal... comecarmos... de leve?...";
 			mes "^FF0000*Tenta encantar o 4o slot. Um entre 6 atributos sera encantado aleatoriamente.*^000000";
 		} else if (.@card[2] == 0) {
-			.@slot = 2;
 			mes "[Espectro Vagante]";
-			mes "Você... gostou... do seu... primeiro... encantamento?...";
-			mes "^FF0000*Tenta encantar o 3o slot. Um entre 6 atributos sera encantado aleatoriamente.*^000000";
+			mes "O 4o slot ja possui um encantamento.";
+			next;
+			switch (select("Rerrolar o 4o slot:Encantar o 3o slot:Cancelar")) {
+			case 1:
+				.@slot = 3;
+				.@reroll = 1;
+				.@display_slot = 4;
+				break;
+			case 2:
+				.@slot = 2;
+				break;
+			default:
+				close;
+			}
+			mes "[Espectro Vagante]";
+			if (.@reroll)
+				mes "O encantamento atual do 4o slot sera substituido por outro aleatorio.";
+			else
+				mes "Um encantamento aleatorio sera colocado no 3o slot.";
 		} else if (.@card[1] == 0) {
-			.@slot = 1;
 			mes "[Espectro Vagante]";
-			mes "Agora sera decidido... se havera... um caminho... para obter... um poder muito maior...";
-			mes "^FF0000*Tenta encantar o 2o slot.";
-			mes "Depois de conseguir um encantamento especial elegivel, ele pode ser reforcado.*^000000";
-					.@can_perfect_enchant = 1;
+			mes "O 4o e o 3o slots ja possuem encantamentos.";
+			next;
+			switch (select("Rerrolar o 4o slot:Rerrolar o 3o slot:Encantar o 2o slot:Cancelar")) {
+			case 1:
+				.@slot = 3;
+				.@reroll = 1;
+				.@display_slot = 4;
+				break;
+			case 2:
+				.@slot = 2;
+				.@reroll = 1;
+				.@display_slot = 3;
+				break;
+			case 3:
+				.@slot = 1;
+				.@can_perfect_enchant = 1;
+				break;
+			default:
+				close;
+			}
+			mes "[Espectro Vagante]";
+			if (.@reroll)
+				mes "O encantamento atual do " + .@display_slot + "o slot sera substituido por outro aleatorio.";
+			else {
+				mes "Agora sera decidido... se havera... um caminho... para obter... um poder muito maior...";
+				mes "^FF0000*Tenta encantar o 2o slot.";
+				mes "Depois de conseguir um encantamento especial elegivel, ele pode ser reforcado.*^000000";
+			}
 		} else {
-			switch (.@card[1]) {
+			mes "[Espectro Vagante]";
+			mes "Os tres slots ja possuem encantamentos.";
+			next;
+			switch (select("Rerrolar o 4o slot:Rerrolar o 3o slot:Rerrolar o 2o slot:Reforcar o 2o slot:Cancelar")) {
+			case 1:
+				.@slot = 3;
+				.@reroll = 1;
+				.@display_slot = 4;
+				break;
+			case 2:
+				.@slot = 2;
+				.@reroll = 1;
+				.@display_slot = 3;
+				break;
+			case 3:
+				.@slot = 1;
+				.@reroll = 1;
+				.@display_slot = 2;
+				break;
+			case 4:
+				.@slot = 999;
+				break;
+			default:
+				close;
+			}
+			if (.@slot != 999) {
+				mes "[Espectro Vagante]";
+				mes "O encantamento atual do " + .@display_slot + "o slot sera substituido por outro aleatorio.";
+				if (.@display_slot == 2)
+					mes "^FF0000*Se houver uma Insignia reforcada, todos os niveis dela serao perdidos no reroll.*^000000";
+			} else {
+				switch (.@card[1]) {
 			case 29061:
 			case 29071:
 			case 29081:
@@ -270,7 +340,7 @@ L_Wandering:
 				mes "E impossivel... reforcar... esse poder... O unico caminho agora e... resetar...";
 				close;
 			}
-			.@slot = 999;
+			}
 		}
 		if (.@can_perfect_enchant) {
 			next;
@@ -367,7 +437,7 @@ L_Wandering:
 			break;
 		default:
 			mes "[Espectro Vagante]";
-			mes "^FF0000*Reset so e possivel em chapéu memorável.*^000000";
+			mes "^FF0000*Reset so e possivel em chapeu memoravel.*^000000";
 			close;
 		}
 		setarray .@card[0], getequipcardid(EQI_HEAD_TOP,0), getequipcardid(EQI_HEAD_TOP,1), getequipcardid(EQI_HEAD_TOP,2), getequipcardid(EQI_HEAD_TOP,3);
@@ -395,7 +465,7 @@ L_Wandering:
 		delequip EQI_HEAD_TOP;
 		getitem2 .@equip_id,1,1,.@refine,0,.@card[0],0,0,0;
 		mes "[Espectro Vagante]";
-		mes "O encantamento do chapéu memorável foi resetado.";
+		mes "O encantamento do chapeu memoravel foi resetado.";
 		close;
 
 	case 3:
