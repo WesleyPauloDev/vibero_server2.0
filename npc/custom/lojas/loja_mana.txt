@@ -1,6 +1,6 @@
 moc_para01,34,32,4	script	Loja de Mana	4_F_JOB_BLACKSMITH,{
 OnTalk:
-	mes "[Artesão de Hugin]";
+	mes "[Artesao de Hugin]";
 	mes "Escolha o que deseja fazer:";
 	next;
 	switch(select("Abrir Loja GlastHeim:Encantar Botas Temporais:Slotar Botas Temporais:Sair")) {
@@ -24,7 +24,7 @@ OnTalk:
 			end;
 
 		case 4:
-			mes "[Artesão de Hugin]";
+			mes "[Artesao de Hugin]";
 			mes "Volte sempre!";
 			close;
 	}
@@ -37,21 +37,21 @@ OnTalk:
     OnTalk:
         disable_items;
         if (MaxWeight - Weight < 1000) {
-            mes "Sua bolsa está muito pesada. Reduza um pouco o peso e volte depois.";
+            mes "Sua bolsa esta muito pesada. Reduza um pouco o peso e volte depois.";
             close;
         }
-        mes "[Artesão de Hugin]";
+        mes "[Artesao de Hugin]";
         mes "Traga-me ^0000FF20 Cristais Temporais e 50 Manas Coaguladas^000000, e eu tentarei colocar um slot nas suas Botas Temporais.";
         mes "Mas saiba que existe 20% de chance de ^FF0000falhar e quebrar o item^000000. Deseja tentar mesmo assim?";
         next;
         if (select("Aceitar o risco e tentar colocar o slot", "Cancelar") == 0) {
-            mes "[Artesão de Hugin]";
+            mes "[Artesao de Hugin]";
             mes "Tudo bem, volte quando quiser.";
             close;
         }
         if (!getequipisequiped(EQI_SHOES)) {
-            mes "[Artesão de Hugin]";
-            mes "Tem certeza de que está usando o item?";
+            mes "[Artesao de Hugin]";
+            mes "Tem certeza de que esta usando o item?";
             close;
         }
 
@@ -72,26 +72,26 @@ OnTalk:
         case 22112:	callsub(S_Slot,22118);	break; // Modified_LUK_Boots
 
         default:
-            mes "[Artesão de Hugin]";
-            mes "Isso não serve! Eu preciso de ^0000FFBotas Temporais^000000!";
+            mes "[Artesao de Hugin]";
+            mes "Isso nao serve! Eu preciso de ^0000FFBotas Temporais^000000!";
             mes "O item precisa ser ^0000FFsem slot^000000!";
             close;
         }
 
     S_Slot:
         .@equip_id = getequipid(EQI_SHOES);
-        mes "[Artesão de Hugin]";
-        mes "E saiba que ^FF0000todas as refinações e encantamentos serão perdidos.^000000";
+        mes "[Artesao de Hugin]";
+        mes "E saiba que ^FF0000todas as refinacoes e encantamentos serao perdidos.^000000";
         mes "Ainda quer arriscar?";
         next;
         if (select("Tudo bem, quero tentar!", "Cancelar") == 0) {
-            mes "[Artesão de Hugin]";
+            mes "[Artesao de Hugin]";
             mes "Tudo bem, volte quando quiser.";
             close;
         }
         if ((countitem(6607) < 20) || (countitem(6608) < 50)) {
-            mes "[Artesão de Hugin]";
-            mes "Você precisa trazer ^0000FF20 Cristais Temporais e 50 Manas Coaguladas^000000. Nada é de graça, sabe...";
+            mes "[Artesao de Hugin]";
+            mes "Voce precisa trazer ^0000FF20 Cristais Temporais e 50 Manas Coaguladas^000000. Nada e de graca, sabe...";
             close;
         }
         delitem 6607,20; // Temporal_Crystal
@@ -99,13 +99,13 @@ OnTalk:
         if (getequipid(EQI_SHOES) == .@equip_id) {
             delequip EQI_SHOES;
             if (rand(1,100) < 20) {
-                mes "[Artesão de Hugin]";
-                mes "Arrggh... falhamos. Melhor sorte da próxima vez.";
+                mes "[Artesao de Hugin]";
+                mes "Arrggh... falhamos. Melhor sorte da proxima vez.";
                 specialeffect2 EF_PHARMACY_FAIL;
                 close;
             }
-            mes "[Artesão de Hugin]";
-            mes "Sucesso! Aqui está seu novo item.";
+            mes "[Artesao de Hugin]";
+            mes "Sucesso! Aqui esta seu novo item.";
             specialeffect2 EF_MAXPOWER;
             getitem getarg(0),1;
         }
@@ -119,50 +119,50 @@ OnTalk:
     OnTalk:
         disable_items;
         if (MaxWeight - Weight < 1000) {
-            mes "Sua bolsa está muito pesada. Diminua o peso e volte.";
+            mes "Sua bolsa esta muito pesada. Diminua o peso e volte.";
             close;
         }
-        mes "[Artesão de Hugin]";
-        mes "Então você veio encantar as Botas Temporais, e o encantamento só é possível no par de botas que você está usando.";
+        mes "[Artesao de Hugin]";
+        mes "Entao voce veio encantar as Botas Temporais, e o encantamento so e possivel no par de botas que voce esta usando.";
         next;
         if (select("Encantar minhas Botas Temporais", "Como funciona o encantamento?") == 0) {
-            mes "[Artesão de Hugin]";
-            mes "Você pode obter ^0000FFMana Coagulada^000000 durante suas jornadas no tempo.";
+            mes "[Artesao de Hugin]";
+            mes "Voce pode obter ^0000FFMana Coagulada^000000 durante suas jornadas no tempo.";
             next;
-            mes "[Artesão de Hugin]";
-            mes "Eu posso encantar suas Botas Temporais dependendo da quantidade desse item. ^0000FFNão é possível em botas comuns^000000, apenas nas 6 versões especiais.";
+            mes "[Artesao de Hugin]";
+            mes "Eu posso encantar suas Botas Temporais dependendo da quantidade desse item. ^0000FFNao e possivel em botas comuns^000000, apenas nas 6 versoes especiais.";
             next;
-            mes "[Artesão de Hugin]";
-            mes "Você pode escolher qual efeito deseja no item.";
+            mes "[Artesao de Hugin]";
+            mes "Voce pode escolher qual efeito deseja no item.";
             next;
-            mes "[Artesão de Hugin]";
-            mes "Claro que isso vale apenas para o 4º slot. Você começará com um efeito pequeno e ele ficará mais forte a cada aprimoramento.";
+            mes "[Artesao de Hugin]";
+            mes "Claro que isso vale apenas para o 4o slot. Voce comecara com um efeito pequeno e ele ficara mais forte a cada aprimoramento.";
             next;
-            mes "[Artesão de Hugin]";
-            mes "Para alcançar o efeito final, será necessário muito mais Mana Coaguladas. Não se esqueça disso.";
+            mes "[Artesao de Hugin]";
+            mes "Para alcancar o efeito final, sera necessario muito mais Mana Coaguladas. Nao se esqueca disso.";
             next;
-            mes "[Artesão de Hugin]";
-            mes "Quando o 4º slot atinge a opção máxima, você pode receber um efeito bônus aleatório no 3º slot — mediante um pequeno pagamento~";
+            mes "[Artesao de Hugin]";
+            mes "Quando o 4o slot atinge a opcao maxima, voce pode receber um efeito bonus aleatorio no 3o slot - mediante um pequeno pagamento~";
             next;
-            mes "[Artesão de Hugin]";
-            mes "Ah, e não se preocupe! Mesmo que o encantamento falhe, você não perderá o item, nem os aprimoramentos ou cartas. Apenas não podemos redefinir o encantamento.";
+            mes "[Artesao de Hugin]";
+            mes "Ah, e nao se preocupe! Mesmo que o encantamento falhe, voce nao perdera o item, nem os aprimoramentos ou cartas. Apenas nao podemos redefinir o encantamento.";
             next;
-            mes "[Artesão de Hugin]";
+            mes "[Artesao de Hugin]";
             mes "Ufa...";
-            mes "Enfim, isso é tudo sobre o encantamento. Agora veja você mesmo como funciona.";
+            mes "Enfim, isso e tudo sobre o encantamento. Agora veja voce mesmo como funciona.";
             close;
         }
         if (!getequipisequiped(EQI_SHOES)) {
-            mes "[Artesão de Hugin]";
-            mes "Você está realmente usando o item?";
+            mes "[Artesao de Hugin]";
+            mes "Voce esta realmente usando o item?";
             close;
         }
         .@equip_id = getequipid(EQI_SHOES);
 
-        setarray .@enchant_1[0],4808,4832,4814,4741,4869,4752; // Espírito de Luta 4 / Arqueiro Perito 1 / Feitiço 2 / Vitalidade 2 / Pós-Conjuração 1 / Sorte 3
-        setarray .@enchant_2[0],4820,4833,4813,4742,4872,4753; // Espírito de Luta 5 / Arqueiro Perito 2 / Feitiço 3 / Vitalidade 3 / Pós-Conjuração 2 / Sorte 4
-        setarray .@enchant_3[0],4821,4834,4812,4861,4873,4754; // Espírito de Luta 6 / Arqueiro Perito 3 / Feitiço 4 / HP Máx. 1 / Pós-Conjuração 3 / Sorte 5
-        setarray .@enchant_4[0],4822,4835,4826,4862,4881,4755; // Espírito de Luta 7 / Arqueiro Perito 4 / Feitiço 5 / HP Máx. 2 / Pós-Conjuração 4 / Sorte 6
+        setarray .@enchant_1[0],4808,4832,4814,4741,4869,4752; // Espirito de Luta 4 / Arqueiro Perito 1 / Feitico 2 / Vitalidade 2 / Pos-Conjuracao 1 / Sorte 3
+        setarray .@enchant_2[0],4820,4833,4813,4742,4872,4753; // Espirito de Luta 5 / Arqueiro Perito 2 / Feitico 3 / Vitalidade 3 / Pos-Conjuracao 2 / Sorte 4
+        setarray .@enchant_3[0],4821,4834,4812,4861,4873,4754; // Espirito de Luta 6 / Arqueiro Perito 3 / Feitico 4 / HP Max. 1 / Pos-Conjuracao 3 / Sorte 5
+        setarray .@enchant_4[0],4822,4835,4826,4862,4881,4755; // Espirito de Luta 7 / Arqueiro Perito 4 / Feitico 5 / HP Max. 2 / Pos-Conjuracao 4 / Sorte 6
         setarray .@enchant_cost[0],1,4,15,30,50;
 
         switch(.@equip_id) {
@@ -190,24 +190,24 @@ OnTalk:
             .@equip_refine = getequiprefinerycnt(EQI_SHOES);
 
             if (.@card[2] > 0) {
-                mes "[Artesão de Hugin]";
-                mes "Essas botas já atingiram o limite de encantamento. Não posso encantá-las mais.";
+                mes "[Artesao de Hugin]";
+                mes "Essas botas ja atingiram o limite de encantamento. Nao posso encanta-las mais.";
                 close;
             }
-            if (.@card[3] == 0) { // Primeiro encantamento no 4º slot
+            if (.@card[3] == 0) { // Primeiro encantamento no 4o slot
                 .@cost = .@enchant_cost[0];
-                mes "[Artesão de Hugin]";
+                mes "[Artesao de Hugin]";
                 mes "Quer encantar ^0000FF" + .@equip_name$ + "^000000?";
-                mes "Para o primeiro encantamento, você precisa de ^0000FF" + .@cost + "^000000 Mana Coagulada.";
+                mes "Para o primeiro encantamento, voce precisa de ^0000FF" + .@cost + "^000000 Mana Coagulada.";
                 next;
-                .@s = select("Cancelar", "Espírito de Luta", "Perícia em Arco", "Feitiço", "Vitalidade", "Velocidade de Ataque", "Sorte") - 2;
+                .@s = select("Cancelar", "Espirito de Luta", "Pericia em Arco", "Feitico", "Vitalidade", "Velocidade de Ataque", "Sorte") - 2;
                 if (.@s == -1) {
-                    mes "[Artesão de Hugin]";
+                    mes "[Artesao de Hugin]";
                     mes "Tudo bem, volte quando estiver pronto.";
                     close;
                 }
                 .@card[3] = .@enchant_1[.@s];
-                .@string$ = "encantamento nível ^6300001^000000.";
+                .@string$ = "encantamento nivel ^6300001^000000.";
             }
             else {
                 for (.@enchant_num = 1; .@enchant_num < 5; .@enchant_num++) {
@@ -217,51 +217,78 @@ OnTalk:
                         break;
                 }
                 if (.@enchant_num == 5) {
-                    mes "[Artesão de Hugin]";
+                    mes "[Artesao de Hugin]";
                     mes "Algo de errado aconteceu.";
                     close;
                 }
                 .@cost = .@enchant_cost[.@enchant_num];
 
-                mes "[Artesão de Hugin]";
+                mes "[Artesao de Hugin]";
                 if (.@enchant_num == 4) {
-                    .@card[2] = callfunc("F_Rand",4875,4876,4877,4878,4879,4880); // Delírio, Epifania, Ânimo, Histeria, Instinto, Euforia
-                    .@string$ = "^990000bônus aleatório^000000 no slot 3.";
-                    mes "O 4º slot já foi aprimorado ao máximo. Deseja adicionar um efeito bônus aleatório ao 3º slot? Você precisará de ^0000ff" + .@cost + "^000000 Mana Coagulada.";
+                    mes "O 4o slot ja foi aprimorado ao maximo.";
+                    mes "Escolha como deseja encantar o 3o slot:";
+                    next;
+                    .@third_option = select("Aleatorio - 50 Manas", "Escolher efeito - 300 Manas", "Cancelar");
+                    if (.@third_option == 3) {
+                        mes "[Artesao de Hugin]";
+                        mes "Tudo bem, volte quando estiver pronto.";
+                        close;
+                    }
+                    if (.@third_option == 1) {
+                        .@cost = 50;
+                        .@card[2] = callfunc("F_Rand",4875,4876,4877,4878,4879,4880); // Delirio, Epifania, Animo, Histeria, Instinto, Euforia
+                        .@string$ = "^990000bonus aleatorio^000000 no slot 3.";
+                        mes "O efeito do 3o slot sera aleatorio. Requer ^0000FF50^000000 Manas Coaguladas.";
+                    }
+                    else {
+                        .@cost = 300;
+                        mes "Escolha o efeito que deseja aplicar no 3o slot:";
+                        next;
+                        .@s = select("Cancelar", "Delirio", "Epifania", "Animo", "Histeria", "Instinto", "Euforia") - 2;
+                        if (.@s == -1) {
+                            mes "[Artesao de Hugin]";
+                            mes "Tudo bem, volte quando estiver pronto.";
+                            close;
+                        }
+                        setarray .@special_enchant[0],4875,4876,4877,4878,4879,4880;
+                        .@card[2] = .@special_enchant[.@s];
+                        .@string$ = "encantamento escolhido no slot 3.";
+                        mes "O efeito escolhido sera aplicado no 3o slot. Requer ^0000FF300^000000 Manas Coaguladas.";
+                    }
                 }
                 else {
                     .@number = .@enchant_num + 1;
                     .@card[3] = getd(".@enchant_" + (.@enchant_num+1) + "[" + .@enchant_type + "]");
-                    .@string$ = "encantamento nível ^630000" + .@number + "^000000.";
-                    mes "Encantando o 4º slot de ^0000FF" + .@equip_name$ + "^000000 para o nível ^0000FF" + .@number + "^000000. Requer ^0000FF" + .@cost + "^000000 Mana Coagulada.";
+                    .@string$ = "encantamento nivel ^630000" + .@number + "^000000.";
+                    mes "Encantando o 4o slot de ^0000FF" + .@equip_name$ + "^000000 para o nivel ^0000FF" + .@number + "^000000. Requer ^0000FF" + .@cost + "^000000 Mana Coagulada.";
                 }
                 next;
-                if (select("Aprimorar Encantamento!", "Cancelar") == 0) {
-                    mes "[Artesão de Hugin]";
+                if (select("Confirmar encantamento", "Cancelar") == 2) {
+                    mes "[Artesao de Hugin]";
                     mes "Tudo bem, volte quando estiver pronto.";
                     close;
                 }
             }
             if (countitem(6608) < .@cost) {
-                mes "[Artesão de Hugin]";
-                mes "Hmm... você está faltando " + (.@cost - countitem(6608)) + " Mana Coagulada. Traga mais e poderemos continuar.";
+                mes "[Artesao de Hugin]";
+                mes "Hmm... voce esta faltando " + (.@cost - countitem(6608)) + " Mana Coagulada. Traga mais e poderemos continuar.";
                 close;
             }
             specialeffect2 EF_REPAIRWEAPON;
-            delitem 6608,.@cost; // Feitiço Coagulado
+            delitem 6608,.@cost; // Feitico Coagulado
 
             // Anti-hack
             if (callfunc("F_IsEquipIDHack", EQI_SHOES, .@equip_id) || callfunc("F_IsEquipCardHack", EQI_SHOES, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]) || callfunc("F_IsEquipRefineHack", EQI_SHOES, .@equip_refine))
                 close;
 
             delequip EQI_SHOES;
-            mes "[Artesão de Hugin]";
+            mes "[Artesao de Hugin]";
             mes "Tentando " + .@string$;
             getitem2 .@equip_id,1,1,.@equip_refine,0,0,0,.@card[2],.@card[3];
             close;
         default:
-            mes "[Artesão de Hugin]";
-            mes "Este não é o item correto para encantamento.";
+            mes "[Artesao de Hugin]";
+            mes "Este nao e o item correto para encantamento.";
             mes "Lembre-se, apenas as 6 Botas Temporais podem ser encantadas.";
             close;
         }
