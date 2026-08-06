@@ -281,10 +281,10 @@ OnTalk:
             if (callfunc("F_IsEquipIDHack", EQI_SHOES, .@equip_id) || callfunc("F_IsEquipCardHack", EQI_SHOES, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]) || callfunc("F_IsEquipRefineHack", EQI_SHOES, .@equip_refine))
                 close;
 
-            delequip EQI_SHOES;
             mes "[Artesao de Hugin]";
             mes "Tentando " + .@string$;
-            getitem2 .@equip_id,1,1,.@equip_refine,0,0,0,.@card[2],.@card[3];
+            setitemcard(EQI_SHOES,2,.@card[2]);
+            setitemcard(EQI_SHOES,3,.@card[3]);
             close;
         default:
             mes "[Artesao de Hugin]";

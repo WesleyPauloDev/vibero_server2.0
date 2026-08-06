@@ -110,6 +110,7 @@ L_Wandering:
 		}
 		.@requirement = 10;
 		setarray .@card[0], getequipcardid(EQI_HEAD_TOP,0), getequipcardid(EQI_HEAD_TOP,1), getequipcardid(EQI_HEAD_TOP,2), getequipcardid(EQI_HEAD_TOP,3);
+		setarray .@old_card[0], .@card[0], .@card[1], .@card[2], .@card[3];
 		.@refine = getequiprefinerycnt(EQI_HEAD_TOP);
 		// Se houver encantamentos de outro sistema nos slots 2, 3 ou 4, o fluxo
 		// do Espectro Vagante pode nao gerar o encantamento correto no 2o slot.
@@ -381,7 +382,7 @@ L_Wandering:
 			close;
 		progressbar "000000",1;
 		delitem 23016,.@requirement;
-		if (callfunc("F_IsEquipIDHack", EQI_HEAD_TOP, .@equip_id) || callfunc("F_IsEquipCardHack", EQI_HEAD_TOP, .@card[0], .@card[1], .@card[2], .@card[3]) || callfunc("F_IsEquipRefineHack", EQI_HEAD_TOP, .@refine))
+		if (callfunc("F_IsEquipIDHack", EQI_HEAD_TOP, .@equip_id) || callfunc("F_IsEquipCardHack", EQI_HEAD_TOP, .@old_card[0], .@old_card[1], .@old_card[2], .@old_card[3]) || callfunc("F_IsEquipRefineHack", EQI_HEAD_TOP, .@refine))
 			close;
 		switch (.@slot) {
 		case 3:
@@ -410,8 +411,10 @@ L_Wandering:
 			mes "Algo ruim aconteceu.";
 			close;
 		}
-		delequip EQI_HEAD_TOP;
-		getitem2 .@equip_id,1,1,.@refine,0,.@card[0],.@card[1],.@card[2],.@card[3];
+		if (.@slot == 999)
+			setitemcard(EQI_HEAD_TOP, 1, .@card[1]);
+		else
+			setitemcard(EQI_HEAD_TOP, .@slot, .@card[.@slot]);
 		specialeffect2 EF_FIREHIT;
 		mes "[Espectro Vagante]";
 		mes "Sucesso. O poder do rancor ficou mais forte.";
@@ -441,6 +444,7 @@ L_Wandering:
 			close;
 		}
 		setarray .@card[0], getequipcardid(EQI_HEAD_TOP,0), getequipcardid(EQI_HEAD_TOP,1), getequipcardid(EQI_HEAD_TOP,2), getequipcardid(EQI_HEAD_TOP,3);
+		setarray .@old_card[0], .@card[0], .@card[1], .@card[2], .@card[3];
 		.@refine = getequiprefinerycnt(EQI_HEAD_TOP);
 		if (.@card[3] < 1) {
 			mes "[Espectro Vagante]";
@@ -460,10 +464,11 @@ L_Wandering:
 		progressbar "000000",2;
 		specialeffect2 EF_FIREHIT;
 		delitem 22687,10;
-		if (callfunc("F_IsEquipIDHack", EQI_HEAD_TOP, .@equip_id) || callfunc("F_IsEquipCardHack", EQI_HEAD_TOP, .@card[0], .@card[1], .@card[2], .@card[3]) || callfunc("F_IsEquipRefineHack", EQI_HEAD_TOP, .@refine))
+		if (callfunc("F_IsEquipIDHack", EQI_HEAD_TOP, .@equip_id) || callfunc("F_IsEquipCardHack", EQI_HEAD_TOP, .@old_card[0], .@old_card[1], .@old_card[2], .@old_card[3]) || callfunc("F_IsEquipRefineHack", EQI_HEAD_TOP, .@refine))
 			close;
-		delequip EQI_HEAD_TOP;
-		getitem2 .@equip_id,1,1,.@refine,0,.@card[0],0,0,0;
+		setitemcard(EQI_HEAD_TOP,1,0);
+		setitemcard(EQI_HEAD_TOP,2,0);
+		setitemcard(EQI_HEAD_TOP,3,0);
 		mes "[Espectro Vagante]";
 		mes "O encantamento do chapeu memoravel foi resetado.";
 		close;

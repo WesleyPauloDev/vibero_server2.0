@@ -628,6 +628,11 @@ end;
 1@gol2,49,65,3	script	Sierra#mvp	4_F_SCIENCE,{
 	if('canLeave) {
 		if(@documents == 0){
+			if (!checkweight(25786,9,25787,15)) {
+				mes "[Sierra]";
+				mes "Voce esta com peso demais ou sem espaco no inventario para receber os documentos e fragmentos.";
+				close;
+			}
 			@documents = 1;
 			getitem 25786,9;
 			getitem 25787,15;
@@ -734,7 +739,8 @@ OnTele:
 1@gol2,49,59,3	script	Box#mvp	4_TREASURE_BOX,{
 	
 	// TODO: msg
-	if(!checkweight(16092,1)) {
+	// Vernan (21052) e a arma mais pesada do bau (peso 6500).
+	if(!checkweight(21052,1)) {
 		mes "Voce esta com peso demais.";
 		close;
 	}
