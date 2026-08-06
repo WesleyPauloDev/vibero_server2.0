@@ -125,9 +125,17 @@ function	script	F_InstanceEntry	{
 			close;
 		}
 
+		// Fecha a instância atual da party.
+		if (.@live_iid > 0) {
+			instance_destroy(.@live_iid);
+		}
+
+		// Somente depois cobra e limpa os controles.
 		#CASHPOINTS -= .@reset_cash_price;
+
 		setd(.@cooldown_name$, 0);
 		setd(.@status_name$, 0);
+
 		if (.@shared_vdec) {
 			setd(.@shared_cooldown_name$, 0);
 			setd(.@shared_status_name$, 0);
