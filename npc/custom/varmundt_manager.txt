@@ -6,6 +6,7 @@
 moc_para01,52,26,4	script	Administrador Varmundt#bio	4_M_BARMUND,{
 	disable_items;
 
+L_Main:
 	mes "[Administrador Varmundt]";
 	mes "Eu organizo os equipamentos e materiais da Biosphere.";
 	mes "Escolha o servico desejado.";
@@ -16,12 +17,10 @@ moc_para01,52,26,4	script	Administrador Varmundt#bio	4_M_BARMUND,{
 		"Criar equipamentos Engraved:" +
 		"Criar/encantar armaduras Deep:" +
 		"Comprar set Varmundt:" +
-		"Encantar Varmundt base:" +
+		"Encantar Varmundt:" +
 		"Encantar Rune Equipment:" +
 		"Reformar/upgrade Varmundt:" +
 		"Adquirir pedras de evolucao:" +
-		"Encantar aneis Varmundt:" +
-		"Encantar aneis melhorados:" +
 		"Cancelar"
 	)) {
 	case 1:
@@ -43,7 +42,7 @@ moc_para01,52,26,4	script	Administrador Varmundt#bio	4_M_BARMUND,{
 		callsub L_BuyVarmundtSet;
 		end;
 	case 5:
-		callsub L_EnchantBase;
+		callsub L_EnchantVarmundt;
 		end;
 	case 6:
 		callsub L_EnchantRune;
@@ -53,12 +52,6 @@ moc_para01,52,26,4	script	Administrador Varmundt#bio	4_M_BARMUND,{
 		end;
 	case 8:
 		callsub L_EvolutionStones;
-		end;
-	case 9:
-		callsub L_EnchantRingBase;
-		end;
-	case 10:
-		callsub L_EnchantRingUpgraded;
 		end;
 	default:
 		close;
@@ -318,9 +311,32 @@ L_EvolutionStones:
 	}
 	end;
 
+L_EnchantVarmundt:
+	mes "[Administrador Varmundt]";
+	mes "Escolha o tipo de equipamento Varmundt que deseja encantar.";
+	next;
+
+	switch (select("Armaduras, capas e botas:Aneis Varmundt base:Aneis melhorados e magicos:Voltar:Cancelar")) {
+	case 1:
+		callsub L_EnchantBase;
+		break;
+	case 2:
+		callsub L_EnchantRingBase;
+		break;
+	case 3:
+		callsub L_EnchantRingUpgraded;
+		break;
+	case 4:
+		clear;
+		goto L_Main;
+	default:
+		close;
+	}
+	end;
+
 L_EnchantBase:
 	mes "[Administrador Varmundt]";
-	mes "Encantamento dos conjuntos Varmundt base.";
+	mes "Encantamento das armaduras, capas e botas Varmundt base.";
 	mes "Escolha as informacoes ou o tipo de conjunto que deseja encantar.";
 	next;
 
@@ -362,16 +378,12 @@ L_EnchantBase:
 		close;
 	}
 
-	switch (select("Encantar:Resetar encantamentos:Cancelar")) {
-	case 1:
-		callsub L_EnchantBaseManual, .@enchant;
-		break;
-	case 2:
-		callsub L_ResetBaseManual, .@enchant;
-		break;
-	default:
-		close;
-	}
+	mes "[Administrador Varmundt]";
+	mes "A interface aceita armaduras, capas e botas do conjunto selecionado.";
+	mes "Nela voce pode usar encantamento aleatorio, Perfect e Upgrade.";
+	mes "Desequipe o equipamento antes de continuar.";
+	close2;
+	item_enchant(.@enchant);
 	end;
 
 L_SetBaseEnchantData:
@@ -383,8 +395,8 @@ L_SetBaseEnchantData:
 	case 16:
 		.base_set_name$ = "Glade";
 		.base_material = 1000640; // Plain_Barmund_Rune2
-		setarray .base_target[0], 450201, 480145, 470108, 450211; // Barmund_Plain_Armor, Barmund_Plain_Hood, Barmund_Plain_Boots, Guardian_Mail
-		.base_target_count = 4;
+		setarray .base_target[0], 450201, 480145, 470108; // Barmund_Plain_Armor, Barmund_Plain_Hood, Barmund_Plain_Boots
+		.base_target_count = 3;
 		break;
 	case 17:
 		.base_set_name$ = "Fire";
@@ -737,16 +749,12 @@ L_EnchantRune:
 		close;
 	}
 
-	switch (select("Encantar:Resetar encantamentos:Cancelar")) {
-	case 1:
-		callsub L_EnchantRuneManual, .@enchant;
-		break;
-	case 2:
-		callsub L_ResetRuneManual, .@enchant;
-		break;
-	default:
-		close;
-	}
+	mes "[Administrador Varmundt]";
+	mes "A interface aceita armaduras, capas e botas Rune do conjunto selecionado.";
+	mes "Nela voce pode usar encantamento aleatorio, Perfect e Upgrade.";
+	mes "Desequipe o equipamento antes de continuar.";
+	close2;
+	item_enchant(.@enchant);
 	end;
 
 L_SetRuneEnchantData:
