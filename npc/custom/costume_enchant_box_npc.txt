@@ -53,8 +53,8 @@ OnTalk:
 
 	switch (.@part) {
 		case EQI_COSTUME_HEAD_TOP:
-			.@slot = 0;
-			.@slot_name$ = "topo";
+			.@slot = 1;
+			.@slot_name$ = "topo (slot 2)";
 			setarray .@stone_id[0],
 				29668,29460,310258,29517,310187,29481,310004,29464,310262,29521,310191,29477,29621,29468,310181,29432,29617,29513,310008,29423,29613,29428,310000,29485,310266,29655,29651,29664,29659,
 				29156,29359,310327,310664,310325,
@@ -64,7 +64,7 @@ OnTalk:
 			break;
 		case EQI_COSTUME_HEAD_MID:
 			.@slot = 1;
-			.@slot_name$ = "meio";
+			.@slot_name$ = "meio (slot 2)";
 			setarray .@stone_id[0],
 				29461,310259,29518,310186,29482,310005,29465,310263,29522,310190,29478,29620,29469,310182,29433,29616,29514,310009,29424,29612,29429,310001,29486,310267,29656,29652,29665,29669,29660,
 				29157,29047,310328,310665,310330,
@@ -73,8 +73,8 @@ OnTalk:
 				311919;
 			break;
 		case EQI_COSTUME_HEAD_LOW:
-			.@slot = 2;
-			.@slot_name$ = "baixo";
+			.@slot = 1;
+			.@slot_name$ = "baixo (slot 2)";
 			setarray .@stone_id[0],
 				29462,310260,29519,310185,29483,310006,29466,310264,29523,310189,29479,29619,29470,310183,29434,29615,29515,310010,29425,29611,29430,310002,29487,310268,29657,29653,29666,29670,29661,
 				29158,29360,310329,310666,310326,
@@ -105,23 +105,15 @@ OnTalk:
 		close;
 
 	if (.@action == 2) {
-		if (.@part == EQI_COSTUME_GARMENT) {
-			mes "[Encantador Visual]";
-			mes "Qual slot de capa deseja limpar?";
-			next;
-			.@remove_slot = select("Slot 2:Slot 3:Cancelar");
-			if (.@remove_slot == 3)
-				close;
-			.@slot = .@remove_slot;
-			if (.@slot == 1)
-				.@slot_name$ = "capa slot 2";
-			else
-				.@slot_name$ = "capa slot 3";
+		.@remove_count = 0;
+		for (.@i = 0; .@i < 4; .@i++) {
+			if (.@card[.@i] > 0)
+				.@remove_count++;
 		}
 
-		if (.@card[.@slot] <= 0) {
+		if (!.@remove_count) {
 			mes "[Encantador Visual]";
-			mes "Este visual nao possui encantamento no slot de " + .@slot_name$ + ".";
+			mes "Este visual nao possui encantamentos para remover.";
 			close;
 		}
 
@@ -132,7 +124,8 @@ OnTalk:
 		}
 
 		mes "[Encantador Visual]";
-		mes "Remover o encantamento atual de ^0055FF" + getitemname(.@equip_id) + "^000000 por ^FF0000100.000 zeny^000000?";
+		mes "Remover ^FF0000todos os encantamentos^000000 de ^0055FF" + getitemname(.@equip_id) + "^000000 por ^FF0000100.000 zeny^000000?";
+		mes "As pedras encontradas nos slots 1, 2, 3 ou 4 serao devolvidas.";
 		next;
 		if (select("Sim:Cancelar") == 2)
 			close;
@@ -150,13 +143,17 @@ OnTalk:
 		specialeffect2 EF_ENHANCE;
 
 		Zeny -= 100000;
-		getitem .@card[.@slot], 1;
-		.@card[.@slot] = 0;
+		for (.@i = 0; .@i < 4; .@i++) {
+			if (.@card[.@i] <= 0)
+				continue;
+			getitem .@card[.@i], 1;
+			.@card[.@i] = 0;
+		}
 		delequip .@part;
 		getitem2 .@equip_id,1,1,.@equip_refine,0,.@card[0],.@card[1],.@card[2],.@card[3];
 
 		mes "[Encantador Visual]";
-		mes "Encantamento removido com sucesso.";
+		mes "Todos os encantamentos foram removidos com sucesso.";
 		close;
 	}
 
