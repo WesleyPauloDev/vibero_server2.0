@@ -122,6 +122,7 @@ function	script	F_InstanceEntry	{
 			mes "[" + .@npc_name$ + "]";
 			mes "Nao e possivel resetar enquanto houver jogadores dentro da instancia atual do grupo.";
 			mes "Aguarde todos os membros sairem antes de tentar novamente.";
+			mes "Ou saia do grupo reset e entre no grupo novamente.";
 			close;
 		}
 
@@ -181,9 +182,16 @@ function	script	F_InstanceEntry	{
 		mes "A instancia ^0055FF" + .@display_name$ + "^000000 foi resetada.";
 		mes "Foram consumidos ^FF0000" + .@reset_cash_price + " CashPoints^000000.";
 		mes "Saldo restante: ^0055FF" + #CASHPOINTS + " CashPoints^000000.";
-		close;
+		next;
+
+		// A instancia anterior ja foi destruida e os controles foram limpos.
+		// Abre imediatamente o menu para o jogador poder cria-la novamente.
+		.@live_iid = 0;
+		.@same_live_instance = 0;
+		goto S_MainMenu;
 	}
 
+S_MainMenu:
 	// =========================
 	// BLOQUEIO POR PARTY + IP
 	// =========================
@@ -762,8 +770,6 @@ function	script	F_InstanceSyncVillaDeception	{
 	}
 	return;
 }
-
-
 
 
 
