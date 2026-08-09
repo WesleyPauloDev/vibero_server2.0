@@ -10434,9 +10434,9 @@ BUILDIN_FUNC(getskilllv)
 /*==========================================
  * partylootitem <item id>,<amount>,<drop rate>;
  *
- * Delivers one script-generated mob reward using the same party item-share
- * path as native autoloot. Without autoloot, creates one protected floor item
- * at the killer's position instead of duplicating it for party members.
+ * Delivers one script-generated mob reward through party_share_loot,
+ * respecting the party item distribution settings. Without shared item
+ * distribution, the reward goes to the killer.
  *------------------------------------------*/
 BUILDIN_FUNC(partylootitem)
 {
@@ -10447,7 +10447,6 @@ BUILDIN_FUNC(partylootitem)
 
 	t_itemid nameid = static_cast<t_itemid>(script_getnum(st, 2));
 	int32 amount = script_getnum(st, 3);
-	int32 drop_rate = cap_value(script_getnum(st, 4), 1, 10000);
 	std::shared_ptr<item_data> id = item_db.find(nameid);
 
 	if (id == nullptr || amount <= 0) {
@@ -10461,17 +10460,10 @@ BUILDIN_FUNC(partylootitem)
 	it.identify = 1;
 	it.bound = BOUND_NONE;
 
-	bool autoloot = (drop_rate <= sd->state.autoloot || pc_isautolooting(sd, nameid));
-	if (autoloot) {
-		struct party_data* p = party_search(sd->status.party_id);
-		if (party_share_loot(p, sd, &it, sd->status.char_id) != ADDITEM_SUCCESS) {
-			clif_additem(sd, 0, 0, ADDITEM_OVERWEIGHT);
-			return SCRIPT_CMD_FAILURE;
-		}
-	} else {
-		if (map_addflooritem(&it, amount, sd->m, sd->x, sd->y,
-			sd->status.char_id, 0, 0, 4, 0, true, DIR_CENTER, BL_CHAR | BL_PET) == 0)
-			return SCRIPT_CMD_FAILURE;
+	struct party_data* p = party_search(sd->status.party_id);
+	if (party_share_loot(p, sd, &it, sd->status.char_id) != ADDITEM_SUCCESS) {
+		clif_additem(sd, 0, 0, ADDITEM_OVERWEIGHT);
+		return SCRIPT_CMD_FAILURE;
 	}
 
 	return SCRIPT_CMD_SUCCESS;
@@ -27611,6 +27603,45 @@ BUILDIN_FUNC(get_drop_bonus)
 
 
 
+
+/*========================================================
+ * Ajusta uma chance base de drop manual com os bonus de drop
+ * do jogador, usando a mesma rotina dos drops normais de mob.
+ * base_rate usa centesimos de porcentagem: 10000 = 100%.
+ * Uso em script: get_adjusted_drop_rate(<mob_id>, <base_rate>);
+ *-------------------------------------------------------*/
+BUILDIN_FUNC(get_adjusted_drop_rate)
+{
+    map_session_data* sd;
+    if ( !script_charid2sd(4, sd) ) {
+        script_pushint(st, script_getnum(st, 3));
+        return SCRIPT_CMD_SUCCESS;
+    }
+
+    int mob_id = script_getnum(st, 2);
+    int32 base_rate = cap_value(script_getnum(st, 3), 0, 10000);
+
+    if (base_rate <= 0) {
+        script_pushint(st, 0);
+        return SCRIPT_CMD_SUCCESS;
+    }
+
+    std::shared_ptr<s_mob_db> mob = mob_db.find(mob_id);
+    if (!mob) {
+        script_pushint(st, base_rate);
+        return SCRIPT_CMD_SUCCESS;
+    }
+
+    int32 drop_modifier = 100;
+#ifdef RENEWAL_DROP
+    drop_modifier = pc_level_penalty_mod(sd, PENALTY_DROP, mob);
+#endif
+
+    int32 final_rate = mob_getdroprate(sd, mob, base_rate, drop_modifier);
+    script_pushint(st, cap_value(final_rate, 0, 10000));
+    return SCRIPT_CMD_SUCCESS;
+}
+
 BUILDIN_FUNC( enchantgradeui ){
 #if PACKETVER_MAIN_NUM >= 20200916 || PACKETVER_RE_NUM >= 20200724
 	map_session_data* sd;
@@ -29089,6 +29120,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(enchantgradeui, "?" ),
 
 	BUILDIN_DEF(get_drop_bonus, "ii?"),
+	BUILDIN_DEF(get_adjusted_drop_rate, "ii"),
 
 	BUILDIN_DEF(set_reborn_drop, "i"),
 	BUILDIN_DEF(set_reborn_exp, "i"),
