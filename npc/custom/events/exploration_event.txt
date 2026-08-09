@@ -637,18 +637,24 @@ function	script	F_Fenda_MvpDead	{
 		if (.@chance > 10000)
 			.@chance = 10000;
 		.@chance = get_adjusted_drop_rate(31902, .@chance);
-		if (rand(10000) < .@chance)
+		if (rand(10000) < .@chance) {
 			partylootitem $Fenda_MvpDropItem, 1, .@chance;
-		if (rand(10000) < .@chance)
+			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Caixa de Encanto da Fenda ao derrotar o Senhor da Fenda!", bc_all;
+		}
+		if (rand(10000) < .@chance) {
 			partylootitem 501000, 1, .@chance;
+			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Pedra de Grade D ao derrotar o Senhor da Fenda!", bc_all;
+		}
 	}
 	if ('Fenda_Level >= 2) {
 		.@mini_refiner_chance = (10 + (('Fenda_Level - 2) * 2)) * 100; // 10% no nivel 2, +2% por nivel.
 		if (.@mini_refiner_chance > 10000)
 			.@mini_refiner_chance = 10000;
 		.@mini_refiner_chance = get_adjusted_drop_rate(31902, .@mini_refiner_chance);
-		if (rand(10000) < .@mini_refiner_chance)
+		if (rand(10000) < .@mini_refiner_chance) {
 			partylootitem 9694, 1, .@mini_refiner_chance;
+			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Mini Refinadora ao derrotar o Senhor da Fenda!", bc_all;
+		}
 	}
 	getmapxy .@map$, .@x, .@y, BL_PC;
 	.@source = -1;
@@ -761,8 +767,10 @@ OnNormalDead:
 OnMiniBossDead:
 	if ($Fenda_MvpDropItem > 0) {
 		.@drop_rate = get_adjusted_drop_rate(31901, 1);
-		if (rand(10000) < .@drop_rate)
+		if (rand(10000) < .@drop_rate) {
 			partylootitem $Fenda_MvpDropItem, 1, .@drop_rate;
+			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Caixa de Encanto da Fenda ao derrotar um Guardiao da Fenda!", bc_all;
+		}
 	}
 	.@drop_rate = get_adjusted_drop_rate(31901, 5000);
 	if (rand(10000) < .@drop_rate)
@@ -771,6 +779,11 @@ OnMiniBossDead:
 	end;
 
 OnRareDead:
+	.@drop_rate = get_adjusted_drop_rate(31903, 2000);
+	if (rand(10000) < .@drop_rate) {
+		partylootitem 9718, 1, .@drop_rate;
+		announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Caixa do Passe de Batalha 19 ao derrotar o mob especial da Fenda!", bc_all;
+	}
 	end;
 
 S_AddPoints:
