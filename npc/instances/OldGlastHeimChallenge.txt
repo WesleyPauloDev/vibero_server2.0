@@ -1006,7 +1006,10 @@ OnInstanceInit:
 	callfunc("F_OGHC_CheckInstance");
 
 	mes "[Oscar]";
-	mes "Deseja sair da Glast Heim Challenge?";
+	if ('oghc_boss_dead)
+		mes "O desafio foi concluido. Deseja receber a recompensa e sair?";
+	else
+		mes "O desafio ainda nao terminou. Deseja abandonar a instancia?";
 	next;
 	if (select("Vou sair", "Ficar") == 1) {
 		if (!'oghc_boss_dead) {
@@ -1030,6 +1033,11 @@ OnInstanceInit:
 				else if (#OGHC_MAX_LEVEL < 'oghc_level)
 					#OGHC_MAX_LEVEL = 'oghc_level;
 				'oghc_finish_announced = 1;
+			} else {
+				mes "[Oscar]";
+				mes "Nao foi possivel registrar a conclusao nem entregar a recompensa agora.";
+				mes "Tente novamente antes de sair da instancia.";
+				close;
 			}
 		}
 
@@ -1038,10 +1046,6 @@ OnInstanceInit:
 		end;
 	}
 	close;
-
-OnInstanceInit:
-	disablenpc instance_npcname(strnpcinfo(0));
-	end;
 }
 
 1@gl_he,1,1,0	script	Controlador#OGHC	-1,{

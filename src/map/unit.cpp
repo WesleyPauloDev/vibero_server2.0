@@ -2054,7 +2054,8 @@ static bool unit_should_skip_skill_motion_delay(struct block_list *src, uint16 s
  */
 void unit_set_castdelay(unit_data& ud, t_tick tick, int32 casttime) {
 	// Use casttime or minimum delay, whatever is longer
-	t_tick cast_delay = i64max(casttime, battle_config.min_skill_delay_limit);
+	const t_tick min_skill_delay = (ud.skill_id == RA_ARROWSTORM) ? 150 : battle_config.min_skill_delay_limit;
+	t_tick cast_delay = i64max(casttime, min_skill_delay);
 
 	// Only apply the cast delay, if it is longer than the act delay (set by unit_set_attackdelay)
 	ud.canact_tick = i64max(ud.canact_tick, tick + cast_delay);

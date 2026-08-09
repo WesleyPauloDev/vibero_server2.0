@@ -846,7 +846,7 @@ bool skill_isNotOk( uint16 skill_id, map_session_data& sd ){
 	// AC_DOUBLE which do not have a skill delay and are not regarded in terms of attack motion.
 	int32 skill_interval = max(
 		sd.battle_status.amotion * (battle_config.skill_amotion_leniency) / 100,
-		battle_config.min_skill_delay_limit
+		(skill_id == RA_ARROWSTORM) ? 150 : battle_config.min_skill_delay_limit
 	);
 
 	if (!sd.state.autocast && sd.skillitem != skill_id && sd.canskill_tick &&
