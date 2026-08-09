@@ -408,9 +408,12 @@ function	script	CT_FinalAward	{
 	makeitem 1000372,1,'map_3$,.@x+rand(-3,3),.@y+rand(-3,3);	
 }
 	
-	// O modo 50 sempre libera quatro baus. O modo 75 continua escalando
-	// normalmente conforme a pontuacao do desafio.
-	.@chest_count = ('boss_floor_lv == 50 ? 4 : 'sum_pt/100+1);
+	// A quantidade de baus e fixa por modo e nao depende do uso de Po de Meteorito.
+	.@chest_count = 1;
+	if ('boss_floor_lv == 50)
+		.@chest_count = 4;
+	else if ('boss_floor_lv == 75)
+		.@chest_count = 7;
 	for(.@i=0;.@i<.@chest_count;.@i++){
 		enablenpc instance_npcname("#win_"+(1+.@i));
 	}
