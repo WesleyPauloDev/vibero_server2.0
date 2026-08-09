@@ -49,6 +49,33 @@ function	script	F_Fenda_Log	{
 	return;
 }
 
+function	script	F_Fenda_PartyMemberCount	{
+	.@party_id = getcharid(1);
+	if (!.@party_id)
+		return 1;
+
+	getpartymember .@party_id, 1, .@char_id;
+	getpartymember .@party_id, 2, .@account_id;
+
+	.@count = 0;
+	for (.@i = 0; .@i < $@partymembercount; ++.@i) {
+		if (!isloggedin(.@account_id[.@i], .@char_id[.@i]))
+			continue;
+
+		.@map$ = strcharinfo(3, .@char_id[.@i]);
+		for (.@j = 0; .@j < 4; ++.@j) {
+			if ('Fenda_Map$[.@j] != "" && .@map$ == 'Fenda_Map$[.@j]) {
+				.@count++;
+				break;
+			}
+		}
+	}
+
+	if (.@count < 1)
+		.@count = 1;
+	return .@count;
+}
+
 function	script	F_Fenda_Cost	{
 	.@level = getarg(0, 1);
 	.@type = getarg(1, 0);
@@ -350,7 +377,14 @@ function	script	F_Fenda_Reward	{
 	}
 
 	FendaRewardInstance = instance_id();
-	.@fenda_points = 100 + ('Fenda_Level * 10);
+	.@base_fenda_points = 100 + ('Fenda_Level * 10);
+	.@party_count = callfunc("F_Fenda_PartyMemberCount");
+	.@reward_percent = 100 - ((.@party_count - 1) * 20);
+	if (.@reward_percent < 50)
+		.@reward_percent = 50;
+	.@fenda_points = (.@base_fenda_points * .@reward_percent) / 100;
+	if (.@fenda_points < 50)
+		.@fenda_points = 50;
 	#FendaShopPoints += .@fenda_points;
 	if (FendaMaxLevel <= 'Fenda_Level)
 		FendaMaxLevel = 'Fenda_Level + 1;
@@ -360,6 +394,8 @@ function	script	F_Fenda_Reward	{
 	mes "[Fenda]";
 	mes "Sua recompensa foi entregue.";
 	mes "Voce recebeu 50 moedas de instancia e 5 tickets de minerios.";
+	mes "Grupo na Fenda: " + .@party_count + " membro(s).";
+	mes "Pontos base: " + .@base_fenda_points + ". Reducao aplicada: " + (100 - .@reward_percent) + "%.";
 	mes "Voce recebeu " + .@fenda_points + " pontos da Fenda.";
 	mes "Saldo atual: " + #FendaShopPoints + " pontos.";
 	mes "Voce sera levado de volta ao seu ponto salvo.";

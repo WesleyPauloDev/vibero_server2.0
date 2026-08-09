@@ -22035,6 +22035,42 @@ BUILDIN_FUNC(instance_destroy)
 }
 
 /*==========================================
+ * Returns the number of players currently inside an instance.
+ * All maps that belong to the instance are counted.
+ *
+ * instance_users {<instance_id>};
+ * Returns -1 when the instance is invalid.
+ *------------------------------------------*/
+BUILDIN_FUNC(instance_users)
+{
+	int32 instance_id;
+
+	if (script_hasdata(st, 2))
+		instance_id = script_getnum(st, 2);
+	else
+		instance_id = script_instancegetid(st);
+
+	std::shared_ptr<s_instance_data> idata = util::umap_find(instances, instance_id);
+
+	if (instance_id <= 0 || idata == nullptr || idata->state != INSTANCE_BUSY) {
+		script_pushint(st, -1);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	int32 users = 0;
+
+	for (const s_instance_map &imap : idata->map) {
+		map_data *mapdata = map_getmapdata(imap.m);
+
+		if (mapdata != nullptr)
+			users += mapdata->users;
+	}
+
+	script_pushint(st, users);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/*==========================================
  * Warps player to instance
  * Results:
  *	IE_OK: Success
@@ -28910,6 +28946,7 @@ struct script_function buildin_func[] = {
 	// Instancing
 	BUILDIN_DEF(instance_create,"s??"),
 	BUILDIN_DEF(instance_destroy,"?"),
+	BUILDIN_DEF(instance_users,"?"),
 	BUILDIN_DEF(instance_id,"?"),
 	BUILDIN_DEF(instance_enter,"s????"),
 	BUILDIN_DEF(instance_npcname,"s?"),

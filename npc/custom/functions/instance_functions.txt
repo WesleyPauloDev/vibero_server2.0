@@ -10,7 +10,7 @@ function	script	F_InstanceEntry	{
 	// getarg(4) -> Level minimo (numero)
 	// getarg(5) -> Nome amigavel da instancia (string opcional)
 	// getarg(6) -> Quest de caca iniciada ao entrar (numero opcional)
-	// getarg(7) -> Preco do reset em CashPoints (padrao: 1000; 0 = desabilitado)
+	// getarg(7) -> Incremento por reset em CashPoints (padrao: 500; 0 = desabilitado)
 	// ==============================
 
 	.@db_name$ = getarg(0);
@@ -20,7 +20,7 @@ function	script	F_InstanceEntry	{
 	.@min_level = getarg(4);
 	.@display_name$ = getarg(5, .@db_name$);
 	.@hunt_quest = getarg(6, 0);
-	.@reset_cash_price = getarg(7, 1000);
+	.@reset_cash_step = getarg(7, 500);
 
     .@cooldown_name$ = "#cooldown_" + .@cooldown_var$;
     .@status_name$ = "#" + .@status_var$ + "_STATUS";
@@ -33,6 +33,19 @@ function	script	F_InstanceEntry	{
 		.@shared_cooldown_name$ = "#cooldown_vdec";
 		.@shared_status_name$ = "#VillaDeception_STATUS";
 	}
+
+	// Contador progressivo por conta e por instancia. As duas dificuldades da
+	// Villa da Decepcao compartilham a mesma tentativa e o mesmo contador.
+	.@reset_counter_key$ = (.@shared_vdec ? "VillaDeception" : .@status_var$);
+	.@reset_count_name$ = "#IRC_" + .@reset_counter_key$;
+	.@reset_cycle_name$ = "#IRX_" + .@reset_counter_key$;
+	.@now = gettimetick(2);
+	if (getd(.@reset_cycle_name$) > 0 && getd(.@reset_cycle_name$) <= .@now) {
+		setd(.@reset_count_name$, 0);
+		setd(.@reset_cycle_name$, 0);
+	}
+	.@reset_number = getd(.@reset_count_name$) + 1;
+	.@reset_cash_price = .@reset_cash_step * .@reset_number;
 
     // debugmes ".@db_name$: " + .@db_name$;
     // debugmes ".@npc_name$: " + .@npc_name$;
@@ -99,12 +112,23 @@ function	script	F_InstanceEntry	{
 		mes "[" + .@npc_name$ + "]";
 		mes "Voce nao pode mais entrar nesta instancia hoje.";
 		mes "Volte amanha apos o reset diario.";
-		if (.@reset_cash_price <= 0)
+		if (.@reset_cash_step <= 0)
 			close;
+
+		// Nao permite que um membro de fora encerre a tentativa de quem
+		// ainda esta jogando em qualquer mapa da instancia da party.
+		if (.@live_iid > 0 && instance_users(.@live_iid) > 0) {
+			next;
+			mes "[" + .@npc_name$ + "]";
+			mes "Nao e possivel resetar enquanto houver jogadores dentro da instancia atual do grupo.";
+			mes "Aguarde todos os membros sairem antes de tentar novamente.";
+			close;
+		}
 
 		next;
 		mes "[" + .@npc_name$ + "]";
 		mes "Deseja resetar somente a instancia ^0055FF" + .@display_name$ + "^000000?";
+		mes "Este sera o ^0055FF" + .@reset_number + "o reset^000000 desta instancia no ciclo atual.";
 		mes "Custo: ^FF0000" + .@reset_cash_price + " CashPoints^000000.";
 		mes "Saldo atual: ^0055FF" + #CASHPOINTS + " CashPoints^000000.";
 		next;
@@ -125,6 +149,15 @@ function	script	F_InstanceEntry	{
 			close;
 		}
 
+		// Confere novamente depois da confirmacao. Um membro pode ter entrado
+		// enquanto o dialogo de reset estava aberto.
+		if (.@live_iid > 0 && instance_users(.@live_iid) > 0) {
+			mes "[" + .@npc_name$ + "]";
+			mes "O reset foi cancelado porque um jogador entrou na instancia.";
+			mes "Nenhum CashPoint foi consumido.";
+			close;
+		}
+
 		// Fecha a instância atual da party.
 		if (.@live_iid > 0) {
 			instance_destroy(.@live_iid);
@@ -132,6 +165,9 @@ function	script	F_InstanceEntry	{
 
 		// Somente depois cobra e limpa os controles.
 		#CASHPOINTS -= .@reset_cash_price;
+		setd(.@reset_count_name$, .@reset_number);
+		if (getd(.@reset_cycle_name$) <= .@now)
+			setd(.@reset_cycle_name$, gettimetick(2) + callfunc("get_daily_reset"));
 
 		setd(.@cooldown_name$, 0);
 		setd(.@status_name$, 0);
@@ -726,8 +762,6 @@ function	script	F_InstanceSyncVillaDeception	{
 	}
 	return;
 }
-
-
 
 
 
