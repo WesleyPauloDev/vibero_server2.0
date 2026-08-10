@@ -79,40 +79,43 @@ function	script	F_Fenda_PartyMemberCount	{
 function	script	F_Fenda_Cost	{
 	.@level = getarg(0, 1);
 	.@type = getarg(1, 0);
+	.@base = 0;
 
 	if (.@level <= 1)
-		return (.@type == 0) ? 50 : 0;
+		.@base = (.@type == 0) ? 50 : 0;
 	if (.@level == 2)
-		return (.@type == 0) ? 100 : 0;
+		.@base = (.@type == 0) ? 100 : 0;
 	if (.@level == 3) {
-		if (.@type == 0) return 100;
-		if (.@type == 1) return 50;
-		return 0;
+		if (.@type == 0) .@base = 100;
+		else if (.@type == 1) .@base = 50;
 	}
 	if (.@level == 4) {
-		if (.@type == 0) return 100;
-		if (.@type == 1) return 100;
-		return 0;
+		if (.@type == 0) .@base = 100;
+		else if (.@type == 1) .@base = 100;
 	}
 	if (.@level == 5) {
-		if (.@type == 1) return 100;
-		if (.@type == 2) return 50;
-		return 0;
+		if (.@type == 1) .@base = 100;
+		else if (.@type == 2) .@base = 50;
 	}
 	if (.@level == 6) {
-		if (.@type == 1) return 100;
-		if (.@type == 2) return 100;
-		return 0;
+		if (.@type == 1) .@base = 100;
+		else if (.@type == 2) .@base = 100;
 	}
 	if (.@level == 7) {
-		if (.@type == 1) return 100;
-		if (.@type == 3) return 100;
-		return 0;
+		if (.@type == 1) .@base = 100;
+		else if (.@type == 3) .@base = 100;
 	}
 
-	if (.@type == 1 || .@type == 3)
-		return 150 + ((.@level - 8) * 50);
-	return 0;
+	if (.@level >= 8 && (.@type == 1 || .@type == 3))
+		.@base = 150 + ((.@level - 8) * 50);
+
+	if (.@base <= 0)
+		return 0;
+
+	.@repeat = #FendaEntryCount[.@level];
+	if (.@repeat < 0)
+		.@repeat = 0;
+	return (.@base * (100 + (.@repeat * 20))) / 100;
 }
 
 function	script	F_Fenda_CostText$	{
@@ -494,11 +497,96 @@ function	script	F_Fenda_ShopBuy	{
 	end;
 }
 
+function	script	F_Fenda_RecycleEnchant	{
+	mes "[Reciclagem da Fenda]";
+	mes "Escolha o tipo de encanto que deseja reciclar.";
+	next;
+
+	switch(select("Encante Hat:Encante Botas:Voltar")) {
+		case 1:
+			mes "[Reciclagem da Fenda]";
+			mes "Custo: 1000 pontos da Fenda + 1 encanto correspondente.";
+			mes "Voce pode trocar:";
+			mes "^0055FFFeitico da Benevolencia^000000 por ^FF0000Feitico da Maldade^000000.";
+			mes "^FF0000Feitico da Maldade^000000 por ^0055FFFeitico da Benevolencia^000000.";
+			next;
+
+			.@menu$ = "";
+			.@count = 0;
+			if (countitem(312014) > 0) {
+				.@menu$ += getitemname(312014) + " -> " + getitemname(312021) + ":";
+				.@from[.@count] = 312014;
+				.@to[.@count] = 312021;
+				.@count++;
+			}
+			if (countitem(312021) > 0) {
+				.@menu$ += getitemname(312021) + " -> " + getitemname(312014) + ":";
+				.@from[.@count] = 312021;
+				.@to[.@count] = 312014;
+				.@count++;
+			}
+			if (.@count <= 0) {
+				mes "[Reciclagem da Fenda]";
+				mes "Voce nao possui encantos de hat da Fenda no inventario.";
+				close;
+			}
+
+			.@pick = select(.@menu$ + "Cancelar") - 1;
+			if (.@pick >= .@count)
+				close;
+
+			.@cost = 1000;
+			.@from_id = .@from[.@pick];
+			.@to_id = .@to[.@pick];
+			mes "[Reciclagem da Fenda]";
+			mes "Trocar:";
+			mes "^FF0000" + getitemname(.@from_id) + "^000000";
+			mes "por:";
+			mes "^0055FF" + getitemname(.@to_id) + "^000000";
+			mes "Custo: " + .@cost + " pontos da Fenda.";
+			next;
+			if (select("Confirmar:Cancelar") == 2)
+				close;
+
+			if (#FendaShopPoints < .@cost) {
+				mes "[Reciclagem da Fenda]";
+				mes "Voce precisa de " + .@cost + " pontos da Fenda.";
+				mes "Saldo atual: " + #FendaShopPoints + ".";
+				close;
+			}
+			if (countitem(.@from_id) < 1) {
+				mes "[Reciclagem da Fenda]";
+				mes "O encanto necessario nao esta mais no inventario.";
+				close;
+			}
+			if (!checkweight(.@to_id, 1)) {
+				mes "[Reciclagem da Fenda]";
+				mes "Libere peso no inventario antes de reciclar.";
+				close;
+			}
+
+			#FendaShopPoints -= .@cost;
+			delitem .@from_id, 1;
+			getitem .@to_id, 1;
+			mes "[Reciclagem da Fenda]";
+			mes "Reciclagem concluida.";
+			mes "Voce recebeu ^0055FF" + getitemname(.@to_id) + "^000000.";
+			mes "Saldo atual: " + #FendaShopPoints + " pontos.";
+			close;
+		case 2:
+			mes "[Reciclagem da Fenda]";
+			mes "A reciclagem de encantes de botas ainda nao foi configurada.";
+			close;
+		default:
+			close;
+	}
+}
+
 function	script	F_Fenda_Shop	{
 	mes "[Loja da Fenda]";
 	mes "Seus pontos: " + #FendaShopPoints + ".";
 	next;
-	switch(select("Hats:Armas:Encantar Hats:Voltar")) {
+	switch(select("Hats:Armas:Encantar Hats:Reciclar Encante:Voltar")) {
 		case 1:
 			callfunc "F_Fenda_ShopBuy", "Hats";
 			end;
@@ -507,6 +595,9 @@ function	script	F_Fenda_Shop	{
 			end;
 		case 3:
 			callfunc "F_FendaHatEnchant";
+			end;
+		case 4:
+			callfunc "F_Fenda_RecycleEnchant";
 			end;
 		default:
 			close;
@@ -576,8 +667,12 @@ function	script	F_Fenda_Menu	{
 		}
 
 		.@level_menu$ = "";
-		for (.@i = 1; .@i <= FendaMaxLevel; ++.@i)
-			.@level_menu$ += "Nivel " + .@i + " - " + callfunc("F_Fenda_CostText$", .@i) + ":";
+		for (.@i = 1; .@i <= FendaMaxLevel; ++.@i) {
+			.@level_menu$ += "Nivel " + .@i + " - " + callfunc("F_Fenda_CostText$", .@i);
+			if (#FendaEntryCount[.@i] > 0)
+				.@level_menu$ += " (entradas: " + #FendaEntryCount[.@i] + ")";
+			.@level_menu$ += ":";
+		}
 		.@level_menu$ += "Cancelar";
 		mes "[Fenda]";
 		mes "Escolha o nivel da Fenda.";
@@ -598,6 +693,7 @@ function	script	F_Fenda_Menu	{
 			close;
 		}
 		callfunc "F_Fenda_DelCost", .@level;
+		#FendaEntryCount[.@level]++;
 		setinstancevar('Fenda_Level, .@level, .@iid);
 		setinstancevar('Fenda_LeaderName$, strcharinfo(0), .@iid);
 		announce "[Fenda] " + strcharinfo(0) + " abriu uma Fenda nivel " + .@level + ". Reuna seu grupo e prepare-se para o desafio!", bc_all;
