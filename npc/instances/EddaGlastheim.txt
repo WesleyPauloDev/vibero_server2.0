@@ -6,6 +6,35 @@
 //= 1.0 Initial Version                                          =|
 //================================================================|
 
+function	script	F_EddaGlastheimPurificationFinish	{
+	.@hunt = getinstancevar('hunt,instance_id());
+	.@mode = getinstancevar('mode,instance_id());
+	.@finish_name$ = (.@mode ? "Purificacao de Glast Heim Hard" : "Purificacao de Glast Heim");
+	.@finish_status$ = "#EddaGHPur_STATUS";
+
+	if(.@hunt > 0 && checkquest(.@hunt,HUNTING) == 2){
+		if(!.@mode)
+			getitem 25739,9;
+		else {
+			getitem 25739,5;
+			getitem 25740,6;
+		}
+		erasequest .@hunt;
+	}
+	.@stone = (.@mode ? 3 : 1);
+	if (getd(.@finish_status$) == 2 && checkweight(25740,.@stone) == 0)
+		return -1;
+	if (!.@mode)
+		.@finish_result = callfunc("F_InstanceFinishBase", .@finish_name$, .@finish_status$);
+	else
+		.@finish_result = callfunc("F_InstanceFinishBase", .@finish_name$, .@finish_status$, 20, 3);
+	if (.@finish_result == -1)
+		return -1;
+	if (.@finish_result == 1)
+		getitem 25740,.@stone;
+	return .@finish_result;
+}
+
 -	script	EddaGlastheimFall_Instance#Custom	999,{
 	if (!attachrid(#INSTANCERID)) end;
 	#INSTANCERID = 0;
@@ -1723,22 +1752,30 @@ OnTalk:
 		next;
 		mes "[Oscar]";
 		mes "^0000CDAqui esta sua recompensa por me acompanhar.^000000";
-		getexp 600000,600000;
-		.@finish_result = callfunc("F_InstanceFinishBase", "Queda de Glast Heim", "#EddaGlastheimFall_STATUS");
+		.@purification_story = getinstancevar('purification_story,instance_id());
+		if (!.@purification_story)
+			getexp 600000,600000;
+		if (.@purification_story)
+			.@finish_result = callfunc("F_EddaGlastheimPurificationFinish");
+		else
+			.@finish_result = callfunc("F_InstanceFinishBase", "Queda de Glast Heim", "#EddaGlastheimFall_STATUS");
 		if (.@finish_result == -1) {
 			mes "Voce esta com peso demais para receber as recompensas.";
 			close;
 		}
-		#EddaGlastheimFall_UNLOCK = 1;
+		if (!.@purification_story)
+			#EddaGlastheimFall_UNLOCK = 1;
 		next;
 		mes "[Oscar]";
 		mes "No fim, Heinrich nao conseguiu seguir as ultimas palavras de Schmidt.";
 		next;
 		mes "[Oscar]";
 		mes "Depois da queda de Glast Heim, sobrou trabalho demais e verdade de menos.";
-		next;
-		mes "[Oscar]";
-		mes "A Purificacao de Glast Heim ficou disponivel para voce.";
+		if (!.@purification_story) {
+			next;
+			mes "[Oscar]";
+			mes "A Purificacao de Glast Heim ficou disponivel para voce.";
+		}
 		mes "Agora vamos sair. Esta distorcao esta desmoronando.";
 		close2;
 		warp "SavePoint",0,0;
@@ -1920,10 +1957,6 @@ end;
 }
 
 1@gl_prq,52,270,4	script	Oscar#gh_purification_4	4_ED_OSCAR,3,3,{
-	.@var = getinstancevar('hunt,instance_id());
-	.@mode = getinstancevar('mode,instance_id());
-	.@finish_name$ = (.@mode ? "Purificacao de Glast Heim Hard" : "Purificacao de Glast Heim");
-	.@finish_status$ = "#EddaGHPur_STATUS";
 	cutin "oscar01",2;
 	mes "[Oscar]";
 	mes "Viajar por essas memorias e lutar aqui gasta muita energia.";
@@ -1933,32 +1966,47 @@ end;
 	next;
 	mes "[Oscar]";
 	mes "Esta distorcao vai comecar a ruir. Vamos sair primeiro.";
-	if(.@var > 0 && checkquest(.@var,HUNTING) == 2){
-		if(!.@mode)
-			getitem 25739,9;
-		else {
-			getitem 25739,5;
-			getitem 25740,6;
+	next;
+	mes "[Oscar]";
+	mes "Antes de sair, ainda posso mostrar o que aconteceu com Schmidt, Varmundt e Heinrich.";
+	mes "Voce quer acompanhar essa parte da historia?";
+	next;
+	if(select("Sair agora.:Acompanhar a historia.") == 1){
+		.@finish_result = callfunc("F_EddaGlastheimPurificationFinish");
+		if (.@finish_result == -1) {
+			mes "Voce esta com peso demais para receber as recompensas.";
+			close;
 		}
-		erasequest .@var;
+		close2;
+		warp "SavePoint",0,0;
+		end;
 	}
-	.@stone = (.@mode ? 3 : 1);
-	if (getd(.@finish_status$) == 2 && checkweight(25740,.@stone) == 0) {
-		mes "Voce esta com peso demais para receber as recompensas.";
-		close;
-	}
-	if (!.@mode)
-		.@finish_result = callfunc("F_InstanceFinishBase", .@finish_name$, .@finish_status$);
-	else
-		.@finish_result = callfunc("F_InstanceFinishBase", .@finish_name$, .@finish_status$, 20, 3);
-	if (.@finish_result == -1) {
-		mes "Voce esta com peso demais para receber as recompensas.";
-		close;
-	}
-	if (.@finish_result == 1)
-		getitem 25740,.@stone;
+
 	close2;
-	warp "SavePoint",0,0;
+	cutin "",255;
+	setinstancevar('purification_story,1,instance_id());
+	setinstancevar('gh_fall,14,instance_id());
+
+	enablenpc("#gh_fall_ev_2");
+	enablenpc("Orb#edda_fall_0");
+	enablenpc("Varmundt#gh_fall_2");
+	enablenpc("Varmundt#gh_fall_3");
+	enablenpc("Schmidt#gh_fall_4");
+	enablenpc("Heinrich#gh_fall_1");
+	enablenpc("Oscar#gh_fall_2");
+
+	hideoffnpc("Orb#edda_fall_0");
+	hideoffnpc("Varmundt#gh_fall_2");
+	hideonnpc("Varmundt#gh_fall_3");
+	hideonnpc("Schmidt#gh_fall_4");
+	hideonnpc("Heinrich#gh_fall_1");
+	hideonnpc("Oscar#gh_fall_2");
+	for(.@i = 0; .@i < 44; .@i++){
+		enablenpc("#schmidt_dummy_" + .@i);
+		hideonnpc("#schmidt_dummy_" + .@i);
+	}
+	.@map$ = getinstancevar('map$,instance_id());
+	warp .@map$,52,275;
 	end;
 }
 

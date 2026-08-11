@@ -76,7 +76,18 @@ function	script	F_Fenda_PartyMemberCount	{
 	return .@count;
 }
 
+function	script	F_Fenda_ResetDailyEntryCost	{
+	.@today = atoi(gettimestr("%Y%m%d", 2));
+	if (#FendaEntryDate == .@today)
+		return;
+
+	#FendaEntryDate = .@today;
+	deletearray #FendaEntryCount[0], getarraysize(#FendaEntryCount);
+	return;
+}
+
 function	script	F_Fenda_Cost	{
+	callfunc "F_Fenda_ResetDailyEntryCost";
 	.@level = getarg(0, 1);
 	.@type = getarg(1, 0);
 	.@base = 0;
@@ -123,6 +134,21 @@ function	script	F_Fenda_CostText$	{
 	setarray .@name$[0],
 		"moeda cheffenia normal", "moeda cheffenia hard",
 		"moeda bio normal", "moeda bio hard";
+	.@text$ = "";
+	for (.@i = 0; .@i < 4; ++.@i) {
+		.@amount = callfunc("F_Fenda_Cost", .@level, .@i);
+		if (.@amount <= 0)
+			continue;
+		if (.@text$ != "")
+			.@text$ += " + ";
+		.@text$ += .@amount + " " + .@name$[.@i];
+	}
+	return .@text$;
+}
+
+function	script	F_Fenda_CostMenuText$	{
+	.@level = getarg(0, 1);
+	setarray .@name$[0], "Chef N", "Chef H", "Bio N", "Bio H";
 	.@text$ = "";
 	for (.@i = 0; .@i < 4; ++.@i) {
 		.@amount = callfunc("F_Fenda_Cost", .@level, .@i);
@@ -668,9 +694,9 @@ function	script	F_Fenda_Menu	{
 
 		.@level_menu$ = "";
 		for (.@i = 1; .@i <= FendaMaxLevel; ++.@i) {
-			.@level_menu$ += "Nivel " + .@i + " - " + callfunc("F_Fenda_CostText$", .@i);
+			.@level_menu$ += "Nv." + .@i + " - " + callfunc("F_Fenda_CostMenuText$", .@i);
 			if (#FendaEntryCount[.@i] > 0)
-				.@level_menu$ += " (entradas: " + #FendaEntryCount[.@i] + ")";
+				.@level_menu$ += " (" + #FendaEntryCount[.@i] + "x)";
 			.@level_menu$ += ":";
 		}
 		.@level_menu$ += "Cancelar";
@@ -772,6 +798,10 @@ function	script	F_Fenda_MvpDead	{
 		if (rand(10000) < .@chance) {
 			partylootitem $Fenda_MvpDropItem, 1, .@chance;
 			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Caixa de Encanto da Fenda ao derrotar o Senhor da Fenda!", bc_all;
+		}
+		if (rand(10000) < .@chance) {
+			partylootitem 9695, 1, .@chance;
+			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Encanto da Fenda (Botas) ao derrotar o Senhor da Fenda!", bc_all;
 		}
 		if (rand(10000) < .@chance) {
 			partylootitem 501000, 1, .@chance;
@@ -902,6 +932,10 @@ OnMiniBossDead:
 		if (rand(10000) < .@drop_rate) {
 			partylootitem $Fenda_MvpDropItem, 1, .@drop_rate;
 			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Caixa de Encanto da Fenda ao derrotar um Guardiao da Fenda!", bc_all;
+		}
+		if (rand(10000) < .@drop_rate) {
+			partylootitem 9695, 1, .@drop_rate;
+			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Encanto da Fenda (Botas) ao derrotar um Guardiao da Fenda!", bc_all;
 		}
 	}
 	.@drop_rate = get_adjusted_drop_rate(31901, 5000);
