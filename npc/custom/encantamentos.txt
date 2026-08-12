@@ -1,6 +1,13 @@
 //==================================================
 // [Wesley] - NPC de Encantamento de Pedras de Atributo
 //==================================================
+function	script	F_IsFendaBootEnchant	{
+	.@id = getarg(0);
+	setarray .@enchants[0],
+		29509,29371,311365,4875,4876,4877,4878,4879,4880,311074,310321;
+	return (inarray(.@enchants[0], .@id) >= 0);
+}
+
 moc_para01,24,18,5	script	Encantador	840,{
 OnTalk:	
 	// for (.@i = 0; .@i < 10; .@i++) {
@@ -178,6 +185,11 @@ OnTalk:
 
 				// Determina qual slot real foi escolhido
 				.@realSlot = .@slotMap[.@slot_choice - 1];
+				if (.@part == EQI_SHOES && .@realSlot == 3 && callfunc("F_IsFendaBootEnchant", .@slot4)) {
+					mes "[Artesao Aprendiz]";
+					mes "Encantos de botas da Fenda nao podem ser removidos por este NPC.";
+					close;
+				}
 
 				// Limpa o slot escolhido
 				switch (.@realSlot) {
@@ -204,6 +216,12 @@ OnTalk:
 			// Remove TODOS os slots de encantamento
 			// =========================================
 			if (.@type == 2) {
+				if (.@part == EQI_SHOES && callfunc("F_IsFendaBootEnchant", .@slot4)) {
+					mes "[Artesao Aprendiz]";
+					mes "Esta bota possui um encanto da Fenda no slot 4.";
+					mes "Encantos de botas da Fenda nao podem ser removidos por este NPC.";
+					close;
+				}
 
 				// Zera os tres ultimos slots
 				if (.@slot2 > 0) getitem callfunc("get_base_enchant", .@slot2),1;
