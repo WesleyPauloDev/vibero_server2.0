@@ -5,6 +5,34 @@ function	script	F_BattlePassSeason	{
 	return (gettime(DT_YEAR) * 100) + gettime(DT_MONTH);
 }
 
+// Achievement rewards are stored per character, while Battle Pass points and
+// the season key are stored per account. Keep a separate character season so
+// every character has stale monthly rewards removed when it logs in.
+function	script	F_BattlePassResetSeasonRewards	{
+	.@season = getarg(0, callfunc("F_BattlePassSeason"));
+	.@preserve_current = getarg(1, 0);
+	.@char_id = getcharid(0);
+
+	for (.@id = 910010; .@id <= 910029; .@id++) {
+		if (!achievementexists(.@id))
+			continue;
+
+		// One-time migration: do not reopen a reward that this character has
+		// already completed or claimed during the current month.
+		if (.@preserve_current) {
+			.@record_season = 0;
+			query_sql("SELECT IFNULL(EXTRACT(YEAR_MONTH FROM GREATEST(IFNULL(`completed`, '1970-01-01'), IFNULL(`rewarded`, '1970-01-01'))), 0) FROM `achievement` WHERE `char_id` = " + .@char_id + " AND `id` = " + .@id, .@record_season);
+			if (.@record_season == .@season)
+				continue;
+		}
+
+		achievementremove .@id;
+	}
+
+	BP_RewardSeason = .@season;
+	return;
+}
+
 
 function	script	F_BattlePassResetDaily	{
 	setarray .@quest[0], 69100, 69101, 69102, 69103, 69105, 69106, 69107, 69108, 69109;
@@ -43,6 +71,7 @@ function	script	F_BattlePassResetDaily	{
 	return;
 }
 function	script	F_BattlePassReset	{
+	.@season = callfunc("F_BattlePassSeason");
 	setarray .@quest[0], 69100, 69101, 69102, 69103, 69104, 69105, 69106, 69107, 69108, 69109, 69110, 69111, 69112, 69113;
 	for (.@i = 0; .@i < getarraysize(.@quest); .@i++) {
 		if (checkquest(.@quest[.@i]) != -1)
@@ -54,14 +83,11 @@ function	script	F_BattlePassReset	{
 		if (achievementexists(.@ach[.@i]))
 			achievementremove .@ach[.@i];
 	}
-	for (.@id = 910010; .@id <= 910029; .@id++) {
-		if (achievementexists(.@id))
-			achievementremove .@id;
-	}
+	callfunc("F_BattlePassResetSeasonRewards", .@season, 0);
 
 	#BP_Points = 0;
 	#BP_DONE_season = 0;
-	#BP_SeasonKey = callfunc("F_BattlePassSeason");
+	#BP_SeasonKey = .@season;
 	#BP_WeeklyResetTick = 0;
 	#BP_DailyResetTick = 0;
 
@@ -105,6 +131,12 @@ function	script	F_BattlePassEnsureSeason	{
 		callfunc("F_BattlePassReset");
 		return;
 	}
+
+	// The account season may already have been changed by another character.
+	// Reset this character's reward achievements independently. A zero marker
+	// identifies characters created before this fix and enables safe migration.
+	if (BP_RewardSeason != .@season)
+		callfunc("F_BattlePassResetSeasonRewards", .@season, BP_RewardSeason == 0);
 
 	if (#BP_WeeklyResetTick <= gettimetick(2))
 		callfunc("F_BattlePassResetWeekly");
