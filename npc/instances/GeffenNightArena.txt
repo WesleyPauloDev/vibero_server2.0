@@ -41,7 +41,9 @@
 	}
 
 	if ('gna_finished) {
-		if (#GNA_REWARD_INSTANCE != instance_id()) {
+		// STATUS 2 means this run is pending. Do not use the recyclable
+		// instance ID as the reward lock.
+		if (#GeffenNightArena_STATUS == 2) {
 			if (!checkweight(1000366,1)) {
 				mes .@n$;
 				mes "Voce esta carregando peso demais para receber as recompensas.";
@@ -58,7 +60,6 @@
 			if (.@finish_result == 1) {
 				getitem 1000316,1;
 				getitem 1000366,1;
-				#GNA_REWARD_INSTANCE = instance_id();
 			}
 		}
 
@@ -239,7 +240,6 @@ OnMobDied:
 				if (.@finish_result == 1) {
 					getitem 1000316,1;
 					getitem 1000366,1;
-					#GNA_REWARD_INSTANCE = instance_id();
 				}
 				else if (.@finish_result == -1) {
 					dispbottom "[Geffen Night Arena] Libere espaco no inventario e fale com o dispositivo para receber as recompensas finais.";

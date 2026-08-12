@@ -1121,6 +1121,11 @@ OnTouchNPC:
 					mes "Voce esta com peso demais para receber as recompensas.";
 					close;
 				}
+				if (.@finish_result != 1) {
+					mes "Nao foi possivel registrar a conclusao agora.";
+					mes "Tente novamente antes de sair da instancia.";
+					close;
+				}
 			}
 		}
 		else {
@@ -1128,6 +1133,11 @@ OnTouchNPC:
 				.@finish_result = callfunc("F_InstanceFinishBase", "Jardim Aquatico", "#WATERGARDEN_STATUS", 10, 2, "#inst175_name$", "#inst175_status");
 				if (.@finish_result == -1) {
 					mes "Voce esta com peso demais para receber as recompensas.";
+					close;
+				}
+				if (.@finish_result != 1) {
+					mes "Nao foi possivel registrar a conclusao agora.";
+					mes "Tente novamente antes de sair da instancia.";
 					close;
 				}
 			}

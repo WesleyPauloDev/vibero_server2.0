@@ -2048,27 +2048,25 @@ OnTimer2000:
 		mes "- O portal esta brilhando intensamente. -";
 		close;
 	}
-	if (#SkyFortress_REWARD_INSTANCE != instance_id()) {
+	// STATUS 2 uniquely identifies a pending completion for this account;
+	// instance IDs can be reused by later runs.
+	if (#SkyFortress_STATUS == 2) {
 		if (checkweight(9608,20) == 0 || checkweight(9198,2) == 0) {
 			mes "- Libere peso no inventario antes de sair";
 			mes "- para receber as recompensas da instancia. -";
 			close;
 		}
-		if ('skyfortress_status == 2)
-			#SkyFortress_STATUS = 2;
-		if (#SkyFortress_STATUS == 2) {
-			.@finish_result = callfunc("F_InstanceFinishBase", "Fortaleza Celeste", "#SkyFortress_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Fortaleza Celeste", 0);
-			if (.@finish_result == -1) {
-				mes "- Libere peso no inventario antes de sair";
-				mes "- para receber as recompensas da instancia. -";
-				close;
-			}
+		.@finish_result = callfunc("F_InstanceFinishBase", "Fortaleza Celeste", "#SkyFortress_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Fortaleza Celeste", 0);
+		if (.@finish_result == -1) {
+			mes "- Libere peso no inventario antes de sair";
+			mes "- para receber as recompensas da instancia. -";
+			close;
 		}
-		else {
-			getitem 9608,20;
-			getitem 9198,2;
+		if (.@finish_result != 1) {
+			mes "- Nao foi possivel registrar a conclusao agora. -";
+			mes "- Tente novamente antes de sair da instancia. -";
+			close;
 		}
-		#SkyFortress_REWARD_INSTANCE = instance_id();
 		if (!'reward_announced) {
 			callfunc("F_InstanceFinishAnnounce", "Fortaleza Celeste");
 			'reward_announced = 1;

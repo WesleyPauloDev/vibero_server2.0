@@ -623,7 +623,15 @@ function	script	F_InstanceFinishBase	{
 		return 0;
 	if (getd(.@status_var$) != 2)
 		return 0;
-	if ((.@coin_amount > 0 && checkweight(9608, .@coin_amount) == 0) || (.@ticket_amount > 0 && checkweight(9198, .@ticket_amount) == 0))
+	// Check the complete reward at once. Separate checks can both pass even
+	// when the combined weight (especially during Instance 2x) does not fit.
+	if (.@coin_amount > 0 && .@ticket_amount > 0) {
+		if (!checkweight(9608, .@coin_amount, 9198, .@ticket_amount))
+			return -1;
+	}
+	else if (.@coin_amount > 0 && !checkweight(9608, .@coin_amount))
+		return -1;
+	else if (.@ticket_amount > 0 && !checkweight(9198, .@ticket_amount))
 		return -1;
 	if (.@rep_amount > 0)
 		callfunc("F_AddRep", .@rep_id, .@rep_amount, .@rep_achievement, .@rep_cap);
@@ -770,7 +778,6 @@ function	script	F_InstanceSyncVillaDeception	{
 	}
 	return;
 }
-
 
 
 

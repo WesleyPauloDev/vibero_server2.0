@@ -1262,26 +1262,30 @@ OnInstanceInit:
 }
 
 1@swat,321,47,0	script	#wp_out_1	PORTAL,{
-	.@iid = instance_id();
-	if (#HHWB_REWARD_INSTANCE != .@iid) {
-		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Base da Guerra Heart Hunter");
-			'reward_announced = 1;
-		}
-		if (!checkweight(9608,20) || !checkweight(9198,2) || (isbegin_quest(12374) == 1 && !checkweight(25155,10))) {
+	if (#HeartHunterWarBase_STATUS == 2) {
+		.@multiplier = callfunc("F_EventWeekInstanceRewardMultiplier");
+		if (isbegin_quest(12374) == 1)
+			.@has_weight = checkweight(9608, 20 * .@multiplier, 9198, 2 * .@multiplier, 25155, 10);
+		else
+			.@has_weight = checkweight(9608, 20 * .@multiplier, 9198, 2 * .@multiplier);
+		if (!.@has_weight) {
 			mes "[Julian]";
 			mes "Voce esta com peso demais para receber as recompensas.";
 			mes "Libere espaco e tente sair novamente pelo portal.";
 			close;
 		}
-		getitem 9608,20; // Moeda de Instancia
-		getitem 9198,2; // Ticket de Instancia
+		.@finish_result = callfunc("F_InstanceFinishBase", "Base da Guerra Heart Hunter", "#HeartHunterWarBase_STATUS", 20, 2);
+		if (.@finish_result != 1) {
+			mes "[Julian]";
+			mes "Nao foi possivel entregar as recompensas agora.";
+			mes "Tente sair novamente pelo portal.";
+			close;
+		}
 		if (isbegin_quest(12374) == 1) {
 			getitem 25155,10;// Swz_Honor_Token
 			completequest 12374;// Heart Hunter Base occupation
 			terra_gloria_main = 20;
 		}
-		#HHWB_REWARD_INSTANCE = .@iid;
 	}
 	warp "SavePoint",0,0;
 	end;
@@ -1292,21 +1296,20 @@ OnInstanceInit:
 // Warps
 1@swat,169,295,0	warp	#wp_boss	2,2,1@swat,150,263
 1@swat,151,266,0	script	#wp_out	PORTAL,2,2,{
-	.@iid = instance_id();
-	if (#HHWB_REWARD_INSTANCE != .@iid) {
-		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Base da Guerra Heart Hunter");
-			'reward_announced = 1;
-		}
-		if (!checkweight(9608,20) || !checkweight(9198,2)) {
+	if (#HeartHunterWarBase_STATUS == 2) {
+		.@finish_result = callfunc("F_InstanceFinishBase", "Base da Guerra Heart Hunter", "#HeartHunterWarBase_STATUS", 20, 2);
+		if (.@finish_result == -1) {
 			mes "[Julian]";
 			mes "Voce esta com peso demais para receber as recompensas.";
 			mes "Libere espaco e tente sair novamente pelo portal.";
 			close;
 		}
-		getitem 9608,20; // Moeda de Instancia
-		getitem 9198,2; // Ticket de Instancia
-		#HHWB_REWARD_INSTANCE = .@iid;
+		if (.@finish_result != 1) {
+			mes "[Julian]";
+			mes "Nao foi possivel entregar as recompensas agora.";
+			mes "Tente sair novamente pelo portal.";
+			close;
+		}
 	}
 	warp "SavePoint",0,0;
 	end;
@@ -1904,6 +1907,5 @@ OnInstanceInit:
 	setcell 'map_swat$,22,272,52,272,cell_walkable,0;
 	end;
 }
-
 
 

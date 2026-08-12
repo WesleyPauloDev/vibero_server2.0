@@ -482,7 +482,6 @@ OnInstanceInit:
 		mes "Nos iremos logo em seguida, entao va na frente e conte isso para ela primeiro.";
 		.@speaker_aid = getcharid(3);
 		.@party_id = getcharid(1);
-		.@instance_id = instance_id();
 		if (ep18_main == 46) {
 			ep18_main = 47;
 			erasequest 16579;
@@ -503,15 +502,12 @@ OnInstanceInit:
 					continue;
 				if (strcharinfo(3) != 'map_tcamp$ || #ThorGunsuBase_STATUS != 2)
 					continue;
-				if (#TGB_REWARD_INSTANCE == .@instance_id)
-					continue;
 				getitem 9608,20;	// Moeda de Instancia
 				getitem 9198,2;	// Ticket de Instancia
 				getitem 25669,5;
 				getitem 25723,5;
 				getitem 25668,1;
 				#ThorGunsuBase_STATUS = 3;
-				#TGB_REWARD_INSTANCE = .@instance_id;
 			}
 			attachrid(.@speaker_aid);
 		}

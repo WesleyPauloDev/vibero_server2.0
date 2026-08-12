@@ -178,21 +178,24 @@ OnInstanceInit:
 
 1@md_gef,199,73,0	script(DISABLED)	Bizzare Sculpture#boss	CLEAR_NPC,{
 	if ('fd_boss_completed) {
-		.@instance_id = instance_id();
 		mes "[Escultura Bizarra]";
 		mes "O poder do Lich King se apagou.";
-		if (#FD_REWARD_INSTANCE != .@instance_id) {
+		if (#FridayDungeon_STATUS == 2) {
+			.@finish_result = callfunc("F_InstanceFinishBase", "Tumulo do Monarca", "#FridayDungeon_STATUS", 20, 2);
+			if (.@finish_result == -1) {
+				mes "Voce esta com peso demais para receber as recompensas.";
+				mes "Libere espaco e fale comigo novamente.";
+				close;
+			}
+			if (.@finish_result != 1) {
+				mes "Nao foi possivel registrar a conclusao agora.";
+				mes "Tente novamente antes de sair da instancia.";
+				close;
+			}
 			mes "Voce recebe a recompensa pela conquista da Dungeon da Sexta-Feira.";
-			getitem 9608,20;
-			getitem 9198,2;
-			#FD_REWARD_INSTANCE = .@instance_id;
 		}
 		else {
 			mes "Voce ja recebeu sua recompensa nesta run.";
-		}
-		if (!'finish_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Tumulo do Monarca");
-			'finish_announced = 1;
 		}
 		next;
 		mes "Uma forca estranha vai mandar voce para o seu savepoint.";

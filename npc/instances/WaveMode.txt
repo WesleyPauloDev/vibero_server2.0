@@ -581,12 +581,11 @@ S_Idle:
 1@def01,50,30,0	script	#wave_mode_forest_warp	WARPNPC,2,2,{// official warp out
 	end;
 OnTouch:
-	.@iid = instance_id();
 	if (!'wave_mode_forest_cleared) {
 		warp "SavePoint",0,0;
 		end;
 	}
-	if (#WaveModeForest_REWARD_INSTANCE != .@iid) {
+	if (#WaveModeForest_STATUS == 2) {
 		.@announce = (!'wave_mode_forest_announced);
 		.@finish_result = callfunc("F_InstanceFinishBase", "Wave Mode - Floresta", "#WaveModeForest_STATUS", 10, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Wave Mode - Floresta", .@announce);
 		if (.@finish_result == -1) {
@@ -596,9 +595,14 @@ OnTouch:
 			close;
 		}
 		if (.@finish_result == 1) {
-			#WaveModeForest_REWARD_INSTANCE = .@iid;
 			if (.@announce)
 				'wave_mode_forest_announced = 1;
+		}
+		else {
+			mes "[Belka]";
+			mes "Nao foi possivel registrar a conclusao agora.";
+			mes "Tente novamente antes de sair da instancia.";
+			close;
 		}
 	}
 	warp "SavePoint",0,0;
@@ -674,12 +678,11 @@ OnTouch:
 		disablenpc instance_npcname("#wave_mode_sky_entrance");
 	}
 	else if ('status_instance == 2) {
-		.@iid = instance_id();
 		if (!'wave_mode_sky_cleared) {
 			warp "SavePoint",0,0;
 			end;
 		}
-		if (#WaveModeSky_REWARD_INSTANCE != .@iid) {
+		if (#WaveModeSky_STATUS == 2) {
 			.@announce = (!'wave_mode_sky_announced);
 			.@finish_result = callfunc("F_InstanceFinishBase", "Wave Mode - Ceu", "#WaveModeSky_STATUS", 10, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Wave Mode - Ceu", .@announce);
 			if (.@finish_result == -1) {
@@ -689,9 +692,14 @@ OnTouch:
 				close;
 			}
 			if (.@finish_result == 1) {
-				#WaveModeSky_REWARD_INSTANCE = .@iid;
 				if (.@announce)
 					'wave_mode_sky_announced = 1;
+			}
+			else {
+				mes "[Belka]";
+				mes "Nao foi possivel registrar a conclusao agora.";
+				mes "Tente novamente antes de sair da instancia.";
+				close;
 			}
 		}
 		warp "SavePoint",0,0;
