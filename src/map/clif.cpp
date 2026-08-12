@@ -5740,6 +5740,32 @@ static int32 clif_getareachar(struct block_list* bl,va_list ap)
 	return 0;
 }
 
+/**
+ * Removes an object from one player's view without making the client reload
+ * the map. clif_refresh() immediately sends the current objects again.
+ */
+static int32 clif_refresh_clear_view( block_list* bl, va_list ap ){
+	map_session_data* sd = va_arg( ap, map_session_data* );
+
+	if( bl == nullptr || sd == nullptr || bl == sd ){
+		return 0;
+	}
+
+	switch( bl->type ){
+		case BL_ITEM:
+			clif_clearflooritem( *reinterpret_cast<flooritem_data*>( bl ), sd );
+			break;
+		case BL_SKILL:
+			clif_clearchar_skillunit( *reinterpret_cast<skill_unit*>( bl ), *sd );
+			break;
+		default:
+			clif_clearunit_single( bl->id, CLR_OUTSIGHT, *sd );
+			break;
+	}
+
+	return 0;
+}
+
 /*==========================================
  * tbl has gone out of view-size of bl
  *------------------------------------------*/
@@ -9954,12 +9980,16 @@ void clif_refresh_storagewindow(map_session_data *sd) {
 	}
 }
 
-// refresh the client's screen, getting rid of any effects
+// Refresh the client's screen without forcing a same-map loading screen.
 void clif_refresh(map_session_data *sd)
 {
 	nullpo_retv(sd);
 
-	clif_changemap( *sd, sd->m, sd->x, sd->y );
+	// ZC_NPCACK_MAPMOVE used here previously makes the client reload the entire
+	// map. On slower clients this produces a long black/loading-screen flash.
+	// Explicitly rebuild the visible area and correct the position instead.
+	map_foreachinallrange( clif_refresh_clear_view, sd, AREA_SIZE, BL_ALL, sd );
+	clif_fixpos( *sd );
 	clif_inventorylist(sd);
 	clif_equipswitch_list(sd);
 	if(pc_iscarton(sd)) {

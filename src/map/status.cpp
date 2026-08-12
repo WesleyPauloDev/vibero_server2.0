@@ -3587,6 +3587,57 @@ static uint32 status_calc_maxhp_pc( map_session_data& sd, uint32 vit ){
 	// Aegis accuracy
 	dmax += static_cast<int64>( dmax * status_get_hpbonus( &sd, STATUS_BONUS_RATE ) / 100 );
 
+	// Custom extended-class HP bonuses. These use the client job id so every
+	// evolution (including baby variants) receives exactly one multiplier.
+	switch( sd.status.class_ ){
+		case JOB_NINJA:
+		case JOB_KAGEROU:
+		case JOB_OBORO:
+		case JOB_SHINKIRO:
+		case JOB_SHIRANUI:
+		case JOB_BABY_NINJA:
+		case JOB_BABY_KAGEROU:
+		case JOB_BABY_OBORO:
+		case JOB_TAEKWON:
+		case JOB_STAR_GLADIATOR:
+		case JOB_STAR_GLADIATOR2:
+		case JOB_STAR_EMPEROR:
+		case JOB_STAR_EMPEROR2:
+		case JOB_SKY_EMPEROR:
+		case JOB_SKY_EMPEROR2:
+		case JOB_BABY_TAEKWON:
+		case JOB_BABY_STAR_GLADIATOR:
+		case JOB_BABY_STAR_GLADIATOR2:
+		case JOB_BABY_STAR_EMPEROR:
+		case JOB_BABY_STAR_EMPEROR2:
+		case JOB_SOUL_LINKER:
+		case JOB_SOUL_REAPER:
+		case JOB_SOUL_ASCETIC:
+		case JOB_BABY_SOUL_LINKER:
+		case JOB_BABY_SOUL_REAPER:
+			dmax *= 1.50; // +50% HP
+			break;
+		case JOB_SUPER_NOVICE:
+		case JOB_SUPER_BABY:
+		case JOB_SUPER_NOVICE_E:
+		case JOB_SUPER_BABY_E:
+		case JOB_HYPER_NOVICE:
+			dmax *= 2.50; // +150% HP
+			break;
+		case JOB_SUMMONER:
+		case JOB_BABY_SUMMONER:
+		case JOB_SPIRIT_HANDLER:
+			dmax *= 1.15; // +15% HP
+			break;
+		case JOB_GUNSLINGER:
+		case JOB_REBELLION:
+		case JOB_NIGHT_WATCH:
+		case JOB_BABY_GUNSLINGER:
+		case JOB_BABY_REBELLION:
+			dmax *= 1.40; // +40% HP
+			break;
+	}
+
 	// Make sure it's not negative before casting to uint32
 	if( dmax < 1.0 ){
 		dmax = 1.0;
@@ -3637,6 +3688,29 @@ static uint32 status_calc_maxsp_pc( map_session_data& sd, uint32 int_ ){
 
 	// Aegis accuracy
 	dmax += static_cast<int64>( dmax * status_get_spbonus( &sd, STATUS_BONUS_RATE ) / 100 );
+
+	// Custom extended-class SP bonuses.
+	switch( sd.status.class_ ){
+		case JOB_SUPER_NOVICE:
+		case JOB_SUPER_BABY:
+		case JOB_SUPER_NOVICE_E:
+		case JOB_SUPER_BABY_E:
+		case JOB_HYPER_NOVICE:
+			dmax *= 6.00; // +500% SP
+			break;
+		case JOB_SUMMONER:
+		case JOB_BABY_SUMMONER:
+		case JOB_SPIRIT_HANDLER:
+			dmax *= 2.00; // +100% SP
+			break;
+		case JOB_GUNSLINGER:
+		case JOB_REBELLION:
+		case JOB_NIGHT_WATCH:
+		case JOB_BABY_GUNSLINGER:
+		case JOB_BABY_REBELLION:
+			dmax *= 1.20; // +20% SP
+			break;
+	}
 
 	// Make sure it's not negative before casting to uint32
 	if( dmax < 1.0 ){
