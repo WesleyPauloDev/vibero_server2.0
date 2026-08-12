@@ -513,6 +513,84 @@ function	script	F_FendaHatEnchant	{
 	close;
 }
 
+function	script	F_FendaBootsEnchant	{
+	mes "[Encanto da Fenda]";
+	mes "Escolha o encanto de botas que deseja aplicar.";
+	mes "O item de encanto precisa estar no inventario e sera consumido.";
+	next;
+
+	setarray .@enchant_items[0], 29509,29371,311365,4875,4876,4877,4878,4879,4880,311074,310321;
+	.@menu$ = "";
+	.@count = 0;
+	for (.@i = 0; .@i < getarraysize(.@enchant_items); ++.@i) {
+		if (countitem(.@enchant_items[.@i]) < 1)
+			continue;
+		.@candidate[.@count] = .@enchant_items[.@i];
+		.@menu$ += getitemname(.@enchant_items[.@i]) + ":";
+		.@count++;
+	}
+
+	if (.@count < 1) {
+		mes "[Encanto da Fenda]";
+		mes "Voce nao possui encantos de botas da Fenda no inventario.";
+		close;
+	}
+
+	.@menu$ += "Cancelar";
+	.@choice = select(.@menu$);
+	if (.@choice > .@count)
+		close;
+
+	.@use_item_id = .@candidate[.@choice - 1];
+	.@enchant_id = .@use_item_id;
+
+	setarray .@boots_ids[0],
+		470108,470109,470110,470111,
+		470173,470174,470175,470176,
+		470115,470116,
+		470087,470088;
+
+	.@part = EQI_SHOES;
+	.@item_id = getequipid(.@part);
+	if (inarray(.@boots_ids[0], .@item_id) < 0) {
+		mes "[Encanto da Fenda]";
+		mes "Equipe uma bota Varmundt, SnowFlower ou GrayWolf valida para encantar.";
+		close;
+	}
+
+	.@slot4 = getequipcardid(.@part,3);
+	.@refine = getequiprefinerycnt(.@part);
+
+	mes "[Encanto da Fenda]";
+	mes "Bota equipada:";
+	mes "^00AAFF" + getitemname(.@item_id) + " [+" + .@refine + "]^000000";
+	if (.@slot4) {
+		mes "O slot 4 ja possui:";
+		mes "^FF0000" + getitemname(.@slot4) + "^000000";
+		mes "Deseja substituir por ^00AAFF" + getitemname(.@enchant_id) + "^000000?";
+	} else {
+		mes "O encanto sera aplicado no slot 4.";
+		mes "^00AAFF" + getitemname(.@enchant_id) + "^000000";
+	}
+	next;
+
+	if (select("Confirmar:Cancelar") == 2)
+		close;
+
+	if (countitem(.@use_item_id) < 1) {
+		mes "[Encanto da Fenda]";
+		mes "Voce nao possui mais ^FF0000" + getitemname(.@use_item_id) + "^000000 no inventario.";
+		close;
+	}
+
+	delitem .@use_item_id, 1;
+	setitemcard .@part, 3, .@enchant_id;
+
+	mes "[Encanto da Fenda]";
+	mes "Encanto aplicado com sucesso no slot 4.";
+	close;
+}
+
 function	script	F_Fenda_ShopBuy	{
 	.@title$ = getarg(0);
 	close2;
@@ -601,7 +679,88 @@ function	script	F_Fenda_RecycleEnchant	{
 			close;
 		case 2:
 			mes "[Reciclagem da Fenda]";
-			mes "A reciclagem de encantes de botas ainda nao foi configurada.";
+			mes "Custo: 1000 pontos da Fenda + 1 encanto de botas.";
+			mes "Escolha qual encanto deseja entregar.";
+			next;
+
+			setarray .@boots_enchants[0], 29509,29371,311365,4875,4876,4877,4878,4879,4880,311074,310321;
+			.@menu$ = "";
+			.@count = 0;
+			for (.@i = 0; .@i < getarraysize(.@boots_enchants); ++.@i) {
+				if (countitem(.@boots_enchants[.@i]) < 1)
+					continue;
+				.@from[.@count] = .@boots_enchants[.@i];
+				.@menu$ += getitemname(.@boots_enchants[.@i]) + ":";
+				.@count++;
+			}
+
+			if (.@count <= 0) {
+				mes "[Reciclagem da Fenda]";
+				mes "Voce nao possui encantos de botas da Fenda no inventario.";
+				close;
+			}
+
+			.@from_pick = select(.@menu$ + "Cancelar") - 1;
+			if (.@from_pick >= .@count)
+				close;
+			.@from_id = .@from[.@from_pick];
+
+			mes "[Reciclagem da Fenda]";
+			mes "Voce entregara:";
+			mes "^FF0000" + getitemname(.@from_id) + "^000000";
+			mes "Agora escolha qual encanto deseja receber.";
+			next;
+
+			.@menu$ = "";
+			.@count = 0;
+			for (.@i = 0; .@i < getarraysize(.@boots_enchants); ++.@i) {
+				if (.@boots_enchants[.@i] == .@from_id)
+					continue;
+				.@to[.@count] = .@boots_enchants[.@i];
+				.@menu$ += getitemname(.@boots_enchants[.@i]) + ":";
+				.@count++;
+			}
+
+			.@to_pick = select(.@menu$ + "Cancelar") - 1;
+			if (.@to_pick >= .@count)
+				close;
+			.@to_id = .@to[.@to_pick];
+			.@cost = 1000;
+
+			mes "[Reciclagem da Fenda]";
+			mes "Trocar:";
+			mes "^FF0000" + getitemname(.@from_id) + "^000000";
+			mes "por:";
+			mes "^0055FF" + getitemname(.@to_id) + "^000000";
+			mes "Custo: " + .@cost + " pontos da Fenda.";
+			next;
+			if (select("Confirmar:Cancelar") == 2)
+				close;
+
+			if (#FendaShopPoints < .@cost) {
+				mes "[Reciclagem da Fenda]";
+				mes "Voce precisa de " + .@cost + " pontos da Fenda.";
+				mes "Saldo atual: " + #FendaShopPoints + ".";
+				close;
+			}
+			if (countitem(.@from_id) < 1) {
+				mes "[Reciclagem da Fenda]";
+				mes "O encanto necessario nao esta mais no inventario.";
+				close;
+			}
+			if (!checkweight(.@to_id, 1)) {
+				mes "[Reciclagem da Fenda]";
+				mes "Libere peso no inventario antes de reciclar.";
+				close;
+			}
+
+			#FendaShopPoints -= .@cost;
+			delitem .@from_id, 1;
+			getitem .@to_id, 1;
+			mes "[Reciclagem da Fenda]";
+			mes "Reciclagem concluida.";
+			mes "Voce recebeu ^0055FF" + getitemname(.@to_id) + "^000000.";
+			mes "Saldo atual: " + #FendaShopPoints + " pontos.";
 			close;
 		default:
 			close;
@@ -612,7 +771,7 @@ function	script	F_Fenda_Shop	{
 	mes "[Loja da Fenda]";
 	mes "Seus pontos: " + #FendaShopPoints + ".";
 	next;
-	switch(select("Hats:Armas:Encantar Hats:Reciclar Encante:Voltar")) {
+	switch(select("Hats:Armas:Encantar Hats:Encantar Botas:Reciclar Encante:Voltar")) {
 		case 1:
 			callfunc "F_Fenda_ShopBuy", "Hats";
 			end;
@@ -623,6 +782,9 @@ function	script	F_Fenda_Shop	{
 			callfunc "F_FendaHatEnchant";
 			end;
 		case 4:
+			callfunc "F_FendaBootsEnchant";
+			end;
+		case 5:
 			callfunc "F_Fenda_RecycleEnchant";
 			end;
 		default:
@@ -772,6 +934,32 @@ function	script	F_Fenda_Menu	{
 	close;
 }
 
+function	script	F_Fenda_MvpDrop	{
+	if ($Fenda_MvpDropItem > 0) {
+		.@chance = (2 + 'Fenda_Level) * 100; // 2% base + 1% por nivel, em centesimos de %.
+		if (.@chance > 10000)
+			.@chance = 10000;
+		.@chance = get_adjusted_drop_rate(31902, .@chance);
+		if (rand(10000) < .@chance) {
+			.@rare_roll = rand(4);
+			if (.@rare_roll == 0) {
+				partylootitem $Fenda_MvpDropItem, 1, .@chance;
+				announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Caixa de Encanto da Fenda ao derrotar o Senhor da Fenda!", bc_all;
+			} else if (.@rare_roll == 1) {
+				partylootitem 9695, 1, .@chance;
+				announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Encanto da Fenda (Botas) ao derrotar o Senhor da Fenda!", bc_all;
+			} else if (.@rare_roll == 2) {
+				partylootitem 501000, 1, .@chance;
+				announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Pedra de Grade D ao derrotar o Senhor da Fenda!", bc_all;
+			} else {
+				partylootitem 9694, 1, .@chance;
+				announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Mini Refinadora ao derrotar o Senhor da Fenda!", bc_all;
+			}
+		}
+	}
+	return;
+}
+
 function	script	F_Fenda_MvpDead	{
 	if (!'Fenda_Active || 'Fenda_BossDead)
 		return;
@@ -790,34 +978,7 @@ function	script	F_Fenda_MvpDead	{
 	$Fenda_LastClearSeconds = 'Fenda_ClearSeconds;
 	$Fenda_LastClearMinutes = 'Fenda_ClearMinutes;
 	callfunc "F_Fenda_Log", "mvp_dead", 'Fenda_Level, 'Fenda_LeaderName$, 'Fenda_ClearSeconds, 'Fenda_ClearMinutes;
-	if ($Fenda_MvpDropItem > 0) {
-		.@chance = (2 + 'Fenda_Level) * 100; // 2% base + 1% por nivel, em centesimos de %.
-		if (.@chance > 10000)
-			.@chance = 10000;
-		.@chance = get_adjusted_drop_rate(31902, .@chance);
-		if (rand(10000) < .@chance) {
-			partylootitem $Fenda_MvpDropItem, 1, .@chance;
-			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Caixa de Encanto da Fenda ao derrotar o Senhor da Fenda!", bc_all;
-		}
-		if (rand(10000) < .@chance) {
-			partylootitem 9695, 1, .@chance;
-			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Encanto da Fenda (Botas) ao derrotar o Senhor da Fenda!", bc_all;
-		}
-		if (rand(10000) < .@chance) {
-			partylootitem 501000, 1, .@chance;
-			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Pedra de Grade D ao derrotar o Senhor da Fenda!", bc_all;
-		}
-	}
-	if ('Fenda_Level >= 2) {
-		.@mini_refiner_chance = (10 + (('Fenda_Level - 2) * 2)) * 100; // 10% no nivel 2, +2% por nivel.
-		if (.@mini_refiner_chance > 10000)
-			.@mini_refiner_chance = 10000;
-		.@mini_refiner_chance = get_adjusted_drop_rate(31902, .@mini_refiner_chance);
-		if (rand(10000) < .@mini_refiner_chance) {
-			partylootitem 9694, 1, .@mini_refiner_chance;
-			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Mini Refinadora ao derrotar o Senhor da Fenda!", bc_all;
-		}
-	}
+	callfunc "F_Fenda_MvpDrop";
 	getmapxy .@map$, .@x, .@y, BL_PC;
 	.@source = -1;
 	for (.@i = 0; .@i < 6; ++.@i)
@@ -930,12 +1091,13 @@ OnMiniBossDead:
 	if ($Fenda_MvpDropItem > 0) {
 		.@drop_rate = get_adjusted_drop_rate(31901, 1);
 		if (rand(10000) < .@drop_rate) {
-			partylootitem $Fenda_MvpDropItem, 1, .@drop_rate;
-			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Caixa de Encanto da Fenda ao derrotar um Guardiao da Fenda!", bc_all;
-		}
-		if (rand(10000) < .@drop_rate) {
-			partylootitem 9695, 1, .@drop_rate;
-			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Encanto da Fenda (Botas) ao derrotar um Guardiao da Fenda!", bc_all;
+			if (rand(2) == 0) {
+				partylootitem $Fenda_MvpDropItem, 1, .@drop_rate;
+				announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Caixa de Encanto da Fenda ao derrotar um Guardiao da Fenda!", bc_all;
+			} else {
+				partylootitem 9695, 1, .@drop_rate;
+				announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Encanto da Fenda (Botas) ao derrotar um Guardiao da Fenda!", bc_all;
+			}
 		}
 	}
 	.@drop_rate = get_adjusted_drop_rate(31901, 5000);
