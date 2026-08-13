@@ -4,11 +4,28 @@
 // 2 = Invasao MVP
 // 3 = Instancia 2x
 // 4 = Rates Especiais
+// Rotacao: Instancia 2x -> Invasao MVP -> Rates Especiais -> Carta MVP 5x
 //=====================================================
 
 -	script	EventWeekController	-1,{
 
 OnInit:
+	// Converte uma unica vez o proximo evento salvo pela rotacao antiga.
+	if ($event_week_rotation_version < 2) {
+		if ($event_week_active >= 1 && $event_week_active <= 4)
+			$event_week = callfunc("F_EventWeekNext", $event_week_active);
+		else {
+			switch ($event_week) {
+			case 2: $event_week = 3; break; // Carta MVP era o evento anterior.
+			case 3: $event_week = 4; break; // Invasao MVP era o evento anterior.
+			case 4: $event_week = 2; break; // Instancia 2x era o evento anterior.
+			case 1: break;                  // Rates ja apontava para Carta MVP.
+			default: $event_week = 3; break;
+			}
+		}
+		$event_week_rotation_version = 2;
+	}
+
 	if ($event_week < 1 || $event_week > 4)
 		$event_week = 3;
 
@@ -231,15 +248,15 @@ function	script	F_EventWeekDescription$	{
 
 function	script	F_EventWeekNext	{
 	switch (getarg(0, 1)) {
-	case 4: // XP 300 -> Carta MVP 5x
-		return 1;
-	case 1: // Carta MVP 5x -> Invasao MVP
+	case 3: // Instancia 2x -> Invasao MVP
 		return 2;
-	case 2: // Invasao MVP -> Instancia 2x
-		return 3;
-	case 3: // Instancia 2x -> XP 300
-	default:
+	case 2: // Invasao MVP -> Rates Especiais
 		return 4;
+	case 4: // Rates Especiais -> Carta MVP 5x
+		return 1;
+	case 1: // Carta MVP 5x -> Instancia 2x
+	default:
+		return 3;
 	}
 }
 

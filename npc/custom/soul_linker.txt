@@ -1,15 +1,16 @@
 prontera,147,165,5	script	Soul Link Santa	485,{
+OnAtcommand:
 	set .@n$,"^0000FF[ Soul Linker NPC ]^000000";
 	set .@time, 600000; // the buff last 5 minutes
 	set .zenycost,10000;
 	
 	mes .@n$;
-	mes "Olá "+strcharinfo(0)+",";
-	mes "Você quer que eu te conceda Soul Link?";
+	mes "Ola "+strcharinfo(0)+",";
+	mes "Voce quer que eu te conceda Soul Link?";
 	mes "Custa ^00996650,000^000000 zeny";
 	next;
 	
-	switch(select("Sim:Não")) {
+	switch(select("Sim:Nao")) {
 		case 1:
 			if((zeny < (.zenycost))) goto l_nozeny;
 			set Zeny, Zeny - (.zenycost);
@@ -38,13 +39,17 @@ prontera,147,165,5	script	Soul Link Santa	485,{
 			}
 		case 2:
 			mes .@n$;
-			mes "Certo, até logo!";
+			mes "Certo, ate logo!";
 			close;
 	}
 l_nozeny:
 	mes .@n$;
-	mes "Desculpe, você não tem zeny suficiente para um Soul Link.";
+	mes "Desculpe, voce nao tem zeny suficiente para um Soul Link.";
 	mes " ";
-	mes "O serviço de Soul Link custa ^00996650,000^000000 zeny";
+	mes "O servico de Soul Link custa ^00996650,000^000000 zeny";
 	close;
+
+OnInit:
+	bindatcmd "soullink", strnpcinfo(3)+"::OnAtcommand", 0, 0;
+	end;
 }
