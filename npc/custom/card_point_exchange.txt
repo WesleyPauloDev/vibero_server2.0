@@ -1,0 +1,289 @@
+// Troca de cartas por #point_card e loja dos tres albuns especiais.
+
+prontera,147,242,5	script	Colecionador de Cartas	719,{
+L_Main:
+	mes "[Colecionador de Cartas]";
+	mes "Eu avalio qualquer carta e pago em ^0055FFPontos de Carta^000000.";
+	mes " ";
+	mes "Carta comum: ^00AA001 ponto^000000";
+	mes "Carta de Mini-Boss: ^00AA0050 pontos^000000";
+	mes "Carta MVP Selada: ^00AA00500 pontos^000000";
+	mes "Carta MVP: ^00AA002.500 pontos^000000";
+	mes " ";
+	mes "Saldo atual: ^0055FF" + #point_card + " ponto(s)^000000.";
+	next;
+
+	switch (select("Trocar cartas:Consultar cartas:Loja de Albuns:Sair")) {
+	case 1:
+		callsub S_ExchangeCard;
+		end;
+	case 2:
+		callsub S_BrowseCards;
+		goto L_Main;
+	case 3:
+		close2;
+		npcshopattach "Card_Album_Shop";
+		callshop "Card_Album_Shop", 1;
+		end;
+	default:
+		close;
+	}
+
+S_BrowseCards:
+L_BrowseCategory:
+	mes "[Colecionador de Cartas]";
+	mes "Qual lista deseja consultar?";
+	next;
+	switch (select("Cartas de Mini-Boss:Cartas MVP Seladas:Cartas MVP:Voltar ao menu principal")) {
+	case 1:
+		copyarray .@browse_cards[0], .mini_cards[0], getarraysize(.mini_cards);
+		.@category$ = "Mini-Boss";
+		break;
+	case 2:
+		copyarray .@browse_cards[0], .sealed_cards[0], getarraysize(.sealed_cards);
+		.@category$ = "MVP Seladas";
+		break;
+	case 3:
+		copyarray .@browse_cards[0], .mvp_cards[0], getarraysize(.mvp_cards);
+		.@category$ = "MVP";
+		break;
+	default:
+		return;
+	}
+
+	.@browse_count = getarraysize(.@browse_cards);
+	.@page_size = 15;
+	.@page = 0;
+
+L_BrowseList:
+	.@start = .@page * .@page_size;
+	.@end = min(.@start + .@page_size, .@browse_count);
+	.@shown = .@end - .@start;
+	.@menu$ = "";
+
+	mes "[Colecionador de Cartas]";
+	mes "Lista de cartas ^0055FF" + .@category$ + "^000000.";
+	mes "Selecione uma carta para consultar sua descricao.";
+	mes "Pagina " + (.@page + 1) + " de " + ((.@browse_count + .@page_size - 1) / .@page_size) + ".";
+	for (.@i = .@start; .@i < .@end; ++.@i)
+		.@menu$ += getitemname(.@browse_cards[.@i]) + ":";
+
+	.@previous_option = -1;
+	.@next_option = -1;
+	.@option_count = .@shown;
+	if (.@page > 0) {
+		.@previous_option = .@option_count++;
+		.@menu$ += "Pagina anterior:";
+	}
+	if (.@end < .@browse_count) {
+		.@next_option = .@option_count++;
+		.@menu$ += "Proxima pagina:";
+	}
+	.@category_option = .@option_count++;
+	.@menu_option = .@option_count++;
+	.@menu$ += "Escolher outra categoria:Voltar ao menu principal";
+
+	.@choice = select(.@menu$) - 1;
+	if (.@choice == .@previous_option) {
+		--.@page;
+		goto L_BrowseList;
+	}
+	if (.@choice == .@next_option) {
+		++.@page;
+		goto L_BrowseList;
+	}
+	if (.@choice == .@category_option)
+		goto L_BrowseCategory;
+	if (.@choice == .@menu_option)
+		return;
+
+	.@selected_id = .@browse_cards[.@start + .@choice];
+	mes "[Colecionador de Cartas]";
+	mes "Categoria: ^0055FF" + .@category$ + "^000000";
+	mes "Carta: " + mesitemlink(.@selected_id, false);
+	mes "Clique no nome da carta acima para visualizar todos os seus efeitos.";
+	next;
+	switch (select("Voltar para a lista:Escolher outra categoria:Voltar ao menu principal")) {
+	case 1:
+		goto L_BrowseList;
+	case 2:
+		goto L_BrowseCategory;
+	default:
+		return;
+	}
+
+S_ExchangeCard:
+	getinventorylist;
+	.@card_count = 0;
+	for (.@i = 0; .@i < @inventorylist_count; ++.@i) {
+		.@id = @inventorylist_id[.@i];
+		if (getiteminfo(.@id, ITEMINFO_TYPE) != IT_CARD)
+			continue;
+		if (inarray(.@card_ids[0], .@id) != -1)
+			continue;
+		.@card_ids[.@card_count++] = .@id;
+	}
+
+	if (!.@card_count) {
+		mes "[Colecionador de Cartas]";
+		mes "Voce nao possui nenhuma carta solta no inventario.";
+		close;
+	}
+
+	.@page = 0;
+	.@page_size = 15;
+	while (true) {
+		.@start = .@page * .@page_size;
+		.@end = min(.@start + .@page_size, .@card_count);
+		.@shown = .@end - .@start;
+		.@menu$ = "";
+
+		mes "[Colecionador de Cartas]";
+		mes "Escolha a carta que deseja trocar.";
+		mes "Pagina " + (.@page + 1) + " de " + ((.@card_count + .@page_size - 1) / .@page_size) + ".";
+		for (.@i = .@start; .@i < .@end; ++.@i) {
+			.@id = .@card_ids[.@i];
+			.@unit_value = callsub(S_CardValue, .@id);
+			.@menu$ += getitemname(.@id) + " (" + countitem(.@id) + "x, " + .@unit_value + " pts):";
+		}
+
+		.@previous_option = -1;
+		.@next_option = -1;
+		.@option_count = .@shown;
+		if (.@page > 0) {
+			.@previous_option = .@option_count++;
+			.@menu$ += "Pagina anterior:";
+		}
+		if (.@end < .@card_count) {
+			.@next_option = .@option_count++;
+			.@menu$ += "Proxima pagina:";
+		}
+		.@cancel_option = .@option_count;
+		.@menu$ += "Cancelar";
+
+		.@choice = select(.@menu$) - 1;
+		if (.@choice == .@previous_option) {
+			--.@page;
+			continue;
+		}
+		if (.@choice == .@next_option) {
+			++.@page;
+			continue;
+		}
+		if (.@choice == .@cancel_option)
+			close;
+
+		.@id = .@card_ids[.@start + .@choice];
+		break;
+	}
+
+	.@available = countitem(.@id);
+	.@unit_value = callsub(S_CardValue, .@id);
+	mes "[Colecionador de Cartas]";
+	mes "Carta: " + mesitemlink(.@id, false);
+	mes "Disponivel: ^0055FF" + .@available + "^000000";
+	mes "Valor unitario: ^00AA00" + .@unit_value + " ponto(s)^000000";
+	mes "Digite a quantidade que deseja trocar.";
+	next;
+	input .@amount, 1, .@available;
+	.@total = .@unit_value * .@amount;
+
+	mes "[Colecionador de Cartas]";
+	mes "Entregar ^0055FF" + .@amount + "x " + getitemname(.@id) + "^000000 por ^00AA00" + .@total + " Pontos de Carta^000000?";
+	next;
+	if (select("Confirmar:Cancelar") == 2) {
+		mes "[Colecionador de Cartas]";
+		mes "Troca cancelada.";
+		close;
+	}
+
+	if (getiteminfo(.@id, ITEMINFO_TYPE) != IT_CARD || countitem(.@id) < .@amount) {
+		mes "[Colecionador de Cartas]";
+		mes "A quantidade de cartas no inventario mudou. Tente novamente.";
+		close;
+	}
+	if (#point_card > 2147483647 - .@total) {
+		mes "[Colecionador de Cartas]";
+		mes "Seu saldo esta muito proximo do limite. Gaste alguns pontos antes desta troca.";
+		close;
+	}
+
+	.@balance_before = #point_card;
+	switch (.@unit_value) {
+	case 50: .@category$ = "MINI_BOSS"; break;
+	case 500: .@category$ = "SEALED_MVP"; break;
+	case 2500: .@category$ = "MVP"; break;
+	default: .@category$ = "COMMON"; break;
+	}
+
+	delitem .@id, .@amount;
+	#point_card += .@total;
+	logmes "CARD_POINT_EXCHANGE|item_id=" + .@id + "|item_name=" + getitemname(.@id) + "|category=" + .@category$ + "|amount=" + .@amount + "|unit_value=" + .@unit_value + "|points=" + .@total + "|balance_before=" + .@balance_before + "|balance_after=" + #point_card;
+	mes "[Colecionador de Cartas]";
+	mes "Troca concluida!";
+	mes "Voce recebeu ^00AA00" + .@total + " Pontos de Carta^000000.";
+	mes "Novo saldo: ^0055FF" + #point_card + " ponto(s)^000000.";
+	close;
+
+S_CardValue:
+	.@id = getarg(0);
+	if (inarray(.sealed_cards[0], .@id) != -1)
+		return 500;
+	if (inarray(.mvp_cards[0], .@id) != -1)
+		return 2500;
+	if (inarray(.mini_cards[0], .@id) != -1)
+		return 50;
+	return 1;
+
+OnBuyItem:
+	.@total_cost = 0;
+	for (.@i = 0; .@i < getarraysize(@bought_nameid); ++.@i) {
+		.@id = @bought_nameid[.@i];
+		.@amount = @bought_quantity[.@i];
+		if (.@amount < 1) {
+			dispbottom "[Pontos de Carta] Quantidade invalida.";
+			end;
+		}
+		switch (.@id) {
+		case 1001466: .@unit_price = 100; break;
+		case 1001467: .@unit_price = 1000; break;
+		case 1001468: .@unit_price = 5000; break;
+		default:
+			dispbottom "[Pontos de Carta] Item nao registrado na loja.";
+			end;
+		}
+		.@total_cost += .@unit_price * .@amount;
+	}
+
+	if (#point_card < .@total_cost) {
+		dispbottom "[Pontos de Carta] Saldo insuficiente. Necessario: " + .@total_cost + ". Saldo: " + #point_card + ".";
+		end;
+	}
+	if (!checkweight2(@bought_nameid, @bought_quantity)) {
+		dispbottom "[Pontos de Carta] Peso ou espaco insuficiente no inventario.";
+		end;
+	}
+
+	.@balance_before = #point_card;
+	#point_card -= .@total_cost;
+	for (.@i = 0; .@i < getarraysize(@bought_nameid); ++.@i) {
+		getitem @bought_nameid[.@i], @bought_quantity[.@i];
+		switch (@bought_nameid[.@i]) {
+		case 1001466: .@unit_price = 100; break;
+		case 1001467: .@unit_price = 1000; break;
+		case 1001468: .@unit_price = 5000; break;
+		}
+		logshop "SCRIPT_SHOP_BUY", "Card_Album_Shop", @bought_nameid[.@i], @bought_quantity[.@i], 0, 0, 0, "#point_card", .@unit_price * @bought_quantity[.@i];
+		logmes "CARD_POINT_SHOP|item_id=" + @bought_nameid[.@i] + "|item_name=" + getitemname(@bought_nameid[.@i]) + "|amount=" + @bought_quantity[.@i] + "|unit_price=" + .@unit_price + "|cost=" + (.@unit_price * @bought_quantity[.@i]) + "|purchase_total=" + .@total_cost + "|balance_before=" + .@balance_before + "|balance_after=" + #point_card;
+	}
+	dispbottom "[Pontos de Carta] Compra concluida por " + .@total_cost + " ponto(s). Saldo: " + #point_card + ".";
+	end;
+
+OnInit:
+	setarray .mini_cards[0], 4047,4054,4163,4169,4174,4179,4183,4197,4198,4203,4207,4237,4238,4241,4243,4250,4254,4266,4290,4300,4306,4354,4384,4391,4392,4393,4394,4395,4396,4397,4398,4406,4429,4431,4423,4426,4427,4428,4440,4462,4463,4508,4524,4532,4575,4577,4579,4581,4605,4606,4631,4632,4642,4643,4644,4645,4646,4684,4685,4686,4687,4688,4689,4690,4691,4692,4693,4694,4695,4696,27105,31024,31025,27183,27165,27168,27262,27263,27343,27184,27322,27323,27324,27325,300007,300192,300193,300382,4557;
+	setarray .sealed_cards[0], 4488,4497,4486,4480,4485,4539,4487,4494,4538,4489,4490,4482,4503,4483,4491,4492,4498,4499,4500,4501,4502,4504,4481,4484,27209,27211,27212,27213,27214,27215,27216,27217,27218,27219,27220,27221,27222,27224,27225,4493,300195,300203,300209,300201;
+	setarray .mvp_cards[0], 4144,4147,4142,4132,4128,4143,4137,4123,4146,4131,4148,4121,4135,4318,4324,4168,4305,4276,4134,4330,4263,4236,4302,4342,4372,4357,4359,4361,4363,4367,4365,4352,4374,4376,4399,4386,4403,4407,4408,4419,4425,4430,4441,4145,27162,4451,4456,27126,4507,4074,4127,4210,4246,4410,4520,4509,4527,4526,4528,4529,4534,4525,4565,4563,4561,4562,4564,4560,4566,4578,4576,4574,4580,4592,4652,4603,4601,27164,4556,27265,31023,27326,27327,27106,4625,27321,4697,27182,4610,27020,4648,4647,4649,4650,4651,4636,31026,4662,27152,27151,27150,27025,27180,27104,27081,27113,27119,27294,27298,27305,27318,27319,27346,27362,27363,27334,300013,300021,300079,300080,300078,300107,300099,300100,300151,300145,300262,300281,300248,300217,300227,300228,300239,300377;
+	end;
+}
+
+-	shop	Card_Album_Shop	-1,no,1001466:100,1001467:1000,1001468:5000

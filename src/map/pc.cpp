@@ -74,6 +74,7 @@ const char *macro_allowed_answer_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKL
 int32 pc_split_atoui(char* str, uint32* val, char sep, int32 max);
 static inline bool pc_attendance_rewarded_today( map_session_data* sd );
 static bool pc_is_left_hand_blocked_weapon( t_itemid nameid );
+static void pc_restock_from_storage(map_session_data* sd, t_itemid nameid);
 
 #define PVP_CALCRANK_INTERVAL 1000	// PVP calculation interval
 
@@ -6151,6 +6152,89 @@ enum e_additem_result pc_additem(map_session_data *sd,struct item *item,int32 am
 	return ADDITEM_SUCCESS;
 }
 
+/**
+ * Refill a configured item after its last unit is consumed.
+ * The transfer is all-or-nothing and never lets the inventory exceed 90% weight.
+ */
+static void pc_restock_from_storage(map_session_data* sd, t_itemid nameid)
+{
+	if (!sd->vars_ok || !sd->storage.state.get || pc_search_inventory(sd, nameid) >= 0)
+		return;
+
+	int32 configured_amount = 0;
+	for (uint32 i = 0; i < RESTOCK_MAX_ITEMS; ++i) {
+		if (static_cast<t_itemid>(pc_readglobalreg(sd, reference_uid(add_str(RESTOCK_ITEM_VAR), i))) != nameid)
+			continue;
+
+		configured_amount = static_cast<int32>(pc_readglobalreg(sd, reference_uid(add_str(RESTOCK_AMOUNT_VAR), i)));
+		break;
+	}
+
+	if (configured_amount <= 0 || configured_amount > MAX_AMOUNT)
+		return;
+
+	std::shared_ptr<item_data> data = item_db.find(nameid);
+	if (data == nullptr)
+		return;
+
+	const uint64 projected_weight = static_cast<uint64>(sd->weight) +
+		static_cast<uint64>(data->weight) * static_cast<uint64>(configured_amount);
+	if (projected_weight * 100 > static_cast<uint64>(sd->max_weight) * 90) {
+		clif_displaymessage(sd->fd, "Restock cancelado: o peso passaria de 90%.");
+		return;
+	}
+
+	if (pc_inventoryblank(sd) == 0) {
+		clif_displaymessage(sd->fd, "Restock cancelado: inventario sem espaco livre.");
+		return;
+	}
+
+	int32 storage_index = -1;
+	for (int32 i = 0; i < sd->storage.max_amount; ++i) {
+		const item& stored_item = sd->storage.u.items_storage[i];
+		if (stored_item.nameid != nameid)
+			continue;
+
+		int32 available = 0;
+		for (int32 j = i; j < sd->storage.max_amount; ++j) {
+			if (compare_item(&sd->storage.u.items_storage[j], &sd->storage.u.items_storage[i]))
+				available += sd->storage.u.items_storage[j].amount;
+		}
+
+		if (available >= configured_amount) {
+			storage_index = i;
+			break;
+		}
+	}
+
+	if (storage_index < 0) {
+		clif_displaymessage(sd->fd, "Restock cancelado: quantidade insuficiente no armazem.");
+		return;
+	}
+
+	item restocked_item = sd->storage.u.items_storage[storage_index];
+	const e_additem_result result = pc_additem(sd, &restocked_item, configured_amount, LOG_TYPE_STORAGE);
+	if (result != ADDITEM_SUCCESS) {
+		clif_displaymessage(sd->fd, "Restock cancelado: nao foi possivel adicionar o item ao inventario.");
+		return;
+	}
+
+	int32 remaining = configured_amount;
+	for (int32 i = storage_index; i < sd->storage.max_amount && remaining > 0; ++i) {
+		item& stored_item = sd->storage.u.items_storage[i];
+		if (!compare_item(&stored_item, &restocked_item))
+			continue;
+
+		const int32 withdrawn = min(remaining, static_cast<int32>(stored_item.amount));
+		storage_delitem(sd, &sd->storage, i, withdrawn);
+		remaining -= withdrawn;
+	}
+
+	char output[CHAT_SIZE_MAX];
+	snprintf(output, sizeof(output), "Restock: %d unidade(s) de %s retiradas do armazem.", configured_amount, data->name.c_str());
+	clif_displaymessage(sd->fd, output);
+}
+
 /*==========================================
  * Remove an item at index n from inventory by amount.
  * @param sd
@@ -6168,6 +6252,8 @@ char pc_delitem(map_session_data *sd,int32 n,int32 amount,int32 type, int16 reas
 	if(n < 0 || sd->inventory.u.items_inventory[n].nameid == 0 || amount <= 0 || sd->inventory.u.items_inventory[n].amount<amount || sd->inventory_data[n] == nullptr)
 		return 1;
 
+	const t_itemid removed_nameid = sd->inventory.u.items_inventory[n].nameid;
+
 	log_pick_pc(sd, log_type, -amount, &sd->inventory.u.items_inventory[n]);
 
 	sd->inventory.u.items_inventory[n].amount -= amount;
@@ -6184,6 +6270,9 @@ char pc_delitem(map_session_data *sd,int32 n,int32 amount,int32 type, int16 reas
 		clif_updatestatus(*sd,SP_WEIGHT);
 
 	pc_show_questinfo(sd);
+
+	if (log_type == LOG_TYPE_CONSUME && pc_search_inventory(sd, removed_nameid) < 0)
+		pc_restock_from_storage(sd, removed_nameid);
 
 	return 0;
 }

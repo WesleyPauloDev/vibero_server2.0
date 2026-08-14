@@ -243,7 +243,7 @@ OnWaveClear:
 	if ('wave_waiting_next)
 		end;
 	'wave_waiting_next = 1;
-	if ('wave >= 20)
+	if ('wave >= 10)
 		donpcevent instance_npcname("#wave_mode_forest_out") + "::OnSuccess";
 	else {
 		mapannounce 'map_def01$, "Onda concluida. A proxima onda chegara em breve. Prepare-se.", bc_map;
@@ -268,18 +268,8 @@ OnSpawn:
 		2600,	// 07 G_WOLF
 		2591,	// 08 G_SAVAGE
 		1429,	// 09 G_ARGIOPE
-		2648,	// 10 C3_SOLDIER_SKELETON
-		2574,	// 11 G_CIVIL_SERVANT
-		1565,	// 12 G_WILD_GINSENG
-		1624,	// 13 G_WASTE_STOVE
-		1573,	// 14 G_ELDER
-		2838,	// 15 C5_EVIL_DRUID
-		2599,	// 16 G_WILD_RIDER
-		1564,	// 17 G_WICKED_NYMPH
-		1791,	// 18 G_GALION
-		1549,	// 19 G_LAVA_GOLEM
-		2594;	// 20 G_SNOWIER
-	if ('wave >= 1 && 'wave <= 20) {
+		2648;	// 10 C3_SOLDIER_SKELETON
+	if ('wave >= 1 && 'wave <= 10) {
 		'mob_id = .@mob_progression['wave];
 		initnpctimer;
 		end;
@@ -615,7 +605,7 @@ OnSuccess:
 	donpcevent instance_npcname("#wave_mode_forest_system") + "::OnStop";
 	'wave_mode_forest_cleared = 1;
 	killmonsterall 'map_def01$;
-	mapannounce 'map_def01$, "Voce completou as 20 ondas do <Wave Mode - Floresta>.", bc_map;
+	mapannounce 'map_def01$, "Voce completou as 10 ondas do <Wave Mode - Floresta>.", bc_map;
 	enablenpc instance_npcname("#wave_mode_forest_warp");
 	initnpctimer;
 	end;
@@ -631,9 +621,15 @@ OnFail:
 	initnpctimer;
 	end;
 OnTimer1000:
-	mapannounce 'map_def01$, "O servico <Wave Mode - Floresta> foi encerrado. Use a saida na entrada para voltar ao seu ponto de salvamento.", bc_map;
+	mapannounce 'map_def01$, "O desafio <Wave Mode - Floresta> terminou. Use a saida na entrada para voltar ao seu ponto de salvamento.", bc_map;
 	end;
-OnTimer30000:
+OnTimer240000:
+	if ('wave_mode_forest_cleared)
+		mapannounce 'map_def01$, "A instancia sera encerrada em 1 minuto. Use a saida para receber sua recompensa e sair.", bc_map;
+	else
+		mapannounce 'map_def01$, "A instancia sera encerrada em 1 minuto. Use a saida para sair.", bc_map;
+	end;
+OnTimer300000:
 	stopnpctimer;
 	instance_destroy();
 	end;
@@ -746,7 +742,7 @@ OnWaveClear:
 	if ('wave_sky_waiting_next)
 		end;
 	'wave_sky_waiting_next = 1;
-	if ('wave_num >= 20)
+	if ('wave_num >= 10)
 		donpcevent instance_npcname("#wave_mode_sky_out") + "::OnSuccess";
 	else {
 		mapannounce 'map_def02$, "Onda concluida. A proxima onda chegara em breve. Prepare-se.", bc_map;
@@ -825,24 +821,14 @@ OnSpawn:
 	.@i = 'wave_num - 1;
 	setarray .@mob_list[0],
 		3076,	// WA_MONSTER_1
-		3076,	// WA_MONSTER_1
-		3077,	// WA_MONSTER_2
 		3077,	// WA_MONSTER_2
 		3078,	// WA_MONSTER_3
 		3079,	// WA_MONSTER_4
-		3079,	// WA_MONSTER_4
-		3080,	// WA_MONSTER_5
 		3080,	// WA_MONSTER_5
 		3081,	// WA_MONSTER_6
-		3081,	// WA_MONSTER_6
-		3082,	// WA_MONSTER_7
 		3082,	// WA_MONSTER_7
 		3083,	// WA_MONSTER_8
-		3083,	// WA_MONSTER_8
 		3084,	// WA_MONSTER_9
-		3084,	// WA_MONSTER_9
-		3085,	// WA_MONSTER_10
-		3085,	// WA_MONSTER_10
 		3085;	// WA_MONSTER_10
 	'mob_id = .@mob_list[.@i];
 	initnpctimer;
@@ -925,14 +911,20 @@ OnSuccess:
 	'wave_mode_sky_cleared = 1;
 	'status_instance = 2;
 	killmonsterall 'map_def02$;
-	mapannounce 'map_def02$, "Voce completou as 20 ondas do <Wave Mode - Ceu>.", bc_map;
+	mapannounce 'map_def02$, "Voce completou as 10 ondas do <Wave Mode - Ceu>.", bc_map;
 	enablenpc instance_npcname("#wave_mode_sky_entrance");
 	initnpctimer;
 	end;
 OnTimer1000:
-	mapannounce 'map_def02$, "O servico <Wave Mode - Ceu> foi encerrado. Use a saida na entrada para voltar ao seu ponto de salvamento.", bc_map;
+	mapannounce 'map_def02$, "O desafio <Wave Mode - Ceu> terminou. Use a saida na entrada para voltar ao seu ponto de salvamento.", bc_map;
 	end;
-OnTimer30000:
+OnTimer240000:
+	if ('wave_mode_sky_cleared)
+		mapannounce 'map_def02$, "A instancia sera encerrada em 1 minuto. Use a saida para receber sua recompensa e sair.", bc_map;
+	else
+		mapannounce 'map_def02$, "A instancia sera encerrada em 1 minuto. Use a saida para sair.", bc_map;
+	end;
+OnTimer300000:
 	stopnpctimer;
 	instance_destroy();
 	end;

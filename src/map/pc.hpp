@@ -124,6 +124,11 @@ enum e_additem_result : uint8 {
 	ADDITEM_STACKLIMIT
 };
 
+// Maximum number of personal-storage restock entries configured per character.
+constexpr uint8 RESTOCK_MAX_ITEMS = 10;
+constexpr const char* RESTOCK_ITEM_VAR = "RestockItem";
+constexpr const char* RESTOCK_AMOUNT_VAR = "RestockAmount";
+
 enum e_lr_flag : uint8 {
 	LR_FLAG_NONE = 0,
 	LR_FLAG_WEAPON,

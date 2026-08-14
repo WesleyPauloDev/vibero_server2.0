@@ -7049,6 +7049,118 @@ ACMD_FUNC(autolootitem)
 }
 
 /*==========================================
+ * @restock
+ *------------------------------------------*/
+ACMD_FUNC(restock)
+{
+	char action[100] = {};
+	int32 amount = 0;
+
+	if (!message || !*message || sscanf(message, "%99s %d", action, &amount) < 1 || strcmpi(action, "list") == 0) {
+		bool found = false;
+		clif_displaymessage(fd, "Itens configurados no @restock:");
+		for (uint32 i = 0; i < RESTOCK_MAX_ITEMS; ++i) {
+			const t_itemid nameid = static_cast<t_itemid>(pc_readglobalreg(sd, reference_uid(add_str(RESTOCK_ITEM_VAR), i)));
+			const int32 entry_amount = static_cast<int32>(pc_readglobalreg(sd, reference_uid(add_str(RESTOCK_AMOUNT_VAR), i)));
+			if (nameid == 0 || entry_amount <= 0)
+				continue;
+
+			std::shared_ptr<item_data> data = item_db.find(nameid);
+			char output[CHAT_SIZE_MAX];
+			snprintf(output, sizeof(output), "- ID %u (%s): %d unidade(s)", nameid,
+				data != nullptr ? data->name.c_str() : "item desconhecido", entry_amount);
+			clif_displaymessage(fd, output);
+			found = true;
+		}
+
+		if (!found)
+			clif_displaymessage(fd, "Nenhum item configurado.");
+		clif_displaymessage(fd, "Uso: @restock <ID> <quantidade> | @restock -<ID> | @restock reset");
+		return 0;
+	}
+
+	if (strcmpi(action, "reset") == 0) {
+		for (uint32 i = 0; i < RESTOCK_MAX_ITEMS; ++i) {
+			pc_setglobalreg(sd, reference_uid(add_str(RESTOCK_ITEM_VAR), i), 0);
+			pc_setglobalreg(sd, reference_uid(add_str(RESTOCK_AMOUNT_VAR), i), 0);
+		}
+		clif_displaymessage(fd, "Todas as configuracoes de restock foram removidas.");
+		return 0;
+	}
+
+	if (action[0] == '-') {
+		char* end = nullptr;
+		const unsigned long parsed_id = strtoul(action + 1, &end, 10);
+		if (action[1] == '\0' || end == nullptr || *end != '\0' || parsed_id == 0 || parsed_id > UINT32_MAX) {
+			clif_displaymessage(fd, "Uso: @restock -<ID>");
+			return -1;
+		}
+
+		const t_itemid nameid = static_cast<t_itemid>(parsed_id);
+		for (uint32 i = 0; i < RESTOCK_MAX_ITEMS; ++i) {
+			if (static_cast<t_itemid>(pc_readglobalreg(sd, reference_uid(add_str(RESTOCK_ITEM_VAR), i))) != nameid)
+				continue;
+
+			pc_setglobalreg(sd, reference_uid(add_str(RESTOCK_ITEM_VAR), i), 0);
+			pc_setglobalreg(sd, reference_uid(add_str(RESTOCK_AMOUNT_VAR), i), 0);
+			clif_displaymessage(fd, "Item removido da lista de restock.");
+			return 0;
+		}
+
+		clif_displaymessage(fd, "Esse item nao esta configurado no restock.");
+		return -1;
+	}
+
+	char* end = nullptr;
+	const unsigned long parsed_id = strtoul(action, &end, 10);
+	if (end == nullptr || *end != '\0' || parsed_id == 0 || parsed_id > UINT32_MAX || amount <= 0 || amount > MAX_AMOUNT) {
+		clif_displaymessage(fd, "Uso: @restock <ID> <quantidade entre 1 e 30000>");
+		return -1;
+	}
+
+	const t_itemid nameid = static_cast<t_itemid>(parsed_id);
+	std::shared_ptr<item_data> data = item_db.find(nameid);
+	if (data == nullptr) {
+		clif_displaymessage(fd, "ID de item inexistente.");
+		return -1;
+	}
+
+	if (!itemdb_isstackable2(data.get()) || data->flag.guid) {
+		clif_displaymessage(fd, "O @restock aceita apenas itens empilhaveis.");
+		return -1;
+	}
+
+	if (data->stack.inventory && amount > data->stack.amount) {
+		clif_displaymessage(fd, "A quantidade excede o limite de pilha desse item no inventario.");
+		return -1;
+	}
+
+	int32 free_slot = -1;
+	for (uint32 i = 0; i < RESTOCK_MAX_ITEMS; ++i) {
+		const t_itemid configured_id = static_cast<t_itemid>(pc_readglobalreg(sd, reference_uid(add_str(RESTOCK_ITEM_VAR), i)));
+		if (configured_id == nameid) {
+			free_slot = static_cast<int32>(i);
+			break;
+		}
+		if (configured_id == 0 && free_slot < 0)
+			free_slot = static_cast<int32>(i);
+	}
+
+	if (free_slot < 0) {
+		clif_displaymessage(fd, "A lista de restock esta cheia (limite: 10 itens).");
+		return -1;
+	}
+
+	pc_setglobalreg(sd, reference_uid(add_str(RESTOCK_ITEM_VAR), free_slot), nameid);
+	pc_setglobalreg(sd, reference_uid(add_str(RESTOCK_AMOUNT_VAR), free_slot), amount);
+
+	char output[CHAT_SIZE_MAX];
+	snprintf(output, sizeof(output), "Restock configurado: %s (ID %u), %d unidade(s).", data->name.c_str(), nameid, amount);
+	clif_displaymessage(fd, output);
+	return 0;
+}
+
+/*==========================================
  * @autoloottype
  * Flags:
  * 1:   IT_HEALING,  2:   IT_UNKNOWN,  4:    IT_USABLE, 8:    IT_ETC,
@@ -12107,6 +12219,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(changelook),
 		ACMD_DEF(autoloot),
 		ACMD_DEF(autolootitem),
+		ACMD_DEF(restock),
 		ACMD_DEF(autoloottype),
 		ACMD_DEF(mobinfo),		
 		ACMD_DEF(exp),

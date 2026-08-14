@@ -260,6 +260,35 @@ O manifesto atual cobre executaveis e bibliotecas de seguranca. Os GRFs grandes
 ficaram fora desta primeira validacao para manter o ciclo de teste rapido. Uma
 fase futura pode adicionar hashes por blocos.
 
+## Preferencia de VSync
+
+O launcher oferece `Usar VSync` antes de iniciar o jogo e salva a escolha local
+em `vibeguard-graphics.ini`. VSync fica ligado por padrao. O modulo `d3d9.dll`,
+compilado a partir de `VibeGuard.Graphics`, encaminha `Direct3DCreate9Ex` para o
+DirectX original do Windows e altera somente `PresentationInterval` durante a
+criacao do dispositivo. Ele nao le teclado, chat, memoria do jogo ou rede.
+
+O arquivo de preferencia nao entra no manifesto porque varia por jogador; o
+modulo grafico entra e seu hash e validado normalmente. Durante uma atualizacao,
+o web-server pode aceitar o manifesto novo e o anterior por meio de
+`vibeguard_manifest_sha256` e `vibeguard_previous_manifest_sha256`. Remova o hash
+anterior depois que a migracao dos clientes terminar.
+
+`Atualizador.exe` tambem nao entra no manifesto rigido. O launcher reconhece
+somente as versoes oficiais explicitamente autorizadas em
+`TrustedUpdaterComponent`, pelo tamanho e SHA-256 completos. Isso permite manter
+o atualizador antigo dos jogadores sem aceitar um executavel desconhecido e sem
+obriga-lo a ser redistribuido a cada novo manifesto.
+
+Compile o modulo para Win32, pois o `Ragexe.exe` e 32 bits:
+
+```powershell
+msbuild tools\VibeGuard\VibeGuard.Graphics\VibeGuard.Graphics.vcxproj `
+  /p:Configuration=Release /p:Platform=Win32
+```
+
+O arquivo de distribuicao e `VibeGuard.Graphics\Release\d3d9.dll`.
+
 ## Estado atual
 
 1. Integridade assinada dos clientes de laboratorio e producao.

@@ -10,6 +10,7 @@ internal sealed class GuardWindow : Form
     private readonly Label bindingLabel;
     private readonly ProgressBar progressBar;
     private readonly Button hideButton;
+    private readonly CheckBox vsyncCheckBox;
     private readonly NotifyIcon trayIcon;
     private readonly System.Windows.Forms.Timer autoHideTimer;
     private readonly System.Windows.Forms.Timer startupProgressTimer;
@@ -23,7 +24,7 @@ internal sealed class GuardWindow : Form
     public GuardWindow()
     {
         Text = "VibeGuard";
-        ClientSize = new Size(500, 410);
+        ClientSize = new Size(500, 448);
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
@@ -84,13 +85,32 @@ internal sealed class GuardWindow : Form
             TextAlign = ContentAlignment.MiddleLeft,
             Text = "Verificacao de seguranca em andamento"
         };
-        hideButton = CreateButton("Ocultar", new Point(398, 338), new Size(78, 30));
-        hideButton.Enabled = false;
+        vsyncCheckBox = new CheckBox
+        {
+            AutoSize = false,
+            Checked = true,
+            ForeColor = Color.FromArgb(181, 193, 209),
+            Location = new Point(24, 372),
+            Size = new Size(360, 30),
+            Text = "Usar VSync (limita o FPS e evita cortes na imagem)"
+        };
+        hideButton = CreateButton("Iniciar", new Point(398, 372), new Size(78, 30));
+        hideButton.Enabled = true;
         hideButton.Click += async (_, _) =>
         {
             if (launchRunning)
             {
                 HideToTray();
+                return;
+            }
+            try
+            {
+                GraphicsPreference.SaveUseVSync(AppContext.BaseDirectory, vsyncCheckBox.Checked);
+            }
+            catch (Exception exception)
+            {
+                lastError = $"Nao foi possivel salvar a preferencia de VSync: {exception.Message}";
+                ShowLaunchFailure();
                 return;
             }
             hideButton.Enabled = false;
@@ -106,13 +126,13 @@ internal sealed class GuardWindow : Form
             AutoSize = true,
             Font = new Font("Segoe UI", 8F),
             ForeColor = Color.FromArgb(111, 126, 147),
-            Location = new Point(24, 382),
+            Location = new Point(24, 420),
             Text = "VibeGuard - integridade verificada - protecao ativa"
         };
 
         Controls.AddRange([
             banner, shield, title, subtitle, statusLabel, detailLabel,
-            progressBar, bindingLabel, hideButton, privacyLabel
+            progressBar, bindingLabel, vsyncCheckBox, hideButton, privacyLabel
         ]);
 
         trayIcon = new NotifyIcon
@@ -143,8 +163,28 @@ internal sealed class GuardWindow : Form
             completedProgressHideTimer.Stop();
             HideToTray();
         };
-        Shown += async (_, _) => await StartGuardAsync();
+        Shown += (_, _) => PrepareLaunch();
         FormClosing += OnFormClosing;
+    }
+
+    private void PrepareLaunch()
+    {
+        try
+        {
+            vsyncCheckBox.Checked = GraphicsPreference.LoadUseVSync(AppContext.BaseDirectory);
+        }
+        catch (Exception exception)
+        {
+            lastError = $"Nao foi possivel ler a preferencia de VSync: {exception.Message}";
+            ShowLaunchFailure();
+            return;
+        }
+
+        statusLabel.Text = "Pronto para iniciar";
+        detailLabel.Text = "Escolha a opcao grafica e inicie o cliente protegido.";
+        progressBar.Style = ProgressBarStyle.Continuous;
+        progressBar.Value = 0;
+        bindingLabel.Text = "VSync ligado por padrao; a escolha fica salva neste computador";
     }
 
     private Control CreateBanner()
@@ -189,6 +229,9 @@ internal sealed class GuardWindow : Form
         if (launchRunning)
             return;
         launchRunning = true;
+        vsyncCheckBox.Enabled = false;
+        hideButton.Text = "Ocultar";
+        hideButton.Enabled = true;
         Console.SetOut(new GuardUiWriter(HandleOutputLine, isError: false));
         Console.SetError(new GuardUiWriter(HandleOutputLine, isError: true));
         var root = AppContext.BaseDirectory;
@@ -246,6 +289,7 @@ internal sealed class GuardWindow : Form
             bindingLabel.Text = "A conexao segura nao foi concluida";
             hideButton.Text = "Tentar novamente";
             hideButton.Enabled = true;
+            vsyncCheckBox.Enabled = true;
             autoHideTimer.Stop();
         });
     }

@@ -319,6 +319,11 @@ bool service_ready(Response& response) {
 		error_response(response, 503, "manifest_not_configured");
 		return false;
 	}
+	if (!web_config.vibeguard_previous_manifest_sha256.empty()
+		&& !valid_hex(web_config.vibeguard_previous_manifest_sha256, 64)) {
+		error_response(response, 503, "previous_manifest_invalid");
+		return false;
+	}
 	return true;
 }
 
@@ -381,7 +386,9 @@ HANDLER_FUNC(vibeguard_session_open) {
 		error_response(res, 400, "invalid_request");
 		return;
 	}
-	if (manifest_hash != lower_ascii(web_config.vibeguard_manifest_sha256)) {
+	if (manifest_hash != lower_ascii(web_config.vibeguard_manifest_sha256)
+		&& (web_config.vibeguard_previous_manifest_sha256.empty()
+			|| manifest_hash != lower_ascii(web_config.vibeguard_previous_manifest_sha256))) {
 		error_response(res, 403, "release_not_allowed");
 		return;
 	}

@@ -157,6 +157,8 @@ bool web_config_read(const char* cfgName, bool normal) {
 			web_config.vibeguard_observation_enabled = config_switch(w2) == 1;
 		else if (!strcmpi(w1, "vibeguard_manifest_sha256"))
 			web_config.vibeguard_manifest_sha256 = w2;
+		else if (!strcmpi(w1, "vibeguard_previous_manifest_sha256"))
+			web_config.vibeguard_previous_manifest_sha256 = w2;
 		else if (!strcmpi(w1, "vibeguard_heartbeat_seconds"))
 			web_config.vibeguard_heartbeat_seconds = (uint32)strtoul(w2, nullptr, 10);
 		else if (!strcmpi(w1, "vibeguard_session_ttl_seconds"))
@@ -275,6 +277,7 @@ void web_set_defaults() {
 	web_config.print_req_res = false;
 	web_config.vibeguard_observation_enabled = false;
 	web_config.vibeguard_manifest_sha256.clear();
+	web_config.vibeguard_previous_manifest_sha256.clear();
 	web_config.vibeguard_heartbeat_seconds = 10;
 	web_config.vibeguard_session_ttl_seconds = 45;
 	web_config.vibeguard_log_path = "./log/vibeguard-observation.log";

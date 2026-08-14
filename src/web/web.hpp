@@ -46,6 +46,7 @@ struct Web_Config {
 	bool allow_gifs;
 	bool vibeguard_observation_enabled;
 	std::string vibeguard_manifest_sha256;
+	std::string vibeguard_previous_manifest_sha256;
 	uint32 vibeguard_heartbeat_seconds;
 	uint32 vibeguard_session_ttl_seconds;
 	std::string vibeguard_log_path;
