@@ -286,4 +286,55 @@ OnInit:
 	end;
 }
 
+// Abre um album e registra no SQL cada carta efetivamente recebida.
+function	script	F_CardAlbumOpenLogged	{
+	.@group_id = getarg(0);
+	.@category$ = getarg(1);
+	.@album_id = getarg(2);
+
+	getinventorylist;
+	.@before_count = 0;
+	for (.@i = 0; .@i < @inventorylist_count; ++.@i) {
+		.@id = @inventorylist_id[.@i];
+		if (getiteminfo(.@id, ITEMINFO_TYPE) != IT_CARD)
+			continue;
+		.@index = inarray(.@before_ids[0], .@id);
+		if (.@index == -1) {
+			.@index = .@before_count++;
+			.@before_ids[.@index] = .@id;
+			.@before_amounts[.@index] = 0;
+		}
+		.@before_amounts[.@index] += @inventorylist_amount[.@i];
+	}
+
+	getgroupitem(.@group_id);
+
+	getinventorylist;
+	.@logged = 0;
+	.@processed_count = 0;
+	for (.@i = 0; .@i < @inventorylist_count; ++.@i) {
+		.@id = @inventorylist_id[.@i];
+		if (getiteminfo(.@id, ITEMINFO_TYPE) != IT_CARD)
+			continue;
+		if (inarray(.@processed_ids[0], .@id) != -1)
+			continue;
+		.@processed_ids[.@processed_count++] = .@id;
+
+		.@before_amount = 0;
+		.@index = inarray(.@before_ids[0], .@id);
+		if (.@index != -1)
+			.@before_amount = .@before_amounts[.@index];
+		.@received = countitem(.@id) - .@before_amount;
+		if (.@received <= 0)
+			continue;
+
+		logmes "CARD_ALBUM_OPEN|category=" + .@category$ + "|album_id=" + .@album_id + "|card_id=" + .@id + "|card_name=" + getitemname(.@id) + "|amount=" + .@received;
+		++.@logged;
+	}
+
+	if (!.@logged)
+		logmes "CARD_ALBUM_OPEN_FAILED|category=" + .@category$ + "|album_id=" + .@album_id + "|group_id=" + .@group_id;
+	return;
+}
+
 -	shop	Card_Album_Shop	-1,no,1001466:100,1001467:1000,1001468:5000
