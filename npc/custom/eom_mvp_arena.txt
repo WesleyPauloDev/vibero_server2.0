@@ -3,17 +3,17 @@
 // Instancia custom para uso de Galho Sangrento por grupo
 //=============================================================
 
-prontera,164,234,4	script	Arena MVP	4_EP19_IWIN,{
+prontera,164,234,4	script	Arena MVP	623,{
 	.@instance_name$ = "Arena MVP";
 
 	mes "[Arena MVP]";
 	mes "^0055FFUse esta sala para farmar MVPs com Galho Sagrento^000000.";
-	mes "Somente membros do seu grupo poderão entrar.";
+	mes "Somente membros do seu grupo poderao entrar.";
 	next;
 
 	if (getcharid(1) < 1) {
 		mes "[Arena MVP]";
-		mes "Você precisa estar em um grupo.";
+		mes "Voce precisa estar em um grupo.";
 		close;
 	}
 
@@ -29,32 +29,32 @@ prontera,164,234,4	script	Arena MVP	4_EP19_IWIN,{
 		break;
 	default:
 		mes "[Arena MVP]";
-		mes "Não foi possível entrar na sala agora.";
+		mes "Nao foi possivel entrar na sala agora.";
 		mes "Tente novamente em instantes.";
 		close;
 	}
 
 	if (!is_party_leader()) {
-		mes "O líder do grupo ainda não criou a sala.";
-		mes "Peça para ele falar comigo primeiro.";
+		mes "O lider do grupo ainda nao criou a sala.";
+		mes "Peca para ele falar comigo primeiro.";
 		close;
 	}
 
-	mes "Não existe uma sala aberta para o seu grupo.";
+	mes "Nao existe uma sala aberta para o seu grupo.";
 	mes "Deseja criar uma nova agora?";
 	if (select("Criar sala:Cancelar") == 2)
 		close;
 
 	if (instance_create(.@instance_name$) < 0) {
 		mes "[Arena MVP]";
-		mes "Não foi possível criar a instância agora.";
-		mes "Verifique se seu grupo já não possui uma instância ativa.";
+		mes "Nao foi possivel criar a instancia agora.";
+		mes "Verifique se seu grupo ja nao possui uma instancia ativa.";
 		close;
 	}
 
 	if (instance_enter(.@instance_name$) != IE_OK) {
 		mes "[Arena MVP]";
-		mes "A instância foi criada, mas não foi possível entrar agora.";
+		mes "A instancia foi criada, mas nao foi possivel entrar agora.";
 		mes "Tente falar comigo novamente.";
 		close;
 	}
@@ -77,6 +77,6 @@ L_EnterArena:
 		removemapflag .@map$, MF_FIREWORKS;
 		warp .@map$,50,50;
 	}
-	dispbottom "Você entrou na Arena MVP.";
+	dispbottom "Voce entrou na Arena MVP.";
 	end;
 }

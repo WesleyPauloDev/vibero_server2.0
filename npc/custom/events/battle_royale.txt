@@ -32,9 +32,20 @@
 		getmapunits(BL_PC, .br_map$, .@units);
 		.@count = getarraysize(.@units);
 
-		// Menos de 2 jogadores, cancela evento
-		if (.@count < 2) {
-			// mapannounce .br_map$, "[Battle Royale] Evento cancelado por falta de participantes.", bc_map;
+		// Sem jogadores, cancela evento
+		if (.@count == 0) {
+			callsub S_ResetEvent;
+			end;
+		}
+
+		// Um unico jogador recebe apenas a recompensa de participacao
+		if (.@count == 1) {
+			if (attachrid(.@units[0])) {
+				callsub S_ParticipationReward;
+				dispbottom "Voce recebeu o premio de participacao do Battle Royale.";
+			}
+
+			announce "[Battle Royale] Evento encerrado com apenas um participante.", bc_all;
 			callsub S_ResetEvent;
 			end;
 		}
@@ -100,11 +111,7 @@
 		if (strcharinfo(3) != .br_map$) end;
 
 		// Recompensa de participacao (perdedor)
-		getitem 9199,1;
-		getitem 9608,10;
-		callfunc("F_DiaryRefreshDaily");
-		if (#evento == 1)
-			#evento = 2;
+		callsub S_ParticipationReward;
 
 		warp "prontera",155,189;
 		dispbottom "Voce foi eliminado do Battle Royale.";
@@ -187,6 +194,14 @@
 
 		sleep 3000;
 		callsub S_ResetEvent;
+		return;
+
+	S_ParticipationReward:
+		getitem 9199,1;
+		getitem 9608,10;
+		callfunc("F_DiaryRefreshDaily");
+		if (#evento == 1)
+			#evento = 2;
 		return;
 
 	S_ResetEvent:
