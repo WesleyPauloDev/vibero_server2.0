@@ -145,6 +145,33 @@ prontera,156,22,0	warp	prt001	3,2,prt_fild08,170,375
 prontera,22,203,0	warp	prt002	2,3,prt_fild05,367,205
 prontera,289,203,0	warp	prt003	2,3,prt_fild06,27,193
 prontera,156,358,0	warp	prt004	2,3,prt_fild01,199,29
+prontera,179,184,0	warp	prt_custom06	2,2,prt_in,60,73
+prt_in,60,77,0	warp	prt_custom06_saida	2,1,prontera,175,188
+
+// ----------------------- Craft de minerios -----------------------
+prt_in,57,55,3	script	Ferreiro de Minerios#prt	4_M_REPAIR,{
+	mes "[Ferreiro de Minerios]";
+	mes "Eu processo e fabrico os minerios utilizados nos refinamentos do servidor.";
+	mes "Escolha a categoria que deseja fabricar.";
+	next;
+
+	switch (select("Oridecon, Elunium e derivados:Minerios de Etel:Shadowdecon e Zelunium:Sair")) {
+	case 1:
+		close2;
+		callshop "barter_refine_1";
+		end;
+	case 2:
+		close2;
+		callshop "barter_refine_2";
+		end;
+	case 3:
+		close2;
+		callshop "barter_refine_3";
+		end;
+	default:
+		close;
+	}
+}
 
 
 // prontera,129,205,4	script	Mudanca de Classe	123,{
