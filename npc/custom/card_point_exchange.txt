@@ -117,7 +117,7 @@ S_ExchangeCard:
 	.@card_count = 0;
 	for (.@i = 0; .@i < @inventorylist_count; ++.@i) {
 		.@id = @inventorylist_id[.@i];
-		if (getiteminfo(.@id, ITEMINFO_TYPE) != IT_CARD)
+		if (getiteminfo(.@id, ITEMINFO_TYPE) != IT_CARD || getiteminfo(.@id, ITEMINFO_SUBTYPE) != CARD_NORMAL)
 			continue;
 		if (inarray(.@card_ids[0], .@id) != -1)
 			continue;
@@ -197,7 +197,7 @@ S_ExchangeCard:
 		close;
 	}
 
-	if (getiteminfo(.@id, ITEMINFO_TYPE) != IT_CARD || countitem(.@id) < .@amount) {
+	if (getiteminfo(.@id, ITEMINFO_TYPE) != IT_CARD || getiteminfo(.@id, ITEMINFO_SUBTYPE) != CARD_NORMAL || countitem(.@id) < .@amount) {
 		mes "[Colecionador de Cartas]";
 		mes "A quantidade de cartas no inventario mudou. Tente novamente.";
 		close;

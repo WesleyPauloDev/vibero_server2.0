@@ -147,9 +147,17 @@ OnPlayerTimer:
 	}
 
 	.@remaining_minutes = (.@remaining + 59) / 60;
-	if (@AscensaoLastMinute != .@remaining_minutes) {
+	.@show_time = 0;
+	if (@AscensaoLastMinute < 0)
+		.@show_time = 1;
+	else if (.@remaining_minutes <= 5 && @AscensaoLastMinute != .@remaining_minutes)
+		.@show_time = 1;
+	else if (.@remaining_minutes > 5 && .@remaining_minutes <= @AscensaoLastMinute - 10)
+		.@show_time = 1;
+
+	if (.@show_time) {
 		@AscensaoLastMinute = .@remaining_minutes;
-		dispbottom "[Ascensao] Tempo restante: " + sprintf("%02d:%02d", .@remaining / 3600, (.@remaining % 3600) / 60) + ".";
+		dispbottom "[Ascensao] Tempo restante: " + sprintf("%02d:%02d", .@remaining_minutes / 60, .@remaining_minutes % 60) + ".";
 	}
 	addtimer 10000, .npc$ + "::OnPlayerTimer";
 	end;
@@ -215,7 +223,11 @@ S_SpawnMvp:
 OnMvpDead:
 	$AscensaoMvpAlive = 0;
 	$AscensaoMvpNext = gettimetick(2) + .mvp_cooldown;
-	mapannounce .map$, "[Ascensao] MVP derrotado. O intervalo de duas horas foi iniciado.", bc_map;
+	.@killer$ = strcharinfo(0);
+	if (.@killer$ == "")
+		.@killer$ = "um aventureiro";
+	announce "[Ascensao] A Deusa da Ascensao foi derrotada por " + .@killer$ + "! O intervalo de duas horas foi iniciado.", bc_all;
+	callfunc "F_AscensaoMvpRareDrops";
 	end;
 
 OnTimer60000:
@@ -227,6 +239,194 @@ OnTimer60000:
 		callsub S_SpawnMvp;
 	setnpctimer 0;
 	end;
+}
+
+// Consumivel do MVP: insere uma pedra de classe em um slot oculto livre
+// de um dos acessorios equipados, sem substituir cartas ou encantamentos.
+function	script	F_AscensaoBrightEnchant	{
+	disable_items;
+
+	.@consumable_id = getarg(0, 40118);
+	setarray .@scan_part[0], EQI_ACC_L, EQI_ACC_R;
+	setarray .@part_name$[0], "Acessorio esquerdo", "Acessorio direito";
+
+	.@menu$ = "";
+	.@count = 0;
+	for (.@i = 0; .@i < getarraysize(.@scan_part); ++.@i) {
+		.@part = .@scan_part[.@i];
+		if (!getequipisequiped(.@part))
+			continue;
+
+		.@free_slot = -1;
+		for (.@slot = 1; .@slot <= 3; ++.@slot) {
+			if (getequipcardid(.@part, .@slot) == 0) {
+				.@free_slot = .@slot;
+				break;
+			}
+		}
+		if (.@free_slot < 0)
+			continue;
+
+		.@available_part[.@count] = .@part;
+		.@available_slot[.@count] = .@free_slot;
+		.@menu$ += .@part_name$[.@i] + " - " + getequipname(.@part) + ":";
+		++.@count;
+	}
+
+	mes "[Encantamento Brilhante]";
+	if (.@count == 0) {
+		mes "Equipe ao menos um acessorio com um slot oculto livre.";
+		mes "Cartas e encantamentos existentes nao serao substituidos.";
+		close;
+	}
+
+	mes "Escolha o acessorio que recebera a pedra.";
+	next;
+	.@pick = select(.@menu$) - 1;
+	.@part = .@available_part[.@pick];
+	.@target_slot = .@available_slot[.@pick];
+	.@equip_id = getequipid(.@part);
+	.@equip_refine = getequiprefinerycnt(.@part);
+	setarray .@equip_card[0],
+		getequipcardid(.@part, 0),
+		getequipcardid(.@part, 1),
+		getequipcardid(.@part, 2),
+		getequipcardid(.@part, 3);
+
+	setarray .@stone_id[0],
+		40119, 40120, 40121, 40122, 40123, 40124, 40125, 40126,
+		40127, 40128, 40129, 40130, 40131, 40132, 40133, 40134;
+	setarray .@job_id[0],
+		JOB_SURA, JOB_RANGER, JOB_WARLOCK, JOB_RUNE_KNIGHT,
+		JOB_MECHANIC, JOB_ARCH_BISHOP, JOB_GUILLOTINE_CROSS, JOB_ROYAL_GUARD,
+		JOB_SORCERER, JOB_MINSTREL, JOB_GENETIC, JOB_STAR_EMPEROR,
+		JOB_SOUL_REAPER, JOB_KAGEROU, JOB_REBELLION, JOB_SUMMONER;
+	setarray .@class_name$[0],
+		"Shura", "Ranger", "Arcano", "Cavaleiro Runico",
+		"Mecanico", "Arcebispo", "Sicario", "Guardiao Real",
+		"Feiticeiro", "Trovador/Musa", "Bioquimico", "Imperador Estelar",
+		"Ceifador de Almas", "Kagerou/Oboro", "Insurgente", "Doram";
+
+	.@class_menu$ = "";
+	for (.@i = 0; .@i < getarraysize(.@stone_id); ++.@i)
+		.@class_menu$ += .@class_name$[.@i] + ":";
+
+	mes "[Encantamento Brilhante]";
+	mes "Acessorio: ^0055FF" + getitemname(.@equip_id) + "^000000";
+	mes "Agora escolha a classe da pedra.";
+	next;
+	.@class_pick = select(.@class_menu$) - 1;
+	.@stone = .@stone_id[.@class_pick];
+	.@class = .@job_id[.@class_pick];
+
+	// Evita consumir outro cristal para uma pedra que ja esta equipada.
+	for (.@i = 0; .@i < getarraysize(.@scan_part); ++.@i) {
+		if (!getequipisequiped(.@scan_part[.@i]))
+			continue;
+		for (.@slot = 0; .@slot <= 3; ++.@slot) {
+			if (getequipcardid(.@scan_part[.@i], .@slot) == .@stone) {
+				mes "[Encantamento Brilhante]";
+				mes "Voce ja possui esta pedra em um acessorio equipado.";
+				mes "Duas pedras da mesma classe nao acumulam o bonus.";
+				close;
+			}
+		}
+	}
+
+	mes "[Encantamento Brilhante]";
+	mes "Pedra: ^00AA00" + getitemname(.@stone) + "^000000";
+	mes "Skills afetadas em ^0055FF50%^000000 do cooldown base:";
+	for (.@i = 0; .@i < 10; ++.@i) {
+		.@skill_name$ = callfunc("F_ShadowSkillData", .@class, .@i, 1);
+		if (.@skill_name$ == "")
+			break;
+		mes "- " + .@skill_name$;
+	}
+	mes "A pedra sera inserida sem apagar os outros slots.";
+	next;
+	if (select("Confirmar encantamento:Cancelar") == 2) {
+		mes "[Encantamento Brilhante]";
+		mes "Operacao cancelada. O cristal nao foi consumido.";
+		close;
+	}
+
+	if (countitem(.@consumable_id) < 1) {
+		mes "[Encantamento Brilhante]";
+		mes "O cristal nao foi encontrado no inventario.";
+		close;
+	}
+	if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) ||
+		callfunc("F_IsEquipRefineHack", .@part, .@equip_refine) ||
+		callfunc("F_IsEquipCardHack", .@part, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]) ||
+		getequipcardid(.@part, .@target_slot) != 0) {
+		mes "[Encantamento Brilhante]";
+		mes "O acessorio foi alterado durante o processo.";
+		mes "Nenhum item foi consumido.";
+		close;
+	}
+
+	delitem .@consumable_id, 1;
+	setitemcard .@part, .@target_slot, .@stone;
+	recalculatestat;
+	specialeffect2 EF_ENHANCE;
+
+	mes "[Encantamento Brilhante]";
+	mes "A ^00AA00" + getitemname(.@stone) + "^000000 foi inserida com sucesso.";
+	mes "Duas copias desta pedra nao acumulam alem de 50%.";
+	close;
+}
+
+// Cada copia equipada divide o mesmo bonus total. Assim, duas pedras iguais
+// continuam fornecendo somente 50% do cooldown base das skills da classe.
+function	script	F_AscensaoBrightStoneBonus	{
+	.@stone = getarg(0);
+	.@class = getarg(1);
+	.@copies = isequippedcnt(.@stone);
+	if (.@copies < 1)
+		return;
+
+	for (.@i = 0; .@i < 10; ++.@i) {
+		.@skill_id = callfunc("F_ShadowSkillData", .@class, .@i, 0);
+		.@skill_cd = callfunc("F_ShadowSkillData", .@class, .@i, 2);
+		if (.@skill_id <= 0 || .@skill_cd <= 0)
+			break;
+		.@reduction = (.@skill_cd / 2) / .@copies;
+		bonus2 bSkillCooldown, .@skill_id, -.@reduction;
+	}
+	return;
+}
+
+// Drops raros controlados pelo evento para permitir anuncio global e log
+// somente quando o premio for realmente sorteado. A chance final preserva
+// bonus pessoais de drop e a penalidade de nivel Renewal.
+function	script	F_AscensaoMvpRareDrops	{
+	setarray .@item_id[0], 501000, 9592, 40118;
+	setarray .@base_rate[0], 200, 500, 200;
+	setarray .@announce_name$[0],
+		"Pedra de Grade D",
+		"Ticket de Refino Shadow Garantido",
+		"Cristal de Encantamento Brilhante";
+
+	.@killer$ = strcharinfo(0);
+	if (.@killer$ == "")
+		.@killer$ = "um aventureiro";
+
+	for (.@i = 0; .@i < getarraysize(.@item_id); ++.@i) {
+		.@final_rate = get_adjusted_drop_rate(31914, .@base_rate[.@i]);
+		if (rand(10000) >= .@final_rate)
+			continue;
+
+		partylootitem .@item_id[.@i], 1, .@final_rate;
+		logmes "ASCENSAO_MVP_RARE_DROP|account_id=" + getcharid(3) +
+			"|char_id=" + getcharid(0) +
+			"|killer=" + .@killer$ +
+			"|item_id=" + .@item_id[.@i] +
+			"|item_name=" + getitemname(.@item_id[.@i]) +
+			"|base_rate=" + .@base_rate[.@i] +
+			"|final_rate=" + .@final_rate;
+		announce "[Ascensao] O grupo de " + .@killer$ + " obteve " + .@announce_name$[.@i] + " ao derrotar a Deusa da Ascensao!", bc_all;
+	}
+	return;
 }
 
 ascensao	mapflag	loadevent

@@ -6,6 +6,8 @@ inst_launch_workaround
 
 PATH=./:$PATH
 LOG_DIR="./log"
+SHUTDOWN_TIMEOUT=${ATHENA_SHUTDOWN_TIMEOUT:-120}
+SAVE_SETTLE_SECONDS=${ATHENA_SAVE_SETTLE_SECONDS:-10}
 
 print_start() {
 	#    more << EOF
@@ -19,10 +21,45 @@ print_start() {
 
 get_status(){
 	PIDFILE=.$1.pid
-	if [ -e ${PIDFILE} ]; then
-		PSRUN=$(pgrep -F ${PIDFILE})
+	PSRUN=""
+	if [ -r "${PIDFILE}" ]; then
+		PSRUN=$(pgrep -F "${PIDFILE}" 2>/dev/null)
 	fi
 	#return ${PSRUN} #seems to cause an issue for some os
+}
+
+stop_serv(){
+	SERVER_NAME=$1
+	PIDFILE=.${SERVER_NAME}.pid
+
+	get_status "${SERVER_NAME}"
+	if [ -z "${PSRUN}" ]; then
+		echo "Server '${SERVER_NAME}' is already stopped"
+		rm -f "${PIDFILE}"
+		return 0
+	fi
+
+	echo "Stopping '${SERVER_NAME}' gracefully (p${PSRUN})..."
+	if ! kill -TERM "${PSRUN}" 2>/dev/null; then
+		echo "ERROR: could not send SIGTERM to '${SERVER_NAME}' (p${PSRUN})"
+		return 1
+	fi
+
+	WAITED=0
+	while kill -0 "${PSRUN}" 2>/dev/null; do
+		if [ "${WAITED}" -ge "${SHUTDOWN_TIMEOUT}" ]; then
+			echo "ERROR: '${SERVER_NAME}' did not stop after ${SHUTDOWN_TIMEOUT}s"
+			echo "It was NOT killed forcibly, to avoid losing player data."
+			return 1
+		fi
+		echo "'${SERVER_NAME}' is still running p${PSRUN}; waiting for graceful shutdown"
+		sleep 1
+		WAITED=$((WAITED+1))
+	done
+
+	rm -f "${PIDFILE}"
+	echo "Server '${SERVER_NAME}' stopped"
+	return 0
 }
 
 #checking if already started, launch and mark in log
@@ -86,21 +123,25 @@ watch_serv(){
 }
 
 restart(){
-	$0 stop
-	if [ $1 ]; then sleep $1; fi
-	for i in ${L_SRV} ${C_SRV} ${M_SRV} ${W_SRV}
-	do
-		FIFO="$1_fifo"
-		while true; do
-			get_status ${i}
-			if [ ${PSRUN} ]; then echo "'${i}' is still running p${PSRUN} waiting for the process to end"; sleep 2;
-			else 
-				if [ -e ./${FIFO} ]; then rm "$FIFO"; fi
-				break
-			fi
-		done
-	done
-	$0 start
+	RESTART_DELAY=${1:-0}
+
+	if ! "$0" stop; then
+		echo "Restart aborted because one or more servers did not stop safely."
+		return 1
+	fi
+
+	case ${RESTART_DELAY} in
+		''|*[!0-9]*)
+			echo "ERROR: restart delay must be an integer number of seconds"
+			return 1
+		;;
+	esac
+
+	if [ "${RESTART_DELAY}" -gt 0 ]; then
+		sleep "${RESTART_DELAY}"
+	fi
+
+	"$0" start
 }
 
 case $1 in
@@ -116,7 +157,7 @@ case $1 in
 		else
 		 echo "Logging is disabled"
 		fi
-		for i in ${L_SRV} ${C_SRV} ${M_SRV} ${W_SRV}
+		for i in ${L_SRV} ${C_SRV} ${W_SRV} ${M_SRV}
 		do
 			start_serv $i $ENLOG
 		done
@@ -135,26 +176,25 @@ case $1 in
 		echo "Watching rAthena now."
 	;;
 	'stop')
-		for i in ${W_SRV} ${M_SRV} ${C_SRV} ${L_SRV}
-		do
-			PIDFILE=.${i}.pid
-			if [ -e ./${PIDFILE} ]; then
-				kill $(cat ${PIDFILE})
-				
-				while true; do
-					get_status ${i}
-					if [ ${PSRUN} ]; then echo "'${i}' is still running p${PSRUN} waiting for the process to end"; sleep 2;
-					else
-						break
-					fi
-				done
-				
-				rm ${PIDFILE}
-			fi
-		done
+		# Stop accepting web requests first. The map-server must stop while the
+		# char-server is still alive, because map_quit() sends every final player
+		# save to it during the graceful SIGTERM shutdown.
+		stop_serv "${W_SRV}" || exit 1
+		stop_serv "${M_SRV}" || exit 1
+
+		# The map-server flushes the save packets before exiting, but it does not
+		# wait for all 0x2b21 save acknowledgements. Keep char alive long enough
+		# to consume those packets and commit their SQL transactions.
+		if [ "${SAVE_SETTLE_SECONDS}" -gt 0 ]; then
+			echo "Waiting ${SAVE_SETTLE_SECONDS}s for final player saves to commit..."
+			sleep "${SAVE_SETTLE_SECONDS}"
+		fi
+
+		stop_serv "${C_SRV}" || exit 1
+		stop_serv "${L_SRV}" || exit 1
 	;;
 	'restart')
-		 restart "$@"
+		restart "${2:-0}"
 	;;
 	'status')
 		for i in ${L_SRV} ${C_SRV} ${M_SRV} ${W_SRV}
@@ -223,5 +263,4 @@ case $1 in
 		$0 $readEnterKey
 	;;
 esac
-
 

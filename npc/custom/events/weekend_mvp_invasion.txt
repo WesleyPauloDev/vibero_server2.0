@@ -18,6 +18,7 @@ OnInit:
 	.event_gid_count = 0;
 	.manual_interval_ms = 0;
 	.next_spawn_tick = 0;
+	.last_auto_spawn_key$ = "";
 
 	setarray .maps$[0], "payon", "morocc", "alberta", "geffen", "aldebaran", "hugel", "comodo", "izlude";
 	setarray .map_names$[0], "Payon", "Morroc", "Alberta", "Geffen", "Aldebaran", "Hugel", "Comodo", "Izlude";
@@ -45,6 +46,7 @@ OnEventWeekSync:
 	}
 	else {
 		.force_off = 0;
+		.last_auto_spawn_key$ = "";
 		if (.active || .alive > 0)
 			callsub S_Clean;
 	}
@@ -133,6 +135,13 @@ S_TrySpawn:
 
 	if (!.manual && !$Event_MVPInvasion_Auto)
 		return;
+
+	// OnClock0000 e a sincronizacao do evento semanal podem ocorrer no mesmo
+	// instante. Garante apenas uma horda automatica por data/hora.
+	.@auto_spawn_key$ = gettimestr("%Y%m%d%H", 21);
+	if (.last_auto_spawn_key$ == .@auto_spawn_key$)
+		return;
+	.last_auto_spawn_key$ = .@auto_spawn_key$;
 
 	.active = 1;
 	callsub S_SpawnWave;
