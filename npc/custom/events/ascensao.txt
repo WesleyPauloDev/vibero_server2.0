@@ -45,13 +45,38 @@ prontera,163,244,4	script	Guardiao da Ascensao	4_EP18_MARAM,{
 	mes "A passagem custa ^FF0000100.000 Zeny^000000 por entrada.";
 	mes "Cada conta pode permanecer no mapa por ate quatro horas por dia.";
 	mes "Tempo restante hoje: ^0055FF" + sprintf("%02d:%02d", .@hours, .@minutes) + "^000000.";
+	if (.@remaining <= 0)
+		mes "Seu limite diario foi esgotado. Volte amanha.";
+	next;
+	.@choice = select("Entrar na Ascensao:Craftar Cristal Brilhante:Agora nao");
+	if (.@choice == 3)
+		close;
+	if (.@choice == 2) {
+		mes "[Guardiao da Ascensao]";
+		mes "Eu posso unir ^0055FF50 Fragmentos do Cristal de Encantamento^000000 para criar:";
+		mes "^00AA001 Cristal de Encantamento Brilhante^000000.";
+		mes "Voce possui ^0055FF" + countitem(40136) + " fragmentos^000000.";
+		next;
+		if (select("Craftar o cristal:Cancelar") == 2)
+			close;
+		if (countitem(40136) < 50) {
+			mes "[Guardiao da Ascensao]";
+			mes "Voce precisa de 50 fragmentos para realizar o craft.";
+			close;
+		}
+		delitem 40136, 50;
+		getitem 40118, 1;
+		specialeffect2 EF_ENHANCE;
+		mes "[Guardiao da Ascensao]";
+		mes "Craft concluido!";
+		mes "Voce recebeu ^00AA001 Cristal de Encantamento Brilhante^000000.";
+		close;
+	}
 	if (.@remaining <= 0) {
+		mes "[Guardiao da Ascensao]";
 		mes "Seu limite diario foi esgotado. Volte amanha.";
 		close;
 	}
-	next;
-	if (select("Entrar na Ascensao:Agora nao") == 2)
-		close;
 	if (Zeny < 100000) {
 		mes "[Guardiao da Ascensao]";
 		mes "Voce precisa de 100.000 Zeny para entrar.";
