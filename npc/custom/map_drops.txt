@@ -19,4 +19,31 @@ function	script	CustomMapDrop	{
     return;
 }
 
+// Drop global da Cheffenia: 1/100000 = 0,001% por monstro derrotado.
+function	script	BossniaMapDrop	{
+	.@map$ = strcharinfo(3);
+
+	if (.@map$ == "bossnia_01" || .@map$ == "bossnia_02")
+		.@item_id = 1001466;
+	else if (.@map$ == "bossnia_03" || .@map$ == "bossnia_04")
+		.@item_id = 1001467;
+	else
+		return;
+
+	// Usa 1% (100/10000) como referencia para obter o multiplicador pessoal
+	// do killer e conserva a precisao da taxa base de 0,001%.
+	.@adjusted_rate = get_adjusted_drop_rate(killedrid, 100);
+	if (rand(10000000) < .@adjusted_rate)
+		partylootitem .@item_id, 1, 1;
+
+	return;
+}
+
+// Cobre monstros que nao possuem um evento de morte proprio.
+-	script	BossniaMapDropEvent	-1,{
+OnNPCKillEvent:
+	callfunc("BossniaMapDrop");
+	end;
+}
+
 
