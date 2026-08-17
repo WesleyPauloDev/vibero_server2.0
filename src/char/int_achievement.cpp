@@ -306,6 +306,24 @@ int32 mapif_parse_achievement_reward(int32 fd){
 	uint32 char_id = RFIFOL(fd, 2);
 	int32 achievement_id = RFIFOL(fd, 6);
 
+	// Check if this achievement has already been rewarded on this account (except Reborn 110008)
+	if (achievement_id != 110008) {
+		int32 already_claimed = 0;
+		if (SQL_SUCCESS == Sql_Query(sql_handle, "SELECT 1 FROM `%s` a JOIN `%s` c ON c.`char_id` = a.`char_id` WHERE c.`account_id` = (SELECT c2.`account_id` FROM `%s` c2 WHERE c2.`char_id` = '%u') AND a.`id` = '%d' AND a.`rewarded` IS NOT NULL LIMIT 1", schema_config.achievement_table, schema_config.char_db, schema_config.char_db, char_id, achievement_id)) {
+			if (Sql_NumRows(sql_handle) > 0) {
+				already_claimed = 1;
+			}
+			Sql_FreeResult(sql_handle);
+		}
+		if (already_claimed) {
+			// Mark this character as rewarded too so client state is synced, but do not send mail
+			Sql_Query(sql_handle, "UPDATE `%s` SET `rewarded` = FROM_UNIXTIME('%u') WHERE `char_id`='%u' AND `id` = '%d' AND `rewarded` IS NULL", schema_config.achievement_table, (uint32)current, char_id, achievement_id);
+			current = 0;
+			mapif_achievement_reward(fd, char_id, achievement_id, current);
+			return 0;
+		}
+	}
+
 	if( Sql_Query( sql_handle, "UPDATE `%s` SET `rewarded` = FROM_UNIXTIME('%u') WHERE `char_id`='%u' AND `id` = '%d' AND `completed` IS NOT NULL AND `rewarded` IS NULL", schema_config.achievement_table, (uint32)current, char_id, achievement_id ) == SQL_ERROR ||
 		Sql_NumRowsAffected(sql_handle) <= 0 ){
 		current = 0;
@@ -328,6 +346,9 @@ int32 mapif_parse_achievement_reward(int32 fd){
 
 		if( !mail_sendmail(0, mail_sender, char_id, mail_receiver, mail_title, mail_text, 0, &item, 1) ){
 			current = 0;
+		} else if (achievement_id != 110008) {
+			// Update all other characters of the same account so that they are marked as rewarded in DB
+			Sql_Query(sql_handle, "UPDATE `%s` a JOIN `%s` c ON c.`char_id` = a.`char_id` SET a.`rewarded` = FROM_UNIXTIME('%u') WHERE c.`account_id` = (SELECT c2.`account_id` FROM `%s` c2 WHERE c2.`char_id` = '%u') AND a.`id` = '%d' AND a.`rewarded` IS NULL", schema_config.achievement_table, schema_config.char_db, (uint32)current, schema_config.char_db, char_id, achievement_id);
 		}
 	}
 

@@ -26207,6 +26207,47 @@ BUILDIN_FUNC(achievementcomplete) {
 }
 
 /**
+ * Award an achievement as completed and already rewarded (claimed)
+ * achievementreward(<achievement ID>{,<char ID>});
+ */
+BUILDIN_FUNC(achievementreward) {
+	map_session_data *sd;
+	int32 i, achievement_id = script_getnum(st, 2);
+
+	if (!script_charid2sd(3, sd)) {
+		script_pushint(st, false);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	if (achievement_db.exists(achievement_id) == false) {
+		ShowWarning("buildin_achievementreward: Achievement '%d' doesn't exist.\n", achievement_id);
+		script_pushint(st, false);
+		return SCRIPT_CMD_FAILURE;
+	}
+	
+	if( !sd->state.pc_loaded ){
+		// Simply ignore it on the first call, because the status will be recalculated after loading anyway
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	ARR_FIND(0, sd->achievement_data.count, i, sd->achievement_data.achievements[i].achievement_id == achievement_id);
+	if (i == sd->achievement_data.count)
+		achievement_add(sd, achievement_id);
+	achievement_update_achievement(sd, achievement_id, true);
+
+	ARR_FIND(0, sd->achievement_data.count, i, sd->achievement_data.achievements[i].achievement_id == achievement_id);
+	if (i < sd->achievement_data.count) {
+		sd->achievement_data.achievements[i].rewarded = time(nullptr);
+		clif_achievement_reward_ack(sd->fd, 1, achievement_id);
+		clif_achievement_update(sd, &sd->achievement_data.achievements[i], sd->achievement_data.count - sd->achievement_data.incompleteCount);
+		sd->achievement_data.save = true;
+	}
+
+	script_pushint(st, true);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
  * Checks if the achievement exists on player.
  * achievementexists(<achievement ID>{,<char ID>});
  */
@@ -29101,6 +29142,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(achievementadd,"i?"),
 	BUILDIN_DEF(achievementremove,"i?"),
 	BUILDIN_DEF(achievementcomplete,"i?"),
+	BUILDIN_DEF(achievementreward,"i?"),
 	BUILDIN_DEF(achievementexists,"i?"),
 	BUILDIN_DEF(achievementupdate,"iii?"),
 

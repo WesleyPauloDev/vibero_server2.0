@@ -444,24 +444,27 @@ function	script	F_FendaHatEnchant	{
 	if (.@enchant_choice == 3)
 		close;
 
-	if (.@enchant_choice == 1)
-		.@use_item_id = 312014;
-	else
-		.@use_item_id = 312021;
+	if (.@enchant_choice == 1) {
+		.@enchant_id = 910300;
+		if (countitem(910300) > 0)
+			.@use_item_id = 910300;
+		else if (countitem(312014) > 0)
+			.@use_item_id = 312014;
+		else
+			.@use_item_id = 910300;
+	} else {
+		.@enchant_id = 910301;
+		if (countitem(910301) > 0)
+			.@use_item_id = 910301;
+		else if (countitem(312021) > 0)
+			.@use_item_id = 312021;
+		else
+			.@use_item_id = 910301;
+	}
 
 	if (countitem(.@use_item_id) < 1) {
 		mes "[Encanto da Fenda]";
 		mes "Voce nao possui ^FF0000" + getitemname(.@use_item_id) + "^000000 no inventario.";
-		close;
-	}
-
-	if (.@use_item_id == 312014)
-		.@enchant_id = 910300;
-	else if (.@use_item_id == 312021)
-		.@enchant_id = 910301;
-	else {
-		mes "[Encanto da Fenda]";
-		mes "Encanto invalido.";
 		close;
 	}
 

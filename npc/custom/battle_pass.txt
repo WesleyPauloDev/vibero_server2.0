@@ -85,7 +85,11 @@ function	script	F_BattlePassReset	{
 	}
 	callfunc("F_BattlePassResetSeasonRewards", .@season, 0);
 
+	// Remove battle pass milestone achievements from database for all characters of this account
+	query_sql("DELETE a FROM `achievement` a JOIN `char` c ON c.`char_id` = a.`char_id` WHERE c.`account_id` = " + getcharid(3) + " AND a.`id` BETWEEN 910010 AND 910029");
+
 	#BP_Points = 0;
+	#BP_AwardedMilestones = 0;
 	#BP_DONE_season = 0;
 	#BP_SeasonKey = .@season;
 	#BP_WeeklyResetTick = 0;
@@ -143,6 +147,7 @@ function	script	F_BattlePassEnsureSeason	{
 	if (#BP_DailyResetTick <= gettimetick(2))
 		callfunc("F_BattlePassResetDaily");
 
+	// Sincronizar missoes e conquistas diarias da conta
 	if (!#BP_DONE_battle_royale && checkquest(69100) == -1)
 		setquest 69100;
 	if (!#BP_DONE_poring_race && checkquest(69101) == -1)
@@ -164,6 +169,26 @@ function	script	F_BattlePassEnsureSeason	{
 	if (!#BP_DONE_season && checkquest(69104) == -1)
 		setquest 69104;
 
+	if (#BP_DONE_battle_royale && !achievementexists(910000))
+		achievementcomplete 910000;
+	if (#BP_DONE_poring_race && !achievementexists(910001))
+		achievementcomplete 910001;
+	if (#BP_DONE_fake_poring && !achievementexists(910002))
+		achievementcomplete 910002;
+	if (#BP_DONE_devil_square && !achievementexists(910003))
+		achievementcomplete 910003;
+	if (#BP_DONE_bg && !achievementexists(910004))
+		achievementcomplete 910004;
+	if (#BP_DONE_pvp && !achievementexists(910005))
+		achievementcomplete 910005;
+	if (#BP_DONE_vote && !achievementexists(910006))
+		achievementcomplete 910006;
+	if (#BP_DONE_instance && !achievementexists(910007))
+		achievementcomplete 910007;
+	if (#BP_DONE_mvp && !achievementexists(910008))
+		achievementcomplete 910008;
+
+	// Sincronizar missoes e conquistas semanais da conta
 	if (!#BP_DONE_weekly_cheffenia && checkquest(69110) == -1)
 		setquest 69110;
 	if (!#BP_DONE_weekly_bio5 && checkquest(69111) == -1)
@@ -172,15 +197,43 @@ function	script	F_BattlePassEnsureSeason	{
 		setquest 69112;
 	if (!#BP_DONE_weekly_woe && checkquest(69113) == -1)
 		setquest 69113;
+
+	if (#BP_DONE_weekly_cheffenia && !achievementexists(910100))
+		achievementcomplete 910100;
+	if (#BP_DONE_weekly_bio5 && !achievementexists(910101))
+		achievementcomplete 910101;
+	if (#BP_DONE_weekly_global_boss && !achievementexists(910102))
+		achievementcomplete 910102;
+	if (#BP_DONE_weekly_woe && !achievementexists(910103))
+		achievementcomplete 910103;
 	return;
 }
 
 function	script	F_BattlePassCheckMilestones	{
+	.@char_id = getcharid(0);
+	.@aid = getcharid(3);
+
 	for (.@i = 0; .@i < 20; .@i++) {
 		.@points = (.@i + 1) * 100;
 		.@ach_id = 910010 + .@i;
-		if (#BP_Points >= .@points && !achievementexists(.@ach_id))
-			achievementcomplete .@ach_id;
+
+		if (#BP_Points >= .@points) {
+			// Verifica se algum personagem da conta ja resgatou este premio
+			.@claimed = 0;
+			query_sql("SELECT 1 FROM `achievement` a JOIN `char` c ON c.`char_id` = a.`char_id` WHERE c.`account_id` = " + .@aid + " AND a.`id` = " + .@ach_id + " AND a.`rewarded` IS NOT NULL LIMIT 1", .@claimed);
+
+			if (.@claimed) {
+				// Ja resgatado na conta: marca como concluida e ja recebida para o personagem
+				achievementreward .@ach_id;
+				query_sql("UPDATE `achievement` SET `rewarded` = NOW() WHERE `char_id` = " + .@char_id + " AND `id` = " + .@ach_id + " AND `rewarded` IS NULL");
+			} else {
+				// Ainda nao resgatado: completa e deixa disponivel para resgatar
+				if (!achievementexists(.@ach_id)) {
+					achievementcomplete .@ach_id;
+					dispbottom "[Passe] Nivel " + (.@i + 1) + " alcancado! Recompensa disponivel na janela de Conquistas.";
+				}
+			}
+		}
 	}
 
 	if (#BP_Points >= 2000 && !#BP_DONE_season) {
@@ -350,7 +403,7 @@ OnAtcommand:
 	next;
 	mes "[Passe de Batalha]";
 	mes "Acompanhe as missoes pela janela de Quest.";
-	mes "Resgate premios pela janela de Conquistas.";
+	mes "Resgate premios pela janela de Conquistas (1 resgate por conta).";
 	next;
 	.@menu$ = "Abrir Quest UI:Sincronizar progresso:";
 	if (getgroupid() >= 99)

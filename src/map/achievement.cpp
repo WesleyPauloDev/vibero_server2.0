@@ -724,6 +724,24 @@ void achievement_check_reward(map_session_data *sd, int32 achievement_id)
 		return;
 	}
 
+	// Check if this achievement has already been rewarded to another character on the same account (except Reborn 110008)
+	if (achievement_id != 110008) {
+		int32 already_claimed = 0;
+		if (SQL_SUCCESS == Sql_Query(mmysql_handle, "SELECT 1 FROM `achievement` a JOIN `char` c ON c.`char_id` = a.`char_id` WHERE c.`account_id` = '%u' AND a.`id` = '%d' AND a.`rewarded` IS NOT NULL LIMIT 1", sd->status.account_id, achievement_id)) {
+			if (Sql_NumRows(mmysql_handle) > 0) {
+				already_claimed = 1;
+			}
+			Sql_FreeResult(mmysql_handle);
+		}
+		if (already_claimed) {
+			sd->achievement_data.achievements[i].rewarded = time(nullptr);
+			sd->achievement_data.save = true;
+			clif_achievement_reward_ack(sd->fd, 0, achievement_id);
+			clif_achievement_update(sd, &sd->achievement_data.achievements[i], sd->achievement_data.count - sd->achievement_data.incompleteCount);
+			return;
+		}
+	}
+
 	if (!intif_achievement_reward(sd, adb.get())) {
 		clif_achievement_reward_ack(sd->fd, 0, achievement_id);
 	}
