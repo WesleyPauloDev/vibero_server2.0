@@ -1262,7 +1262,7 @@ OnInstanceInit:
 }
 
 1@swat,321,47,0	script	#wp_out_1	PORTAL,{
-	if (#HeartHunterWarBase_STATUS == 2) {
+	if (#HeartHunterWarBase_STATUS == 1 || #HeartHunterWarBase_STATUS == 2) {
 		.@multiplier = callfunc("F_EventWeekInstanceRewardMultiplier");
 		if (isbegin_quest(12374) == 1)
 			.@has_weight = checkweight(9608, 20 * .@multiplier, 9198, 2 * .@multiplier, 25155, 10);
@@ -1296,7 +1296,7 @@ OnInstanceInit:
 // Warps
 1@swat,169,295,0	warp	#wp_boss	2,2,1@swat,150,263
 1@swat,151,266,0	script	#wp_out	PORTAL,2,2,{
-	if (#HeartHunterWarBase_STATUS == 2) {
+	if (#HeartHunterWarBase_STATUS == 1 || #HeartHunterWarBase_STATUS == 2) {
 		.@finish_result = callfunc("F_InstanceFinishBase", "Base da Guerra Heart Hunter", "#HeartHunterWarBase_STATUS", 20, 2);
 		if (.@finish_result == -1) {
 			mes "[Julian]";

@@ -17,12 +17,12 @@
 		// instance_create("Espaco Infinito");
 		// instance_enter("Espaco Infinito");
 		callfunc("F_InstanceEntry",
-			"Espaco Infinito",        // Nome da instância
+			"Espaco Infinito",        // Nome da instï¿½ncia
 			"Explorador Imprudente",                 // Nome do NPC
-			"infinite_space", // Variável de cooldown da conta
-			"InfiniteSpace",        // Variável de status da conta
-			100,                      // Level mínimo
-			"Espaço Infinito"
+			"infinite_space", // Variï¿½vel de cooldown da conta
+			"InfiniteSpace",        // Variï¿½vel de status da conta
+			100,                      // Level mï¿½nimo
+			"Espaco Infinito"
 		);
 	end;
 }
@@ -548,7 +548,7 @@ OnUnitSpawn:
 		sleep 10000;
 		while (.@index < getarraysize(.@unit_id)) {
 			if (unitexists('boss_id)) {
-				mapannounce 'map$,"O monstro chefe está tentando invocar seus aliados.",0xFFFF00;
+				mapannounce 'map$,"O monstro chefe estï¿½ tentando invocar seus aliados.",0xFFFF00;
 				getunitdata 'boss_id,.@data;
 				.@x = .@data[UMOB_X];
 				.@y = .@data[UMOB_Y];
@@ -569,15 +569,15 @@ OnMobKill:
 	if (!mobcount('map$,.@event$)) {
 		
 		if ('floor == 50) {
-			mapannounce 'map$,"Explorador Imprudente : Parece que não há outro caminho a partir daqui. É perigoso, então é melhor você voltar para fora.",0xFFFF00;
+			mapannounce 'map$,"Explorador Imprudente : Parece que nï¿½o hï¿½ outro caminho a partir daqui. ï¿½ perigoso, entï¿½o ï¿½ melhor vocï¿½ voltar para fora.",0xFFFF00;
 			enablenpc instance_npcname("#w50_ppl");
 		}
 		if ('floor < 50) {
 			if (('floor%10) == 0)
-				mapannounce 'map$,"Explorador Imprudente :  Área " + 'floor + " limpa. Use a passagem para ir para a próxima área.",0xFFFF00;
+				mapannounce 'map$,"Explorador Imprudente :  ï¿½rea " + 'floor + " limpa. Use a passagem para ir para a prï¿½xima ï¿½rea.",0xFFFF00;
 			else
-				mapannounce 'map$,"Explorador Imprudente : Área " + 'floor + " limpa. Passe pela passagem para a próxima área.",0xFFFF00;
-			// Habilitar portal de teletransporte para o próximo andar
+				mapannounce 'map$,"Explorador Imprudente : ï¿½rea " + 'floor + " limpa. Passe pela passagem para a prï¿½xima ï¿½rea.",0xFFFF00;
+			// Habilitar portal de teletransporte para o prï¿½ximo andar
 			sleep 5000;
 			enablenpc instance_npcname("#w" + 'floor);
 			'floor += 1;
@@ -595,12 +595,12 @@ OnPoringKill:
 1@infi,42,8,1	script	#w0_0	4_F_GON,{
 	if (is_party_leader() && !'mode && 'sanity == 0) {
 		mes "[ Explorador Imprudente ]";
-		mes "Já entrei e saí deste lugar muitas vezes e descobri uma maneira de provocar os monstros daqui. Você pode conseguir mais recompensas se lidar com os mais agressivos.";
+		mes "Jï¿½ entrei e saï¿½ deste lugar muitas vezes e descobri uma maneira de provocar os monstros daqui. Vocï¿½ pode conseguir mais recompensas se lidar com os mais agressivos.";
 		next;
 		mes "[ Explorador Imprudente ]";
-		mes "O que você acha? Gostaria de tentar algo desafiador?";
+		mes "O que vocï¿½ acha? Gostaria de tentar algo desafiador?";
 		next;
-		if (select("Quero prosseguir normalmente:Quero prosseguir com algo difícil") == 1 && 'sanity == 0) {
+		if (select("Quero prosseguir normalmente:Quero prosseguir com algo difï¿½cil") == 1 && 'sanity == 0) {
 			'mode = 1;
 			'poring_chance = 1;
 		} else {
@@ -608,24 +608,24 @@ OnPoringKill:
 			'poring_chance = 2;
 		}
 		mes "[ Explorador Imprudente ]";
-		mes "Ótimo. Vamos agora?";
+		mes "ï¿½timo. Vamos agora?";
 		close2;
 		if ('sanity == 0) {
 			'sanity = 1;
 			disablenpc instance_npcname(strnpcinfo(0));
 			hideoffnpc instance_npcname("#w0");
-			npctalk "Explorador Imprudente : Uau~ É muito legal para um lugar submerso, não acha?",instance_npcname("#w0");
+			npctalk "Explorador Imprudente : Uau~ ï¿½ muito legal para um lugar submerso, nï¿½o acha?",instance_npcname("#w0");
 			sleep 3000;
-			npctalk "Explorador Imprudente : Eu diria que é um sítio arqueológico antigo, não um farol. É tão bem organizado...",instance_npcname("#w0");
+			npctalk "Explorador Imprudente : Eu diria que ï¿½ um sï¿½tio arqueolï¿½gico antigo, nï¿½o um farol. ï¿½ tï¿½o bem organizado...",instance_npcname("#w0");
 			sleep 3000;
-			npctalk "Explorador Imprudente : Ah, você ouviu alguma coisa?",instance_npcname("#w0");
+			npctalk "Explorador Imprudente : Ah, vocï¿½ ouviu alguma coisa?",instance_npcname("#w0");
 			donpcevent instance_npcname("#inf_space_mobs") + "::OnSummon";
 			sleep 3000;
 			npctalk "Explorador Imprudente : Ah, devem ser os monstros assombrando este lugar.",instance_npcname("#w0");
 			sleep 3000;
-			npctalk "Explorador Imprudente : Elas não parecem diferentes das que vimos lá fora, mas posso sentir uma energia muito forte.",instance_npcname("#w0");
+			npctalk "Explorador Imprudente : Elas nï¿½o parecem diferentes das que vimos lï¿½ fora, mas posso sentir uma energia muito forte.",instance_npcname("#w0");
 			sleep 3000;
-			npctalk "Explorador Imprudente : Hum, parece perigoso, então vou voltar. Vou te dar instruções de cima.",instance_npcname("#w0");
+			npctalk "Explorador Imprudente : Hum, parece perigoso, entï¿½o vou voltar. Vou te dar instruï¿½ï¿½es de cima.",instance_npcname("#w0");
 			disablenpc instance_npcname("#w0");
 		}
 	}
@@ -638,18 +638,18 @@ OnPoringKill:
 
 1@infi,366,392,4	script	#w50_ppl	4_F_GON,{
 	mes "[ Explorador Imprudente ]";
-	mes "Manterei um registro separado desta expedição. Se você tiver tido sorte, poderá ter recebido uma recompensa decente pela sua expedição.";
+	mes "Manterei um registro separado desta expediï¿½ï¿½o. Se vocï¿½ tiver tido sorte, poderï¿½ ter recebido uma recompensa decente pela sua expediï¿½ï¿½o.";
 	next;
-	// Premiações do Servidor
-	if (#InfiniteSpace_STATUS == 2) {
-		.@finish_result = callfunc("F_InstanceFinishBase", "Espaço Infinito", "#InfiniteSpace_STATUS", 20, 2, "#inst120_name$", "#inst120_status", 1, 20);
+	// Premiaï¿½ï¿½es do Servidor
+	if (#InfiniteSpace_STATUS == 1 || #InfiniteSpace_STATUS == 2) {
+		.@finish_result = callfunc("F_InstanceFinishBase", "Espaco Infinito", "#InfiniteSpace_STATUS", 20, 2, "#inst120_name$", "#inst120_status", 1, 20);
 		if (.@finish_result == -1) {
 			mes "Voce esta com peso demais para receber as recompensas.";
 			close;
 		}
 	}
 	mes "[ Explorador Imprudente ]";
-	mes "Então, vamos sair daqui?";
+	mes "Entï¿½o, vamos sair daqui?";
 	close2;
 	warp "cmd_fild07",53,270;
 	end;

@@ -495,8 +495,10 @@ function	script	F_InstanceRouletteComplete	{
 
 		.@roulette_code$ = callfunc("F_InstanceHistoryCode", .@roulette_name$);
 		if (.@roulette_name$ == .@finish_name$ || .@roulette_name$ == .@finish_match$ || .@roulette_code$ == .@finish_code$ || .@roulette_code$ == .@match_code$) {
-			if (getd(.@roulette_status_var$) == 1)
+			if (getd(.@roulette_status_var$) == 1) {
 				setd(.@roulette_status_var$, 2);
+				dispbottom "[Roleta de Instancias] Missao cumprida: " + .@roulette_name$ + "! Resgate seu premio no NPC da Roleta.";
+			}
 		}
 	}
 	return;
@@ -621,7 +623,7 @@ function	script	F_InstanceFinishBase	{
 
 	if (.@status_var$ == "")
 		return 0;
-	if (getd(.@status_var$) != 2)
+	if (getd(.@status_var$) != 1 && getd(.@status_var$) != 2)
 		return 0;
 	// Check the complete reward at once. Separate checks can both pass even
 	// when the combined weight (especially during Instance 2x) does not fit.

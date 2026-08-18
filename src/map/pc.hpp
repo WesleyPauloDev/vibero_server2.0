@@ -423,6 +423,7 @@ public:
 		uint32 hidevisual :1;
 		uint32 hidemount :1;
 		uint32 noask :1; // [LuzZza]
+		uint32 noautoattack :1;
 		uint32 trading :1; //[Skotlex] is 1 only after a trade has started.
 		uint32 deal_locked :2; //1: Clicked on OK. 2: Clicked on TRADE
 		uint32 size :2; // for tiny/large types

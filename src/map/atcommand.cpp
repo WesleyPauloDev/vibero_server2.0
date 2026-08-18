@@ -9377,6 +9377,36 @@ ACMD_FUNC(hidemount)
 }
 
 /*==========================================
+ * @noautoattack
+ *------------------------------------------*/
+ACMD_FUNC(noautoattack)
+{
+	nullpo_ret(sd);
+
+	if (message && *message) {
+		if (strcmpi(message, "on") == 0 || strcmpi(message, "1") == 0)
+			sd->state.noautoattack = 1;
+		else if (strcmpi(message, "off") == 0 || strcmpi(message, "0") == 0)
+			sd->state.noautoattack = 0;
+		else {
+			clif_displaymessage(fd, "Uso: @noautoattack [on|off]");
+			return -1;
+		}
+	} else {
+		sd->state.noautoattack = !sd->state.noautoattack;
+	}
+
+	if (sd->state.noautoattack) {
+		unit_stop_attack(sd);
+		clif_displaymessage(fd, "Auto-ataque desativado: clicar nos monstros nao causara ataque basico (apenas habilidades).");
+	} else {
+		clif_displaymessage(fd, "Auto-ataque ativado: voce voltara a atacar normalmente ao clicar nos monstros.");
+	}
+
+	return 0;
+}
+
+/*==========================================
  * Duel organizing functions [LuzZza]
  *
  * @duel [limit|nick] - create a duel
@@ -12240,6 +12270,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(hidepet),
 		ACMD_DEF(hidevisual),
 		ACMD_DEF(hidemount),
+		ACMD_DEF(noautoattack),
 		ACMD_DEF(autotrade),
 		ACMD_DEF(changegm),
 		ACMD_DEF(changeleader),

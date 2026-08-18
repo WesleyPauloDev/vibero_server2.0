@@ -19,12 +19,12 @@
 		// instance_create("Laboratorio Werner");
 		// instance_enter("Laboratorio Werner");
 		callfunc("F_InstanceEntry",
-			"Laboratorio Werner",        // Nome da instância
+			"Laboratorio Werner",        // Nome da instï¿½ncia
 			"Rookie",                 // Nome do NPC
-			"wlcr", // Variável de cooldown da conta
-			"WLCR",        // Variável de status da conta
-			90,                      // Level mínimo
-			"Laboratório Werner"
+			"wlcr", // Variï¿½vel de cooldown da conta
+			"WLCR",        // Variï¿½vel de status da conta
+			90,                      // Level mï¿½nimo
+			"Laboratorio Werner"
 		);
 	end;
 }
@@ -208,11 +208,11 @@
 // warps
 1@slw,187,170,0	warp	#slwwarp01	1,1,1@slw,71,32
 1@slw,71,77,0	warp	#slwwarp02	1,1,1@slw,54,134
-1@slw,55,150,0	script	Saída de Emergência#saida	PORTAL,{
+1@slw,55,150,0	script	Saï¿½da de Emergï¿½ncia#saida	PORTAL,{
 
-	// Premiações do Servidor
-	if (#WLCR_STATUS == 2) {
-		.@finish_result = callfunc("F_InstanceFinishBase", "Laboratório Werner", "#WLCR_STATUS", 10, 2, "#inst120_name$", "#inst120_status");
+	// Premiaï¿½ï¿½es do Servidor
+	if (#WLCR_STATUS == 1 || #WLCR_STATUS == 2) {
+		.@finish_result = callfunc("F_InstanceFinishBase", "Laboratorio Werner", "#WLCR_STATUS", 10, 2, "#inst120_name$", "#inst120_status");
 		if (.@finish_result == -1) {
 			mes "Voce esta com peso demais para receber as recompensas.";
 			close;
@@ -250,7 +250,7 @@ OnInstanceInit:
 	disablenpc instance_npcname("#slwwarp01");
 	disablenpc instance_npcname("#slwwarp02");
 	disablenpc instance_npcname("Entrada Central#porta");
-	disablenpc instance_npcname("Saída de Emergência#saida");
+	disablenpc instance_npcname("Saï¿½da de Emergï¿½ncia#saida");
 
 	disablenpc instance_npcname("Eisen Werner#werner01");
 	disablenpc instance_npcname("Eisen Werner#werner02");
@@ -258,10 +258,10 @@ OnInstanceInit:
 	disablenpc instance_npcname("Eisen Werner#werner04");
 	disablenpc instance_npcname("Eisen Werner#werner05");
 
-	disablenpc instance_npcname("Dispositivo de Segurança#switch01");
-	disablenpc instance_npcname("Dispositivo de Segurança#switch02");
-	disablenpc instance_npcname("Dispositivo de Segurança#switch11");
-	disablenpc instance_npcname("Dispositivo de Segurança#switch12");
+	disablenpc instance_npcname("Dispositivo de Seguranï¿½a#switch01");
+	disablenpc instance_npcname("Dispositivo de Seguranï¿½a#switch02");
+	disablenpc instance_npcname("Dispositivo de Seguranï¿½a#switch11");
+	disablenpc instance_npcname("Dispositivo de Seguranï¿½a#switch12");
 
 	disablenpc instance_npcname("Guard#gard01");
 	disablenpc instance_npcname("Guard#gard02");
@@ -295,7 +295,7 @@ OnInstanceInit:
 		"^4d4dffGirl^000000's ^ff0000dream^000000", "MT-Wxx0ax2-1";
 	.@num = (atoi(strnpcinfo(2)) - 1) * 2;
 	mes "[" + .@sample$[.@num] + "]";
-	mes "Número do experimento: " + .@sample$[.@num+1] + "";
+	mes "Nï¿½mero do experimento: " + .@sample$[.@num+1] + "";
 	close;
 }
 1@slw,201,145,3	duplicate(Amostra Exibida#01)	Amostra Exibida#02	CLEAR_NPC
@@ -420,27 +420,27 @@ OnInstanceInit:
 	cutin "",255;
 	if (is_party_leader() == true) {
 		disablenpc instance_npcname("Eisen Werner#werner02");
-		enablenpc instance_npcname("Dispositivo de Segurança#switch01");
-		enablenpc instance_npcname("Dispositivo de Segurança#switch02");
+		enablenpc instance_npcname("Dispositivo de Seguranï¿½a#switch01");
+		enablenpc instance_npcname("Dispositivo de Seguranï¿½a#switch02");
 	}
 	end;
 }
 
-// Dispositivo de Segurança
-1@slw,155,191,3	script	Dispositivo de Segurança#switch01	CLEAR_NPC,{
+// Dispositivo de Seguranï¿½a
+1@slw,155,191,3	script	Dispositivo de Seguranï¿½a#switch01	CLEAR_NPC,{
 	if (is_party_leader() == false)
 		end;
 	.@number = atoi( replacestr( strnpcinfo(2), "switch", "" ) );
 	.@type = (.@number < 10) ? 0 : 1;
 	.@npc_num = (.@number < 10) ? .@number : (.@number-10);
 	if ('device_state[.@type] & .@npc_num) {
-		mes "Este dispositivo já foi ativado.";
+		mes "Este dispositivo jï¿½ foi ativado.";
 		close;
 	}
 	callsub S_Code, .@string$, .@answer;
-	mes "Há códigos de segurança escritos aqui.";
+	mes "Hï¿½ cï¿½digos de seguranï¿½a escritos aqui.";
 	mes "[" + .@string$ + "]";
-	mes "Qual código você deseja inserir?";
+	mes "Qual cï¿½digo vocï¿½ deseja inserir?";
 	next;
 	if (select( "^ff0000" + .@string$ + "^000000", "^4d4dff" + .@string$ + "^000000" ) != .@answer) {
 		'device_state[.@type] = 0;
@@ -451,12 +451,12 @@ OnInstanceInit:
 		end;
 	'device_state[.@type] = 'device_state[.@type] | .@npc_num;
 	if ('device_state[.@type] != 3) {
-		mes "Você operou o dispositivo de segurança.";
-		mes "Parece que há outro dispositivo para ativar.";
+		mes "Vocï¿½ operou o dispositivo de seguranï¿½a.";
+		mes "Parece que hï¿½ outro dispositivo para ativar.";
 		close;
 	}
-	mes "Você operou o dispositivo de segurança.";
-	mes "O portão foi ativado.";
+	mes "Vocï¿½ operou o dispositivo de seguranï¿½a.";
+	mes "O portï¿½o foi ativado.";
 	switch( .@type ) {
 	case 0:
 		enablenpc instance_npcname("#slwwarp01");
@@ -484,22 +484,22 @@ S_Code:
 		"Eternidade", 2,
 		"Aurora", 2,
 		"Rosa", 1,
-		"Contradição", 1,
+		"Contradiï¿½ï¿½o", 1,
 		"Alegria", 1,
 		"Mar", 1,
 		"Caminho de volta", 1,
-		"Solidão", 1,
+		"Solidï¿½o", 1,
 		"Brilho", 1,
-		"Crepúsculo", 1;
+		"Crepï¿½sculo", 1;
 	.@size = getarraysize(.@sample$) / 2;
 	.@r = rand(.@size) * 2;
 	set getarg(0), .@sample$[.@r];
 	set getarg(1), .@sample$[.@r+1];
 	return;
 }
-1@slw,220,191,3	duplicate(Dispositivo de Segurança#switch01)	Dispositivo de Segurança#switch02	CLEAR_NPC
-1@slw,22,61,3	duplicate(Dispositivo de Segurança#switch01)	Dispositivo de Segurança#switch11	CLEAR_NPC
-1@slw,122,61,3	duplicate(Dispositivo de Segurança#switch01)	Dispositivo de Segurança#switch12	CLEAR_NPC
+1@slw,220,191,3	duplicate(Dispositivo de Seguranï¿½a#switch01)	Dispositivo de Seguranï¿½a#switch02	CLEAR_NPC
+1@slw,22,61,3	duplicate(Dispositivo de Seguranï¿½a#switch01)	Dispositivo de Seguranï¿½a#switch11	CLEAR_NPC
+1@slw,122,61,3	duplicate(Dispositivo de Seguranï¿½a#switch01)	Dispositivo de Seguranï¿½a#switch12	CLEAR_NPC
 
 
 // Guardas
@@ -510,37 +510,37 @@ OnTouch:
 	getmapxy .@map$,.@x,.@y, BL_NPC;
 	switch( .@num ) {
 	case 1:	// 2 spawn area
-		npctalk ".. Droga, como você entrou aqui?";
+		npctalk ".. Droga, como vocï¿½ entrou aqui?";
 		areamonster .@map$, 186,92,190,94, "Guarda Especial", 3622,3;
 		.@mob_count = 3;
 		break;
 	case 2:
-		npctalk ".. Droga, como você entrou aqui?";
+		npctalk ".. Droga, como vocï¿½ entrou aqui?";
 		areamonster .@map$, 186,142,190,143, "Guarda Especial", 3622,3;
 		areamonster .@map$, 186,160,190,162, "Guarda Especial", 3622,3;
 		.@mob_count = 3;
 		break;
 	case 5:
-		npctalk ".. Droga, como você entrou aqui?";
+		npctalk ".. Droga, como vocï¿½ entrou aqui?";
 		.@mob_count = 3;
 		break;
 	case 3:
-		npctalk ".. Droga, como você entrou aqui?";
+		npctalk ".. Droga, como vocï¿½ entrou aqui?";
 		.@mob_count = 1;
 		.@label$ = instance_npcname("#security_device_lab") + "::OnLeft1";
 		break;
 	case 4:
-		npctalk ".. Droga, como você entrou aqui?";
+		npctalk ".. Droga, como vocï¿½ entrou aqui?";
 		.@mob_count = 3;
 		.@label$ = instance_npcname("#security_device_lab") + "::OnRight1";
 		break;
 	case 6:
-		npctalk "Quem está aí?";
+		npctalk "Quem estï¿½ aï¿½?";
 		.@mob_count = 3;
 		.@label$ = instance_npcname("#security_device_lab") + "::OnLeft2";
 		break;
 	case 7:
-		npctalk "Vou acabar com você!";
+		npctalk "Vou acabar com vocï¿½!";
 		.@mob_count = 3;
 		.@label$ = instance_npcname("#security_device_lab") + "::OnRight2";
 		break;
@@ -557,31 +557,31 @@ OnTouch:
 1@slw,33,52,3	duplicate(Guard#gard01)	Guard#gard06	3622,4,4
 1@slw,111,52,3	duplicate(Guard#gard01)	Guard#gard07	3622,4,4
 
-// Eventos de ativação dos dispositivos
+// Eventos de ativaï¿½ï¿½o dos dispositivos
 1@slw,1,1,3	script	#security_device_lab	HIDDEN_WARP_NPC,{
 	end;
 OnLeft1:
 	if (mobcount('map_slw$, instance_npcname("#security_device_lab")+"::OnLeft1") < 1) {
-		mapannounce 'map_slw$, "O dispositivo de segurança L-01 foi ativado.", bc_map,0xFF99;
-		enablenpc instance_npcname("Dispositivo de Segurança#switch01");
+		mapannounce 'map_slw$, "O dispositivo de seguranï¿½a L-01 foi ativado.", bc_map,0xFF99;
+		enablenpc instance_npcname("Dispositivo de Seguranï¿½a#switch01");
 	}
 	end;
 OnRight1:
 	if (mobcount('map_slw$, instance_npcname("#security_device_lab")+"::OnRight1") < 1) {
-		mapannounce 'map_slw$, "O dispositivo de segurança R-01 foi ativado.", bc_map,0xFF99;
-		enablenpc instance_npcname("Dispositivo de Segurança#switch02");
+		mapannounce 'map_slw$, "O dispositivo de seguranï¿½a R-01 foi ativado.", bc_map,0xFF99;
+		enablenpc instance_npcname("Dispositivo de Seguranï¿½a#switch02");
 	}
 	end;
 OnLeft2:
 	if (mobcount('map_slw$, instance_npcname("#security_device_lab")+"::OnLeft2") < 1) {
-		mapannounce 'map_slw$, "O dispositivo de segurança L-02 foi ativado.", bc_map,0xFF99;
-		enablenpc instance_npcname("Dispositivo de Segurança#switch11");
+		mapannounce 'map_slw$, "O dispositivo de seguranï¿½a L-02 foi ativado.", bc_map,0xFF99;
+		enablenpc instance_npcname("Dispositivo de Seguranï¿½a#switch11");
 	}
 	end;
 OnRight2:
 	if (mobcount('map_slw$, instance_npcname("#security_device_lab")+"::OnRight2") < 1) {
-		mapannounce 'map_slw$, "O dispositivo de segurança R-02 foi ativado.", bc_map,0xFF99;
-		enablenpc instance_npcname("Dispositivo de Segurança#switch12");
+		mapannounce 'map_slw$, "O dispositivo de seguranï¿½a R-02 foi ativado.", bc_map,0xFF99;
+		enablenpc instance_npcname("Dispositivo de Seguranï¿½a#switch12");
 	}
 	end;
 }
@@ -593,55 +593,55 @@ OnRight2:
 		end;
 	cutin "ep16_eisen01.bmp",1;
 	mes "[Eisen Werner]";
-	mes "Mais fácil do que imaginava?";
-	mes "Os próximos dispositivos são parecidos, então não precisarei explicar novamente.";
+	mes "Mais fï¿½cil do que imaginava?";
+	mes "Os prï¿½ximos dispositivos sï¿½o parecidos, entï¿½o nï¿½o precisarei explicar novamente.";
 	next;
 	mes "[Eisen Werner]";
 	mes "O que acha deste lugar?";
-	mes "Não é incrível?";
-	mes "Você já esteve em ^4d4dffVerus^000000?";
+	mes "Nï¿½o ï¿½ incrï¿½vel?";
+	mes "Vocï¿½ jï¿½ esteve em ^4d4dffVerus^000000?";
 	next;
 	mes "[Eisen Werner]";
-	mes "Este laboratório foi construído com base naquele.";
+	mes "Este laboratï¿½rio foi construï¿½do com base naquele.";
 	mes "Era o meu estilo.";
 	mes "......";
 	next;
 	mes "[Eisen Werner]";
 	mes "A tecnologia deles era completamente diferente da nossa.";
-	mes "Aproveitamos tudo o que podíamos.";
+	mes "Aproveitamos tudo o que podï¿½amos.";
 	next;
 	mes "[Eisen Werner]";
-	mes "E então?";
-	mes "Bonito, não?";
+	mes "E entï¿½o?";
+	mes "Bonito, nï¿½o?";
 	next;
-	select("Está se perguntando por que estou dizendo tudo isso?");
+	select("Estï¿½ se perguntando por que estou dizendo tudo isso?");
 	mes "[Eisen Werner]";
-	mes "Haha... porque você vai morrer aqui mesmo.";
+	mes "Haha... porque vocï¿½ vai morrer aqui mesmo.";
 	mes "Quero apenas promover minhas conquistas antes disso.";
 	next;
 	select("Morrer aqui? Eu?");
 	mes "[Eisen Werner]";
-	mes "Com certeza. Você vai morrer aqui.";
+	mes "Com certeza. Vocï¿½ vai morrer aqui.";
 	mes "Acha que eu ficaria aqui desprotegido?";
 	next;
 	mes "[Eisen Werner]";
 	mes "Eu sei que veio aqui por ordem do Reino de Rune-Midgard.";
-	mes "Então eu preparei algo para você.";
+	mes "Entï¿½o eu preparei algo para vocï¿½.";
 	next;
 	cutin "ep16_eisen02.bmp",1;
 	mes "[Eisen Werner]";
-	mes "Um grande espetáculo.";
-	mes "Você vai morrer. Aqui e agora.";
+	mes "Um grande espetï¿½culo.";
+	mes "Vocï¿½ vai morrer. Aqui e agora.";
 	next;
 	mes "[Eisen Werner]";
 	mes "Portanto, seja bem-vindo.";
-	mes "Vamos seguir para a próxima área.";
+	mes "Vamos seguir para a prï¿½xima ï¿½rea.";
 	close2;
 	cutin "",255;
 	if (is_party_leader() == true) {
 		disablenpc instance_npcname("Eisen Werner#werner03");
-		enablenpc instance_npcname("Dispositivo de Segurança#switch11");
-		enablenpc instance_npcname("Dispositivo de Segurança#switch12");
+		enablenpc instance_npcname("Dispositivo de Seguranï¿½a#switch11");
+		enablenpc instance_npcname("Dispositivo de Seguranï¿½a#switch12");
 	}
 	end;
 }
@@ -653,28 +653,28 @@ OnRight2:
 		end;
 	cutin "ep16_eisen01.bmp",1;
 	mes "[Eisen Werner]";
-	mes "Atrás desta parede há algo que você veio buscar.";
+	mes "Atrï¿½s desta parede hï¿½ algo que vocï¿½ veio buscar.";
 	next;
 	mes "[Eisen Werner]";
 	mes "Aquele item incrustado na coroa...";
-	mes "Sabe o que ele realmente é?";
+	mes "Sabe o que ele realmente ï¿½?";
 	next;
 	mes "[Eisen Werner]";
-	mes "Mesmo sendo apenas um fragmento, é parte do coração de Ymir.";
-	mes "Nada comparado a uma mera imitação.";
+	mes "Mesmo sendo apenas um fragmento, ï¿½ parte do coraï¿½ï¿½o de Ymir.";
+	mes "Nada comparado a uma mera imitaï¿½ï¿½o.";
 	next;
 	mes "[Eisen Werner]";
-	mes "... Os tolos do reino nem sabem usar o poder que já possuem.";
-	mes "Que desperdício.";
-	mes "Por isso, eu decidi utilizá-lo.";
+	mes "... Os tolos do reino nem sabem usar o poder que jï¿½ possuem.";
+	mes "Que desperdï¿½cio.";
+	mes "Por isso, eu decidi utilizï¿½-lo.";
 	next;
 	mes "[Eisen Werner]";
-	mes "Quer recuperá-lo? Então prove seu valor.";
-	mes "Não fiquei esperando de mãos vazias.";
+	mes "Quer recuperï¿½-lo? Entï¿½o prove seu valor.";
+	mes "Nï¿½o fiquei esperando de mï¿½os vazias.";
 	next;
 	mes "[Eisen Werner]";
 	mes "Mais uma vez, deixe-me avisar.";
-	mes "Não se assuste.";
+	mes "Nï¿½o se assuste.";
 	mes "Ou melhor, eu ficarei feliz se se assustar. Huhuhuhu...";
 	next;
 	cutin "ep16_eisen03.bmp",1;
@@ -708,7 +708,7 @@ OnTouch:
 	}
 	switch( 'event_final ) {
 	case 1:
-		mes "Reiniciando a história.";
+		mes "Reiniciando a histï¿½ria.";
 		close2;
 		warp 'map_slw$,55,153;
 		end;
@@ -716,12 +716,12 @@ OnTouch:
 		warp 'map_slw$,55,153;
 		end;
 	}
-	mes "Você tem duas opções na próxima área.";
-	mes "Se deseja reviver a história de Seyren Windsor, escolha ^4d4dffProsseguir com a história^000000.";
-	mes "Se quer testemunhar a criação de Eisen Werner, escolha ^4d4dffProsseguir com a batalha^000000.";
+	mes "Vocï¿½ tem duas opï¿½ï¿½es na prï¿½xima ï¿½rea.";
+	mes "Se deseja reviver a histï¿½ria de Seyren Windsor, escolha ^4d4dffProsseguir com a histï¿½ria^000000.";
+	mes "Se quer testemunhar a criaï¿½ï¿½o de Eisen Werner, escolha ^4d4dffProsseguir com a batalha^000000.";
 	next;
-	if (select("Prosseguir com a história.","Prosseguir com a batalha.") == 1) {
-		mes "Você escolheu prosseguir com a história.";
+	if (select("Prosseguir com a histï¿½ria.","Prosseguir com a batalha.") == 1) {
+		mes "Vocï¿½ escolheu prosseguir com a histï¿½ria.";
 		close2;
 		if ('event_final == 0) {
 			'event_final = 1;
@@ -730,7 +730,7 @@ OnTouch:
 		warp 'map_slw$,55,153;
 		end;
 	}
-	mes "Você escolheu prosseguir com a batalha.";
+	mes "Vocï¿½ escolheu prosseguir com a batalha.";
 	close2;
 	if ('event_final == 0) {
 		'event_final = 2;
@@ -742,36 +742,36 @@ OnTouch:
 }
 
 // Sala do Chefe
-// * História
+// * Histï¿½ria
 1@slw,56,171,3	duplicate(dummy_npc)	Seyren Windsor#seiren	4_M_SEIREN_UC
 
 1@slw,53,171,5	script	Eisen Werner#werner05	4_M_EISEN,{
 	if (is_party_leader() == false) {
-		mes "^4d4dffApenas o líder do grupo pode prosseguir com este evento.^000000";
+		mes "^4d4dffApenas o lï¿½der do grupo pode prosseguir com este evento.^000000";
 		close;
 	}
 	if (checkweight(501,1) == 0) {
-		mes "- Não é possível continuar a missão, pois você está carregando itens demais. -";
+		mes "- Nï¿½o ï¿½ possï¿½vel continuar a missï¿½o, pois vocï¿½ estï¿½ carregando itens demais. -";
 		close;
 	}
 	.@seyren$ = instance_npcname("Seyren Windsor#seiren");
 	cutin "ep16_eisen01.bmp",1;
 	mes "[Eisen Werner]";
-	mes "Este lugar é o núcleo do laboratório e contém tudo da minha pesquisa.";
-	npctalk "Este lugar é o núcleo do laboratório e contém tudo da minha pesquisa.";
+	mes "Este lugar ï¿½ o nï¿½cleo do laboratï¿½rio e contï¿½m tudo da minha pesquisa.";
+	npctalk "Este lugar ï¿½ o nï¿½cleo do laboratï¿½rio e contï¿½m tudo da minha pesquisa.";
 	next;
 	mes "[Eisen Werner]";
-	mes "É o fragmento do coração de Ymir que contém o poder fundamental para constituir o mundo. Ele também guarda a origem da vida.";
-	npctalk "É o fragmento do coração de Ymir que contém o poder fundamental para constituir o mundo. Ele também guarda a origem da vida.";
+	mes "ï¿½ o fragmento do coraï¿½ï¿½o de Ymir que contï¿½m o poder fundamental para constituir o mundo. Ele tambï¿½m guarda a origem da vida.";
+	npctalk "ï¿½ o fragmento do coraï¿½ï¿½o de Ymir que contï¿½m o poder fundamental para constituir o mundo. Ele tambï¿½m guarda a origem da vida.";
 	next;
 	mes "[Eisen Werner]";
-	mes "Observe com atenção.";
-	mes "O que você veio recuperar está realizando algo magnífico!";
-	npctalk "Observe com atenção. O que você veio recuperar está realizando algo magnífico!";
+	mes "Observe com atenï¿½ï¿½o.";
+	mes "O que vocï¿½ veio recuperar estï¿½ realizando algo magnï¿½fico!";
+	npctalk "Observe com atenï¿½ï¿½o. O que vocï¿½ veio recuperar estï¿½ realizando algo magnï¿½fico!";
 	next;
 	mes "[Eisen Werner]";
-	mes "A energia extraída disso flui para o círculo mágico no chão... Ha ha ha. Claro, esse círculo foi reinterpretado magicamente.";
-	npctalk "A energia extraída disso flui para o círculo mágico no chão... Ha ha ha. Claro, esse círculo foi reinterpretado magicamente.";
+	mes "A energia extraï¿½da disso flui para o cï¿½rculo mï¿½gico no chï¿½o... Ha ha ha. Claro, esse cï¿½rculo foi reinterpretado magicamente.";
+	npctalk "A energia extraï¿½da disso flui para o cï¿½rculo mï¿½gico no chï¿½o... Ha ha ha. Claro, esse cï¿½rculo foi reinterpretado magicamente.";
 	next;
 	mes "[Eisen Werner]";
 	mes "De qualquer forma, a energia vai para o sujeito experimental... Usando esse poder, eu ajustei o tempo deles.";
@@ -780,12 +780,12 @@ OnTouch:
 	mes "[Eisen Werner]";
 	mes "... Certamente, alguns deles morreram devido ao rompimento celular. Ha ha!";
 	next;
-	select("É só isso que você tem a dizer?");
-	unittalk getcharid(3), "" + strcharinfo(0) + " : É só isso que você tem a dizer?";
+	select("ï¿½ sï¿½ isso que vocï¿½ tem a dizer?");
+	unittalk getcharid(3), "" + strcharinfo(0) + " : ï¿½ sï¿½ isso que vocï¿½ tem a dizer?";
 	cutin "ep16_eisen02.bmp",1;
 	mes "[Eisen Werner]";
-	mes "Não! De forma alguma!";
-	mes "Já esqueceu o que te disse antes?";
+	mes "Nï¿½o! De forma alguma!";
+	mes "Jï¿½ esqueceu o que te disse antes?";
 	mes "Eu preparei um presente.";
 	next;
 	cutin "ep16_eisen01.bmp",1;
@@ -803,23 +803,23 @@ OnTouch:
 	unittalk getcharid(3), "" + strcharinfo(0) + " : ... Seyren?!";
 	mes "[Eisen Werner]";
 	mes "Gostou do presente que preparei?!";
-	mes "Está satisfeito?";
+	mes "Estï¿½ satisfeito?";
 	cutin "ep16_eisen01.bmp",1;
 	next;
 	mes "[Eisen Werner]";
-	mes "Este sujeito fazia parte da delegação daquela família real tola.";
-	mes "Graças ao experimento de um certo corajoso, eu consegui isso.";
+	mes "Este sujeito fazia parte da delegaï¿½ï¿½o daquela famï¿½lia real tola.";
+	mes "Graï¿½as ao experimento de um certo corajoso, eu consegui isso.";
 	next;
-	select("Você está falando do Experimento em Vivo?");
-	unittalk getcharid(3), "" + strcharinfo(0) + " : Você está falando do Experimento em Vivo?";
+	select("Vocï¿½ estï¿½ falando do Experimento em Vivo?");
+	unittalk getcharid(3), "" + strcharinfo(0) + " : Vocï¿½ estï¿½ falando do Experimento em Vivo?";
 	cutin "ep16_eisen02.bmp",1;
 	mes "[Eisen Werner]";
 	mes "Sim, exatamente.";
-	mes "Há muitos que fazem Experimentos em Vivo, mas ele foi o primeiro com coragem de aprimorar um ser vivo.";
+	mes "Hï¿½ muitos que fazem Experimentos em Vivo, mas ele foi o primeiro com coragem de aprimorar um ser vivo.";
 	next;
 	cutin "ep16_eisen01.bmp",1;
 	mes "[Eisen Werner]";
-	mes "usando o coração imitado de Ymir.";
+	mes "usando o coraï¿½ï¿½o imitado de Ymir.";
 	mes "Foi um grande ponto de virada para os Experimentos em Vivo.";
 	next;
 	mes "[Eisen Werner]";
@@ -827,11 +827,11 @@ OnTouch:
 	next;
 	mes "[Eisen Werner]";
 	mes "Mas enfim...";
-	mes "Você deveria cumprimentá-lo, não acha?";
+	mes "Vocï¿½ deveria cumprimentï¿½-lo, nï¿½o acha?";
 	next;
 	mes "[Eisen Werner]";
-	mes "Ah~ é verdade.";
-	mes "Na verdade, não precisa cumprimentar, pois vocês dois vão morrer!";
+	mes "Ah~ ï¿½ verdade.";
+	mes "Na verdade, nï¿½o precisa cumprimentar, pois vocï¿½s dois vï¿½o morrer!";
 	cutin "ep16_eisen03.bmp",1;
 	next;
 	cutin "ep16_eisen02.bmp",1;
@@ -847,7 +847,7 @@ OnTouch:
 	cutin "ep16_evt_ws.bmp",4;
 	mes "[Eisen Werner]";
 	mes "Hmm?";
-	mes "O que é isso, Seyren? Está em fase negativa agora?";
+	mes "O que ï¿½ isso, Seyren? Estï¿½ em fase negativa agora?";
 	next;
 	mes "[Seyren]";
 	mes "Sinto que despertei de um longo sono.";
@@ -855,70 +855,70 @@ OnTouch:
 	npctalk "Sinto que despertei de um longo sono. Talvez fosse para este momento.", .@seyren$;
 	next;
 	mes "[Eisen Werner]";
-	mes "Não se esqueça do seu dever, Seyren.";
-	mes "Você é uma arma. Nada mais que um fantoche com a aparência de um cavaleiro chamado Seyren Windsor.";
+	mes "Nï¿½o se esqueï¿½a do seu dever, Seyren.";
+	mes "Vocï¿½ ï¿½ uma arma. Nada mais que um fantoche com a aparï¿½ncia de um cavaleiro chamado Seyren Windsor.";
 	next;
 	mes "[Eisen Werner]";
 	mes "Quer que eu explique passo a passo?";
-	mes "Após o transplante do coração falso de Ymir, o corpo não suportou o poder e colapsou.";
+	mes "Apï¿½s o transplante do coraï¿½ï¿½o falso de Ymir, o corpo nï¿½o suportou o poder e colapsou.";
 	next;
 	mes "[Eisen Werner]";
-	mes "Então o espírito se duplicou e continuou se dividindo.";
-	mes "Durante esse processo, memória, consciência e alma se dispersaram como areia.";
+	mes "Entï¿½o o espï¿½rito se duplicou e continuou se dividindo.";
+	mes "Durante esse processo, memï¿½ria, consciï¿½ncia e alma se dispersaram como areia.";
 	next;
 	mes "[Eisen Werner]";
-	mes "Esperávamos que alguém com mente e corpo fortes se tornasse uma arma biológica perfeita.";
+	mes "Esperï¿½vamos que alguï¿½m com mente e corpo fortes se tornasse uma arma biolï¿½gica perfeita.";
 	next;
 	mes "[Eisen Werner]";
 	mes "Nunca imaginamos que se multiplicaria infinitamente. O experimento foi considerado um fracasso.";
 	next;
 	mes "[Eisen Werner]";
-	mes "Para piorar, tornou-se uma criatura incontrolável, movida apenas pela fúria.";
+	mes "Para piorar, tornou-se uma criatura incontrolï¿½vel, movida apenas pela fï¿½ria.";
 	next;
 	mes "[Seyren]";
 	mes "Eu estou aqui.";
 	npctalk "Eu estou aqui.", .@seyren$;
 	next;
 	mes "[Eisen Werner]";
-	mes "Sabe de uma coisa? Eles ainda estão se dividindo.";
+	mes "Sabe de uma coisa? Eles ainda estï¿½o se dividindo.";
 	mes "Imitando o corpo original, continuam crescendo dentro dele.";
 	next;
 	mes "[Eisen Werner]";
 	mes "Seres imperfeitos que desejam se tornar perfeitos.";
 	next;
 	mes "[Eisen Werner]";
-	mes "E o único experimento bem-sucedido é você. Nós o chamamos de Seyren agora.";
+	mes "E o ï¿½nico experimento bem-sucedido ï¿½ vocï¿½. Nï¿½s o chamamos de Seyren agora.";
 	next;
 	cutin "ep16_seiren02.bmp",2;
 	mes "[Seyren]";
-	mes "...... É o fim da sua vontade?";
-	npctalk "...... É o fim da sua vontade?", .@seyren$;
+	mes "...... ï¿½ o fim da sua vontade?";
+	npctalk "...... ï¿½ o fim da sua vontade?", .@seyren$;
 	next;
 	cutin "ep16_eisen03.bmp",0;
 	mes "[Eisen Werner]";
-	mes "Ei, meu caro? Você não pode fazer isso comigo.";
-	mes "Você deve me obedecer!";
+	mes "Ei, meu caro? Vocï¿½ nï¿½o pode fazer isso comigo.";
+	mes "Vocï¿½ deve me obedecer!";
 	next;
 	cutin "ep16_eisen02.bmp",0;
 	mes "[Eisen Werner]";
-	mes "Não lembra o quanto lutei para te trazer de volta daquele inferno?";
-	mes "Não se deixe influenciar pela consciência de um morto.";
+	mes "Nï¿½o lembra o quanto lutei para te trazer de volta daquele inferno?";
+	mes "Nï¿½o se deixe influenciar pela consciï¿½ncia de um morto.";
 	next;
 	cutin "ep16_seiren02.bmp",2;
 	mes "[Seyren]";
 	mes "... Eisen Werner.";
-	mes "Deixe-me perguntar novamente. É o fim da sua vontade?";
-	npctalk "... Eisen Werner. Deixe-me perguntar novamente. É o fim da sua vontade?", .@seyren$;
+	mes "Deixe-me perguntar novamente. ï¿½ o fim da sua vontade?";
+	npctalk "... Eisen Werner. Deixe-me perguntar novamente. ï¿½ o fim da sua vontade?", .@seyren$;
 	next;
 	cutin "ep16_eisen01.bmp",0;
 	mes "[Eisen Werner]";
 	mes "Droga!";
 	mes "Eu nunca esperei por isso!";
-	mes "Esse mundo é mesmo engraçado! Ha ha ha ha ha";
+	mes "Esse mundo ï¿½ mesmo engraï¿½ado! Ha ha ha ha ha";
 	next;
 	mes "[Eisen Werner]";
-	mes "Não pense que acabou por aqui.";
-	mes "Eu não preciso de um fracassado!";
+	mes "Nï¿½o pense que acabou por aqui.";
+	mes "Eu nï¿½o preciso de um fracassado!";
 	close2;
 	setpcblock PCBLOCK_NPC, true;
 	cutin "",255;
@@ -932,8 +932,8 @@ OnTouch:
 	setpcblock PCBLOCK_NPC, false;
 	npctalk "Oh....", .@seyren$;
 	mes "[Seyren]";
-	mes "... Eisen. Você abandonou tudo assim.";
-	npctalk "... Eisen. Você abandonou tudo assim.", .@seyren$;
+	mes "... Eisen. Vocï¿½ abandonou tudo assim.";
+	npctalk "... Eisen. Vocï¿½ abandonou tudo assim.", .@seyren$;
 	specialeffect2 EF_DEVIL3;
 	cutin "ep16_seiren01.bmp",2;
 	next;
@@ -943,36 +943,36 @@ OnTouch:
 	cutin "ep16_seiren02.bmp",2;
 	next;
 	mes "[Seyren]";
-	mes "A estrutura está enfraquecendo novamente.";
-	mes "Agora, tenho uma mensagem mais urgente para você do que para Eisen.";
-	npctalk "A estrutura está enfraquecendo novamente. Agora, tenho uma mensagem mais urgente para você do que para Eisen.", .@seyren$;
+	mes "A estrutura estï¿½ enfraquecendo novamente.";
+	mes "Agora, tenho uma mensagem mais urgente para vocï¿½ do que para Eisen.";
+	npctalk "A estrutura estï¿½ enfraquecendo novamente. Agora, tenho uma mensagem mais urgente para vocï¿½ do que para Eisen.", .@seyren$;
 	next;
 	mes "[Seyren]";
-	mes "Esperei por você por muito tempo.";
-	mes "Como Eisen disse, já não importa se sou ou não Seyren.";
-	npctalk "Esperei por você por muito tempo. Como Eisen disse, já não importa se sou ou não Seyren.", .@seyren$;
+	mes "Esperei por vocï¿½ por muito tempo.";
+	mes "Como Eisen disse, jï¿½ nï¿½o importa se sou ou nï¿½o Seyren.";
+	npctalk "Esperei por vocï¿½ por muito tempo. Como Eisen disse, jï¿½ nï¿½o importa se sou ou nï¿½o Seyren.", .@seyren$;
 	next;
 	mes "[Seyren]";
 	mes "Desde que comecei a pensar, nunca soube quem eu era nem por que existia.";
 	next;
 	specialeffect2 EF_DEVIL4;
 	mes "[Seyren]";
-	mes "A divisão contínua criou inúmeras cópias de mim mesmo.";
+	mes "A divisï¿½o contï¿½nua criou inï¿½meras cï¿½pias de mim mesmo.";
 	next;
 	mes "[Seyren]";
-	mes "O poder do coração falso de Ymir respondeu à minha vontade e à dos meus companheiros. Eles queriam se unir, mas continuavam a se dividir.";
+	mes "O poder do coraï¿½ï¿½o falso de Ymir respondeu ï¿½ minha vontade e ï¿½ dos meus companheiros. Eles queriam se unir, mas continuavam a se dividir.";
 	next;
 	specialeffect2 EF_DEVIL5;
 	cutin "ep16_seiren01.bmp",2;
 	mes "[Seyren]";
-	mes "Quantas cópias de mim já foram criadas?";
+	mes "Quantas cï¿½pias de mim jï¿½ foram criadas?";
 	next;
 	cutin "ep16_seiren02.bmp",2;
 	mes "[Seyren]";
-	mes "Perdi o ego após tantas divisões, mas fui regenerado na forma anterior. Não acho que foi coincidência.";
+	mes "Perdi o ego apï¿½s tantas divisï¿½es, mas fui regenerado na forma anterior. Nï¿½o acho que foi coincidï¿½ncia.";
 	next;
 	mes "[Seyren]";
-	mes "Acho que havia um propósito.";
+	mes "Acho que havia um propï¿½sito.";
 	next;
 	mes "[Seyren]";
 	mes "E percebi isso ao ver ^4d4dffTerra Gloria^000000.";
@@ -981,14 +981,14 @@ OnTouch:
 	specialeffect2 EF_DEVIL6;
 	cutin "ep16_seiren01.bmp",2;
 	mes "[Seyren]";
-	mes "Você veio recuperar isto?";
+	mes "Vocï¿½ veio recuperar isto?";
 	mes "... A terra se foi e apenas a estrela permaneceu.";
 	next;
 	specialeffect2 EF_DEVIL7;
 	cutin "ep16_seiren02.bmp",2;
 	mes "[Seyren]";
-	mes "Eisen tem razão. ^4d4dffSeyren Windsor não existe mais neste mundo.^000000";
-	mes "Tudo o que resta é a forte vontade de continuar passando algo adiante.";
+	mes "Eisen tem razï¿½o. ^4d4dffSeyren Windsor nï¿½o existe mais neste mundo.^000000";
+	mes "Tudo o que resta ï¿½ a forte vontade de continuar passando algo adiante.";
 	next;
 	specialeffect2 EF_SCREEN_QUAKE;
 	specialeffect2 EF_DEVIL8;
@@ -1004,33 +1004,33 @@ OnTouch:
 	mes ".....";
 	next;
 	mes "[Seyren]";
-	mes "Não tenho mais tempo.";
+	mes "Nï¿½o tenho mais tempo.";
 	mes "Depois deste momento, ^4d4dffserei dividido e espalhado novamente.^000000";
 	next;
 	mes "[Seyren]";
-	mes "Enquanto ainda tenho consciência, tenho uma última mensagem para você.";
+	mes "Enquanto ainda tenho consciï¿½ncia, tenho uma ï¿½ltima mensagem para vocï¿½.";
 	next;
 	if (instance_live_info(ILI_NAME) == "Werner Laboratory central room#1") {
 		mes "[Seyren]";
 		mes "Por favor, siga em frente.";
-		mes "Seyren Windsor, o cavaleiro de Prontera, falhou em sua missão.";
+		mes "Seyren Windsor, o cavaleiro de Prontera, falhou em sua missï¿½o.";
 		next;
 		mes "[Seyren]";
-		mes "^4d4dffEu e todos os meus companheiros já morremos há muito tempo.^000000";
-		mes "Não desperdice seus sentimentos com corpos que já estão mortos.";
+		mes "^4d4dffEu e todos os meus companheiros jï¿½ morremos hï¿½ muito tempo.^000000";
+		mes "Nï¿½o desperdice seus sentimentos com corpos que jï¿½ estï¿½o mortos.";
 		next;
 		mes "[Seyren]";
-		mes "Eles são apenas fantasmas cobertos por cascas.";
-		mes "Tive sorte de mostrar minha última vontade diante de você.";
+		mes "Eles sï¿½o apenas fantasmas cobertos por cascas.";
+		mes "Tive sorte de mostrar minha ï¿½ltima vontade diante de vocï¿½.";
 		next;
 		mes "[Seyren]";
-		mes "Eles são as ^4d4dffrelíquias^000000 minhas e de meus companheiros.";
-		mes "Por favor, entregue-as às nossas famílias.";
+		mes "Eles sï¿½o as ^4d4dffrelï¿½quias^000000 minhas e de meus companheiros.";
+		mes "Por favor, entregue-as ï¿½s nossas famï¿½lias.";
 		if (is_party_leader() == true) {
-			getitem 25179,1;	// Estrela da Bênção
+			getitem 25179,1;	// Estrela da Bï¿½nï¿½ï¿½o
 			getitem 23087,1;	// Pequena Bolsa de Couro
-			erasequest 7739;// Encontrar Estrela da Bênção!
-			setquest 7740;// Estrela da Bênção Obtida
+			erasequest 7739;// Encontrar Estrela da Bï¿½nï¿½ï¿½o!
+			setquest 7740;// Estrela da Bï¿½nï¿½ï¿½o Obtida
 			terra_gloria_main = 22;
 		}
 		close2;
@@ -1047,9 +1047,9 @@ OnTouch:
 		warp "que_swat",155,50;
 		end;
 	}
-	// Repetição diária
+	// Repetiï¿½ï¿½o diï¿½ria
 	mes "[Seyren]";
-	mes "Foi ótimo te ver no final.";
+	mes "Foi ï¿½timo te ver no final.";
 	mes "Obrigado... Adeus.";
 	close2;
 	setpcblock PCBLOCK_NPC, true;
@@ -1064,7 +1064,7 @@ OnTouch:
 	setpcblock PCBLOCK_NPC, false;
 	if (is_party_leader() == true)
 		'event_final = 0;
-	mapannounce 'map_slw$, "As configurações da sala central foram reinicializadas.", bc_map,0xFF99;
+	mapannounce 'map_slw$, "As configuraï¿½ï¿½es da sala central foram reinicializadas.", bc_map,0xFF99;
 	warpparty 'map_slw$,54,134,getcharid(1),'map_slw$,2,2;
 	disablenpc .@seyren$;
 	end;
@@ -1076,11 +1076,11 @@ OnTouch:
 1@slw,55,170,3	script	#chefe_mestre_dummy	HIDDEN_WARP_NPC,5,5,{
 	end;
 OnTouch:
-	if (is_party_leader() == false) // oficialmente o jogador pode invocar vários chefes trocando o líder do grupo
+	if (is_party_leader() == false) // oficialmente o jogador pode invocar vï¿½rios chefes trocando o lï¿½der do grupo
 		end;
 	setpcblock PCBLOCK_NPC, true;
 	.@npc_name$ = instance_npcname("Filhote de Monstro#chefe_mestre");
-	npctalk "Como você ousa entrar aqui! Que coragem!", .@npc_name$;
+	npctalk "Como vocï¿½ ousa entrar aqui! Que coragem!", .@npc_name$;
 	sleep2 3000;
 	npctalk "Deve ser uma honra lutar comigo!", .@npc_name$;
 	sleep2 3000;
@@ -1088,7 +1088,7 @@ OnTouch:
 	sleep2 3000;
 	npctalk ".. Droga do Werner. Por que ele me misturou com um lobo?", .@npc_name$;
 	sleep2 3000;
-	npctalk "De qualquer forma... você vai virar carne morta.", .@npc_name$;
+	npctalk "De qualquer forma... vocï¿½ vai virar carne morta.", .@npc_name$;
 	sleep2 3000;
 	setpcblock PCBLOCK_NPC, false;
 	disablenpc instance_npcname("#chefe_mestre_dummy");
@@ -1096,7 +1096,7 @@ OnTouch:
 	specialeffect EF_DANCE_BLADE_ATK, AREA, instance_npcname("Filhote de Monstro#chefe_mestre");
 	specialeffect EF_ALL_FULL_THROTTLE, AREA, instance_npcname("Filhote de Monstro#chefe_mestre");
 	donpcevent instance_npcname("#chefe_mestre_lab") + "::OnStart";
-	mapannounce 'map_slw$, "O campo mágico foi ativado.", bc_map,0xFF99;
+	mapannounce 'map_slw$, "O campo mï¿½gico foi ativado.", bc_map,0xFF99;
 	cloakonnpc instance_npcname("Filhote de Monstro#chefe_mestre");
 	end;
 }
@@ -1110,8 +1110,8 @@ OnStart:
 	end;
 OnMobDead:
 	if (mobcount( 'map_slw$, instance_npcname("#chefe_mestre_lab") + "::OnMobDead" ) < 1) {
-		mapannounce 'map_slw$, "O campo mágico foi dissipado. Uma saída apareceu.", bc_map,0xFF99;
-		enablenpc instance_npcname("Saída de Emergência#saida");
+		mapannounce 'map_slw$, "O campo mï¿½gico foi dissipado. Uma saï¿½da apareceu.", bc_map,0xFF99;
+		enablenpc instance_npcname("Saï¿½da de Emergï¿½ncia#saida");
 		disablenpc instance_npcname("#chefe_mestre_lab");
 	}
 	end;

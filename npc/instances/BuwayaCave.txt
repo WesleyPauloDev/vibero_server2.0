@@ -266,7 +266,7 @@ OnMyMobDead:
 		donpcevent instance_npcname("#box_call")+"::OnDisable";
 		donpcevent instance_npcname("#bunshin")+"::OnDisable";
 		donpcevent instance_npcname("#exit_mob")+"::OnDisable";
-		donpcevent instance_npcname("Guarda da Saída#cave_out")+"::OnEnable";
+		donpcevent instance_npcname("Guarda da Saï¿½da#cave_out")+"::OnEnable";
 		mapannounce .@map$,"Guarda: Excelente trabalho! Saia da caverna o quanto antes!",bc_map,"0x00ff99";
 	}
 	end;
@@ -298,12 +298,12 @@ OnMyMobDead:
 	end;
 }
 
-1@ma_c,28,57,0	script	Guarda da Saída#cave_out	570,{
+1@ma_c,28,57,0	script	Guarda da Saï¿½da#cave_out	570,{
 	mes "[Guarda]";
 	mes "Buwaya foi derrotado. Deseja sair da caverna?";
 	next;
-	if (select("Sim:Não, vou ficar mais um pouco.") == 1) {
-		if (#BuwayaCave_STATUS == 2) {
+	if (select("Sim:Nï¿½o, vou ficar mais um pouco.") == 1) {
+		if (#BuwayaCave_STATUS == 1 || #BuwayaCave_STATUS == 2) {
 			.@finish_result = callfunc("F_InstanceFinishBase", "Caverna Buwaya", "#BuwayaCave_STATUS", 10, 2, "#inst175_name$", "#inst175_status", 1, 10, 110002, 3000, 3, 0, "Buwaya Cave");
 			if (.@finish_result == -1) {
 				mes "Voce esta com peso demais para receber as recompensas.";
@@ -317,12 +317,12 @@ OnMyMobDead:
 
 OnInstanceInit:
 	'reward_announced = 0;
-	hideonnpc instance_npcname("Guarda da Saída#cave_out");
-	disablenpc instance_npcname("Guarda da Saída#cave_out");
+	hideonnpc instance_npcname("Guarda da Saï¿½da#cave_out");
+	disablenpc instance_npcname("Guarda da Saï¿½da#cave_out");
 	end;
 OnEnable:
-	hideoffnpc instance_npcname("Guarda da Saída#cave_out");
-	enablenpc instance_npcname("Guarda da Saída#cave_out");
+	hideoffnpc instance_npcname("Guarda da Saï¿½da#cave_out");
+	enablenpc instance_npcname("Guarda da Saï¿½da#cave_out");
 	end;
 }
 

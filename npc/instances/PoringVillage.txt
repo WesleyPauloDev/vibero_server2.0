@@ -15,11 +15,11 @@
 	
 	OnStartInstance:
 		callfunc("F_InstanceEntry",
-			"Poring Village",        // Nome da instância
+			"Poring Village",        // Nome da instï¿½ncia
 			"Emily",                 // Nome do NPC
-			"poringvillage", // Variável de cooldown da conta
-			"PORING",        // Variável de status da conta
-			30,                       // Level mínimo
+			"poringvillage", // Variï¿½vel de cooldown da conta
+			"PORING",        // Variï¿½vel de status da conta
+			30,                       // Level mï¿½nimo
 			"Vila dos Porings",
 			0,                        // Sem quest de caca na entrada
 			1000                      // Reset diario por CashPoints
@@ -38,7 +38,7 @@ OnTouch:
 
 OnInstanceInit:
 	set .@map$, instance_mapname("1@begi");
-	// Bloqueia certas áreas até os diálogos da Emily liberarem
+	// Bloqueia certas ï¿½reas atï¿½ os diï¿½logos da Emily liberarem
 	setcell .@map$,146,35,146,41,cell_walkable,0;
 	setcell .@map$,154,100,154,107,cell_walkable,0;
 	setcell .@map$,59,187,59,197,cell_walkable,0;
@@ -55,9 +55,9 @@ OnInstanceInit:
 
 OnStart:
 	set .@map$, instance_mapname("1@begi");
-	npctalk "Emily: Então... essa é a Vila dos Porings?";
+	npctalk "Emily: Entï¿½o... essa ï¿½ a Vila dos Porings?";
 	sleep 2000;
-	npctalk "Emily: Certo! Vamos lá!";
+	npctalk "Emily: Certo! Vamos lï¿½!";
 	sleep 2000;
 	disablenpc();
 	donpcevent instance_npcname("#start_wp1_2") + "::OnStart";
@@ -67,7 +67,7 @@ OnStart:
 
 1@begi,140,37,5	script	#start_wp1_2	4_GEFFEN_03,{
 	mes "[Emily]";
-	mes "Vou começar devagar agora...";
+	mes "Vou comeï¿½ar devagar agora...";
 	close;
 
 OnStart:
@@ -78,21 +78,21 @@ OnStart:
 	sleep 3000;
 	npctalk "Emily: Tenho quase certeza de que os Porings esconderam muitos tesouros por aqui...";
 	sleep 4000;
-	mapannounce .@map$, "???: Ouço uma voz humana... Recebam-nos, pessoal!", bc_map, "0xFFFF00";
+	mapannounce .@map$, "???: Ouï¿½o uma voz humana... Recebam-nos, pessoal!", bc_map, "0xFFFF00";
 	sleep 4000;
 	npctalk "Emily: O que foi que ele disse?";
 	sleep 3000;
-	npctalk "Emily: Parece que algo está vindo correndo pra cá...";
+	npctalk "Emily: Parece que algo estï¿½ vindo correndo pra cï¿½...";
 	sleep 2500;
-	mapannounce .@map$, "???: Não deixem eles fugirem! Peguem tudo que tiver valor!", bc_map, 0xFFFF00;
+	mapannounce .@map$, "???: Nï¿½o deixem eles fugirem! Peguem tudo que tiver valor!", bc_map, 0xFFFF00;
 	sleep 2500;
-	npctalk "Emily: É... acho que eles não são amigáveis. Rápido, esconda-se!";
+	npctalk "Emily: ï¿½... acho que eles nï¿½o sï¿½o amigï¿½veis. Rï¿½pido, esconda-se!";
 	sleep 4000;
 
-	// Em vez de sumir completamente, o NPC fica invisível (padrão oficial)
+	// Em vez de sumir completamente, o NPC fica invisï¿½vel (padrï¿½o oficial)
 	hideonnpc();
 	sleep 1000;
-	npctalk "Emily: Aaaah! Você não conseguiu se esconder? Bem... força aí!";
+	npctalk "Emily: Aaaah! Vocï¿½ nï¿½o conseguiu se esconder? Bem... forï¿½a aï¿½!";
 
 	// Efeitos de surgimento dos Porings
 	hideonnpc instance_npcname("#poring_wl18");
@@ -103,7 +103,7 @@ OnStart:
 	specialeffect EF_LORD, AREA, instance_npcname("#poring_wl19");
 	sleep 500;
 
-	// Remove bloqueios para permitir combate e movimentação
+	// Remove bloqueios para permitir combate e movimentaï¿½ï¿½o
 	disablenpc instance_npcname("#poring_wl15");
 	sleep 500;
 	disablenpc instance_npcname("#poring_wl16");
@@ -176,11 +176,11 @@ OnMobDead:
 	if (mobcount( .@map$, instance_npcname("poring_village_1") + "::OnMobDead" ) > 3)
 		end;
 	killmonster .@map$, instance_npcname("poring_village_1") + "::OnMobDead";
-	mapannounce .@map$, "Emily: Uau~ Você é muito forte! Você derrotou todos esses Porings!", bc_map, 0xFFFF00;
+	mapannounce .@map$, "Emily: Uau~ Vocï¿½ ï¿½ muito forte! Vocï¿½ derrotou todos esses Porings!", bc_map, 0xFFFF00;
 	sleep 2000;
-	mapannounce .@map$, "Emily: Mas o Poring parece único de alguma forma. Tome cuidado!", bc_map, 0xFFFF00;
+	mapannounce .@map$, "Emily: Mas o Poring parece ï¿½nico de alguma forma. Tome cuidado!", bc_map, 0xFFFF00;
 	sleep 2000;
-	mapannounce .@map$, "Emily: Ah, há uma força única se você chegar perto da coluna de luz azul.", bc_map, 0xFFFF00;
+	mapannounce .@map$, "Emily: Ah, hï¿½ uma forï¿½a ï¿½nica se vocï¿½ chegar perto da coluna de luz azul.", bc_map, 0xFFFF00;
 	sleep 2000;
 	monster .@map$,132,103,"--en--","MD_GOLDRING",1, instance_npcname("poring_village_1") + "::OnBossDead";
 	end;
@@ -297,9 +297,9 @@ OnMobDead:
 	if (mobcount( .@map$, instance_npcname("poring_village_2") + "::OnMobDead" ) > 4)
 		end;
 	killmonster .@map$, instance_npcname("poring_village_2") + "::OnMobDead";
-	mapannounce .@map$, "Emily: Hmm... aqui está outro chefe... Parece forte...", bc_map, 0xFFFF00;
+	mapannounce .@map$, "Emily: Hmm... aqui estï¿½ outro chefe... Parece forte...", bc_map, 0xFFFF00;
 	sleep 2000;
-	mapannounce .@map$, "Emily: Não sou boa em batalhas. Deixe-me procurar o tesouro primeiro. Até breve~", bc_map, 0xFFFF00;
+	mapannounce .@map$, "Emily: Nï¿½o sou boa em batalhas. Deixe-me procurar o tesouro primeiro. Atï¿½ breve~", bc_map, 0xFFFF00;
 	sleep 2000;
 	monster .@map$,42,173,"--en--","MD_AMERING",1, instance_npcname("poring_village_2") + "::OnBossDead";
 	end;
@@ -382,17 +382,17 @@ OnMobDead:
 	if (mobcount( .@map$, instance_npcname("poring_village_3") + "::OnMobDead" ) > 4)
 		end;
 	killmonster .@map$, instance_npcname("poring_village_3") + "::OnMobDead";
-	mapannounce .@map$, "Rei Poring: Com licença... Mas... Você poderia voltar agora?...", bc_map, 0xFFFF;
+	mapannounce .@map$, "Rei Poring: Com licenï¿½a... Mas... Vocï¿½ poderia voltar agora?...", bc_map, 0xFFFF;
 	sleep 2000;
-	mapannounce .@map$, "Emily: O quê? Quem é você?", bc_map, 0xFFFF00;
+	mapannounce .@map$, "Emily: O quï¿½? Quem ï¿½ vocï¿½?", bc_map, 0xFFFF00;
 	sleep 2000;
-	mapannounce .@map$, "Rei Poring: Eu sou o líder desta Vila Poring. Desculpem a apresentação tardia.", bc_map, 0xFFFF;
+	mapannounce .@map$, "Rei Poring: Eu sou o lï¿½der desta Vila Poring. Desculpem a apresentaï¿½ï¿½o tardia.", bc_map, 0xFFFF;
 	sleep 2000;
-	mapannounce .@map$, "Rei Poring: Talvez haja algum mal-entendido em nossos panfletos. Esta vila é muito pobre e não tem nada de valor.", bc_map, 0xFFFF;
+	mapannounce .@map$, "Rei Poring: Talvez haja algum mal-entendido em nossos panfletos. Esta vila ï¿½ muito pobre e nï¿½o tem nada de valor.", bc_map, 0xFFFF;
 	sleep 2000;
 	mapannounce .@map$, "Emily: Cabe a mim julgar depois de olhar mais ao redor...", bc_map, 0xFFFF00;
 	sleep 2000;
-	mapannounce .@map$, "Rei Poring: Ugh... Não gosto de lutar, mas não há escolha.", bc_map, 0xFFFF;
+	mapannounce .@map$, "Rei Poring: Ugh... Nï¿½o gosto de lutar, mas nï¿½o hï¿½ escolha.", bc_map, 0xFFFF;
 	sleep 2000;
 	monster .@map$,182,194,"--en--","PORING",10;
 	for ( .@i = 0; .@i < 10; ++.@i ) {
@@ -415,13 +415,13 @@ OnBossDead:
 OnTouch:
 	switch( rand(3) ) {
 		case 0:
-			unittalk getcharid(3), "" + strcharinfo(0) + " : Ohhhhh!!! Solte o papagaio que está lá dentro!!!!";
+			unittalk getcharid(3), "" + strcharinfo(0) + " : Ohhhhh!!! Solte o papagaio que estï¿½ lï¿½ dentro!!!!";
 			break;
 		case 1:
-			unittalk getcharid(3), "" + strcharinfo(0) + " : Acho que não tem problema dar um biquinho em alguém agora!!";
+			unittalk getcharid(3), "" + strcharinfo(0) + " : Acho que nï¿½o tem problema dar um biquinho em alguï¿½m agora!!";
 			break;
 		case 2:
-			unittalk getcharid(3), "" + strcharinfo(0) + " : Você foi mordido por um papagaio louco?";
+			unittalk getcharid(3), "" + strcharinfo(0) + " : Vocï¿½ foi mordido por um papagaio louco?";
 			break;
 	}
 	transform 1629,60000;
@@ -436,24 +436,24 @@ OnTouch:
 
 1@begi,199,186,5	script	#gift	4_GEFFEN_03,{
 	mes "[Emily]";
-	mes "Você pode ficar com todos os itens que encontrar nesta masmorra. Eu já tenho alguns.";
+	mes "Vocï¿½ pode ficar com todos os itens que encontrar nesta masmorra. Eu jï¿½ tenho alguns.";
 	next;
 	
 	mes "[Emily]";
-	mes "Ah, encontrei alguns itens. Deixa eu te dar um deles. Só para comemorar sua primeira visita!";
+	mes "Ah, encontrei alguns itens. Deixa eu te dar um deles. Sï¿½ para comemorar sua primeira visita!";
 	next;
 	if (rand(100) < 50) {
-		getitem 14586,10;	// Doce HiperAçucarado
+		getitem 14586,10;	// Doce HiperAï¿½ucarado
 	} else {
 		getitem 12210,1;	// Goma de Mascar
 	}
 	
 	mes "[Emily]";
-	mes "Encontrei algumas Moedas também, pode ficar com algumas. Agora, vamos lá fora!";
+	mes "Encontrei algumas Moedas tambï¿½m, pode ficar com algumas. Agora, vamos lï¿½ fora!";
 	close2;
 	
-	// Premiações do Servidor
-	if (#PORING_STATUS == 2) {
+	// Premiaï¿½ï¿½es do Servidor
+	if (#PORING_STATUS == 1 || #PORING_STATUS == 2) {
 		.@finish_result = callfunc("F_InstanceFinishBase", "Vila dos Porings", "#PORING_STATUS", 10, 2, "#inst60_name$", "#inst60_status", 1, 10, 110002, 3000, 3, 0, "Poring Village");
 		if (.@finish_result == -1) {
 			mes "Voce esta com peso demais para receber as recompensas.";

@@ -11960,6 +11960,9 @@ void clif_parse_ActionRequest_sub( map_session_data& sd, uint8 action_type, int3
 		if( pc_cant_act(&sd) )
 			return;
 
+		if( sd.state.noautoattack )
+			return;
+
 		if (!battle_config.sdelay_attack_enable && pc_checkskill(&sd, SA_FREECAST) <= 0) {
 			if (DIFF_TICK(tick, sd.ud.canact_tick) < 0) {
 				clif_skill_fail( sd, 1, USESKILL_FAIL_SKILLINTERVAL );
