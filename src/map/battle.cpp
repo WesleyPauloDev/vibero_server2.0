@@ -3723,10 +3723,6 @@ int32 battle_get_magic_element(struct block_list* src, struct block_list* target
 			if (sc && sc->getSCE(SC_ANCILLA))
 				element = ELE_NEUTRAL;
 			break;
-		case LG_RAYOFGENESIS:
-			if (sc && sc->getSCE(SC_INSPIRATION))
-				element = ELE_NEUTRAL;
-			break;
 		case IG_IMPERIAL_PRESSURE:
 			if (sc != nullptr && sc->hasSCE(SC_GUARD_STANCE))
 				element = ELE_HOLY;
