@@ -198,39 +198,66 @@ L_Main:
 	mes "Servicos da ^0055FFOld Glast Heim Challenge^000000.";
 	next;
 
-	switch (select("Hats temporais:Armas reais e guardioes:Encantar Circlet equipado:Aprimorar encantamento:Resetar encantamentos:Informacoes:Voltar")) {
+	switch (select("Hats temporais:Acessorios temporais:Capas do Cavaleiro Branco:Armas reais e guardioes:Encantar equipamentos temporais:Aprimorar encantamento:Informacoes:Voltar")) {
 	case 1:
 		close2;
 		callshop "barter_ogh_challenge_hats",1;
 		end;
 
 	case 2:
+		mes "[Oscar]";
+		mes "Estes acessorios ativam combos com os Circlets Temporais correspondentes.";
+		mes "A janela de troca mostra todos os materiais necessarios.";
+		next;
+		close2;
+		callshop "barter_ogh_challenge_accessories",1;
+		end;
+
+	case 3:
+		mes "[Oscar]";
+		mes "As Capas do Cavaleiro Branco possuem versoes para combate corpo a corpo, a distancia e magico.";
+		mes "Os combos especiais exigem soma de refino ^0055FF21^000000 entre a capa e o Circlet correspondente.";
+		next;
+		close2;
+		callshop "barter_ogh_challenge_mantles",1;
+		end;
+
+	case 4:
 		close2;
 		callshop "barter_ogh_challenge_weapons",1;
 		end;
 
-	case 3:
-		goto L_Enchant;
-
-	case 4:
-		goto L_Upgrade;
-
 	case 5:
-		goto L_Reset;
+		close2;
+		item_enchant(165);
+		end;
 
 	case 6:
+		goto L_Upgrade;
+
+	case 7:
 		mes "[Oscar]";
-		mes "Equipe o Circlet Temporal no topo da cabeca.";
+		mes "A janela de encantamento reconhece os Circlets e acessorios temporais no inventario ou equipados.";
 		mes "O processo preenche os slots na ordem: ^0055FF4o slot^000000, ^0055FF3o slot^000000 e ^0055FF2o slot^000000.";
 		next;
 		mes "[Oscar]";
 		mes "Custos:";
-		mes "4o slot: ^0055FF10x " + getitemname(25867) + "^000000.";
-		mes "3o slot normal: ^0055FF20x " + getitemname(25867) + "^000000.";
-		mes "3o slot especial: ^0055FF2x " + getitemname(25865) + "^000000.";
+		mes "4o slot: ^0055FF10x aleatorio / 30x perfeito " + getitemname(25867) + "^000000.";
+		mes "3o slot: ^0055FF20x aleatorio / 60x perfeito " + getitemname(25867) + "^000000.";
+		mes "3o slot especial escolhido: ^0055FF2x " + getitemname(25865) + "^000000.";
 		mes "2o slot aleatorio: ^0055FF2x " + getitemname(25866) + "^000000.";
-		mes "2o slot escolhido: ^0055FF5.000.000 Zeny + 40x " + getitemname(25866) + "^000000.";
-		mes "Aprimoramento perfeito: ^0055FF5x o custo normal + 5.000.000z por nivel atual^000000.";
+		mes "2o slot perfeito escolhido: ^0055FF6x " + getitemname(25866) + "^000000 (3x o custo aleatorio).";
+		mes "As Joias Temporais tambem aparecem no perfeito do 2o slot por ^0055FF2x " + getitemname(25865) + "^000000.";
+		mes "O aprimoramento permanece na opcao separada e conserva as chances atuais.";
+		next;
+		mes "[Oscar]";
+		mes "Os acessorios temporais possuem combo direto com o Circlet da classe correspondente.";
+		mes "Alguns deles tambem recebem bonus extras quando o Circlet possui uma Joia Temporal especifica no 3o slot.";
+		mes "Consulte a descricao do acessorio e do Circlet antes de escolher o encantamento especial.";
+		next;
+		mes "[Oscar]";
+		mes "As Capas do Cavaleiro Branco possuem tres especializacoes: corpo a corpo, distancia e magia.";
+		mes "O bonus com Circlet e ativado quando a soma dos refinos do elmo e da capa alcanca ^0055FF21^000000.";
 		next;
 		goto L_Main;
 
@@ -238,122 +265,53 @@ L_Main:
 		return;
 	}
 
-L_Enchant:
-	.@part = EQI_HEAD_TOP;
-	.@equip_id = getequipid(.@part);
-	if (.@equip_id < 19474 || .@equip_id > 19492) {
+L_SelectEnchantEquip:
+	setarray .@accessory_ids[0],490211,490219,490238,490257,490258,490259,490260,490262,490263,490269,490281,490284,490561,490575,490580,490586,490590,490598,490600,490603,490611;
+	setarray .@scan_part[0],EQI_HEAD_TOP,EQI_ACC_L,EQI_ACC_R;
+	setarray .@slot_name$[0],"Topo","Acessorio esquerdo","Acessorio direito";
+	.@total = 0;
+	.@menu$ = "";
+
+	for (.@i = 0; .@i < getarraysize(.@scan_part); ++.@i) {
+		.@part = .@scan_part[.@i];
+		.@id = getequipid(.@part);
+		if (.@id <= 0)
+			continue;
+
+		.@valid = (.@part == EQI_HEAD_TOP)
+			? (.@id >= 19474 && .@id <= 19492)
+			: (inarray(.@accessory_ids, .@id) != -1);
+		if (!.@valid)
+			continue;
+
+		.@available_part[.@total] = .@part;
+		.@menu$ += getequipname(.@part) + " [" + .@slot_name$[.@i] + "]:";
+		.@total++;
+	}
+
+	if (.@total == 0) {
 		mes "[Oscar]";
-		mes "Equipe um Circlet Temporal no topo da cabeca.";
+		mes "Nao encontrei nenhum equipamento temporal valido.";
+		mes "Equipe um Circlet Temporal ou um dos acessorios temporais da loja.";
 		close;
 	}
 
-	setarray .@card[0], getequipcardid(.@part,0), getequipcardid(.@part,1), getequipcardid(.@part,2), getequipcardid(.@part,3);
-	.@refine = getequiprefinerycnt(.@part);
-	.@cost_item = 0;
-	.@cost_amount = 0;
-	.@cost_zeny = 0;
-	.@target_slot = 0;
-	.@perfect = 0;
-
-	if (!.@card[3]) {
-		.@target_slot = 3;
-		.@cost_item = 25867;
-		.@cost_amount = 10;
-		setarray .@enchant[0],4700,4701,4702,4703,4710,4711,4712,4713,4720,4721,4722,4723,4730,4731,4732,4733,4740,4741,4742,4743,4750,4751,4752,4753;
-	} else if (!.@card[2]) {
-		mes "[Oscar]";
-		mes "O 4o slot ja esta encantado com ^0055FF" + getitemname(.@card[3]) + "^000000.";
-		mes "Qual encantamento deseja tentar no 3o slot?";
-		next;
-		.@mode = select("Normal - 20 Fragmentos:Especial - 2 Gemas:Cancelar");
-		if (.@mode == 3)
-			close;
-
-		.@target_slot = 2;
-		if (.@mode == 1) {
-			.@cost_item = 25867;
-			.@cost_amount = 20;
-			setarray .@enchant[0],4700,4701,4702,4703,4710,4711,4712,4713,4720,4721,4722,4723,4730,4731,4732,4733,4740,4741,4742,4743,4750,4751,4752,4753;
-		} else {
-			.@cost_item = 25865;
-			.@cost_amount = 2;
-			setarray .@enchant[0],29672,29673,29674,29675,29676,29677,29678,29679,29680,29681,29682,29683,29684,29685,29686,29687,29688,29689;
-		}
-	} else if (!.@card[1]) {
-		mes "[Oscar]";
-		mes "O 2o slot pode receber um encantamento avancado.";
-		next;
-		.@mode = select("Aleatorio - 2 Temporal Spell:Escolher - 5.000.000z + 40 Temporal Spell:Cancelar");
-		if (.@mode == 3)
-			close;
-
-		.@target_slot = 1;
-		.@cost_item = 25866;
-		if (.@mode == 1) {
-			.@cost_amount = 2;
-			setarray .@enchant[0],4818,4817,4816,4843,4832,4833,4834,4835,4869,4872,4873,4881,4815,4814,4813,4812,29706,29061,29111,29101,29091,29071,29081;
-		} else {
-			.@perfect = 1;
-			.@cost_amount = 40;
-			.@cost_zeny = 5000000;
-			setarray .@enchant[0],4818,4817,4816,4843,4832,4833,4834,4835,4869,4872,4873,4881,4815,4814,4813,4812,29706,29061,29111,29101,29091,29071,29081;
-			.@menu$ = "";
-			for (.@i = 0; .@i < getarraysize(.@enchant); ++.@i)
-				.@menu$ += getitemname(.@enchant[.@i]) + ":";
-			.@pick = select(.@menu$) - 1;
-			.@chosen_enchant = .@enchant[.@pick];
-		}
-	} else {
-		mes "[Oscar]";
-		mes "Este Circlet ja possui os 3 encantamentos.";
-		mes "Use a opcao de aprimoramento para evoluir encantamentos especiais.";
-		close;
-	}
-
-	if (!.@perfect)
-		.@chosen_enchant = .@enchant[rand(getarraysize(.@enchant))];
+	if (.@total == 1)
+		return .@available_part[0];
 
 	mes "[Oscar]";
-	mes "Vou encantar o ^0055FF" + getequipname(.@part) + "^000000.";
-	mes "Custo: ^0055FF" + .@cost_amount + "x " + getitemname(.@cost_item) + "^000000.";
-	if (.@cost_zeny)
-		mes "Zeny: ^0055FF5.000.000^000000.";
+	mes "Encontrei mais de um equipamento temporal.";
+	mes "Qual deles deseja usar?";
 	next;
-	if (select("Confirmar:Cancelar") == 2)
+	.@choice = select(.@menu$ + "Cancelar") - 1;
+	if (.@choice >= .@total)
 		close;
 
-	if (countitem(.@cost_item) < .@cost_amount) {
-		mes "[Oscar]";
-		mes "Voce nao possui material suficiente.";
-		close;
-	}
-	if (Zeny < .@cost_zeny) {
-		mes "[Oscar]";
-		mes "Voce nao possui Zeny suficiente.";
-		close;
-	}
-
-	if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@card[0], .@card[1], .@card[2], .@card[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine))
-		close;
-
-	delitem .@cost_item, .@cost_amount;
-	Zeny -= .@cost_zeny;
-	progressbar "ffff00",2;
-	setitemcard(.@part, .@target_slot, .@chosen_enchant);
-	specialeffect2 EF_ENHANCE;
-
-	mes "[Oscar]";
-	mes "O Circlet recebeu ^0055FF" + getitemname(.@chosen_enchant) + "^000000.";
-	close;
+	return .@available_part[.@choice];
 
 L_Upgrade:
-	.@part = EQI_HEAD_TOP;
+	.@part = callsub(L_SelectEnchantEquip);
 	.@equip_id = getequipid(.@part);
-	if (.@equip_id < 19474 || .@equip_id > 19492) {
-		mes "[Oscar]";
-		mes "Equipe um Circlet Temporal no topo da cabeca.";
-		close;
-	}
 
 	setarray .@card[0], getequipcardid(.@part,0), getequipcardid(.@part,1), getequipcardid(.@part,2), getequipcardid(.@part,3);
 	.@refine = getequiprefinerycnt(.@part);
@@ -367,7 +325,7 @@ L_Upgrade:
 	}
 	if (!.@base_id) {
 		mes "[Oscar]";
-		mes "O 2o slot deste Circlet nao possui um encantamento especial aprimoravel.";
+		mes "O 2o slot deste equipamento nao possui um encantamento especial aprimoravel.";
 		close;
 	}
 
@@ -434,50 +392,6 @@ L_Upgrade:
 	}
 	close;
 
-L_Reset:
-	.@part = EQI_HEAD_TOP;
-	.@equip_id = getequipid(.@part);
-	if (.@equip_id < 19474 || .@equip_id > 19492) {
-		mes "[Oscar]";
-		mes "Equipe um Circlet Temporal no topo da cabeca.";
-		close;
-	}
-
-	setarray .@card[0], getequipcardid(.@part,0), getequipcardid(.@part,1), getequipcardid(.@part,2), getequipcardid(.@part,3);
-	.@refine = getequiprefinerycnt(.@part);
-	if (!.@card[1] && !.@card[2] && !.@card[3]) {
-		mes "[Oscar]";
-		mes "Este Circlet nao possui encantamentos para resetar.";
-		close;
-	}
-
-	mes "[Oscar]";
-	mes "Posso remover os 3 encantamentos do Circlet equipado.";
-	mes "A carta real do item sera preservada.";
-	mes "Custo: ^0055FF20x " + getitemname(25866) + "^000000.";
-	next;
-	if (select("Confirmar reset:Cancelar") == 2)
-		close;
-
-	if (countitem(25866) < 20) {
-		mes "[Oscar]";
-		mes "Voce nao possui " + getitemname(25866) + " suficiente.";
-		close;
-	}
-
-	if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@card[0], .@card[1], .@card[2], .@card[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine))
-		close;
-
-	delitem 25866,20;
-	progressbar "ff8080",2;
-	setitemcard(.@part,1,0);
-	setitemcard(.@part,2,0);
-	setitemcard(.@part,3,0);
-	specialeffect2 EF_REPAIRWEAPON;
-
-	mes "[Oscar]";
-	mes "Os encantamentos foram removidos.";
-	close;
 }
 
 -	script	OGHC_Instance#Custom	4_ED_OSCAR,{
