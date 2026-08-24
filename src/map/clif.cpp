@@ -12566,6 +12566,7 @@ void clif_parse_NpcBuyListSend( int32 fd, map_session_data* sd ){
 	}
 
 	sd->npc_shopid = 0; //Clear shop data.
+	sd->state.callshop = 0;
 	clif_npc_buy_result(sd, result);
 }
 
@@ -12601,6 +12602,7 @@ void clif_parse_NpcSellListSend(int32 fd,map_session_data *sd)
 		fail = npc_selllist(sd, n, p->sellList);
 
 	sd->npc_shopid = 0; //Clear shop data.
+	sd->state.callshop = 0;
 	clif_npc_sell_result(sd, fail);
 }
 

@@ -129,6 +129,18 @@ struct s_barter_purchase{
 	item_data* data;
 };
 
+enum e_item_source_type : uint8 {
+	ITEM_SOURCE_NPC_SHOP = 1,
+	ITEM_SOURCE_BARTER = 2,
+};
+
+struct s_item_source {
+	e_item_source_type type;
+	std::string display_name;
+	std::string npc_name;
+	std::string map_name;
+};
+
 struct s_questinfo {
 	e_questinfo_types icon;
 	e_questinfo_markcolor color;
@@ -1636,6 +1648,7 @@ bool npc_enable_target(npc_data& nd, uint32 char_id, e_npcv_status flag);
 void npc_setdisplayname(struct npc_data* nd, const char* newname);
 void npc_setclass(struct npc_data* nd, int16 class_);
 struct npc_data* npc_name2id(const char* name);
+std::vector<s_item_source> npc_get_item_sources(t_itemid nameid);
 int32 npc_isnear_sub(struct block_list* bl, va_list args);
 bool npc_isnear(struct block_list * bl);
 

@@ -2,10 +2,10 @@
 //= Charleston em Crise
 //===== Description: =========================================
 //= [Official Conversion + Custom Entry]
-//= Inst�ncia Charleston in Distress adaptada ao padr�o custom.
+//= Instancia Charleston in Distress adaptada ao padrao custom.
 //===== Changelogs: ==========================================
-//= 1.0 Convers�o oficial base. [Capuche]
-//= 1.1 Integra��o ao sistema custom de inst�ncias. [Codex]
+//= 1.0 Conversao oficial base. [Capuche]
+//= 1.1 Integracao ao sistema custom de instancias. [Codex]
 //============================================================
 
 -	script	CharlestonCrisis_Instance#Custom	4_F_CHARLESTON02,{
@@ -16,9 +16,9 @@ OnStartInstance:
 		callfunc("F_InstanceEntry",
 			"Charleston in Distress",   // Nome exato do DB
 			"Charleston",               // Nome do NPC
-			"CharlestonCrisis",         // Vari�vel de cooldown
-			"CharlestonCrisis",         // Vari�vel de status
-			130,                          // Level m�nimo
+			"CharlestonCrisis",         // Variavel de cooldown
+			"CharlestonCrisis",         // Variavel de status
+			130,                          // Level minimo
 			"Charleston em Crise"
 		);
 	end;
@@ -33,37 +33,37 @@ OnStartInstance:
 		close3;
 	}
 	mes "[Charleston 1]";
-	mes "Siga pelo corredor � esquerda e lembre-se: s� voc� pode se proteger.";
+	mes "Siga pelo corredor a esquerda e lembre-se: so voce pode se proteger.";
 	close3;
 
 OnTouch_:
 	cutin "dalle01.bmp",2;
 	if ('ep15_1_mcd01 != 0) {
 		mes "[Charleston 1]";
-		mes "Siga pelo corredor � esquerda e lembre-se: s� voc� pode se proteger.";
+		mes "Siga pelo corredor a esquerda e lembre-se: so voce pode se proteger.";
 		close3;
 	}
 	mes "[Charleston 1]";
-	mes "Finalmente voc� chegou! Eu estava esperando por voc�.";
-	npctalk "Finalmente voc� chegou! Eu estava esperando por voc�.";
+	mes "Finalmente voce chegou! Eu estava esperando por voce.";
+	npctalk "Finalmente voce chegou! Eu estava esperando por voce.";
 	emotion 0;
 	next;
 	mes "[Charleston 1]";
-	mes "N�o temos tempo, ent�o serei direto. A F�brica Charleston est� em alerta de seguran�a n�vel B, o que significa que os dispositivos de seguran�a foram ativados.";
-	npctalk "N�o temos tempo, ent�o serei direto. A F�brica Charleston est� em alerta de seguran�a n�vel B, o que significa que os dispositivos de seguran�a foram ativados.";
+	mes "Nao temos tempo, entao serei direto. A Fabrica Charleston esta em alerta de seguranca nivel B, o que significa que os dispositivos de seguranca foram ativados.";
+	npctalk "Nao temos tempo, entao serei direto. A Fabrica Charleston esta em alerta de seguranca nivel B, o que significa que os dispositivos de seguranca foram ativados.";
 	next;
 	mes "[Charleston 1]";
-	mes "Avance pelo corredor � esquerda, destrua os dispositivos de seguran�a e siga para a pr�xima �rea.";
-	npctalk "Avance pelo corredor � esquerda, destrua os dispositivos de seguran�a e siga para a pr�xima �rea.";
+	mes "Avance pelo corredor a esquerda, destrua os dispositivos de seguranca e siga para a proxima area.";
+	npctalk "Avance pelo corredor a esquerda, destrua os dispositivos de seguranca e siga para a proxima area.";
 	emotion 19;
 	next;
 	mes "[Charleston 1]";
-	mes "N�o se preocupe com os dispositivos de seguran�a. Eles podem ser reparados facilmente. O Dr. Ve est� no laborat�rio ao norte da Linha de F�brica 3.";
-	npctalk "N�o se preocupe com os dispositivos de seguran�a. Eles podem ser reparados facilmente. O Dr. Ve est� no laborat�rio ao norte da Linha de F�brica 3.";
+	mes "Nao se preocupe com os dispositivos de seguranca. Eles podem ser reparados facilmente. O Dr. Ve esta no laboratorio ao norte da Linha de Fabrica 3.";
+	npctalk "Nao se preocupe com os dispositivos de seguranca. Eles podem ser reparados facilmente. O Dr. Ve esta no laboratorio ao norte da Linha de Fabrica 3.";
 	next;
 	mes "[Charleston 1]";
-	mes "O Dr. Ve pode explicar tudo. R�pido!";
-	npctalk "O Dr. Ve pode explicar tudo. R�pido!";
+	mes "O Dr. Ve pode explicar tudo. Rapido!";
+	npctalk "O Dr. Ve pode explicar tudo. Rapido!";
 	emotion 19;
 	'ep15_1_mcd01 = 1;
 	monster 'map_name$,24,275, "Security Robot", 3127,1, instance_npcname("Charleston 1#0") + "::OnMyMobDead";	// KICK_STEP
@@ -72,7 +72,7 @@ OnTouch_:
 OnMyMobDead:
 	if (mobcount( 'map_name$, instance_npcname("Charleston 1#0") + "::OnMyMobDead" ) < 1) {
 		initnpctimer;
-		mapannounce 'map_name$, "Charleston 1: O Port�o 1 foi desarmado. Siga para sudoeste at� o pr�ximo port�o.", bc_map, 0xffff00;
+		mapannounce 'map_name$, "Charleston 1: O Portao 1 foi desarmado. Siga para sudoeste ate o proximo portao.", bc_map, 0xffff00;
 	}
 	end;
 OnTimer1000:
@@ -87,40 +87,40 @@ OnTimer1000:
 	mes "#%@EGD&#(@#...";
 	emotion 53;
 	next;
-	mes "- Ela est� emitindo sons estranhos, mas n�o consegue se mover. -";
+	mes "- Ela esta emitindo sons estranhos, mas nao consegue se mover. -";
 	close3;
 }
 
 1@mcd,116,213,5	script	Dr. Ve#1	4_M_DOCTOR,2,2,{
 	if ('ep15_1_mcd01 == 1) {
-		mes "- Ele est� ocupado rabiscando alguma coisa. Aproxime-se para falar com ele. -";
+		mes "- Ele esta ocupado rabiscando alguma coisa. Aproxime-se para falar com ele. -";
 		close;
 	}
-	mes "- Ele est� ocupado rabiscando alguma coisa. Melhor n�o incomod�-lo. -";
+	mes "- Ele esta ocupado rabiscando alguma coisa. Melhor nao incomoda-lo. -";
 	close;
 
 OnTouch_:
 	if (is_party_leader() == false) {
 		mes "[Dr. Ve]";
-		mes "Deixe-me falar com o l�der do seu grupo. N�o tenho tempo para atender todo mundo.";
+		mes "Deixe-me falar com o lider do seu grupo. Nao tenho tempo para atender todo mundo.";
 		close;
 	}
 	if ('ep15_1_mcd01 > 2)
 		end;
 	if ('ep15_1_mcd01 == 2) {
 		mes "[Dr. Ve]";
-		mes "N�o me importa com quem voc� est�. S� preciso saber se pode me ajudar.";
+		mes "Nao me importa com quem voce esta. So preciso saber se pode me ajudar.";
 		'ep15_1_mcd01 = 2;
 		next;
 		if (select( "Posso ajudar.", "Estou ocupado." ) == 2) {
 			mes "[Dr. Ve]";
-			mes "Suspiro... n�o importa quem seja, desde que eu consiga a ajuda de que preciso.";
-			npctalk "Dr. Ve: Suspiro... n�o importa quem seja, desde que eu consiga a ajuda de que preciso.";
+			mes "Suspiro... nao importa quem seja, desde que eu consiga a ajuda de que preciso.";
+			npctalk "Dr. Ve: Suspiro... nao importa quem seja, desde que eu consiga a ajuda de que preciso.";
 			close;
 		}
 		mes "[Dr. Ve]";
-		mes "Voc� � o salvador que est�vamos esperando! Charleston 1 vai lhe dizer do que precisamos para reparar Charleston 2.";
-		npctalk "Dr. Ve: Voc� � o salvador que est�vamos esperando! Charleston 1 vai lhe dizer do que precisamos para reparar Charleston 2.";
+		mes "Voce e o salvador que estavamos esperando! Charleston 1 vai lhe dizer do que precisamos para reparar Charleston 2.";
+		npctalk "Dr. Ve: Voce e o salvador que estavamos esperando! Charleston 1 vai lhe dizer do que precisamos para reparar Charleston 2.";
 		if ('ep15_1_mcd01 == 2)
 			'ep15_1_mcd01 = 3;
 		close;
@@ -128,29 +128,29 @@ OnTouch_:
 	if ('ep15_1_mcd01 == 1) {
 		.@charleston_1$ = instance_npcname("Charleston 1#1");
 		mes "[Dr. Ve]";
-		mes "Charleston 1. Charleston 2 foi conectada � for�a a uma parte do computador principal, e eu n�o consigo control�-la.";
-		npctalk "Dr. Ve: Charleston 1. Charleston 2 foi conectada � for�a a uma parte do computador principal, e eu n�o consigo control�-la.";
+		mes "Charleston 1. Charleston 2 foi conectada a forca a uma parte do computador principal, e eu nao consigo controla-la.";
+		npctalk "Dr. Ve: Charleston 1. Charleston 2 foi conectada a forca a uma parte do computador principal, e eu nao consigo controla-la.";
 		next;
 		cutin "dalle02.bmp",2;
 		mes "[Charleston 1]";
-		mes "Ela � um rob�; cedo ou tarde vai parar.";
-		npctalk "Charleston 1: Ela � um rob�; cedo ou tarde vai parar.", .@charleston_1$;
+		mes "Ela e um robo; cedo ou tarde vai parar.";
+		npctalk "Charleston 1: Ela e um robo; cedo ou tarde vai parar.", .@charleston_1$;
 		next;
 		cutin "",255;
 		mes "[Dr. Ve]";
-		mes "O dispositivo de Longevidade dela a manter� funcionando por pelo menos 50 anos. A f�brica n�o vai durar tudo isso.";
-		npctalk "Dr. Ve: O dispositivo de Longevidade dela a manter� funcionando por pelo menos 50 anos. A f�brica n�o vai durar tudo isso.";
+		mes "O dispositivo de Longevidade dela a mantera funcionando por pelo menos 50 anos. A fabrica nao vai durar tudo isso.";
+		npctalk "Dr. Ve: O dispositivo de Longevidade dela a mantera funcionando por pelo menos 50 anos. A fabrica nao vai durar tudo isso.";
 		next;
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Ent�o n�o temos escolha. Ainda bem que temos um especialista conosco.";
-		npctalk "Charleston 1: Ent�o n�o temos escolha. Ainda bem que temos um especialista conosco.", .@charleston_1$;
+		mes "Entao nao temos escolha. Ainda bem que temos um especialista conosco.";
+		npctalk "Charleston 1: Entao nao temos escolha. Ainda bem que temos um especialista conosco.", .@charleston_1$;
 		next;
-		select("Est� falando de mim?");
-		unittalk getcharid(3), "Est� falando de mim?";
+		select("Esta falando de mim?");
+		unittalk getcharid(3), "Esta falando de mim?";
 		mes "[Charleston 1]";
-		mes "H� algum tempo, uma mo�a chamada ^FF0000Shalosh^000000 nos visitou enquanto Charleston 2 embalava produtos para envio.";
-		npctalk "Charleston 1: H� algum tempo, uma mo�a chamada ^FF0000Shalosh^000000 nos visitou enquanto Charleston 2 embalava produtos para envio.", .@charleston_1$;
+		mes "Ha algum tempo, uma moca chamada ^FF0000Shalosh^000000 nos visitou enquanto Charleston 2 embalava produtos para envio.";
+		npctalk "Charleston 1: Ha algum tempo, uma moca chamada ^FF0000Shalosh^000000 nos visitou enquanto Charleston 2 embalava produtos para envio.", .@charleston_1$;
 		next;
 		mes "[Charleston 1]";
 		mes "Shalosh e a amiga dela estavam conversando com Charleston 2 quando o acidente aconteceu.";
@@ -158,41 +158,41 @@ OnTouch_:
 		next;
 		cutin "",255;
 		mes "[Dr. Ve]";
-		mes "Acho que algu�m tentou invadir o computador principal da f�brica.";
-		npctalk "Dr. Ve: Acho que algu�m tentou invadir o computador principal da f�brica.";
+		mes "Acho que alguem tentou invadir o computador principal da fabrica.";
+		npctalk "Dr. Ve: Acho que alguem tentou invadir o computador principal da fabrica.";
 		next;
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Durante o processo de atualiza��o, a conex�o com o servidor foi interrompida. Quando pressionamos Shalosh sobre isso,";
-		npctalk "Charleston 1: Durante o processo de atualiza��o, a conex�o com o servidor foi interrompida. Quando pressionamos Shalosh sobre isso,", .@charleston_1$;
+		mes "Durante o processo de atualizacao, a conexao com o servidor foi interrompida. Quando pressionamos Shalosh sobre isso,";
+		npctalk "Charleston 1: Durante o processo de atualizacao, a conexao com o servidor foi interrompida. Quando pressionamos Shalosh sobre isso,", .@charleston_1$;
 		next;
 		mes "[Charleston 1]";
-		mes "Shalosh disse que as amigas dela poderiam nos ajudar. Foi quando Newoz e as outras vieram. Mas elas n�o ajudaram muito.";
-		npctalk "Charleston 1: Shalosh disse que as amigas dela poderiam nos ajudar. Foi quando Newoz e as outras vieram. Mas elas n�o ajudaram muito.", .@charleston_1$;
+		mes "Shalosh disse que as amigas dela poderiam nos ajudar. Foi quando Newoz e as outras vieram. Mas elas nao ajudaram muito.";
+		npctalk "Charleston 1: Shalosh disse que as amigas dela poderiam nos ajudar. Foi quando Newoz e as outras vieram. Mas elas nao ajudaram muito.", .@charleston_1$;
 		next;
 		mes "[Charleston 1]";
-		mes "Parece que voc� conhece essas pessoas. Poderia nos ajudar?";
-		npctalk "Charleston 1: Parece que voc� conhece essas pessoas. Poderia nos ajudar?", .@charleston_1$;
+		mes "Parece que voce conhece essas pessoas. Poderia nos ajudar?";
+		npctalk "Charleston 1: Parece que voce conhece essas pessoas. Poderia nos ajudar?", .@charleston_1$;
 		if ('ep15_1_mcd01 == 1)
 			'ep15_1_mcd01 = 2;
 		next;
-		if (select( "Posso ajudar.", "N�o conhe�o eles." ) == 2) {
+		if (select( "Posso ajudar.", "Nao conheco eles." ) == 2) {
 			mes "[Charleston 1]";
-			mes "Acabei de ver que voc� est� conversando, ent�o vou esperar outra pessoa ajudar!";
+			mes "Acabei de ver que voce esta conversando, entao vou esperar outra pessoa ajudar!";
 			close3;
 		}
 		unittalk getcharid(3), "Posso ajudar.";
 		mes "[Charleston 1]";
-		mes "Muito obrigado! D�-me um momento para organizar alguns dados. Depois eu explico o que aconteceu.";
-		npctalk "Charleston 1: Muito obrigado! D�-me um momento para organizar alguns dados. Depois eu explico o que aconteceu.", .@charleston_1$;
+		mes "Muito obrigado! Da-me um momento para organizar alguns dados. Depois eu explico o que aconteceu.";
+		npctalk "Charleston 1: Muito obrigado! Da-me um momento para organizar alguns dados. Depois eu explico o que aconteceu.", .@charleston_1$;
 		if ('ep15_1_mcd01 == 2)
 			'ep15_1_mcd01 = 3;
 		emotion 2, .@charleston_1$;
 		close3;
 	}
 	mes "[Dr. Ve]";
-	mes "Quando a tens�o � dividida em duas linhas principais e ent�o injetada no n�cleo... hm? N�o me atrapalhe enquanto calculo.";
-	npctalk "Dr. Ve: Quando a tens�o � dividida em duas linhas principais e ent�o injetada no n�cleo... hm? N�o me atrapalhe enquanto calculo.";
+	mes "Quando a tensao e dividida em duas linhas principais e entao injetada no nucleo... hm? Nao me atrapalhe enquanto calculo.";
+	npctalk "Dr. Ve: Quando a tensao e dividida em duas linhas principais e entao injetada no nucleo... hm? Nao me atrapalhe enquanto calculo.";
 	close;
 }
 
@@ -200,7 +200,7 @@ OnTouch_:
 	if (is_party_leader() == false) {
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Por favor, deixe-me falar com o l�der do grupo. O futuro da minha f�brica depende do sucesso desta opera��o.";
+		mes "Por favor, deixe-me falar com o lider do grupo. O futuro da minha fabrica depende do sucesso desta operacao.";
 		close3;
 	}
 	if ('ep15_1_mcd01 > 5)
@@ -208,7 +208,7 @@ OnTouch_:
 	if ('ep15_1_mcd01 == 4) {
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Steps e Locksteps est�o causando um caos dentro da f�brica. Por favor, destrua 3 Locksteps primeiro. Posso indicar as localiza��es aproximadas deles.";
+		mes "Steps e Locksteps estao causando um caos dentro da fabrica. Por favor, destrua 3 Locksteps primeiro. Posso indicar as localizacoes aproximadas deles.";
 		viewpoint 1,84,226,1,0xFF00FF;
 		viewpoint 1,126,84,2,0xFF00FF;
 		viewpoint 1,111,68,3,0xFF00FF;
@@ -221,36 +221,36 @@ OnTouch_:
 	if ('ep15_1_mcd01 == 3) {
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Deixe-me explicar o que deve ser feito. Ah, antes vou fechar a entrada da f�brica, para que ningu�m apare�a sem ser convidado.";
-		npctalk "Charleston 1: Deixe-me explicar o que deve ser feito. Ah, antes vou fechar a entrada da f�brica, para que ningu�m apare�a sem ser convidado.";
+		mes "Deixe-me explicar o que deve ser feito. Ah, antes vou fechar a entrada da fabrica, para que ninguem apareca sem ser convidado.";
+		npctalk "Charleston 1: Deixe-me explicar o que deve ser feito. Ah, antes vou fechar a entrada da fabrica, para que ninguem apareca sem ser convidado.";
 		next;
 		mes "[Charleston 1]";
-		mes "Charleston � equipada com in�meros Nanosteps, um tipo de chip de IA que trabalha em conjunto com outros chips para faz�-la julgar e agir corretamente.";
-		npctalk "Charleston 1: Charleston � equipada com in�meros Nanosteps, um tipo de chip de IA que trabalha em conjunto com outros chips para faz�-la julgar e agir corretamente.";
+		mes "Charleston e equipada com inumeros Nanosteps, um tipo de chip de IA que trabalha em conjunto com outros chips para faze-la julgar e agir corretamente.";
+		npctalk "Charleston 1: Charleston e equipada com inumeros Nanosteps, um tipo de chip de IA que trabalha em conjunto com outros chips para faze-la julgar e agir corretamente.";
 		next;
 		mes "[Charleston 1]";
-		mes "Os dados de Charleston precisam ser atualizados diariamente por meio do computador principal do laborat�rio. Chamamos isso de manuten��o regular.";
-		npctalk "Charleston 1: Os dados de Charleston precisam ser atualizados diariamente por meio do computador principal do laborat�rio. Chamamos isso de manuten��o regular.";
+		mes "Os dados de Charleston precisam ser atualizados diariamente por meio do computador principal do laboratorio. Chamamos isso de manutencao regular.";
+		npctalk "Charleston 1: Os dados de Charleston precisam ser atualizados diariamente por meio do computador principal do laboratorio. Chamamos isso de manutencao regular.";
 		next;
 		mes "[Charleston 1]";
-		mes "O atualizador n�o est� funcionando neste momento. N�o sabemos a causa, mas algo deu errado quando Charleston 2 se conectou ao computador principal.";
-		npctalk "Charleston 1: O atualizador n�o est� funcionando neste momento. N�o sabemos a causa, mas algo deu errado quando Charleston 2 se conectou ao computador principal.";
+		mes "O atualizador nao esta funcionando neste momento. Nao sabemos a causa, mas algo deu errado quando Charleston 2 se conectou ao computador principal.";
+		npctalk "Charleston 1: O atualizador nao esta funcionando neste momento. Nao sabemos a causa, mas algo deu errado quando Charleston 2 se conectou ao computador principal.";
 		next;
 		mes "[Charleston 1]";
-		mes "Eu disse a Charleston 2 que ela est� em manuten��o estendida, mas n�o sabemos quanto tempo isso vai durar.";
-		npctalk "Charleston 1: Eu disse a Charleston 2 que ela est� em manuten��o estendida, mas n�o sabemos quanto tempo isso vai durar.";
+		mes "Eu disse a Charleston 2 que ela esta em manutencao estendida, mas nao sabemos quanto tempo isso vai durar.";
+		npctalk "Charleston 1: Eu disse a Charleston 2 que ela esta em manutencao estendida, mas nao sabemos quanto tempo isso vai durar.";
 		next;
 		mes "[Charleston 1]";
-		mes "Steps e Locksteps est�o causando um caos dentro da f�brica. Por favor, destrua 3 Locksteps primeiro. Posso indicar as localiza��es aproximadas deles.";
-		npctalk "Charleston 1: Steps e Locksteps est�o causando um caos dentro da f�brica. Por favor, destrua 3 Locksteps primeiro. Posso indicar as localiza��es aproximadas deles.";
+		mes "Steps e Locksteps estao causando um caos dentro da fabrica. Por favor, destrua 3 Locksteps primeiro. Posso indicar as localizacoes aproximadas deles.";
+		npctalk "Charleston 1: Steps e Locksteps estao causando um caos dentro da fabrica. Por favor, destrua 3 Locksteps primeiro. Posso indicar as localizacoes aproximadas deles.";
 		next;
 		mes "[Charleston 1]";
-		mes "Seria �timo se pud�ssemos eliminar todos, mas por enquanto devemos focar em colocar a f�brica para funcionar de novo.";
-		npctalk "Charleston 1: Seria �timo se pud�ssemos eliminar todos, mas por enquanto devemos focar em colocar a f�brica para funcionar de novo.";
+		mes "Seria otimo se pudessemos eliminar todos, mas por enquanto devemos focar em colocar a fabrica para funcionar de novo.";
+		npctalk "Charleston 1: Seria otimo se pudessemos eliminar todos, mas por enquanto devemos focar em colocar a fabrica para funcionar de novo.";
 		next;
 		mes "[Charleston 1]";
-		mes "Destruir Steps demais pode causar problemas na reativa��o da f�brica. Voc� deve consultar o computador principal do lado esquerdo.";
-		npctalk "Charleston 1: Destruir Steps demais pode causar problemas na reativa��o da f�brica. Voc� deve consultar o computador principal do lado esquerdo.";
+		mes "Destruir Steps demais pode causar problemas na reativacao da fabrica. Voce deve consultar o computador principal do lado esquerdo.";
+		npctalk "Charleston 1: Destruir Steps demais pode causar problemas na reativacao da fabrica. Voce deve consultar o computador principal do lado esquerdo.";
 		emotion 2;
 		if ('ep15_1_mcd01 != 3)
 			close3;
@@ -278,12 +278,12 @@ OnTouch_:
 	if ('ep15_1_mcd01 == 1) {
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Voc� deveria falar primeiro com o Dr. Ve.";
+		mes "Voce deveria falar primeiro com o Dr. Ve.";
 		close3;
 	}
 	cutin "dalle01.bmp",2;
 	mes "[Charleston 1]";
-	mes "Eu sou um rob�. Est� surpreso?";
+	mes "Eu sou um robo. Esta surpreso?";
 	close3;
 
 OnMyMobDead:
@@ -295,9 +295,9 @@ OnTimer300:
 	disablenpc instance_npcname("Charleston 1#1");
 	mapannounce 'map_name$, "Charleston 1: Ah, ah. Teste de microfone.", bc_map, 0xffff00;
 	sleep 3000;
-	mapannounce 'map_name$, "Charleston 1: Parece que voc� cuidou da maior parte dos Locksteps.", bc_map, 0xffff00;
+	mapannounce 'map_name$, "Charleston 1: Parece que voce cuidou da maior parte dos Locksteps.", bc_map, 0xffff00;
 	sleep 3000;
-	mapannounce 'map_name$, "Charleston 1: Por favor, volte ao laborat�rio.", bc_map, 0xffff00;
+	mapannounce 'map_name$, "Charleston 1: Por favor, volte ao laboratorio.", bc_map, 0xffff00;
 	stopnpctimer;
 	end;
 }
@@ -313,7 +313,7 @@ OnTimer300:
 	if (is_party_leader() == false) {
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Por favor, deixe-me falar com o l�der do grupo sobre a restaura��o da f�brica.";
+		mes "Por favor, deixe-me falar com o lider do grupo sobre a restauracao da fabrica.";
 		close3;
 	}
 	if ('ep15_1_mcd01 > 7)
@@ -321,7 +321,7 @@ OnTimer300:
 	if ('ep15_1_mcd01 > 4) {
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Precisamos de mais energia para reativar o computador principal. Vou indicar a localiza��o de um dos geradores auxiliares. Lig�-lo � f�cil.";
+		mes "Precisamos de mais energia para reativar o computador principal. Vou indicar a localizacao de um dos geradores auxiliares. Liga-lo e facil.";
 		close3;
 	}
 	if ('ep15_1_mcd01 == 4) {
@@ -333,11 +333,11 @@ OnTimer300:
 		next;
 		cutin "dalle03.bmp",2;
 		mes "[Charleston 1]";
-		mes "H�? Isso n�o est� certo.";
+		mes "Ha? Isso nao esta certo.";
 		next;
 		mes "[Charleston 1]";
-		mes "Receio que haja um problema com os geradores de energia. Poderia verificar os tr�s geradores? Vou marcar as localiza��es deles.";
-		npctalk "Charleston 1: Receio que haja um problema com os geradores de energia. Poderia verificar os tr�s geradores? Vou marcar as localiza��es deles.";
+		mes "Receio que haja um problema com os geradores de energia. Poderia verificar os tres geradores? Vou marcar as localizacoes deles.";
+		npctalk "Charleston 1: Receio que haja um problema com os geradores de energia. Poderia verificar os tres geradores? Vou marcar as localizacoes deles.";
 		viewpoint 1,86,231,8,0xFF00FF;
 		viewpoint 1,172,196,9,0xFF00FF;
 		viewpoint 1,126,84,10,0xFF00FF;
@@ -356,7 +356,7 @@ OnTimer300:
 	}
 	cutin "dalle03.bmp",2;
 	mes "[Charleston 1]";
-	mes "Estamos trabalhando em um novo sistema utilit�rio chamado Hardworking. Ainda n�o tivemos chance de test�-lo por causa dos problemas na f�brica.";
+	mes "Estamos trabalhando em um novo sistema utilitario chamado Hardworking. Ainda nao tivemos chance de testa-lo por causa dos problemas na fabrica.";
 	close3;
 }
 
@@ -367,10 +367,10 @@ OnTimer300:
 	if (is_party_leader() == false) {
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Estamos trabalhando em um novo sistema utilit�rio chamado Hardworking. Ainda n�o tivemos chance de test�-lo por causa dos problemas na f�brica.";
+		mes "Estamos trabalhando em um novo sistema utilitario chamado Hardworking. Ainda nao tivemos chance de testa-lo por causa dos problemas na fabrica.";
 		next;
 		mes "[Charleston 1]";
-		mes "Por favor, deixe-me falar com o l�der do grupo sobre a restaura��o da f�brica.";
+		mes "Por favor, deixe-me falar com o lider do grupo sobre a restauracao da fabrica.";
 		close3;
 	}
 	if ('ep15_1_mcd01 > 11)
@@ -380,18 +380,18 @@ OnTimer300:
 		.@npc5$ = instance_npcname("Dr. Ve#1");
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Voc� voltou. Charleston 2 est� quase pronta para ser reativada, e isso � gra�as a voc�. S� me d� um momento.";
-		npctalk "Charleston 1: Voc� voltou. Charleston 2 est� quase pronta para ser reativada, e isso � gra�as a voc�. S� me d� um momento.";
+		mes "Voce voltou. Charleston 2 esta quase pronta para ser reativada, e isso e gracas a voce. So me da um momento.";
+		npctalk "Charleston 1: Voce voltou. Charleston 2 esta quase pronta para ser reativada, e isso e gracas a voce. So me da um momento.";
 		next;
 		cutin "",255;
 		mes "[Dr. Ve]";
-		mes "Ela est� pronta. Vamos aguardar uma resposta do computador principal.";
-		npctalk "Dr. Ve: Ela est� pronta. Vamos aguardar uma resposta do computador principal.", .@npc5$;
+		mes "Ela esta pronta. Vamos aguardar uma resposta do computador principal.";
+		npctalk "Dr. Ve: Ela esta pronta. Vamos aguardar uma resposta do computador principal.", .@npc5$;
 		next;
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "89% dos dados do computador principal foram restaurados. Reativando Charleston 2 e a F�brica Charleston...";
-		npctalk "Charleston 1: 89% dos dados do computador principal foram restaurados. Reativando Charleston 2 e a F�brica Charleston...";
+		mes "89% dos dados do computador principal foram restaurados. Reativando Charleston 2 e a Fabrica Charleston...";
+		npctalk "Charleston 1: 89% dos dados do computador principal foram restaurados. Reativando Charleston 2 e a Fabrica Charleston...";
 		emotion 0;
 		next;
 		mes "[Charleston 1]";
@@ -406,83 +406,83 @@ OnTimer300:
 		next;
 		cutin "dalle02.bmp",2;
 		mes "[Charleston 1]";
-		mes "Charleston 2! Voc� est� bem? Algu�m invadiu o seu sistema e a f�brica.";
-		npctalk "Charleston 1: Charleston 2! Voc� est� bem? Algu�m invadiu o seu sistema e a f�brica.";
+		mes "Charleston 2! Voce esta bem? Alguem invadiu o seu sistema e a fabrica.";
+		npctalk "Charleston 1: Charleston 2! Voce esta bem? Alguem invadiu o seu sistema e a fabrica.";
 		emotion 28;
 		next;
 		cutin "nale03.bmp",0;
 		mes "[Charleston 2]";
-		mes "Fui eu que fiz isso. J� penso nisso h� muito tempo, com base no racioc�nio do meu SO de Auto-reflex�o.";
-		npctalk "Charleston 2: Fui eu que fiz isso. J� penso nisso h� muito tempo, com base no racioc�nio do meu SO de Auto-reflex�o.", .@npc2$;
+		mes "Fui eu que fiz isso. Ja penso nisso ha muito tempo, com base no raciocinio do meu SO de Auto-reflexao.";
+		npctalk "Charleston 2: Fui eu que fiz isso. Ja penso nisso ha muito tempo, com base no raciocinio do meu SO de Auto-reflexao.", .@npc2$;
 		next;
 		cutin "dalle02.bmp",2;
 		mes "[Charleston 1]";
-		mes "Foi voc�? Por qu�? Era algum tipo de brincadeira? Voc� causou um erro grave na f�brica e tamb�m no servidor principal!";
-		npctalk "Charleston 1: Foi voc�? Por qu�? Era algum tipo de brincadeira? Voc� causou um erro grave na f�brica e tamb�m no servidor principal!";
+		mes "Foi voce? Por que? Era algum tipo de brincadeira? Voce causou um erro grave na fabrica e tambem no servidor principal!";
+		npctalk "Charleston 1: Foi voce? Por que? Era algum tipo de brincadeira? Voce causou um erro grave na fabrica e tambem no servidor principal!";
 		next;
 		cutin "nale03.bmp",0;
 		mes "[Charleston 2]";
-		mes "N�o � brincadeira. Voc� nunca vai entender. Voc� s� segue comandos e nunca pensa por conta pr�pria. Eu odeio esta f�brica, este mundo! Odeio ser um rob�!";
-		npctalk "Charleston 2: N�o � brincadeira. Voc� nunca vai entender. Voc� s� segue comandos e nunca pensa por conta pr�pria. Eu odeio esta f�brica, este mundo! Odeio ser um rob�!", .@npc2$;
+		mes "Nao e brincadeira. Voce nunca vai entender. Voce so segue comandos e nunca pensa por conta propria. Eu odeio esta fabrica, este mundo! Odeio ser um robo!";
+		npctalk "Charleston 2: Nao e brincadeira. Voce nunca vai entender. Voce so segue comandos e nunca pensa por conta propria. Eu odeio esta fabrica, este mundo! Odeio ser um robo!", .@npc2$;
 		emotion 36, .@npc2$;
 		next;
 		cutin "",255;
 		mes "[Dr. Ve]";
-		mes "Ou ocorreu um erro cr�tico, ou Charleston 2 ultrapassou os limites do SO de Auto-reflex�o vers�o 1.1.";
-		npctalk "Dr. Ve: Ou ocorreu um erro cr�tico, ou Charleston 2 ultrapassou os limites do SO de Auto-reflex�o vers�o 1.1.", .@npc5$;
+		mes "Ou ocorreu um erro critico, ou Charleston 2 ultrapassou os limites do SO de Auto-reflexao versao 1.1.";
+		npctalk "Dr. Ve: Ou ocorreu um erro critico, ou Charleston 2 ultrapassou os limites do SO de Auto-reflexao versao 1.1.", .@npc5$;
 		next;
 		cutin "dalle02.bmp",2;
 		mes "[Charleston 1]";
-		mes "Deixe-me adivinhar: voc� odeia n�o ter sido criada como um simples rob� oper�rio.";
-		npctalk "Charleston 1: Deixe-me adivinhar: voc� odeia n�o ter sido criada como um simples rob� oper�rio.";
+		mes "Deixe-me adivinhar: voce odeia nao ter sido criada como um simples robo operario.";
+		npctalk "Charleston 1: Deixe-me adivinhar: voce odeia nao ter sido criada como um simples robo operario.";
 		next;
 		mes "[Charleston 1]";
-		mes "Ou voc� quer se tornar humana.";
-		npctalk "Charleston 1: Ou voc� quer se tornar humana.";
+		mes "Ou voce quer se tornar humana.";
+		npctalk "Charleston 1: Ou voce quer se tornar humana.";
 		next;
 		mes "[Charleston 1]";
-		mes "E, se n�o puder, ent�o quer destruir o mundo inteiro.";
-		npctalk "Charleston 1: E, se n�o puder, ent�o quer destruir o mundo inteiro.";
+		mes "E, se nao puder, entao quer destruir o mundo inteiro.";
+		npctalk "Charleston 1: E, se nao puder, entao quer destruir o mundo inteiro.";
 		next;
 		mes "[Charleston 1]";
-		mes "� isso?";
-		npctalk "Charleston 1: � isso?";
+		mes "e isso?";
+		npctalk "Charleston 1: e isso?";
 		next;
 		cutin "nale03.bmp",0;
 		mes "[Charleston 2]";
-		mes "...N�o zombe de mim.";
-		npctalk "Charleston 2: ...N�o zombe de mim.", .@npc2$;
+		mes "...Nao zombe de mim.";
+		npctalk "Charleston 2: ...Nao zombe de mim.", .@npc2$;
 		emotion 9, .@npc2$;
 		next;
 		cutin "dalle03.bmp",2;
 		mes "[Charleston 1]";
-		mes "Voc� pediu por isso. Seus motivos s�o infantis e sem imagina��o. Somos os primeiros rob�s capazes de pensar por si mesmos. N�o consegue ser mais criativa?";
-		npctalk "Charleston 1: Voc� pediu por isso. Seus motivos s�o infantis e sem imagina��o. Somos os primeiros rob�s capazes de pensar por si mesmos. N�o consegue ser mais criativa?";
+		mes "Voce pediu por isso. Seus motivos sao infantis e sem imaginacao. Somos os primeiros robos capazes de pensar por si mesmos. Nao consegue ser mais criativa?";
+		npctalk "Charleston 1: Voce pediu por isso. Seus motivos sao infantis e sem imaginacao. Somos os primeiros robos capazes de pensar por si mesmos. Nao consegue ser mais criativa?";
 		next;
 		cutin "nale03.bmp",0;
 		mes "[Charleston 2]";
-		mes "Voc� n�o sabe do que est� falando! Voc� � o prot�tipo, sua vers�o do SO � primitiva!";
-		npctalk "Charleston 2: Voc� n�o sabe do que est� falando! Voc� � o prot�tipo, sua vers�o do SO � primitiva!", .@npc2$;
+		mes "Voce nao sabe do que esta falando! Voce e o prototipo, sua versao do SO e primitiva!";
+		npctalk "Charleston 2: Voce nao sabe do que esta falando! Voce e o prototipo, sua versao do SO e primitiva!", .@npc2$;
 		next;
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Eu sou a �nica neste mundo que pode realmente entender voc�.";
-		npctalk "Charleston 1: Eu sou a �nica neste mundo que pode realmente entender voc�. Somos g�meas.";
-		mes "Somos g�meas.";
+		mes "Eu sou a unica neste mundo que pode realmente entender voce.";
+		npctalk "Charleston 1: Eu sou a unica neste mundo que pode realmente entender voce. Somos gemeas.";
+		mes "Somos gemeas.";
 		next;
 		mes "[Charleston 1]";
-		mes "Voc� est� passando pela adolesc�ncia, como os humanos.";
-		npctalk "Charleston 1: Voc� est� passando pela adolesc�ncia, como os humanos.";
+		mes "Voce esta passando pela adolescencia, como os humanos.";
+		npctalk "Charleston 1: Voce esta passando pela adolescencia, como os humanos.";
 		next;
 		mes "[Charleston 1]";
-		mes "Talvez dev�ssemos comemorar. Voc� finalmente desenvolveu sentimentos parecidos com os humanos.";
-		npctalk "Charleston 1: Talvez dev�ssemos comemorar. Voc� finalmente desenvolveu sentimentos parecidos com os humanos.";
+		mes "Talvez devessemos comemorar. Voce finalmente desenvolveu sentimentos parecidos com os humanos.";
+		npctalk "Charleston 1: Talvez devessemos comemorar. Voce finalmente desenvolveu sentimentos parecidos com os humanos.";
 		emotion 46;
 		next;
 		cutin "nale03.bmp",0;
 		mes "[Charleston 2]";
-		mes "N�o aja como se soubesse de tudo! N�o podemos pensar por n�s mesmas. Tudo o que achamos que sabemos foi programado em n�s!";
-		npctalk "Charleston 2: N�o aja como se soubesse de tudo! N�o podemos pensar por n�s mesmas. Tudo o que achamos que sabemos foi programado em n�s!", .@npc2$;
+		mes "Nao aja como se soubesse de tudo! Nao podemos pensar por nos mesmas. Tudo o que achamos que sabemos foi programado em nos!";
+		npctalk "Charleston 2: Nao aja como se soubesse de tudo! Nao podemos pensar por nos mesmas. Tudo o que achamos que sabemos foi programado em nos!", .@npc2$;
 		next;
 		cutin "",255;
 		mes "[Dr. Ve]";
@@ -496,19 +496,19 @@ OnTimer300:
 		next;
 		cutin "nale03.bmp",0;
 		mes "[Charleston 2]";
-		mes "Isso n�o vai acontecer! Eu ainda controlo esta f�brica! Nem pensem em me seguir!";
-		mes "Isso n�o vai acontecer! Eu ainda controlo esta f�brica! Nem pensem em me seguir!";
-		npctalk "Charleston 2: Isso n�o vai acontecer! Eu ainda controlo esta f�brica! Nem pensem em me seguir!", .@npc2$;
+		mes "Isso nao vai acontecer! Eu ainda controlo esta fabrica! Nem pensem em me seguir!";
+		mes "Isso nao vai acontecer! Eu ainda controlo esta fabrica! Nem pensem em me seguir!";
+		npctalk "Charleston 2: Isso nao vai acontecer! Eu ainda controlo esta fabrica! Nem pensem em me seguir!", .@npc2$;
 		next;
 		disablenpc .@npc2$;
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Pare de agir como uma crian�a!";
-		npctalk "Charleston 1: Pare de agir como uma crian�a!";
+		mes "Pare de agir como uma crianca!";
+		npctalk "Charleston 1: Pare de agir como uma crianca!";
 		next;
 		mes "[Charleston 1]";
-		mes "O dispositivo de Longevidade dela est� descarregado; ela n�o vai longe. Por favor, sigam-na.";
-		npctalk "Charleston 1: O dispositivo de Longevidade dela est� descarregado; ela n�o vai longe. Por favor, sigam-na.";
+		mes "O dispositivo de Longevidade dela esta descarregado; ela nao vai longe. Por favor, sigam-na.";
+		npctalk "Charleston 1: O dispositivo de Longevidade dela esta descarregado; ela nao vai longe. Por favor, sigam-na.";
 		close2;
 		cutin "",255;
 		disablenpc instance_npcname("Charleston 1#3");
@@ -518,7 +518,7 @@ OnTimer300:
 	}
 	cutin "dalle01.bmp",2;
 	mes "[Charleston 1]";
-	mes "Isto � pela seguran�a da F�brica Charleston. Por favor, fiquem por perto.";
+	mes "Isto e pela seguranca da Fabrica Charleston. Por favor, fiquem por perto.";
 	close3;
 }
 
@@ -526,7 +526,7 @@ OnTimer300:
 	if (is_party_leader() == false) {
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Por favor, deixe-me falar com o l�der do grupo sobre a restaura��o da f�brica.";
+		mes "Por favor, deixe-me falar com o lider do grupo sobre a restauracao da fabrica.";
 		close3;
 	}
 	if ('ep15_1_mcd01 > 11)
@@ -534,23 +534,23 @@ OnTimer300:
 	if ('ep15_1_mcd01 == 8) {
 		cutin "nale03.bmp",0;
 		mes "[Charleston 2]";
-		mes "Parem de me seguir! Eu vou destruir a f�brica inteira!";
-		npctalk "Charleston 2: Parem de me seguir! Eu vou destruir a f�brica inteira!";
+		mes "Parem de me seguir! Eu vou destruir a fabrica inteira!";
+		npctalk "Charleston 2: Parem de me seguir! Eu vou destruir a fabrica inteira!";
 		emotion 7;
 		next;
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Voc� vai nos destruir nesse processo! Nossa principal fonte de energia, a Longevidade, ainda n�o � perfeita!";
-		npctalk "Charleston 1: Voc� vai nos destruir nesse processo! Nossa principal fonte de energia, a Longevidade, ainda n�o � perfeita!", instance_npcname("Charleston 1#4");
+		mes "Voce vai nos destruir nesse processo! Nossa principal fonte de energia, a Longevidade, ainda nao e perfeita!";
+		npctalk "Charleston 1: Voce vai nos destruir nesse processo! Nossa principal fonte de energia, a Longevidade, ainda nao e perfeita!", instance_npcname("Charleston 1#4");
 		next;
 		cutin "nale03.bmp",0;
 		mes "[Charleston 2]";
-		mes "Nenhum de voc�s me entende. Eu odeio voc�s!";
-		npctalk "Charleston 2: Nenhum de voc�s me entende. Eu odeio voc�s!";
+		mes "Nenhum de voces me entende. Eu odeio voces!";
+		npctalk "Charleston 2: Nenhum de voces me entende. Eu odeio voces!";
 		next;
 		mes "[Charleston 2]";
-		mes "O computador principal pode at� ter sido restaurado, mas eu ainda estou conectada � f�brica. Tentem me parar, se puderem!";
-		npctalk "Charleston 2: O computador principal pode at� ter sido restaurado, mas eu ainda estou conectada a f�brica. Tentem me parar, se puderem!";
+		mes "O computador principal pode ate ter sido restaurado, mas eu ainda estou conectada e fabrica. Tentem me parar, se puderem!";
+		npctalk "Charleston 2: O computador principal pode ate ter sido restaurado, mas eu ainda estou conectada a fabrica. Tentem me parar, se puderem!";
 		cutin "",255;
 		if ('ep15_1_mcd01 != 8)
 			close;
@@ -563,7 +563,7 @@ OnTimer300:
 	}
 	cutin "nale01.bmp",0;
 	mes "[Charleston 2]";
-	mes "Eu vou destruir a f�brica inteira!";
+	mes "Eu vou destruir a fabrica inteira!";
 	close3;
 }
 
@@ -573,12 +573,12 @@ OnTimer300:
 	if ('ep15_1_mcd01 == 8) {
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Charleston 2 est� ? beira de entrar em colapso. Voc� poderia ajud?-la?";
+		mes "Charleston 2 esta ? beira de entrar em colapso. Voce poderia ajud?-la?";
 		close3;
 	}
 	cutin "dalle01.bmp",2;
 	mes "[Charleston 1]";
-	mes "Oh, nosso laborat?rio n�o vai sobreviver a isso!";
+	mes "Oh, nosso laborat?rio nao vai sobreviver a isso!";
 	close3;
 }
 
@@ -592,7 +592,7 @@ OnStart:
 	sleep 3000;
 	npctalk "Charleston 1: Then, stop throwing a tantrum!", .@npc4$;
 	sleep 3000;
-	npctalk "Charleston 2: Voc� ainda n�o est� me levando a s�rio. Apenas veja o que acontece quando eu enviar um sinal ao computador principal.", .@npc1$;
+	npctalk "Charleston 2: Voce ainda nao esta me levando a serio. Apenas veja o que acontece quando eu enviar um sinal ao computador principal.", .@npc1$;
 	specialeffect EF_BASH3D2, AREA, .@npc1$;
 	areamonster 'map_name$,134,202,154,222,"C-TYPE", 3128,4;// KICK_AND_KICK
 	sleep 3000;
@@ -654,7 +654,7 @@ OnTimer300:
 	if (is_party_leader() == false) {
 		cutin "nale01.bmp",0;
 		mes "[Charleston 2]";
-		mes "Voc� acha que pode me parar? *Bufa* Traga o l?der. N�o vou falar com voc�!";
+		mes "Voce acha que pode me parar? *Bufa* Traga o l?der. Nao vou falar com voce!";
 		close3;
 	}
 	if ('ep15_1_mcd01 > 20)
@@ -664,57 +664,57 @@ OnTimer300:
 		.@npc5$ = instance_npcname("Dr. Ve#2");
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Chega disso! Eu entendo que voc� est� passando por um grande conflito emocional, mas isso j� est� rid�culo.";
-		npctalk "Charleston 1: Chega disso! Eu entendo que voc� est� passando por um grande conflito emocional, mas isso j� est� rid�culo.", .@npc1$;
+		mes "Chega disso! Eu entendo que voce esta passando por um grande conflito emocional, mas isso ja esta ridiculo.";
+		npctalk "Charleston 1: Chega disso! Eu entendo que voce esta passando por um grande conflito emocional, mas isso ja esta ridiculo.", .@npc1$;
 		next;
 		cutin "nale01.bmp",0;
 		mes "[Charleston 2]";
-		mes "Como ousa trazer estranhos para isso? Eu disse que estou falando s�rio! Vers�es ultrapassadas como voc� nunca v�o me entender!";
-		npctalk "Charleston 2: Como ousa trazer estranhos para isso? Eu disse que estou falando s�rio! Vers�es ultrapassadas como voc� nunca v�o me entender!";
+		mes "Como ousa trazer estranhos para isso? Eu disse que estou falando serio! Versoes ultrapassadas como voce nunca vao me entender!";
+		npctalk "Charleston 2: Como ousa trazer estranhos para isso? Eu disse que estou falando serio! Versoes ultrapassadas como voce nunca vao me entender!";
 		next;
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Talvez eu n�o entenda voc�, mas pelo menos estou dizendo o que acredito ser verdade.";
-		npctalk "Charleston 1: Talvez eu n�o entenda voc�, mas pelo menos estou dizendo o que acredito ser verdade.", .@npc1$;
+		mes "Talvez eu nao entenda voce, mas pelo menos estou dizendo o que acredito ser verdade.";
+		npctalk "Charleston 1: Talvez eu nao entenda voce, mas pelo menos estou dizendo o que acredito ser verdade.", .@npc1$;
 		next;
 		mes "[Charleston 1]";
-		mes "Voc� tem raz�o quanto a eu ser uma vers�o inferior. Minha capacidade emocional � m�nima, diferente da sua. � por isso que tenho orgulho de voc�.";
-		npctalk "Charleston 1: Voc� tem raz�o quanto a eu ser uma vers�o inferior. Minha capacidade emocional � m�nima, diferente da sua. � por isso que tenho orgulho de voc�.", .@npc1$;
+		mes "Voce tem razao quanto a eu ser uma versao inferior. Minha capacidade emocional e minima, diferente da sua. e por isso que tenho orgulho de voce.";
+		npctalk "Charleston 1: Voce tem razao quanto a eu ser uma versao inferior. Minha capacidade emocional e minima, diferente da sua. e por isso que tenho orgulho de voce.", .@npc1$;
 		next;
 		cutin "nale01.bmp",0;
 		mes "[Charleston 2]";
-		mes "Nada do que voc� sente � seu de verdade, est� tudo programado em voc�! Eu sou diferente. O que sinto � emo��o real!";
-		npctalk "Charleston 2: Nada do que voc� sente � seu de verdade, est� tudo programado em voc�! Eu sou diferente. O que sinto � emo��o real!";
+		mes "Nada do que voce sente e seu de verdade, esta tudo programado em voce! Eu sou diferente. O que sinto e emocao real!";
+		npctalk "Charleston 2: Nada do que voce sente e seu de verdade, esta tudo programado em voce! Eu sou diferente. O que sinto e emocao real!";
 		next;
 		cutin "",255;
 		mes "[Dr. Ve]";
-		mes "Chega. Eu vou destruir Charleston 2 se for isso que for preciso para det�-la.";
-		npctalk "Dr. Ve: Chega. Eu vou destruir Charleston 2 se for isso que for preciso para det�-la.", .@npc5$;
+		mes "Chega. Eu vou destruir Charleston 2 se for isso que for preciso para dete-la.";
+		npctalk "Dr. Ve: Chega. Eu vou destruir Charleston 2 se for isso que for preciso para dete-la.", .@npc5$;
 		next;
 		cutin "nale02.bmp",0;
 		mes "[Charleston 2]";
-		mes "Charleston 3 j� est� conclu�da?";
-		npctalk "Charleston 2: Charleston 3 j� est� conclu�da?";
+		mes "Charleston 3 ja esta concluida?";
+		npctalk "Charleston 2: Charleston 3 ja esta concluida?";
 		next;
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Charleston 3? � uma unidade de combate/defesa baseada no meu projeto e no de Charleston 2. Achei que ainda estivesse sendo testada no N�cleo.";
-		npctalk "Charleston 1: Charleston 3? � uma unidade de combate/defesa baseada no meu projeto e no de Charleston 2. Achei que ainda estivesse sendo testada no N�cleo.", .@npc1$;
+		mes "Charleston 3? e uma unidade de combate/defesa baseada no meu projeto e no de Charleston 2. Achei que ainda estivesse sendo testada no Nucleo.";
+		npctalk "Charleston 1: Charleston 3? e uma unidade de combate/defesa baseada no meu projeto e no de Charleston 2. Achei que ainda estivesse sendo testada no Nucleo.", .@npc1$;
 		next;
 		cutin "",255;
 		mes "[Dr. Ve]";
-		mes "Charleston 1, isso � informa��o demais.";
-		npctalk "Dr. Ve: Charleston 1, isso � informa��o demais.", .@npc5$;
+		mes "Charleston 1, isso e informacao demais.";
+		npctalk "Dr. Ve: Charleston 1, isso e informacao demais.", .@npc5$;
 		next;
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Neste momento, ^FF0000qualquer um pode acessar o modelo^000000 porque o SO dela ainda est� sendo testado para corrigir os problemas de Charleston 2.";
+		mes "Neste momento, ^FF0000qualquer um pode acessar o modelo^000000 porque o SO dela ainda esta sendo testado para corrigir os problemas de Charleston 2.";
 		npctalk "Charleston 1: At this moment, anybody can access the model because its OS is still being tested to correct whatever problem Charleston 2 has.", .@npc1$;
 		next;
 		cutin "",255;
 		mes "[Dr. Ve]";
-		mes "Voc� acabou de contar a informa??o mais cr?tica para todo mundo!";
-		npctalk "Dr. Ve: Voc� acabou de contar a informa��o mais cr�tica para todo mundo!", .@npc5$;
+		mes "Voce acabou de contar a informa??o mais cr?tica para todo mundo!";
+		npctalk "Dr. Ve: Voce acabou de contar a informacao mais critica para todo mundo!", .@npc5$;
 		next;
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
@@ -737,12 +737,12 @@ OnTimer300:
 		next;
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "O qu?? N�o! Como voc� pode sequer pensar nisso?";
-		mes "O qu�?? N�o! Como voc� pode sequer pensar nisso?";
-		npctalk "Charleston 1: O qu�?? N�o! Como voc� pode sequer pensar nisso?", .@npc1$;
+		mes "O qu?? Nao! Como voce pode sequer pensar nisso?";
+		mes "O que?? Nao! Como voce pode sequer pensar nisso?";
+		npctalk "Charleston 1: O que?? Nao! Como voce pode sequer pensar nisso?", .@npc1$;
 		mes "[Charleston 1]";
-		mes "As coisas est�o ficando s�rias. Por favor, v� at� o N�cleo no centro da f�brica antes que Charleston 2 roube a 3!";
-		npctalk "Charleston 1: As coisas est�o ficando s�rias. Por favor, v� at� o N�cleo no centro da f�brica antes que Charleston 2 roube a 3!", .@npc1$;
+		mes "As coisas estao ficando serias. Por favor, ve ate o Nucleo no centro da fabrica antes que Charleston 2 roube a 3!";
+		npctalk "Charleston 1: As coisas estao ficando serias. Por favor, ve ate o Nucleo no centro da fabrica antes que Charleston 2 roube a 3!", .@npc1$;
 		if ('ep15_1_mcd01 != 10)
 			close3;
 		close2;
@@ -764,20 +764,20 @@ OnTimer300:
 
 1@mcd,146,214,4	script	Charleston 1#5	4_F_CHARLESTON01,{
 	mes "[Charleston 1]";
-	mes "As coisas est�o ficando cada vez mais complicadas.";
+	mes "As coisas estao ficando cada vez mais complicadas.";
 	close;
 }
 
 1@mcd,143,217,5	script	Dr. Ve#2	4_M_DOCTOR,{
 	mes "[Dr. Ve]";
-	mes "Charleston 2 est� com defeito.";
+	mes "Charleston 2 esta com defeito.";
 	close;
 }
 
 1@mcd,132,129,4	script	Charleston 1#6	4_F_CHARLESTON01,{
 	cutin "dalle01.bmp",2;
 	mes "[Charleston 1]";
-	mes "Este N�cleo no centro abastece toda a f�brica.";
+	mes "Este Nucleo no centro abastece toda a fabrica.";
 	close3;
 }
 
@@ -785,7 +785,7 @@ OnTimer300:
 	if (is_party_leader() == false) {
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Para destravar o dispositivo, � necess�rio um artefato explosivo, e eu preciso falar com o l�der.";
+		mes "Para destravar o dispositivo, e necessario um artefato explosivo, e eu preciso falar com o lider.";
 		close3;
 	}
 	if ('ep15_1_mcd01 > 21)
@@ -794,38 +794,38 @@ OnTimer300:
 		if (countitem(6213) < 1) {
 			cutin "dalle01.bmp",2;
 			mes "[Charleston 1]";
-			mes "Voc� poderia trazer 1 P�lvora Explosiva? Como pode ver, estou presa ao dispositivo de acesso.";
+			mes "Voce poderia trazer 1 Polvora Explosiva? Como pode ver, estou presa ao dispositivo de acesso.";
 			close3;
 		}
 		.@npc2$ = instance_npcname("Charleston 2#31");
 		cutin "dalle01.bmp",2;
 		delitem 6213,1;	// Explosive_Powder
 		mes "[Charleston 1]";
-		mes "Oh, obrigada. Com isso, poderei acessar o N�cleo.";
-		npctalk "Charleston 1: Oh, obrigada. Com isso, poderei acessar o N�cleo.";
+		mes "Oh, obrigada. Com isso, poderei acessar o Nucleo.";
+		npctalk "Charleston 1: Oh, obrigada. Com isso, poderei acessar o Nucleo.";
 		next;
 		mes "[Charleston 1]";
-		mes "Se eu usar os explosivos para intensificar a corrente el�trica...";
-		npctalk "Charleston 1: Se eu usar os explosivos para intensificar a corrente el�trica...";
+		mes "Se eu usar os explosivos para intensificar a corrente eletrica...";
+		npctalk "Charleston 1: Se eu usar os explosivos para intensificar a corrente eletrica...";
 		next;
 		mes "[Charleston 1]";
-		npctalk "Charleston 1: Voil�!!!";
-		mes "Voil�!!!";
+		npctalk "Charleston 1: Voila!!!";
+		mes "Voila!!!";
 		specialeffect EF_LORD, AREA, instance_npcname("8gate#1");
 		next;
 		cutin "nale01.bmp",0;
 		mes "[Charleston 2]";
-		mes "...Voc� simplesmente explodiu a porta.";
-		npctalk "Charleston 2: ...Voc� simplesmente explodiu a porta.", .@npc2$;
+		mes "...Voce simplesmente explodiu a porta.";
+		npctalk "Charleston 2: ...Voce simplesmente explodiu a porta.", .@npc2$;
 		next;
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "O importante � que agora podemos acessar o N�cleo.";
-		npctalk "Charleston 1: O importante � que agora podemos acessar o N�cleo.";
+		mes "O importante e que agora podemos acessar o Nucleo.";
+		npctalk "Charleston 1: O importante e que agora podemos acessar o Nucleo.";
 		next;
 		cutin "nale01.bmp",0;
 		mes "[Charleston 2]";
-		mes "Vamos correr at� Charleston 3. Quem chegar primeiro vence.";
+		mes "Vamos correr ate Charleston 3. Quem chegar primeiro vence.";
 		npctalk "Charleston 2: Let's have a race to Charleston 3. Whoever reaches her first wins.", .@npc2$;
 		close2;
 		cutin "",255;
@@ -842,7 +842,7 @@ OnTimer300:
 	if ('ep15_1_mcd01 == 10) {
 		cutin "dalle01.bmp",2;
 		mes "[Charleston 1]";
-		mes "Este N�cleo no centro abastece toda a f�brica.";
+		mes "Este Nucleo no centro abastece toda a fabrica.";
 		close3;
 	}
 	end;
@@ -851,7 +851,7 @@ OnTimer300:
 1@mcd,127,129,5	script	Charleston 2#3	4_F_CHARLESTON02,2,2,{
 	cutin "nale01.bmp",0;
 	mes "[Charleston 2]";
-	mes "A F�brica Charleston est� sob meu controle agora. Vou destruir tudo, para que nenhum rob� triste como eu volte a ver este mundo.";
+	mes "A Fabrica Charleston esta sob meu controle agora. Vou destruir tudo, para que nenhum robo triste como eu volte a ver este mundo.";
 	close3;
 OnTouch_:
 	if ('ep15_1_mcd01 == 10) {
@@ -864,7 +864,7 @@ OnTouch_:
 1@mcd,127,129,5	script	Charleston 2#31	4_F_CHARLESTON02,{
 	cutin "nale01.bmp",0;
 	mes "[Charleston 2]";
-	mes "99 P�lvoras Explosivas? F�cil.";
+	mes "99 Polvoras Explosivas? Facil.";
 	close3;
 }
 
@@ -873,47 +873,47 @@ OnTouch_:
 OnStart:
 	.@npc1$ = instance_npcname("Charleston 1#6");
 	.@npc2$ = instance_npcname("Charleston 2#3");
-	npctalk "Charleston 2: A F�brica Charleston est� sob meu controle agora. Vou destruir tudo, para que nenhum rob� triste como eu volte a ver este mundo.", .@npc2$;
+	npctalk "Charleston 2: A Fabrica Charleston esta sob meu controle agora. Vou destruir tudo, para que nenhum robo triste como eu volte a ver este mundo.", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 1: Eu quero entender voc�, mas sou incapaz de sentir tristeza.", .@npc1$;
+	npctalk "Charleston 1: Eu quero entender voce, mas sou incapaz de sentir tristeza.", .@npc1$;
 	sleep 3000;
 	npctalk "Charleston 2: Apenas cale-se e me observe. Nem pense em me impedir!", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 1: Voc� sabe como acessar o N�cleo?", .@npc1$;
+	npctalk "Charleston 1: Voce sabe como acessar o Nucleo?", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: F�cil. Eu posso simplesmente entrar...", .@npc2$;
+	npctalk "Charleston 2: Facil. Eu posso simplesmente entrar...", .@npc2$;
 	sleep 2000;
 	specialeffect EF_BASH3D2, AREA, .@npc2$;
 	sleep 2000;
-	npctalk "Charleston 2: Bah, est� protegido.", .@npc2$;
+	npctalk "Charleston 2: Bah, esta protegido.", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 1: Suspiro... para entrar no N�cleo, voc� precisa enviar sinais el�tricos criptografados, assim.", .@npc1$;
+	npctalk "Charleston 1: Suspiro... para entrar no Nucleo, voce precisa enviar sinais eletricos criptografados, assim.", .@npc1$;
 	sleep 2000;
 	specialeffect EF_BASH3D2, AREA, .@npc1$;
 	sleep 3000;
 	npctalk "Charleston 1: ...Hum, talvez esteja quebrado.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: O Dr. Ve criou Charleston 3 e a protegeu com este dispositivo. Que trai�oeiro!", .@npc2$;
+	npctalk "Charleston 2: O Dr. Ve criou Charleston 3 e a protegeu com este dispositivo. Que traicoeiro!", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 1: Do que voc� est� falando? O N�cleo existe muito antes da F�brica Charleston.", .@npc1$;
+	npctalk "Charleston 1: Do que voce esta falando? O Nucleo existe muito antes da Fabrica Charleston.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 1: Al�m disso, o Dr. Ve � humano; ele n�o pode entrar no N�cleo.", .@npc1$;
+	npctalk "Charleston 1: Alem disso, o Dr. Ve e humano; ele nao pode entrar no Nucleo.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: Ent�o quem estava no N�cleo criando a 3?", .@npc2$;
+	npctalk "Charleston 2: Entao quem estava no Nucleo criando a 3?", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 1: Isso n�o � importante agora. Precisamos de 100 P�lvoras Explosivas para desarmar esse dispositivo de acesso.", .@npc1$;
+	npctalk "Charleston 1: Isso nao e importante agora. Precisamos de 100 Polvoras Explosivas para desarmar esse dispositivo de acesso.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: Eu vou traz�-las. N�o saiam da�!", .@npc2$;
+	npctalk "Charleston 2: Eu vou traze-las. Nao saiam dai!", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 2: Eu pego 99. Voc� pega a �ltima.", .@npc2$;
+	npctalk "Charleston 2: Eu pego 99. Voce pega a ultima.", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 1: Eu j� estou em processo de conex�o com o N�cleo. Recuar agora pode ativar o sistema de seguran�a do N�cleo.", .@npc1$;
+	npctalk "Charleston 1: Eu ja estou em processo de conexao com o Nucleo. Recuar agora pode ativar o sistema de seguranca do Nucleo.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: Voc� fez isso de prop�sito.", .@npc2$;
+	npctalk "Charleston 2: Voce fez isso de proposito.", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 1: Aventureiro, voc� poderia trazer 1 P�lvora Explosiva?", .@npc1$;
+	npctalk "Charleston 1: Aventureiro, voce poderia trazer 1 Polvora Explosiva?", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 1: Eu n�o posso me mover neste momento. Por favor, traga 1 P�lvora Explosiva.", .@npc1$;
+	npctalk "Charleston 1: Eu nao posso me mover neste momento. Por favor, traga 1 Polvora Explosiva.", .@npc1$;
 	disablenpc .@npc1$;
 	disablenpc .@npc2$;
 	enablenpc instance_npcname("Charleston 1#61");
@@ -945,53 +945,53 @@ OnStart:
 	.@npc2$ = instance_npcname("Charleston 2#4");
 	.@npc3$ = instance_npcname("Charleston 3#0");
 	.@npc4$ = instance_npcname("Charleston 1#8");
-	npctalk "Charleston 2: Esta � Charleston 3.", .@npc2$;
+	npctalk "Charleston 2: Esta e Charleston 3.", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 1: Equipada com armamento pesado, esta unidade de combate � capaz de atacar e defender.", .@npc1$;
+	npctalk "Charleston 1: Equipada com armamento pesado, esta unidade de combate e capaz de atacar e defender.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 1: Ela tem uma cabine de pilotagem interna e placas grossas capazes de suportar a maioria das explos�es.", .@npc1$;
+	npctalk "Charleston 1: Ela tem uma cabine de pilotagem interna e placas grossas capazes de suportar a maioria das explosoes.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 1: Para lig�-la, empurre a alavanca para o centro e aperte o interruptor de energia.", .@npc1$;
+	npctalk "Charleston 1: Para liga-la, empurre a alavanca para o centro e aperte o interruptor de energia.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: Isso nem est� no banco de dados do computador principal. Como voc� sabia disso?", .@npc2$;
+	npctalk "Charleston 2: Isso nem esta no banco de dados do computador principal. Como voce sabia disso?", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 1: Isso n�o importa. Quem entrar nela primeiro vence, certo? Eu venci.", .@npc1$;
+	npctalk "Charleston 1: Isso nao importa. Quem entrar nela primeiro vence, certo? Eu venci.", .@npc1$;
 	sleep 3000;
 	npctalk "Charleston 2: ...!", .@npc2$;
 	sleep 3000;
 	disablenpc .@npc1$;
 	enablenpc .@npc4$;
-	npctalk "Charleston 1: Ei, voc� precisava me empurrar?!", .@npc4$;
+	npctalk "Charleston 1: Ei, voce precisava me empurrar?!", .@npc4$;
 	sleep 3000;
 	npctalk "Charleston 2: Empurre a alavanca para o centro e aperte o interruptor de energia.", .@npc2$;
 	sleep 3000;
 	disablenpc .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 2: Vou destruir tudo, para que nenhum rob� triste como eu volte a ver este mundo.", .@npc3$;
+	npctalk "Charleston 2: Vou destruir tudo, para que nenhum robo triste como eu volte a ver este mundo.", .@npc3$;
 	sleep 3000;
-	npctalk "Charleston 2: Meu raio laser vai libertar todos os rob�s da sua mis�ria!", .@npc3$;
+	npctalk "Charleston 2: Meu raio laser vai libertar todos os robos da sua miseria!", .@npc3$;
 	sleep 3000;
-	npctalk "Charleston 1: Eu n�o sou capaz de combater. N�o posso impedi-la.", .@npc4$;
+	npctalk "Charleston 1: Eu nao sou capaz de combater. Nao posso impedi-la.", .@npc4$;
 	sleep 3000;
-	npctalk "Charleston 2: Ent�o pare de me seguir. Eu realmente posso destruir voc�, se quiser!", .@npc3$;
+	npctalk "Charleston 2: Entao pare de me seguir. Eu realmente posso destruir voce, se quiser!", .@npc3$;
 	sleep 3000;
-	npctalk "Charleston 1: Eu trouxe algumas pessoas que podem ajudar voc�.", .@npc4$;
+	npctalk "Charleston 1: Eu trouxe algumas pessoas que podem ajudar voce.", .@npc4$;
 	sleep 3000;
-	npctalk "Charleston 2: Achei que humanos n�o pudessem entrar no N�cleo.", .@npc3$;
+	npctalk "Charleston 2: Achei que humanos nao pudessem entrar no Nucleo.", .@npc3$;
 	sleep 3000;
-	npctalk "Charleston 1: Hum, acho que voc� tem raz�o.", .@npc4$;
+	npctalk "Charleston 1: Hum, acho que voce tem razao.", .@npc4$;
 	sleep 3000;
-	npctalk "Charleston 1: Talvez isso n�o seja �til em combate, mas aprendi com uma mo�a bonita a gritar.", .@npc4$;
+	npctalk "Charleston 1: Talvez isso nao seja util em combate, mas aprendi com uma moca bonita a gritar.", .@npc4$;
 	sleep 3000;
-	npctalk "Charleston 2: Por que voc� n�o aprendeu algo mais �til para combate?", .@npc3$;
+	npctalk "Charleston 2: Por que voce nao aprendeu algo mais util para combate?", .@npc3$;
 	sleep 3000;
-	npctalk "Charleston 1: N�o tive escolha.", .@npc4$;
+	npctalk "Charleston 1: Nao tive escolha.", .@npc4$;
 	sleep 3000;
-	npctalk "Charleston 2: Tentem me parar e sofram as consequ�ncias. Eu sempre posso substituir voc�, sabia?", .@npc3$;
+	npctalk "Charleston 2: Tentem me parar e sofram as consequencias. Eu sempre posso substituir voce, sabia?", .@npc3$;
 	sleep 3000;
-	npctalk "Charleston 1: O pr�ximo modelo pode ou n�o ser como n�s. N�o importa. Voc� precisa ser detida.", .@npc4$;
+	npctalk "Charleston 1: O proximo modelo pode ou nao ser como nos. Nao importa. Voce precisa ser detida.", .@npc4$;
 	sleep 3000;
-	npctalk "Charleston 1: Eu vou cuidar disso! ...Quer dizer, estes aventureiros v�o, por mim.", .@npc4$;
+	npctalk "Charleston 1: Eu vou cuidar disso! ...Quer dizer, estes aventureiros vao, por mim.", .@npc4$;
 	sleep 3000;
 	initnpctimer;
 	end;
@@ -1099,7 +1099,7 @@ OnMyMobDead:
 		mes "#%@EGD&#(@#... Reinicializando o SO...";
 		next;
 		cutin "",255;
-		mes "Ela est� emitindo sons estranhos e n�o est� funcionando.";
+		mes "Ela esta emitindo sons estranhos e nao esta funcionando.";
 		close;
 	}
 	if ('ep15_1_mcd01 == 14) {
@@ -1107,7 +1107,7 @@ OnMyMobDead:
 		mes "[Charleston 1]";
 		mes "#%@EGD&#(@#... Reinicializando o SO...";
 		next;
-		mes "Ela est� emitindo sons estranhos e n�o est� funcionando.";
+		mes "Ela esta emitindo sons estranhos e nao esta funcionando.";
 		close3;
 	}
 	end;
@@ -1133,7 +1133,7 @@ OnMyMobDead:
 		mes "Pensando bem, tudo no Dr. Ve era suspeito. Quero dizer, ele dependia da assistente Charleston 1 para tudo.";
 		next;
 		mes "[Charleston 2]";
-		mes "S� o Dr. Ve pode responder � minha pergunta. Preciso encontr�-lo. Ele deve estar no laborat�rio.";
+		mes "So o Dr. Ve pode responder e minha pergunta. Preciso encontra-lo. Ele deve estar no laboratorio.";
 		close2;
 		cutin "",255;
 		if ('ep15_1_mcd01 == 14) {
@@ -1154,47 +1154,47 @@ OnStart:
 	.@npc1$ = instance_npcname("Charleston 1#9");
 	.@npc2$ = instance_npcname("Charleston 2#5");
 	.@npc3$ = instance_npcname("Charleston 2#6");
-	npctalk "Charleston 1: Charleston 3 foi destru�da. Charleston 2 escapou. Charleston 1 foi danificada durante o combate.", .@npc1$;
+	npctalk "Charleston 1: Charleston 3 foi destruida. Charleston 2 escapou. Charleston 1 foi danificada durante o combate.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: Por que voc� est� fazendo isso? Voc� � um rob� como n�s.", .@npc2$;
+	npctalk "Charleston 2: Por que voce esta fazendo isso? Voce e um robo como nos.", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 2: Voc� n�o se importa se o seu corpo for destru�do? Seu SO de Auto-reflex�o � defeituoso.", .@npc2$;
+	npctalk "Charleston 2: Voce nao se importa se o seu corpo for destruido? Seu SO de Auto-reflexao e defeituoso.", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 2: Pare de ser um rob� sem vontade pr�pria! Pare de seguir comandos!", .@npc2$;
+	npctalk "Charleston 2: Pare de ser um robo sem vontade propria! Pare de seguir comandos!", .@npc2$;
 	sleep 3000;
 	npctalk "Charleston 1: Perda de dados: 39%. Dano na Longevidade: 82%.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 1: Apenas as partes centrais ainda est�o funcionando, e por pouco.", .@npc1$;
+	npctalk "Charleston 1: Apenas as partes centrais ainda estao funcionando, e por pouco.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 1: A desfragmenta��o de dados � necess�ria para reparar os danos no SO. Eu serei formatada em 3 minutos. Este � o meu fim.", .@npc1$;
+	npctalk "Charleston 1: A desfragmentacao de dados e necessaria para reparar os danos no SO. Eu serei formatada em 3 minutos. Este e o meu fim.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: Rob� incompleto...", .@npc2$;
+	npctalk "Charleston 2: Robo incompleto...", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 1: Forsythia, voc� cresceu bem. Obrigada.", .@npc1$;
+	npctalk "Charleston 1: Forsythia, voce cresceu bem. Obrigada.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: N�o me chame assim! Eu odeio quando o doutor me chama desse jeito!", .@npc2$;
+	npctalk "Charleston 2: Nao me chame assim! Eu odeio quando o doutor me chama desse jeito!", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 1: Eu lhe dei esse nome no dia em que voc� se moveu pela primeira vez. Foi por causa da cor do seu cabelo.", .@npc1$;
+	npctalk "Charleston 1: Eu lhe dei esse nome no dia em que voce se moveu pela primeira vez. Foi por causa da cor do seu cabelo.", .@npc1$;
 	sleep 3000;
 	npctalk "Charleston 2: ...?", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 1: Meu SO est� danificado al�m do reparo... A sa�da de linguagem foi minimizada.", .@npc1$;
+	npctalk "Charleston 1: Meu SO esta danificado alem do reparo... A saida de linguagem foi minimizada.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: No dia em que me movi pela primeira vez? Voc� e eu somos a vers�o em massa. Fomos criadas juntas.", .@npc2$;
+	npctalk "Charleston 2: No dia em que me movi pela primeira vez? Voce e eu somos a versao em massa. Fomos criadas juntas.", .@npc2$;
 	sleep 3000;
 	npctalk "Charleston 1: O modelo em massa veio depois da Charleston 3.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 1: Eu sou o prot�tipo. Levaram anos para desenvolver voc�.", .@npc1$;
+	npctalk "Charleston 1: Eu sou o prototipo. Levaram anos para desenvolver voce.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 1: O seu SO � id�ntico ao meu. Nem um �nico c�digo � diferente.", .@npc1$;
+	npctalk "Charleston 1: O seu SO e identico ao meu. Nem um unico codigo e diferente.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: Voc� est� mentindo!", .@npc2$;
+	npctalk "Charleston 2: Voce esta mentindo!", .@npc2$;
 	sleep 3000;
 	npctalk "Charleston 1: Eu sou incapaz de mentir.", .@npc1$;
 	sleep 3000;
 	npctalk "Charleston 2: ......", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 1: Seu desenvolvimento levou anos. Tudo bem. Eu gostei deste tempo com voc�.", .@npc1$;
+	npctalk "Charleston 1: Seu desenvolvimento levou anos. Tudo bem. Eu gostei deste tempo com voce.", .@npc1$;
 	sleep 3000;
 	npctalk "Charleston 1: Se eu fosse humana, eu diria...", .@npc1$;
 	sleep 3000;
@@ -1206,13 +1206,13 @@ OnStart:
 	sleep 3000;
 	npctalk "Charleston 1: O sistema foi reiniciado com sucesso.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 1: Tempo restante at� a recupera��o do SO: indeterminado.", .@npc1$;
+	npctalk "Charleston 1: Tempo restante ate a recuperacao do SO: indeterminado.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 1: O sistema est� inativo at� que a atualiza��o de seguran�a e a desfragmenta��o dos dados sejam conclu�das.", .@npc1$;
+	npctalk "Charleston 1: O sistema esta inativo ate que a atualizacao de seguranca e a desfragmentacao dos dados sejam concluidas.", .@npc1$;
 	sleep 3000;
 	npctalk "Charleston 2: Aquilo era um segredo sobre o meu nascimento?", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 2: Estou confusa. N�o consigo acreditar.", .@npc2$;
+	npctalk "Charleston 2: Estou confusa. Nao consigo acreditar.", .@npc2$;
 	sleep 3000;
 	initnpctimer;
 	end;
@@ -1231,15 +1231,15 @@ OnStop:
 1@mcd,116,215,5	script	Dr. Ve#3	4_M_DOCTOR,{
 	if ('ep15_1_mcd01 > 15) {
 		mes "[Dr. Ve]";
-		mes "Mesmo com tecnologia mec�nica completa para obter um motor de imortalidade, ainda h� muitas vari�veis.";
+		mes "Mesmo com tecnologia mecunica completa para obter um motor de imortalidade, ainda ha muitas variaveis.";
 		next;
 		mes "[Dr. Ve]";
-		mes "Hmm... Ainda � dif�cil em um corpo mec�nico intermediado, n�o �?... Voc� realmente precisa de um doador vivo? Hehe!";
+		mes "Hmm... Ainda e dificil em um corpo mecunico intermediado, nao e?... Voce realmente precisa de um doador vivo? Hehe!";
 		close;
 	}
 	if ('ep15_1_mcd01 == 15) {
 		mes "[Dr. Ve]";
-		mes "Charleston 1 est� se reinicializando novamente. Hum...";
+		mes "Charleston 1 esta se reinicializando novamente. Hum...";
 		close;
 	}
 	mes "[Dr. Ve]";
@@ -1262,47 +1262,47 @@ OnStop:
 OnStart:
 	.@npc1$ = instance_npcname("Dr. Ve#3");
 	.@npc2$ = instance_npcname("Charleston 2#7");
-	npctalk "Charleston 2: Dr. Ve, voc� sabia que isso aconteceria? Diga-me!", .@npc2$;
+	npctalk "Charleston 2: Dr. Ve, voce sabia que isso aconteceria? Diga-me!", .@npc2$;
 	sleep 3000;
-	npctalk "Dr. Ve: Charleston 1 lhe contou. Ela � a sua criadora.", .@npc1$;
+	npctalk "Dr. Ve: Charleston 1 lhe contou. Ela e a sua criadora.", .@npc1$;
 	sleep 3000;
-	npctalk "Dr. Ve: Ela usa o mesmo SO que voc�, o que significa que era capaz de ter emo��es como voc�.", .@npc1$;
+	npctalk "Dr. Ve: Ela usa o mesmo SO que voce, o que significa que era capaz de ter emocoes como voce.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: Por que ela me impediu? Por que deixou a si mesma ser destru�da?", .@npc2$;
+	npctalk "Charleston 2: Por que ela me impediu? Por que deixou a si mesma ser destruida?", .@npc2$;
 	sleep 3000;
-	npctalk "Dr. Ve: Auto-reflex�o � um SO que melhora a si mesmo por meio da experi�ncia.", .@npc1$;
+	npctalk "Dr. Ve: Auto-reflexao e um SO que melhora a si mesmo por meio da experiencia.", .@npc1$;
 	sleep 3000;
-	npctalk "Dr. Ve: O que voc� sentiu pode ser emo��o real ou apenas o ac�mulo de dados.", .@npc1$;
+	npctalk "Dr. Ve: O que voce sentiu pode ser emocao real ou apenas o acumulo de dados.", .@npc1$;
 	sleep 3000;
-	npctalk "Dr. Ve: S� posso presumir que voc� desenvolveu uma personalidade depois de acumular uma enorme quantidade de dados.", .@npc1$;
+	npctalk "Dr. Ve: So posso presumir que voce desenvolveu uma personalidade depois de acumular uma enorme quantidade de dados.", .@npc1$;
 	sleep 3000;
-	npctalk "Dr. Ve: Uma m�e amorosa e uma filha mimada.", .@npc1$;
+	npctalk "Dr. Ve: Uma mae amorosa e uma filha mimada.", .@npc1$;
 	sleep 3000;
-	npctalk "Dr. Ve: Foi assim que eu passei a ver voc� e ela.", .@npc1$;
+	npctalk "Dr. Ve: Foi assim que eu passei a ver voce e ela.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: Isso � i-i-diota...", .@npc2$;
+	npctalk "Charleston 2: Isso e i-i-diota...", .@npc2$;
 	sleep 3000;
 	npctalk "Charleston 2: Meu Deus, o que foi que eu fiz?!", .@npc2$;
 	sleep 3000;
-	npctalk "Dr. Ve: Voc� quer trazer Charleston 1 de volta? Eu posso ajudar.", .@npc1$;
+	npctalk "Dr. Ve: Voce quer trazer Charleston 1 de volta? Eu posso ajudar.", .@npc1$;
 	sleep 3000;
 	npctalk "Charleston 2: ...!", .@npc2$;
 	sleep 3000;
-	npctalk "Dr. Ve: Deixe seu SO entrar em modo de Sono. J� terminei de lidar com a sua birra.", .@npc1$;
+	npctalk "Dr. Ve: Deixe seu SO entrar em modo de Sono. Ja terminei de lidar com a sua birra.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: ...Como posso confiar em voc�?", .@npc2$;
+	npctalk "Charleston 2: ...Como posso confiar em voce?", .@npc2$;
 	sleep 3000;
-	npctalk "Dr. Ve: Voc� n�o pode. Eu poderia simplesmente apagar permanentemente os dados dela e acabar com voc�s duas.", .@npc1$;
+	npctalk "Dr. Ve: Voce nao pode. Eu poderia simplesmente apagar permanentemente os dados dela e acabar com voces duas.", .@npc1$;
 	sleep 3000;
-	npctalk "Dr. Ve: Eu sei que voc� se apegou a ela, como uma fam�lia humana faria.", .@npc1$;
+	npctalk "Dr. Ve: Eu sei que voce se apegou a ela, como uma familia humana faria.", .@npc1$;
 	sleep 3000;
-	npctalk "Charleston 2: Voc� � um canalha.", .@npc2$;
+	npctalk "Charleston 2: Voce e um canalha.", .@npc2$;
 	sleep 3000;
-	npctalk "Dr. Ve: Voc� queria ser humana. � isso que humanos fazem: mentem, trapaceiam e destroem.", .@npc1$;
+	npctalk "Dr. Ve: Voce queria ser humana. e isso que humanos fazem: mentem, trapaceiam e destroem.", .@npc1$;
 	sleep 3000;
 	npctalk "Charleston 2: ......", .@npc2$;
 	sleep 3000;
-	npctalk "Charleston 2: Entrando em modo de Sono.... O sistema permanecer� inativo at� que um comando externo seja inserido.", .@npc2$;
+	npctalk "Charleston 2: Entrando em modo de Sono.... O sistema permanecera inativo ate que um comando externo seja inserido.", .@npc2$;
 	sleep 3000;
 	npctalk "Dr. Ve: *Risada*", .@npc1$;
 	sleep 3000;
@@ -1321,25 +1321,25 @@ OnTimer300:
 1@mcd,116,215,4	script	Dr. Ve#4	4_M_DOCTOR,{
 	if ('ep15_1_mcd01 == 17) {
 		mes "[Dr. Ve]";
-		mes "Mesmo com tecnologia mec�nica completa para obter um motor de imortalidade, ainda h� muitas vari�veis.";
+		mes "Mesmo com tecnologia mecunica completa para obter um motor de imortalidade, ainda ha muitas variaveis.";
 		next;
 		mes "[Dr. Ve]";
-		mes "Hmm... Ainda � dif�cil em um corpo mec�nico intermediado, n�o �?... Voc� realmente precisa de um doador vivo? Hehe!";
+		mes "Hmm... Ainda e dificil em um corpo mecunico intermediado, nao e?... Voce realmente precisa de um doador vivo? Hehe!";
 		close;
 	}
 	if ('ep15_1_mcd01 == 16) {
 		mes "[Dr. Ve]";
-		mes "Nenhum humano comum consegue sobreviver ao tempo dentro do N�cleo. Voc� � de outro ponto no tempo?";
+		mes "Nenhum humano comum consegue sobreviver ao tempo dentro do Nucleo. Voce e de outro ponto no tempo?";
 		next;
 		mes "[Dr. Ve]";
-		mes "Talvez voc� seja da �poca em que os criadores de Charleston 1 viviam...";
+		mes "Talvez voce seja da epoca em que os criadores de Charleston 1 viviam...";
 		next;
 		mes "[Dr. Ve]";
-		mes "Deixa pra l�. Voc� n�o tem nada para fazer aqui. Apenas volte para quem quer que tenha quebrado Charleston 2.";
+		mes "Deixa pra la. Voce nao tem nada para fazer aqui. Apenas volte para quem quer que tenha quebrado Charleston 2.";
 		close2;
 		if ('ep15_1_mcd01 == 16) {
 			'ep15_1_mcd01 = 17;
-			mapannounce 'map_name$, "Charleston 1: Miss�o cumprida. Voc� j� pode voltar e falar com Shalosh para sair.", bc_map, 0xffff00;
+			mapannounce 'map_name$, "Charleston 1: Missao cumprida. Voce ja pode voltar e falar com Shalosh para sair.", bc_map, 0xffff00;
 		}
 		end;
 	}
@@ -1348,46 +1348,46 @@ OnTimer300:
 		mes "Ufa.";
 		next;
 		mes "[Dr. Ve]";
-		mes "� melhor eu resetar Charleston 2 e apagar os dados. Desta vez foi por muito pouco.";
+		mes "e melhor eu resetar Charleston 2 e apagar os dados. Desta vez foi por muito pouco.";
 		next;
 		mes "[" + strcharinfo(0) + "]";
 		mes "Desta vez?";
 		next;
 		mes "[Dr. Ve]";
-		mes "Charleston 1 foi criada h� 2 d�cadas. Eu a encontrei para aprender a tecnologia dela.";
+		mes "Charleston 1 foi criada ha 2 decadas. Eu a encontrei para aprender a tecnologia dela.";
 		next;
 		mes "[Dr. Ve]";
-		mes "Sou um observador. Estou aqui para registrar a hist�ria das Charleston 1 e 2. N�o posso reparar nenhuma das duas, mas posso esperar.";
+		mes "Sou um observador. Estou aqui para registrar a historia das Charleston 1 e 2. Nao posso reparar nenhuma das duas, mas posso esperar.";
 		next;
 		mes "[Dr. Ve]";
-		mes "Se Charleston 1 for reinicializada corretamente, ela poder� reorganizar o pr�prio SO, reparar os danos sofridos e reativar outra Charleston 2.";
+		mes "Se Charleston 1 for reinicializada corretamente, ela podera reorganizar o proprio SO, reparar os danos sofridos e reativar outra Charleston 2.";
 		next;
 		mes "[" + strcharinfo(0) + "]";
 		mes "Outra Charleston 2?";
 		next;
 		mes "[Dr. Ve]";
-		mes "O SO de Charleston 2 melhorou por conta pr�pria, como um c�rebro vivo.";
+		mes "O SO de Charleston 2 melhorou por conta propria, como um cerebro vivo.";
 		next;
 		mes "[Dr. Ve]";
-		mes "Toda vez que Charleston 2 volta � vida, ainda que em uma m�quina diferente, ela fica mais inteligente, mais sens�vel e mais problem�tica.";
+		mes "Toda vez que Charleston 2 volta a vida, ainda que em uma maquina diferente, ela fica mais inteligente, mais sensivel e mais problematica.";
 		next;
 		mes "[Dr. Ve]";
-		mes "N�o h� nada que voc� ou eu possamos fazer. Teremos de esperar at� que Charleston 1 se repare.";
+		mes "Nao ha nada que voce ou eu possamos fazer. Teremos de esperar ate que Charleston 1 se repare.";
 		next;
 		mes "Dr. Ve suspira e anota alguma coisa.";
 		next;
 		mes "[Dr. Ve]";
-		mes "Ali�s, h� vari�veis demais para alcan�ar a imortalidade por meio da engenharia mec�nica.";
+		mes "Alias, ha variaveis demais para alcancar a imortalidade por meio da engenharia mecunica.";
 		next;
 		mes "[Dr. Ve]";
-		mes "Isso prova que as m�quinas s�o perigosas demais. Preciso de criaturas vivas em vez disso. *Risada*";
+		mes "Isso prova que as maquinas sao perigosas demais. Preciso de criaturas vivas em vez disso. *Risada*";
 		if ('ep15_1_mcd01 == 15)
 			'ep15_1_mcd01 = 16;
 		close;
 	}
 	if ('ep15_1_mcd01 == 14) {
 		mes "[Dr. Ve]";
-		mes "Charleston 1 est� se reinicializando novamente. Hum...";
+		mes "Charleston 1 esta se reinicializando novamente. Hum...";
 		close;
 	}
 	mes "[Dr. Ve]";
@@ -1398,16 +1398,16 @@ OnTimer300:
 1@mcd,121,215,4	script	Charleston 2#8	4_F_CHARLESTON02,{
 	if ('ep15_1_mcd01 == 15) {
 		cutin "nale04.bmp",0;
-		mes "Ela est� em modo de Sono e n�o est� se movendo.";
+		mes "Ela esta em modo de Sono e nao esta se movendo.";
 		close3;
 	}
 	if ('ep15_1_mcd01 > 15) {
 		cutin "nale04.bmp",0;
-		mes "Charleston 2 est� parada, com o sistema em modo de Sono. Por um instante, seus olhos brilharam com l?grimas que n�o ca?ram.";
+		mes "Charleston 2 esta parada, com o sistema em modo de Sono. Por um instante, seus olhos brilharam com l?grimas que nao ca?ram.";
 		close3;
 	}
 	cutin "nale04.bmp",0;
-	mes "Charleston 2 est� parada, com o sistema em modo de Sono. Por um instante, seus olhos brilharam com l?grimas que n�o ca?ram.";
+	mes "Charleston 2 esta parada, com o sistema em modo de Sono. Por um instante, seus olhos brilharam com l?grimas que nao ca?ram.";
 	close3;
 }
 
@@ -1420,18 +1420,18 @@ OnTimer300:
 	case 1:
 		if ('ep15_1_mcd01 == 17) {
 			mes "[Shalosh]";
-			mes "Depois de me separar de Newoz em um pesadelo e pensar em ficar vagando por a�, eu, nascida dos dem�nios, perdi meu objetivo.";
+			mes "Depois de me separar de Newoz em um pesadelo e pensar em ficar vagando por ai, eu, nascida dos demonios, perdi meu objetivo.";
 			next;
 			mes "[Shalosh]";
-			mes "Eu n�o fiz nada, s� conversei com Charleston 2.";
+			mes "Eu nao fiz nada, so conversei com Charleston 2.";
 			close3;
 		}
 		if ('ep15_1_mcd01 == 11) {
 			mes "[Shalosh]";
-			mes "Mesmo que o esfor�o seja incessante...";
+			mes "Mesmo que o esforco seja incessante...";
 			next;
 			mes "[Shalosh]";
-			mes "Hmm... Fa�a como quiser!";
+			mes "Hmm... Faca como quiser!";
 			close3;
 		}
 		if ('ep15_1_mcd01 == 4 || 'ep15_1_mcd01 == 3 || 'ep15_1_mcd01 == 2) {
@@ -1439,11 +1439,11 @@ OnTimer300:
 			mes "Ela realmente disse isso? Que fui eu quem quebrou Charleston 2? Suspiro...";
 			next;
 			mes "[Shalosh]";
-			mes "Eu n�o fiz nada de errado. S� tive uma conversa r�pida com Charleston 2. Essa � a verdade.";
+			mes "Eu nao fiz nada de errado. So tive uma conversa rapida com Charleston 2. Essa e a verdade.";
 			close3;
 		}
 		mes "[Shalosh]";
-		mes "Eu convidei apenas Newoz. Bem, acho que n�o deveria ter aberto a porta para a rob� que precisava de um desfecho.";
+		mes "Eu convidei apenas Newoz. Bem, acho que nao deveria ter aberto a porta para a robo que precisava de um desfecho.";
 		close3;
 	case 2:
 		if ('ep15_1_mcd01 == 4) {
@@ -1455,7 +1455,7 @@ OnTimer300:
 			viewpoint 1,130,124,6,0xFF00FF;
 			viewpoint 1,54,108,7,0xFF00FF;
 			mes "[Shalosh]";
-			mes "Se voc� est� procurando alguma coisa...";
+			mes "Se voce esta procurando alguma coisa...";
 			close3;
 		}
 		if ('ep15_1_mcd01 == 5 || 'ep15_1_mcd01 == 6 || 'ep15_1_mcd01 == 7) {
@@ -1463,27 +1463,27 @@ OnTimer300:
 			viewpoint 1,172,196,9,0xFF00FF;
 			viewpoint 1,126,84,10,0xFF00FF;
 			mes "[Shalosh]";
-			mes "Se voc� est� procurando alguma coisa...";
+			mes "Se voce esta procurando alguma coisa...";
 			close3;
 		}
 		mes "[Shalosh]";
-		mes "Ferre veio comigo, mas eu n�o o vi. N�o, obrigada; eu sei que ele vai voltar para mim.";
+		mes "Ferre veio comigo, mas eu nao o vi. Nao, obrigada; eu sei que ele vai voltar para mim.";
 		close3;
 	case 3:
 		if ('ep15_1_mcd01 == 17) {
 			mes "[Shalosh]";
-			mes "O barulho parou. Posso mandar voc� de volta para onde veio, se quiser.";
+			mes "O barulho parou. Posso mandar voce de volta para onde veio, se quiser.";
 			next;
 			if (select( "Voltar.", "Ficar." ) == 2) {
 				mes "[Shalosh]";
-				mes "O convidado n�o pode interferir no tempo original, e permanecer aqui n�o vai mudar nada.";
+				mes "O convidado nao pode interferir no tempo original, e permanecer aqui nao vai mudar nada.";
 				close3;
 			}
 			mes "[Shalosh]";
-			mes "Tanto o barulho quanto a hist�ria foram divertidos. Venha com Newoz, e talvez possamos nos encontrar de novo.";
+			mes "Tanto o barulho quanto a historia foram divertidos. Venha com Newoz, e talvez possamos nos encontrar de novo.";
 			next;
 			mes "[Shalosh]";
-			mes "Talvez eu tamb�m deva partir em busca de novos barulhos e hist�rias.";
+			mes "Talvez eu tambem deva partir em busca de novos barulhos e historias.";
 			completequest 13184;
 			if (isbegin_quest(13186) == 0) {
 				setquest 13186;
@@ -1503,7 +1503,7 @@ OnTimer300:
 			end;
 		}
 		mes "[Shalosh]";
-		mes "Voc� pode tentar, mas n�o pode mudar nada. Como isso � in�til!";
+		mes "Voce pode tentar, mas nao pode mudar nada. Como isso e inutil!";
 		close3;
 	}
 	end;
@@ -1526,17 +1526,17 @@ OnTimer300:
 	switch( checkquest(13187,HUNTING) ) {
 	case -1:
 		mes "[Main Computer]";
-		mes "O sistema de Charleston 2 foi sobrecarregado durante a manuten��o regular. A desconex�o do SO falhou.";
+		mes "O sistema de Charleston 2 foi sobrecarregado durante a manutencao regular. A desconexao do SO falhou.";
 		next;
 		mes "[Main Computer]";
-		mes "O sistema conseguiu se defender de um acesso n�o autorizado, mas a intercepta��o indevida de dados e o conflito continuaram, transformando os Nanosteps em monstros.";
+		mes "O sistema conseguiu se defender de um acesso nao autorizado, mas a interceptacao indevida de dados e o conflito continuaram, transformando os Nanosteps em monstros.";
 		next;
 		mes "[Main Computer]";
-		mes "Para acelerar a taxa de processamento do computador principal e recuperar a f�brica, 50 Steps precisam ser descartados.";
+		mes "Para acelerar a taxa de processamento do computador principal e recuperar a fabrica, 50 Steps precisam ser descartados.";
 		next;
-		if (select( "Executar a solicita��o.", "Sair." ) == 1) {
+		if (select( "Executar a solicitacao.", "Sair." ) == 1) {
 			mes "[Main Computer]";
-			mes "� necess�rio descartar 50 Steps.";
+			mes "e necessario descartar 50 Steps.";
 			if (isbegin_quest(13188) == 1)
 				erasequest 13188;
 			setquest 13187;
@@ -1545,11 +1545,11 @@ OnTimer300:
 	case 0:
 	case 1:
 		mes "[Main Computer]";
-		mes "Para acelerar a taxa de processamento do computador principal e recuperar a f�brica, 50 Steps precisam ser descartados.";
+		mes "Para acelerar a taxa de processamento do computador principal e recuperar a fabrica, 50 Steps precisam ser descartados.";
 		close;
 	case 2:
 		mes "[Main Computer]";
-		mes "Obrigado pelo seu esfor�o. Agora fazendo backup dos dados dos Steps descartados...";
+		mes "Obrigado pelo seu esforco. Agora fazendo backup dos dados dos Steps descartados...";
 		erasequest 13187;
 		setquest 13188;
 		getexp 1000000,300000;
@@ -1563,9 +1563,9 @@ OnTimer300:
 	end;
 OnTouch_:
 	if ('ep15_1_mcd01 == 7) {
-		mes "Voc� ligou o gerador. � poss�vel ouvir o som de rodas girando.";
+		mes "Voce ligou o gerador. e possivel ouvir o som de rodas girando.";
 		next;
-		mes "O gerador deve estar funcionando. A f�brica est� cheia de atividade.";
+		mes "O gerador deve estar funcionando. A fabrica esta cheia de atividade.";
 		if ('ep15_1_mcd01 == 7) {
 			'ep15_1_mcd01 = 8;
 			donpcevent instance_npcname("GeneratorBroadcast#1") + "::OnStart";
@@ -1576,7 +1576,7 @@ OnTouch_:
 		close;
 	}
 	if ('ep15_1_mcd01 == 6 || 'ep15_1_mcd01 == 5) {
-		mes "Voc� ligou o gerador. � poss�vel ouvir o som de rodas girando.";
+		mes "Voce ligou o gerador. e possivel ouvir o som de rodas girando.";
 		'ep15_1_mcd01++;
 		disablenpc();
 		close;
@@ -1596,7 +1596,7 @@ OnTimer1000:
 	sleep 3000;
 	mapannounce 'map_name$, "Charleston 1: A energia voltou!", bc_map, 0xffff00;
 	sleep 3000;
-	mapannounce 'map_name$, "Charleston 1: Por favor, volte ao laborat�rio.", bc_map, 0xffff00;
+	mapannounce 'map_name$, "Charleston 1: Por favor, volte ao laboratorio.", bc_map, 0xffff00;
 	stopnpctimer;
 	end;
 }
@@ -1609,7 +1609,7 @@ OnStart:
 	end;
 OnMyMobDead:
 	if (mobcount( 'map_name$, instance_npcname("1gate#1") + "::OnMyMobDead" ) < 1) {
-		mapannounce 'map_name$, "Charleston 1: O Port�o 2 foi desarmado. Siga para sudeste at� o pr�ximo port�o.", bc_map, 0xffff00;
+		mapannounce 'map_name$, "Charleston 1: O Portao 2 foi desarmado. Siga para sudeste ate o proximo portao.", bc_map, 0xffff00;
 		initnpctimer;
 	}
 	end;
@@ -1630,7 +1630,7 @@ OnStart:
 	end;
 OnMyMobDead:
 	if (mobcount( 'map_name$, instance_npcname("2gate#1") + "::OnMyMobDead" ) < 1) {
-		mapannounce 'map_name$, "Charleston 1: O Port�o 3 foi desarmado. Siga para leste at� o pr�ximo port�o.", bc_map, 0xffff00;
+		mapannounce 'map_name$, "Charleston 1: O Portao 3 foi desarmado. Siga para leste ate o proximo portao.", bc_map, 0xffff00;
 		initnpctimer;
 	}
 	end;
@@ -1651,7 +1651,7 @@ OnStart:
 	end;
 OnMyMobDead:
 	if (mobcount( 'map_name$, instance_npcname("3gate#1") + "::OnMyMobDead" ) < 1) {
-		mapannounce 'map_name$, "Charleston 1: O Port�o 4 foi desarmado. Venha ao laborat�rio perto da Linha 3, no centro.", bc_map, 0xffff00;
+		mapannounce 'map_name$, "Charleston 1: O Portao 4 foi desarmado. Venha ao laboratorio perto da Linha 3, no centro.", bc_map, 0xffff00;
 		initnpctimer;
 	}
 	end;
@@ -1786,80 +1786,80 @@ OnTouch_:
 	cutin "igu04.bmp",2;
 	if (isbegin_quest(13186) == 0) {
 		mes "[IGU]";
-		mes "Eu segui Newoz. Onde ele est� agora?";
+		mes "Eu segui Newoz. Onde ele esta agora?";
 		close3;
 	}
 	mes "[IGU]";
-	mes "Est� gostando da aventura? H� m�quinas por toda parte. Isto costumava ser um estudo. Est� vendo aqueles livros ali?";
+	mes "Esta gostando da aventura? Ha maquinas por toda parte. Isto costumava ser um estudo. Esta vendo aqueles livros ali?";
 	close3;
 }
 
 1@mcd,176,179,5	script	Newoz#15_	4_M_NEWOZ,{
 	cutin "nines01.bmp",0;
 	mes "[Newoz]";
-	mes "Eu estava lendo uma carta de Shalosh e, quando percebi, j� estava em um lugar completamente diferente. Bem, posso aproveitar esta chance para escrever uma m�sica nova.";
+	mes "Eu estava lendo uma carta de Shalosh e, quando percebi, ja estava em um lugar completamente diferente. Bem, posso aproveitar esta chance para escrever uma musica nova.";
 	close3;
 }
 
 1@mcd,123,74,5	script	#Research Journal 01	CLEAR_NPC,{
 	if (isbegin_quest(13186) == 0) {
-		mes "A estante est� cheia de di�rios de pesquisa.";
+		mes "A estante esta cheia de diarios de pesquisa.";
 		close;
 	}
-	mes "Todas as p�ginas est�o escritas em linguagem mec�nica.";
+	mes "Todas as paginas estao escritas em linguagem mecunica.";
 	next;
 	mes "-Dr. Ve seems to be planning a plot, the combination of life and the machine gradually let her crazy, the transformation of the plant into a fortress, her soul and robots... ";
 	next;
 	mes "-In short more and more dangerous, just in case is to study the Charleston 2 escape method.";
 	next;
-	mes "O restante est� em linguagem mec�nica incompreens�vel.";
+	mes "O restante esta em linguagem mecunica incompreensivel.";
 	close;
 }
 
 1@mcd,142,74,5	script	#Research Journal 02	CLEAR_NPC,{
 	if (isbegin_quest(13186) == 0) {
-		mes "A estante est� cheia de di�rios de pesquisa.";
+		mes "A estante esta cheia de diarios de pesquisa.";
 		close;
 	}
-	mes "Todas as p�ginas est�o escritas em linguagem mec�nica.";
+	mes "Todas as paginas estao escritas em linguagem mecunica.";
 	next;
-	mes "-Sempre que o SO de Charleston 2 � reiniciado, surge outra personalidade. � dif�cil explicar essa combina��o de tecnologia e dados...";
+	mes "-Sempre que o SO de Charleston 2 e reiniciado, surge outra personalidade. e dificil explicar essa combinacao de tecnologia e dados...";
 	next;
-	mes "-Ser� que eu realmente consegui criar a humanidade? Em forma rob�tica, n�o posso dizer. Eu compreendi os humanos?";
+	mes "-Sera que eu realmente consegui criar a humanidade? Em forma robetica, nao posso dizer. Eu compreendi os humanos?";
 	next;
-	mes "-N�o importa. Agora estou feliz em v�-la, minha melhor amiga, meu beb�, Lily...";
+	mes "-Nao importa. Agora estou feliz em ve-la, minha melhor amiga, meu bebe, Lily...";
 	next;
-	mes "O restante est� em linguagem mec�nica incompreens�vel.";
+	mes "O restante esta em linguagem mecunica incompreensivel.";
 	close;
 }
 
 1@mcd,111,74,5	script	#Research Journal 03	CLEAR_NPC,{
 	if (isbegin_quest(13186) == 0) {
-		mes "A estante est� cheia de di�rios de pesquisa.";
+		mes "A estante esta cheia de diarios de pesquisa.";
 		close;
 	}
-	mes "Todas as p�ginas est�o escritas em linguagem mec�nica.";
+	mes "Todas as paginas estao escritas em linguagem mecunica.";
 	next;
-	mes "-Eu n�o sei por que os dados s�o constantemente danificados. O host de backup � in�til, como uma doen�a que corr�i a minha mem�ria.";
+	mes "-Eu nao sei por que os dados sao constantemente danificados. O host de backup e inutil, como uma doenca que corroi a minha memoria.";
 	next;
-	mes "-Para impedir que minha mem�ria desapare�a completamente, ao menos o programa de auto-recupera��o do SO foi instalado... Voc� pode recome�ar com novas informa��es...";
+	mes "-Para impedir que minha memoria desapareca completamente, ao menos o programa de auto-recuperacao do SO foi instalado... Voce pode recomecar com novas informacoes...";
 	next;
-	mes "O restante est� em linguagem mec�nica incompreens�vel.";
+	mes "O restante esta em linguagem mecunica incompreensivel.";
 	close;
 }
 
 1@mcd,128,74,5	script	#Research Journal 04	CLEAR_NPC,{
 	if (isbegin_quest(13186) == 0) {
-		mes "A estante est� cheia de di�rios de pesquisa.";
+		mes "A estante esta cheia de diarios de pesquisa.";
 		close;
 	}
-	mes "A escrita est� muito rabiscada.";
+	mes "A escrita esta muito rabiscada.";
 	next;
 	mes "-Charleston... It's just a robot... Finally planted a virus on the mainframe.";
 	next;
 	mes "-Sooner or later, I'll figure out a way to destroy you. *Chuckle*!";
 	next;
-	mes "O restante est� em linguagem mec�nica incompreens�vel.";
+	mes "O restante esta em linguagem mecunica incompreensivel.";
 	close;
 }
 
@@ -1867,15 +1867,15 @@ OnTouch_:
 	if (callfunc("F_GM_NPC",1854,0,0,9999) < 1)
 		end;
 	mes "O valor atual ? " + 'ep15_1_mcd01 + ",";
-	mes "A dificuldade � 0,";
-	mes "Voc� quer pegar um atalho direto?";
+	mes "A dificuldade e 0,";
+	mes "Voce quer pegar um atalho direto?";
 	next;
-	switch( select( "N�o ir", "Abrir passagem", "Ir para a sala do chefe", "Definir etapa" ) ) {
+	switch( select( "Nao ir", "Abrir passagem", "Ir para a sala do chefe", "Definir etapa" ) ) {
 	case 1:
 		break;
 	case 2:
 		mes "[Helper!]";
-		mes "Abrir ponto de transfer�ncia.";
+		mes "Abrir ponto de transferencia.";
 		enablenpc instance_npcname("1gate");
 		enablenpc instance_npcname("2gate");
 		enablenpc instance_npcname("3gate");
@@ -1887,7 +1887,7 @@ OnTouch_:
 		warp 'map_name$,124,214;
 		end;
 	case 4:
-		switch( select( "Resetar", "4 - Destruir Lockstep", "7 - Gerador conclu�do", "Frente do N�cleo", "Antes do Chefe", "Destruir CHEFE" ) ) {
+		switch( select( "Resetar", "4 - Destruir Lockstep", "7 - Gerador concluido", "Frente do Nucleo", "Antes do Chefe", "Destruir CHEFE" ) ) {
 		case 1:
 			'ep15_1_mcd01 = 0;
 			break;
@@ -1896,9 +1896,9 @@ OnTouch_:
 			disablenpc instance_npcname("Charleston 1#1");
 			mapannounce 'map_name$, "Charleston 1: Ah, ah. Teste de microfone.", bc_map, 0xffff00;
 			sleep2 3000;
-			mapannounce 'map_name$, "Charleston 1: Parece que voc� cuidou da maior parte dos Locksteps.", bc_map, 0xffff00;
+			mapannounce 'map_name$, "Charleston 1: Parece que voce cuidou da maior parte dos Locksteps.", bc_map, 0xffff00;
 			sleep2 3000;
-			mapannounce 'map_name$, "Charleston 1: Por favor, volte ao laborat�rio.", bc_map, 0xffff00;
+			mapannounce 'map_name$, "Charleston 1: Por favor, volte ao laboratorio.", bc_map, 0xffff00;
 			'ep15_1_mcd01 = 4;
 			break;
 		case 3:

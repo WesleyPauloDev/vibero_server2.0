@@ -30,11 +30,11 @@ OnStartInstance:
 
 
 
-	// Verificação de Nível
+	// Verificacao de Nivel
 
 	if (BaseLevel < 70) {
 
-		mes "Sinto muito, mas a Torre Sem Fim é um lugar perigoso. Você precisa ter no mínimo o nível 70 para poder entrar.";
+		mes "Sinto muito, mas a Torre Sem Fim e um lugar perigoso. Voce precisa ter no minimo o nivel 70 para poder entrar.";
 
 		close;
 
@@ -44,7 +44,7 @@ OnStartInstance:
 
 	set .@pid, getcharid(1);	
 
-	if (.@pid <= 0) { mes "Você precisa estar em um grupo."; close; }
+	if (.@pid <= 0) { mes "Voce precisa estar em um grupo."; close; }
 
 
 
@@ -72,7 +72,7 @@ OnStartInstance:
 
 	if (#ETOWER_COOLDOWN_4H <= gettimetick(2) && #ETOWER_COOLDOWN_4H > 0) {
 
-		// Tempo de Instância acabou
+		// Tempo de Instancia acabou
 
 		set #ETOWER_STATUS, 3;
 
@@ -108,7 +108,7 @@ OnStartInstance:
 
 	if (#ETOWER_STATUS == 0) {
 
-		mes "Bem vindo a Instância Torre Sem Fim.";
+		mes "Bem vindo a Instancia Torre Sem Fim.";
 
 		if (checkquest(60201,PLAYTIME) >= 0) {
 
@@ -132,11 +132,11 @@ OnStartInstance:
 
 	} else if (#ETOWER_STATUS == 1) {
 
-		mes "Você já abriu uma instância.";
+		mes "Voce ja abriu uma instancia.";
 
 	} else if (#ETOWER_STATUS == 2) {
 
-		mes "Sua instância da Torre está ativa.";
+		mes "Sua instancia da Torre esta ativa.";
 
 	} else if (#ETOWER_STATUS == 3) {
 
@@ -149,9 +149,9 @@ OnStartInstance:
 
 	} else if (#ETOWER_STATUS == 4) {		
 
-		mes "Parabéns, você já realizou uma grande conquista hoje na Torre Sem Fim!";
+		mes "Parabens, voce ja realizou uma grande conquista hoje na Torre Sem Fim!";
 
-    	mes "Aguarde o descanso necessário para continuar a sua jornada amanhã.";
+    	mes "Aguarde o descanso necessario para continuar a sua jornada amanha.";
 
 		set #ETOWER_STATUS, 3;
 
@@ -187,9 +187,9 @@ OnStartInstance:
 
 		mes "[Torre Sem Fim]";
 
-		mes "Jogadores com mesmo IP só podem participar de mais de uma ";
+		mes "Jogadores com mesmo IP so podem participar de mais de uma ";
 
-		mes "Instância simultaneamente , se estiverem em grupos diferentes.";
+		mes "Instancia simultaneamente , se estiverem em grupos diferentes.";
 
 		close;
 
@@ -202,7 +202,7 @@ OnStartInstance:
 		goto S_Enter;
 	}
 
-	// .@instance_id = instance_id(IM_PARTY); // ID da instância
+	// .@instance_id = instance_id(IM_PARTY); // ID da instancia
 
 	// if (.@instance_id > 0) {		
 
@@ -252,13 +252,13 @@ OnStartInstance:
 
 			
 
-	// 		// Se NÃO for o mesmo char ? bloqueia
+	// 		// Se NAO for o mesmo char ? bloqueia
 
 	// 		if (.@saved_cid != getcharid(0)) {
 
 	// 			mes "[Captain Janssen]";
 
-	// 			mes "Apenas um personagem por IP pode entrar nesta instância neste grupo.";
+	// 			mes "Apenas um personagem por IP pode entrar nesta instancia neste grupo.";
 
 	// 			close;
 
@@ -306,7 +306,7 @@ OnStartInstance:
 
 				mes "[Captain Janssen]";
 
-				mes "Apenas o líder do grupo pode gerar a Instância.";			
+				mes "Apenas o lider do grupo pode gerar a Instancia.";			
 
 				close;
 
@@ -318,7 +318,7 @@ OnStartInstance:
 
 				mes "[Captain Janssen]";
 
-				mes "Você já possui uma instância em andamento.";
+				mes "Voce ja possui uma instancia em andamento.";
 
 				close;
 
@@ -330,7 +330,7 @@ OnStartInstance:
 
 				mes "[Captain Janssen]";
 
-				mes "Você  tem uma Instância aberta.";
+				mes "Voce  tem uma Instancia aberta.";
 
 				close;
 
@@ -346,7 +346,7 @@ OnStartInstance:
 
 			
 
-			announce "[Instâncias] " + strcharinfo(0) + " criou Torre Sem Fim para o grupo " + .@partyName$ + ".", bc_all, 0xFF9900;
+			announce "[Instancias] " + strcharinfo(0) + " criou Torre Sem Fim para o grupo " + .@partyName$ + ".", bc_all, 0xFF9900;
 
 			callfunc("F_InstanceLogStart", "ETOWER", "Torre Sem Fim");
 
@@ -354,11 +354,11 @@ OnStartInstance:
 
 			mes "[Captain Janssen]";
 
-			mes "Instância criada! Use '^0000FFEntrar na Instância^000000' para começar.";
+			mes "Instancia criada! Use '^0000FFEntrar na Instancia^000000' para comecar.";
 
 			next;
 
-			if (select("Entrar na Instância", "Fechar") == 1)
+			if (select("Entrar na Instancia", "Fechar") == 1)
 				goto S_Enter;
 
 			close;
@@ -455,7 +455,7 @@ OnStartInstance:
 
 				default:
 
-					mes "Não foi possível entrar na instância.";
+					mes "Nao foi possivel entrar na instancia.";
 
 					close;
 
@@ -479,7 +479,7 @@ OnStartInstance:
 
 	if (.@iid > 0) {
 
-		// pega o party_id salvo para essa instância
+		// pega o party_id salvo para essa instancia
 
 		.@pid = getd("$etower_pid_by_iid_"+.@iid);
 
@@ -509,7 +509,7 @@ OnStartInstance:
 
 		mapannounce "e_tower",
 
-			"O tempo da instância terminou! A Torre Sem Fim foi destruída.",
+			"O tempo da instancia terminou! A Torre Sem Fim foi destruida.",
 
 			bc_all, "0xff0000";
 

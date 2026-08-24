@@ -16,15 +16,15 @@ OnStartInstance:
 
 
 
-	mes "[Guardião do Portão de Yggdrasil]";
+	mes "[Guardiao do Portao de Yggdrasil]";
 
 
 
-	// Verificação de Nível
+	// Verificacao de Nivel
 
 	if (BaseLevel < 65) {
 
-		mes "Sinto muito, mas O Ninho de Nydhog é um lugar perigoso. Você precisa ter no mínimo o nível 65 para poder entrar.";
+		mes "Sinto muito, mas O Ninho de Nydhog e um lugar perigoso. Voce precisa ter no minimo o nivel 65 para poder entrar.";
 
 		close;
 
@@ -32,13 +32,13 @@ OnStartInstance:
 
 
 
-	// Verificação de Grupo
+	// Verificacao de Grupo
 
 	set .@party_id, getcharid(1);
 
 	if (.@party_id == 0) {
 
-        mes "Você precisa estar em um grupo para ir para O Ninho de Nydhog.";
+        mes "Voce precisa estar em um grupo para ir para O Ninho de Nydhog.";
 
         close;
 
@@ -48,7 +48,7 @@ OnStartInstance:
 
 	set .@pid, getcharid(1);	
 
-	if (.@pid <= 0) { mes "Você precisa estar em um grupo."; close; }
+	if (.@pid <= 0) { mes "Voce precisa estar em um grupo."; close; }
 
 	// Tempo
 
@@ -66,7 +66,7 @@ OnStartInstance:
 
 	if (#NYD_COOLDOWN_4H <= gettimetick(2) && #NYD_COOLDOWN_4H > 0) {
 
-		// Tempo de Instância acabou
+		// Tempo de Instancia acabou
 
 		set #NYD_STATUS, 3;
 
@@ -104,7 +104,7 @@ OnStartInstance:
 
 	if (#NYD_STATUS == 0) {
 
-		mes "Bem vindo a Instância Ninho de Nydhog.";
+		mes "Bem vindo a Instancia Ninho de Nydhog.";
 
 		if (checkquest(3135,PLAYTIME) >= 0) {
 
@@ -128,11 +128,11 @@ OnStartInstance:
 
 	} else if (#NYD_STATUS == 1) {
 
-		mes "Você já abriu uma instância.";
+		mes "Voce ja abriu uma instancia.";
 
 	} else if (#NYD_STATUS == 2) {
 
-		mes "Sua instância Ninho de Nydhog está ativa.";
+		mes "Sua instancia Ninho de Nydhog esta ativa.";
 
 	} else if (#NYD_STATUS == 3) {
 
@@ -145,9 +145,9 @@ OnStartInstance:
 
 	} else if (#NYD_STATUS == 4) {		
 
-		mes "Parabéns, você já realizou uma grande conquista hoje no Ninho de Nydhog!";
+		mes "Parabens, voce ja realizou uma grande conquista hoje no Ninho de Nydhog!";
 
-    	mes "Aguarde o descanso necessário para continuar a sua jornada amanhã.";
+    	mes "Aguarde o descanso necessario para continuar a sua jornada amanha.";
 
 		set #NYD_STATUS, 3;
 
@@ -183,9 +183,9 @@ OnStartInstance:
 
 		mes "[Ninho de Nydhog]";
 
-		mes "Jogadores com mesmo IP só podem participar de mais de uma ";
+		mes "Jogadores com mesmo IP so podem participar de mais de uma ";
 
-		mes "Instância simultaneamente , se estiverem em grupos diferentes.";
+		mes "Instancia simultaneamente , se estiverem em grupos diferentes.";
 
 		close;
 
@@ -216,9 +216,9 @@ OnStartInstance:
 
 			if (is_party_leader() != true) {
 
-				mes "[Guardião do Portão de Yggdrasil]";
+				mes "[Guardiao do Portao de Yggdrasil]";
 
-				mes "Apenas o líder do grupo pode gerar a Instância.";			
+				mes "Apenas o lider do grupo pode gerar a Instancia.";			
 
 				close;
 
@@ -228,9 +228,9 @@ OnStartInstance:
 
 			if (#NYD_STATUS > 0) {
 
-				mes "[Guardião do Portão de Yggdrasil]";
+				mes "[Guardiao do Portao de Yggdrasil]";
 
-				mes "Você já possui uma instância em andamento.";
+				mes "Voce ja possui uma instancia em andamento.";
 
 				close;
 
@@ -240,9 +240,9 @@ OnStartInstance:
 
 			if (.@instance_check < 0) {
 
-				mes "[Guardião do Portão de Yggdrasil]";
+				mes "[Guardiao do Portao de Yggdrasil]";
 
-				mes "Você  tem uma Instância aberta.";
+				mes "Voce  tem uma Instancia aberta.";
 
 				close;
 
@@ -258,19 +258,19 @@ OnStartInstance:
 
 			
 
-			announce "[Instâncias] " + strcharinfo(0) + " criou Ninho de Nidhog para o grupo " + .@partyName$ + ".", bc_all, 0xFF9900;
+			announce "[Instancias] " + strcharinfo(0) + " criou Ninho de Nidhog para o grupo " + .@partyName$ + ".", bc_all, 0xFF9900;
 
 			callfunc("F_InstanceLogStart", "NYD", "Ninho de Nidhog");
 
 
 
-			mes "[Guardião do Portão de Yggdrasil]";
+			mes "[Guardiao do Portao de Yggdrasil]";
 
-			mes "Instância criada! Use ^0000FFEntrar na Instância^000000 para começar.";
+			mes "Instancia criada! Use ^0000FFEntrar na Instancia^000000 para comecar.";
 
 			next;
 
-			if (select("Entrar na Instância", "Fechar") == 1)
+			if (select("Entrar na Instancia", "Fechar") == 1)
 				goto S_Enter;
 
 			close;
@@ -356,7 +356,7 @@ OnStartInstance:
 
 				default:
 
-					mes "Não foi possível entrar na instância.";
+					mes "Nao foi possivel entrar na instancia.";
 
 					close;
 
@@ -380,7 +380,7 @@ OnStartInstance:
 
 	if (.@iid > 0) {
 
-		// pega o party_id salvo para essa instância
+		// pega o party_id salvo para essa instancia
 
 		.@pid = getd("$nyd_pid_by_iid_"+.@iid);
 
@@ -408,7 +408,7 @@ OnStartInstance:
 
 		mapannounce strcharinfo(3),
 
-			"O tempo da instância terminou! O Ninho de Nydhog foi destruída.",
+			"O tempo da instancia terminou! O Ninho de Nydhog foi destruida.",
 
 			bc_map, "0xff0000";
 
@@ -464,7 +464,7 @@ OnEnable:
 
 	monster .@map$,230,280,"Nidhoggur's Guardian#12",2021,1,instance_npcname("nyd_call_mon_1#Custom")+"::OnMyMobDead";
 
-	mapannounce .@map$, "Guardião de Nidhoggur: Proteja o Santuário do Guardião. Livre-se dos intrusos.",bc_map,"0x00ff99";
+	mapannounce .@map$, "Guardiao de Nidhoggur: Proteja o Santuario do Guardiao. Livre-se dos intrusos.",bc_map,"0x00ff99";
 
 	end;
 
@@ -488,7 +488,7 @@ OnMyMobDead:
 
 	if (.@mob_dead_num < 1) {
 
-		mapannounce .@map$, "Todos os Guardiões de Nidhoggur foram derrotados!",bc_map,"0x00ff99";
+		mapannounce .@map$, "Todos os Guardioes de Nidhoggur foram derrotados!",bc_map,"0x00ff99";
 
 		donpcevent instance_npcname("ins_nyd_1f_timer#Custom")+"::OnDisable";
 
@@ -498,7 +498,7 @@ OnMyMobDead:
 
 	} else {
 
-		mapannounce .@map$, "Restam "+.@mob_dead_num+" Guardiões de Nidhoggur.",bc_map,"0x00ff99";
+		mapannounce .@map$, "Restam "+.@mob_dead_num+" Guardioes de Nidhoggur.",bc_map,"0x00ff99";
 
 	}
 
@@ -514,37 +514,37 @@ OnTouch:
 
 	if (ins_nyd2 == 0) {
 
-		mes "Quando uma fraca luz entra em seu coração, uma voz ecoa em sua mente.";
+		mes "Quando uma fraca luz entra em seu coracao, uma voz ecoa em sua mente.";
 
 		next;
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "Tudo acabou... servos do Guardião... Apressem-se e deixem este lugar.";
+		mes "Tudo acabou... servos do Guardiao... Apressem-se e deixem este lugar.";
 
 		next;
 
 		while(1) {
 
-			switch(select("Quem é você?:O que quer dizer?")) {
+			switch(select("Quem e voce?:O que quer dizer?")) {
 
 			case 1:
 
-				mes "[Árvore do Mundo Yggdrasil]";
+				mes "[Arvore do Mundo Yggdrasil]";
 
-				mes "Eu... Eu sou Yggdrasil, a Árvore do Mundo, serva do Guardião Nidhoggur, bem como a Alta Sacerdotisa que lidera a Tribo Laphine.";
-
-				next;
-
-				mes "[Árvore do Mundo Yggdrasil]";
-
-				mes "Então você não é uma sacerdotisa da Tribo Laphine... Como conseguiu entrar aqui? Não importa, não há tempo para isso.";
+				mes "Eu... Eu sou Yggdrasil, a Arvore do Mundo, serva do Guardiao Nidhoggur, bem como a Alta Sacerdotisa que lidera a Tribo Laphine.";
 
 				next;
 
-				mes "[Árvore do Mundo Yggdrasil]";
+				mes "[Arvore do Mundo Yggdrasil]";
 
-				mes "Rápido... vá embora... saia deste lugar antes que seja tarde demais.";
+				mes "Entao voce nao e uma sacerdotisa da Tribo Laphine... Como conseguiu entrar aqui? Nao importa, nao ha tempo para isso.";
+
+				next;
+
+				mes "[Arvore do Mundo Yggdrasil]";
+
+				mes "Rapido... va embora... saia deste lugar antes que seja tarde demais.";
 
 				next;
 
@@ -552,39 +552,39 @@ OnTouch:
 
 			case 2:
 
-				mes "[Árvore do Mundo Yggdrasil]";
+				mes "[Arvore do Mundo Yggdrasil]";
 
-				mes "O Guardião... algo está errado com o Guardião. Não sei o que o deixou assim.";
-
-				next;
-
-				mes "[Árvore do Mundo Yggdrasil]";
-
-				mes "Isto... isto não é mais o Ninho do Guardião da Árvore do Mundo Yggdrasil.";
+				mes "O Guardiao... algo esta errado com o Guardiao. Nao sei o que o deixou assim.";
 
 				next;
 
-				mes "[Árvore do Mundo Yggdrasil]";
+				mes "[Arvore do Mundo Yggdrasil]";
 
-				mes "A escuridão tomou conta do Guardião e destruiu todos os seres vivos... agora este lugar se tornou o lar amaldiçoado de monstros.";
-
-				next;
-
-				mes "[Árvore do Mundo Yggdrasil]";
-
-				mes "Agora, a vil Sombra de Nidhoggur está causando destruição aqui...";
+				mes "Isto... isto nao e mais o Ninho do Guardiao da Arvore do Mundo Yggdrasil.";
 
 				next;
 
-				mes "[Árvore do Mundo Yggdrasil]";
+				mes "[Arvore do Mundo Yggdrasil]";
 
-				mes "Ainda há tempo, vá embora... conte à Tribo Laphine sobre isso... avise os comandantes de Alfheim...";
+				mes "A escuridao tomou conta do Guardiao e destruiu todos os seres vivos... agora este lugar se tornou o lar amaldicoado de monstros.";
 
 				next;
 
-				mes "[Árvore do Mundo Yggdrasil]";
+				mes "[Arvore do Mundo Yggdrasil]";
 
-				mes "Minha alma... foi aprisionada aqui. Agora, vocês são os únicos em quem posso confiar.";
+				mes "Agora, a vil Sombra de Nidhoggur esta causando destruicao aqui...";
+
+				next;
+
+				mes "[Arvore do Mundo Yggdrasil]";
+
+				mes "Ainda ha tempo, va embora... conte a Tribo Laphine sobre isso... avise os comandantes de Alfheim...";
+
+				next;
+
+				mes "[Arvore do Mundo Yggdrasil]";
+
+				mes "Minha alma... foi aprisionada aqui. Agora, voces sao os unicos em quem posso confiar.";
 
 				next;
 
@@ -598,97 +598,97 @@ OnTouch:
 
 		select("Sombra de Nidhoggur?");
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "O Guardião Nidhoggur... ele não está mais no ninho.";
-
-		next;
-
-		mes "[Árvore do Mundo Yggdrasil]";
-
-		mes "Ele... por algum motivo, abandonou sua própria sombra e partiu.";
+		mes "O Guardiao Nidhoggur... ele nao esta mais no ninho.";
 
 		next;
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "Tudo o que restou é a feia Sombra do Guardião de Nidhoggur... a Sombra que enlouqueceu.";
-
-		next;
-
-		mes "[Árvore do Mundo Yggdrasil]";
-
-		mes "A Sombra sugou todos os nutrientes da Árvore do Mundo Yggdrasil e enlouqueceu quando não havia mais nada para consumir. Agora, ela deseja esta terra.";
+		mes "Ele... por algum motivo, abandonou sua propria sombra e partiu.";
 
 		next;
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "Quando a terrível Sombra sair daqui para roubar o poder de outras Árvores do Mundo Yggdrasil, haverá uma grande destruição. Este mundo se tornará um inferno.";
-
-		next;
-
-		mes "[Árvore do Mundo Yggdrasil]";
-
-		mes "Você deve... avisar os comandantes de Alfheim sobre isso e elaborar um plano. Somente eles...";
+		mes "Tudo o que restou e a feia Sombra do Guardiao de Nidhoggur... a Sombra que enlouqueceu.";
 
 		next;
 
-		select("Não há mais nada que possamos fazer?");
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "[Árvore do Mundo Yggdrasil]";
-
-		mes "Com nossos poderes atuais... é impossível derrotar o Guardião.";
+		mes "A Sombra sugou todos os nutrientes da Arvore do Mundo Yggdrasil e enlouqueceu quando nao havia mais nada para consumir. Agora, ela deseja esta terra.";
 
 		next;
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "Mas quem está enlouquecendo não é o Guardião, e sim sua Sombra sombria... talvez possamos aprisioná-la aqui...";
-
-		next;
-
-		mes "[Árvore do Mundo Yggdrasil]";
-
-		mes "Você está disposto a aceitar esta missão? Mesmo que isso custe sua vida?";
+		mes "Quando a terrivel Sombra sair daqui para roubar o poder de outras Arvores do Mundo Yggdrasil, havera uma grande destruicao. Este mundo se tornara um inferno.";
 
 		next;
 
-		if(select("Deixe conosco.:Não podemos fazer isso.") == 2)
+		mes "[Arvore do Mundo Yggdrasil]";
+
+		mes "Voce deve... avisar os comandantes de Alfheim sobre isso e elaborar um plano. Somente eles...";
+
+		next;
+
+		select("Nao ha mais nada que possamos fazer?");
+
+		mes "[Arvore do Mundo Yggdrasil]";
+
+		mes "Com nossos poderes atuais... e impossivel derrotar o Guardiao.";
+
+		next;
+
+		mes "[Arvore do Mundo Yggdrasil]";
+
+		mes "Mas quem esta enlouquecendo nao e o Guardiao, e sim sua Sombra sombria... talvez possamos aprisiona-la aqui...";
+
+		next;
+
+		mes "[Arvore do Mundo Yggdrasil]";
+
+		mes "Voce esta disposto a aceitar esta missao? Mesmo que isso custe sua vida?";
+
+		next;
+
+		if(select("Deixe conosco.:Nao podemos fazer isso.") == 2)
 
 			close;
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "Agradeço profundamente por sua decisão. Usarei o que resta de meus poderes para abrir o caminho até o Ninho do Guardião.";
-
-		next;
-
-		mes "[Árvore do Mundo Yggdrasil]";
-
-		mes "O caminho até o Ninho do Guardião fica logo após a cachoeira, próxima à grande Árvore do Mundo Yggdrasil ao norte. Os mecanismos de defesa do Santuário serão ativados imediatamente.";
+		mes "Agradeco profundamente por sua decisao. Usarei o que resta de meus poderes para abrir o caminho ate o Ninho do Guardiao.";
 
 		next;
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "Derrote todos os guardiões de Nidhoggur e atravesse a cachoeira até o ninho... detenha a Sombra de Nidhoggur lá.";
-
-		next;
-
-		mes "[Árvore do Mundo Yggdrasil]";
-
-		mes "O portão se abrirá em breve. Derrote todos os guardiões... vocês devem eliminá-los em até 30 minutos antes que o portão se abra...";
+		mes "O caminho ate o Ninho do Guardiao fica logo apos a cachoeira, proxima a grande Arvore do Mundo Yggdrasil ao norte. Os mecanismos de defesa do Santuario serao ativados imediatamente.";
 
 		next;
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "30 minutos... esse é o limite dos meus poderes. Por favor, apresse-se.";
+		mes "Derrote todos os guardioes de Nidhoggur e atravesse a cachoeira ate o ninho... detenha a Sombra de Nidhoggur la.";
 
 		next;
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
+
+		mes "O portao se abrira em breve. Derrote todos os guardioes... voces devem elimina-los em ate 30 minutos antes que o portao se abra...";
+
+		next;
+
+		mes "[Arvore do Mundo Yggdrasil]";
+
+		mes "30 minutos... esse e o limite dos meus poderes. Por favor, apresse-se.";
+
+		next;
+
+		mes "[Arvore do Mundo Yggdrasil]";
 
 		mes "E... tenham cuidado... cuidado com o poder da sombra.";
 
@@ -710,9 +710,9 @@ OnTouch:
 
 		} else {
 
-			mes "[Árvore do Mundo Yggdrasil]";
+			mes "[Arvore do Mundo Yggdrasil]";
 
-			mes "Somente o Líder pode iniciar a missão.";
+			mes "Somente o Lider pode iniciar a missao.";
 
 			close;
 
@@ -720,49 +720,49 @@ OnTouch:
 
 	} else if (ins_nyd2 == 1) {
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "O caminho até o Ninho do Guardião fica logo após a cachoeira, próxima à grande Árvore do Mundo Yggdrasil ao norte. Os mecanismos de defesa serão ativados imediatamente.";
-
-		next;
-
-		mes "[Árvore do Mundo Yggdrasil]";
-
-		mes "Derrote todos os guardiões de Nidhoggur e atravesse a cachoeira até o ninho... detenha a Sombra de Nidhoggur lá.";
+		mes "O caminho ate o Ninho do Guardiao fica logo apos a cachoeira, proxima a grande Arvore do Mundo Yggdrasil ao norte. Os mecanismos de defesa serao ativados imediatamente.";
 
 		next;
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "O portão se abrirá em breve. Derrote todos os guardiões.";
+		mes "Derrote todos os guardioes de Nidhoggur e atravesse a cachoeira ate o ninho... detenha a Sombra de Nidhoggur la.";
+
+		next;
+
+		mes "[Arvore do Mundo Yggdrasil]";
+
+		mes "O portao se abrira em breve. Derrote todos os guardioes.";
 
 		close;
 
 	} else if (ins_nyd2 == 2) {
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "O caminho até o Ninho do Guardião fica logo após a cachoeira, próxima à grande Árvore do Mundo Yggdrasil ao norte.";
+		mes "O caminho ate o Ninho do Guardiao fica logo apos a cachoeira, proxima a grande Arvore do Mundo Yggdrasil ao norte.";
 
 		next;
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
 		mes "Usem seus poderes... e destruam a vil Sombra...";
 
 		next;
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "Isso é... tudo o que posso fazer por vocês...";
+		mes "Isso e... tudo o que posso fazer por voces...";
 
 		close;
 
 	} else {
 
-		mes "[Árvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 
-		mes "Aqueles que desejam profanar o Santuário Sagrado do Guardião... Saiam daqui.";
+		mes "Aqueles que desejam profanar o Santuario Sagrado do Guardiao... Saiam daqui.";
 
 	}
 
@@ -806,7 +806,7 @@ OnDisable:
 
 OnTimer900000:
 
-	mapannounce instance_mapname("1@nyd"), "Árvore do Mundo Yggdrasil: O tempo está acabando... por favor, apresse-se!", bc_map, "0xFFFF00";
+	mapannounce instance_mapname("1@nyd"), "Arvore do Mundo Yggdrasil: O tempo esta acabando... por favor, apresse-se!", bc_map, "0xFFFF00";
 
 	end;
 
@@ -814,7 +814,7 @@ OnTimer900000:
 
 OnTimer1200000:
 
-	mapannounce instance_mapname("1@nyd"), "Árvore do Mundo Yggdrasil: Minhas forças estão desaparecendo... rápido, não há muito tempo!", bc_map, "0xFFFF00";
+	mapannounce instance_mapname("1@nyd"), "Arvore do Mundo Yggdrasil: Minhas forcas estao desaparecendo... rapido, nao ha muito tempo!", bc_map, "0xFFFF00";
 
 	end;
 
@@ -822,7 +822,7 @@ OnTimer1200000:
 
 OnTimer1500000:
 
-	mapannounce instance_mapname("1@nyd"), "Árvore do Mundo Yggdrasil: Eu... estou quase no meu limite... por favor, apresse-se!", bc_map, "0xFFFF00";
+	mapannounce instance_mapname("1@nyd"), "Arvore do Mundo Yggdrasil: Eu... estou quase no meu limite... por favor, apresse-se!", bc_map, "0xFFFF00";
 
 	end;
 
@@ -830,7 +830,7 @@ OnTimer1500000:
 
 OnTimer1800000:
 
-	mapannounce instance_mapname("1@nyd"), "Árvore do Mundo Yggdrasil: Vocês falharam... mas usarei o pouco poder que me resta... para tirá-los daqui.", bc_map, "0xFFFF00";
+	mapannounce instance_mapname("1@nyd"), "Arvore do Mundo Yggdrasil: Voces falharam... mas usarei o pouco poder que me resta... para tira-los daqui.", bc_map, "0xFFFF00";
 
 	end;
 
@@ -838,7 +838,7 @@ OnTimer1800000:
 
 OnTimer1830000:
 
-	mapannounce instance_mapname("1@nyd"), "A abertura do Portão falhou.", bc_map, "0xFFFF00";
+	mapannounce instance_mapname("1@nyd"), "A abertura do Portao falhou.", bc_map, "0xFFFF00";
 
 	end;
 

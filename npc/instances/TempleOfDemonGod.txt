@@ -14,11 +14,11 @@
 		// instance_create("Templo do Rei Demonio");
 		// instance_enter("Templo do Rei Demonio");
 		callfunc("F_InstanceEntry",
-			"Templo do Rei Demonio",        // Nome da inst�ncia
+			"Templo do Rei Demonio",        // Nome da instancia
 			"Nidhogg",                 // Nome do NPC
-			"trg", // Vari�vel de cooldown da conta
-			"TRG",        // Vari�vel de status da conta
-			160,                       // Level m�nimo
+			"trg", // Variavel de cooldown da conta
+			"TRG",        // Variavel de status da conta
+			160,                       // Level minimo
 			"Templo do Rei Demonio"
 		);		
 	end;
@@ -227,7 +227,7 @@ OnVariableReset:
 	end;
 	
 OnMyMobDead:
-	if (!playerattached())	// n�o deveria acontecer
+	if (!playerattached())	// nao deveria acontecer
 		end;
 	.@mob_id = killedrid;
 	sleep 5000;
@@ -277,7 +277,7 @@ OnInstanceInit:
 	disablenpc instance_npcname("Nidhogg#eomnyd03");
 	disablenpc instance_npcname("#fire_to_center");
 
-	// Centro para �ltimo
+	// Centro para ultimo
 	disablenpc instance_npcname("#gate_to_last");
 	disablenpc instance_npcname("Jovem Estranho#mocadt01");
 	disablenpc instance_npcname("#moc_master");
@@ -296,46 +296,46 @@ OnInstanceInit:
 	end;
 }
 
-1@eom,101,43,3	script	Ap�stolo do Deus Dem�nio Ahat#ahat	4_HUMAN_GERUTOO,{
+1@eom,101,43,3	script	Apostolo do Deus Demonio Ahat#ahat	4_HUMAN_GERUTOO,{
 	cutin "ep13_ahat_" + (Sex ? "f" : "m") + ".bmp",2;	// f para masculino, m para feminino
 	if (is_party_leader() == false || 'step != 0) {
 		mes "[Ahat]";
 		mes "Bem-vindo";
-		mes "ao Templo do Rei Dem�nio.";
-		mes "� uma honra ser seu anfitri�o hoje.";
+		mes "ao Templo do Rei Demonio.";
+		mes "e uma honra ser seu anfitriao hoje.";
 		close3;
 	}
-	.@ahat$ = instance_npcname("Ap�stolo do Deus Dem�nio Ahat#ahat");
+	.@ahat$ = instance_npcname("Apostolo do Deus Demonio Ahat#ahat");
 	mes "[Ahat]";
-	mes "Ent�o, voc� veio.";
+	mes "Entao, voce veio.";
 	mes "Nossa, que persistente.";
-	mes "Haha, est� surpreso em me ver aqui?";
-	npctalk "Ahat: Ent�o, voc� veio.", .@ahat$;
+	mes "Haha, esta surpreso em me ver aqui?";
+	npctalk "Ahat: Entao, voce veio.", .@ahat$;
 	next;
 	mes "[Ahat]";
-	mes "N�o esperava por isso, n�o �?";
+	mes "Nao esperava por isso, nao e?";
 	mes "Deixe-me me apresentar oficialmente.";
-	mes "Sou Ahat, o primeiro servo do Deus Dem�nio.";
-	npctalk "Ahat: Sou Ahat, o primeiro servo do Deus Dem�nio.", .@ahat$;
+	mes "Sou Ahat, o primeiro servo do Deus Demonio.";
+	npctalk "Ahat: Sou Ahat, o primeiro servo do Deus Demonio.", .@ahat$;
 	next;
 	mes "[Ahat]";
 	mes "Bem, talvez eu perca minha vida hoje.";
-	mes "N�o me olhe assim. Tudo est� conforme o plano.";
-	npctalk "Ahat: Tudo est� conforme o plano.", .@ahat$;
+	mes "Nao me olhe assim. Tudo esta conforme o plano.";
+	npctalk "Ahat: Tudo esta conforme o plano.", .@ahat$;
 	next;
 	mes "[Ahat]";
-	mes "Meu mestre deseja que Shnaim e eu coloquemos voc�s � prova.";
-	mes "Para ver se s�o dignos de serem nossos convidados.";
-	npctalk "Ahat: Meu mestre deseja que Shnaim e eu coloquemos voc�s � prova.", .@ahat$;
+	mes "Meu mestre deseja que Shnaim e eu coloquemos voces e prova.";
+	mes "Para ver se sao dignos de serem nossos convidados.";
+	npctalk "Ahat: Meu mestre deseja que Shnaim e eu coloquemos voces e prova.", .@ahat$;
 	next;
 	mes "[Ahat]";
-	mes "Se acha que chegou at� aqui sozinho, est� enganado.";
-	npctalk "Ahat: Se acha que chegou at� aqui sozinho, est� enganado.", .@ahat$;
+	mes "Se acha que chegou ate aqui sozinho, esta enganado.";
+	npctalk "Ahat: Se acha que chegou ate aqui sozinho, esta enganado.", .@ahat$;
 	next;
 	mes "[Ahat]";
-	mes "Tudo est� conforme o plano do Mestre.";
+	mes "Tudo esta conforme o plano do Mestre.";
 	mes "Por enquanto, vejamos se consegue abrir esta porta.";
-	npctalk "Ahat: Tudo est� conforme o plano do Mestre. Vamos ver se consegue abrir esta porta.", .@ahat$;
+	npctalk "Ahat: Tudo esta conforme o plano do Mestre. Vamos ver se consegue abrir esta porta.", .@ahat$;
 	if (isbegin_quest(7596) == 0)
 		setquest 7596;
 	if ('step != 0)
@@ -359,22 +359,22 @@ OnStart:
 	'apostle = 10;
 	enablenpc instance_npcname("#door_mobmaster");
 	.@label$ = instance_npcname("#door_mobmaster") + "::OnMyMobDead";
-	monster 'map_eom$,102,30, "Ap�stolo do Deus Dem�nio Ahat",3105,1, .@label$;
+	monster 'map_eom$,102,30, "Apostolo do Deus Demonio Ahat",3105,1, .@label$;
 	setunitdata $@mobid[0], UMOB_HP, 5000000;
-	monster 'map_eom$, 98,30, "Fragmento do Deus Dem�nio",1918,1, .@label$;
-	monster 'map_eom$,100,30, "Fragmento do Deus Dem�nio",1918,1, .@label$;
-	monster 'map_eom$,104,30, "Fragmento do Deus Dem�nio",1918,1, .@label$;
-	monster 'map_eom$,106,30, "Fragmento do Deus Dem�nio",1918,1, .@label$;
+	monster 'map_eom$, 98,30, "Fragmento do Deus Demonio",1918,1, .@label$;
+	monster 'map_eom$,100,30, "Fragmento do Deus Demonio",1918,1, .@label$;
+	monster 'map_eom$,104,30, "Fragmento do Deus Demonio",1918,1, .@label$;
+	monster 'map_eom$,106,30, "Fragmento do Deus Demonio",1918,1, .@label$;
 	sleep 2000;
-	mapannounce 'map_eom$, "Elimine os Ap�stolos do Deus Dem�nio, Ahat e Shnaim, e colete suas almas.", bc_map, 0x00ff00;
-	monster 'map_eom$,102,40, "Ap�stolo do Deus Dem�nio Shnaim",3106,1, .@label$;
+	mapannounce 'map_eom$, "Elimine os Apostolos do Deus Demonio, Ahat e Shnaim, e colete suas almas.", bc_map, 0x00ff00;
+	monster 'map_eom$,102,40, "Apostolo do Deus Demonio Shnaim",3106,1, .@label$;
 	setunitdata $@mobid[0], UMOB_HP, 5000000;
-	monster 'map_eom$, 98,40, "Fragmento do Deus Dem�nio",1921,1, .@label$;
-	monster 'map_eom$,100,40, "Fragmento do Deus Dem�nio",1921,1, .@label$;
-	monster 'map_eom$,104,40, "Fragmento do Deus Dem�nio",1921,1, .@label$;
-	monster 'map_eom$,106,40, "Fragmento do Deus Dem�nio",1921,1, .@label$;
+	monster 'map_eom$, 98,40, "Fragmento do Deus Demonio",1921,1, .@label$;
+	monster 'map_eom$,100,40, "Fragmento do Deus Demonio",1921,1, .@label$;
+	monster 'map_eom$,104,40, "Fragmento do Deus Demonio",1921,1, .@label$;
+	monster 'map_eom$,106,40, "Fragmento do Deus Demonio",1921,1, .@label$;
 	sleep 3000;
-	mapannounce 'map_eom$, "As almas dos Ap�stolos s�o a chave para abrir o Templo do Rei Dem�nio.", bc_map, 0x00ff00;
+	mapannounce 'map_eom$, "As almas dos Apostolos sao a chave para abrir o Templo do Rei Demonio.", bc_map, 0x00ff00;
 	end;
 	
 OnMyMobDead:
@@ -384,7 +384,7 @@ OnMyMobDead:
 		disablenpc instance_npcname("#door_mobmaster");
 		enablenpc instance_npcname("Globo de Alma Vazio#shnaim01");
 		enablenpc instance_npcname("Globo de Alma Vazio#ahat01");
-		mapannounce 'map_eom$, "Os Globos de Alma usados para abrir o Templo do Rei Dem�nio foram ativados.", bc_map, 0x00ff00;
+		mapannounce 'map_eom$, "Os Globos de Alma usados para abrir o Templo do Rei Demonio foram ativados.", bc_map, 0x00ff00;
 	}
 	end;
 }
@@ -406,7 +406,7 @@ S_Globe:
 
 	disable_items;
 	if (is_party_leader() == false || isbegin_quest(7596) != 1 || 'step != 2) {
-		mes "Apenas o l�der do grupo pode realizar este evento.";
+		mes "Apenas o lider do grupo pode realizar este evento.";
 		close;
 	}
 	if (countitem(.@item_id) < 1) {
@@ -425,11 +425,11 @@ S_Globe:
 		enablenpc instance_npcname("Globo de Alma Cheio#" + .@hidden_npc_name$);
 		specialeffect EF_ENTRY,AREA, instance_npcname("Globo de Alma Cheio#" + .@hidden_npc_name$);
 		specialeffect EF_LEVEL99_3,AREA, instance_npcname("Globo de Alma Cheio#" + .@hidden_npc_name$);
-		mes "Voc� ativou com sucesso o globo de alma de " + .@visible_npc_name$ + ".";
+		mes "Voce ativou com sucesso o globo de alma de " + .@visible_npc_name$ + ".";
 		if ('inject_soul == 3 && 'step == 2) {
 			'step = 3;
 			if (isbegin_quest(7596) == 1)
-				erasequest 7596; // Qualifica��es dos Convidados
+				erasequest 7596; // Qualificacoes dos Convidados
 			enablenpc instance_npcname("#gate_to_center");
 			enablenpc instance_npcname("Garoto Estranho#mockid01");
 			specialeffect EF_MAPPILLAR,AREA, instance_npcname("#gate_to_center");
@@ -459,32 +459,32 @@ OnTouch_:
 	if (is_party_leader() == false) {
 		mes "[Garoto]";
 		mes "Criatura insignificante.";
-		mes "Como ousa erguer a m�o contra um deus em ascens�o?!";
+		mes "Como ousa erguer a mao contra um deus em ascensao?!";
 		close;
 	}
 	cutin "morocc_kid.bmp",2;
 	mes "[Garoto]";
-	mes "Antes de tudo, devo aplaudi-lo por ter chegado at� aqui.";
-	mes "Voc� foi um bom pe�o.";
+	mes "Antes de tudo, devo aplaudi-lo por ter chegado ate aqui.";
+	mes "Voce foi um bom peco.";
 	next;
-	select("Do que est� falando?");
-	unittalk getcharid(3), "" + strcharinfo(0) + " : Do que est� falando?";
+	select("Do que esta falando?");
+	unittalk getcharid(3), "" + strcharinfo(0) + " : Do que esta falando?";
 	mes "[Garoto]";
 	mes "Estive esperando por este dia.";
-	mes "Para sair daquele canto do mundo demon�aco e dominar todo o universo.";
-	npctalk "Garoto: Estive esperando por este dia. Para sair daquele canto do mundo demon�aco e dominar todo o universo.";
+	mes "Para sair daquele canto do mundo demoniaco e dominar todo o universo.";
+	npctalk "Garoto: Estive esperando por este dia. Para sair daquele canto do mundo demoniaco e dominar todo o universo.";
 	sleep2 2000;
 	next;
 	mes "[Garoto]";
-	mes "Para alcan�ar isso, percebi que precisava abandonar meu antigo corpo.";
-	mes "Ent�o eu morri � ou melhor, deixei que voc�s me matassem.";
-	npctalk "Garoto: Para alcan�ar isso, percebi que precisava abandonar meu antigo corpo. Ent�o eu morri � ou melhor, deixei que voc�s me matassem.";
+	mes "Para alcancar isso, percebi que precisava abandonar meu antigo corpo.";
+	mes "Entao eu morri e ou melhor, deixei que voces me matassem.";
+	npctalk "Garoto: Para alcancar isso, percebi que precisava abandonar meu antigo corpo. Entao eu morri e ou melhor, deixei que voces me matassem.";
 	sleep2 2000;
 	next;
 	mes "[Garoto]";
-	mes "A morte � um passo inevit�vel antes do renascimento.";
-	mes "E assim, eu renasci � novamente, gra�as a voc�s.";
-	npctalk "Garoto: A morte � um passo inevit�vel antes do renascimento. E assim, eu renasci � novamente, gra�as a voc�s.";
+	mes "A morte e um passo inevitavel antes do renascimento.";
+	mes "E assim, eu renasci e novamente, gracas a voces.";
+	npctalk "Garoto: A morte e um passo inevitavel antes do renascimento. E assim, eu renasci e novamente, gracas a voces.";
 	sleep2 2000;
 	next;
 	mes "[Garoto]";
@@ -494,15 +494,15 @@ OnTouch_:
 	next;
 	mes "[Morroc]";
 	mes "Isso mesmo, seus tolos humanos!";
-	mes "Eu morri uma vez, para poder percorrer o mundo e envolv�-lo em meus bra�os.";
+	mes "Eu morri uma vez, para poder percorrer o mundo e envolve-lo em meus bracos.";
 	mes "Fui renascido para engolir este mundo.";
-	npctalk "Morroc: Eu morri uma vez, para poder percorrer o mundo e envolv�-lo em meus bra�os. Fui renascido para engolir este mundo.";
+	npctalk "Morroc: Eu morri uma vez, para poder percorrer o mundo e envolve-lo em meus bracos. Fui renascido para engolir este mundo.";
 	sleep2 2000;
 	next;
 	mes "[Morroc]";
 	mes "Criarei um novo mundo e serei seu Criador.";
-	mes "Deixem-me perguntar a voc�s, as primeiras criaturas a pisar nesta nova terra.";
-	npctalk "Morroc: Criarei um novo mundo e serei seu Criador. Deixem-me perguntar a voc�s, as primeiras criaturas a pisar nesta nova terra.";
+	mes "Deixem-me perguntar a voces, as primeiras criaturas a pisar nesta nova terra.";
+	npctalk "Morroc: Criarei um novo mundo e serei seu Criador. Deixem-me perguntar a voces, as primeiras criaturas a pisar nesta nova terra.";
 	sleep2 2000;
 	next;
 	mes "[Morroc]";
@@ -518,19 +518,19 @@ OnTouch_:
 	enablenpc .@nidhogg$;
 	npctalk "Loki: Chega de tolices. Apenas diga que gosta de destruir as coisas.", .@loki$;
 	sleep2 5000;
-	npctalk "Loki: Criar um novo mundo e se tornar o Criador? Se este � o mundo novo de que fala, ent�o estou decepcionado.", .@loki$;
+	npctalk "Loki: Criar um novo mundo e se tornar o Criador? Se este e o mundo novo de que fala, entao estou decepcionado.", .@loki$;
 	sleep2 5000;
-	npctalk "Loki: Mesmo que queime seu corpo, seu poder n�o � t�o forte quanto o de Ymir, do G�nesis.", .@loki$;
+	npctalk "Loki: Mesmo que queime seu corpo, seu poder nao e tao forte quanto o de Ymir, do Genesis.", .@loki$;
 	sleep2 5000;
 	npctalk "Loki: O simples fato de precisar roubar Yggdrasil mostra sua falta de criatividade.", .@loki$;
 	sleep2 5000;
-	npctalk "Loki: Olhe bem para si mesmo. � delirante se acha que parece um criador de qualquer coisa.", .@loki$;
+	npctalk "Loki: Olhe bem para si mesmo. e delirante se acha que parece um criador de qualquer coisa.", .@loki$;
 	sleep2 5000;
-	npctalk "Nidhogg: Concordo. Voc� � desnecess�rio para este mundo. N�o pertence a ele.", .@nidhogg$;
+	npctalk "Nidhogg: Concordo. Voce e desnecessario para este mundo. Nao pertence a ele.", .@nidhogg$;
 	sleep2 4000;
-	npctalk "Nidhogg: At� mesmo Yggdrasil nega sua exist�ncia!", .@nidhogg$;
+	npctalk "Nidhogg: Ate mesmo Yggdrasil nega sua existencia!", .@nidhogg$;
 	sleep2 4000;
-	npctalk "Nidhogg: Como guardi�o de Yggdrasil, devo expuls�-lo deste mundo.", .@nidhogg$;
+	npctalk "Nidhogg: Como guardiao de Yggdrasil, devo expulsa-lo deste mundo.", .@nidhogg$;
 	sleep2 2000;
 	npctalk "Morroc: Bah!";
 	sleep2 2000;
@@ -538,11 +538,11 @@ OnTouch_:
 	sleep2 3000;
 	npctalk "Morroc: Levarei sua carne e sangue como presentes para minha nova morada.";
 	sleep2 3000;
-	npctalk "Morroc: J� contemplou a escurid�o do G�nesis?";
+	npctalk "Morroc: Ja contemplou a escuridao do Genesis?";
 	sleep2 3000;
-	npctalk "Morroc: J� contemplou o gelo, o in�cio da vida?";
+	npctalk "Morroc: Ja contemplou o gelo, o inicio da vida?";
 	sleep2 6000;
-	npctalk "Morroc: Contemple o Gelo de Audhumla que eu trouxe de volta � vida, neste mundo!";
+	npctalk "Morroc: Contemple o Gelo de Audhumla que eu trouxe de volta a vida, neste mundo!";
 	sleep2 3000;
 	specialeffect EF_ENTRY;
 	if ('step == 3) {
@@ -551,7 +551,7 @@ OnTouch_:
 		donpcevent instance_npcname("#gate_to_ice") + "::OnEnable";
 		enablenpc instance_npcname("Nidhogg#eomnyd01");
 		enablenpc instance_npcname("Brinaranea#brinpc01");
-		npctalk "Loki: Est� fugindo?", .@loki$;
+		npctalk "Loki: Esta fugindo?", .@loki$;
 		sleep2 2000;
 		disablenpc .@loki$;
 	}
@@ -577,7 +577,7 @@ OnTouch_:
 
 1@eom,95,122,5	script	Loki#eomloki01	4_M_ROKI2,{
 	mes "[Loki]";
-	mes "Voc� � indefeso.";
+	mes "Voce e indefeso.";
 	mes "E nojento.";
 	close;
 }
@@ -587,8 +587,8 @@ OnTouch_:
 		end;
 	if (getmercinfo(0) > 0) {
 		mes "[Nidhogg]";
-		mes "Voc� est� com um mercen�rio.";
-		mes "Voc� poderia dispensar seu mercen�rio atual e me contratar?";
+		mes "Voce esta com um mercenario.";
+		mes "Voce poderia dispensar seu mercenario atual e me contratar?";
 		close;
 	}
 	switch( checkquest(7605,PLAYTIME) ) {
@@ -597,7 +597,7 @@ OnTouch_:
 	case 0:
 	case 1:
 		mes "[Nidhogg]";
-		mes "Eu j� te ajudei uma vez.";
+		mes "Eu ja te ajudei uma vez.";
 		mes "Por favor, tenha cuidado!";
 		close;
 	case 2:
@@ -607,16 +607,16 @@ OnTouch_:
 	setnpcdisplay instance_npcname("Nidhogg#eomnyd01"), 3087;
 	mes "[Nidhogg]";
 	mes "" + strcharinfo(0) + ",";
-	mes "permita-me ajud�-lo nesta batalha.";
-	npctalk "Nidhogg: Permita-me ajud�-lo nesta batalha.";
+	mes "permita-me ajuda-lo nesta batalha.";
+	npctalk "Nidhogg: Permita-me ajuda-lo nesta batalha.";
 	specialeffect EF_SPHERE;
 	next;
 	mes "[Nidhogg]";
-	mes "Meu dever como guardi�o ainda n�o acabou.";
-	npctalk "Nidhogg: Meu dever como guardi�o ainda n�o acabou.";
+	mes "Meu dever como guardiao ainda nao acabou.";
+	npctalk "Nidhogg: Meu dever como guardiao ainda nao acabou.";
 	next;
 	mercenary_create 3087,1800000;// M_NYDHOG
-	mes "^4d4dffO Guardi�o Nidhogg se juntou ao seu grupo.^000000";
+	mes "^4d4dffO Guardiao Nidhogg se juntou ao seu grupo.^000000";
 	setquest 7605;// Guardian's Blessing
 	disablenpc instance_npcname("Nidhogg#eomnyd01");
 	close;
@@ -684,7 +684,7 @@ OnTouch_:
 	}
 	end;
 OnTimer3000:
-	npctalk "Brinaranea: Meus filhos v�o fazer um banquete hoje � noite. Ho ho ho!";
+	npctalk "Brinaranea: Meus filhos vao fazer um banquete hoje e noite. Ho ho ho!";
 	disablenpc instance_npcname("Brinaranea#brinpc01");
 	donpcevent instance_npcname("#ice_hpcheck") + "::OnSpawn";
 	end;
@@ -727,7 +727,7 @@ OnTimer3000:
 	'boss_hp = .@hp;
 
 	if (.@hp > 69500000 && .@hp < 70000000) {
-		unittalk 'boss_id, "Saiam, meus filhos. Um banquete delicioso chegou at� n�s!";
+		unittalk 'boss_id, "Saiam, meus filhos. Um banquete delicioso chegou ate nos!";
 		donpcevent instance_npcname("#ice_hpcheck") + "::OnCallBaby";
 	}
 	else if (.@hp > 59500000 && .@hp < 60000000) {
@@ -735,7 +735,7 @@ OnTimer3000:
 		donpcevent instance_npcname("#ice_hpcheck") + "::OnCallBaby";
 	}
 	else if (.@hp > 49500000 && .@hp < 50000000) {
-		unittalk 'boss_id, "J� comeram todos? Apare�am agora!";
+		unittalk 'boss_id, "Ja comeram todos? Aparecam agora!";
 		donpcevent instance_npcname("#ice_hpcheck") + "::OnCallBaby";
 	}
 	else if (.@hp < 22200000 && 'icestunami == false)
@@ -758,7 +758,7 @@ OnMyMobDead:
 	enablenpc instance_npcname("Nidhogg#eomnyd02");
 	enablenpc instance_npcname("#ice_to_center");
 	enablenpc instance_npcname("Morroc#mockid02");
-	mapannounce 'map_eom$, "Nidhogg: A influ�ncia de Brinaranea se dissipou e um novo portal de dobra apareceu.", bc_map, 0x00ff00;
+	mapannounce 'map_eom$, "Nidhogg: A influencia de Brinaranea se dissipou e um novo portal de dobra apareceu.", bc_map, 0x00ff00;
 	'step = 6;
 
 	donpcevent instance_npcname("#demon_god_variables") + "::OnVariableReset";
@@ -923,14 +923,14 @@ OnTimer3000:
 	end;
 OnStart:
 	initnpctimer;
-	unittalk 'boss_id, "Voc� � irritante! N�o mexa com a Geada de Audhumla!";
+	unittalk 'boss_id, "Voce e irritante! Nao mexa com a Geada de Audhumla!";
 	unitskilluseid 'boss_id, "NPC_ALLHEAL",1;
 	getunitdata 'boss_id, .@data;
 	'boss_hp = .@data[UMOB_HP];
 	end;
 OnTimer2000:
 	stopnpctimer;
-	mapannounce 'map_eom$, "Nidhogg: N�o... Ela se regenerou perfeitamente.", bc_map, 0x00ff00;
+	mapannounce 'map_eom$, "Nidhogg: Nao... Ela se regenerou perfeitamente.", bc_map, 0x00ff00;
 	end;
 }
 
@@ -939,7 +939,7 @@ OnTimer2000:
 OnStart:
 	'icestunami = true;
 	initnpctimer;
-	unittalk 'boss_id, "Voc�s, c�es do inferno, podem levar isso tamb�m?";
+	unittalk 'boss_id, "Voces, caes do inferno, podem levar isso tambem?";
 	getunitdata 'boss_id, .@data;
 	'x_icemine = .@data[UMOB_X];
 	'y_icemine = .@data[UMOB_Y];
@@ -975,19 +975,19 @@ OnMobDead:
 		end;
 	if (isbegin_quest(7602) == 0 && checkquest(7601,HUNTING) == 2) {
 		mes "[Nidhogg]";
-		mes "Essa foi uma batalha dif�cil.";
-		mes "Isso pode n�o ser bom o suficiente, mas espero que ajude no seu crescimento.";
+		mes "Essa foi uma batalha dificil.";
+		mes "Isso pode nao ser bom o suficiente, mas espero que ajude no seu crescimento.";
 		next;
-		mes "^4d4dffO Guardi�o Nidhogg recompensou voc� com uma grande quantidade de EXP por derrotar Brinaranea.^000000";
+		mes "^4d4dffO Guardiao Nidhogg recompensou voce com uma grande quantidade de EXP por derrotar Brinaranea.^000000";
 		erasequest 7601;// Templo do Rei Demonio Phase 1
 		setquest 7602;// Templo do Rei Demonio Phase 1 Completed
 		getexp 1000000,500000;
 		close;
 	}
 	mes "[Nidhogg]";
-	mes "Este lugar terr�vel pode competir com a Geada do G�nesis?";
-	mes "N�o sei dizer.";
-	mes "Ele n�o criou nada sozinho. Como ele se convenceu de que poderia ser um criador?";
+	mes "Este lugar terrivel pode competir com a Geada do Genesis?";
+	mes "Nao sei dizer.";
+	mes "Ele nao criou nada sozinho. Como ele se convenceu de que poderia ser um criador?";
 	close;
 }
 
@@ -996,10 +996,10 @@ OnMobDead:
 OnTouch_:
 	if (isbegin_quest(7602) == 0 && checkquest(7601,HUNTING) == 2) {
 		mes "[Nidhogg]";
-		mes "Essa foi uma batalha dif�cil.";
-		mes "Isso pode n�o ser bom o suficiente, mas espero que ajude no seu crescimento.";
+		mes "Essa foi uma batalha dificil.";
+		mes "Isso pode nao ser bom o suficiente, mas espero que ajude no seu crescimento.";
 		next;
-		mes "^4d4dffO Guardi�o Nidhogg recompensou voc� com uma grande quantidade de EXP por derrotar Brinaranea.^000000";
+		mes "^4d4dffO Guardiao Nidhogg recompensou voce com uma grande quantidade de EXP por derrotar Brinaranea.^000000";
 		setquest 7602;
 		erasequest 7601;
 		getexp 1000000,500000;
@@ -1015,17 +1015,17 @@ OnTouch_:
 		end;
 	cutin "morocc_kid.bmp",2;
 	mes "[Morroc]";
-	mes "Voc� � bom.";
-	mes "Voc� consegue enfrentar o lobo que engoliu o sol?";
-	npctalk "Morroc: Voc� � bom. Voc� consegue enfrentar o lobo que engoliu o sol?";
+	mes "Voce e bom.";
+	mes "Voce consegue enfrentar o lobo que engoliu o sol?";
+	npctalk "Morroc: Voce e bom. Voce consegue enfrentar o lobo que engoliu o sol?";
 	next;
 	mes "[Morroc]";
-	mes "Se voc� n�o consegue lidar com ele, ent�o n�o consegue lidar com um deus agora, consegue?";
-	npctalk "Morroc: Se voc� n�o consegue lidar com ele, ent�o n�o consegue lidar com um deus agora, consegue?";
+	mes "Se voce nao consegue lidar com ele, entao nao consegue lidar com um deus agora, consegue?";
+	npctalk "Morroc: Se voce nao consegue lidar com ele, entao nao consegue lidar com um deus agora, consegue?";
 	next;
 	mes "[Morroc]";
-	mes "Vou ficar de olho em voc�. Mwa hah hah!";
-	npctalk "Morroc: Vou ficar de olho em voc�. Mwa hah hah!";
+	mes "Vou ficar de olho em voce. Mwa hah hah!";
+	npctalk "Morroc: Vou ficar de olho em voce. Mwa hah hah!";
 	close2;
 	cutin "",255;
 	if ('step == 6) {
@@ -1064,23 +1064,23 @@ OnTouch_:
 	mapannounce 'map_eom$, "Grr...", bc_map, 0xff0000;
 	sleep 3000;
 	mapannounce 'map_eom$, "Eu sinto cheiro de humano... Grr...", bc_map, 0xff0000;
-	monster 'map_eom$,139,101, "Kasa Fren�tico",3089,1;	// MM_LOCO_KASA
+	monster 'map_eom$,139,101, "Kasa Frenetico",3089,1;	// MM_LOCO_KASA
 	sleep 1000;
-	monster 'map_eom$,142, 98, "Kasa Fren�tico",3089,1;
+	monster 'map_eom$,142, 98, "Kasa Frenetico",3089,1;
 	sleep 1000;
-	monster 'map_eom$,144, 92, "Kasa Fren�tico",3089,1;
+	monster 'map_eom$,144, 92, "Kasa Frenetico",3089,1;
 	sleep 3000;
-	monster 'map_eom$,145,104, "Kasa Fren�tico",3089,1;
+	monster 'map_eom$,145,104, "Kasa Frenetico",3089,1;
 	sleep 1000;
-	monster 'map_eom$,148, 98, "Kasa Fren�tico",3089,1;
+	monster 'map_eom$,148, 98, "Kasa Frenetico",3089,1;
 	sleep 1000;
-	monster 'map_eom$,150, 93, "Kasa Fren�tico",3089,1;
+	monster 'map_eom$,150, 93, "Kasa Frenetico",3089,1;
 	sleep 3000;
-	monster 'map_eom$,151,106, "Kasa Fren�tico",3089,1;
+	monster 'map_eom$,151,106, "Kasa Frenetico",3089,1;
 	sleep 1000;
-	monster 'map_eom$,153,100, "Kasa Fren�tico",3089,1;
+	monster 'map_eom$,153,100, "Kasa Frenetico",3089,1;
 	sleep 1000;
-	monster 'map_eom$,156, 95, "Kasa Fren�tico",3089,1;
+	monster 'map_eom$,156, 95, "Kasa Frenetico",3089,1;
 	mapannounce 'map_eom$, "...QUEIMAR!", bc_map, 0xff0000;
 	donpcevent instance_npcname("#skollmaster") + "::OnStart";
 	end;
@@ -1104,7 +1104,7 @@ OnStart:
 	'boss_hp = .@data[UMOB_MAXHP];
 	sleep 1000;
 	if ('boss_id)
-		unittalk 'boss_id, "Voc�s s�o os �nicos... Grr... �timo, vou esmagar seus ossos! Grr...";
+		unittalk 'boss_id, "Voces sao os unicos... Grr... otimo, vou esmagar seus ossos! Grr...";
 	sleep 4000;
 	if ('boss_id)
 		donpcevent instance_npcname("#skollmaster") + "::OnLava_heal";
@@ -1123,7 +1123,7 @@ OnTimer2000:
 OnTimer4000:
 	callsub S_ReSpawn, 168,121;
 	unitskilluseid 'boss_id, "CR_REFLECTSHIELD",1;
-	unittalk 'boss_id, "Vamos fazer isso de novo. Vamos l�!";
+	unittalk 'boss_id, "Vamos fazer isso de novo. Vamos la!";
 	donpcevent instance_npcname("#loco_call") + "::OnSpawn";
 	end;
 OnTimer6000:
@@ -1151,7 +1151,7 @@ S_Event:
 		}
 		unitskilluseid 'boss_id, "AL_HEAL",11;
 	}
-	mapannounce 'map_eom$, "Nidhogg: Muspellskoll est� tentando se regenerar usando a lava!", bc_map, 0x00ff00;
+	mapannounce 'map_eom$, "Nidhogg: Muspellskoll esta tentando se regenerar usando a lava!", bc_map, 0x00ff00;
 	getunitdata 'boss_id, .@data;
 	'boss_hp = .@data[UMOB_HP];
 	donpcevent instance_npcname("#loco_call") + "::OnSpawn";
@@ -1166,7 +1166,7 @@ OnMobDead:
 	donpcevent instance_npcname("#loco_call") + "::OnEnd";
 
 	killmonster 'map_eom$, instance_npcname("#skollmaster") + "::OnMobDead";
-	mapannounce 'map_eom$, "Nidhogg: A influ�ncia de Muspellskoll se dissipou e um novo portal de dobra apareceu.", bc_map, 0x00ff00;
+	mapannounce 'map_eom$, "Nidhogg: A influencia de Muspellskoll se dissipou e um novo portal de dobra apareceu.", bc_map, 0x00ff00;
 
 	enablenpc instance_npcname("Nidhogg#eomnyd03");
 	enablenpc instance_npcname("#fire_to_center");
@@ -1214,7 +1214,7 @@ OnTimer3000:
 OnHeal:
 	if ('fire_combo)
 		donpcevent instance_npcname("#fire_combo") + "::OnEnd";
-	unittalk 'boss_id, "Pare�o f�cil para voc�? Vou te queimar at� virar cinzas!";
+	unittalk 'boss_id, "Pareco facil para voce? Vou te queimar ate virar cinzas!";
 	sleep 2000;
 	if ('boss_id == 0)
 		end;
@@ -1425,7 +1425,7 @@ OnMobDead:
 		end;
 	mes "Pode ser usado para bloquear o fluxo de lava usando um Cristal de Gelo.";
 	next;
-	if (select( "Use um Cristal de Gelo", "N�o use um Cristal de Gelo" ) == 2)
+	if (select( "Use um Cristal de Gelo", "Nao use um Cristal de Gelo" ) == 2)
 		end;
 	if ('flowing_lava_deactivate[0] == true)
 		end;
@@ -1442,7 +1442,7 @@ OnTimer120000:
 	'flowing_lava_deactivate[0] = false;
 	donpcevent instance_npcname("Lava Endurecida#lavaseal01") + "::OnDisable";
 	enablenpc instance_npcname("Lava Fluindo#lavapond01");
-	mapannounce 'map_eom$, "Nidhogg: A geada derreteu. A lava est� fluindo novamente!", bc_map, 0x00ff00;
+	mapannounce 'map_eom$, "Nidhogg: A geada derreteu. A lava esta fluindo novamente!", bc_map, 0x00ff00;
 	stopnpctimer;
 	end;
 }
@@ -1452,7 +1452,7 @@ OnTimer120000:
 		end;
 	mes "Pode ser usado para bloquear o fluxo de lava usando um Cristal de Gelo.";
 	next;
-	if (select( "Use um Cristal de Gelo", "N�o use um Cristal de Gelo" ) == 2)
+	if (select( "Use um Cristal de Gelo", "Nao use um Cristal de Gelo" ) == 2)
 		end;
 	if ('flowing_lava_deactivate[1] == true)
 		end;
@@ -1469,7 +1469,7 @@ OnTimer120000:
 	'flowing_lava_deactivate[1] = false;
 	donpcevent instance_npcname("Lava Endurecida#lavaseal02") + "::OnDisable";
 	enablenpc instance_npcname("Lava Fluindo#lavapond02");
-	mapannounce 'map_eom$, "Nidhogg: A geada derreteu. A lava est� fluindo novamente!", bc_map, 0x00ff00;
+	mapannounce 'map_eom$, "Nidhogg: A geada derreteu. A lava esta fluindo novamente!", bc_map, 0x00ff00;
 	stopnpctimer;
 	end;
 }
@@ -1533,9 +1533,9 @@ OnTouch:
 	if (checkquest(7603,HUNTING) == 2 && isbegin_quest(7604) == 0) {
 		mes "[Nidhogg]";
 		mes "Bom trabalho, de novo.";
-		mes "Isso pode n�o ser bom o suficiente, mas espero que ajude no seu crescimento.";
+		mes "Isso pode nao ser bom o suficiente, mas espero que ajude no seu crescimento.";
 		next;
-		mes "^4d4dffO Guardi�o Nidhogg recompensou voc� com uma grande quantidade de EXP por derrotar Muspellskoll.^000000";
+		mes "^4d4dffO Guardiao Nidhogg recompensou voce com uma grande quantidade de EXP por derrotar Muspellskoll.^000000";
 		erasequest 7603;// Templo do Rei Demonio Phase 2
 		setquest 7604;// Templo do Rei Demonio Phase 2 Completed
 		getexp 1000000,500000;
@@ -1543,8 +1543,8 @@ OnTouch:
 	}
 	mes "[Nidhogg]";
 	mes "Skoll... Skoll e Hati...";
-	mes "Tudo aqui � uma mera c�pia do que h� no mundo exterior.";
-	mes "Ele n�o � um criador.";
+	mes "Tudo aqui e uma mera copia do que ha no mundo exterior.";
+	mes "Ele nao e um criador.";
 	close;
 }
 
@@ -1554,7 +1554,7 @@ OnTouch_:
 	if (checkquest(7603,HUNTING) == 2 && isbegin_quest(7604) == 0) {
 		mes "[Nidhogg]";
 		mes "Bom trabalho, de novo.";
-		mes "Isso pode n�o ser bom o suficiente, mas espero que ajude no seu crescimento.";
+		mes "Isso pode nao ser bom o suficiente, mas espero que ajude no seu crescimento.";
 		next;
 		mes "^4d4dffGuardian Nidhogg has rewarded you with a large amount of EXP for defeating Muspellskoll.^000000";
 		setquest 7604;
@@ -1577,7 +1577,7 @@ OnTouch_:
 	}
 	end;
 OnTimer1000:
-	npctalk "Voc� superou minhas expectativas.";
+	npctalk "Voce superou minhas expectativas.";
 	end;
 OnTimer4000:
 	npctalk "Aceitarei seu desafio.";
@@ -1609,7 +1609,7 @@ OnTouch_:
 	if ('step != 9)
 		end;
 	'step = 10;
-	npctalk "Morroc: Voc� j� est� aqui, ent�o n�o vamos perder tempo conversando.";
+	npctalk "Morroc: Voce ja esta aqui, entao nao vamos perder tempo conversando.";
 	initnpctimer;
 	end;
 OnTimer2000:
@@ -1647,7 +1647,7 @@ OnPhase02:
 	stopnpctimer instance_npcname("#Semideus_event_3");
 	stopnpctimer instance_npcname("#mk_hpcheck");
 	stopnpctimer instance_npcname("#mk_combo");
-	unittalk 'boss_id, "Voc� ter� que fazer melhor que isso!";
+	unittalk 'boss_id, "Voce tera que fazer melhor que isso!";
 	sleep 2000;
 	if ('boss_id == 0)
 		end;
@@ -1675,7 +1675,7 @@ OnPhase03:
 	monster 'map_eom$,101,194, "Semideus",3096,1, instance_npcname("#despair_god_main") + "::OnMobDead";	// MM_MOROCC_KID
 	'boss_id = $@mobid[0];
 	setunitdata 'boss_id, UMOB_HP, 'boss_hp;
-	unittalk 'boss_id, "Pare de ser t�o persistente!";
+	unittalk 'boss_id, "Pare de ser tao persistente!";
 	sleep 2000;
 	if ('boss_id == 0)
 		end;
@@ -1750,7 +1750,7 @@ OnTimer6000:
 			.@hp_b = .@hp + (.@hp_a - 200000) * 3;
 			.@hp_b = min(80000000, .@hp_b);
 			setunitdata 'boss_id, UMOB_HP, .@hp_b;
-			mapannounce 'map_eom$, "Nidhogg: Uau, o poder regenerativo dele � in�dito! N�o deixe ele se regenerar de novo!", bc_map, 0x00ff00;
+			mapannounce 'map_eom$, "Nidhogg: Uau, o poder regenerativo dele e inedito! Nao deixe ele se regenerar de novo!", bc_map, 0x00ff00;
 		}
 		unitskilluseid 'boss_id, "AL_HEAL",11;
 		getunitdata 'boss_id, .@data;
@@ -1760,7 +1760,7 @@ OnTimer6000:
 	}
 	'boss_hp = .@hp;
 
-	switch( 'boss_phase ) {	// processo por fase em vez de (oficialmente) hp, s� por precau��o
+	switch( 'boss_phase ) {	// processo por fase em vez de (oficialmente) hp, so por precaucao
 	case 1:
 		if (.@hp < 40000000)
 			donpcevent instance_npcname("#despair_god_main") + "::OnPhase02";
@@ -1804,7 +1804,7 @@ OnTimer7000:
 	end;
 OnEvent:
 	initnpctimer;
-	unittalk 'boss_id, "Uma raps�dia para almas fracas...";
+	unittalk 'boss_id, "Uma rapsodia para almas fracas...";
 	end;
 OnTimer2000:
 	unitskilluseid 'boss_id, "NPC_WIDEWEB",1;
@@ -1859,7 +1859,7 @@ OnTimer7000:
 	end;
 OnEvent:
 	initnpctimer;
-	unittalk 'boss_id, "Para quem a fuga � tocada? Para quem o r�quiem � tocado?";
+	unittalk 'boss_id, "Para quem a fuga e tocada? Para quem o requiem e tocado?";
 	end;
 OnTimer2000:
 	unitskilluseid 'boss_id, "NPC_WIDEWEB",1;
@@ -1875,7 +1875,7 @@ OnTimer5000:
 	unitskillusepos 'boss_id,"WZ_METEOR",5,.@data[UMOB_X],(.@data[UMOB_Y]-5),-50;
 	end;
 OnTimer9000:
-	unittalk 'boss_id, "Queime at� virar cinzas!";
+	unittalk 'boss_id, "Queime ate virar cinzas!";
 	end;
 OnTimer11000:
 	getunitdata 'boss_id, .@data;
@@ -1892,7 +1892,7 @@ OnTimer13000:
 	end;
 OnEnable:
 	enablenpc instance_npcname("#moc_origin");
-	monster 'map_eom$,114,198, "Morroc do G�nesis", 3098,1, instance_npcname("#moc_origin") + "::OnMobDead1";	// MM_MOROCC_ORIGIN
+	monster 'map_eom$,114,198, "Morroc do Genesis", 3098,1, instance_npcname("#moc_origin") + "::OnMobDead1";	// MM_MOROCC_ORIGIN
 	'miniboss_id[0] = $@mobid[0];
 	'miniboss_id[1] = 0;
 	initnpctimer;
@@ -1940,7 +1940,7 @@ S_Dead:
 		donpcevent instance_npcname("#despair_god_main") + "::OnPhase03";
 	}
 	else {
-		unittalk 'miniboss_id[1], "Vou te dar um descanso. � minha miseric�rdia!!!"; // todo, custom text
+		unittalk 'miniboss_id[1], "Vou te dar um descanso. e minha misericordia!!!"; // todo, custom text
 		setunitdata 'miniboss_id[1], UMOB_HP, 1000000;
 		donpcevent instance_npcname("#moc_meddling") + "::OnStart";
 	}
@@ -1973,10 +1973,10 @@ OnTrap:
 	.@label$ = instance_npcname("#mk_trap") + "::OnMobDead";
 	if (mobcount( 'map_eom$, .@label$ ) < 3) {
 		getunitdata 'boss_id, .@data;
-		monster 'map_eom$,.@data[UMOB_X]-4,.@data[UMOB_Y], "Kasa Fren�tico", 3089,1, .@label$;	// MM_LOCO_KASA
-		monster 'map_eom$,.@data[UMOB_X],.@data[UMOB_Y]-4, "Kasa Fren�tico", 3089,1, .@label$;
-		monster 'map_eom$,.@data[UMOB_X]+4,.@data[UMOB_Y], "Kasa Fren�tico", 3089,1, .@label$;
-		monster 'map_eom$,.@data[UMOB_X],.@data[UMOB_Y]+4, "Kasa Fren�tico", 3089,1, .@label$;
+		monster 'map_eom$,.@data[UMOB_X]-4,.@data[UMOB_Y], "Kasa Frenetico", 3089,1, .@label$;	// MM_LOCO_KASA
+		monster 'map_eom$,.@data[UMOB_X],.@data[UMOB_Y]-4, "Kasa Frenetico", 3089,1, .@label$;
+		monster 'map_eom$,.@data[UMOB_X]+4,.@data[UMOB_Y], "Kasa Frenetico", 3089,1, .@label$;
+		monster 'map_eom$,.@data[UMOB_X],.@data[UMOB_Y]+4, "Kasa Frenetico", 3089,1, .@label$;
 	}
 	end;
 OnMobDead:
@@ -1990,10 +1990,10 @@ OnStart:
 	initnpctimer;
 	end;
 OnTimer2000:
-	mapannounce 'map_eom$, "Isso est� ficando mais interessante. *Risada*", bc_map, 0xff0000;
+	mapannounce 'map_eom$, "Isso esta ficando mais interessante. *Risada*", bc_map, 0xff0000;
 	end;
 OnTimer6000:
-	mapannounce 'map_eom$, "Ei, voc� n�o acha que isso j� acabou, acha?", bc_map, 0xff0000;
+	mapannounce 'map_eom$, "Ei, voce nao acha que isso ja acabou, acha?", bc_map, 0xff0000;
 	end;
 OnTimer10000:
 	disablenpc instance_npcname("#morocc_god");
@@ -2002,7 +2002,7 @@ OnTimer12000:
 	donpcevent instance_npcname("#despair_main") + "::OnStart";
 	end;
 OnTimer13000:
-	unittalk 'boss_id, "O que voc� est� esperando?!";
+	unittalk 'boss_id, "O que voce esta esperando?!";
 	end;
 OnTimer14000:
 	unitskilluseid 'boss_id, "NPC_WIDEWEB",1;
@@ -2035,7 +2035,7 @@ OnMobDead:
 	stopnpctimer instance_npcname("#despair_event_3");
 	stopnpctimer instance_npcname("#despair_event_4");
 	stopnpctimer instance_npcname("#despair_event_5");
-	mapannounce 'map_eom$, "N-n�o pense... que... isso... acabou... Voc�... j�... chegou... a hora...", bc_map, 0xff0000;
+	mapannounce 'map_eom$, "N-nao pense... que... isso... acabou... Voce... ja... chegou... a hora...", bc_map, 0xff0000;
 	initnpctimer;
 
 	'step = 11;
@@ -2067,7 +2067,7 @@ OnTimer10000:
 	end;
 OnEvent:
 	initnpctimer;
-	unittalk 'boss_id, "Eu vou queimar voc� lenta e dolorosamente.";
+	unittalk 'boss_id, "Eu vou queimar voce lenta e dolorosamente.";
 	end;
 OnTimer2000:
 	unitskilluseid 'boss_id, "NPC_WIDEWEB",1;
@@ -2087,7 +2087,7 @@ OnTimer5000:
 	end;
 OnEvent:
 	initnpctimer;
-	unittalk 'boss_id, "Voc� consegue ouvir a raps�dia? � o som da sua alma se contorcendo e gritando de dor!";
+	unittalk 'boss_id, "Voce consegue ouvir a rapsodia? e o som da sua alma se contorcendo e gritando de dor!";
 	end;
 OnTimer2000:
 	unitskilluseid 'boss_id, "NPC_WIDEWEB",1;
@@ -2141,7 +2141,7 @@ OnTimer7000:
 	end;
 OnEvent:
 	initnpctimer;
-	unittalk 'boss_id, "Este � o raio da morte!";
+	unittalk 'boss_id, "Este e o raio da morte!";
 	end;
 OnTimer2000:
 	unitskilluseid 'boss_id, "NPC_WIDEWEB",1;
@@ -2157,7 +2157,7 @@ OnTimer6000:
 	unitskillusepos 'boss_id,"WZ_VERMILION",5,.@data[UMOB_X],(.@data[UMOB_Y]-7),-50;
 	end;
 OnTimer10000:
-	unittalk 'boss_id, "Queime e fa�a lindas chamas!";
+	unittalk 'boss_id, "Queime e faca lindas chamas!";
 	end;
 OnTimer12000:
 	getunitdata 'boss_id, .@data;
@@ -2207,7 +2207,7 @@ OnTimer8000:
 
 1@eom,103,194,3	script	Nidhogg#eomnyd04	4_F_NYDHOG,{
 	
-	// Premia��es do Servidor
+	// Premiacoes do Servidor
 	if (#TRG_STATUS == 1 || #TRG_STATUS == 2) {
 		.@finish_result = callfunc("F_InstanceFinishBase", "Templo do Rei Demonio", "#TRG_STATUS", 10, 2, "#inst175_name$", "#inst175_status");
 		if (.@finish_result == -1) {
@@ -2219,50 +2219,50 @@ OnTimer8000:
 		end;
 	if (isbegin_quest(7597) == 0 && checkquest(7593,HUNTING) == 2) {
 		mes "[Nidhogg]";
-		mes "N�o sei o que dizer.";
-		mes "N�s paramos o deus-em-espera.";
-		mes "N�s alcan�amos nosso objetivo.";
+		mes "Nao sei o que dizer.";
+		mes "Nos paramos o deus-em-espera.";
+		mes "Nos alcancamos nosso objetivo.";
 		mes "Mas ainda estou nervoso.";
 		cutin "ep14_nyd03.bmp",2;
 		next;
 		mes "[Nidhogg]";
 		mes "Este mundo foi criado na mente de Morroc.";
-		mes "Ele viver� para sempre neste jardim que n�o conseguiu terminar.";
+		mes "Ele vivera para sempre neste jardim que nao conseguiu terminar.";
 		cutin "ep14_nyd02.bmp",2;
 		next;
 		mes "[Nidhogg]";
-		mes "Ele provavelmente n�o sabe que seu corpo foi destru�do para sempre.";
-		mes "Ele era ambicioso demais, at� mesmo para ele.";
+		mes "Ele provavelmente nao sabe que seu corpo foi destruido para sempre.";
+		mes "Ele era ambicioso demais, ate mesmo para ele.";
 		mes "Ele queria criar um novo mundo e se tornar seu criador,";
 		next;
 		mes "[Nidhogg]";
-		mes "mas ele n�o conseguia criar nada sozinho.";
-		mes "Ele abandonou seu corpo de Dem�nio, apenas para se tornar um mero fac-s�mile de um deus existente.";
+		mes "mas ele nao conseguia criar nada sozinho.";
+		mes "Ele abandonou seu corpo de Demonio, apenas para se tornar um mero fac-simile de um deus existente.";
 		cutin "ep14_nyd03.bmp",2;
 		next;
 		mes "[Nidhogg]";
 		mes "Ele assumiu a forma de um homem.";
-		mes "Ele n�o foi criativo o suficiente para reinventar o conceito de Deus.";
+		mes "Ele nao foi criativo o suficiente para reinventar o conceito de Deus.";
 		mes "Ele era um paradoxo.";
 		next;
 		mes "[Nidhogg]";
 		mes "Agora precisamos sair dessa armadilha no tempo e no fim; para a realidade.";
-		mes "Este mundo s� existe na mente do Deus Dem�nio. O mesmo dia se repete para sempre.";
+		mes "Este mundo so existe na mente do Deus Demonio. O mesmo dia se repete para sempre.";
 		next;
 		mes "[Nidhogg]";
-		mes "Todos que entram neste mundo ser�o arrastados para o mesmo ciclo.";
-		mes "Nesse sentido, ele conseguiu criar seu pr�prio mundo.";
+		mes "Todos que entram neste mundo serao arrastados para o mesmo ciclo.";
+		mes "Nesse sentido, ele conseguiu criar seu proprio mundo.";
 		cutin "ep14_nyd02.bmp",2;
 		next;
 		mes "[Nidhogg]";
-		mes "O desespero de hoje se repetir� dia ap�s dia.";
+		mes "O desespero de hoje se repetira dia apos dia.";
 		mes "Mesmo sabendo disso, voltaremos a trilhar o mesmo caminho. Espero poder lutar ao seu lado todas as vezes...";
 		cutin "ep14_nyd03.bmp",2;
 		next;
 		cutin "ep14_nyd04.bmp",2;
 		mes "[Nidhogg]";
-		mes "Eu falei demais. O Comandante deve estar esperando. Deixe-me validar seu feito, para que voc� possa se reportar a ele.";
-		mes "Voc� se saiu muito bem hoje.";
+		mes "Eu falei demais. O Comandante deve estar esperando. Deixe-me validar seu feito, para que voce possa se reportar a ele.";
+		mes "Voce se saiu muito bem hoje.";
 		if (isbegin_quest(7593) == 1) {
 			erasequest 7593;// Demon God Subjugation
 			setquest 7597;// Fall of the False God
@@ -2280,16 +2280,16 @@ OnTimer8000:
 	}
 	else {	// todo, custom text
 		mes "[Nidhogg]";
-		mes "...Parece que as coisas ainda n�o acabaram,";
-		mes "Isso � muito pr�ximo do mundo espiritual de Morroc,";
+		mes "...Parece que as coisas ainda nao acabaram,";
+		mes "Isso e muito proximo do mundo espiritual de Morroc,";
 		mes "Ele deveria estar aqui para continuar pensando no passado!";
 		cutin "ep14_nyd03.bmp",2;
 	}
 	next;
 	select("Sair.");
 	mes "[Nidhogg]";
-	mes "Claro. Voc� deve estar exausto.";
-	mes "Deixe-me envi�-lo aos outros membros da sua Expedi��o, sem custos.";
+	mes "Claro. Voce deve estar exausto.";
+	mes "Deixe-me envia-lo aos outros membros da sua Expedicao, sem custos.";
 	close2;
 	warp "moro_vol",91,87;
 	end;

@@ -141,7 +141,7 @@ e_tower,72,115,2	script	Oscar#Con1	4_ED_OSCAR,{
 			if(.@set_difficulty  == ID_HARD){
 		       	mes "Os mobs ganham 100% a mais de drop, experiencia, atributos e HP.";
 			mes "Seu personagem perde 35% de cast, ASPD, HP, SP, velocidade, ATQ e ATQM, e tambem perde 35 em todos os atributos.";
-			mes "AlÃ©m disso, os mobs recebem apenas 35% do dano total.";
+			mes "Alem disso, os mobs recebem apenas 35% do dano total.";
 			dispbottom "Modo dificil selecionado.";
 			next;
 			mes "Deseja continuar?";
@@ -167,7 +167,7 @@ e_tower,72,115,2	script	Oscar#Con1	4_ED_OSCAR,{
 			if(.@set_difficulty == ID_INSANE){
 		       	mes "Os mobs ganham 170% a mais de drop, experiencia, atributos e HP.";
 			mes "Seu personagem perde 55% de cast, ASPD, HP, SP, velocidade, ATQ e ATQM, e tambem perde 55 em todos os atributos.";
-			mes "AlÃ©m disso, os mobs recebem apenas 5% do dano total.";
+			mes "Alem disso, os mobs recebem apenas 5% do dano total.";
 			next;
 			mes "Deseja continuar?";
 			switch(select("Sim:Nao")){
@@ -240,7 +240,7 @@ S_Enter:
 }
 
 
-//Â½Ã•Â¸Ã•Â¥ÃŽ
+// NPC de administracao da instancia.
 1@ch_t,46,17,3	script	Oscar#Con2	4_ED_OSCAR,{
 	if (getgmlevel() < 80) end;
 	switch(select("25 andares de desafio normal:50 andares de desafio intermediario:75 andares de desafio alto")){
@@ -323,7 +323,7 @@ OnInstanceInit:
 	'C_MDEF_mob=100;
 	'C_HIT_mob=100;
 	
-	//Â¨CÂ¼hMPVÂ¥[Â¦Â¨Ã„ÃÂ©ÃŠ
+	// Atributos base dos MVPs por andar.
 	'C_HP_mvpmob=5;
 	'C_ATKMIN_mvpmob=1000;
 	'C_ATKMAX_mvpmob=1000;
@@ -333,7 +333,7 @@ OnInstanceInit:
 	'C_MDEF_mvpmob=100;
 	'C_HIT_mvpmob=100;
 	
-	//101Â¼hBOSSÂ¥[Â¦Â¨Ã„ÃÂ©ÃŠ
+	// Bonus do chefe do andar 101.
 	'N_HP_par=0;
 	'N_ATKMIN_par=0;
 	'N_ATKMAX_par=0;
@@ -456,7 +456,7 @@ function	script	CT_FinishRun	{
 }
 
 function	script	get_item	{
-	//Ã€Â»Â±Ã¾Â¤pÂ©Ã‡Ã€Ã²Â¨ÃºÂ¯Â»Â¥Â½Â¾Ã·Â²v
+	// Chance de obter o item da instancia.
 	if(rand(100)<'droprate) getitem 1000372,1;
 	return;
 }
@@ -515,8 +515,8 @@ function	script	better_Monster	{
 }
 
 function	script	CT_DeployFloorMob	{
-	.@level = getarg(0);//1Â¼Ã“Â¼hÂµÂ¥Â¯Ã…
-	.@mob_count = getarg(1);//Â¼Ã“Â¼hÃ…]ÂªÂ«Â¼Ã†Â¶q
+	.@level = getarg(0); // Nivel do andar.
+	.@mob_count = getarg(1); // Quantidade de monstros.
 	.@label$ = getarg(2);
 	.@floor = .@level % 25 ;
 	for(.@i=0;.@i < .@mob_count;.@i++){
@@ -527,8 +527,8 @@ function	script	CT_DeployFloorMob	{
 }
 
 function	script	CT_DeployFloorMvpMob	{
-	.@level = getarg(0);//1Â¼Ã“Â¼hÂµÂ¥Â¯Ã…
-	.@mob_count = getarg(1);//Â¼Ã“Â¼hÃ…]ÂªÂ«Â¼Ã†Â¶q
+	.@level = getarg(0); // Nivel do andar.
+	.@mob_count = getarg(1); // Quantidade de monstros.
 	.@label$ = getarg(2);
 	.@floor = .@level % 25 ;
 	for(.@i=0;.@i < .@mob_count;.@i++){
@@ -1214,7 +1214,7 @@ OnTimer1000:
 		case 5:
 			break;
 		case 6:
-			//Â©@Â¯Ã«Â¶Ã°Â­Âµ	
+			// Forma uma grade de monstros.
 			sleep 1000;
 			.@k=0;
 			for(.@i = 0; .@i < 5; .@i++){			
@@ -2438,7 +2438,7 @@ OnTimer3000:
 	}
 		if(rand(5)==0){
 
-			//Â©@Â¯Ã«Â¶Ã°Â­Âµ	
+			// Forma uma grade de monstros.
 			sleep 1000;
 			.@k=0;
 			for(.@i = 0; .@i < 5; .@i++){
@@ -2556,7 +2556,7 @@ Onstoptime:
 	stopnpctimer;
 	end;
 
-OnTimer10000://10Â¬Ã­Â§PÂ©wÂ¤@Â¦Â¸ Ã‚Ã·Â¶}Â¶WÂ¹L30Â¬Ã­Â­Â«Â·sÂ¥Â´
+OnTimer10000: // Verifica periodicamente se o chefe saiu da area.
 	getunitdata 'BossID,'amdaraisdata;
 	.@x = 'amdaraisdata[6];
 	.@y = 'amdaraisdata[7];
@@ -2931,7 +2931,7 @@ OnInstanceInit:
 	}
 	
 	
-	//Ã€YÂ¹Â¢Â«Â½Â«Â½Â¼ÃºÃ€y Â¤UÂ«Â«ÂªÂºÂ°Ã‘Â±JÂ¥|Â«Â½Â«Â½(ÂªAÂ¹Â¢) Â¶Ã‚ÂªÂ¢Ã€sÂ°Â²Â¾v(ÂªAÂ¹Â¢) Â¶Ã‚Â¦Ã¢Â°{Â¹q  (ÂªAÂ¹Â¢)  ID Â¦Ã›Â¤vÂ²KÂ¥[
+	// IDs visuais adicionados conforme a pontuacao total.
 	setarray .@head_id,400147,400148,400149;
 	
 	if('sum_pt/100>=4){

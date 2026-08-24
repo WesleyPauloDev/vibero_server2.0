@@ -28,7 +28,8 @@ geffen,112,65,5	script	Trocador da Night Arena#gna	4_M_HUMERCHANT,{
 
 L_EnchantMenu:
 	mes "[Arena de Geffen]";
-	mes "As joias magicas aplicam opcoes aleatorias no equipamento correspondente.";
+	mes "As joias magicas encantam somente os equipamentos especiais da Night Arena.";
+	mes "Eles podem ser obtidos no menu Equipamentos especiais e joias.";
 	mes "O equipamento precisa estar equipado.";
 	next;
 
@@ -81,16 +82,28 @@ L_EnchantMenu:
 		close;
 	}
 
+	mes "[Arena de Geffen]";
+	mes "Equipamentos aceitos nesta opcao:";
+	for (.@i = 0; .@i < getarraysize(.@valid); ++.@i)
+		mes "- " + mesitemlink(.@valid[.@i], false) + " (ID " + .@valid[.@i] + ")";
+	mes "Joia necessaria:";
+	mes "- 1x " + mesitemlink(.@jewel, false) + " (ID " + .@jewel + ")";
+	mes "Equipe um dos itens acima na posicao escolhida.";
+	next;
+
 	.@equip = getequipid(.@part);
 	if (inarray(.@valid[0], .@equip) == -1) {
 		mes "[Arena de Geffen]";
 		mes "Voce nao esta usando um equipamento valido nessa posicao.";
+		mes "Equipe um destes itens:";
+		for (.@i = 0; .@i < getarraysize(.@valid); ++.@i)
+			mes "- " + mesitemlink(.@valid[.@i], false) + " (ID " + .@valid[.@i] + ")";
 		close;
 	}
 
 	if (countitem(.@jewel) < 1) {
 		mes "[Arena de Geffen]";
-		mes "Voce precisa de 1x " + getitemname(.@jewel) + ".";
+		mes "Voce precisa de 1x " + mesitemlink(.@jewel, false) + " (ID " + .@jewel + ").";
 		close;
 	}
 

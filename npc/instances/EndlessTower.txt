@@ -11,51 +11,51 @@
 //= Endless Tower Memorial Dungeon.
 //= Consists of 101 floors.
 //===== Additional Comments: ================================= 
-//= 1.0 Primeira vers�o.
-//= 1.1 Removido um disablenpc de #102FShadowDust1. (relat�rio de bug: 4415)
-//= 1.2 Adicionados "end" a v�rios NPCs, permitindo reiniciar timers.
-//=     Adicionados alguns stopnpctimers que estavam faltando nos NPCs. (relat�rio de bug: 4418)
+//= 1.0 Primeira versao.
+//= 1.1 Removido um disablenpc de #102FShadowDust1. (relatorio de bug: 4415)
+//= 1.2 Adicionados "end" a varios NPCs, permitindo reiniciar timers.
+//=     Adicionados alguns stopnpctimers que estavam faltando nos NPCs. (relatorio de bug: 4418)
 //= 1.3 Corrigidos alguns erros de copiar/colar :D Falha minha. [L0ne_W0lf]
-//      O timer n�o reinicia mais ao reentrar.
+//      O timer nao reinicia mais ao reentrar.
 //= 1.4 Adicionadas entradas no log de quests baseadas no iRO. [L0ne_W0lf]
-//=     Voc� pode precisar atualizar seu questid2display.
-//=     Alterado o spawn da White Lady para MVP White Lady. (relat�rio de bug: 4601)
-//= 1.5 Corrigida gram�tica e erros de digita��o.
-//= 1.6 Corrigida a condi��o de bloqueio de reentrada na torre. (relat�rio de bug: 4677) [L0ne_W0lf]
-//=     Corrigido warp do andar 75 que desabilitava o NPC errado. (relat�rio de bug: 4711)
-//= 1.7 Adicionados "end" faltantes para evitar desabilita��o acidental de
-//=     warps entre andares. (relat�rio de bug: 4623)
-//=     Adicionados "end" faltantes para evitar spawn infinito de monstros (relat�rio de bug: 4540)
+//=     Voce pode precisar atualizar seu questid2display.
+//=     Alterado o spawn da White Lady para MVP White Lady. (relatorio de bug: 4601)
+//= 1.5 Corrigida gramatica e erros de digitacao.
+//= 1.6 Corrigida a condicao de bloqueio de reentrada na torre. (relatorio de bug: 4677) [L0ne_W0lf]
+//=     Corrigido warp do andar 75 que desabilitava o NPC errado. (relatorio de bug: 4711)
+//= 1.7 Adicionados "end" faltantes para evitar desabilitacao acidental de
+//=     warps entre andares. (relatorio de bug: 4623)
+//=     Adicionados "end" faltantes para evitar spawn infinito de monstros (relatorio de bug: 4540)
 //=     Comentados NPCs restantes de uso exclusivo de GM. [Gepard]
 //= 1.8 Ajustado Instance Attach Map para validar TODOS os mapas, em vez de
-//=     apenas 1@tower -> 5@tower (relat�rio de bug: 4983)
+//=     apenas 1@tower -> 5@tower (relatorio de bug: 4983)
 //= 1.9 Adicionado comando instance_check_party ao script para verificar corretamente se
 //=     o grupo invocador atende aos requisitos para entrar na Memorial Dungeon.
 //= 2.0 Corrigido encadeamento de else/if quebrado. [Joseph]
 //= 2.1 Atualizado para coincidir com o script oficial mais recente. [Euphy]
-//= 2.2 Reescrita do sistema de inst�ncias. [Euphy]
-//= 2.3 Adicionadas algumas mensagens de an�ncio que estavam faltando. [Euphy]
-//= 2.4 Adicionada fun��o de gerenciamento para GM. [Euphy]
+//= 2.2 Reescrita do sistema de instancias. [Euphy]
+//= 2.3 Adicionadas algumas mensagens de anuncio que estavam faltando. [Euphy]
+//= 2.4 Adicionada funcao de gerenciamento para GM. [Euphy]
 //============================================================
 
 1@tower,50,350,2	script	Lucid Crystal#102Custom	844,{
-	// Verifica se o jogador � GM
+	// Verifica se o jogador e GM
 	if (getgroupid() == 99) {		
 		mes "[Voz Misteriosa]";
-		mes "Voc� deseja ir diretamente ao �ltimo andar da torre?";
+		mes "Voce deseja ir diretamente ao ultimo andar da torre?";
 		next;
-		switch(select("Sim.:N�o")) {
+		switch(select("Sim.:Nao")) {
 		case 1:
 			mes "Muito bem, prepare-se para enfrentar o desafio final!";
 			warp instance_mapname("6@tower"),32,12;
 			break;
 		case 2:
-			mes "Como desejar, fique � vontade para continuar pelos andares anteriores.";
+			mes "Como desejar, fique a vontade para continuar pelos andares anteriores.";
 			close;
 			break;
 		}
 	} else {
-		mes "Apenas GMs podem usar este cristal para acessar o �ltimo andar.";
+		mes "Apenas GMs podem usar este cristal para acessar o ultimo andar.";
 		close;
 	}
 	end;
@@ -1049,23 +1049,23 @@ function	script	F_Tower_Warp	{
 // Levels 1-25
 //============================================================
 1@tower,50,360,0	script	Immortal Brazier#	844,{
-	mes "- Uma Mensagem Est� Gravada na Pira -";
-	mes "Aquele que espalhar as cinzas da escurid�o neste lugar estar� um passo mais pr�ximo de Naght Sieger, o Hegemon-Rei das Trevas...";
-	mes "Voc� precisar� das Cinzas das Trevas para avan�ar:";
-	mes "26� Andar -> 1 Cinzas da Escurid�o", "51� Andar -> 2 Cinzas da Escurid�o","76� Andar -> 3 Cinzas da Escurid�o";
+	mes "- Uma Mensagem Esta Gravada na Pira -";
+	mes "Aquele que espalhar as cinzas da escuridao neste lugar estara um passo mais proximo de Naght Sieger, o Hegemon-Rei das Trevas...";
+	mes "Voce precisara das Cinzas das Trevas para avancar:";
+	mes "26o Andar -> 1 Cinzas da Escuridao", "51o Andar -> 2 Cinzas da Escuridao","76o Andar -> 3 Cinzas da Escuridao";
 	next;
 
-	setarray .@level$[1],"26�","51�","76�";
+	setarray .@level$[1],"26o","51o","76o";
 	setarray .@map$[1],"2@tower","3@tower","4@tower";
-	set .@i, select("26� Andar:51� Andar:76� Andar");
+	set .@i, select("26o Andar:51o Andar:76o Andar");
 
 	if (countitem(6000) < .@i) {
 		mes "-Aviso-";
-		mes "Para se teleportar para o "+.@level$[.@i]+" Andar, voc� precisa de "+.@i+" Cinzas das Trevas.";
+		mes "Para se teleportar para o "+.@level$[.@i]+" Andar, voce precisa de "+.@i+" Cinzas das Trevas.";
 		close;
 	}
 	delitem 6000,.@i; // Dark_Ashes
-	mapannounce instance_mapname("1@tower"), strcharinfo(0)+". Voc� ser� teletransportado para o "+.@level$[.@i]+" Andar.",bc_map,"0x00ff99";
+	mapannounce instance_mapname("1@tower"), strcharinfo(0)+". Voce sera teletransportado para o "+.@level$[.@i]+" Andar.",bc_map,"0x00ff99";
 	
 	warp instance_mapname(.@map$[.@i]),52,354;
 	close;
@@ -1075,7 +1075,7 @@ OnInstanceInit:
 	end;
 
 OnTimer10000:
-	mapannounce instance_mapname("1@tower"), "Aviso: Domar um monstro n�o conta como derrot�-lo.",bc_map,"0xff0000";
+	mapannounce instance_mapname("1@tower"), "Aviso: Domar um monstro nao conta como derrota-lo.",bc_map,"0xff0000";
 	stopnpctimer;
 	end;
 }
@@ -1091,10 +1091,10 @@ OnTimer10000:
 		// Pega o andar salvo para o grupo
 		set .@saved, getd(.@key$);
 
-		// se ainda n�o houver valor salvo, come�a do n�vel deste portal
+		// se ainda nao houver valor salvo, comeca do nivel deste portal
 		if (.@saved <= 1) {
 			mes "[Atalho]";
-			mes "Voc� est� no maior piso alcan�ado hoje.";
+			mes "Voce esta no maior piso alcancado hoje.";
 			close;
 		}		
 
@@ -1102,7 +1102,7 @@ OnTimer10000:
 	}
 	// set .@saved, 98;
 
-	// pega o mapa correto da inst�ncia
+	// pega o mapa correto da instancia
 	if (.@saved <= 25) {
 		.@map$ = instance_mapname("1@tower");
 		.npc$ = instance_npcname("#1F Controller");
@@ -1118,10 +1118,10 @@ OnTimer10000:
 	} 	
 
 	mes "[Atalho]";
-	mes "Gostaria de ir direto ao : ^0055FF"+.@saved+"�^000000 andar?";
-	switch(select("Sim.:N�o")) {
+	mes "Gostaria de ir direto ao : ^0055FF"+.@saved+"o^000000 andar?";
+	switch(select("Sim.:Nao")) {
 		case 1:			
-			mes "Voc� ser� teletransportado para o "+.@saved+"� andar.";
+			mes "Voce sera teletransportado para o "+.@saved+"o andar.";
 			close2;
 
 			if(.@saved == 100) {
@@ -1138,7 +1138,7 @@ OnTimer10000:
 
 			end;	
 		case 2:
-			mes "Como desejar, fique � vontade para escalar os andares.";			
+			mes "Como desejar, fique a vontade para escalar os andares.";			
 			end;			
 	}
 }
@@ -1163,12 +1163,12 @@ OnMyMobDead:
 	set .@map$, instance_mapname("1@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#1F Controller")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {	
-		mapannounce instance_mapname("1@tower"), "Todos os monstros do 1� n�vel foram derrotados.",bc_map,"0xffff00";
+		mapannounce instance_mapname("1@tower"), "Todos os monstros do 1o nivel foram derrotados.",bc_map,"0xffff00";
 		initnpctimer;
 		//SetItemPartyInMap in_102floor 1
 	} else
 		// callfunc("CustomMapDrop", "1@tower", 607, 100);
-		mapannounce .@map$, "Monstros restantes no 1� n�vel - "+.@mob_dead_num,bc_map,"0x00ff99";
+		mapannounce .@map$, "Monstros restantes no 1o nivel - "+.@mob_dead_num,bc_map,"0x00ff99";
 	end;
 
 OnTimer5000:	
@@ -1204,13 +1204,13 @@ OnTouch_:
 		// Pega o andar salvo para o grupo
 		set .@saved, getd(.@key$);
 
-		// se ainda n�o houver valor salvo, come�a do n�vel deste portal
+		// se ainda nao houver valor salvo, comeca do nivel deste portal
 		if (.@saved <= 0) {
 			set .@saved, .@this_level;
 			setd(.@key$, .@saved);
 		}
 
-		// s� grava se o jogador estiver indo para um andar MAIS ALTO
+		// so grava se o jogador estiver indo para um andar MAIS ALTO
 		if (.@this_level > .@saved) {
 			setd(.@key$, .@this_level);
 			.@saved = .@this_level;
@@ -1229,11 +1229,11 @@ OnMyMobDead:
 	set .@level, atoi(replacestr(strnpcinfo(0),"FGate102tower","")) + 1;
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
-		mapannounce strnpcinfo(4), "Todos os monstros no "+callfunc("F_GetNumSuffix",.@level)+" n�vel foram derrotados.",bc_map,"0xffff00";
+		mapannounce strnpcinfo(4), "Todos os monstros no "+callfunc("F_GetNumSuffix",.@level)+" nivel foram derrotados.",bc_map,"0xffff00";
 		initnpctimer;
 
 	} else
-		mapannounce .@map$, "Monstros restantes no "+callfunc("F_GetNumSuffix",.@level)+" n�vel - "+.@mob_dead_num,bc_map,"0x00ff99";
+		mapannounce .@map$, "Monstros restantes no "+callfunc("F_GetNumSuffix",.@level)+" nivel - "+.@mob_dead_num,bc_map,"0x00ff99";
 	end;
 
 OnTimer5000:
@@ -1320,11 +1320,11 @@ OnTimer15000:
 	end;
 
 OnTimer30000:
-	mapannounce instance_mapname("1@tower"), "Drops valiosos te esperam! Mostre sua coragem e siga para o pr�ximo andar!", bc_map, "0x00ffcc";
+	mapannounce instance_mapname("1@tower"), "Drops valiosos te esperam! Mostre sua coragem e siga para o proximo andar!", bc_map, "0x00ffcc";
 	end;
 
 OnTimer45000:
-	mapannounce instance_mapname("1@tower"), "A jornada � dif�cil, mas a vit�ria espera no topo! Continue avan�ando!", bc_map, "0x00ffcc";
+	mapannounce instance_mapname("1@tower"), "A jornada e dificil, mas a vitoria espera no topo! Continue avancando!", bc_map, "0x00ffcc";
 	stopnpctimer;
 	end;
 }
@@ -1335,16 +1335,16 @@ OnTimer45000:
 	set .@i, callfunc("F_GM_NPC","dmc2008",1);
 	next;
 	if (.@i == 1) {
-		mes "Este NPC gerencia a torre do 1� ao 25� n�vel.";
-		mes "Por favor, insira o n�mero do n�vel a ser aberto.";
+		mes "Este NPC gerencia a torre do 1o ao 25o nivel.";
+		mes "Por favor, insira o numero do nivel a ser aberto.";
 		mes "(i.g.: 1F->1, 25F->25)";
 		input .@input,1,25;
 		next;
 		if (.@input < 1 || .@input > 25)
-			mes "Voc� s� pode inserir um n�mero de 1 a 25.";
+			mes "Voce so pode inserir um numero de 1 a 25.";
 		else {
 			donpcevent instance_npcname(.@input+"FGate102tower")+"::OnEnable";
-			mes "*** N�vel "+ .@input + " est� sendo aberto agora. ***";
+			mes "*** Nivel "+ .@input + " esta sendo aberto agora. ***";
 		}
 	}
 	close;
@@ -1371,12 +1371,12 @@ OnMyMobDead:
 	set .@map$, instance_mapname("2@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("Immortal Furnace#1")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
-		mapannounce instance_mapname("2@tower"), "Todos os monstros do 26� n�vel foram derrotados.",bc_map,"0xffff00";		
+		mapannounce instance_mapname("2@tower"), "Todos os monstros do 26o nivel foram derrotados.",bc_map,"0xffff00";		
 		initnpctimer;
 		//SetItemPartyInMap in_102floor 26
 	}
 	else
-		mapannounce .@map$, "Monstros restantes no 26� n�vel - " + .@mob_dead_num,bc_map,"0x00ff99";
+		mapannounce .@map$, "Monstros restantes no 26o nivel - " + .@mob_dead_num,bc_map,"0x00ff99";
 	end;
 
 OnTimer5000:
@@ -1456,16 +1456,16 @@ OnTouch_:
 	set .@i, callfunc("F_GM_NPC","dmc2008",1);
 	next;
 	if (.@i == 1) {
-		mes "Este NPC gerencia a torre do 26� ao 50� n�vel.";
-		mes "Por favor, insira o n�mero do n�vel a ser aberto.";
+		mes "Este NPC gerencia a torre do 26o ao 50o nivel.";
+		mes "Por favor, insira o numero do nivel a ser aberto.";
 		mes "(i.g.: 26F->26, 50F->50)";
 		input .@input,26,50;
 		next;
 		if (.@onput < 26 || .@input > 50)
-			mes "Voc� s� pode inserir um n�mero de 26 a 50.";
+			mes "Voce so pode inserir um numero de 26 a 50.";
 		else {
 			donpcevent instance_npcname(.@input+"FGate102tower")+"::OnEnable";
-			mes "*** N�vel "+ .@input + " est� sendo aberto agora. ***";
+			mes "*** Nivel "+ .@input + " esta sendo aberto agora. ***";
 		}
 	}
 	close;
@@ -1491,12 +1491,12 @@ OnMyMobDead:
 	set .@map$, instance_mapname("3@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("Immortal Furnace#2")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
-		mapannounce instance_mapname("3@tower"), "Todos os monstros do 51� n�vel foram derrotados.",bc_map,"0xffff00";
+		mapannounce instance_mapname("3@tower"), "Todos os monstros do 51o nivel foram derrotados.",bc_map,"0xffff00";
 		initnpctimer;
 		//SetItemPartyInMap in_102floor 51
 	}
 	else
-		mapannounce .@map$, "Monstros restantes no 51� n�vel - " + .@mob_dead_num,bc_map,"0x00ff99";
+		mapannounce .@map$, "Monstros restantes no 51o nivel - " + .@mob_dead_num,bc_map,"0x00ff99";
 	end;
 
 OnTimer5000:
@@ -1576,16 +1576,16 @@ OnTouch_:
 	set .@i, callfunc("F_GM_NPC","dmc2008",1);
 	next;
 	if (.@i == 1) {
-		mes "Este NPC gerencia a torre do 51� ao 75� n�vel.";
-		mes "Por favor, insira o n�mero do n�vel a ser aberto.";
+		mes "Este NPC gerencia a torre do 51o ao 75o nivel.";
+		mes "Por favor, insira o numero do nivel a ser aberto.";
 		mes "(i.g.: 51F->51, 75F->75)";
 		input .@input,51,75;
 		next;
 		if (.@input < 51 || .@input > 75)
-			mes "Voc� s� pode inserir um n�mero de 51 a 75.";
+			mes "Voce so pode inserir um numero de 51 a 75.";
 		else {
 			donpcevent instance_npcname(.@input+"FGate102tower")+"::OnEnable";
-			mes "*** N�vel "+ .@input + " est� sendo aberto agora. ***";
+			mes "*** Nivel "+ .@input + " esta sendo aberto agora. ***";
 		}
 	}
 	close;
@@ -1612,12 +1612,12 @@ OnMyMobDead:
 	set .@map$, instance_mapname("4@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("Immortal Furnace#3")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
-		mapannounce instance_mapname("4@tower"),"Todos os monstros do 76� n�vel foram derrotados.",bc_map,"0xffff00";
+		mapannounce instance_mapname("4@tower"),"Todos os monstros do 76o nivel foram derrotados.",bc_map,"0xffff00";
 		initnpctimer;
 		//SetItemPartyInMap in_102floor 76
 	}
 	else
-		mapannounce .@map$,"Monstros restantes no 76� n�vel - " + .@mob_dead_num,bc_map,"0x00ff99";
+		mapannounce .@map$,"Monstros restantes no 76o nivel - " + .@mob_dead_num,bc_map,"0x00ff99";
 	end;
 
 OnTimer5000:
@@ -1673,13 +1673,13 @@ OnTouch_:
 		// Pega o andar salvo para o grupo
 		set .@saved, getd(.@key$);
 
-		// se ainda n�o houver valor salvo, come�a do n�vel deste portal
+		// se ainda nao houver valor salvo, comeca do nivel deste portal
 		if (.@saved <= 0) {
 			set .@saved, .@this_level;
 			setd(.@key$, .@saved);
 		}
 
-		// s� grava se o jogador estiver indo para um andar MAIS ALTO
+		// so grava se o jogador estiver indo para um andar MAIS ALTO
 		if (.@this_level > .@saved) {
 			setd(.@key$, .@this_level);
 			.@saved = .@this_level;
@@ -1721,16 +1721,16 @@ OnTouch_:
 	set .@i, callfunc("F_GM_NPC","dmc2008",1);
 	next;
 	if (.@i == 1) {
-		mes "Este NPC gerencia a torre do 76� ao 100� n�vel.";
-		mes "Por favor, insira o n�mero do n�vel a ser aberto.";
+		mes "Este NPC gerencia a torre do 76o ao 100o nivel.";
+		mes "Por favor, insira o numero do nivel a ser aberto.";
 		mes "(i.g.: 76F->76, 99F->99)";
 		input .@input,76,99;
 		next;
 		if (.@input < 76 || .@input > 99)
-			mes "Voc� s� pode inserir um n�mero de 76 a 99.";
+			mes "Voce so pode inserir um numero de 76 a 99.";
 		else {
 			donpcevent instance_npcname(.@input+"FGate102tower")+"::OnEnable";
-			mes "*** N�vel "+ .@input + " est� sendo aberto agora. ***";
+			mes "*** Nivel "+ .@input + " esta sendo aberto agora. ***";
 		}
 	}
 	close;
@@ -1741,32 +1741,32 @@ OnTouch_:
 5@tower,106,109,2	script	Lucid Crystal#102	844,{
 
 	if (in_102tower < 10) {
-		mes "^0000ffUma voz misteriosa ecoa pela sala enquanto voc� toca o cristal l�cido que irradia uma luz intensa.^000000";
+		mes "^0000ffUma voz misteriosa ecoa pela sala enquanto voce toca o cristal lucido que irradia uma luz intensa.^000000";
 		next;
 		mes "[Voz Misteriosa]";
-		mes "Bem-vindos ao meu dom�nio, intrusos. Foi divertido observar voc�s enfrentarem todas as dificuldades que preparei.";
+		mes "Bem-vindos ao meu dominio, intrusos. Foi divertido observar voces enfrentarem todas as dificuldades que preparei.";
 		next;
 		mes "[Voz Misteriosa]";
-		mes "Infelizmente, chegou a hora de encerrar o espet�culo.";
+		mes "Infelizmente, chegou a hora de encerrar o espetaculo.";
 		next;
 		mes "[Voz Misteriosa]";
-		mes "Ainda � cedo para comemorar sua vit�ria contra meu bra�o direito Knothen, pois ele n�o foi completamente destru�do!";
+		mes "Ainda e cedo para comemorar sua vitoria contra meu braco direito Knothen, pois ele nao foi completamente destruido!";
 		next;
 		mes "[Voz Misteriosa]";
-		mes "Eu o ressuscitarei para o pr�ximo espet�culo. Derrote-o novamente, e ent�o aceitarei seu desafio com prazer.";
+		mes "Eu o ressuscitarei para o proximo espetaculo. Derrote-o novamente, e entao aceitarei seu desafio com prazer.";
 		next;
 		mes "[Voz Misteriosa]";
 		mes "Adeus por enquanto.";
-		mes "Mais uma vez, foi muito divertido, humanos. Espero encontr�-los novamente em breve.";
+		mes "Mais uma vez, foi muito divertido, humanos. Espero encontra-los novamente em breve.";
 		next;
-		mes "^0000ffAssim que a voz parou de falar, uma for�a irresist�vel o levantou e transportou para outro lugar.";
+		mes "^0000ffAssim que a voz parou de falar, uma forca irresistivel o levantou e transportou para outro lugar.";
 		close2;
 
 		set in_102tower,10;
 
 		.@iid = instance_id(IM_PARTY);
 		if (.@iid > 0) {
-			// pega o party_id salvo para essa inst�ncia
+			// pega o party_id salvo para essa instancia
 			.@pid = getd("$etower_pid_by_iid_"+.@iid);
 			// .@partyName$ = party_name(.@iid);
 
@@ -1781,7 +1781,7 @@ OnTouch_:
 			set .@party_id, getcharid(1);
 			set .@partyName$, getpartyname(.@party_id);
 			
-			// Premia��es do Servidor
+			// Premiacoes do Servidor
 			if (#ETOWER_STATUS == 1 || #ETOWER_STATUS == 2) {
 				.@finish_result = callfunc("F_InstanceFinishBase", "Torre Sem Fim", "#ETOWER_STATUS", 30, 3, "#inst60_name$", "#inst60_status", 1, 50, 110002, 3000, 4, 1);
 				if (#torre == 1)
@@ -1789,23 +1789,23 @@ OnTouch_:
 			}
 
 			// // anuncia globalmente
-			announce "O jogador "+strcharinfo(0)+" finalmente conquistou o andar 99 da Torre Sem Fim ! Parab�ns!", bc_all, 0xFF0000;
+			announce "O jogador "+strcharinfo(0)+" finalmente conquistou o andar 99 da Torre Sem Fim ! Parabens!", bc_all, 0xFF0000;
 			
 		}
 		
 		warp "prontera",155,184;
 	}
 	else {
-		mes "^0000ffO peda�o de cristal que irradia luz parece cham�-lo, assim como da �ltima vez.^000000";
+		mes "^0000ffO pedaco de cristal que irradia luz parece chama-lo, assim como da ultima vez.^000000";
 		next;
 		mes "[Voz Misteriosa]";
-		mes "Devo ter subestimado voc�s... N�o esperava v�-los novamente.";
+		mes "Devo ter subestimado voces... Nao esperava ve-los novamente.";
 		next;
 		mes "[Voz Misteriosa]";
-		mes "Posso sentir o cheiro do seu suor, ouvir os suspiros de exaust�o em combate. Ah~ O desejo humano por vit�ria sempre me excita.";
+		mes "Posso sentir o cheiro do seu suor, ouvir os suspiros de exaustao em combate. Ah~ O desejo humano por vitoria sempre me excita.";
 		next;
 		mes "[Voz Misteriosa]";
-		mes "Agora permito que venham receber uma audi�ncia comigo. Venham at� mim, a Naght Sieger, o Hegemon-Rei das Trevas!";
+		mes "Agora permito que venham receber uma audiencia comigo. Venham ate mim, a Naght Sieger, o Hegemon-Rei das Trevas!";
 		close2;
 
 		warp instance_mapname("6@tower"),32,12;
@@ -1886,7 +1886,7 @@ OnMyMobDead:
 	set .@map$, instance_mapname("5@tower");
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#102FShadowDust1")+"::OnMyMobDead");
 	if (.@mob_dead_num < 1) {
-		mapannounce .@map$, "Voz Misteriosa: Quem � voc� para ousar invadir meu santu�rio?!",bc_map,"0xffff00";
+		mapannounce .@map$, "Voz Misteriosa: Quem e voce para ousar invadir meu santuario?!",bc_map,"0xffff00";
 		donpcevent instance_npcname("#102FShadowDust")+"::OnDisable";
 		donpcevent instance_npcname("Lucid Crystal#102")+"::OnEnable";
 		//SetItemPartyInMap in_102floor 100
@@ -1947,12 +1947,12 @@ OnEnable:
 
 5@tower,71,1,0	script	#Manager Mode5	844,{
 	callfunc "F_GM_NPC";
-	mes "Este NPC gerencia o cristal no 100� n�vel. Por favor, digite a senha.";
+	mes "Este NPC gerencia o cristal no 100o nivel. Por favor, digite a senha.";
 	set .@i, callfunc("F_GM_NPC","dmc2008",1);
 	next;
 	if (.@i == 1) {
 		donpcevent instance_npcname("Lucid Crystal#102")+"::OnEnable";
-		mes "O cristal do 100� n�vel foi ativado.";
+		mes "O cristal do 100o nivel foi ativado.";
 	} else
 		mes "Por favor, digite a senha correta.";
 	close;
@@ -1961,7 +1961,7 @@ OnEnable:
 // Level 101
 //============================================================
 6@tower,45,89,2	script	Life Spring#1	844,{
-	mes "^0066ffVoc� tomou um gole da �gua cristalina da fonte e se sente revigorado.^000000";
+	mes "^0066ffVoce tomou um gole da agua cristalina da fonte e se sente revigorado.^000000";
 	heal (MaxHp-Hp),(MaxSp-Sp);
 	close;
 
@@ -2029,24 +2029,24 @@ OnEnable:
 	end;
 
 OnTimer500:
-	mapannounce instance_mapname("6@tower"),"Convidados, hein? Espero que tenham vindo aqui sabendo que ser�o enterrados neste lugar. Se n�o sabiam, bem... � tarde demais!",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Convidados, hein? Espero que tenham vindo aqui sabendo que serao enterrados neste lugar. Se nao sabiam, bem... e tarde demais!",bc_map,"0x00ffcc";
 	end;
 
 OnTimer5500:
-	mapannounce instance_mapname("6@tower"),"� por isso que voc�s, aventureiros, sempre acabam mortos.",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"E por isso que voces, aventureiros, sempre acabam mortos.",bc_map,"0x00ffcc";
 	end;
 
 OnTimer10500:
-	mapannounce instance_mapname("6@tower"),"Posso aplaudir sua coragem... Claro, pretendo brincar um pouco com voc� primeiro.",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Posso aplaudir sua coragem... Claro, pretendo brincar um pouco com voce primeiro.",bc_map,"0x00ffcc";
 	end;
 
 OnTimer15500:
-	mapannounce instance_mapname("6@tower"),"Sabe, eu gosto de ver humanos correndo por a� com medo.",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Sabe, eu gosto de ver humanos correndo por ai com medo.",bc_map,"0x00ffcc";
 	end;
 
 OnTimer20500:
 	set .@map$, instance_mapname("6@tower");
-	mapannounce .@map$,"Vamos ver quem corre mais r�pido. Est�o preparados?",bc_map,"0x00ffcc";
+	mapannounce .@map$,"Vamos ver quem corre mais rapido. Estao preparados?",bc_map,"0x00ffcc";
 	stopnpctimer;
 	areamonster .@map$,151,66,153,106,"Bone Guardian",1152,50,instance_npcname("#1st Beeper")+"::OnMyMobDead";
 	areamonster .@map$,158,66,160,106,"Bone Guardian",1152,50,instance_npcname("#1st Beeper")+"::OnMyMobDead";
@@ -2072,7 +2072,7 @@ OnEnable:
 	end;
 
 OnTimer500:
-	mapannounce instance_mapname("6@tower"),"Bem, acho que elas n�o s�o muito desafiadoras para voc�.",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Bem, acho que elas nao sao muito desafiadoras para voce.",bc_map,"0x00ffcc";
 	end;
 
 OnTimer5500:
@@ -2107,16 +2107,16 @@ OnEnable:
 	end;
 
 OnTimer500:
-	mapannounce instance_mapname("6@tower"),"Sim, isso est� ficando emocionante!",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Sim, isso esta ficando emocionante!",bc_map,"0x00ffcc";
 	end;
 
 OnTimer5500:
-	mapannounce instance_mapname("6@tower"),"Vou lembrar de voc� como um dos poucos que conseguiram me entreter.",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Vou lembrar de voce como um dos poucos que conseguiram me entreter.",bc_map,"0x00ffcc";
 	end;
 
 OnTimer10500:
 	set .@map$, instance_mapname("6@tower");
-	mapannounce .@map$,"Voc� gostaria de jogar mais uma rodada?",bc_map,"0x00ffcc";
+	mapannounce .@map$,"Voce gostaria de jogar mais uma rodada?",bc_map,"0x00ffcc";
 	stopnpctimer;
 	areamonster .@map$,151,66,153,106,"Sword Edge Guardian",1132,20,instance_npcname("#3rd Beeper")+"::OnMyMobDead";
 	areamonster .@map$,158,66,160,106,"Sword Edge Guardian",1132,20,instance_npcname("#3rd Beeper")+"::OnMyMobDead";
@@ -2146,12 +2146,12 @@ OnTimer500:
 	end;
 
 OnTimer5500:
-	mapannounce instance_mapname("6@tower"),"Voc� quer saber quem eu sou?",bc_map,"0x00ffcc";
+	mapannounce instance_mapname("6@tower"),"Voce quer saber quem eu sou?",bc_map,"0x00ffcc";
 	end;
 
 OnTimer10500:
 	set .@map$, instance_mapname("6@tower");
-	mapannounce .@map$,"Voc� logo saber�. O meu � o rosto da morte!",bc_map,"0x00ffcc";
+	mapannounce .@map$,"Voce logo sabera. O meu e o rosto da morte!",bc_map,"0x00ffcc";
 	stopnpctimer;
 	monster .@map$,156,147,"Naght Sieger",1956,1,instance_npcname("#4th Beeper")+"::OnMyMobDead";
 	end;
@@ -2163,31 +2163,31 @@ OnMyMobDead:
 
 6@tower,169,127,2	script	Lost Soul#102	796,{
 	if (checkweight(1201,1) == 0) {
-		mes "Voc� est� carregando itens demais. Por que n�o guarda um pouco e volta depois?";
+		mes "Voce esta carregando itens demais. Por que nao guarda um pouco e volta depois?";
 		close;
 	}
 	mes "[Almas Perdidas]";
-	mes "Foi voc� que nos libertou do malvado Naght Sieger.";
+	mes "Foi voce que nos libertou do malvado Naght Sieger.";
 	next;
 	mes "[Almas Perdidas]";
-	mes "Muito obrigado. Agora podemos escapar deste lugar frio e escuro... para o c�u.";
+	mes "Muito obrigado. Agora podemos escapar deste lugar frio e escuro... para o ceu.";
 	next;
 	if ((countitem(13412) > 0) && (countitem(13413) > 0)) {
 		mes "[Almas Perdidas]";
-		mes "Ei, voc� tem os restos de Naght Sieger com voc�.";
+		mes "Ei, voce tem os restos de Naght Sieger com voce.";
 		next;
 		mes "[Almas Perdidas]";
-		mes "Eles podem parecer espadas de uma m�o, mas posso junt�-las para criar uma de duas m�os, se voc� quiser. � a �nica forma de retribuir por nos libertar.";
+		mes "Eles podem parecer espadas de uma mao, mas posso junta-las para criar uma de duas maos, se voce quiser. E a unica forma de retribuir por nos libertar.";
 		next;
-		switch(select("Criar Espada de Duas M�os.:N�o, obrigado.")) {
+		switch(select("Criar Espada de Duas Maos.:Nao, obrigado.")) {
 		case 1:
 			mes "[Almas Perdidas]";
-			mes "Se ela j� estiver aprimorada ou tiver uma carta, esses efeitos desaparecer�o. Est� bem para voc�?";
+			mes "Se ela ja estiver aprimorada ou tiver uma carta, esses efeitos desaparecerao. Esta bem para voce?";
 			next;
 			switch(select("Tudo bem, por favor crie.:De jeito nenhum!")) {
 			case 1:
 				mes "[Almas Perdidas]";
-				mes "�timo, ent�o vou combinar estas para criar a espada de duas m�os.";
+				mes "Otimo, entao vou combinar estas para criar a espada de duas maos.";
 				next;
 				delitem 13412,1; //Twin_Edge_B
 				delitem 13413,1; //Twin_Edge_R
@@ -2195,14 +2195,14 @@ OnMyMobDead:
 				break;
 			case 2:
 				mes "[Almas Perdidas]";
-				mes "Entendo. Acho que voc� n�o � t�o ganancioso ou ambicioso quanto outros aventureiros.";
+				mes "Entendo. Acho que voce nao e tao ganancioso ou ambicioso quanto outros aventureiros.";
 				next;
 				break;
 			}
 			break;
 		case 2:
 			mes "[Almas Perdidas]";
-			mes "Entendo. Acho que voc� n�o � t�o ganancioso ou ambicioso quanto outros aventureiros.";
+			mes "Entendo. Acho que voce nao e tao ganancioso ou ambicioso quanto outros aventureiros.";
 			next;
 			break;
 		}
@@ -2216,7 +2216,7 @@ OnMyMobDead:
 
 	.@iid = instance_id(IM_PARTY);
 	if (.@iid > 0) {
-		// pega o party_id salvo para essa inst�ncia
+		// pega o party_id salvo para essa instancia
 		.@pid = getd("$etower_pid_by_iid_"+.@iid);
 		// .@partyName$ = party_name(.@iid);
 
@@ -2227,7 +2227,7 @@ OnMyMobDead:
 			setd("$etower_pid_by_iid_"+.@iid, 0);
 		}		
 
-		// Premia��es do Servidor
+		// Premiacoes do Servidor
 		if (#ETOWER_STATUS == 1 || #ETOWER_STATUS == 2) {
 			.@finish_result = callfunc("F_InstanceFinishBase", "Torre Sem Fim", "#ETOWER_STATUS", 30, 3, "#inst60_name$", "#inst60_status", 1, 50, 110002, 3000, 4, 1);
 				if (#torre == 1)
@@ -2236,7 +2236,7 @@ OnMyMobDead:
 		}
 
 		// // anuncia globalmente
-		announce "O jogador "+strcharinfo(0)+" conquistou todos os andares da Torre Sem Fim! Parab�ns!", bc_all, 0xFF0000;
+		announce "O jogador "+strcharinfo(0)+" conquistou todos os andares da Torre Sem Fim! Parabens!", bc_all, 0xFF0000;
 	}	
 
 	warp "prontera",155,184;
@@ -2254,11 +2254,11 @@ OnEnable:
 	end;
 
 OnTimer500:
-	mapannounce instance_mapname("6@tower"),"Isto... Isto n�o pode estar acontecendo! N�o posso ser derrotado!",bc_map,"0xffff00";
+	mapannounce instance_mapname("6@tower"),"Isto... Isto nao pode estar acontecendo! Nao posso ser derrotado!",bc_map,"0xffff00";
 	end;
 
 OnTimer5500:
-	mapannounce instance_mapname("6@tower"),"N���o! Minha alma... Minha casca...! N���o~!",bc_map,"0xffff00";
+	mapannounce instance_mapname("6@tower"),"Nao! Minha alma... Minha casca...! Nao~!",bc_map,"0xffff00";
 	end;
 
 OnTimer10500:

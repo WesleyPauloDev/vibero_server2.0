@@ -63,191 +63,55 @@ L_IcyStormSuit:
 	mes "Posso criar e encantar as armaduras especiais da Deep Biosphere.";
 	next;
 
-	switch (select("Flame/Earth Armor:Ice/Storm Suit:Soul/Purify Robe:Corrupt/Poison Cloth:Cancelar")) {
+	switch (select("Criar armadura:Encantar armadura:Voltar:Cancelar")) {
 	case 1:
-		.@item_id = 450274; // Flame_E_R_Armor
-		.@engraved_id = 450282; // Flame_E_R_Armor2
-		.@enchant_id = 99;
-		setarray .@material[0], 1001306, 1001307, 1001314, 1001315;
-		break;
+		mes "[Administrador Varmundt]";
+		mes "A loja mostra todas as armaduras Deep e suas versoes Engraved.";
+		mes "A versao Engraved consome a armadura base indicada no preco.";
+		close2;
+		callshop "barter_varmundt_deep_armor";
+		end;
 	case 2:
-		.@item_id = 450279; // Ice_S_R_Suits
-		.@engraved_id = 450283; // Ice_S_R_Suits2
-		.@enchant_id = 100;
-		setarray .@material[0], 1001308, 1001309, 1001316, 1001317;
 		break;
 	case 3:
-		.@item_id = 450280; // Soul_P_R_Robe
-		.@engraved_id = 450284; // Soul_P_R_Robe2
-		.@enchant_id = 101;
-		setarray .@material[0], 1001310, 1001311, 1001318, 1001319;
-		break;
-	case 4:
-		.@item_id = 450281; // Corrupt_P_R_Cloth
-		.@engraved_id = 450285; // Corrupt_P_R_Cloth2
-		.@enchant_id = 102;
-		setarray .@material[0], 1001312, 1001313, 1001320, 1001321;
-		break;
+		goto L_Main;
 	default:
 		close;
 	}
 
-	.@price = 5000000;
-	setarray .@amount[0], 100, 100, 50, 50;
+	mes "[Administrador Varmundt]";
+	mes "Escolha o tipo de armadura Deep.";
+	next;
+	switch (select("Flame/Earth Armor:Ice/Storm Suit:Soul/Purify Robe:Corrupt/Poison Cloth:Cancelar")) {
+	case 1:
+		.@item_id = 450274; // Flame_E_R_Armor
+		.@enchant_id = 99;
+		break;
+	case 2:
+		.@item_id = 450279; // Ice_S_R_Suits
+		.@enchant_id = 100;
+		break;
+	case 3:
+		.@item_id = 450280; // Soul_P_R_Robe
+		.@enchant_id = 101;
+		break;
+	case 4:
+		.@item_id = 450281; // Corrupt_P_R_Cloth
+		.@enchant_id = 102;
+		break;
+	default:
+		close;
+	}
 
 	mes "[Administrador Varmundt]";
 	mes "Equipamento selecionado: " + mesitemlink(.@item_id, false) + ".";
 	next;
-	switch (select("Criar armadura:Criar versao Engraved:Encantar armadura:Voltar:Cancelar")) {
-	case 1:
-
-		mes "[Administrador Varmundt]";
-		mes "Para criar a " + mesitemlink(.@item_id, false) + ", preciso de:";
-		mes "- " + .@price + " zeny.";
-		for (.@i = 0; .@i < getarraysize(.@material); .@i++)
-			mes "- " + .@amount[.@i] + "x " + mesitemlink(.@material[.@i], false) + " (voce possui " + countitem(.@material[.@i]) + ").";
-		next;
-		if (select("Criar:Cancelar") == 2)
-			close;
-
-		if (Zeny < .@price) {
-			mes "[Administrador Varmundt]";
-			mes "Zeny insuficiente.";
-			close;
-		}
-
-		for (.@i = 0; .@i < getarraysize(.@material); .@i++) {
-			if (countitem(.@material[.@i]) < .@amount[.@i]) {
-				mes "[Administrador Varmundt]";
-				mes "Material insuficiente: " + .@amount[.@i] + "x " + mesitemlink(.@material[.@i], false) + ".";
-				close;
-			}
-		}
-
-		if (!checkweight(.@item_id, 1)) {
-			mes "[Administrador Varmundt]";
-			mes "Voce nao possui espaco ou capacidade de peso suficiente.";
-			close;
-		}
-
-		Zeny -= .@price;
-		for (.@i = 0; .@i < getarraysize(.@material); .@i++)
-			delitem .@material[.@i], .@amount[.@i];
-		getitem .@item_id, 1;
-
-		mes "[Administrador Varmundt]";
-		mes "Criacao concluida. Voce recebeu " + mesitemlink(.@item_id, false) + ".";
-		close;
-	case 2:
-		callsub L_ReformDeepArmor, .@item_id, .@engraved_id, .@material[0], .@material[1], .@material[2], .@material[3];
-		end;
-	case 3:
-		mes "[Administrador Varmundt]";
-		mes "A interface aceita a armadura selecionada e sua versao Engraved.";
-		mes "Desequipe a armadura antes de continuar.";
-		close2;
-		item_enchant(.@enchant_id);
-		end;
-	case 4:
-		goto L_IcyStormSuit;
-	default:
-		close;
-	}
+	mes "[Administrador Varmundt]";
+	mes "A interface aceita a armadura selecionada e sua versao Engraved.";
+	mes "Desequipe a armadura antes de continuar.";
+	close2;
+	item_enchant(.@enchant_id);
 	end;
-
-L_ReformDeepArmor:
-	.@base_id = getarg(0);
-	.@result_id = getarg(1);
-	setarray .@material[0], getarg(2), getarg(3), getarg(4), getarg(5);
-	setarray .@amount[0], 30, 30, 15, 15;
-
-	getinventorylist;
-	.@found = false;
-	.@equipped = false;
-	.@menu$ = "";
-	.@count = 0;
-
-	for (.@i = 0; .@i < @inventorylist_count; .@i++) {
-		if (@inventorylist_id[.@i] != .@base_id)
-			continue;
-		.@found = true;
-		if (@inventorylist_equip[.@i] != 0) {
-			.@equipped = true;
-			continue;
-		}
-		.@candidate[.@count] = .@i;
-		.@menu$ += getitemname(.@base_id) + " [Refino +" + @inventorylist_refine[.@i] + "]:";
-		.@count++;
-	}
-
-	if (!.@found) {
-		mes "[Administrador Varmundt]";
-		mes "Voce nao possui " + mesitemlink(.@base_id, false) + " no inventario.";
-		close;
-	}
-	if (.@count == 0) {
-		mes "[Administrador Varmundt]";
-		mes "Desequipe a armadura antes de criar a versao Engraved.";
-		close;
-	}
-
-	mes "[Administrador Varmundt]";
-	mes "Escolha a armadura que sera transformada.";
-	next;
-	.@selected = select(.@menu$ + "Cancelar") - 1;
-	if (.@selected == .@count)
-		close;
-
-	.@inv_i = .@candidate[.@selected];
-	.@inv_idx = @inventorylist_idx[.@inv_i];
-	.@identify = @inventorylist_identify[.@inv_i];
-	.@refine = @inventorylist_refine[.@inv_i];
-	.@attribute = @inventorylist_attribute[.@inv_i];
-	.@bound = @inventorylist_bound[.@inv_i];
-	.@grade = @inventorylist_enchantgrade[.@inv_i];
-	setarray .@card[0], @inventorylist_card1[.@inv_i], @inventorylist_card2[.@inv_i], @inventorylist_card3[.@inv_i], @inventorylist_card4[.@inv_i];
-	for (.@i = 0; .@i < 5; .@i++) {
-		.@opt_id[.@i] = getd("@inventorylist_option_id" + (.@i + 1) + "[" + .@inv_i + "]");
-		.@opt_val[.@i] = getd("@inventorylist_option_value" + (.@i + 1) + "[" + .@inv_i + "]");
-		.@opt_param[.@i] = getd("@inventorylist_option_parameter" + (.@i + 1) + "[" + .@inv_i + "]");
-	}
-
-	mes "[Administrador Varmundt]";
-	mes "Resultado: " + mesitemlink(.@result_id, false) + ".";
-	mes "A reforma preserva refino, grade, cartas e encantamentos.";
-	mes "Materiais:";
-	for (.@i = 0; .@i < 4; .@i++)
-		mes "- " + .@amount[.@i] + "x " + mesitemlink(.@material[.@i], false) + " (voce possui " + countitem(.@material[.@i]) + ").";
-	next;
-	if (select("Criar Engraved:Cancelar") == 2)
-		close;
-
-	for (.@i = 0; .@i < 4; .@i++) {
-		if (countitem(.@material[.@i]) < .@amount[.@i]) {
-			mes "[Administrador Varmundt]";
-			mes "Material insuficiente: " + .@amount[.@i] + "x " + mesitemlink(.@material[.@i], false) + ".";
-			close;
-		}
-	}
-	if (!checkweight(.@result_id, 1)) {
-		mes "[Administrador Varmundt]";
-		mes "Voce nao possui capacidade de peso suficiente.";
-		close;
-	}
-
-	for (.@i = 0; .@i < 4; .@i++)
-		delitem .@material[.@i], .@amount[.@i];
-	// O indice individual evita consumir outra armadura com refino ou encantamentos diferentes.
-	delitemidx .@inv_idx, 1;
-	if (.@bound > 0)
-		getitembound4 .@result_id, 1, .@identify, .@refine, .@attribute, .@card[0], .@card[1], .@card[2], .@card[3], .@bound, .@grade, .@opt_id, .@opt_val, .@opt_param;
-	else
-		getitem4 .@result_id, 1, .@identify, .@refine, .@attribute, .@card[0], .@card[1], .@card[2], .@card[3], .@grade, .@opt_id, .@opt_val, .@opt_param;
-
-	mes "[Administrador Varmundt]";
-	mes "Reforma concluida.";
-	mes "Voce recebeu " + mesitemlink(.@result_id, false) + " [Refino +" + .@refine + "].";
-	close;
 
 L_BuyVarmundtSet:
 	mes "[Administrador Varmundt]";
@@ -1555,54 +1419,11 @@ L_Reform:
 	mes "[Administrador Varmundt]";
 	mes "Armadura, bota e capa precisam estar +7 ou mais.";
 	mes "Os aneis precisam estar no inventario e desequipados.";
-	next;
-
-	switch (select(
-		"Fire Rune Equipment:" +
-		"Plain Rune Equipment:" +
-		"Ice Rune Equipment:" +
-		"Death Rune Equipment:" +
-		"Soul Rune Ring:" +
-		"Venom Rune Ring:" +
-		"Temple Rune Ring:" +
-		"Soul Magic Ring:" +
-		"Venom Magic Ring:" +
-		"Temple Magic Ring:" +
-		"Cancelar"
-	)) {
-	case 1:
-		callsub L_ReformRuneManual, 1;
-		end;
-	case 2:
-		callsub L_ReformRuneManual, 2;
-		end;
-	case 3:
-		callsub L_ReformRuneManual, 3;
-		end;
-	case 4:
-		callsub L_ReformRuneManual, 4;
-		end;
-	case 5:
-		callsub L_ReformRingManual, 1;
-		end;
-	case 6:
-		callsub L_ReformRingManual, 2;
-		end;
-	case 7:
-		callsub L_ReformRingManual, 3;
-		end;
-	case 8:
-		callsub L_ReformRingManual, 4;
-		end;
-	case 9:
-		callsub L_ReformRingManual, 5;
-		end;
-	case 10:
-		callsub L_ReformRingManual, 6;
-		end;
-	default:
-		close;
-	}
+	mes "A interface mostra todas as reformas e seus respectivos precos.";
+	mes "O resultado e um item novo e nao preserva refino, cartas ou encantamentos.";
+	close2;
+	callshop "barter_varmundt_reform";
+	end;
 
 L_SetRingReformData:
 	.@type = getarg(0);

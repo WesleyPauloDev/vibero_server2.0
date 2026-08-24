@@ -17,11 +17,11 @@
 		// instance_create("Espaco Infinito");
 		// instance_enter("Espaco Infinito");
 		callfunc("F_InstanceEntry",
-			"Espaco Infinito",        // Nome da inst�ncia
+			"Espaco Infinito",        // Nome da instancia
 			"Explorador Imprudente",                 // Nome do NPC
-			"infinite_space", // Vari�vel de cooldown da conta
-			"InfiniteSpace",        // Vari�vel de status da conta
-			100,                      // Level m�nimo
+			"infinite_space", // Variavel de cooldown da conta
+			"InfiniteSpace",        // Variavel de status da conta
+			100,                      // Level minimo
 			"Espaco Infinito"
 		);
 	end;
@@ -548,7 +548,7 @@ OnUnitSpawn:
 		sleep 10000;
 		while (.@index < getarraysize(.@unit_id)) {
 			if (unitexists('boss_id)) {
-				mapannounce 'map$,"O monstro chefe est� tentando invocar seus aliados.",0xFFFF00;
+				mapannounce 'map$,"O monstro chefe esta tentando invocar seus aliados.",0xFFFF00;
 				getunitdata 'boss_id,.@data;
 				.@x = .@data[UMOB_X];
 				.@y = .@data[UMOB_Y];
@@ -569,15 +569,15 @@ OnMobKill:
 	if (!mobcount('map$,.@event$)) {
 		
 		if ('floor == 50) {
-			mapannounce 'map$,"Explorador Imprudente : Parece que n�o h� outro caminho a partir daqui. � perigoso, ent�o � melhor voc� voltar para fora.",0xFFFF00;
+			mapannounce 'map$,"Explorador Imprudente : Parece que nao ha outro caminho a partir daqui. e perigoso, entao e melhor voce voltar para fora.",0xFFFF00;
 			enablenpc instance_npcname("#w50_ppl");
 		}
 		if ('floor < 50) {
 			if (('floor%10) == 0)
-				mapannounce 'map$,"Explorador Imprudente :  �rea " + 'floor + " limpa. Use a passagem para ir para a pr�xima �rea.",0xFFFF00;
+				mapannounce 'map$,"Explorador Imprudente :  area " + 'floor + " limpa. Use a passagem para ir para a proxima area.",0xFFFF00;
 			else
-				mapannounce 'map$,"Explorador Imprudente : �rea " + 'floor + " limpa. Passe pela passagem para a pr�xima �rea.",0xFFFF00;
-			// Habilitar portal de teletransporte para o pr�ximo andar
+				mapannounce 'map$,"Explorador Imprudente : area " + 'floor + " limpa. Passe pela passagem para a proxima area.",0xFFFF00;
+			// Habilitar portal de teletransporte para o proximo andar
 			sleep 5000;
 			enablenpc instance_npcname("#w" + 'floor);
 			'floor += 1;
@@ -595,12 +595,12 @@ OnPoringKill:
 1@infi,42,8,1	script	#w0_0	4_F_GON,{
 	if (is_party_leader() && !'mode && 'sanity == 0) {
 		mes "[ Explorador Imprudente ]";
-		mes "J� entrei e sa� deste lugar muitas vezes e descobri uma maneira de provocar os monstros daqui. Voc� pode conseguir mais recompensas se lidar com os mais agressivos.";
+		mes "Ja entrei e sai deste lugar muitas vezes e descobri uma maneira de provocar os monstros daqui. Voce pode conseguir mais recompensas se lidar com os mais agressivos.";
 		next;
 		mes "[ Explorador Imprudente ]";
-		mes "O que voc� acha? Gostaria de tentar algo desafiador?";
+		mes "O que voce acha? Gostaria de tentar algo desafiador?";
 		next;
-		if (select("Quero prosseguir normalmente:Quero prosseguir com algo dif�cil") == 1 && 'sanity == 0) {
+		if (select("Quero prosseguir normalmente:Quero prosseguir com algo dificil") == 1 && 'sanity == 0) {
 			'mode = 1;
 			'poring_chance = 1;
 		} else {
@@ -608,24 +608,24 @@ OnPoringKill:
 			'poring_chance = 2;
 		}
 		mes "[ Explorador Imprudente ]";
-		mes "�timo. Vamos agora?";
+		mes "otimo. Vamos agora?";
 		close2;
 		if ('sanity == 0) {
 			'sanity = 1;
 			disablenpc instance_npcname(strnpcinfo(0));
 			hideoffnpc instance_npcname("#w0");
-			npctalk "Explorador Imprudente : Uau~ � muito legal para um lugar submerso, n�o acha?",instance_npcname("#w0");
+			npctalk "Explorador Imprudente : Uau~ e muito legal para um lugar submerso, nao acha?",instance_npcname("#w0");
 			sleep 3000;
-			npctalk "Explorador Imprudente : Eu diria que � um s�tio arqueol�gico antigo, n�o um farol. � t�o bem organizado...",instance_npcname("#w0");
+			npctalk "Explorador Imprudente : Eu diria que e um sitio arqueologico antigo, nao um farol. e tao bem organizado...",instance_npcname("#w0");
 			sleep 3000;
-			npctalk "Explorador Imprudente : Ah, voc� ouviu alguma coisa?",instance_npcname("#w0");
+			npctalk "Explorador Imprudente : Ah, voce ouviu alguma coisa?",instance_npcname("#w0");
 			donpcevent instance_npcname("#inf_space_mobs") + "::OnSummon";
 			sleep 3000;
 			npctalk "Explorador Imprudente : Ah, devem ser os monstros assombrando este lugar.",instance_npcname("#w0");
 			sleep 3000;
-			npctalk "Explorador Imprudente : Elas n�o parecem diferentes das que vimos l� fora, mas posso sentir uma energia muito forte.",instance_npcname("#w0");
+			npctalk "Explorador Imprudente : Elas nao parecem diferentes das que vimos la fora, mas posso sentir uma energia muito forte.",instance_npcname("#w0");
 			sleep 3000;
-			npctalk "Explorador Imprudente : Hum, parece perigoso, ent�o vou voltar. Vou te dar instru��es de cima.",instance_npcname("#w0");
+			npctalk "Explorador Imprudente : Hum, parece perigoso, entao vou voltar. Vou te dar instrucoes de cima.",instance_npcname("#w0");
 			disablenpc instance_npcname("#w0");
 		}
 	}
@@ -638,9 +638,9 @@ OnPoringKill:
 
 1@infi,366,392,4	script	#w50_ppl	4_F_GON,{
 	mes "[ Explorador Imprudente ]";
-	mes "Manterei um registro separado desta expedi��o. Se voc� tiver tido sorte, poder� ter recebido uma recompensa decente pela sua expedi��o.";
+	mes "Manterei um registro separado desta expedicao. Se voce tiver tido sorte, podera ter recebido uma recompensa decente pela sua expedicao.";
 	next;
-	// Premia��es do Servidor
+	// Premiacoes do Servidor
 	if (#InfiniteSpace_STATUS == 1 || #InfiniteSpace_STATUS == 2) {
 		.@finish_result = callfunc("F_InstanceFinishBase", "Espaco Infinito", "#InfiniteSpace_STATUS", 20, 2, "#inst120_name$", "#inst120_status", 1, 20);
 		if (.@finish_result == -1) {
@@ -649,7 +649,7 @@ OnPoringKill:
 		}
 	}
 	mes "[ Explorador Imprudente ]";
-	mes "Ent�o, vamos sair daqui?";
+	mes "Entao, vamos sair daqui?";
 	close2;
 	warp "cmd_fild07",53,270;
 	end;

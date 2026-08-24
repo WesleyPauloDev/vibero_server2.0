@@ -13,6 +13,7 @@
 #include <cmath>
 #include <csetjmp>
 #include <cstdlib> // atoi, strtol, strtoll, exit
+#include <fstream>
 
 #ifdef PCRE_SUPPORT
 #include <pcre.h> // preg_match
@@ -10578,8 +10579,13 @@ BUILDIN_FUNC(end)
 		if (sd->state.callshop == 0){
 			// If a menu/select/prompt is active, close it.
 			clif_scriptclose( *sd, st->oid );
-		}else
-			sd->state.callshop = 0;
+		}else{
+			// Regular NPC shops still need this flag while processing the
+			// remotely opened buy or sell window. Other shop types do not.
+			npc_data* shop_nd = map_id2nd( sd->npc_shopid );
+			if( shop_nd == nullptr || shop_nd->subtype != NPCTYPE_SHOP )
+				sd->state.callshop = 0;
+		}
 	}
 
 	return SCRIPT_CMD_SUCCESS;
@@ -18416,6 +18422,9 @@ BUILDIN_FUNC(callshop)
 	if (nd->subtype == NPCTYPE_SHOP) {
 		// flag the user as using a valid script call for opening the shop (for floating NPCs)
 		sd->state.callshop = 1;
+		// Set this before npc_buysellsel so npc_checknear can recognize that
+		// this specific shop was intentionally opened through callshop.
+		sd->npc_shopid = nd->id;
 
 		switch (flag) {
 			case 1: npc_buysellsel(sd,nd->id,0); break; //Buy window
@@ -19110,6 +19119,125 @@ BUILDIN_FUNC(searchitem)
 	}
 
 	script_pushint64(st, items.size());
+	return SCRIPT_CMD_SUCCESS;
+}
+
+// Returns loaded NPC shops and barters that offer an item. The parallel output
+// arrays contain display name, callable NPC name, source type and map name.
+BUILDIN_FUNC(getitemsource)
+{
+	const t_itemid nameid = static_cast<t_itemid>(script_getnum(st, 2));
+
+	if (!item_db.exists(nameid)) {
+		script_pushint(st, -1);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	map_session_data* sd = nullptr;
+	if (!script_rid2sd(sd)) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	struct script_data* display_data = script_getdata(st, 3);
+	struct script_data* npc_data = script_getdata(st, 4);
+	struct script_data* type_data = script_getdata(st, 5);
+	struct script_data* map_data = script_getdata(st, 6);
+
+	if (!data_isreference(display_data) || !is_string_variable(reference_getname(display_data)) ||
+		!data_isreference(npc_data) || !is_string_variable(reference_getname(npc_data)) ||
+		!data_isreference(type_data) || is_string_variable(reference_getname(type_data)) ||
+		!data_isreference(map_data) || !is_string_variable(reference_getname(map_data))) {
+		ShowError("buildin_getitemsource: Expected string, string, integer and string array references.\n");
+		script_pushint(st, 0);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	const std::vector<s_item_source> sources = npc_get_item_sources(nameid);
+	for (size_t i = 0; i < sources.size(); ++i) {
+		const s_item_source& source = sources[i];
+		const uint32 display_index = reference_getindex(display_data) + static_cast<uint32>(i);
+		const uint32 npc_index = reference_getindex(npc_data) + static_cast<uint32>(i);
+		const uint32 type_index = reference_getindex(type_data) + static_cast<uint32>(i);
+		const uint32 map_index = reference_getindex(map_data) + static_cast<uint32>(i);
+
+		set_reg_str(st, sd, reference_uid(reference_getid(display_data), display_index), reference_getname(display_data), source.display_name.c_str(), reference_getref(display_data));
+		set_reg_str(st, sd, reference_uid(reference_getid(npc_data), npc_index), reference_getname(npc_data), source.npc_name.c_str(), reference_getref(npc_data));
+		set_reg_num(st, sd, reference_uid(reference_getid(type_data), type_index), reference_getname(type_data), source.type, reference_getref(type_data));
+		set_reg_str(st, sd, reference_uid(reference_getid(map_data), map_index), reference_getname(map_data), source.map_name.c_str(), reference_getref(map_data));
+	}
+
+	script_pushint64(st, sources.size());
+	return SCRIPT_CMD_SUCCESS;
+}
+
+// Reads identifiedDisplayName values from a text Lua/LUB itemInfo table.
+// The original bytes are preserved so the name uses the client's encoding.
+BUILDIN_FUNC(getitemclientname)
+{
+	const t_itemid nameid = static_cast<t_itemid>(script_getnum(st, 2));
+	const std::string path = script_getstr(st, 3);
+
+	struct s_client_item_name_cache {
+		bool loaded = false;
+		std::unordered_map<t_itemid, std::string> names;
+	};
+	static std::unordered_map<std::string, s_client_item_name_cache> caches;
+	s_client_item_name_cache& cache = caches[path];
+
+	if (!cache.loaded) {
+		cache.loaded = true;
+		std::ifstream input(path, std::ios::binary);
+		if (!input.is_open()) {
+			ShowWarning("buildin_getitemclientname: Could not open client itemInfo file '%s'.\n", path.c_str());
+		} else {
+			std::string line;
+			t_itemid current_id = 0;
+			bool inside_item = false;
+
+			while (std::getline(input, line)) {
+				uint32 parsed_id = 0;
+				if (sscanf(line.c_str(), " [%u] = {", &parsed_id) == 1) {
+					current_id = static_cast<t_itemid>(parsed_id);
+					inside_item = true;
+					continue;
+				}
+				if (!inside_item)
+					continue;
+
+				const std::string key = "identifiedDisplayName";
+				const size_t key_position = line.find_first_not_of(" \t");
+				if (key_position == std::string::npos || line.compare(key_position, key.length(), key) != 0)
+					continue;
+
+				const size_t quote = line.find('"', key_position + key.length());
+				if (quote == std::string::npos)
+					continue;
+
+				std::string value;
+				for (size_t i = quote + 1; i < line.length(); ++i) {
+					const char character = line[i];
+					if (character == '"')
+						break;
+					if (character == '\\' && i + 1 < line.length()) {
+						value += line[++i];
+						continue;
+					}
+					value += character;
+				}
+
+				if (!value.empty())
+					cache.names[current_id] = std::move(value);
+				inside_item = false;
+			}
+		}
+	}
+
+	const auto name = cache.names.find(nameid);
+	if (name == cache.names.end())
+		script_pushconststr(st, "");
+	else
+		script_pushstrcopy(st, name->second.c_str());
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -28942,6 +29070,8 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(delwall,"s"),
 	BUILDIN_DEF(checkwall,"s"),
 	BUILDIN_DEF(searchitem,"rs"),
+	BUILDIN_DEF(getitemsource,"irrrr"),
+	BUILDIN_DEF(getitemclientname,"is"),
 	BUILDIN_DEF(mercenary_create,"ii"),
 	BUILDIN_DEF(mercenary_delete,"??"),
 	BUILDIN_DEF(mercenary_heal,"ii"),

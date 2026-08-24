@@ -23,11 +23,11 @@
 		// instance_create("Lago Bakonawa");
 		// instance_enter("Lago Bakonawa");
 		callfunc("F_InstanceEntry",
-			"Lago Bakonawa",        // Nome da inst�ncia
+			"Lago Bakonawa",        // Nome da instancia
 			"Taho",                 // Nome do NPC
-			"BakonawaLake", // Vari�vel de cooldown da conta
-			"BakonawaLake",        // Vari�vel de status da conta
-			120,                      // Level m�nimo
+			"BakonawaLake", // Variavel de cooldown da conta
+			"BakonawaLake",        // Variavel de status da conta
+			120,                      // Level minimo
 			"Lago Bakonawa"
 		);
 	end;
@@ -138,38 +138,38 @@ sec_in02,26,26,4	script	Bakonawa's Rage	541,{
 	close;
 }
 // =======================================================
-// Inst�ncia: Bakonawa
+// Instancia: Bakonawa
 // =======================================================
 
 1@ma_b,62,52,4	script	Taho#nf	541,{
 	mes "[Taho]";
-	mes "Heehee, eu at� poderia participar da ca�ada ao Bakonawa, mas prefiro me esconder atr�s daquela rocha e torcer por voc�s.";
+	mes "Heehee, eu ate poderia participar da cacada ao Bakonawa, mas prefiro me esconder atres daquela rocha e torcer por voces.";
 	next;
 	mes "[Taho]";
-	mes "Em certo momento, Bakonawa se tornar� invenc�vel. Quando isso acontecer, ou�am atentamente as minhas instru��es. Confiem em mim que tudo dar� certo.";
+	mes "Em certo momento, Bakonawa se tornara invencivel. Quando isso acontecer, oucam atentamente as minhas instrucoes. Confiem em mim que tudo dara certo.";
 	next;
 	if (is_party_leader() == true) {
 		mes "[Taho]";
 		mes "Agora farei o Bakonawa emergir do lago.";
 		next;
-		switch(select("Espere! Ainda n�o estou pronto!:Vamos come�ar!")) {
+		switch(select("Espere! Ainda nao estou pronto!:Vamos comecar!")) {
 		case 1:
 			mes "[Taho]";
 			mes "Ah... tudo bem... me avise quando estiver pronto.";
 			close;
 		case 2:
 			mes "[Taho]";
-			mes "Ent�o deixarei cair uma gota de Albopal neste lago.";
+			mes "Entao deixarei cair uma gota de Albopal neste lago.";
 			next;
 			mes "[Taho]";
-			mes "Assim que Bakonawa provar disso, ele vir� � tona...";
+			mes "Assim que Bakonawa provar disso, ele vira e tona...";
 			donpcevent instance_npcname("#Bakonawan1")+"::OnStart";
 			disablenpc instance_npcname("Taho#nf");
 			close;
 		}
 	} else {
 		mes "[Taho]";
-		mes "Estou jogando Albopal para irritar Bakonawa. Ele pode ser uma boa fonte de prote�na quando o pegarmos.";
+		mes "Estou jogando Albopal para irritar Bakonawa. Ele pode ser uma boa fonte de proteina quando o pegarmos.";
 		close;
 	}
 }
@@ -182,7 +182,7 @@ OnInstanceInit:
 OnStart:
 	enablenpc instance_npcname("#Bakonawan1");
 	set .@map$, instance_mapname("1@ma_b");
-	mapannounce .@map$,"Taho: Consigo v�-lo na superf�cie! ATAQUEM!!!",bc_map,"0x00ffff";
+	mapannounce .@map$,"Taho: Consigo ve-lo na superficie! ATAQUEM!!!",bc_map,"0x00ffff";
 	monster .@map$,78,83,"Bakonawa",2320,1,instance_npcname("#Bakonawan1")+"::OnMyMobDead";
 	initnpctimer;
 	end;
@@ -272,16 +272,16 @@ OnStart:
 	initnpctimer;
 	end;
 OnTimer100:
-	mapannounce instance_mapname("1@ma_b"),"Taho: Bom trabalho! Bakonawa se escondeu debaixo d��gua. Agora ele tentar� engolir a lua!",bc_map,"0x00ffff";
+	mapannounce instance_mapname("1@ma_b"),"Taho: Bom trabalho! Bakonawa se escondeu debaixo dagua. Agora ele tentara engolir a lua!",bc_map,"0x00ffff";
 	end;
 OnTimer5000:
-	mapannounce instance_mapname("1@ma_b"),"Taho: Precisamos fazer barulhos altos com os caldeir�es e tambores para que ele n�o consiga se concentrar!",bc_map,"0x00ffff";
+	mapannounce instance_mapname("1@ma_b"),"Taho: Precisamos fazer barulhos altos com os caldeiroes e tambores para que ele nao consiga se concentrar!",bc_map,"0x00ffff";
 	end;
 OnTimer10000:
-	mapannounce instance_mapname("1@ma_b"),"Taho: N�o o ataquem, mesmo que apare�a na superf�cie! Apenas fa�am muito barulho!",bc_map,"0x00ffff";
+	mapannounce instance_mapname("1@ma_b"),"Taho: Nao o ataquem, mesmo que apareca na superficie! Apenas facam muito barulho!",bc_map,"0x00ffff";
 	end;
 OnTimer15000:
-	mapannounce instance_mapname("1@ma_b"),"Miss�o - Destrua 2 caldeir�es e 2 tambores nos lados esquerdo e direito do lago.",bc_map,"0xff3300";
+	mapannounce instance_mapname("1@ma_b"),"Missao - Destrua 2 caldeiroes e 2 tambores nos lados esquerdo e direito do lago.",bc_map,"0xff3300";
 	donpcevent instance_npcname("#Bakonawan2")+"::OnStart";
 	stopnpctimer;
 	disablenpc instance_npcname("#BakonawaDeadn1");
@@ -297,8 +297,8 @@ OnStart:
 	enablenpc instance_npcname("#Bakonawan2");
 	set .@label$, instance_npcname("#Bakonawan2")+"::OnMyMobDead";
 	set .@map$, instance_mapname("1@ma_b");
-	monster .@map$,95,98,"Caldeir�o",2328,1,.@label$;
-	monster .@map$,60,98,"Caldeir�o",2328,1,.@label$;
+	monster .@map$,95,98,"Caldeirao",2328,1,.@label$;
+	monster .@map$,60,98,"Caldeirao",2328,1,.@label$;
 	monster .@map$,97,104,"Tambor",2328,1,.@label$;
 	monster .@map$,58,104,"Tambor",2328,1,.@label$;
 	donpcevent instance_npcname("#Bakonawan2-1")+"::OnStart";
@@ -344,7 +344,7 @@ OnAnnounce:
 }
 
 // =======================================================
-// Inst�ncia: Bakonawa - Parte 2 
+// Instancia: Bakonawa - Parte 2 
 // =======================================================
 
 1@ma_b,36,111,4	script	#Bakonawan2-1	844,{
@@ -365,13 +365,13 @@ OnEnd:
 	initnpctimer;
 	end;
 OnTimer1000:
-	mapannounce instance_mapname("1@ma_b"),"Taho: Ele voltou para o lago novamente. Ser� que acabou?",bc_map,"0x00ffff";
+	mapannounce instance_mapname("1@ma_b"),"Taho: Ele voltou para o lago novamente. Sera que acabou?",bc_map,"0x00ffff";
 	end;
 OnTimer5000:
-	mapannounce instance_mapname("1@ma_b"),"Taho: ESPERE! Algo est� subindo rapidamente da �gua! Ba... Bakonawa est� voltando!!",bc_map,"0x00ffff";
+	mapannounce instance_mapname("1@ma_b"),"Taho: ESPERE! Algo esta subindo rapidamente da agua! Ba... Bakonawa esta voltando!!",bc_map,"0x00ffff";
 	end;
 OnTimer10000:
-	mapannounce instance_mapname("1@ma_b"),"Miss�o - Derrote o Bakonawa, que agora est� ainda mais feroz.",bc_map,"0xff3300";
+	mapannounce instance_mapname("1@ma_b"),"Missao - Derrote o Bakonawa, que agora esta ainda mais feroz.",bc_map,"0xff3300";
 	donpcevent instance_npcname("#Bakonawan3")+"::OnStart";
 	stopnpctimer;
 	disablenpc instance_npcname("#Bakonawan2-1");
@@ -486,7 +486,7 @@ OnMobSpawn:
 
 1@ma_b,62,52,4	script	Taho#Completed	541,{
 
-	// Premia��es do Servidor
+	// Premiacoes do Servidor
 	if (#BakonawaLake_STATUS == 1 || #BakonawaLake_STATUS == 2) {
 		.@finish_result = callfunc("F_InstanceFinishBase", "Lago Bakonawa", "#BakonawaLake_STATUS", 10, 2, "#inst120_name$", "#inst120_status");
 		if (.@finish_result == -1) {
@@ -497,17 +497,17 @@ OnMobSpawn:
 	
 	disable_items;
 	if (checkweight(1201,1) == 0) {
-		mes "Parece que voc� est� carregando muitos tipos diferentes de itens. Tente novamente ap�s liberar espa�o.";
+		mes "Parece que voce esta carregando muitos tipos diferentes de itens. Tente novamente apos liberar espaco.";
 		close;
 	}
 	if (MaxWeight - Weight < 10000) {
-		mes "Voc� est� muito sobrecarregado. Tente novamente ap�s reduzir o peso.";
+		mes "Voce esta muito sobrecarregado. Tente novamente apos reduzir o peso.";
 		close;
 	}
 	if (checkquest(12279,HUNTING) == 2) {
 		erasequest 12279;
 		mes "[Taho]";
-		mes "Isto foi encontrado no corpo de Bakonawa. Acho melhor voc� ficar com isto.";
+		mes "Isto foi encontrado no corpo de Bakonawa. Acho melhor voce ficar com isto.";
 		if (!VIP_SCRIPT || vip_status(VIP_STATUS_ACTIVE))
 			getitem 6499,7; // Rancor Antigo
 		else
@@ -516,7 +516,7 @@ OnMobSpawn:
 		next;
 	}
 	mes "[Taho]";
-	mes "Melhor irmos embora logo. Este lugar ainda � perigoso, mesmo sem o Bakonawa...";
+	mes "Melhor irmos embora logo. Este lugar ainda e perigoso, mesmo sem o Bakonawa...";
 	next;
 	mes "[Taho]";
 	mes "Vamos usar a corda para subir!";
@@ -531,30 +531,30 @@ OnStart:
 	initnpctimer;
 	end;
 OnTimer1000:
-	monster instance_mapname("1@ma_b"),78,74,"Ba� do Tesouro de Bakonawa",2335,1;
+	monster instance_mapname("1@ma_b"),78,74,"Bau do Tesouro de Bakonawa",2335,1;
 	end;
 OnTimer10000:
-	mapannounce instance_mapname("1@ma_b"),"Taho: Ap�s abrir o ba�, venha me ver no topo da colina. Tenho algo para te entregar.",bc_map,"0x00ffff";
+	mapannounce instance_mapname("1@ma_b"),"Taho: Apos abrir o bau, venha me ver no topo da colina. Tenho algo para te entregar.",bc_map,"0x00ffff";
 	stopnpctimer;
 	end;
 }
 
 1@ma_b,62,52,4	script	Taho#Fail	541,{
 	mes "[Taho]";
-	mes "HMM. Quase conseguimos, mas ele � uma criatura muito r�pida...";
+	mes "HMM. Quase conseguimos, mas ele e uma criatura muito rapida...";
 	next;
 	if (is_party_leader() == true) {
 		mes "[Taho]";
 		mes "Vamos tentar novamente?";
 		next;
-		switch(select("Espere um pouco!:Claro! N�o podemos desistir agora!")) {
+		switch(select("Espere um pouco!:Claro! Nao podemos desistir agora!")) {
 		case 1:
 			mes "[Taho]";
 			mes "Ah... Eu quase o trouxe de volta.";
 			close;
 		case 2:
 			mes "[Taho]";
-			mes "Ent�o usarei novamente o Albopal no lago.";
+			mes "Entao usarei novamente o Albopal no lago.";
 			next;
 			mes "[Taho]";
 			mes "Preparem-se, pois veremos Bakonawa ainda mais furioso...";

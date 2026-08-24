@@ -11254,7 +11254,7 @@ static bool status_change_start_post_delay(block_list* src, block_list* bl, sc_t
 			val2 = 30; // Speed and ASPD penalty
 			break;
 		case SC_RICHMANKIM:
-			val2 = 10 + 10 * val1; // Exp increase bonus
+			val2 = 8 * val1; // Exp increase bonus (8% per level, 40% at level 5)
 			break;
 		case SC_DRUMBATTLE:
 			val2 = 15 + val1 * 5; // Atk increase

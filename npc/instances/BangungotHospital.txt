@@ -2,15 +2,15 @@
 //= Hospital Bangungot
 //===== Description: =========================================
 //= [Official Conversion + Custom Entry]
-//= Inst�ncia Bangungot Hospital 2F adaptada ao padr�o custom
+//= Instancia Bangungot Hospital 2F adaptada ao padrao custom
 //= do servidor, com entrada via `F_InstanceEntry`.
 //===== Changelogs: ==========================================
-//= 1.0 Convers�o oficial base. [Euphy]
-//= 1.1 Ajustes e corre��es. [Capuche]
-//= 1.2 Integra��o ao sistema custom de inst�ncias. [Codex]
+//= 1.0 Conversao oficial base. [Euphy]
+//= 1.1 Ajustes e correcoes. [Capuche]
+//= 1.2 Integracao ao sistema custom de instancias. [Codex]
 //============================================================
 
-// Inst�ncia
+// Instancia
 -	script	BangungotHospital_Instance#Custom	4_F_NURSE,{
 	if (!attachrid(#INSTANCERID)) end;
 	#INSTANCERID = 0;
@@ -19,9 +19,9 @@ OnStartInstance:
 		callfunc("F_InstanceEntry",
 			"Bangungot Hospital 2F",      // Nome exato do DB
 			"Enfermeira Maenne",          // Nome do NPC
-			"BangungotHospital",          // Vari�vel de cooldown
-			"BangungotHospital",          // Vari�vel de status
-			110,                           // Level m�nimo
+			"BangungotHospital",          // Variavel de cooldown
+			"BangungotHospital",          // Variavel de status
+			110,                           // Level minimo
 			"Hospital Abandonado"
 		);
 	end;
@@ -47,7 +47,7 @@ OnTimer1000:
 	if (mobcount('map_name$,instance_npcname("#Memorial Start") + "::OnMyMobDead") < 1) {
 		donpcevent instance_npcname("#Ward1 Entry") + "::OnEnable1";
 		donpcevent instance_npcname("#Memorial Start_time") + "::OnDisable";
-		mapannounce 'map_name$, "Bangungot: � aqui que o seu PESADELO come�a...",bc_map,"0xFF82FF";
+		mapannounce 'map_name$, "Bangungot: E aqui que o seu PESADELO comeca...",bc_map,"0xFF82FF";
 		disablenpc instance_npcname("#Memorial Start");
 	}
 	stopnpctimer;
@@ -64,7 +64,7 @@ OnDisable:
 	stopnpctimer;
 	end;
 OnTimer5000:
-	mapannounce 'map_name$, "Bangungot: Voc� n�o pode ajudar ningu�m... n�o pode me derrotar.",bc_map,"0xFF82FF";
+	mapannounce 'map_name$, "Bangungot: Voce nao pode ajudar ninguem... nao pode me derrotar.",bc_map,"0xFF82FF";
 	end;
 OnTimer10000:
 	mapannounce 'map_name$, "Bangungot: HAHAHAHAHAHAHAHA!!!!",bc_map,"0xFF82FF";
@@ -128,8 +128,8 @@ OnTimer1000:
 		specialeffect EF_BAT2;
 		donpcevent instance_npcname(strnpcinfo(0)) + "::OnEnable3";
 		switch(atoi(charat(strnpcinfo(2),4))) {
-			case 1: .@string$ = "Bangungot: Eu vou fazer voc�s sentirem dor e agonia de verdade..."; break;
-			case 2: .@string$ = "Bangungot: Esp�ritos doentes s�o a fonte da minha energia... e da minha vida..."; break;
+			case 1: .@string$ = "Bangungot: Eu vou fazer voces sentirem dor e agonia de verdade..."; break;
+			case 2: .@string$ = "Bangungot: Espiritos doentes sao a fonte da minha energia... e da minha vida..."; break;
 			case 3: .@string$ = "Bangungot: Gritem mais... e mais... deixem a dor crescer..."; break;
 			case 4: .@string$ = "Bangungot: Afundem cada vez mais no sofrimento..."; break;
 			case 5: .@string$ = "Bangungot: Tremam de horror... fiquem petrificados."; break;
@@ -173,7 +173,7 @@ OnTimer3000:
 	if (mobcount('map_name$,instance_npcname("#Ward6 Entry") + "::OnMyMobDead") < 1) {
 		specialeffect EF_BAT2;
 		donpcevent instance_npcname("#Summon Boss") + "::OnEnable";
-		mapannounce 'map_name$, "Bangungot: Voc� teve a escolha de entrar aqui, mas n�o ter� a liberdade de sair quando quiser...",bc_map,"0xFF82FF";
+		mapannounce 'map_name$, "Bangungot: Voce teve a escolha de entrar aqui, mas nao tera a liberdade de sair quando quiser...",bc_map,"0xFF82FF";
 	}
 	stopnpctimer;
 	end;
@@ -196,7 +196,7 @@ OnMyMobDead:
 OnTimer1000:
 	if (mobcount('map_name$,instance_npcname("#Summon Boss") + "::OnMyMobDead") < 1) {
 		donpcevent instance_npcname("#Summon Pillar") + "::OnEnable1";
-		mapannounce 'map_name$, "Bangungot: Eu... n�o posso... acabar... assim...",bc_map,"0xFF82FF";
+		mapannounce 'map_name$, "Bangungot: Eu... nao posso... acabar... assim...",bc_map,"0xFF82FF";
 		disablenpc instance_npcname("#Summon Boss");
 	}
 	stopnpctimer;
@@ -229,7 +229,7 @@ OnMyMobDead:
 	end;
 OnTimer1000:
 	if (mobcount('map_name$,instance_npcname("#Boss Room Entry") + "::OnMyMobDead") < 1)
-		mapannounce 'map_name$, "Bangungot: HAHAHAH... Isso n�o basta, eu ficarei ainda mais forte...",bc_map,"0xFF82FF";
+		mapannounce 'map_name$, "Bangungot: HAHAHAH... Isso nao basta, eu ficarei ainda mais forte...",bc_map,"0xFF82FF";
 	stopnpctimer;
 	end;
 
@@ -264,24 +264,24 @@ OnInstanceInit:
 1@ma_h,147,143,0	script	#Boss Room Entry_time	HIDDEN_WARP_NPC,{ //10,10
 	end;
 OnEnable:
-	mapannounce 'map_name$, "Bangungot: Pobres miser�veis... vou convid�-los ao mundo das doen�as infecciosas...",bc_map,"0xFF82FF";
+	mapannounce 'map_name$, "Bangungot: Pobres miseraveis... vou convida-los ao mundo das doencas infecciosas...",bc_map,"0xFF82FF";
 	initnpctimer;
 	end;
 OnTimer25000:
-	mapannounce 'map_name$, "Bangungot: Voc�s v�o descobrir o que isso significa...",bc_map,"0xFF82FF";
+	mapannounce 'map_name$, "Bangungot: Voces vao descobrir o que isso significa...",bc_map,"0xFF82FF";
 	for ( .@i = 10; .@i <= 22; ++.@i )
 		disablenpc instance_npcname("#Patternwarp" + .@i);
 	end;
 OnTimer35000:
-	mapannounce 'map_name$, "Bangungot: Dor verdadeira! Voc�s v�o conhecer!!",bc_map,"0xFF82FF";
+	mapannounce 'map_name$, "Bangungot: Dor verdadeira! Voces vao conhecer!!",bc_map,"0xFF82FF";
 	for ( .@i = 25; .@i <= 33; ++.@i )
 		disablenpc instance_npcname("#Patternwarp" + .@i);
 	end;
 OnTimer45000:
-	mapannounce 'map_name$, "Bangungot: Voc�s j� ouviram os gritos dos pacientes?",bc_map,"0xFF82FF";
+	mapannounce 'map_name$, "Bangungot: Voces ja ouviram os gritos dos pacientes?",bc_map,"0xFF82FF";
 	end;
 OnTimer55000:
-	mapannounce 'map_name$, "Bangungot: Se ainda n�o ouviram, eu farei isso acontecer!!",bc_map,"0xFF82FF";
+	mapannounce 'map_name$, "Bangungot: Se ainda nao ouviram, eu farei isso acontecer!!",bc_map,"0xFF82FF";
 	enablenpc instance_npcname("#Summon Ward Mob");
 	donpcevent instance_npcname("#Summon Ward Mob") + "::OnEnable7";
 	end;
@@ -296,11 +296,11 @@ OnTimer60500:
 		enablenpc instance_npcname("#Patternwarp" + .@i);
 	end;
 OnTimer90000:
-	mapannounce 'map_name$, "Bangungot: O deleite nascido da agonia � o meu alimento.",bc_map,"0xFF82FF";
+	mapannounce 'map_name$, "Bangungot: O deleite nascido da agonia e o meu alimento.",bc_map,"0xFF82FF";
 	donpcevent instance_npcname("#Boss Room Entry") + "::OnSpawn";
 	end;
 OnTimer110000:
-	mapannounce 'map_name$, "Bangungot: Permane�am aqui, doen�a maldita...",bc_map,"0xFF82FF";
+	mapannounce 'map_name$, "Bangungot: Permanecam aqui, doenca maldita...",bc_map,"0xFF82FF";
 	donpcevent instance_npcname("#Boss Room Entry") + "::OnSpawn";
 	end;
 OnTimer125000:
@@ -340,11 +340,11 @@ OnInstanceInit:
 1@ma_h,111,177,0	script	#Boss Room Entry_2	WARPNPC,{
 	end;
 OnEnable:
-	mapannounce 'map_name$, "Bangungot: Voc�s s�o bem poderosos...",bc_map,"0xFF82FF";
+	mapannounce 'map_name$, "Bangungot: Voces sao bem poderosos...",bc_map,"0xFF82FF";
 	initnpctimer;
 	end;
 OnTimer3000:
-	mapannounce 'map_name$, "Bangungot: Mas ser� que conseguem...",bc_map,"0xFF82FF";
+	mapannounce 'map_name$, "Bangungot: Mas sera que conseguem...",bc_map,"0xFF82FF";
 	end;
 OnTimer6000:
 	mapannounce 'map_name$, "Bangungot: ...me derrotar outra vez...?",bc_map,"0xFF82FF";
@@ -473,13 +473,13 @@ OnEnable:
 	disablenpc instance_npcname("#Summon Ward Mob");
 	end;
 OnTimer2000:
-	mapannounce 'map_name$, "Bangungot: Meu esp�rito habitar� seus corpos amaldi�oados...",bc_map,"0xFF82FF";
+	mapannounce 'map_name$, "Bangungot: Meu espirito habitara seus corpos amaldicoados...",bc_map,"0xFF82FF";
 	end;
 OnTimer4000:
-	mapannounce 'map_name$, "Bangungot: Meus servos...!! V�o!! Atormentem os pacientes nas enfermarias!!",bc_map,"0xFF82FF";
+	mapannounce 'map_name$, "Bangungot: Meus servos...!! Vao!! Atormentem os pacientes nas enfermarias!!",bc_map,"0xFF82FF";
 	end;
 OnTimer6000:
-	mapannounce 'map_name$, "- Os servos de Bangungot est�o atacando os pacientes!! Se voc� n�o derrotar todos, Bangungot ficar� mais forte. -",bc_map,"0xFF8200";
+	mapannounce 'map_name$, "- Os servos de Bangungot estao atacando os pacientes!! Se voce nao derrotar todos, Bangungot ficara mais forte. -",bc_map,"0xFF8200";
 	end;
 OnTimer10000:
 	setarray .@npc$[1],
@@ -522,8 +522,8 @@ OnTimer1000:
 		donpcevent instance_npcname("#Summon Pillar_time") + "::OnStopTimer";
 		donpcevent instance_npcname("#Summon Pillar") + "::OnEnable3";
 		donpcevent instance_npcname("#Boss Room Entry") + "::OnReset";
-		mapannounce 'map_name$, "Bangungot: Oh... n�o posso acreditar que perdi...",bc_map,"0xFF4500";
-		mapannounce 'map_name$, "Bangungot: Mas n�o pense que este � o fim!!",bc_map,"0xFF4500";
+		mapannounce 'map_name$, "Bangungot: Oh... nao posso acreditar que perdi...",bc_map,"0xFF4500";
+		mapannounce 'map_name$, "Bangungot: Mas nao pense que este e o fim!!",bc_map,"0xFF4500";
 		mapannounce 'map_name$, "Bangungot: EU VOU VOLTAR!!!!!",bc_map,"0xFF4500";
 	}
 	stopnpctimer;
@@ -542,7 +542,7 @@ OnStopTimer:
 	stopnpctimer;
 	end;
 OnTimer1000:
-	mapannounce 'map_name$, "- O Pilar Espiritual de Bangungot est� curando o chefe. Se voc� n�o o destruir agora, ele ir� se recuperar por completo!! -",bc_map,"0xFF8200";
+	mapannounce 'map_name$, "- O Pilar Espiritual de Bangungot esta curando o chefe. Se voce nao o destruir agora, ele ira se recuperar por completo!! -",bc_map,"0xFF8200";
 	specialeffect EF_MAPPILLAR2,AREA,instance_npcname("#Dummy_Patternwarp45");
 	end;
 OnTimer7000:
@@ -554,7 +554,7 @@ OnTimer14000:
 	specialeffect EF_MAPPILLAR2,AREA,instance_npcname("#Dummy_Patternwarp45");
 	end;
 OnTimer21000:
-	mapannounce 'map_name$, "Bangungot: Eu n�o posso morrer assim...!!!!",bc_map,"0xFF82FF";
+	mapannounce 'map_name$, "Bangungot: Eu nao posso morrer assim...!!!!",bc_map,"0xFF82FF";
 	specialeffect EF_MAPPILLAR2,AREA,instance_npcname("#Dummy_Patternwarp45");
 	end;
 OnTimer50000:
@@ -639,7 +639,7 @@ OnInstanceInit:
 OnEnable:
 	switch(atoi(strnpcinfo(2))) {
 		case 2: .@str$ = "Paciente Gritando: Aaaaargh!!"; break;
-		case 3: .@str$ = "Paciente com Dor: Oooooowwww!! Isso est� me matando!!!"; break;
+		case 3: .@str$ = "Paciente com Dor: Oooooowwww!! Isso esta me matando!!!"; break;
 		case 4: .@str$ = "Paciente Desmaiado: ........"; break;
 		case 5: .@str$ = "Paciente em Pesadelo: Socorro~!!! Me ajude!!!"; break;
 		case 6: .@str$ = "Paciente Enfraquecido: Hu..a...aaah.."; break;
@@ -699,14 +699,14 @@ OnTimer30000:
 //============================================================
 1@ma_h,35,156,0	script	#Boss Room Exit	4_F_NURSE,{
 	mes "[Enfermeira Maenne]";
-	mes "Voc� conseguiu expulsar Bangungot do hospital por enquanto.";
+	mes "Voce conseguiu expulsar Bangungot do hospital por enquanto.";
 	next;
 	mes "[Enfermeira Maenne]";
-	mes "Ainda sinto uma presen�a pesada neste lugar, mas sem voc� a situa��o teria sido muito pior.";
+	mes "Ainda sinto uma presenca pesada neste lugar, mas sem voce a situacao teria sido muito pior.";
 	next;
 	if (#BangungotHospital_STATUS == 1 || #BangungotHospital_STATUS == 2) {
 		mes "[Enfermeira Maenne]";
-		mes "Aceite esta recompensa pelo seu esfor�o.";
+		mes "Aceite esta recompensa pelo seu esforco.";
 		getexp 500000,0;
 		if (VIP_SCRIPT == 0 || vip_status(VIP_STATUS_ACTIVE))
 			getitem 6499,7;	// Ancient_Grudge

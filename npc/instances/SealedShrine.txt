@@ -38,9 +38,9 @@
 		callfunc("F_InstanceEntry",
 			"Altar do Selo",        // Nome da inst?ncia
 			"Friar Patrick",                 // Nome do NPC
-			"santuario_selado", // Vari�vel de cooldown da conta
-			"SANTUARIOSELADO",        // Vari�vel de status da conta
-			75,                       // Level m�nimo
+			"santuario_selado", // Variavel de cooldown da conta
+			"SANTUARIOSELADO",        // Variavel de status da conta
+			75,                       // Level minimo
 			"Altar do Selo"
 		);
 	end;
@@ -447,7 +447,7 @@
 //============================================================
 1@cata,1,2,0	script	ins_baphomet_lotto	-1,{
 OnInstanceInit:
-	// Escolhe uma "l�pide verdadeira" e 12 "l�pides falsas".
+	// Escolhe uma "lapide verdadeira" e 12 "lapides falsas".
 	set .@true, 1;
 	for(set .@i,1; .@i<=13; set .@i,.@i+1) {
 		disablenpc instance_npcname("Gravestone#1F_"+.@i+((.@i == .@true)?"T":"F"));
@@ -480,21 +480,21 @@ OnEnable:
 OnEnable:
 	set .@label$, instance_npcname("ins_baphomet_lotto3")+"::OnMyMobDead";
 	set .@map$, instance_mapname("1@cata");
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1869,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1291,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1869,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1291,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1869,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1291,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1869,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1132,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1117,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1132,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1117,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1132,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1291,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1117,1,.@label$;
-	monster .@map$,0,0,"Ap�stolo de Bafom�",1869,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1869,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1291,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1869,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1291,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1869,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1291,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1869,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1132,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1117,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1132,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1117,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1132,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1291,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1117,1,.@label$;
+	monster .@map$,0,0,"Apostolo de Bafome",1869,1,.@label$;
 	end;
 
 OnDisable:
@@ -504,9 +504,9 @@ OnDisable:
 OnMyMobDead:
 	set .@map$, instance_mapname("1@cata");
 	if (mobcount(.@map$,instance_npcname("ins_baphomet_lotto3")+"::OnMyMobDead") < 1) {
-		mapannounce .@map$, "Todos os Ap�stolos de Bafom� foram derrotados!",bc_map,"0x00ff99";
+		mapannounce .@map$, "Todos os Apostolos de Bafome foram derrotados!",bc_map,"0x00ff99";
 	}
-	getitem 6002,1; //Token do Ap�stolo
+	getitem 6002,1; //Token do Apostolo
 	end;
 }
 
@@ -515,42 +515,42 @@ OnMyMobDead:
 1@cata,141,221,0	script	Gravestone#	844,3,3,{
 	set .@party_id,getcharid(1);
 	if ('ins_baphomet == 0) {
-		mes "A l�pide est� tremendo...";
+		mes "A lapide esta tremendo...";
 		next;
-		mes "Ao tocar na l�pide, ou�o uma voz.";
+		mes "Ao tocar na lapide, ouco uma voz.";
 		next;
 		specialeffect2 EF_CONE;
-		mes "[Voz da L�pide]";
-		mes "Esperei e esperei por um aventureiro corajoso como voc� que voltaria aqui novamente...";
+		mes "[Voz da Lapide]";
+		mes "Esperei e esperei por um aventureiro corajoso como voce que voltaria aqui novamente...";
 		next;
 		while(1) {
-			switch(select("Quem � voc�?:Esperou por mim?:Cancelar.")) {
+			switch(select("Quem e voce?:Esperou por mim?:Cancelar.")) {
 			case 1:
-				mes "[Voz da L�pide]";
-				mes "Eu fui um dos guerreiros que deteve Baphomet, assim como voc�. Agora, estou morto e s� resta minha alma...";
+				mes "[Voz da Lapide]";
+				mes "Eu fui um dos guerreiros que deteve Baphomet, assim como voce. Agora, estou morto e so resta minha alma...";
 				next;
-				mes "[Voz da L�pide]";
-				mes "Como voc�s sabem... N�o temos muito tempo. Voc�s n�o podem deter Baphomet sozinhos. O poder do diabo se fortaleceu ao longo dos anos.";
+				mes "[Voz da Lapide]";
+				mes "Como voces sabem... Nao temos muito tempo. Voces nao podem deter Baphomet sozinhos. O poder do diabo se fortaleceu ao longo dos anos.";
 				next;
-				mes "[Voz da L�pide]";
-				mes "No passado, meus companheiros e eu selamos Baphomet no altar localizado no 2� por�o e bloqueamos a entrada.";
+				mes "[Voz da Lapide]";
+				mes "No passado, meus companheiros e eu selamos Baphomet no altar localizado no 2o porao e bloqueamos a entrada.";
 				next;
-				mes "[Voz da L�pide]";
-				mes "Transferi a ess�ncia da minha alma para o meu pingente, para que eu pudesse permanecer neste mundo. Foi ent�o que me tornei o guardi�o deste t�mulo.";
+				mes "[Voz da Lapide]";
+				mes "Transferi a essencia da minha alma para o meu pingente, para que eu pudesse permanecer neste mundo. Foi entao que me tornei o guardiao deste tumulo.";
 				next;
 				break;
 			case 2:
-				mes "[Voz da L�pide]";
-				mes "O poder de Baphomet est� prestes a romper o selo que criamos. Se voc� n�o os reativar... O renascimento de Baphomet ser� apenas uma quest�o de tempo.";
+				mes "[Voz da Lapide]";
+				mes "O poder de Baphomet esta prestes a romper o selo que criamos. Se voce nao os reativar... O renascimento de Baphomet sera apenas uma questao de tempo.";
 				next;
-				mes "[Voz da L�pide]";
-				mes "Para abrir a entrada, voc� precisa substancializar minha alma. Eu abrirei a entrada e reativarei os selos enfraquecidos depois que eu for substancializado.";
+				mes "[Voz da Lapide]";
+				mes "Para abrir a entrada, voce precisa substancializar minha alma. Eu abrirei a entrada e reativarei os selos enfraquecidos depois que eu for substancializado.";
 				next;
-				mes "[Voz da L�pide]";
-				mes "Para substancializar minha alma, voc� precisa encontrar meu pingente. Voc� pode encontrar meu corpo perto de um t�mulo aqui.";
+				mes "[Voz da Lapide]";
+				mes "Para substancializar minha alma, voce precisa encontrar meu pingente. Voce pode encontrar meu corpo perto de um tumulo aqui.";
 				next;
-				mes "[Voz da L�pide]";
-				mes "Se o seu ^0000FFl�der do grupo^000000 me trouxer o pingente, minha alma poder� ser substancializada. Ent�o, apresse-se.";
+				mes "[Voz da Lapide]";
+				mes "Se o seu ^0000FFlider do grupo^000000 me trouxer o pingente, minha alma podera ser substancializada. Entao, apresse-se.";
 				set 'ins_baphomet,1;
 				close;
 			case 3:
@@ -561,46 +561,46 @@ OnMyMobDead:
 	}
 	debugmes "ins_baphomet == 1: " + 'ins_baphomet;
 	if ('ins_baphomet == 1) {
-		mes "[Voz da L�pide]";
-		mes "Para abrir a entrada, voc� precisa substancializar minha alma. Eu abrirei a entrada e reativarei os selos enfraquecidos depois que eu for substancializado.";
+		mes "[Voz da Lapide]";
+		mes "Para abrir a entrada, voce precisa substancializar minha alma. Eu abrirei a entrada e reativarei os selos enfraquecidos depois que eu for substancializado.";
 		next;
-		mes "[Voz da L�pide]";
-		mes "Para substancializar minha alma, voc� precisa encontrar meu pingente. Voc� pode encontrar meu corpo perto de um t�mulo aqui.";
+		mes "[Voz da Lapide]";
+		mes "Para substancializar minha alma, voce precisa encontrar meu pingente. Voce pode encontrar meu corpo perto de um tumulo aqui.";
 		next;
-		mes "[Voz da L�pide]";
-		mes "Se o seu ^0000FFl�der do grupo^000000 me trouxer o pingente, minha alma poder� ser substancializada. Ent�o, apresse-se.";
+		mes "[Voz da Lapide]";
+		mes "Se o seu ^0000FFlider do grupo^000000 me trouxer o pingente, minha alma podera ser substancializada. Entao, apresse-se.";
 		close;
 	}
 	else if (('ins_baphomet == 2) && is_party_leader(.@party_id) == true) {
-		mes "[Voz da L�pide]";
-		mes "Voc� encontrou o pingente?";
+		mes "[Voz da Lapide]";
+		mes "Voce encontrou o pingente?";
 		next;
 		if (countitem(6003) > 0) {
 			specialeffect EF_MAPPILLAR;
-			mes "[Voz da L�pide]";
-			mes "Sim... Este �... Meu pingente...";
+			mes "[Voz da Lapide]";
+			mes "Sim... Este e... Meu pingente...";
 			next;
 			delitem 6003,1; //Soul_Pendant
-			enablenpc instance_npcname("Alma do Her�i Antigo#1F");
+			enablenpc instance_npcname("Alma do Heroi Antigo#1F");
 			disablenpc instance_npcname("Gravestone#");
-			mes "[Voz da L�pide]";
-			mes "Sinto a voz enfraquecendo. Agora posso materializar minha alma. Espero por voc� em frente ao altar de fogo localizado no centro deste t�mulo. Vamos nos encontrar l�.";
+			mes "[Voz da Lapide]";
+			mes "Sinto a voz enfraquecendo. Agora posso materializar minha alma. Espero por voce em frente ao altar de fogo localizado no centro deste tumulo. Vamos nos encontrar la.";
 			next;
-			mapannounce instance_mapname("1@cata"), "Alma do Her�i Antigo: Eu esperarei por voc� em frente ao altar de fogo localizado no centro",bc_map,"0xFFFF00";
+			mapannounce instance_mapname("1@cata"), "Alma do Heroi Antigo: Eu esperarei por voce em frente ao altar de fogo localizado no centro",bc_map,"0xFFFF00";
 			mes "Posso sentir a voz ficando fraca.";
 			close;
 		}
 		else {
-			mes "[Voz da L�pide]";
-			mes "Voc� ainda est� a�? Traga meu pingente de volta o mais r�pido poss�vel.";
+			mes "[Voz da Lapide]";
+			mes "Voce ainda esta ai? Traga meu pingente de volta o mais rapido possivel.";
 			next;
-			mes "[Voz da L�pide]";
-			mes "Voc� pode encontrar meu corpo perto de um t�mulo aqui. V� l� e pegue meu pingente.";
+			mes "[Voz da Lapide]";
+			mes "Voce pode encontrar meu corpo perto de um tumulo aqui. Ve la e pegue meu pingente.";
 			close;
 		}
 	}
 	else {
-		mes "[Voz da L�pide]";
+		mes "[Voz da Lapide]";
 		mes "Quero falar com ^0000FFa representante do seu grupo^000000. Todos os outros, esperem aqui.";
 		close;
 	}
@@ -610,7 +610,7 @@ OnTouch:
 	if ('ins_baphomet == 0) {
 		mes "'Krrrr... Krrrr...'";
 		next;
-		mes "Sinto algo estranho no t�mulo. � como se algu�m estivesse chamando silenciosamente...";
+		mes "Sinto algo estranho no tumulo. e como se alguem estivesse chamando silenciosamente...";
 		close;
 	}
 	end;
@@ -620,97 +620,97 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 	end;
 }
 
-1@cata,176,119,4	script	Alma do Her�i Antigo#1F	411,{
+1@cata,176,119,4	script	Alma do Heroi Antigo#1F	411,{
 	set .@party_id,getcharid(1);
 	cutin "ins_cata_champ_n",2;
 	if ('ins_baphomet == 2) {
-		mes "[Alma do Her�i Antigo]";
-		mes "Com a sua ajuda, minha alma pode ser substancializada. Quero conversar mais, mas n�o temos tempo suficiente...";
+		mes "[Alma do Heroi Antigo]";
+		mes "Com a sua ajuda, minha alma pode ser substancializada. Quero conversar mais, mas nao temos tempo suficiente...";
 		next;
-		mes "[Alma do Her�i Antigo]";
-		mes "Preciso ser substancializado na pr�xima hora. Para chegar ao Altar Principal subterr�neo, voc� precisa me ajudar a realizar a cerim�nia de abertura de cada selo.";
+		mes "[Alma do Heroi Antigo]";
+		mes "Preciso ser substancializado na proxima hora. Para chegar ao Altar Principal subterraneo, voce precisa me ajudar a realizar a cerimonia de abertura de cada selo.";
 		next;
-		mes "[Alma do Her�i Antigo]";
-		mes "Agora vou te dizer o que voc� deve fazer. Primeiro, colete ^0000FFEss�ncia de Fogo^000000 das tochas nos t�mulos...";
+		mes "[Alma do Heroi Antigo]";
+		mes "Agora vou te dizer o que voce deve fazer. Primeiro, colete ^0000FFEssencia de Fogo^000000 das tochas nos tumulos...";
 		next;
-		mes "[Alma do Her�i Antigo]";
-		mes "Segundo, todos os membros que entrarem no subsolo devem carregar um s�mbolo, chamado Token do Ap�stolo.";
+		mes "[Alma do Heroi Antigo]";
+		mes "Segundo, todos os membros que entrarem no subsolo devem carregar um simbolo, chamado Token do Apostolo.";
 		next;
 		while(1) {
 			cutin "ins_cata_champ_n",2;
-			switch(select("O que � Ess�ncia de Fogo?:O que � um S�mbolo de Ap�stolo?:O que devo fazer?:Estou pronto.")) {
+			switch(select("O que e Essencia de Fogo?:O que e um Simbolo de Apostolo?:O que devo fazer?:Estou pronto.")) {
 			case 1:
 				set .@ins_baphomet_1f_1,.@ins_baphomet_1f_1+1;
-				mes "[Alma do Her�i Antigo]";
-				mes "Voc� pode ver as tochas aqui e ali. Essas tochas s�o a ess�ncia de Thor, o deus do Trov�o. Elas foram herdadas de nossos predecessores para deter a escurid�o de Baphomet...";
+				mes "[Alma do Heroi Antigo]";
+				mes "Voce pode ver as tochas aqui e ali. Essas tochas sao a essencia de Thor, o deus do Trovao. Elas foram herdadas de nossos predecessores para deter a escuridao de Baphomet...";
 				next;
-				mes "[Alma do Her�i Antigo]";
-				mes "Para abrir o port�o subterr�neo selado, preciso ser purificado pela ^0000FFEss�ncia do Fogo^000000, que tem o poder de Thor. Colete ^0000FF8 Ess�ncia do Fogo^000000 das tochas.";
+				mes "[Alma do Heroi Antigo]";
+				mes "Para abrir o portao subterraneo selado, preciso ser purificado pela ^0000FFEssencia do Fogo^000000, que tem o poder de Thor. Colete ^0000FF8 Essencia do Fogo^000000 das tochas.";
 				next;
-				mes "[Alma do Her�i Antigo]";
-				mes "Uma coisa que voc� deve lembrar �... ^0000FFEss�ncia do Fogo^000000 s� pode ser coletada pelo Herdeiro da F�.";
+				mes "[Alma do Heroi Antigo]";
+				mes "Uma coisa que voce deve lembrar e... ^0000FFEssencia do Fogo^000000 so pode ser coletada pelo Herdeiro da Fe.";
 				next;
-				mes "[Alma do Her�i Antigo]";
-				mes "Darei o s�mbolo do Herdeiro da F� ao l�der do grupo. Somente o l�der do grupo pode coletar a ^0000FFEss�ncia do Fogo^000000.";
+				mes "[Alma do Heroi Antigo]";
+				mes "Darei o simbolo do Herdeiro da Fe ao lider do grupo. Somente o lider do grupo pode coletar a ^0000FFEssencia do Fogo^000000.";
 				next;
 				break;
 			case 2:
 				set .@ins_baphomet_1f_2,.@ins_baphomet_1f_2+1;
-				mes "[Alma do Her�i Antigo]";
-				mes "Naquela �poca, era imposs�vel nos livrarmos do Dem�nio Baphomet sozinhos. Depois que in�meros her�is sacrificaram suas vidas, mal conseguimos sel�-lo sob esta Abadia.";
+				mes "[Alma do Heroi Antigo]";
+				mes "Naquela epoca, era impossivel nos livrarmos do Demonio Baphomet sozinhos. Depois que inumeros herois sacrificaram suas vidas, mal conseguimos sela-lo sob esta Abadia.";
 				next;
-				mes "[Alma do Her�i Antigo]";
-				mes "No entanto, Baphomet nunca desistiu. Ele fortaleceu continuamente seu poder. E seu poder trouxe nova vida a este santu�rio.";
+				mes "[Alma do Heroi Antigo]";
+				mes "No entanto, Baphomet nunca desistiu. Ele fortaleceu continuamente seu poder. E seu poder trouxe nova vida a este santuario.";
 				next;
-				mes "[Alma do Her�i Antigo]";
-				mes "Alguns desses monstros t�m poderes m�gicos. Baphomet os chama de 'Ap�stolos'.";
+				mes "[Alma do Heroi Antigo]";
+				mes "Alguns desses monstros tem poderes magicos. Baphomet os chama de 'Apostolos'.";
 				next;
-				mes "[Alma do Her�i Antigo]";
-				mes "Os ap�stolos est�o se clonando para encher o santu�rio com sua energia maligna. Eles s�o os monstros aqui nesta catacumba.";
+				mes "[Alma do Heroi Antigo]";
+				mes "Os apostolos estao se clonando para encher o santuario com sua energia maligna. Eles sao os monstros aqui nesta catacumba.";
 				next;
-				mes "[Alma do Her�i Antigo]";
-				mes "Mate os Ap�stolos. Eles s� podem ser distinguidos de seus clones porque possuem um ^0000FFToken de Ap�stolo^000000...";
+				mes "[Alma do Heroi Antigo]";
+				mes "Mate os Apostolos. Eles so podem ser distinguidos de seus clones porque possuem um ^0000FFToken de Apostolo^000000...";
 				next;
-				mes "[Alma do Her�i Antigo]";
-				mes "Se cada membro do grupo possuir um ^0000FFToken do Ap�stolo^000000, Baphomet n�o ser� capaz de perceber sua entrada no Altar Principal subterr�neo.";
+				mes "[Alma do Heroi Antigo]";
+				mes "Se cada membro do grupo possuir um ^0000FFToken do Apostolo^000000, Baphomet nao sera capaz de perceber sua entrada no Altar Principal subterraneo.";
 				next;
-				mes "[Alma do Her�i Antigo]";
-				mes "Se Baphomet o vir ao passar pelo port�o selado, ele poder� liberar seu tremendo poder m�gico. Ent�o, esta abadia ser� demolida.";
+				mes "[Alma do Heroi Antigo]";
+				mes "Se Baphomet o vir ao passar pelo portao selado, ele podera liberar seu tremendo poder magico. Entao, esta abadia sera demolida.";
 				next;
-				mes "[Alma do Her�i Antigo]";
-				mes "Mate os ap�stolos e obtenha o ^0000FFToken do Ap�stolo^000000.";
+				mes "[Alma do Heroi Antigo]";
+				mes "Mate os apostolos e obtenha o ^0000FFToken do Apostolo^000000.";
 				next;
 				break;
 			case 3:
 				set .@ins_baphomet_1f_3,.@ins_baphomet_1f_3+1;
 				if (is_party_leader(.@party_id) == true) {
-					mes "[Alma do Her�i Antigo]";
-					mes "Voc� parece o l�der deste grupo. Precisa ir buscar ^0000FF8 Ess�ncia de Fogo^000000 das tochas.";
+					mes "[Alma do Heroi Antigo]";
+					mes "Voce parece o lider deste grupo. Precisa ir buscar ^0000FF8 Essencia de Fogo^000000 das tochas.";
 					next;
-					mes "[Alma do Her�i Antigo]";
-					mes "Agora, vou esculpir o s�mbolo que mostra que voc� � um herdeiro da f�. Esteja ciente de que ningu�m no seu grupo, exceto voc�, pode coletar a Ess�ncia do Fogo.";
+					mes "[Alma do Heroi Antigo]";
+					mes "Agora, vou esculpir o simbolo que mostra que voce e um herdeiro da fe. Esteja ciente de que ninguem no seu grupo, exceto voce, pode coletar a Essencia do Fogo.";
 					next;
 					specialeffect2 EF_HOLYHIT;
-					mes "[Alma do Her�i Antigo]";
-					mes "Voc� tamb�m deve carregar um ^0000FFToken do Ap�stolo^000000, ent�o encontre um para voc� tamb�m.";
+					mes "[Alma do Heroi Antigo]";
+					mes "Voce tambem deve carregar um ^0000FFToken do Apostolo^000000, entao encontre um para voce tambem.";
 					next;
-					mes "[Alma do Her�i Antigo]";
-					mes "Quando todos estiverem prontos para ir, avisem-me. Abrirei o port�o selado quando estiverem prontos.";
+					mes "[Alma do Heroi Antigo]";
+					mes "Quando todos estiverem prontos para ir, avisem-me. Abrirei o portao selado quando estiverem prontos.";
 					next;
 				}
 				else {
-					mes "[Alma do Her�i Antigo]";
-					mes "Certifique-se de que o l�der do seu grupo ouviu minha explica��o sobre o que voc� e seus companheiros devem fazer.";
+					mes "[Alma do Heroi Antigo]";
+					mes "Certifique-se de que o lider do seu grupo ouviu minha explicacao sobre o que voce e seus companheiros devem fazer.";
 					next;
-					mes "[Alma do Her�i Antigo]";
-					mes "Mate os Ap�stolos de Baphomet e encontre seu ^0000FFToken de Ap�stolo^000000.";
+					mes "[Alma do Heroi Antigo]";
+					mes "Mate os Apostolos de Baphomet e encontre seu ^0000FFToken de Apostolo^000000.";
 					next;
-					mes "[Alma do Her�i Antigo]";
-					mes "Talvez seja melhor matar todos eles porque n�o h� como diferenci�-los de seus clones.";
+					mes "[Alma do Heroi Antigo]";
+					mes "Talvez seja melhor matar todos eles porque nao ha como diferencia-los de seus clones.";
 					next;
-					mes "[Alma do Her�i Antigo]";
-					mes "Voc� est� pronto?";
-					mes "Certifique-se de ter ouvido tudo o que tenho a dizer antes de dizer que est� pronto.";
+					mes "[Alma do Heroi Antigo]";
+					mes "Voce esta pronto?";
+					mes "Certifique-se de ter ouvido tudo o que tenho a dizer antes de dizer que esta pronto.";
 					next;
 				}
 				break;
@@ -725,16 +725,16 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 			if (.@exitloop) break;
 		}
 		if (is_party_leader(.@party_id) == true) {
-			mes "[Alma do Her�i Antigo]";
-			mes "Para lembrar novamente, preciso ser substancializado na pr�xima hora. Ent�o, pessoal, terminem seus trabalhos dentro desse prazo!";
+			mes "[Alma do Heroi Antigo]";
+			mes "Para lembrar novamente, preciso ser substancializado na proxima hora. Entao, pessoal, terminem seus trabalhos dentro desse prazo!";
 			set 'ins_baphomet,3;
 			donpcevent instance_npcname("ins_baphomet_1f_timer")+"::OnEnable";
 			donpcevent instance_npcname("ins_baphomet_lotto2")+"::OnEnable";
 			donpcevent instance_npcname("ins_baphomet_lotto3")+"::OnEnable";
 		}
 		else {
-			mes "[Alma do Her�i Antigo]";
-			mes "Para lembrar novamente, posso ficar substancializado pela pr�xima hora. Ent�o, pessoal, terminem seus trabalhos dentro desse prazo.";
+			mes "[Alma do Heroi Antigo]";
+			mes "Para lembrar novamente, posso ficar substancializado pela proxima hora. Entao, pessoal, terminem seus trabalhos dentro desse prazo.";
 			//set 'ins_baphomet,3;
 		}
 		close2;
@@ -743,18 +743,18 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 	}
 	else if (('ins_baphomet == 3) && is_party_leader(.@party_id) == true) {
 		cutin "ins_cata_champ_n",2;
-		mes "[Alma do Her�i Antigo]";
-		mes "Voc� conseguiu 8 ^0000FF Ess�ncia de Fogo^000000 e ^0000FF Ficha de Ap�stolo^000000?";
+		mes "[Alma do Heroi Antigo]";
+		mes "Voce conseguiu 8 ^0000FF Essencia de Fogo^000000 e ^0000FF Ficha de Apostolo^000000?";
 		next;
 		if ((countitem(6001) > 7) && (countitem(6002) > 0)) {
 			delitem 6001,countitem(6001); //Essence_Of_Fire
 			set 'ins_baphomet,4;
-			mes "[Alma do Her�i Antigo]";
-			mes "Certo. Voc� fez seu trabalho. Agora, verifique seus companheiros e me avise quando todos tiverem terminado seu trabalho.";
+			mes "[Alma do Heroi Antigo]";
+			mes "Certo. Voce fez seu trabalho. Agora, verifique seus companheiros e me avise quando todos tiverem terminado seu trabalho.";
 		}
 		else {
-			mes "[Alma do Her�i Antigo]";
-			mes "Ainda n�o est� pronto? Prepare 8 ^0000FFEss�ncia do Fogo^000000 e ^0000FFFicha do Ap�stolo^000000.";
+			mes "[Alma do Heroi Antigo]";
+			mes "Ainda nao esta pronto? Prepare 8 ^0000FFEssencia do Fogo^000000 e ^0000FFFicha do Apostolo^000000.";
 		}
 		close2;
 		cutin "",255;
@@ -762,17 +762,17 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 	}
 	else if ('ins_baphomet == 3) {
 		cutin "ins_cata_champ_n",2;
-		mes "[Alma do Her�i Antigo]";
-		mes "Voc� tem um ^0000FFToken do Ap�stolo^000000?";
+		mes "[Alma do Heroi Antigo]";
+		mes "Voce tem um ^0000FFToken do Apostolo^000000?";
 		next;
 		if (countitem(6002) > 0) {
 			set 'ins_baphomet,4;
-			mes "[Alma do Her�i Antigo]";
-			mes "Certo. Voc� fez seu trabalho. Diga ao seu representante para verificar seus companheiros e vir at� mim quando todos tiverem terminado seu trabalho.";
+			mes "[Alma do Heroi Antigo]";
+			mes "Certo. Voce fez seu trabalho. Diga ao seu representante para verificar seus companheiros e vir ate mim quando todos tiverem terminado seu trabalho.";
 		}
 		else {
-			mes "[Alma do Her�i Antigo]";
-			mes "Ainda n�o est� pronto? Prepare ^0000FFToken do Ap�stolo^000000.";
+			mes "[Alma do Heroi Antigo]";
+			mes "Ainda nao esta pronto? Prepare ^0000FFToken do Apostolo^000000.";
 		}
 		close2;
 		cutin "",255;
@@ -780,8 +780,8 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 	}
 	else if (('ins_baphomet == 4) && is_party_leader(.@party_id) == true) {
 		cutin "ins_cata_champ_n",2;
-		mes "[Alma do Her�i Antigo]";
-		mes "Voc� est� pronto? Abri o port�o selado. Para passar pelo port�o, voc� deve carregar um ^0000FFToken do Ap�stolo^000000.";
+		mes "[Alma do Heroi Antigo]";
+		mes "Voce esta pronto? Abri o portao selado. Para passar pelo portao, voce deve carregar um ^0000FFToken do Apostolo^000000.";
 		next;
 		set 'ins_baphomet,5;
 		specialeffect EF_TELEPORTATION;
@@ -800,45 +800,45 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 		viewpointmap instance_mapname("1@cata"),2,71,42,11,0xFFFFFF;
 		viewpointmap instance_mapname("1@cata"),2,155,14,12,0xFFFFFF;
 		viewpointmap instance_mapname("1@cata"),1,281,12,13,0xFFFFFF;
-		mes "[Alma do Her�i Antigo]";
-		mes "Agora voc� pode ir at� o altar principal. Ele fica no canto inferior direito deste andar.";
+		mes "[Alma do Heroi Antigo]";
+		mes "Agora voce pode ir ate o altar principal. Ele fica no canto inferior direito deste andar.";
 		next;
-		mes "[Alma do Her�i Antigo]";
-		mes "Sua verdadeira batalha come�ar�... Eu te seguirei em breve e encontrarei uma maneira de te ajudar.";
+		mes "[Alma do Heroi Antigo]";
+		mes "Sua verdadeira batalha comecara... Eu te seguirei em breve e encontrarei uma maneira de te ajudar.";
 		next;
-		mes "[Alma do Her�i Antigo]";
-		mes "V� em frente, guerreiros.";
+		mes "[Alma do Heroi Antigo]";
+		mes "Ve em frente, guerreiros.";
 		cutin "",255;
-		mapannounce instance_mapname("1@cata"), "Alma do Her�i Antigo : Agora voc� pode ir at� o port�o do Altar Principal. Ele est� localizado no sudeste",bc_map,"0xFFFF00";
+		mapannounce instance_mapname("1@cata"), "Alma do Heroi Antigo : Agora voce pode ir ate o portao do Altar Principal. Ele esta localizado no sudeste",bc_map,"0xFFFF00";
 		close;
 	}
 	else if ('ins_baphomet == 4) {
 		cutin "ins_cata_champ_n",2;
-		mes "[Alma do Her�i Antigo]";
-		mes "AVoc� est� pronto? Abri o port�o selado. Para passar pelo port�o, voc� deve carregar um ^0000FFToken do Ap�stolo^000000.";
+		mes "[Alma do Heroi Antigo]";
+		mes "AVoce esta pronto? Abri o portao selado. Para passar pelo portao, voce deve carregar um ^0000FFToken do Apostolo^000000.";
 		next;
-		mes "[Alma do Her�i Antigo]";
-		mes "Concluirei a abertura do port�o selado quando seu representante me disser que voc� est� pronto.";
+		mes "[Alma do Heroi Antigo]";
+		mes "Concluirei a abertura do portao selado quando seu representante me disser que voce esta pronto.";
 		cutin "",255;
 		close;
 	}
 	else if ('ins_baphomet == 5) {
 		cutin "ins_cata_champ_n",2;
-		mes "[Alma do Her�i Antigo]";
-		mes "O que voc� est� fazendo? A entrada do altar principal est� aberta agora, v� e lute! A entrada fica perto do canto inferior direito deste andar.";
+		mes "[Alma do Heroi Antigo]";
+		mes "O que voce esta fazendo? A entrada do altar principal esta aberta agora, ve e lute! A entrada fica perto do canto inferior direito deste andar.";
 		cutin "",255;
 		close;
 	}
 	else {
 		cutin "ins_cata_champ_n",2;
-		mes "[Alma do Her�i Antigo]";
-		mes "N�o tenho nada a lhe dizer...";
+		mes "[Alma do Heroi Antigo]";
+		mes "Nao tenho nada a lhe dizer...";
 		cutin "",255;
 		close;
 	}
 
 OnInstanceInit:
-	disablenpc instance_npcname("Alma do Her�i Antigo#1F");
+	disablenpc instance_npcname("Alma do Heroi Antigo#1F");
 	end;
 }
 
@@ -854,8 +854,8 @@ OnTouch:
 		end;
 	}
 	else {
-		mes "[Alma do Her�i Antigo]";
-		mes "Onde est� o seu S�mbolo do Ap�stolo? Eu disse que voc� deveria carregar o S�mbolo do Ap�stolo para passar por este port�o.";
+		mes "[Alma do Heroi Antigo]";
+		mes "Onde esta o seu Simbolo do Apostolo? Eu disse que voce deveria carregar o Simbolo do Apostolo para passar por este portao.";
 		close;
 	}
 
@@ -873,12 +873,12 @@ OnInstanceInit:
 		mes "Um pequeno objeto brilha sob uma cova inclinada.";
 		next;
 		mes "[" + strcharinfo(0) + "]";
-		mes "Acho que esse � o pingente...";
+		mes "Acho que esse e o pingente...";
 		close;
 	}
 	else {
 		debugmes "ins_baphomet == 1: " + 'ins_baphomet;
-		mes "S� consigo sentir tristeza nesta l�pide.";
+		mes "So consigo sentir tristeza nesta lapide.";
 		close;
 	}
 }
@@ -897,7 +897,7 @@ OnInstanceInit:
 1@cata,267,30,0	duplicate(Gravestone#SS1)	Gravestone#1F_13T	844
 
 -	script	Gravestone#SS2	-1,{
-	mes "S� consigo sentir tristeza nesta l�pide.";
+	mes "So consigo sentir tristeza nesta lapide.";
 	debugmes "strinfonpc(3): " + instance_npcname(strnpcinfo(0));
 	close;
 }
@@ -920,9 +920,9 @@ OnInstanceInit:
 -	script	Bobbing Torch#SS	-1,{
 	if (is_party_leader() == true) {
 		if (('ins_baphomet == 3) && (countitem(6001) < 8)) {
-			mes "Uma enorme tocha, que parece poder queimar tudo, est� subindo e descendo na minha frente.";
+			mes "Uma enorme tocha, que parece poder queimar tudo, esta subindo e descendo na minha frente.";
 			next;
-			mes "A grande apar�ncia e o calor do fogo me fazem recuar... Mas crio coragem e estendo a m�o para pegar a tocha.";
+			mes "A grande aparencia e o calor do fogo me fazem recuar... Mas crio coragem e estendo a mao para pegar a tocha.";
 			next;
 			specialeffect2 EF_HOLYHIT;
 			getitem 6001,1; //Essence_Of_Fire
@@ -941,24 +941,24 @@ OnInstanceInit:
 			else if (.@x == 155 && .@y == 14) .@marker_id = 12;
 			if (.@marker_id)
 				viewpointmap .@map$,2,.@x,.@y,.@marker_id,0xFFFFFF;
-			mes "O s�mbolo do herdeiro brilha. Ent�o, um pequeno cristal da tocha cai na minha m�o.";
+			mes "O simbolo do herdeiro brilha. Entao, um pequeno cristal da tocha cai na minha mao.";
 			disablenpc();
 			close;
 		}
 		else if (('ins_baphomet == 3) && (countitem(6001) > 7)) {
-			mes "Voc� j� tem 8 Ess�ncias de Fogo, ent�o n�o precisa coletar mais nenhuma.";
+			mes "Voce ja tem 8 Essencias de Fogo, entao nao precisa coletar mais nenhuma.";
 			close;
 		}
 		else {
-			mes "Voc� n�o precisa mais coletar Ess�ncia de Fogo.";
+			mes "Voce nao precisa mais coletar Essencia de Fogo.";
 			close;
 		}
 	}
 	else {
-		mes "Uma enorme tocha que parece poder queimar tudo est� subindo e descendo na minha frente.";
+		mes "Uma enorme tocha que parece poder queimar tudo esta subindo e descendo na minha frente.";
 		next;
 		mes "[Unknown Voice]";
-		mes "Voc� n�o � um herdeiro da f�. N�o profane a Ess�ncia do Fogo com suas m�os desrespeitosas.";
+		mes "Voce nao e um herdeiro da fe. Nao profane a Essencia do Fogo com suas maos desrespeitosas.";
 		specialeffect2 EF_FIRESPLASHHIT;
 		percentheal -50,0;
 		close;
@@ -997,23 +997,23 @@ OnDisable:
 	end;
 
 OnTimer1800000:
-	mapannounce instance_mapname("1@cata"), "Alma do Her�i Anci�o: N�o temos tempo suficiente! Apresse-se!",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("1@cata"), "Alma do Heroi Anciao: Nao temos tempo suficiente! Apresse-se!",bc_map,"0xFFFF00";
 	end;
 
 OnTimer2400000:
-	mapannounce instance_mapname("1@cata"), "Alma do Her�i Antigo: Meu corpo est� desaparecendo... Depressa!",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("1@cata"), "Alma do Heroi Antigo: Meu corpo esta desaparecendo... Depressa!",bc_map,"0xFFFF00";
 	end;
 
 OnTimer3000000:
-	mapannounce instance_mapname("1@cata"), "Alma do Her�i Antigo: Tudo acabou... N�o h� outro jeito a n�o ser esperar pela pr�xima chance...",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("1@cata"), "Alma do Heroi Antigo: Tudo acabou... Nao ha outro jeito a nao ser esperar pela proxima chance...",bc_map,"0xFFFF00";
 	end;
 
 OnTimer3050000:
-	mapannounce instance_mapname("1@cata"), "Alma do Her�i Anci�o: N�s falhamos... No entanto... Ainda temos uma chance. Espero que voc�s se treinem at� a hora chegar.",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("1@cata"), "Alma do Heroi Anciao: Nos falhamos... No entanto... Ainda temos uma chance. Espero que voces se treinem ate a hora chegar.",bc_map,"0xFFFF00";
 	end;
 
 OnTimer3100000:
-	mapannounce instance_mapname("1@cata"), "Voc� falhou em abrir o selo do altar principal.",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("1@cata"), "Voce falhou em abrir o selo do altar principal.",bc_map,"0xFFFF00";
 	end;
 
 OnTimer3500000:
@@ -1045,15 +1045,15 @@ OnTimer10000:
 	end;
 
 OnTimer13000:
-	mapannounce instance_mapname("2@cata"), "Ap�stolo de Baphomet: Humanos! Humanos invadiram nosso santu�rio!",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Apostolo de Baphomet: Humanos! Humanos invadiram nosso santuario!",bc_map,"0xFFFF00";
 	end;
 
 OnTimer16000:
-	mapannounce instance_mapname("2@cata"), "Ap�stolo de Baphomet: Matem os humanos! N�o impe�am o renascimento do nosso Mestre!",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Apostolo de Baphomet: Matem os humanos! Nao impecam o renascimento do nosso Mestre!",bc_map,"0xFFFF00";
 	end;
 
 OnTimer18000:
-	mapannounce instance_mapname("2@cata"), "Ap�stolo de Baphomet: Apressem-se e abram os selos dos altares! O retorno do nosso Mestre est� pr�ximo!",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Apostolo de Baphomet: Apressem-se e abram os selos dos altares! O retorno do nosso Mestre esta proximo!",bc_map,"0xFFFF00";
 	stopnpctimer;
 	disablenpc instance_npcname("ins_2f_enter_broad");
 	end;
@@ -1062,23 +1062,23 @@ OnTimer18000:
 2@cata,50,67,0	script	slave_left	-1,5,5,{
 OnTouch_:
 	set .@map$, instance_mapname("2@cata");
-	mapannounce .@map$, "Ap�stolo de Baphomet: Matem os humanos! N�o deixem que eles interrompam o renascimento do nosso Mestre!",bc_map,"0xFFFF00";
-	monster .@map$,55,67,"Ap�stolo de Baphomet",1869,1;
-	monster .@map$,51,67,"Ap�stolo de Baphomet",1291,1;
-	monster .@map$,58,67,"Ap�stolo de Baphomet",1292,1;
-	monster .@map$,53,67,"Ap�stolo de Baphomet",1291,1;
-	monster .@map$,54,67,"Ap�stolo de Baphomet",1869,1;
-	monster .@map$,55,67,"Ap�stolo de Baphomet",1291,1;
-	monster .@map$,56,67,"Ap�stolo de Baphomet",1117,1;
-	monster .@map$,58,66,"Ap�stolo de Baphomet",1869,1;
-	monster .@map$,56,66,"Ap�stolo de Baphomet",1117,1;
-	monster .@map$,60,66,"Ap�stolo de Baphomet",1132,1;
-	monster .@map$,59,66,"Ap�stolo de Baphomet",1117,1;
-	monster .@map$,54,66,"Ap�stolo de Baphomet",1132,1;
-	monster .@map$,55,66,"Ap�stolo de Baphomet",1292,1;
-	monster .@map$,56,66,"Ap�stolo de Baphomet",1132,1;
-	monster .@map$,50,65,"Ap�stolo de Baphomet",1867,1;
-	monster .@map$,61,65,"Ap�stolo de Baphomet",1292,1;
+	mapannounce .@map$, "Apostolo de Baphomet: Matem os humanos! Nao deixem que eles interrompam o renascimento do nosso Mestre!",bc_map,"0xFFFF00";
+	monster .@map$,55,67,"Apostolo de Baphomet",1869,1;
+	monster .@map$,51,67,"Apostolo de Baphomet",1291,1;
+	monster .@map$,58,67,"Apostolo de Baphomet",1292,1;
+	monster .@map$,53,67,"Apostolo de Baphomet",1291,1;
+	monster .@map$,54,67,"Apostolo de Baphomet",1869,1;
+	monster .@map$,55,67,"Apostolo de Baphomet",1291,1;
+	monster .@map$,56,67,"Apostolo de Baphomet",1117,1;
+	monster .@map$,58,66,"Apostolo de Baphomet",1869,1;
+	monster .@map$,56,66,"Apostolo de Baphomet",1117,1;
+	monster .@map$,60,66,"Apostolo de Baphomet",1132,1;
+	monster .@map$,59,66,"Apostolo de Baphomet",1117,1;
+	monster .@map$,54,66,"Apostolo de Baphomet",1132,1;
+	monster .@map$,55,66,"Apostolo de Baphomet",1292,1;
+	monster .@map$,56,66,"Apostolo de Baphomet",1132,1;
+	monster .@map$,50,65,"Apostolo de Baphomet",1867,1;
+	monster .@map$,61,65,"Apostolo de Baphomet",1292,1;
 	disablenpc instance_npcname("slave_left");
 	end;
 }
@@ -1086,23 +1086,23 @@ OnTouch_:
 2@cata,109,67,0	script	slave_right	-1,5,5,{
 OnTouch_:
 	set .@map$, instance_mapname("2@cata");
-	mapannounce .@map$, "Ap�stolo de Baphomet : Matem os humanos! N�o deixem que eles interrompam a ressurrei��o do nosso Mestre!",bc_map,"0xFFFF00";
-	monster .@map$,105,67,"Ap�stolo de Baphomet",1869,1;
-	monster .@map$,104,67,"Ap�stolo de Baphomet",1291,1;
-	monster .@map$,107,67,"Ap�stolo de Baphomet",1869,1;
-	monster .@map$,106,67,"Ap�stolo de Baphomet",1291,1;
-	monster .@map$,102,67,"Ap�stolo de Baphomet",1869,1;
-	monster .@map$,103,67,"Ap�stolo de Baphomet",1291,1;
-	monster .@map$,103,67,"Ap�stolo de Baphomet",1117,1;
-	monster .@map$,109,66,"Ap�stolo de Baphomet",1117,1;
-	monster .@map$,108,66,"Ap�stolo de Baphomet",1132,1;
-	monster .@map$,101,66,"Ap�stolo de Baphomet",1117,1;
-	monster .@map$,106,66,"Ap�stolo de Baphomet",1292,1;
-	monster .@map$,102,66,"Ap�stolo de Baphomet",1132,1;
-	monster .@map$,104,66,"Ap�stolo de Baphomet",1292,1;
-	monster .@map$,103,66,"Ap�stolo de Baphomet",1132,1;
-	monster .@map$,109,65,"Ap�stolo de Baphomet",1867,1;
-	monster .@map$,108,65,"Ap�stolo de Baphomet",1292,1;
+	mapannounce .@map$, "Apostolo de Baphomet : Matem os humanos! Nao deixem que eles interrompam a ressurreicao do nosso Mestre!",bc_map,"0xFFFF00";
+	monster .@map$,105,67,"Apostolo de Baphomet",1869,1;
+	monster .@map$,104,67,"Apostolo de Baphomet",1291,1;
+	monster .@map$,107,67,"Apostolo de Baphomet",1869,1;
+	monster .@map$,106,67,"Apostolo de Baphomet",1291,1;
+	monster .@map$,102,67,"Apostolo de Baphomet",1869,1;
+	monster .@map$,103,67,"Apostolo de Baphomet",1291,1;
+	monster .@map$,103,67,"Apostolo de Baphomet",1117,1;
+	monster .@map$,109,66,"Apostolo de Baphomet",1117,1;
+	monster .@map$,108,66,"Apostolo de Baphomet",1132,1;
+	monster .@map$,101,66,"Apostolo de Baphomet",1117,1;
+	monster .@map$,106,66,"Apostolo de Baphomet",1292,1;
+	monster .@map$,102,66,"Apostolo de Baphomet",1132,1;
+	monster .@map$,104,66,"Apostolo de Baphomet",1292,1;
+	monster .@map$,103,66,"Apostolo de Baphomet",1132,1;
+	monster .@map$,109,65,"Apostolo de Baphomet",1867,1;
+	monster .@map$,108,65,"Apostolo de Baphomet",1292,1;
 	disablenpc instance_npcname("slave_right");
 	end;
 }
@@ -1110,23 +1110,23 @@ OnTouch_:
 2@cata,79,39,0	script	slave_down	-1,5,5,{
 OnTouch_:
 	set .@map$, instance_mapname("2@cata");
-	mapannounce .@map$, "Ap�stolo de Baphomet : Matem os humanos! N�o deixem que eles interrompam a ressurrei��o do nosso Mestre!",bc_map,"0xFFFF00";
-	monster .@map$,78,41,"Ap�stolo de Baphomet",1869,1;
-	monster .@map$,79,42,"Ap�stolo de Baphomet",1291,1;
-	monster .@map$,78,46,"Ap�stolo de Baphomet",1869,1;
-	monster .@map$,81,41,"Ap�stolo de Baphomet",1291,1;
-	monster .@map$,81,42,"Ap�stolo de Baphomet",1869,1;
-	monster .@map$,79,43,"Ap�stolo de Baphomet",1291,1;
-	monster .@map$,77,40,"Ap�stolo de Baphomet",1117,1;
-	monster .@map$,79,41,"Ap�stolo de Baphomet",1132,1;
-	monster .@map$,79,42,"Ap�stolo de Baphomet",1117,1;
-	monster .@map$,79,43,"Ap�stolo de Baphomet",1132,1;
-	monster .@map$,79,48,"Ap�stolo de Baphomet",1117,1;
-	monster .@map$,78,49,"Ap�stolo de Baphomet",1132,1;
-	monster .@map$,78,41,"Ap�stolo de Baphomet",1292,1;
-	monster .@map$,74,42,"Ap�stolo de Baphomet",1292,1;
-	monster .@map$,72,48,"Ap�stolo de Baphomet",1867,1;
-	monster .@map$,72,38,"Ap�stolo de Baphomet",1292,1;
+	mapannounce .@map$, "Apostolo de Baphomet : Matem os humanos! Nao deixem que eles interrompam a ressurreicao do nosso Mestre!",bc_map,"0xFFFF00";
+	monster .@map$,78,41,"Apostolo de Baphomet",1869,1;
+	monster .@map$,79,42,"Apostolo de Baphomet",1291,1;
+	monster .@map$,78,46,"Apostolo de Baphomet",1869,1;
+	monster .@map$,81,41,"Apostolo de Baphomet",1291,1;
+	monster .@map$,81,42,"Apostolo de Baphomet",1869,1;
+	monster .@map$,79,43,"Apostolo de Baphomet",1291,1;
+	monster .@map$,77,40,"Apostolo de Baphomet",1117,1;
+	monster .@map$,79,41,"Apostolo de Baphomet",1132,1;
+	monster .@map$,79,42,"Apostolo de Baphomet",1117,1;
+	monster .@map$,79,43,"Apostolo de Baphomet",1132,1;
+	monster .@map$,79,48,"Apostolo de Baphomet",1117,1;
+	monster .@map$,78,49,"Apostolo de Baphomet",1132,1;
+	monster .@map$,78,41,"Apostolo de Baphomet",1292,1;
+	monster .@map$,74,42,"Apostolo de Baphomet",1292,1;
+	monster .@map$,72,48,"Apostolo de Baphomet",1867,1;
+	monster .@map$,72,38,"Apostolo de Baphomet",1292,1;
 	disablenpc instance_npcname("slave_down");
 	end;
 }
@@ -1139,7 +1139,7 @@ OnTouch_:
 		specialeffect2 EF_SILENCEATTACK;
 		percentheal -50,0;
 		sc_start SC_Stone,30000,0;
-		mes "Seu SP ainda n�o se recuperou. Voc� perdeu seu SP no altar, mas parece que o poder do selo retornou.";
+		mes "Seu SP ainda nao se recuperou. Voce perdeu seu SP no altar, mas parece que o poder do selo retornou.";
 		close;
 	}
 	if (.@seal_check == 2) erasequest 3041;
@@ -1154,10 +1154,10 @@ OnTouch_:
 	percentheal -50,0;
 	sc_start SC_Stone,20000,0;
 	setquest 3041;
-	mapannounce .@map$, "O selo foi ativado ao colocar poder m�gico no altar.",bc_map,"0x87ceeb";
-	mes "Posso sentir que o poder do altar retornou ao adicionar poder m�gico.";
+	mapannounce .@map$, "O selo foi ativado ao colocar poder magico no altar.",bc_map,"0x87ceeb";
+	mes "Posso sentir que o poder do altar retornou ao adicionar poder magico.";
 	next;
-	mes "Mas voc� n�o pode usar sua magia por 3 minutos porque usou seu SP no altar.";
+	mes "Mas voce nao pode usar sua magia por 3 minutos porque usou seu SP no altar.";
 	close;
 
 OnInstanceInit:
@@ -1172,54 +1172,54 @@ OnInstanceInit:
 
 2@cata,79,65,0	script	The Main Altar#ss	844,{
 	if (('ins_baphomet == 5) && is_party_leader() == true) {
-		mes "Um poder maligno, terr�vel demais para descrever, jaz sob o grande altar, irradiando uma cor violeta.";
+		mes "Um poder maligno, terrivel demais para descrever, jaz sob o grande altar, irradiando uma cor violeta.";
 		next;
-		mes "Letras r�nicas m�gicas complicadas piscam rapidamente, tentando suprimir o terr�vel poder interior.";
+		mes "Letras runicas magicas complicadas piscam rapidamente, tentando suprimir o terrivel poder interior.";
 		next;
 		mes "A base do Altar Principal treme furiosamente.";
 		next;
 		specialeffect EF_METEORSTORM;
 		specialeffect EF_METEORSTORM;
 		mes "[" + strcharinfo(0) + "]";
-		mes "Cuidado! Alguma coisa... Alguma coisa est� vindo.";
+		mes "Cuidado! Alguma coisa... Alguma coisa esta vindo.";
 		set 'ins_baphomet,6;
 		donpcevent instance_npcname("ins_2f_hero_broad")+"::OnEnable";
 		disablenpc instance_npcname("The Main Altar#ss");
 		close;
 	}
 	else {
-		mes "Um poder maligno, terr�vel demais para descrever, jaz sob o grande altar, irradiando uma cor violeta.";
+		mes "Um poder maligno, terrivel demais para descrever, jaz sob o grande altar, irradiando uma cor violeta.";
 		next;
-		mes "Letras r�nicas m�gicas complicadas piscam rapidamente, tentando suprimir o terr�vel poder interior.";
+		mes "Letras runicas magicas complicadas piscam rapidamente, tentando suprimir o terrivel poder interior.";
 		close;
 	}
 	end;
 }
 
-2@cata,80,63,4	script	Alma do Her�i Antigo#2F	411,{
+2@cata,80,63,4	script	Alma do Heroi Antigo#2F	411,{
 	cutin "ins_cata_champ_s",2;
 	if (checkquest(3041)>=0) erasequest 3041;
-	mes "[Alma do Her�i Antigo]";
-	mes "Bom trabalho, meus descendentes... Voc�s conclu�ram a tarefa t�o acalentada que eu e meus irm�os n�o conseguimos completar.";
+	mes "[Alma do Heroi Antigo]";
+	mes "Bom trabalho, meus descendentes... Voces concluiram a tarefa tao acalentada que eu e meus irmaos nao conseguimos completar.";
 	next;
-	mes "[Alma do Her�i Antigo]";
-	mes "Agrade�o muito sua ajuda.";
+	mes "[Alma do Heroi Antigo]";
+	mes "Agradeco muito sua ajuda.";
 	mes "Nossas almas finalmente podem descansar em paz...";
 	next;
-	mes "[Alma do Her�i Antigo]";
-	mes "A luta pela paz neste mundo nunca terminar�. Mas... meu papel aqui finalmente chegou ao fim, porque existem her�is corajosos como voc�.";
+	mes "[Alma do Heroi Antigo]";
+	mes "A luta pela paz neste mundo nunca terminara. Mas... meu papel aqui finalmente chegou ao fim, porque existem herois corajosos como voce.";
 	next;
-	switch(select("Deixe-me sair do santu�rio.:Pare de falar.")) {
+	switch(select("Deixe-me sair do santuario.:Pare de falar.")) {
 	case 1:
-		mes "[Alma do Her�i Antigo]";
-		mes "Certo. Vou deixar voc� e seu grupo sa�rem daqui em seguran�a.";
+		mes "[Alma do Heroi Antigo]";
+		mes "Certo. Vou deixar voce e seu grupo sairem daqui em seguranca.";
 		next;
-		mes "[Alma do Her�i Antigo]";
-		mes "Se voc� for embora, por favor, diga ol� para Patrick por mim.";
+		mes "[Alma do Heroi Antigo]";
+		mes "Se voce for embora, por favor, diga ola para Patrick por mim.";
 		cutin "",255;
 		set 'ins_baphomet,0;
 
-		// Premia��es do Servidor
+		// Premiacoes do Servidor
 		if (#SANTUARIOSELADO_STATUS == 1 || #SANTUARIOSELADO_STATUS == 2) {
 			.@finish_result = callfunc("F_InstanceFinishBase", "Altar do Selo", "#SANTUARIOSELADO_STATUS", 20, 2, "#inst120_name$", "#inst120_status", 1, 20);
 			if (.@finish_result == -1) {
@@ -1231,14 +1231,14 @@ OnInstanceInit:
 		warp "SavePoint",0,0;
 		close;
 	case 2:
-		mes "[Alma do Her�i Antigo]";
-		mes "Voc� ainda tem algo para fazer aqui? Se j� tiver terminado, vou deixar voc� sair em seguran�a...";
+		mes "[Alma do Heroi Antigo]";
+		mes "Voce ainda tem algo para fazer aqui? Se ja tiver terminado, vou deixar voce sair em seguranca...";
 		cutin "",255;
 		close;
 	}
 
 OnInstanceInit:
-	disablenpc instance_npcname("Alma do Her�i Antigo#2F");
+	disablenpc instance_npcname("Alma do Heroi Antigo#2F");
 	end;
 }
 
@@ -1253,27 +1253,27 @@ OnDisable:
 	end;
 
 OnTimer3000:
-	mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : Meu Deus! O selo do Altar Principal est� enfraquecendo!",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : Meu Deus! O selo do Altar Principal esta enfraquecendo!",bc_map,"0xFFFF00";
 	end;
 
 OnTimer6000:
-	mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : Meus descendentes... Ou�am atentamente o que vou dizer.",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : Meus descendentes... Oucam atentamente o que vou dizer.",bc_map,"0xFFFF00";
 	end;
 
 OnTimer9000:
-	mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : Os altares que controlam o poder do Altar Principal est�o localizados nos cantos nordeste, sudeste, sudoeste e noroeste desta sala.",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : Os altares que controlam o poder do Altar Principal estao localizados nos cantos nordeste, sudeste, sudoeste e noroeste desta sala.",bc_map,"0xFFFF00";
 	end;
 
 OnTimer12000:
-	mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : Encontre esses altares e ative seus selos antes que Baphomet reviva.",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : Encontre esses altares e ative seus selos antes que Baphomet reviva.",bc_map,"0xFFFF00";
 	end;
 
 OnTimer15000:
-	mapannounce instance_mapname("2@cata"), "Baphomet : � tarde demais, fracotes... Agora voc�s sentir�o o desespero da morte!",bc_map,"0xdb7093";
+	mapannounce instance_mapname("2@cata"), "Baphomet : e tarde demais, fracotes... Agora voces sentirao o desespero da morte!",bc_map,"0xdb7093";
 	end;
 
 OnTimer17000:
-	mapannounce instance_mapname("2@cata"), "Baphomet : Ningu�m pode me fazer mal aqui. Voc� ser� meu primeiro sacrif�cio.",bc_map,"0xdb7093";
+	mapannounce instance_mapname("2@cata"), "Baphomet : Ninguem pode me fazer mal aqui. Voce sera meu primeiro sacrificio.",bc_map,"0xdb7093";
 	donpcevent instance_npcname("control_baphomet")+"::OnEnable";
 	donpcevent instance_npcname("ins_2f_hero_broad2")+"::OnEnable";
 	stopnpctimer;
@@ -1299,8 +1299,8 @@ OnMyMobDead:
 		set 'ins_baphomet,7;
 		if (isbegin_quest(3041))
 			erasequest 3041;
-		mapannounce .@map$, "Baphomet : N�o! N�o, n�o, n�o! Como esses fracotes ousam me derrotar!... N�o!!...",bc_map,"0xdb7093";
-		enablenpc instance_npcname("Alma do Her�i Antigo#2F");
+		mapannounce .@map$, "Baphomet : Nao! Nao, nao, nao! Como esses fracotes ousam me derrotar!... Nao!!...",bc_map,"0xdb7093";
+		enablenpc instance_npcname("Alma do Heroi Antigo#2F");
 		disablenpc instance_npcname("slave_down");
 		disablenpc instance_npcname("slave_left");
 		disablenpc instance_npcname("slave_right");
@@ -1329,31 +1329,31 @@ OnEnable:
 	end;
 
 OnTimer8000:
-	mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : N�o desanime, Baphomet ainda pode ser derrotado!",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : Nao desanime, Baphomet ainda pode ser derrotado!",bc_map,"0xFFFF00";
 	end;
 
 OnTimer11000:
-	mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : V� at� os altares e ative seus selos.",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : Ve ate os altares e ative seus selos.",bc_map,"0xFFFF00";
 	end;
 
 OnTimer13000:
-	mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : Quando os selos recuperarem seu poder, Baphomet ficar� vulner�vel.",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : Quando os selos recuperarem seu poder, Baphomet ficara vulneravel.",bc_map,"0xFFFF00";
 	end;
 
 OnTimer16000:
-	mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : Voc� deve atrair Baphomet para os Altares abertos. Caso contr�rio, seus esfor�os ser�o em v�o.",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : Voce deve atrair Baphomet para os Altares abertos. Caso contrario, seus esforcos serao em vao.",bc_map,"0xFFFF00";
 	end;
 
 OnTimer19000:
-	mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : Temos apenas 1 hora para deter Baphomet. Se o tempo acabar, o poder dos selos ser� in�til.",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : Temos apenas 1 hora para deter Baphomet. Se o tempo acabar, o poder dos selos sera inutil.",bc_map,"0xFFFF00";
 	end;
 
 OnTimer22000:
-	mapannounce instance_mapname("2@cata"), "Baphomet : � in�til. Fa�am mais selos. Vou destruir todos eles. Nenhum de voc�s sobreviver�!",bc_map,"0xdb7093";
+	mapannounce instance_mapname("2@cata"), "Baphomet : e inutil. Facam mais selos. Vou destruir todos eles. Nenhum de voces sobrevivera!",bc_map,"0xdb7093";
 	end;
 
 OnTimer26000:
-	mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : O poder m�gico do selo central est� se esgotando. V� at� o selo central e coloque o poder m�gico.",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : O poder magico do selo central esta se esgotando. Ve ate o selo central e coloque o poder magico.",bc_map,"0xFFFF00";
 	enablenpc instance_npcname("Magical Seal#0");
 	disablenpc instance_npcname("Magical Seal#2");
 	disablenpc instance_npcname("Magical Seal#4");
@@ -1441,11 +1441,11 @@ OnDisable:
 	end;
 
 OnTimer3600000:
-	mapannounce instance_mapname("2@cata"), "Baphomet : krrrr... Agora voc� n�o pode me deter com os selos. Tudo o que lhe resta � esperar pela morte!",bc_map,"0xdb7093";
+	mapannounce instance_mapname("2@cata"), "Baphomet : krrrr... Agora voce nao pode me deter com os selos. Tudo o que lhe resta e esperar pela morte!",bc_map,"0xdb7093";
 	end;
 
 OnTimer3605000:
-	mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : N�o podemos mais deter Baphomet com o poder m�gico dos selos. Agora tudo depende de Deus...",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : Nao podemos mais deter Baphomet com o poder magico dos selos. Agora tudo depende de Deus...",bc_map,"0xFFFF00";
 	donpcevent instance_npcname("ins_2f_hero_pattern_c")+"::OnDisable";
 	end;
 }
@@ -1468,7 +1468,7 @@ OnDisable:
 OnTimer70000:
 	switch(rand(1,5)) {
 	case 1:
-		mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : O selo do Altar Principal est� se esgotando. Fortale�a o selo do Altar Principal!",bc_map,"0xFFFF00";
+		mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : O selo do Altar Principal esta se esgotando. Fortaleca o selo do Altar Principal!",bc_map,"0xFFFF00";
 		enablenpc instance_npcname("Magical Seal#0");
 		disablenpc instance_npcname("Magical Seal#2");
 		disablenpc instance_npcname("Magical Seal#4");
@@ -1476,7 +1476,7 @@ OnTimer70000:
 		disablenpc instance_npcname("Magical Seal#10");
 		break;
 	case 2:
-		mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : O poder m�gico do selo �s 2 horas est� acabando. V� para as 2 horas e coloque o poder m�gico no selo.",bc_map,"0xFFFF00";
+		mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : O poder magico do selo as 2 horas esta acabando. Ve para as 2 horas e coloque o poder magico no selo.",bc_map,"0xFFFF00";
 		disablenpc instance_npcname("Magical Seal#0");
 		enablenpc instance_npcname("Magical Seal#2");
 		disablenpc instance_npcname("Magical Seal#4");
@@ -1484,7 +1484,7 @@ OnTimer70000:
 		disablenpc instance_npcname("Magical Seal#10");
 		break;
 	case 3:
-		mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : O poder m�gico do selo �s 4 horas est� se esgotando. V� at� as 4 horas e coloque o poder m�gico no selo.",bc_map,"0xFFFF00";
+		mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : O poder magico do selo as 4 horas esta se esgotando. Ve ate as 4 horas e coloque o poder magico no selo.",bc_map,"0xFFFF00";
 		disablenpc instance_npcname("Magical Seal#0");
 		disablenpc instance_npcname("Magical Seal#2");
 		enablenpc instance_npcname("Magical Seal#4");
@@ -1492,7 +1492,7 @@ OnTimer70000:
 		disablenpc instance_npcname("Magical Seal#10");
 		break;
 	case 4:
-		mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : O poder m�gico do selo das 8 horas est� acabando. V� para as 8 horas e coloque o poder m�gico no selo.",bc_map,"0xFFFF00";
+		mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : O poder magico do selo das 8 horas esta acabando. Ve para as 8 horas e coloque o poder magico no selo.",bc_map,"0xFFFF00";
 		disablenpc instance_npcname("Magical Seal#0");
 		disablenpc instance_npcname("Magical Seal#2");
 		disablenpc instance_npcname("Magical Seal#4");
@@ -1500,7 +1500,7 @@ OnTimer70000:
 		disablenpc instance_npcname("Magical Seal#10");
 		break;
 	case 5:
-		mapannounce instance_mapname("2@cata"), "Alma do Her�i Antigo : O poder m�gico do selo �s 10 horas est� se esgotando. V� para as 10 horas e coloque o poder m�gico no selo.",bc_map,"0xFFFF00";
+		mapannounce instance_mapname("2@cata"), "Alma do Heroi Antigo : O poder magico do selo as 10 horas esta se esgotando. Ve para as 10 horas e coloque o poder magico no selo.",bc_map,"0xFFFF00";
 		disablenpc instance_npcname("Magical Seal#0");
 		disablenpc instance_npcname("Magical Seal#2");
 		disablenpc instance_npcname("Magical Seal#4");
@@ -1518,21 +1518,21 @@ OnInstanceInit:
 	set .@map$, instance_mapname("1@cata");
 	monster .@map$,0,0,"Mestre Zumbi",1298,10;
 	monster .@map$,0,0,"Espectro Morto",1291,10;
-	//monster .@map$,0,0,"M�mico Antigo",1699,10;
-	monster .@map$,0,0,"Cr�nio Flamejante",1869,10;
+	//monster .@map$,0,0,"Mimico Antigo",1699,10;
+	monster .@map$,0,0,"Cranio Flamejante",1869,10;
 	monster .@map$,0,0,"General Esqueleto",1290,10;
 	monster .@map$,0,0,"Mestre Zumbi",1298,10;
 	monster .@map$,0,0,"General Esqueleto",1290,10;
-	monster .@map$,0,0,"Cr�nio Flamejante",1869,10;
+	monster .@map$,0,0,"Cranio Flamejante",1869,10;
 	monster .@map$,0,0,"Espectro Morto",1291,10;
 	monster .@map$,0,0,"Espectro Morto",1291,10;
 	monster .@map$,0,0,"Khalitzburg",1132,10;
 	monster .@map$,0,0,"Khalitzburg",1132,10;
-	monster .@map$,0,0,"Cr�nio Flamejante",1869,10;
-	monster .@map$,0,0,"Cr�nio Flamejante",1869,10;
-	monster .@map$,0,0,"M�mico Antigo",1699,10;
+	monster .@map$,0,0,"Cranio Flamejante",1869,10;
+	monster .@map$,0,0,"Cranio Flamejante",1869,10;
+	monster .@map$,0,0,"Mimico Antigo",1699,10;
 	monster .@map$,0,0,"Mestre Zumbi",1298,10;
-	monster .@map$,0,0,"M�mico Antigo",1699,10;
+	monster .@map$,0,0,"Mimico Antigo",1699,10;
 	monster .@map$,0,0,"Mestre Zumbi",1298,10;
 	monster .@map$,0,0,"Espectro Morto",1291,10;
 	monster .@map$,0,0,"General Esqueleto",1290,10;
@@ -1546,7 +1546,7 @@ OnInstanceInit:
 	monster .@map$,0,0,"Druida Maligno",1117,10;
 	monster .@map$,0,0,"Druida Maligno",1117,10;
 	monster .@map$,0,0,"Banshee",1867,10;
-	monster .@map$,0,0,"Ilus�o das Trevas",1302,1;
+	monster .@map$,0,0,"Ilusao das Trevas",1302,1;
 	disablenpc instance_npcname("ins_1f_spawn_mobs");
 	end;
 }

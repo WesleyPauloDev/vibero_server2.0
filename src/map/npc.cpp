@@ -1122,6 +1122,106 @@ struct npc_data* npc_name2id(const char* name)
 {
 	return (struct npc_data *) strdb_get(npcname_db, name);
 }
+
+std::vector<s_item_source> npc_get_item_sources(t_itemid nameid)
+{
+	std::vector<s_item_source> sources;
+	DBIterator* iter = db_iterator(npcname_db);
+	struct npc_data* nd = nullptr;
+
+	for (nd = static_cast<struct npc_data*>(dbi_first(iter)); dbi_exists(iter); nd = static_cast<struct npc_data*>(dbi_next(iter))) {
+		bool sells_item = false;
+		e_item_source_type source_type = ITEM_SOURCE_NPC_SHOP;
+
+		if (nd->subtype == NPCTYPE_BARTER) {
+			std::shared_ptr<s_npc_barter> barter = barter_db.find(nd->exname);
+
+			if (barter != nullptr) {
+				for (const auto& item_pair : barter->items) {
+					if (item_pair.second->nameid == nameid) {
+						sells_item = true;
+						break;
+					}
+				}
+			}
+			source_type = ITEM_SOURCE_BARTER;
+		} else if (nd->subtype == NPCTYPE_SHOP || nd->subtype == NPCTYPE_CASHSHOP ||
+			nd->subtype == NPCTYPE_ITEMSHOP || nd->subtype == NPCTYPE_POINTSHOP ||
+			nd->subtype == NPCTYPE_MARKETSHOP) {
+			for (uint16 i = 0; i < nd->u.shop.count; ++i) {
+				if (nd->u.shop.shop_item[i].nameid == nameid) {
+					sells_item = true;
+					break;
+				}
+			}
+		}
+
+		if (!sells_item)
+			continue;
+
+		s_item_source source;
+		source.type = source_type;
+		source.display_name = *nd->name != '\0' ? nd->name : nd->exname;
+		source.npc_name = nd->exname;
+		if (nd->m >= 0)
+			source.map_name = map[nd->m].name;
+
+		// Names such as "Utility Shop#eden" use the suffix as a friendly
+		// location identifier. Hide it from the shop name and show "Eden"
+		// instead of an internal map name such as "moc_para01".
+		std::string name_with_suffix = source.display_name;
+		size_t separator = name_with_suffix.find('#');
+		if (separator == std::string::npos) {
+			name_with_suffix = source.npc_name;
+			separator = name_with_suffix.find('#');
+		}
+		if (separator != std::string::npos && separator + 1 < name_with_suffix.length()) {
+			if (source.display_name.find('#') != std::string::npos)
+				source.display_name.erase(source.display_name.find('#'));
+
+			source.map_name = name_with_suffix.substr(separator + 1);
+			bool capitalize = true;
+			for (char& character : source.map_name) {
+				if (character == '_') {
+					character = ' ';
+					capitalize = true;
+				} else if (capitalize) {
+					character = static_cast<char>(std::toupper(static_cast<unsigned char>(character)));
+					capitalize = false;
+				}
+			}
+		}
+		sources.emplace_back(std::move(source));
+	}
+
+	dbi_destroy(iter);
+
+	std::sort(sources.begin(), sources.end(), [](const s_item_source& left, const s_item_source& right) {
+		if (left.display_name != right.display_name)
+			return left.display_name < right.display_name;
+		return left.npc_name < right.npc_name;
+	});
+
+	// Regular NPC shops use the same item price. Keep only one shop in the
+	// result and prefer Prontera because its utility shop is more complete.
+	// Preserve every barter, whose requirements may differ.
+	std::string selected_shop;
+	for (const s_item_source& source : sources) {
+		if (source.type != ITEM_SOURCE_NPC_SHOP)
+			continue;
+		if (selected_shop.empty())
+			selected_shop = source.npc_name;
+		if (strcasecmp(source.map_name.c_str(), "prontera") == 0) {
+			selected_shop = source.npc_name;
+			break;
+		}
+	}
+	sources.erase(std::remove_if(sources.begin(), sources.end(), [&selected_shop](const s_item_source& source) {
+		return source.type == ITEM_SOURCE_NPC_SHOP && source.npc_name != selected_shop;
+	}), sources.end());
+
+	return sources;
+}
 /**
  * For the Secure NPC Timeout option (check src/config/secure.hpp)
  * @author RR
@@ -2167,6 +2267,11 @@ struct npc_data* npc_checknear(map_session_data* sd, struct block_list* bl)
 	if(bl == nullptr) return nullptr;
 	if(bl->type != BL_NPC) return nullptr;
 	nd = (TBL_NPC*)bl;
+
+	// A shop opened through the script command callshop is intentionally
+	// accessible remotely until the transaction or NPC state is closed.
+	if (sd->state.callshop && sd->npc_shopid == nd->id)
+		return nd;
 
 	if(sd->state.using_fake_npc && sd->npc_id == bl->id)
 		return nd;

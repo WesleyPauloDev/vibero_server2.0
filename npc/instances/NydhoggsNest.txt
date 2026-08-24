@@ -89,11 +89,11 @@ OnEnable:
 	end;
 
 OnTimer12000:
-	mapannounce instance_mapname("2@nyd"), "Sombra de Nidhoggur: Chega... Eu n�o aguento mais...",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@nyd"), "Sombra de Nidhoggur: Chega... Eu nao aguento mais...",bc_map,"0xFFFF00";
 	end;
 
 OnTimer15000:
-	mapannounce instance_mapname("2@nyd"), "Sombra de Nidhoggur: Eu preciso... Eu preciso do poder da �rvore-Mundo Yggdrasil...",bc_map,"0xFFFF00";
+	mapannounce instance_mapname("2@nyd"), "Sombra de Nidhoggur: Eu preciso... Eu preciso do poder da Arvore-Mundo Yggdrasil...",bc_map,"0xFFFF00";
 	end;
 
 OnTimer18000:
@@ -106,9 +106,9 @@ OnTimer18000:
 2@nyd,199,178,0	script	nyd_2f_ddr_control	-1,6,6,{
 OnTouch:
 	specialeffect2 EF_HOLYHIT;
-	mes "Debaixo das pedras reluzentes, uma estranha brisa come�a a se formar.";
+	mes "Debaixo das pedras reluzentes, uma estranha brisa comeca a se formar.";
 	next;
-	mes "O estranho poder lentamente envolve seu corpo, e a dimens�o come�a a mudar.";
+	mes "O estranho poder lentamente envolve seu corpo, e a dimensao comeca a mudar.";
 	close2;
 	warp instance_mapname("2@nyd"),199,255;
 	end;
@@ -133,7 +133,7 @@ OnEnable:
 	enablenpc instance_npcname("nyd_2f_boss_enter_call");
 	set .@map$, instance_mapname("2@nyd");
 	monster .@map$,199,327,"Sombra de Nidhoggur",2022,1,instance_npcname("nyd_2f_boss_enter_call")+"::OnMyMobDead";
-	mapannounce .@map$, "Sombra de Nidhoggur: Eu devorarei todos voc�s... voc�s e a �rvore-Mundo Yggdrasil.",bc_map,"0x00ff99";
+	mapannounce .@map$, "Sombra de Nidhoggur: Eu devorarei todos voces... voces e a Arvore-Mundo Yggdrasil.",bc_map,"0x00ff99";
 	initnpctimer;
 	end;
 
@@ -148,7 +148,7 @@ OnWarpColor:
 	set .@map$, instance_mapname("2@nyd");
 	switch(rand(1,4)) {
 	case 1:
-		mapannounce .@map$, "Sombra de Nidhoggur: Neste caos... o seu sangue � tudo o que eu preciso.",bc_map,"0xFFFF00";
+		mapannounce .@map$, "Sombra de Nidhoggur: Neste caos... o seu sangue e tudo o que eu preciso.",bc_map,"0xFFFF00";
 		donpcevent instance_npcname("nyd_2f_white")+"::OnDisable";
 		donpcevent instance_npcname("nyd_2f_yellow")+"::OnDisable";
 		donpcevent instance_npcname("nyd_2f_green")+"::OnDisable";
@@ -156,7 +156,7 @@ OnWarpColor:
 		instance_warpall .@map$,115,278, instance_id();
 		end;
 	case 2:
-		mapannounce .@map$, "Sombra de Nidhoggur: Eu vou congelar at� a �ltima gota do seu sangue.",bc_map,"0xFFFF00";
+		mapannounce .@map$, "Sombra de Nidhoggur: Eu vou congelar ate a ultima gota do seu sangue.",bc_map,"0xFFFF00";
 		donpcevent instance_npcname("nyd_2f_red")+"::OnDisable";
 		donpcevent instance_npcname("nyd_2f_yellow")+"::OnDisable";
 		donpcevent instance_npcname("nyd_2f_green")+"::OnDisable";
@@ -164,7 +164,7 @@ OnWarpColor:
 		instance_warpall .@map$,115,373, instance_id();
 		end;
 	case 3:
-		mapannounce .@map$, "Sombra de Nidhoggur: Durmam para sempre em uma ilus�o vazia.",bc_map,"0xFFFF00";
+		mapannounce .@map$, "Sombra de Nidhoggur: Durmam para sempre em uma ilusao vazia.",bc_map,"0xFFFF00";
 		donpcevent instance_npcname("nyd_2f_red")+"::OnDisable";
 		donpcevent instance_npcname("nyd_2f_white")+"::OnDisable";
 		donpcevent instance_npcname("nyd_2f_green")+"::OnDisable";
@@ -185,7 +185,7 @@ OnWarpColor:
 OnMyMobDead:
 	set .@map$, instance_mapname("2@nyd");
 	if (mobcount(.@map$,instance_npcname("nyd_2f_boss_enter_call")+"::OnMyMobDead") < 1) {
-		mapannounce .@map$, "Sombra de Nidhoggur: Guardi�o da �rvore-Mundo Yggdrasil... seus poderes est�o desaparecendo...",bc_map,"0x00ff99";
+		mapannounce .@map$, "Sombra de Nidhoggur: Guardiao da Arvore-Mundo Yggdrasil... seus poderes estao desaparecendo...",bc_map,"0x00ff99";
 		donpcevent instance_npcname("Fada do Yggdrasil#2F")+"::OnEnable";
 		donpcevent instance_npcname("nyd_2f_boss_enter_call")+"::OnDisable";
 		donpcevent instance_npcname("nyd_2f_boss_enter_logic")+"::OnDisable";
@@ -222,30 +222,30 @@ OnTimer180000:
 }
 
 2@nyd,202,324,5	script	Fada do Yggdrasil#2F	437,3,3,{
-	mes "[�rvore do Mundo Yggdrasil]";
-	mes "Obrigada. Voc� � o salvador dos humanos e da Tribo Laphine.";
+	mes "[Arvore do Mundo Yggdrasil]";
+	mes "Obrigada. Voce e o salvador dos humanos e da Tribo Laphine.";
 	next;
-	mes "[�rvore do Mundo Yggdrasil]";
-	mes "Voc� derrotou a Sombra de Nidhoggur. Mas... ela n�o desapareceu completamente. Seus poderes est�o apenas adormecidos.";
+	mes "[Arvore do Mundo Yggdrasil]";
+	mes "Voce derrotou a Sombra de Nidhoggur. Mas... ela nao desapareceu completamente. Seus poderes estao apenas adormecidos.";
 	next;
-	mes "[�rvore do Mundo Yggdrasil]";
-	mes "Mesmo assim, voc� nos concedeu um tempo precioso. Isso � maravilhoso.";
+	mes "[Arvore do Mundo Yggdrasil]";
+	mes "Mesmo assim, voce nos concedeu um tempo precioso. Isso e maravilhoso.";
 	next;
-	mes "[�rvore do Mundo Yggdrasil]";
-	mes "Por favor, v� e reporte isso aos respons�veis por Splendide e Manuk.";
+	mes "[Arvore do Mundo Yggdrasil]";
+	mes "Por favor, va e reporte isso aos responsaveis por Splendide e Manuk.";
 	next;
-	mes "[�rvore do Mundo Yggdrasil]";
-	mes "Como voc� viu, nem a tribo Sapha nem a tribo Laphine s�o culpadas pelo enfraquecimento da �rvore do Mundo. Tudo aconteceu por causa da Sombra do Guardi�o...";
+	mes "[Arvore do Mundo Yggdrasil]";
+	mes "Como voce viu, nem a tribo Sapha nem a tribo Laphine sao culpadas pelo enfraquecimento da Arvore do Mundo. Tudo aconteceu por causa da Sombra do Guardiao...";
 	next;
-	mes "[�rvore do Mundo Yggdrasil]";
-	mes "A loucura do Guardi�o... foi causada por poderes desconhecidos para n�s... Voc� deve contar isso a todos.";
+	mes "[Arvore do Mundo Yggdrasil]";
+	mes "A loucura do Guardiao... foi causada por poderes desconhecidos para nos... Voce deve contar isso a todos.";
 	next;
-	mes "[�rvore do Mundo Yggdrasil]";
-	mes "Agora... permita-me escolt�-lo para fora deste ninho amaldi�oado.";
+	mes "[Arvore do Mundo Yggdrasil]";
+	mes "Agora... permita-me escolta-lo para fora deste ninho amaldicoado.";
 	next;
 	switch(select("Por favor, me leve para fora.:Quero olhar ao redor por mais um tempo.")) {
 	case 1:
-		// Premia��es do Servidor
+		// Premiacoes do Servidor
 		if (#NYD_STATUS == 1 || #NYD_STATUS == 2) {
 			set ins_nyd2, 0;
 			set ins_nyd, 203;
@@ -257,7 +257,7 @@ OnTimer180000:
 		warp "nyd_dun02",98,196;
 		end;
 	case 2:
-		mes "[�rvore do Mundo Yggdrasil]";
+		mes "[Arvore do Mundo Yggdrasil]";
 		mes "Entendo... Estarei por aqui caso queira sair.";
 		close;
 	}
@@ -269,7 +269,7 @@ OnDisable:
 
 OnEnable:
 	enablenpc instance_npcname("Fada do Yggdrasil#2F");
-	mapannounce instance_mapname("2@nyd"), "�rvore do Mundo Yggdrasil: Voc� fez bem. Pe�a a todos que se re�nam no C�rculo M�gico no centro e se preparem para a destrui��o do ninho.", bc_map, "0x00ff99";
+	mapannounce instance_mapname("2@nyd"), "Arvore do Mundo Yggdrasil: Voce fez bem. Peca a todos que se reunam no Circulo Magico no centro e se preparem para a destruicao do ninho.", bc_map, "0x00ff99";
 	end;
 }
 
@@ -358,7 +358,7 @@ OnEnable:
 OnMyMobDead:
 	set .@map$, instance_mapname("2@nyd");
 	if (mobcount(.@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead") < 1) {
-		mapannounce .@map$, "Sombra de Nidhoggur: Voc� n�o � ruim... mas eu serei seu oponente desta vez.",bc_map,"0x00ff99";
+		mapannounce .@map$, "Sombra de Nidhoggur: Voce nao e ruim... mas eu serei seu oponente desta vez.",bc_map,"0x00ff99";
 		donpcevent instance_npcname("nyd_2f_boss_enter_logic")+"::OnEnable";
 		donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
 		end;
