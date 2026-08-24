@@ -14,6 +14,9 @@
 #include <csetjmp>
 #include <cstdlib> // atoi, strtol, strtoll, exit
 #include <fstream>
+#include <limits>
+#include <regex>
+#include <unordered_set>
 
 #ifdef PCRE_SUPPORT
 #include <pcre.h> // preg_match
@@ -19171,6 +19174,119 @@ BUILDIN_FUNC(getitemsource)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+static bool item_has_active_mob_source(t_itemid nameid) {
+	for (const auto& mob_pair : mob_db) {
+		if (mob_spawn_data.find(static_cast<uint16>(mob_pair.first)) == mob_spawn_data.end())
+			continue;
+
+		const std::shared_ptr<s_mob_db>& mob = mob_pair.second;
+		for (const std::shared_ptr<s_mob_drop>& drop : mob->dropitem) {
+			if (drop->nameid == nameid && drop->rate > 0)
+				return true;
+		}
+		for (const std::shared_ptr<s_mob_drop>& drop : mob->mvpitem) {
+			if (drop->nameid == nameid && drop->rate > 0)
+				return true;
+		}
+	}
+
+	return false;
+}
+
+static bool item_is_configured_start_reward(t_itemid nameid) {
+	static bool loaded = false;
+	static std::unordered_set<t_itemid> start_items;
+	if (!loaded) {
+		loaded = true;
+		std::ifstream input("conf/char_athena.conf");
+		std::string line;
+		static const std::regex item_pattern(R"((?:^|:)\s*([0-9]+)\s*,)");
+
+		while (std::getline(input, line)) {
+			const size_t separator = line.find(':');
+			if (separator == std::string::npos)
+				continue;
+
+			const std::string key = line.substr(0, separator);
+			if (key != "start_items" && key != "start_items_doram")
+				continue;
+
+			const std::string values = line.substr(separator + 1);
+			for (std::sregex_iterator it(values.begin(), values.end(), item_pattern), last; it != last; ++it) {
+				const uint64 parsed_id = std::strtoull((*it)[1].str().c_str(), nullptr, 10);
+				if (parsed_id > 0 && parsed_id <= std::numeric_limits<t_itemid>::max())
+					start_items.insert(static_cast<t_itemid>(parsed_id));
+			}
+		}
+	}
+
+	return start_items.find(nameid) != start_items.end();
+}
+
+static bool item_has_active_source(t_itemid nameid) {
+	return !npc_get_item_sources(nameid).empty() ||
+		item_has_active_mob_source(nameid) ||
+		npc_item_is_script_reward(nameid) ||
+		item_is_configured_start_reward(nameid);
+}
+
+// Returns container item IDs whose scripts directly give the requested item
+// or open an item group that contains it.
+BUILDIN_FUNC(getitemboxsource)
+{
+	const t_itemid nameid = static_cast<t_itemid>(script_getnum(st, 2));
+
+	if (!item_db.exists(nameid)) {
+		script_pushint(st, -1);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	map_session_data* sd = nullptr;
+	if (!script_rid2sd(sd)) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	struct script_data* box_data = script_getdata(st, 3);
+	if (!data_isreference(box_data) || is_string_variable(reference_getname(box_data))) {
+		ShowError("buildin_getitemboxsource: Expected an integer array reference.\n");
+		script_pushint(st, 0);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	std::vector<t_itemid> box_ids;
+	for (const auto& item_pair : item_db) {
+		const std::shared_ptr<item_data>& box = item_pair.second;
+		if (!box->flag.group || (box->type != IT_USABLE && box->type != IT_DELAYCONSUME))
+			continue;
+
+		bool found = std::find(box->container_items.begin(), box->container_items.end(), nameid) != box->container_items.end();
+		if (!found) {
+			for (const uint16 group_id : box->container_groups) {
+				// item_exists() only consults groups actually loaded by this server.
+				if (itemdb_group.exists(group_id) && itemdb_group.item_exists(group_id, nameid)) {
+					found = true;
+					break;
+				}
+			}
+		}
+
+		if (found && item_has_active_source(box->nameid))
+			box_ids.push_back(box->nameid);
+	}
+
+	std::sort(box_ids.begin(), box_ids.end());
+	box_ids.erase(std::unique(box_ids.begin(), box_ids.end()), box_ids.end());
+
+	for (size_t i = 0; i < box_ids.size(); ++i) {
+		const uint32 index = reference_getindex(box_data) + static_cast<uint32>(i);
+		set_reg_num(st, sd, reference_uid(reference_getid(box_data), index), reference_getname(box_data), box_ids[i], reference_getref(box_data));
+	}
+
+	script_pushint64(st, box_ids.size());
+	return SCRIPT_CMD_SUCCESS;
+}
+
 // Reads identifiedDisplayName values from a text Lua/LUB itemInfo table.
 // The original bytes are preserved so the name uses the client's encoding.
 BUILDIN_FUNC(getitemclientname)
@@ -29071,6 +29187,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(checkwall,"s"),
 	BUILDIN_DEF(searchitem,"rs"),
 	BUILDIN_DEF(getitemsource,"irrrr"),
+	BUILDIN_DEF(getitemboxsource,"ir"),
 	BUILDIN_DEF(getitemclientname,"is"),
 	BUILDIN_DEF(mercenary_create,"ii"),
 	BUILDIN_DEF(mercenary_delete,"??"),

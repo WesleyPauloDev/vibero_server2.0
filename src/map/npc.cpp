@@ -3,9 +3,13 @@
 
 #include "npc.hpp"
 
+#include <cctype>
 #include <cerrno>
 #include <cstdlib>
+#include <limits>
 #include <map>
+#include <regex>
+#include <unordered_set>
 #include <vector>
 
 #include <common/cbasetypes.hpp>
@@ -49,6 +53,42 @@ static int32 npc_script=0;
 static int32 npc_mob=0;
 static int32 npc_delay_mob=0;
 static int32 npc_cache_mob=0;
+
+static std::unordered_set<t_itemid> npc_script_reward_items;
+
+static void npc_index_script_rewards(const char* begin, const char* end) {
+	if (begin == nullptr || end == nullptr || end <= begin)
+		return;
+
+	static const std::regex comment_pattern(R"(/\*[\s\S]*?\*/|//[^\r\n]*)");
+	static const std::regex getitem_pattern(
+		R"npc((?:^|[^A-Za-z0-9_])getitem(?:bound|2|3)?\s*(?:\(\s*)?(?:"([^"]+)"|([A-Za-z_][A-Za-z0-9_]*|[0-9]+))\s*,)npc",
+		std::regex_constants::icase);
+	const std::string source(begin, end);
+	const std::string active_source = std::regex_replace(source, comment_pattern, " ");
+
+	for (std::sregex_iterator it(active_source.begin(), active_source.end(), getitem_pattern), last; it != last; ++it) {
+		const std::string token = (*it)[1].matched ? (*it)[1].str() : (*it)[2].str();
+		t_itemid nameid = 0;
+
+		if (!token.empty() && std::isdigit(static_cast<unsigned char>(token[0]))) {
+			const uint64 parsed_id = std::strtoull(token.c_str(), nullptr, 10);
+			if (parsed_id <= std::numeric_limits<t_itemid>::max())
+				nameid = static_cast<t_itemid>(parsed_id);
+		} else {
+			const std::shared_ptr<item_data> item = item_db.search_aegisname(token.c_str());
+			if (item != nullptr)
+				nameid = item->nameid;
+		}
+
+		if (nameid != 0)
+			npc_script_reward_items.insert(nameid);
+	}
+}
+
+bool npc_item_is_script_reward(t_itemid nameid) {
+	return npc_script_reward_items.find(nameid) != npc_script_reward_items.end();
+}
 
 struct eri *npc_sc_display_ers;
 
@@ -4628,6 +4668,7 @@ static const char* npc_parse_script(char* w1, char* w2, char* w3, char* w4, cons
 	if( end == nullptr )
 		return nullptr;// (simple) parse error, don't continue
 
+	npc_index_script_rewards(script_start, end);
 	script = parse_script(script_start, filepath, strline(buffer,script_start-buffer), SCRIPT_USE_LABEL_DB);
 	label_list = nullptr;
 	label_list_num = 0;
@@ -5384,6 +5425,7 @@ static const char* npc_parse_function(char* w1, char* w2, char* w3, char* w4, co
 	if( end == nullptr )
 		return nullptr;// (simple) parse error, don't continue
 
+	npc_index_script_rewards(script_start, end);
 	script = parse_script(script_start, filepath, strline(buffer,start-buffer), SCRIPT_RETURN_EMPTY_SCRIPT);
 	if( script == nullptr )// parse error, continue
 		return end;
@@ -6329,6 +6371,7 @@ int32 npc_reload(void) {
 
 	npc_warp = npc_shop = npc_script = 0;
 	npc_mob = npc_cache_mob = npc_delay_mob = 0;
+	npc_script_reward_items.clear();
 
 	// reset mapflags
 	map_flags_init();

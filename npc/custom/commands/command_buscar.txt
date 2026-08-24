@@ -1,10 +1,12 @@
 // Localizador de fontes de itens.
-// Tipos retornados por getitemsource(): 1 = loja de NPC, 2 = barter.
+// Tipos usados no menu: 1 = loja de NPC, 2 = barter, 3 = caixa.
 -	script	ComandoBuscar	-1,{
 
 OnInit:
 	.client_iteminfo$ = "C:/Users/wesley/Desktop/VibeRO - Client/System/iteminfo_ptbr.lub";
+	.client_iteminfo_custom$ = "C:/Users/wesley/Desktop/VibeRO - Client/System/iteminfo_item.lub";
 	.client_iteminfo_fallback$ = "C:/Users/wesley/Desktop/MeuRag/System/iteminfo_ptbr.lub";
+	.client_iteminfo_custom_fb$ = "C:/Users/wesley/Desktop/MeuRag/System/iteminfo_item.lub";
 
 	// Mapeamento: nome tecnico da loja -> nome exibido ao jogador.
 	setarray .source_ids$[0],
@@ -471,23 +473,51 @@ OnAtcommand:
 		}
 		++.@source_count;
 	}
+	// Acrescenta caixas que entregam o item diretamente ou por item group.
+	.@box_count = getitemboxsource(.@item_id, .@box_ids);
+	for (.@i = 0; .@i < .@box_count; ++.@i) {
+		.@box_name$ = getitemclientname(.@box_ids[.@i], .client_iteminfo$);
+		if (.@box_name$ == "")
+			.@box_name$ = getitemclientname(.@box_ids[.@i], .client_iteminfo_custom$);
+		if (.@box_name$ == "")
+			.@box_name$ = getitemclientname(.@box_ids[.@i], .client_iteminfo_fallback$);
+		if (.@box_name$ == "")
+			.@box_name$ = getitemclientname(.@box_ids[.@i], .client_iteminfo_custom_fb$);
+		if (.@box_name$ == "")
+			.@box_name$ = getitemname(.@box_ids[.@i]);
+		if (.@box_name$ == "" || .@box_name$ == "null")
+			.@box_name$ = replacestr(getiteminfo(.@box_ids[.@i], ITEMINFO_AEGISNAME), "_", " ");
+
+		.@source_names$[.@source_count] = .@box_name$;
+		.@source_npcs$[.@source_count] = "";
+		.@source_types[.@source_count] = 3;
+		.@source_maps$[.@source_count] = "";
+		.@source_box_ids[.@source_count] = .@box_ids[.@i];
+		++.@source_count;
+	}
 	freeloop(0);
 
 	mes "[Busca de Itens]";
 	// Usa o mesmo nome e a mesma codificacao da tabela do cliente.
 	.@item_name$ = getitemclientname(.@item_id, .client_iteminfo$);
 	if (.@item_name$ == "")
+		.@item_name$ = getitemclientname(.@item_id, .client_iteminfo_custom$);
+	if (.@item_name$ == "")
 		.@item_name$ = getitemclientname(.@item_id, .client_iteminfo_fallback$);
 	if (.@item_name$ == "")
+		.@item_name$ = getitemclientname(.@item_id, .client_iteminfo_custom_fb$);
+	if (.@item_name$ == "")
+		.@item_name$ = getitemname(.@item_id);
+	if (.@item_name$ == "" || .@item_name$ == "null")
 		.@item_name$ = replacestr(getiteminfo(.@item_id, ITEMINFO_AEGISNAME), "_", " ");
 	mes "Item: ^0055FF" + .@item_name$ + "^000000 (ID " + .@item_id + ")";
 	if (.@source_count == 0) {
-		mes "Ainda nao encontrei este item em lojas de NPC ou trocas barter.";
+		mes "Ainda nao encontrei este item em lojas de NPC, trocas barter ou caixas.";
 		mes "Drops, instancias e lojas de jogadores serao adicionados nas proximas etapas.";
 		close;
 	}
 
-	mes "Este item pode ser obtido nas fontes abaixo. Escolha uma para abrir o menu.";
+	mes "Este item pode ser obtido nas fontes abaixo. Escolha uma para ver os detalhes ou abrir o menu.";
 	.@page = 0;
 	.@per_page = 8;
 
@@ -497,7 +527,7 @@ OnAtcommand:
 		.@menu$ = "";
 
 		for (.@i = .@start; .@i < .@end; ++.@i) {
-			.@kind$ = (.@source_types[.@i] == 2 ? "Troca" : "Loja");
+			.@kind$ = (.@source_types[.@i] == 3 ? "Caixa" : (.@source_types[.@i] == 2 ? "Troca" : "Loja"));
 			.@where$ = (.@source_maps$[.@i] == "" ? "" : " - " + .@source_maps$[.@i]);
 			.@menu$ += .@source_names$[.@i] + " [" + .@kind$ + "]" + .@where$ + ":";
 		}
@@ -531,6 +561,12 @@ OnAtcommand:
 	}
 
 	mes "[Busca de Itens]";
+	if (.@source_types[.@selected] == 3) {
+		mes "Este item pode ser obtido ao abrir a caixa ^0055FF" + .@source_names$[.@selected] + "^000000 (ID " + .@source_box_ids[.@selected] + ").";
+		mes "A recompensa da caixa pode ser direta ou fazer parte de um grupo de itens.";
+		close;
+	}
+
 	mes "Este item pode ser obtido no NPC ^0055FF" + .@source_names$[.@selected] + "^000000.";
 	if (.@source_maps$[.@selected] != "")
 		mes "Local: ^00AA00" + .@source_maps$[.@selected] + "^000000.";

@@ -8,7 +8,9 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <map>
+#include <regex>
 #include <unordered_map>
 
 #include <common/nullpo.hpp>
@@ -36,6 +38,45 @@ ItemGroupDatabase itemdb_group;
 struct s_roulette_db rd;
 
 static void itemdb_jobid2mapid(uint64 bclass[3], e_mapid jobmask, bool active);
+
+static void itemdb_parse_container_sources(item_data& item, const std::string& script) {
+	item.container_items.clear();
+	item.container_groups.clear();
+
+	// Only active usable containers from the item database loaded by this
+	// map-server are valid box sources for @buscar.
+	if (!item.flag.group || (item.type != IT_USABLE && item.type != IT_DELAYCONSUME))
+		return;
+
+	static const std::regex getitem_pattern(
+		R"((?:^|[^A-Za-z0-9_])getitem\s*(?:\(\s*)?([0-9]+)\s*,)",
+		std::regex_constants::icase);
+	static const std::regex getgroupitem_pattern(
+		R"((?:^|[^A-Za-z0-9_])getgroupitem\s*\(\s*(IG_[A-Za-z0-9_]+))",
+		std::regex_constants::icase);
+	static const std::regex comment_pattern(R"(/\*[\s\S]*?\*/|//[^\r\n]*)");
+	const std::string active_script = std::regex_replace(script, comment_pattern, " ");
+
+	for (std::sregex_iterator it(active_script.begin(), active_script.end(), getitem_pattern), end; it != end; ++it) {
+		const uint64 parsed_id = std::stoull((*it)[1].str());
+		if (parsed_id == 0 || parsed_id > std::numeric_limits<t_itemid>::max())
+			continue;
+
+		const t_itemid nameid = static_cast<t_itemid>(parsed_id);
+		if (std::find(item.container_items.begin(), item.container_items.end(), nameid) == item.container_items.end())
+			item.container_items.push_back(nameid);
+	}
+
+	for (std::sregex_iterator it(active_script.begin(), active_script.end(), getgroupitem_pattern), end; it != end; ++it) {
+		int64 constant;
+		if (!script_get_constant((*it)[1].str().c_str(), &constant) || constant < IG_BLUEBOX || constant > UINT16_MAX)
+			continue;
+
+		const uint16 group_id = static_cast<uint16>(constant);
+		if (std::find(item.container_groups.begin(), item.container_groups.end(), group_id) == item.container_groups.end())
+			item.container_groups.push_back(group_id);
+	}
+}
 
 const std::string ItemDatabase::getDefaultLocation() {
 	return std::string(db_path) + "/item_db.yml";
@@ -1068,10 +1109,14 @@ uint64 ItemDatabase::parseBodyNode(const ryml::NodeRef& node) {
 			item->script = nullptr;
 		}
 
+		itemdb_parse_container_sources(*item, script);
 		item->script = parse_script(script.c_str(), this->getCurrentFile().c_str(), this->getLineNumber(node["Script"]), SCRIPT_IGNORE_EXTERNAL_BRACKETS);
 	} else {
-		if (!exists) 
+		if (!exists) {
+			item->container_items.clear();
+			item->container_groups.clear();
 			item->script = nullptr;
+		}
 	}
 
 	if (this->nodeExists(node, "EquipScript")) {

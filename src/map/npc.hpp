@@ -1649,6 +1649,7 @@ void npc_setdisplayname(struct npc_data* nd, const char* newname);
 void npc_setclass(struct npc_data* nd, int16 class_);
 struct npc_data* npc_name2id(const char* name);
 std::vector<s_item_source> npc_get_item_sources(t_itemid nameid);
+bool npc_item_is_script_reward(t_itemid nameid);
 int32 npc_isnear_sub(struct block_list* bl, va_list args);
 bool npc_isnear(struct block_list * bl);
 

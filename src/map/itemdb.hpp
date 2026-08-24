@@ -3370,6 +3370,10 @@ struct item_data
 	struct script_code *script;	//Default script for everything.
 	struct script_code *equip_script;	//Script executed once when equipping.
 	struct script_code *unequip_script;//Script executed once when unequipping.
+	// Static item and group references found in scripts of container items.
+	// Used by @buscar to report which boxes can produce an item.
+	std::vector<t_itemid> container_items;
+	std::vector<uint16> container_groups;
 	struct {
 		unsigned available : 1;
 		uint32 no_equip;
