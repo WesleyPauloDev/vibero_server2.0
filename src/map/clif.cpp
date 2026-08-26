@@ -25122,63 +25122,39 @@ bool clif_parse_enchant_basecheck( struct item& selected_item, std::shared_ptr<s
 	return true;
 }
 
-static bool clif_enchant_add_confirm_item( map_session_data* sd, uint64 enchant_group, std::unordered_map<uint16, uint16>& materials ){
-	t_itemid required_box = 0;
+static bool clif_enchant_is_custom_glacial( uint64 enchant_group ){
+	return ( enchant_group >= 26 && enchant_group <= 30 ) || enchant_group == 47;
+}
 
-	switch( enchant_group ){
-		case 26:
-			required_box = 101185;
-			break;
-		case 27:
-			required_box = 101217;
-			break;
-		case 28:
-			required_box = 101218;
-			break;
-		case 29:
-			required_box = 101219;
-			break;
-		case 30:
-			required_box = 101220;
-			break;
-		case 47:
-			required_box = 101186;
-			break;
-		default:
-			return true;
+static bool clif_enchant_is_group_allowed( uint64 session_group, uint64 packet_group ){
+	if( session_group == packet_group ){
+		return true;
+	}
+	if( session_group == 26 && packet_group >= 26 && packet_group <= 30 ){
+		return true;
+	}
+	return false;
+}
+
+static std::shared_ptr<s_item_enchant> clif_enchant_resolve_snowflower_group( const struct item& selected_item, uint64 requested_group, std::shared_ptr<s_item_enchant> enchant ){
+	if( requested_group >= 26 && requested_group <= 30 ){
+		for( uint64 group = 26; group <= 30; group++ ){
+			std::shared_ptr<s_item_enchant> candidate = item_enchant_db.find( group );
+
+			if( candidate != nullptr && util::vector_exists( candidate->target_item_ids, selected_item.nameid ) ){
+				return candidate;
+			}
+		}
 	}
 
-	int16 idx = pc_search_inventory( sd, required_box );
-
-	if( idx < 0 ){
-		return false;
-	}
-
-	uint16 required_amount = 1;
-	auto material = materials.find( idx );
-
-	if( material != materials.end() ){
-		required_amount += material->second;
-	}
-
-	if( sd->inventory.u.items_inventory[idx].amount < required_amount ){
-		return false;
-	}
-
-	materials[idx] = required_amount;
-	return true;
+	return enchant;
 }
 
 void clif_parse_enchantwindow_general( int32 fd, map_session_data* sd ){
 #if PACKETVER_MAIN_NUM >= 20201118 || PACKETVER_RE_NUM >= 20211103 || PACKETVER_ZERO_NUM >= 20221024
 	const PACKET_CZ_REQUEST_RANDOM_ENCHANT* p = reinterpret_cast<PACKET_CZ_REQUEST_RANDOM_ENCHANT*>( RFIFOP( fd, 0 ) );
 
-	if( p->enchant_group == 47 ){
-		clif_enchantwindow_result( *sd, false );
-		return;
-	}
-
-	if( sd->state.item_enchant_index != p->enchant_group ){
+	if( !clif_enchant_is_group_allowed( sd->state.item_enchant_index, p->enchant_group ) ){
 		if( p->enchant_group == 47 ){
 			ShowInfo( "Dim Glacier enchant rejected: session group=%" PRIu64 " packet group=%" PRIu64 ".\n", sd->state.item_enchant_index, p->enchant_group );
 		}
@@ -25218,6 +25194,8 @@ void clif_parse_enchantwindow_general( int32 fd, map_session_data* sd ){
 		return;
 	}
 
+	enchant = clif_enchant_resolve_snowflower_group( selected_item, p->enchant_group, enchant );
+
 	uint16 slot = MAX_SLOTS;
 
 	for( uint16 nextSlot : enchant->order ){
@@ -25241,84 +25219,10 @@ void clif_parse_enchantwindow_general( int32 fd, map_session_data* sd ){
 		return;
 	}
 
-	if( p->enchant_group == 47 ){
-		ShowInfo( "Dim Glacier enchant processing: item=%u refine=%d enchantgrade=%u slot=%u cards=%u,%u,%u,%u itemslots=%u.\n", selected_item.nameid, selected_item.refine, selected_item.enchantgrade, slot, selected_item.card[0], selected_item.card[1], selected_item.card[2], selected_item.card[3], sd->inventory_data[index]->slots );
-
-		t_itemid material_id = 0;
-		uint16 material_amount = 0;
-		t_itemid enchant_item = 0;
-
-		switch( slot ){
-			case 3:
-				material_id = 1001034; // EP19_S_F_1_Extract
-				material_amount = 10;
-				switch( rnd_value( 0, 2 ) ){
-					case 0:
-						enchant_item = 311192; // Glacier_F_Orb_1
-						break;
-					case 1:
-						enchant_item = 311193; // Glacier_F_Orb_2
-						break;
-					default:
-						enchant_item = 311194; // Glacier_F_Orb_3
-						break;
-				}
-				break;
-			case 2:
-				material_id = 1001034; // EP19_S_F_1_Extract
-				material_amount = 30;
-				switch( rnd_value( 0, 2 ) ){
-					case 0:
-						enchant_item = 311192; // Glacier_F_Orb_1
-						break;
-					case 1:
-						enchant_item = 311193; // Glacier_F_Orb_2
-						break;
-					default:
-						enchant_item = 311194; // Glacier_F_Orb_3
-						break;
-				}
-				break;
-			case 1:
-				material_id = 1001034; // EP19_S_F_1_Extract
-				material_amount = 50;
-				enchant_item = rnd_value( 0, 1 ) == 0 ? 311449 : 311454; // Physical_Grade_1 / Magical_Grade_1
-				break;
-			default:
-				return;
-		}
-
-		std::unordered_map<uint16, uint16> materials;
-		int16 material_idx = pc_search_inventory( sd, material_id );
-
-		if( material_idx < 0 || sd->inventory.u.items_inventory[material_idx].amount < material_amount ){
-			ShowInfo( "Dim Glacier enchant rejected: missing material id=%u amount=%u found_index=%d.\n", material_id, material_amount, material_idx );
-			clif_enchantwindow_result( *sd, false );
-			return;
-		}
-
-		materials[material_idx] = material_amount;
-
-		if( !clif_enchant_add_confirm_item( sd, p->enchant_group, materials ) ){
-			ShowInfo( "Dim Glacier enchant rejected: missing box 101186.\n" );
-			clif_enchantwindow_result( *sd, false );
-			return;
-		}
-
-		for( const auto& entry : materials ){
-			if( pc_delitem( sd, entry.first, entry.second, 0, 0, LOG_TYPE_ENCHANT ) != 0 ){
-				ShowInfo( "Dim Glacier enchant rejected: failed to delete inventory index=%u amount=%u.\n", entry.first, entry.second );
-				clif_enchantwindow_result( *sd, false );
-				return;
-			}
-		}
-
-		log_pick_pc( sd, LOG_TYPE_ENCHANT, -1, &selected_item );
-		selected_item.card[slot] = enchant_item;
-		log_pick_pc( sd, LOG_TYPE_ENCHANT, 1, &selected_item );
-
-		clif_enchantwindow_result( *sd, true, selected_item.card[slot] );
-		ShowInfo( "Dim Glacier enchant success: item=%u slot=%u enchant=%u.\n", selected_item.nameid, slot, enchant_item );
+	if( clif_enchant_is_custom_glacial( p->enchant_group ) ){
+		// Snowflower e Dim Glacier possuem somente encantamento perfeito.
+		clif_enchantwindow_result( *sd, false );
+		clif_messagecolor( sd, color_table[COLOR_RED], "Equipamentos Glaciais utilizam apenas encantamento perfeito (selecione o encanto na lista a direita).", false, SELF );
 		return;
 	}
 
@@ -25354,10 +25258,6 @@ void clif_parse_enchantwindow_general( int32 fd, map_session_data* sd ){
 		}
 
 		materials[idx] = entry.second;
-	}
-
-	if( !clif_enchant_add_confirm_item( sd, p->enchant_group, materials ) ){
-		return;
 	}
 
 	if( pc_payzeny( sd, enchant_slot->normal.zeny, LOG_TYPE_ENCHANT ) != 0 ){
@@ -25413,7 +25313,7 @@ void clif_parse_enchantwindow_perfect( int32 fd, map_session_data* sd ){
 #if PACKETVER_MAIN_NUM >= 20201118 || PACKETVER_RE_NUM >= 20211103 || PACKETVER_ZERO_NUM >= 20221024
 	const PACKET_CZ_REQUEST_PERFECT_ENCHANT* p = reinterpret_cast<PACKET_CZ_REQUEST_PERFECT_ENCHANT*>( RFIFOP( fd, 0 ) );
 
-	if( sd->state.item_enchant_index != p->enchant_group ){
+	if( !clif_enchant_is_group_allowed( sd->state.item_enchant_index, p->enchant_group ) ){
 		return;
 	}
 
@@ -25437,6 +25337,8 @@ void clif_parse_enchantwindow_perfect( int32 fd, map_session_data* sd ){
 	if( !clif_parse_enchant_basecheck( selected_item, enchant ) ){
 		return;
 	}
+
+	enchant = clif_enchant_resolve_snowflower_group( selected_item, p->enchant_group, enchant );
 
 	uint16 slot = MAX_SLOTS;
 
@@ -25464,10 +25366,14 @@ void clif_parse_enchantwindow_perfect( int32 fd, map_session_data* sd ){
 	std::shared_ptr<s_item_enchant_perfect> perfect_enchant = util::umap_find( enchant_slot->perfect.enchants, p->ITID );
 
 	if( perfect_enchant == nullptr ){
+		clif_enchantwindow_result( *sd, false );
+		clif_messagecolor( sd, color_table[COLOR_RED], "Este encanto nao e valido para o slot atual.", false, SELF );
 		return;
 	}
 
 	if( sd->status.zeny < perfect_enchant->zeny ){
+		clif_enchantwindow_result( *sd, false );
+		clif_messagecolor( sd, color_table[COLOR_RED], "Voce nao possui Zeny suficiente.", false, SELF );
 		return;
 	}
 
@@ -25476,19 +25382,13 @@ void clif_parse_enchantwindow_perfect( int32 fd, map_session_data* sd ){
 	for( const auto& entry : perfect_enchant->materials ){
 		int16 idx = pc_search_inventory( sd, entry.first );
 
-		if( idx < 0 ){
-			return;
-		}
-
-		if( sd->inventory.u.items_inventory[idx].amount < entry.second ){
+		if( idx < 0 || sd->inventory.u.items_inventory[idx].amount < entry.second ){
+			clif_enchantwindow_result( *sd, false );
+			clif_messagecolor( sd, color_table[COLOR_RED], "Voce nao possui os materiais necessarios no inventario.", false, SELF );
 			return;
 		}
 
 		materials[idx] = entry.second;
-	}
-
-	if( !clif_enchant_add_confirm_item( sd, p->enchant_group, materials ) ){
-		return;
 	}
 
 	if( pc_payzeny( sd, perfect_enchant->zeny, LOG_TYPE_ENCHANT ) != 0 ){
@@ -25517,7 +25417,7 @@ void clif_parse_enchantwindow_upgrade( int32 fd, map_session_data* sd ){
 #if PACKETVER_MAIN_NUM >= 20201118 || PACKETVER_RE_NUM >= 20211103 || PACKETVER_ZERO_NUM >= 20221024
 	const PACKET_CZ_REQUEST_UPGRADE_ENCHANT* p = reinterpret_cast<PACKET_CZ_REQUEST_UPGRADE_ENCHANT*>( RFIFOP( fd, 0 ) );
 
-	if( sd->state.item_enchant_index != p->enchant_group ){
+	if( !clif_enchant_is_group_allowed( sd->state.item_enchant_index, p->enchant_group ) ){
 		return;
 	}
 
@@ -25588,10 +25488,6 @@ void clif_parse_enchantwindow_upgrade( int32 fd, map_session_data* sd ){
 		materials[idx] = entry.second;
 	}
 
-	if( !clif_enchant_add_confirm_item( sd, p->enchant_group, materials ) ){
-		return;
-	}
-
 	if( pc_payzeny( sd, upgrade->zeny, LOG_TYPE_ENCHANT ) != 0 ){
 		return;
 	}
@@ -25618,7 +25514,7 @@ void clif_parse_enchantwindow_reset( int32 fd, map_session_data* sd ){
 #if PACKETVER_MAIN_NUM >= 20201118 || PACKETVER_RE_NUM >= 20211103 || PACKETVER_ZERO_NUM >= 20221024
 	const PACKET_CZ_REQUEST_RESET_ENCHANT* p = reinterpret_cast<PACKET_CZ_REQUEST_RESET_ENCHANT*>( RFIFOP( fd, 0 ) );
 
-	if( sd->state.item_enchant_index != p->enchant_group ){
+	if( !clif_enchant_is_group_allowed( sd->state.item_enchant_index, p->enchant_group ) ){
 		return;
 	}
 
@@ -25695,10 +25591,6 @@ void clif_parse_enchantwindow_reset( int32 fd, map_session_data* sd ){
 		}
 
 		materials[idx] = entry.second;
-	}
-
-	if( !clif_enchant_add_confirm_item( sd, p->enchant_group, materials ) ){
-		return;
 	}
 
 	if( pc_payzeny( sd, enchant->reset.zeny, LOG_TYPE_ENCHANT ) != 0 ){

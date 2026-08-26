@@ -8,11 +8,57 @@ moc_para01,37,22,4	shop	Loja de Utilidades#eden	850,643:100,512:100,601:100,602:
 
 moc_para01,43,22,4	script	Pesquisador Glacial#eden	793,{
 	mes "[Pesquisador Glacial]";
-	mes "Eu troco materiais de Jor por suprimentos de encantamento Snowflower.";
-	mes "Escolha a opcao de acordo com o material que deseja entregar.";
-	close2;
-	callshop "barter_eden_snowflower_enchant", 1;
-	end;
+	mes "Posso fornecer equipamentos glaciais ou abrir a interface de encantamento.";
+
+	switch(select("Loja de equipamentos:Loja de armas:Loja de elixir para armas:Encantar equipamentos Flor de Neve:Encantar armas Dim Glacier:Sair")) {
+		case 1:
+			close2;
+			callshop "barter_eden_snowflower_equipment", 1;
+			end;
+		case 2:
+			close2;
+			callshop "barter_eden_dim_glacier_weapon", 1;
+			end;
+		case 3:
+			close2;
+			callshop "barter_eden_dim_glacier_elixir", 1;
+			end;
+		case 4:
+			mes "[Pesquisador Glacial]";
+			mes "Escolha qual tipo de equipamento Flor de Neve deseja encantar na interface:";
+			next;
+			switch(select("Armadura / Robe:Capa / Cachecol:Botas / Sapatos:Pendente / Colar:Anel / Brinco:Cancelar")) {
+				case 1:
+					close2;
+					item_enchant(26);
+					end;
+				case 2:
+					close2;
+					item_enchant(27);
+					end;
+				case 3:
+					close2;
+					item_enchant(28);
+					end;
+				case 4:
+					close2;
+					item_enchant(29);
+					end;
+				case 5:
+					close2;
+					item_enchant(30);
+					end;
+				default:
+					close;
+			}
+			end;
+		case 5:
+			close2;
+			item_enchant(47);
+			end;
+		default:
+			close;
+	}
 }
 
 moc_para01,37,15,4	duplicate(Warper)	Teleportador#eden	405
