@@ -1363,10 +1363,6 @@ OnMobDead:
 		getitem 1000103, .@reward;
 		next;
 	}
-	if (!'finish_announced) {
-		callfunc("F_InstanceFinishAnnounce", "Fazenda de Pitayas");
-		'finish_announced = 1;
-	}
 	mes "[Silk]";
 	mes "Entao... quer sair?";
 	next;
@@ -1388,7 +1384,7 @@ OnMobDead:
 			mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 			close;
 		}
-		.@finish_result = callfunc("F_InstanceFinishBase", "Fazenda de Pitayas", "#LostFarm_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Fazenda de Pitayas", 0);
+		.@finish_result = callfunc("F_InstanceFinishBase", "Fazenda de Pitayas", "#LostFarm_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Fazenda de Pitayas", 1);
 		if (.@finish_result == -1) {
 			mes "^008800Espere um pouco!!";
 			mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";

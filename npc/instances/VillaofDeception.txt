@@ -1019,8 +1019,7 @@ OnTouch:	// effect ?
 		close;
 	}
 
-	.@announce = (!'vdec_done && getcharid(1) > 0);
-	.@finish_result = callfunc("F_InstanceFinishBase", .@display_name$, .@status_var$, .@coin, .@ticket, "", "", 1, .@rep, 110002, 3000, 3, 0, .@display_name$, .@announce);
+	.@finish_result = callfunc("F_InstanceFinishBase", .@display_name$, .@status_var$, .@coin, .@ticket, "", "", 1, .@rep, 110002, 3000, 3, 0, .@display_name$, 1);
 	if (.@finish_result == -1) {
 		mes "[Aira]";
 		mes "Voce esta carregando peso demais para receber as recompensas.";
@@ -1031,13 +1030,7 @@ OnTouch:	// effect ?
 		setd(.@shared_status_var$, 3);
 		'vdec_reward[.@aid] = 1;
 		getitem 1000405, .@fragment;
-		if (!'vdec_done) {
-			'vdec_done = 1;
-			if (getcharid(1) < 1) {
-				callfunc("F_InstanceProgressComplete", .@aid, .@instance_code$, .@display_name$);
-				announce "[Instancias] " + strcharinfo(0) + " concluiu " + .@display_name$ + " em modo solo.", bc_all, "0xFF9900";
-			}
-		}
+		'vdec_done = 1;
 		mes "[Aira]";
 		mes "Recompensa entregue.";
 		mes "Vou te enviar ao seu ponto de salvamento.";

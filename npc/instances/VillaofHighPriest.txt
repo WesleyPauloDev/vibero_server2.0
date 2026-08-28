@@ -1137,8 +1137,7 @@ OnMobDead2:
 		mes "Libere espaco no inventario e fale comigo novamente.";
 		close3;
 	}
-	.@announce = (!'vhp_finish_announced);
-	.@finish_result = callfunc("F_InstanceFinishBase", "Vila do Sumo Sacerdote", "#VillaHighPriest_STATUS", 20, 2, "", "", 1, 20, 110002, 3000, 3, 0, "Vila do Sumo Sacerdote", .@announce);
+	.@finish_result = callfunc("F_InstanceFinishBase", "Vila do Sumo Sacerdote", "#VillaHighPriest_STATUS", 20, 2, "", "", 1, 20, 110002, 3000, 3, 0, "Vila do Sumo Sacerdote", 1);
 	if (.@finish_result == -1) {
 		cutin "ep18_miriam_01.png",0;
 		mes "[Miriam]";
@@ -1148,8 +1147,7 @@ OnMobDead2:
 	}
 	if (.@finish_result == 1) {
 		'vhp_reward_claimed[.@aid] = 1;
-		if (.@announce)
-			'vhp_finish_announced = 1;
+		'vhp_finish_announced = 1;
 		cutin "ep18_miriam_01.png",0;
 		mes "[Miriam]";
 		mes "Recompensa entregue.";

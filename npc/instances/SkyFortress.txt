@@ -2056,7 +2056,7 @@ OnTimer2000:
 			mes "- para receber as recompensas da instancia. -";
 			close;
 		}
-		.@finish_result = callfunc("F_InstanceFinishBase", "Fortaleza Celeste", "#SkyFortress_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Fortaleza Celeste", 0);
+		.@finish_result = callfunc("F_InstanceFinishBase", "Fortaleza Celeste", "#SkyFortress_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Fortaleza Celeste", 1);
 		if (.@finish_result == -1) {
 			mes "- Libere peso no inventario antes de sair";
 			mes "- para receber as recompensas da instancia. -";
@@ -2067,10 +2067,7 @@ OnTimer2000:
 			mes "- Tente novamente antes de sair da instancia. -";
 			close;
 		}
-		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Fortaleza Celeste");
-			'reward_announced = 1;
-		}
+		'reward_announced = 1;
 	}
 	mes "- Voce comeca a ser transportado. -";
 	close2;

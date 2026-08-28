@@ -488,10 +488,6 @@ OnInstanceInit:
 			setquest 16580;
 			getitem 1000405,50;	// Ep18_Amethyst_Fragment
 		}
-		if (!'reward_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Base Militar");
-			'reward_announced = 1;
-		}
 		if (.@party_id > 0) {
 			getpartymember(.@party_id,1);
 			getpartymember(.@party_id,2);
@@ -502,15 +498,24 @@ OnInstanceInit:
 					continue;
 				if (strcharinfo(3) != 'map_tcamp$ || (#ThorGunsuBase_STATUS != 1 && #ThorGunsuBase_STATUS != 2))
 					continue;
-				getitem 9608,20;	// Moeda de Instancia
-				getitem 9198,2;	// Ticket de Instancia
-				getitem 25669,5;
-				getitem 25723,5;
-				getitem 25668,1;
-				#ThorGunsuBase_STATUS = 3;
+				.@finish_result = callfunc("F_InstanceFinishBase", "Base Militar", "#ThorGunsuBase_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Base Militar", 1);
+				if (.@finish_result == 1) {
+					getitem 25669,5;
+					getitem 25723,5;
+					getitem 25668,1;
+				}
 			}
 			attachrid(.@speaker_aid);
 		}
+		else if (#ThorGunsuBase_STATUS == 1 || #ThorGunsuBase_STATUS == 2) {
+			.@finish_result = callfunc("F_InstanceFinishBase", "Base Militar", "#ThorGunsuBase_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Base Militar", 1);
+			if (.@finish_result == 1) {
+				getitem 25669,5;
+				getitem 25723,5;
+				getitem 25668,1;
+			}
+		}
+		'reward_announced = 1;
 		close2;
 		warp "SavePoint",0,0;
 		end;

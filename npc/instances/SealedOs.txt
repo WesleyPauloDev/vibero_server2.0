@@ -512,9 +512,8 @@ OnTouch:
 		warp "SavePoint",0,0;
 		end;
 	}
-	.@announce = (!'sealed_os_finish_announced);
-	.@finish_result = callfunc("F_InstanceFinishBase", "OS Selado", "#SealedOs_STATUS", 10, 2, "", "", 1, 10, 110002, 3000, 3, 0, "SealedOs", .@announce);
-	if (.@finish_result == 2) {
+	.@finish_result = callfunc("F_InstanceFinishBase", "OS Selado", "#SealedOs_STATUS", 10, 2, "", "", 1, 10, 110002, 3000, 3, 0, "SealedOs", 1);
+	if (.@finish_result == -1 || .@finish_result == 2) {
 		cutin "",255;
 		mes "[Ridsh]";
 		mes "Voce esta carregando peso demais para receber as recompensas.";
@@ -523,8 +522,7 @@ OnTouch:
 	}
 	if (.@finish_result == 1) {
 		'sealed_os_reward_claimed[.@aid] = 1;
-		if (.@announce)
-			'sealed_os_finish_announced = 1;
+		'sealed_os_finish_announced = 1;
 		cutin "",255;
 		mes "[Ridsh]";
 		mes "Recompensa entregue.";

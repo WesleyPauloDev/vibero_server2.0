@@ -520,8 +520,7 @@ OnInstanceInit:
 		end;
 	}
 
-	.@announce = (!'oz_finish_announced);
-	.@reward = callfunc("F_InstanceFinishBase", "Labirinto de Oz", "#MazeofOz_STATUS", 20, 2, "", "", 1, 20, 110002, 3000, 3, 0, "Labirinto de Oz", .@announce);
+	.@reward = callfunc("F_InstanceFinishBase", "Labirinto de Oz", "#MazeofOz_STATUS", 20, 2, "", "", 1, 20, 110002, 3000, 3, 0, "Labirinto de Oz", 1);
 	if (.@reward == -1) {
 		mes "[Corda de Saida]";
 		mes "Voce esta carregando peso demais para receber as recompensas.";
@@ -530,8 +529,7 @@ OnInstanceInit:
 	}
 	if (.@reward == 1) {
 		'oz_reward_claimed[.@aid] = 1;
-		if (.@announce)
-			'oz_finish_announced = 1;
+		'oz_finish_announced = 1;
 		mes "[Corda de Saida]";
 		mes "Recompensa entregue.";
 		mes "Voltando ao ponto de salvamento.";

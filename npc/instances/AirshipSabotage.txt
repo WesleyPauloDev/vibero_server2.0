@@ -233,7 +233,6 @@ OnTouch:
 	mes "O nucleo foi desativado e a rota de fuga esta aberta.";
 	next;
 	if (select("Sair do dirigivel:Continuar explorando") == 2) close;
-	.@announce = !'finish_announced;
 	.@result = callfunc("F_InstanceFinishBase",
 		"Sabotagem no Dirigivel",
 		"#AirshipSabotage_STATUS",
@@ -248,7 +247,7 @@ OnTouch:
 		3,
 		0,
 		"Sabotagem no Dirigivel",
-		.@announce
+		1
 	);
 	if (.@result == -1) {
 		mes "Voce nao possui peso suficiente para receber a recompensa.";
@@ -258,8 +257,7 @@ OnTouch:
 		mes "A recompensa desta operacao ja foi recebida ou sua participacao nao foi registrada.";
 		close;
 	}
-	if (.@announce)
-		'finish_announced = 1;
+	'finish_announced = 1;
 	close2;
 	warp "SavePoint",0,0;
 	end;

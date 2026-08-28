@@ -629,8 +629,7 @@ OnFail:
 		end;
 	}
 
-	.@announce = (!'rgsr_finish_announced);
-	.@finish_result = callfunc("F_InstanceFinishBase", "Regenschirm", "#Regenschirm_STATUS", 20, 2, "", "", 1, 20, 110002, 3000, 3, 0, "Regenschirm", .@announce);
+	.@finish_result = callfunc("F_InstanceFinishBase", "Regenschirm", "#Regenschirm_STATUS", 20, 2, "", "", 1, 20, 110002, 3000, 3, 0, "Regenschirm", 1);
 	if (.@finish_result == -1) {
 		mes "[Aas]";
 		mes "Voce esta carregando peso demais para receber as recompensas.";
@@ -639,8 +638,7 @@ OnFail:
 	}
 	if (.@finish_result == 1) {
 		'rgsr_reward_claimed[.@aid] = 1;
-		if (.@announce)
-			'rgsr_finish_announced = 1;
+		'rgsr_finish_announced = 1;
 		mes "[Aas]";
 		mes "Recompensa entregue.";
 		mes "Voltando ao ponto de salvamento.";

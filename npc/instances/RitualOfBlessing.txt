@@ -627,9 +627,8 @@ OnDisable:
 		warp "SavePoint",0,0;
 		end;
 	}
-	.@announce = (!'ritual_finish_announced);
-	.@finish_result = callfunc("F_InstanceFinishBase", "Ritual da Bencao", "#RitualOfBlessing_STATUS", 10, 2, "", "", 1, 10, 110002, 3000, 3, 0, "RitualOfBlessing", .@announce);
-	if (.@finish_result == 2) {
+	.@finish_result = callfunc("F_InstanceFinishBase", "Ritual da Bencao", "#RitualOfBlessing_STATUS", 10, 2, "", "", 1, 10, 110002, 3000, 3, 0, "RitualOfBlessing", 1);
+	if (.@finish_result == -1 || .@finish_result == 2) {
 		mes "[Kronecker]";
 		mes "Voce esta carregando peso demais para receber as recompensas.";
 		mes "Libere espaco no inventario e fale comigo novamente.";
@@ -637,8 +636,7 @@ OnDisable:
 	}
 	if (.@finish_result == 1) {
 		'ritual_reward_claimed[.@aid] = 1;
-		if (.@announce)
-			'ritual_finish_announced = 1;
+		'ritual_finish_announced = 1;
 		donpcevent instance_npcname("Friedrich S. Heine#stol_2") + "::OnDisable";
 		disablenpc instance_npcname("Nyhill M. Heine#nihil03");
 		mes "[Kronecker]";

@@ -443,7 +443,7 @@ function	script	F_InstanceHistoryCode	{
 		return "HeartHunterWarBase";
 	if (.@key$ == "FridayDungeon" || .@key$ == "Friday Dungeon" || .@key$ == "Dungeon da Sexta" || .@key$ == "Dungeon da Sexta-Feira" || .@key$ == "Tumulo do Monarca" || .@key$ == "Midnight Arena")
 		return "FridayDungeon";
-	if (.@key$ == "HiddenGarden" || .@key$ == "Hidden Flower Garden" || .@key$ == "Security Area 1" || .@key$ == "Security Area 2" || .@key$ == "Jardim de Vermuth")
+	if (.@key$ == "HiddenGarden" || .@key$ == "Hidden Flower Garden" || .@key$ == "Security Area 1" || .@key$ == "Security Area 2" || .@key$ == "Jardim de Vermuth" || .@key$ == "Jardim de Varmundt" || .@key$ == "Jardim de Vermuth - Normal" || .@key$ == "Jardim de Vermuth - Hard" || .@key$ == "Jardim de Varmundt - Normal" || .@key$ == "Jardim de Varmundt - Hard")
 		return "HiddenGarden";
 	if (.@key$ == "LostFarm" || .@key$ == "Lost Farm in Time" || .@key$ == "Farm Lost in Time" || .@key$ == "Fazenda Perdida no Tempo" || .@key$ == "Fazenda de Pitayas")
 		return "LostFarm";
@@ -596,7 +596,10 @@ function	script	F_InstanceFinishAnnounce	{
 	callfunc("F_InstanceRouletteComplete", .@db_name$);
 	if (#instancia == 1)
 		#instancia = 2;
-	announce "[Instancias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
+	if (getcharid(1) > 0)
+		announce "[Instancias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, "0xFF9900";
+	else
+		announce "[Instancias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " em modo solo.", bc_all, "0xFF9900";
 	return;
 }
 

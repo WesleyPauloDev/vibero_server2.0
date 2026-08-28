@@ -18,7 +18,16 @@ OnStartInstance:
 		#HiddenGarden_MODE = 0;
 	}
 
-	if (getd(.@status_name$) == 0 || #HiddenGarden_MODE == 0) {
+	.@live_iid = instance_id(IM_PARTY);
+	.@live_name$ = (.@live_iid > 0) ? instance_live_info(ILI_NAME, .@live_iid) : "";
+
+	if (.@live_name$ == "Security Area 2") {
+		#HiddenGarden_MODE = 2;
+	}
+	else if (.@live_name$ == "Security Area 1" || .@live_name$ == "Hidden Flower Garden") {
+		#HiddenGarden_MODE = 1;
+	}
+	else if (getd(.@status_name$) == 0 || #HiddenGarden_MODE == 0) {
 		if (BaseLevel >= 175) {
 			switch(select("Modo Normal [150+]", "Modo Hard [175+]", "Cancelar")) {
 			case 1:
@@ -41,11 +50,13 @@ OnStartInstance:
 		.@md_name$ = "Security Area 2";
 		.@min_level = 175;
 		.@display_name$ = "Jardim de Vermuth - Hard";
+		.@hunt_quest = 12500;
 		break;
 	default:
 		.@md_name$ = "Security Area 1";
 		.@min_level = 150;
 		.@display_name$ = "Jardim de Vermuth - Normal";
+		.@hunt_quest = 12499;
 		break;
 	}
 	callfunc("F_InstanceEntry",
@@ -54,7 +65,8 @@ OnStartInstance:
 		"hidden_garden",
 		"HiddenGarden",
 		.@min_level,
-		.@display_name$
+		.@display_name$,
+		.@hunt_quest
 	);
 	end;
 }
@@ -65,7 +77,7 @@ OnStartInstance:
 //= Episode 17.2 Hidden Flower Garden
 //= Episode 17.2 Security Area 1 & 2
 //= Note:
-// - NPC_LOCKON_LASER skill is currently no implemented.
+//= - NPC_LOCKON_LASER skill is currently no implemented.
 //===== Changelog: ===========================================
 //= 1.0 Initial release [crazyarashi]
 //= 1.1 Optimizations and cleanup [Everade]
@@ -76,145 +88,30 @@ OnStartInstance:
 ba_maison,120,320,0	script	#herbs_chk	HIDDEN_WARP_NPC,3,3,{
 	end;
 OnTouch:
-	//You can start this quest without registering on alpha
-	if (isbegin_quest(12497) == 0) {	// story
-		cloakoffnpcself( "#he_admin1" );
-		specialeffect EF_WHITEBODY, AREA, "#he_admin1";
-		npctalk "Afaste-se do perimetro da area de seguranca. Forasteiros nao tem permissao para entrar.", "#he_admin1", bc_self;
-		end;
-	}
-	// daily
+	cloakoffnpcself( "#he_admin1" );
 	cloakoffnpcself( "#he_admin2" );
+	specialeffect EF_WHITEBODY, AREA, "#he_admin1";
 	specialeffect EF_WHITEBODY, AREA, "#he_admin2";
 	end;
 }
 
 ba_maison,120,321,5	script(CLOAKED)	#he_admin1	MD_ASSISTANT,{
-	if (ep17_2_main < 1)
-		end;
-	mes "[Gerente do Jardim]";
-	mes "Um visitante nao registrado foi detectado.";
-	next;
-	.@party_id = getcharid(1);
-	if (!is_party_leader()) {
+	if (ep17_2_main < 1) {
 		mes "[Gerente do Jardim]";
-		mes "Voce nao pode prosseguir sem a autoridade do lider do grupo.";
+		mes "Acesso restrito.";
 		close;
 	}
-	.@party_name$ = getpartyname(.@party_id);
-	mes "[Gerente do Jardim]";
-	mes "Se voce e um administrador que perdeu a autorizacao, pode reemitir essa permissao por meio de um processo de autenticacao.";
-	next;
-	.@md_name$ = "Hidden Flower Garden";
-
-	if (instance_live_info(ILI_NAME,instance_id(IM_PARTY)) == .@md_name$)
-		.@menu$ = "^FF0000Enter^000000";
-
-	switch( select( "Recuar.", "Autenticar identidade", .@menu$ ) ) {
-	case 1:
-		mes "[Gerente do Jardim]";
-		mes "Uma escolha sabia.";
-		close;
-	case 2:
-		if (instance_create(.@md_name$) == -3)
-			dispbottom "A reserva da instancia '" + .@md_name$ + "' falhou por causa de uma instancia ativa.";
-		end;
-	case 3:
-		if (!is_party_leader()) {	// shouldn't happen
-			mes "[Gerente do Jardim]";
-			mes "Voce nao pode prosseguir sem a autoridade do lider do grupo.";
-			close;
-		}
-		if (instance_enter(.@md_name$) != IE_OK) {
-			mes "[Gerente do Jardim]";
-			mes "Voce so pode ir para la quando o lider do grupo concluir todas as permissoes. Verifique novamente a area liberada.";
-			close;
-		}
-		mapannounce "ba_maison", "" + strcharinfo(0) + ", do grupo " + .@party_name$ + ", esta entrando em " + .@md_name$ + ".", bc_map, "0x00FF99";
-		end;
-	}
+	doevent "HiddenGarden_Instance#Custom::OnStartInstance";
 	end;
 }
 
 ba_maison,120,321,5	script(CLOAKED)	#he_admin2	MD_ASSISTANT,{
-	if (ep17_2_main < 1)
-		end;
-	if (isbegin_quest(12497) != 2)
-		end;
-	switch( checkquest(12498,PLAYTIME) ) {
-	case -1:
-		break;
-	case 0:
-	case 1:
+	if (ep17_2_main < 1) {
 		mes "[Gerente do Jardim]";
-		mes "Voce acabou de entrar na area de seguranca.";
-		mes "Descanse por um dia, como Sigma ordenou.";
+		mes "Acesso restrito.";
 		close;
-	case 2:
-		erasequest 12498;
-		break;
 	}
-	mes "[Gerente do Jardim]";
-	mes "Sua identidade foi confirmada. Voce pode entrar na area de seguranca. Como posso ajudar?";
-	next;
-	if (BaseLevel >= 150)
-		.@menu$[0] = "Zona de Seguranca 1.";
-	if (BaseLevel >= 175)
-		.@menu$[1] = "^FF0000Zona de Seguranca 2.^000000";
-
-	switch( select( "Recuar.", "Autenticar identidade", "Entrar na zona" ) ) {
-	case 1:
-		mes "[Gerente do Jardim]";
-		mes "Tudo bem.";
-		close;
-	case 2:
-		switch( select( "Recuar.", .@menu$[0], .@menu$[1] ) ) {
-		case 1:
-			mes "[Gerente do Jardim]";
-			mes "Tudo bem.";
-			close;
-		case 2:
-			.@md_name$ = "Security Area 1";
-			break;
-		case 3:
-			.@md_name$ = "Security Area 2";
-			break;
-		}
-		if (!is_party_leader()) {
-			mes "[Gerente do Jardim]";
-			mes "Somente o lider do grupo pode iniciar a verificacao de identidade. Deixe isso com o responsavel.";
-			close;
-		}
-		if (instance_create(.@md_name$) == -3)
-			dispbottom "A reserva da instancia '" + .@md_name$ + "' falhou por causa de uma instancia ativa.";
-		end;
-	case 3:
-		switch( select( .@menu$[0], .@menu$[1] ) ) {
-		case 1:
-			.@md_name$ = "Security Area 1";
-			.@qid = 12499;
-			.@qid2 = 12500;
-			break;
-		case 2:
-			.@md_name$ = "Security Area 2";
-			.@qid = 12500;
-			.@qid2 = 12499;
-			break;
-		}
-		if (instance_enter(.@md_name$) != IE_OK) {
-			mes "[Gerente do Jardim]";
-			mes "Voce so pode ir para la quando o lider do grupo concluir todas as permissoes. Verifique novamente a area liberada.";
-			close;
-		}
-		setquest 12498;
-		if (isbegin_quest(.@qid) > 0)
-			erasequest .@qid;
-		if (isbegin_quest(.@qid2) > 0)
-			erasequest .@qid2;
-		setquest .@qid;
-		mapannounce "ba_maison", "" + strcharinfo(0) + ", do grupo " + getpartyname( getcharid(1) ) + ", esta entrando em " + .@md_name$ + ".", bc_map, "0x00FF99";
-		end;
-	}
+	doevent "HiddenGarden_Instance#Custom::OnStartInstance";
 	end;
 }
 
@@ -1305,8 +1202,14 @@ OnTouch:
 	}
 	if ('hidden_garden == 24) {
 		removespecialeffect EF_MARKING_USE_CHANGEMONSTER;
+		.@is_hard = ('mode == 1 || instance_live_info(ILI_NAME, instance_id(IM_PARTY)) == "Security Area 2" || #HiddenGarden_MODE == 2);
+		.@coin = .@is_hard ? 30 : 20;
+		.@ticket = .@is_hard ? 3 : 2;
+		.@barmeal = .@is_hard ? 100 : 50;
+		.@esteatico = .@is_hard ? 50 : 25;
+
 		if (isbegin_quest(12497) == 0) {
-			if (checkweight(1000103,20) == 0) {	// (custom)
+			if (checkweight(1000103, 20) == 0 || checkweight(9608, .@coin) == 0 || checkweight(9198, .@ticket) == 0) {
 				mes "^008800Espere um pouco!!";
 				mes "Voce nao pode receber mais itens porque esta carregando coisas demais. Tente novamente depois de aliviar o peso.^000000";
 				close;
@@ -1320,55 +1223,57 @@ OnTouch:
 			next;
 			mes "[Sigma]";
 			mes "Tome isto. Um codigo de reconhecimento que pode levar a outras areas deste jardim secreto.";
-			if (!'finish_announced) {
-				callfunc("F_InstanceFinishAnnounce", "Jardim de Vermuth");
-				'finish_announced = 1;
+			if (#HiddenGarden_STATUS == 0) {
+				#HiddenGarden_STATUS = 2;
+				#cooldown_hidden_garden = gettimetick(2) + callfunc("get_daily_reset");
 			}
 			if (#HiddenGarden_STATUS == 1 || #HiddenGarden_STATUS == 2) {
-				.@coin = (#HiddenGarden_MODE == 2) ? 30 : 20;
-				.@ticket = (#HiddenGarden_MODE == 2) ? 3 : 2;
-				if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0) {
+				.@finish_result = callfunc("F_InstanceFinishBase", "Jardim de Vermuth", "#HiddenGarden_STATUS", .@coin, .@ticket, "", "", 1, 10, 110002, 3000, 3, 0, "Jardim de Vermuth", 1);
+				if (.@finish_result == -1) {
 					mes "^008800Espere um pouco!!";
 					mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 					close;
 				}
-				.@finish_result = callfunc("F_InstanceFinishBase", "Jardim de Vermuth", "#HiddenGarden_STATUS", .@coin, .@ticket, "", "", 1, 10, 110002, 3000, 3, 0, "Jardim de Vermuth", 0);
-			if (.@finish_result == -1) {
-				mes "^008800Espere um pouco!!";
-				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
-				close;
-			}
 			}
 			close2;
 			setquest 12497;
 			completequest 12497;
-			getitem 1000103,20;
+			getitem 1000103, 20;
 			specialeffect EF_MARKING_USE_CHANGEMONSTER;
 			end;
 		}
 		mes "[Sigma]";
 		mes "Ha aproximadamente 82% de chance de voce perder a vida diante da repressao radical dela antes de contarmos que o Mestre Varmundt esta vivo.";
 		next;
-		mes "[Sigma]";
-		if (!'finish_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Jardim de Vermuth");
-			'finish_announced = 1;
+		if (#HiddenGarden_STATUS == 3) {
+			mes "[Sigma]";
+			mes "Voce ja recebeu suas recompensas desta instancia hoje.";
+			mes "Vamos evitar este lugar por hoje e prometer voltar numa proxima vez. Na proxima voce estara livre para ir a outra area.";
+			next;
+			mes "[Sigma]";
+			mes "Segure firme em mim. Vou tira-lo daqui com um warp.";
+			close2;
+			warp "SavePoint",0,0;
+			end;
+		}
+		if (#HiddenGarden_STATUS == 0) {
+			#HiddenGarden_STATUS = 2;
+			#cooldown_hidden_garden = gettimetick(2) + callfunc("get_daily_reset");
 		}
 		if (#HiddenGarden_STATUS == 1 || #HiddenGarden_STATUS == 2) {
-			.@coin = (#HiddenGarden_MODE == 2) ? 30 : 20;
-			.@ticket = (#HiddenGarden_MODE == 2) ? 3 : 2;
-			.@barmeal = (#HiddenGarden_MODE == 2) ? 100 : 50;
-			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0 || checkweight(1000103,.@barmeal) == 0) {
+			if (checkweight(9608, .@coin) == 0 || checkweight(9198, .@ticket) == 0 || checkweight(1000103, .@barmeal) == 0 || checkweight(1000104, .@esteatico) == 0) {
 				mes "^008800Espere um pouco!!";
 				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 				close;
 			}
-			.@finish_result = callfunc("F_InstanceFinishBase", "Jardim de Vermuth", "#HiddenGarden_STATUS", .@coin, .@ticket, "", "", 1, 10, 110002, 3000, 3, 0, "Jardim de Vermuth", 0);
+			.@finish_result = callfunc("F_InstanceFinishBase", "Jardim de Vermuth", "#HiddenGarden_STATUS", .@coin, .@ticket, "", "", 1, 10, 110002, 3000, 3, 0, "Jardim de Vermuth", 1);
 			if (.@finish_result == -1) {
 				mes "^008800Espere um pouco!!";
 				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
 				close;
 			}
+			getitem 1000103, .@barmeal;
+			getitem 1000104, .@esteatico;
 		}
 		mes "Vamos evitar este lugar por hoje e prometer voltar numa proxima vez. Na proxima voce estara livre para ir a outra area.";
 		next;
@@ -2157,87 +2062,76 @@ OnTouch:	// unknown effect
 
 
 1@herbs,85,77,8	script(DISABLED)	#sigma2	MD_REDPEPPER_H,{
+	.@is_hard = ('mode == 1 || instance_live_info(ILI_NAME, instance_id(IM_PARTY)) == "Security Area 2" || #HiddenGarden_MODE == 2);
+	.@coin = .@is_hard ? 30 : 20;
+	.@ticket = .@is_hard ? 3 : 2;
+	.@barmeal = .@is_hard ? 100 : 50;
+	.@esteatico = .@is_hard ? 50 : 25;
+
 	if (isbegin_quest(12500) > 0)
 		.@qid = 12500;
 	else if (isbegin_quest(12499) > 0)
 		.@qid = 12499;
 
-	if (checkquest(.@qid,HUNTING) == 2) {
-		if (checkweight(1000103,6) == 0) {	// (custom text)
-			mes "^008800Espere um pouco!!";
-			mes "Voce nao pode receber mais itens porque esta carregando coisas demais. Tente novamente depois de aliviar o peso.^000000";
-			close;
-		}
+	mes "[Sigma]";
+	mes "Voce fez um otimo trabalho ao faze-los se render e garantir a seguranca da area.";
+	next;
+
+	// Se o jogador ja recebeu a recompensa de conclusao nesta corrida / hoje
+	if (#HiddenGarden_STATUS == 3) {
 		mes "[Sigma]";
-		mes "Voce fez um otimo trabalho ao faze-los se render, mas nao acho que tenham lhe concedido qualquer direito de administrador.";
+		mes "Voce ja recebeu suas recompensas de conclusao desta instancia.";
+		mes "Deseja que eu te envie para fora agora?";
 		next;
-		mes "[Sigma]";
-		mes "Como eles vao se recuperar depois de algum tempo, acho que voce tera de continuar lutando contra eles ate o Mestre Varmundt voltar.";
-		next;
-		mes "[Sigma]";
-		mes "Ah.";
-		mes "Trouxe alguns itens antigos do passado. Talvez isso ajude, entao fique com eles.";
-		if (!'finish_announced) {
-			callfunc("F_InstanceFinishAnnounce", "Jardim de Vermuth");
-			'finish_announced = 1;
+		if (select("Sim, me tire daqui.:Vou ficar mais um pouco.") == 1) {
+			warp "SavePoint",0,0;
+			end;
 		}
-		if (#HiddenGarden_STATUS == 1 || #HiddenGarden_STATUS == 2) {
-			.@coin = (#HiddenGarden_MODE == 2) ? 30 : 20;
-			.@ticket = (#HiddenGarden_MODE == 2) ? 3 : 2;
-			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0) {
-				mes "^008800Espere um pouco!!";
-				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
-				close;
-			}
-			.@finish_result = callfunc("F_InstanceFinishBase", "Jardim de Vermuth", "#HiddenGarden_STATUS", .@coin, .@ticket, "", "", 1, 10, 110002, 3000, 3, 0, "Jardim de Vermuth", 0);
-			if (.@finish_result == -1) {
-				mes "^008800Espere um pouco!!";
-				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
-				close;
-			}
-			getitem 1000103,.@barmeal;
-			getitem 1000104,.@barmeal / 2;
-		}
-		close2;
+		close;
+	}
+
+	// Se o jogador entrou sem ter o status setado previamente, inicializa para permitir receber
+	if (#HiddenGarden_STATUS == 0) {
+		#HiddenGarden_STATUS = 2;
+		#cooldown_hidden_garden = gettimetick(2) + callfunc("get_daily_reset");
+	}
+
+	if (checkweight(9608, .@coin) == 0 || checkweight(9198, .@ticket) == 0 || checkweight(1000103, .@barmeal + 6) == 0 || checkweight(1000104, .@esteatico + 5) == 0) {
+		mes "^008800Espere um pouco!!";
+		mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
+		close;
+	}
+
+	.@finish_result = callfunc("F_InstanceFinishBase", "Jardim de Vermuth", "#HiddenGarden_STATUS", .@coin, .@ticket, "", "", 1, 10, 110002, 3000, 3, 0, "Jardim de Vermuth", 1);
+	if (.@finish_result == -1) {
+		mes "^008800Espere um pouco!!";
+		mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
+		close;
+	}
+
+	getitem 1000103, .@barmeal;
+	getitem 1000104, .@esteatico;
+
+	if (.@qid > 0 && isbegin_quest(.@qid) > 0) {
 		erasequest .@qid;
-		getitem 1000103,6;
+		getitem 1000103, 6;
 		if (.@qid == 12500) {
 			if (rand(1,100) < 95)
-				getitem 1000104,rand(1,5);
+				getitem 1000104, rand(1,5);
 			else
-				getitem 100161,1;
+				getitem 100161, 1;
 		}
+	}
+
+	mes "[Sigma]";
+	mes "Trouxe estes suprimentos para recompensar seus esforcos.";
+	mes "Deseja que eu te envie para fora agora?";
+	next;
+	if (select("Sim, me tire daqui.:Vou ficar mais um pouco.") == 1) {
+		warp "SavePoint",0,0;
 		end;
 	}
-	mes "[Sigma]";
-	mes "Vou mostrar o caminho de saida. O que voce vai fazer?";
-	if (!'finish_announced) {
-		callfunc("F_InstanceFinishAnnounce", "Jardim de Vermuth");
-		'finish_announced = 1;
-	}
-	next;
-	if (select( "Vou olhar mais um pouco.", "Vou sair." ) == 2) {
-		if (#HiddenGarden_STATUS == 1 || #HiddenGarden_STATUS == 2) {
-			.@coin = (#HiddenGarden_MODE == 2) ? 30 : 20;
-			.@ticket = (#HiddenGarden_MODE == 2) ? 3 : 2;
-			.@barmeal = (#HiddenGarden_MODE == 2) ? 100 : 50;
-			if (checkweight(9608,.@coin) == 0 || checkweight(9198,.@ticket) == 0 || checkweight(1000103,.@barmeal) == 0) {
-				mes "^008800Espere um pouco!!";
-				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
-				close;
-			}
-			.@finish_result = callfunc("F_InstanceFinishBase", "Jardim de Vermuth", "#HiddenGarden_STATUS", .@coin, .@ticket, "", "", 1, 10, 110002, 3000, 3, 0, "Jardim de Vermuth", 0);
-			if (.@finish_result == -1) {
-				mes "^008800Espere um pouco!!";
-				mes "Voce nao pode receber os premios agora porque esta carregando peso demais. Alivie o peso e fale comigo de novo.^000000";
-				close;
-			}
-			getitem 1000103,.@barmeal;
-			getitem 1000104,.@barmeal / 2;
-		}
-		warp "SavePoint",0,0;
-	}
-	end;
+	close;
 }
 
 

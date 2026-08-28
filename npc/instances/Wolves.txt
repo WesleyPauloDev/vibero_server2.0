@@ -690,8 +690,7 @@ OnTouch_:
 		mes "Libere espaco no inventario e toque na saida novamente.";
 		close;
 	}
-	.@announce = (!'wolves_finish_announced);
-	.@finish_result = callfunc("F_InstanceFinishBase", "Encontro dos Lobos", "#WolvesGathering_STATUS", 20, 2, "", "", 1, 20, 110002, 3000, 3, 0, "Encontro dos Lobos", .@announce);
+	.@finish_result = callfunc("F_InstanceFinishBase", "Encontro dos Lobos", "#WolvesGathering_STATUS", 20, 2, "", "", 1, 20, 110002, 3000, 3, 0, "Encontro dos Lobos", 1);
 	if (.@finish_result == -1) {
 		mes "[Suad]";
 		mes "Voce esta carregando peso demais para receber as recompensas.";
@@ -700,8 +699,7 @@ OnTouch_:
 	}
 	if (.@finish_result == 1) {
 		'wolves_reward_claimed[.@aid] = 1;
-		if (.@announce)
-			'wolves_finish_announced = 1;
+		'wolves_finish_announced = 1;
 		mes "[Suad]";
 		mes "Recompensa entregue.";
 		mes "Vou te enviar ao seu ponto de salvamento.";
@@ -3364,8 +3362,7 @@ OnTouch:
 		mes "Libere espaco no inventario e toque na saida novamente.";
 		close;
 	}
-	.@announce = (!'sanctuary_finish_announced);
-	.@finish_result = callfunc("F_InstanceFinishBase", "Purificacao do Santuario", "#SanctuaryPurification_STATUS", 15, 2, "", "", 1, 15, 110002, 3000, 3, 0, "Purificacao do Santuario", .@announce);
+	.@finish_result = callfunc("F_InstanceFinishBase", "Purificacao do Santuario", "#SanctuaryPurification_STATUS", 15, 2, "", "", 1, 15, 110002, 3000, 3, 0, "Purificacao do Santuario", 1);
 	if (.@finish_result == -1) {
 		mes "[Sacerdote]";
 		mes "Voce esta carregando peso demais para receber as recompensas.";
@@ -3374,8 +3371,7 @@ OnTouch:
 	}
 	if (.@finish_result == 1) {
 		'sanctuary_reward_claimed[.@aid] = 1;
-		if (.@announce)
-			'sanctuary_finish_announced = 1;
+		'sanctuary_finish_announced = 1;
 		mes "[Sacerdote]";
 		mes "Recompensa entregue.";
 		mes "Vou te enviar ao seu ponto de salvamento.";
