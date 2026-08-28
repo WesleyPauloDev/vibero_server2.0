@@ -804,22 +804,27 @@ OnStepTimer:
 		getmapxy(.@m$, .@cx, .@cy, BL_PC);
 		if (.@m$ != "moc_para01") {
 			warp "moc_para01", 30, 14;
+			#BOT_WP_INDEX = 0;
 			#BOT_LAST_TX = 0;
 			#BOT_LAST_TY = 0;
+			#BOT_STUCK_TICKS = 0;
 			addtimer 1500, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
-		// Ponto 0: 30,14 -> Ponto 1: 28,26 (Mesa de descanso)
+		// Sub-estagio 0: Caminhando da entrada (30,14) para a mesa (28,26)
 		if (#BOT_WP_INDEX == 0) {
 			.@tx = 28; .@ty = 26;
 			.@dist = distance(.@cx, .@cy, .@tx, .@ty);
 
+			// Chegou perto da mesa de descanso (<= 2 celulas)
 			if (.@dist <= 2) {
-				#BOT_WP_INDEX = 1;
+				#BOT_WP_INDEX = 1; // Agora em descanso aguardando timer
 				#BOT_LAST_TX = 0;
 				#BOT_LAST_TY = 0;
+				#BOT_STUCK_TICKS = 0;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
+
 				if (#BOT_TEST_MODE) {
 					addtimer 10000, "PlayerBotAI::OnFinishEdenRest";
 				} else {
@@ -830,21 +835,35 @@ OnStepTimer:
 				end;
 			}
 
-			if (#BOT_LAST_TX != 28 || #BOT_LAST_TY != 26) {
-				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				unitwalk getcharid(3), 28, 26;
-				#BOT_LAST_TX = 28;
-				#BOT_LAST_TY = 26;
+			// Movimento continuo e Anti-Stuck para 28,26
+			if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
+				#BOT_STUCK_TICKS++;
+				if (#BOT_STUCK_TICKS >= 2) {
+					#BOT_STUCK_TICKS = 0;
+					unitstopwalk getcharid(3), USW_FORCE_STOP;
+				}
+			} else {
+				#BOT_STUCK_TICKS = 0;
 			}
-			addtimer 2500, "PlayerBotAI::OnStepTimer";
+			#BOT_STUCK_X = .@cx;
+			#BOT_STUCK_Y = .@cy;
+
+			unitwalk getcharid(3), 28, 26;
+			addtimer 2000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
-		// Apos descanso: Caminha de volta para 30,14
+		// Sub-estagio 1: Descansando no Eden (Apenas aguarda o timer OnFinishEdenRest)
 		if (#BOT_WP_INDEX == 1) {
+			end;
+		}
+
+		// Sub-estagio 2: Apos descanso, caminhando de volta para a saida (30,14)
+		if (#BOT_WP_INDEX == 2) {
 			.@tx = 30; .@ty = 14;
 			.@dist = distance(.@cx, .@cy, .@tx, .@ty);
 
+			// Chegou perto da saida (<= 2 celulas) -> Vai para a cacada
 			if (.@dist <= 2) {
 				#BOT_AI_STAGE = 3;
 				#BOT_WP_INDEX = 0;
@@ -856,6 +875,9 @@ OnStepTimer:
 				#BOT_DIR_VY = 0;
 				#BOT_EXPLORE_STEPS = 0;
 				#BOT_WALL_HIT = 0;
+				#BOT_STUCK_X = 0;
+				#BOT_STUCK_Y = 0;
+				#BOT_STUCK_TICKS = 0;
 				#BOT_HUNT_START = gettimetick(2);
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				callsub OnGetHuntMap;
@@ -864,13 +886,21 @@ OnStepTimer:
 				end;
 			}
 
-			if (#BOT_LAST_TX != 30 || #BOT_LAST_TY != 14) {
-				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				unitwalk getcharid(3), 30, 14;
-				#BOT_LAST_TX = 30;
-				#BOT_LAST_TY = 14;
+			// Movimento continuo e Anti-Stuck para 30,14
+			if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
+				#BOT_STUCK_TICKS++;
+				if (#BOT_STUCK_TICKS >= 2) {
+					#BOT_STUCK_TICKS = 0;
+					unitstopwalk getcharid(3), USW_FORCE_STOP;
+				}
+			} else {
+				#BOT_STUCK_TICKS = 0;
 			}
-			addtimer 2500, "PlayerBotAI::OnStepTimer";
+			#BOT_STUCK_X = .@cx;
+			#BOT_STUCK_Y = .@cy;
+
+			unitwalk getcharid(3), 30, 14;
+			addtimer 2000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 	}
@@ -1101,9 +1131,10 @@ OnFinishRest:
 // -------------------------------------------------------------
 OnFinishEdenRest:
 	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 2) end;
-	#BOT_WP_INDEX = 1;
+	#BOT_WP_INDEX = 2;
 	#BOT_LAST_TX = 0;
 	#BOT_LAST_TY = 0;
+	#BOT_STUCK_TICKS = 0;
 	unitstopwalk getcharid(3), USW_FORCE_STOP;
 	addtimer 800, "PlayerBotAI::OnStepTimer";
 	end;

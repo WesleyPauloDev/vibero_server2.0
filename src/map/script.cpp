@@ -9992,6 +9992,10 @@ BUILDIN_FUNC(offlinebot)
 
 	sd->state.autotrade = 1;
 	channel_pcquit(sd, 0xF);
+	if (sd->prev == nullptr) {
+		map_addblock(sd);
+		clif_spawn(sd);
+	}
 	if (sd->fd) {
 		set_eof(sd->fd);
 	}

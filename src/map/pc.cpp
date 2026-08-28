@@ -7447,6 +7447,11 @@ enum e_setpos pc_setpos(map_session_data* sd, uint16 mapindex, int32 x, int32 y,
 		buyingstore_update(*sd);
 
 	pc_antibot_teleport_check(*sd, clrtype, sd->state.changemap != 0);
+
+	if (sd->state.autotrade && sd->prev == nullptr) {
+		map_addblock(sd);
+		clif_spawn(sd);
+	}
 	
 	return SETPOS_OK;
 }
