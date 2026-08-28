@@ -579,6 +579,7 @@ OnShowGMStatus:
 	.@b_active = #BOT_AI_ACTIVE;
 	.@b_test = #BOT_TEST_MODE;
 	.@b_stage = #BOT_AI_STAGE;
+	.@b_wp = #BOT_WP_INDEX;
 	.@b_job = #BOT_TARGET_JOB;
 	.@b_base = BaseLevel;
 	.@b_jlvl = JobLevel;
@@ -591,8 +592,13 @@ OnShowGMStatus:
 
 	.@st$ = "Desconhecido";
 	if (.@b_stage == 0) .@st$ = "Passeando por pontos aleatorios em Prontera";
-	else if (.@b_stage == 1) .@st$ = "Descansando na Fonte de Prontera";
-	else if (.@b_stage == 2) .@st$ = "No Grupo Eden descansando";
+	else if (.@b_stage == 1) .@st$ = (.@b_wp == 1 ? "Descansando na Fonte de Prontera (Sentado)" : "Caminhando para a Fonte de Prontera");
+	else if (.@b_stage == 2) {
+		if (.@b_wp == 0 || .@b_wp == 1) .@st$ = "No Grupo Eden (Aguardando na Entrada 30,14)";
+		else if (.@b_wp == 2) .@st$ = "No Grupo Eden (Caminhando para a Mesa 28,26)";
+		else if (.@b_wp == 3) .@st$ = "No Grupo Eden (Descansando Sentado na Mesa)";
+		else .@st$ = "No Grupo Eden (Caminhando para a Saida 30,14)";
+	}
 	else if (.@b_stage == 3) .@st$ = "Em Campo de Cacada com Habilidades";
 
 	dispbottom "--------------------------------------------------", 0x00FFFF;
@@ -839,6 +845,7 @@ OnStepTimer:
 			#BOT_STUCK_X = .@cx;
 			#BOT_STUCK_Y = .@cy;
 
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
 			unitwalk getcharid(3), 156, 170;
 			addtimer 2000, "PlayerBotAI::OnStepTimer";
 			end;
@@ -851,7 +858,7 @@ OnStepTimer:
 	}
 
 	// =========================================================
-	// ESTAGIO 2: Grupo Eden (2 Pontos: 30,14 e 28,26)
+	// ESTAGIO 2: Grupo Eden (Entrada 30,14 e Mesa 28,26 com tempos sorteados)
 	// =========================================================
 	if (#BOT_AI_STAGE == 2) {
 		getmapxy(.@m$, .@cx, .@cy, BL_PC);
@@ -865,14 +872,37 @@ OnStepTimer:
 			end;
 		}
 
-		// Sub-estagio 0: Caminhando da entrada (30,14) para a mesa (28,26)
+		// Sub-estagio 0: Chegou na entrada (30,14) -> Sorteia tempo de espera na entrada
 		if (#BOT_WP_INDEX == 0) {
+			#BOT_WP_INDEX = 1; // Aguardando tempo na entrada
+			#BOT_LAST_TX = 0;
+			#BOT_LAST_TY = 0;
+			#BOT_STUCK_TICKS = 0;
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
+
+			if (#BOT_TEST_MODE) {
+				addtimer 10000, "PlayerBotAI::OnFinishEdenEntrance";
+			} else {
+				// Sorteia tempo de espera na entrada do Eden: 1, 5, 10, 20 ou 30 minutos
+				setarray .@e_wait[0], 60000, 300000, 600000, 1200000, 1800000;
+				addtimer .@e_wait[rand(0, 4)], "PlayerBotAI::OnFinishEdenEntrance";
+			}
+			end;
+		}
+
+		// Sub-estagio 1: Aguardando tempo na entrada do Eden
+		if (#BOT_WP_INDEX == 1) {
+			end;
+		}
+
+		// Sub-estagio 2: Caminhando da entrada (30,14) para a mesa de descanso (28,26)
+		if (#BOT_WP_INDEX == 2) {
 			.@tx = 28; .@ty = 26;
 			.@dist = distance(.@cx, .@cy, .@tx, .@ty);
 
 			// Chegou perto da mesa de descanso (<= 2 celulas)
 			if (.@dist <= 2) {
-				#BOT_WP_INDEX = 1; // Agora em descanso sentado
+				#BOT_WP_INDEX = 3; // Agora em descanso sentado na mesa
 				#BOT_LAST_TX = 0;
 				#BOT_LAST_TY = 0;
 				#BOT_STUCK_TICKS = 0;
@@ -882,7 +912,7 @@ OnStepTimer:
 				if (#BOT_TEST_MODE) {
 					addtimer 10000, "PlayerBotAI::OnFinishEdenRest";
 				} else {
-					// Sorteia o tempo de descanso no Eden: 1, 5, 10, 20 ou 30 minutos
+					// Sorteia tempo de descanso na mesa do Eden: 1, 5, 10, 20 ou 30 minutos
 					setarray .@e_rest[0], 60000, 300000, 600000, 1200000, 1800000;
 					addtimer .@e_rest[rand(0, 4)], "PlayerBotAI::OnFinishEdenRest";
 				}
@@ -902,18 +932,19 @@ OnStepTimer:
 			#BOT_STUCK_X = .@cx;
 			#BOT_STUCK_Y = .@cy;
 
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
 			unitwalk getcharid(3), 28, 26;
 			addtimer 2000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
-		// Sub-estagio 1: Descansando sentado no Eden (Apenas aguarda o timer OnFinishEdenRest)
-		if (#BOT_WP_INDEX == 1) {
+		// Sub-estagio 3: Descansando sentado na mesa do Eden (Apenas aguarda o timer OnFinishEdenRest)
+		if (#BOT_WP_INDEX == 3) {
 			end;
 		}
 
-		// Sub-estagio 2: Apos descanso, caminhando de volta para a saida (30,14)
-		if (#BOT_WP_INDEX == 2) {
+		// Sub-estagio 4: Apos descanso, caminhando de volta para a saida (30,14)
+		if (#BOT_WP_INDEX == 4) {
 			.@tx = 30; .@ty = 14;
 			.@dist = distance(.@cx, .@cy, .@tx, .@ty);
 
@@ -953,6 +984,7 @@ OnStepTimer:
 			#BOT_STUCK_X = .@cx;
 			#BOT_STUCK_Y = .@cy;
 
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
 			unitwalk getcharid(3), 30, 14;
 			addtimer 2000, "PlayerBotAI::OnStepTimer";
 			end;
@@ -1183,12 +1215,25 @@ OnFinishRest:
 	end;
 
 // -------------------------------------------------------------
-// Fim do Descanso no Grupo Eden (Vai para a saida)
+// Fim do Tempo de Espera na Entrada do Eden (Vai para a mesa)
+// -------------------------------------------------------------
+OnFinishEdenEntrance:
+	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 2) end;
+	#BOT_WP_INDEX = 2;
+	#BOT_LAST_TX = 0;
+	#BOT_LAST_TY = 0;
+	#BOT_STUCK_TICKS = 0;
+	unitstopwalk getcharid(3), USW_FORCE_STOP;
+	addtimer 500, "PlayerBotAI::OnStepTimer";
+	end;
+
+// -------------------------------------------------------------
+// Fim do Descanso na Mesa do Grupo Eden (Vai para a saida)
 // -------------------------------------------------------------
 OnFinishEdenRest:
 	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 2) end;
 	stand; // Levanta da mesa
-	#BOT_WP_INDEX = 2;
+	#BOT_WP_INDEX = 4;
 	#BOT_LAST_TX = 0;
 	#BOT_LAST_TY = 0;
 	#BOT_STUCK_TICKS = 0;
