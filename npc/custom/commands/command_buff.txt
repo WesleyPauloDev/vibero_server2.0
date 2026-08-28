@@ -1,11 +1,12 @@
 -	script	BuffVIP	-1,{
 
 OnInit:
-	bindatcmd "buff", strnpcinfo(3)+"::OnAtcommand";
+	bindatcmd "buff", strnpcinfo(3)+"::OnAtcommand", 0, 99;
+	bindatcmd "buffs", strnpcinfo(3)+"::OnAtcommand", 0, 99;
 	end;
 
 OnAtcommand:
-	if (getgroupid() > 0) {
+	if (getgroupid() > 0 || #BOT_AI_ACTIVE) {
 		.@Delay = 5;
 		.@time = 600000;
 
@@ -23,7 +24,6 @@ OnAtcommand:
 		end;
 	}
 	
-    message strcharinfo(0), "Este comando e exclusivo para jogadores VIP.";
-
+	message strcharinfo(0), "Este comando e exclusivo para jogadores VIP.";
 	end;
 }

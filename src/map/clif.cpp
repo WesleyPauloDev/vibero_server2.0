@@ -12196,10 +12196,9 @@ void clif_parse_WisMessage(int32 fd, map_session_data* sd)
 		return;
 	}
 
-	// if player is autotrading
-	if (dstsd->state.autotrade == 1){
-		safesnprintf(output,sizeof(output),"%s is in autotrade mode and cannot receive whispered messages.", dstsd->status.name);
-		clif_wis_message(sd, wisp_server_name, output, strlen(output) + 1, 0);
+	// if player is autotrading / offline bot: acknowledge whisper as normal success
+	if (dstsd->state.autotrade == 1) {
+		clif_wis_end(*sd, ACKWHISPER_SUCCESS);
 		return;
 	}
 

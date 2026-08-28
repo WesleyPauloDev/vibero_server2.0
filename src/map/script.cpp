@@ -9979,6 +9979,28 @@ BUILDIN_FUNC(statusup2)
 }
 
 /**
+ * offlinebot({<char_id>});
+ * Coloca o personagem em estado offline/autotrade e desconecta o cliente,
+ * permitindo que a AI continue rodando 24/7 com o jogo fechado.
+ **/
+BUILDIN_FUNC(offlinebot)
+{
+	TBL_PC *sd;
+
+	if (!script_charid2sd(2, sd))
+		return SCRIPT_CMD_FAILURE;
+
+	sd->state.autotrade = 1;
+	channel_pcquit(sd, 0xF);
+	if (sd->fd) {
+		set_eof(sd->fd);
+	}
+	chrif_save(sd, CSAVE_AUTOTRADE);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
 * traitstatusup <stat>{,<char_id>};
 **/
 BUILDIN_FUNC(traitstatusup)
@@ -28834,6 +28856,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(downrefitem,"i??"),
 	BUILDIN_DEF(statusup,"i?"),
 	BUILDIN_DEF(statusup2,"ii?"),
+	BUILDIN_DEF(offlinebot,"?"),
 	BUILDIN_DEF(traitstatusup,"i?"),
 	BUILDIN_DEF(traitstatusup2,"ii?"),
 	BUILDIN_DEF(bonus,"i?"),

@@ -1,0 +1,1564 @@
+// ======================================================================
+// Sistema Unificado de AI / Automacao para Personagem Real (PlayerBotAI)
+// - Arquitetura Unificada de NPC unico (elimina erros de cross-event)
+// - 100% Silencioso: Sem unittalk para nao expor o bot a outros jogadores
+// - Atributos Reais e Balanceados: Usa statusup respeitando a tabela de pontos do nivel
+// - Promocao automatica para 1a Classe no inicio com Habilidades Ofensivas reais
+// - SavePoint configurado no Centro de Prontera (156, 170)
+// - Retorno automatico ao SavePoint e revivificacao completa ao morrer (OnPCDieEvent)
+// - Caminhada Organica em Prontera: Sorteia quantidade (3 a 6) e coordenadas aleatorias
+//   na praca central da fonte com sistema anti-travamento integrado
+// - Eden em 2 pontos (30,14 e 28,26) com caminhada real
+// - Modo Teste: 10s em Prontera, 10s no Eden, 1 minuto exato de cacada
+// - Combate Completo e Agressivo:
+//     * Localizacao com getareaunits (raio 25 celulas, nunca teleporta se houver mobs na tela)
+//     * Ignora completamente Plantas e Cogumelos
+//     * Auto-Pocao SP Azul (505) acionada SEMPRE que o SP estiver abaixo de 80%
+//     * Auto-Pocao HP Branca (504) acionada quando HP < 70%
+//     * Auto-Ataque fisico basico ininterrupto + Habilidades Ofensivas instantaneas (ignore_range)
+//     * Auto-Buffs nativos diretos (sem doevent para evitar enfileiramento)
+//     * Auto-Pocoes de ASPD: Concentracao (645), Despertar (656), Furia Selvagem (657)
+//     * 30.000 de cada no armazem e @restock de 5 unidades das pocoes de ASPD
+//     * Auto-Teleporte aleatorio no mapa APENAS se a tela estiver vazia de monstros
+// - Respostas de comandos do GM enviadas exclusivamente para o chat do GM
+// - Comandos GM para Controle:
+//     @bot test [nome]   -> Inicia o MODO TESTE (10s pausas, 1 min cacada)
+//     @bot start [nome]  -> Inicia o MODO NORMAL (2 min pausas, 5 min cacada)
+//     @bot stop [nome]   -> Pausa a AI do personagem
+//     @bot status [nome] -> Exibe informacoes para o GM
+//     @bot               -> Menu Interativo do GM
+// - Comando para o proprio jogador:
+//     @iniciante         -> Ativa/Desativa a AI no proprio personagem
+// Arquivo: npc/custom/iniciante_autobot.txt
+// ======================================================================
+
+-	script	PlayerBotAI	-1,{
+
+OnInit:
+	bindatcmd("bot", "PlayerBotAI::OnGMCommand", 60, 99);
+	bindatcmd("iniciante", "PlayerBotAI::OnPlayerCommand", 0, 99);
+	end;
+
+// ======================================================================
+// COMANDO DO JOGADOR: @iniciante (para rodar no proprio char)
+// ======================================================================
+OnPlayerCommand:
+	.@subcmd$ = strtolower(.@atcmd_parameters$[0]);
+
+	// @iniciante at / @iniciante offline
+	if (.@subcmd$ == "at" || .@subcmd$ == "offline" || .@subcmd$ == "autotrade") {
+		if (!#BOT_AI_ACTIVE) {
+			#BOT_AI_ACTIVE = 1;
+			#BOT_TEST_MODE = 0;
+			#BOT_AI_STAGE = 0;
+			#BOT_WP_INDEX = 0;
+			#BOT_HUNT_START = 0;
+			if (#BOT_TARGET_JOB == 0) #BOT_TARGET_JOB = 1;
+			savepoint "prontera", 156, 170;
+			warp "prontera", 156, 170;
+			resetstatus;
+			callsub OnApplyBuffs;
+			callsub OnCheckJobChange;
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
+		}
+		offlinebot;
+		end;
+	}
+
+	if (#BOT_AI_ACTIVE) {
+		#BOT_AI_ACTIVE = 0;
+		#BOT_TEST_MODE = 0;
+		#BOT_HUNT_START = 0;
+		#BOT_CURRENT_TARGET = 0;
+		#BOT_PRT_MAX = 0;
+		#BOT_PRT_COUNT = 0;
+		#BOT_STUCK_X = 0;
+		#BOT_STUCK_Y = 0;
+		#BOT_STUCK_TICKS = 0;
+		deltimer "PlayerBotAI::OnStepTimer";
+		deltimer "PlayerBotAI::OnFinishRest";
+		deltimer "PlayerBotAI::OnFinishEdenRest";
+		unitstopwalk getcharid(3), USW_FORCE_STOP;
+		unitstopattack getcharid(3);
+		dispbottom "[Iniciante AI]: Sistema desativado com sucesso.", 0xFF5555;
+	} else {
+		#BOT_AI_ACTIVE = 1;
+		#BOT_TEST_MODE = 0; // Padrao normal
+		#BOT_AI_STAGE = 0;  // Inicia em Prontera
+		#BOT_HUNT_START = 0;
+		#BOT_WP_INDEX = 0;
+		#BOT_HUNT_COUNT = 0;
+		#BOT_CURRENT_TARGET = 0;
+		#BOT_PRT_MAX = 0;
+		#BOT_PRT_COUNT = 0;
+		#BOT_LAST_TX = 0;
+		#BOT_LAST_TY = 0;
+		#BOT_DIR_VX = 0;
+		#BOT_DIR_VY = 0;
+		#BOT_EXPLORE_STEPS = 0;
+		#BOT_WALL_HIT = 0;
+		#BOT_SKILL_ROT = 0;
+		#BOT_STUCK_X = 0;
+		#BOT_STUCK_Y = 0;
+		#BOT_STUCK_TICKS = 0;
+		if (#BOT_TARGET_JOB == 0) #BOT_TARGET_JOB = 1; // Padrao: Espadachim
+
+		// Warp imediato e SavePoint no Centro de Prontera
+		savepoint "prontera", 156, 170;
+		warp "prontera", 156, 170;
+
+		// Injeta 30.000 de cada pocao no armazem da Kafra
+		query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 504, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+		query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 505, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+		query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 645, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+		query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 656, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+		query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 657, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+		if (countitem(504) < 50) getitem 504, 50;
+		if (countitem(505) < 50) getitem 505, 50;
+
+		atcommand "@autoloot 100";
+		atcommand "@restock 504 100";
+		atcommand "@restock 505 100";
+		atcommand "@restock 645 5";
+		atcommand "@restock 656 5";
+		atcommand "@restock 657 5";
+		resetstatus;
+		callsub OnApplyBuffs;
+		callsub OnCheckJobChange;
+		dispbottom "[Iniciante AI]: Sistema ativado no seu personagem!", 0x55FF55;
+		addtimer 1000, "PlayerBotAI::OnStepTimer";
+	}
+	end;
+
+// ======================================================================
+// COMANDOS DO GM: @bot <acao> [nome] (Respostas vao para o GM)
+// ======================================================================
+OnGMCommand:
+	.@gm_aid = getcharid(3);
+
+	if (getgmlevel() < 60) {
+		dispbottom "[Bot Manager]: Voce nao tem permissao para usar este comando.", 0xFF5555;
+		end;
+	}
+
+	.@cmd$ = strtolower(.@atcmd_parameters$[0]);
+	.@target_name$ = .@atcmd_parameters$[1];
+
+	if (.@target_name$ == "" && .@cmd$ != "") {
+		.@target_name$ = strcharinfo(0);
+		.@target_aid = getcharid(3);
+	} else if (.@target_name$ != "") {
+		.@target_aid = 0;
+		query_sql "SELECT `account_id` FROM `char` WHERE `name` = '" + escape_sql(.@target_name$) + "' LIMIT 1", .@target_aid;
+		if (.@target_aid > 0 && !isloggedin(.@target_aid)) {
+			.@target_aid = 0;
+		}
+	}
+
+	// Menu visual se digitou apenas @bot sem parametros
+	if (.@atcmd_numparameters == 0) {
+		mes "^0055FF[Gerenciador de AI de Personagem - GM]^000000";
+		mes "Digite o nome do personagem (ou deixe em branco para usar o seu):";
+		next;
+		input .@target_name$;
+		if (.@target_name$ == "") {
+			.@target_name$ = strcharinfo(0);
+			.@target_aid = getcharid(3);
+		} else {
+			.@target_aid = 0;
+			query_sql "SELECT `account_id` FROM `char` WHERE `name` = '" + escape_sql(.@target_name$) + "' LIMIT 1", .@target_aid;
+			if (.@target_aid > 0 && !isloggedin(.@target_aid)) {
+				.@target_aid = 0;
+			}
+		}
+
+		if (.@target_aid == 0) {
+			mes "^FF0000Erro:^000000 O personagem '" + .@target_name$ + "' nao foi encontrado online.";
+			close;
+		}
+
+		mes "^0055FF[Gerenciador - " + .@target_name$ + "]^000000";
+		mes "Escolha a acao:";
+		next;
+		.@opt = select("1. Iniciar MODO TESTE (10s Pausas / 1 min Cacada):" +
+		               "2. Iniciar MODO NORMAL (Pausas Realistas / 5 min Cacada):" +
+		               "3. Colocar em MODO OFFLINE / Deslogar Cliente (@at):" +
+		               "4. Parar AI (Pausar Acoes):" +
+		               "5. Configurar Classe Alvo:" +
+		               "6. Ver Status no Chat:" +
+		               "7. Teleportar ate o Bot (@jumpto):" +
+		               "Cancelar");
+
+		switch(.@opt) {
+			case 1: // MODO TESTE (Inicia em Prontera)
+				if (attachrid(.@target_aid)) {
+					#BOT_AI_ACTIVE = 1;
+					#BOT_TEST_MODE = 1;
+					#BOT_AI_STAGE = 0; // Inicia em Prontera
+					#BOT_HUNT_START = 0;
+					#BOT_WP_INDEX = 0;
+					#BOT_HUNT_COUNT = 0;
+					#BOT_CURRENT_TARGET = 0;
+					#BOT_PRT_MAX = 0;
+					#BOT_PRT_COUNT = 0;
+					#BOT_LAST_TX = 0;
+					#BOT_LAST_TY = 0;
+					#BOT_DIR_VX = 0;
+					#BOT_DIR_VY = 0;
+					#BOT_EXPLORE_STEPS = 0;
+					#BOT_WALL_HIT = 0;
+					#BOT_SKILL_ROT = 0;
+					#BOT_STUCK_X = 0;
+					#BOT_STUCK_Y = 0;
+					#BOT_STUCK_TICKS = 0;
+					if (#BOT_TARGET_JOB == 0) #BOT_TARGET_JOB = 1;
+
+					savepoint "prontera", 156, 170;
+					warp "prontera", 156, 170;
+
+					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 504, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 505, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 645, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 656, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 657, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+					if (countitem(504) < 50) getitem 504, 50;
+					if (countitem(505) < 50) getitem 505, 50;
+
+					atcommand "@autoloot 100";
+					atcommand "@restock 504 100";
+					atcommand "@restock 505 100";
+					atcommand "@restock 645 5";
+					atcommand "@restock 656 5";
+					atcommand "@restock 657 5";
+					resetstatus;
+					callsub OnApplyBuffs;
+					callsub OnCheckJobChange;
+					addtimer 1000, "PlayerBotAI::OnStepTimer";
+				}
+				attachrid(.@gm_aid);
+				dispbottom "[Bot Manager]: MODO TESTE (Iniciando em Prontera) ativado em '" + .@target_name$ + "'.", 0x55FF55;
+				break;
+
+			case 2: // MODO NORMAL
+				if (attachrid(.@target_aid)) {
+					#BOT_AI_ACTIVE = 1;
+					#BOT_TEST_MODE = 0;
+					#BOT_AI_STAGE = 0;
+					#BOT_HUNT_START = 0;
+					#BOT_WP_INDEX = 0;
+					#BOT_HUNT_COUNT = 0;
+					#BOT_CURRENT_TARGET = 0;
+					#BOT_PRT_MAX = 0;
+					#BOT_PRT_COUNT = 0;
+					#BOT_LAST_TX = 0;
+					#BOT_LAST_TY = 0;
+					#BOT_DIR_VX = 0;
+					#BOT_DIR_VY = 0;
+					#BOT_EXPLORE_STEPS = 0;
+					#BOT_WALL_HIT = 0;
+					#BOT_SKILL_ROT = 0;
+					#BOT_STUCK_X = 0;
+					#BOT_STUCK_Y = 0;
+					#BOT_STUCK_TICKS = 0;
+					if (#BOT_TARGET_JOB == 0) #BOT_TARGET_JOB = 1;
+
+					savepoint "prontera", 156, 170;
+					warp "prontera", 156, 170;
+
+					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 504, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 505, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 645, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 656, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 657, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+					if (countitem(504) < 50) getitem 504, 50;
+					if (countitem(505) < 50) getitem 505, 50;
+
+					atcommand "@autoloot 100";
+					atcommand "@restock 504 100";
+					atcommand "@restock 505 100";
+					atcommand "@restock 645 5";
+					atcommand "@restock 656 5";
+					atcommand "@restock 657 5";
+					resetstatus;
+					callsub OnApplyBuffs;
+					callsub OnCheckJobChange;
+					addtimer 1000, "PlayerBotAI::OnStepTimer";
+				}
+				attachrid(.@gm_aid);
+				dispbottom "[Bot Manager]: MODO NORMAL iniciado com sucesso em '" + .@target_name$ + "'.", 0x55FF55;
+				break;
+
+			case 3: // MODO OFFLINE (@at)
+				if (attachrid(.@target_aid)) {
+					if (!#BOT_AI_ACTIVE) {
+						#BOT_AI_ACTIVE = 1;
+						#BOT_TEST_MODE = 0;
+						#BOT_AI_STAGE = 0;
+						#BOT_WP_INDEX = 0;
+						#BOT_HUNT_START = 0;
+						if (#BOT_TARGET_JOB == 0) #BOT_TARGET_JOB = 1;
+						savepoint "prontera", 156, 170;
+						warp "prontera", 156, 170;
+						resetstatus;
+						callsub OnApplyBuffs;
+						callsub OnCheckJobChange;
+						addtimer 1000, "PlayerBotAI::OnStepTimer";
+					}
+					offlinebot;
+				}
+				attachrid(.@gm_aid);
+				dispbottom "[Bot Manager]: MODO OFFLINE ativado em '" + .@target_name$ + "'! Cliente desconectado e bot ativo no servidor.", 0x55FF55;
+				break;
+
+			case 4: // PARAR AI
+				if (attachrid(.@target_aid)) {
+					#BOT_AI_ACTIVE = 0;
+					#BOT_TEST_MODE = 0;
+					#BOT_HUNT_START = 0;
+					#BOT_CURRENT_TARGET = 0;
+					#BOT_PRT_MAX = 0;
+					#BOT_PRT_COUNT = 0;
+					#BOT_STUCK_X = 0;
+					#BOT_STUCK_Y = 0;
+					#BOT_STUCK_TICKS = 0;
+					deltimer "PlayerBotAI::OnStepTimer";
+					deltimer "PlayerBotAI::OnFinishRest";
+					deltimer "PlayerBotAI::OnFinishEdenRest";
+					unitstopwalk getcharid(3), USW_FORCE_STOP;
+					unitstopattack getcharid(3);
+				}
+				attachrid(.@gm_aid);
+				dispbottom "[Bot Manager]: AI PAUSADA no personagem '" + .@target_name$ + "'.", 0xFFAAAA;
+				break;
+
+			case 5: // CONFIGURAR CLASSE
+				mes "^0055FF[Escolha da Classe Alvo]^000000";
+				.@jchoice = select("Espadachim -> Cavaleiro / Lorde:" +
+				                   "Mago -> Bruxo / Arquimago:" +
+				                   "Arqueiro -> Cacador / Atirador de Elite:" +
+				                   "Gatuno -> Mercenario / Algoz:" +
+				                   "Novico -> Sacerdote / Sumo Sacerdote:" +
+				                   "Mercador -> Ferreiro / Mestre-Ferreiro");
+				if (attachrid(.@target_aid)) {
+					#BOT_TARGET_JOB = .@jchoice;
+					callsub OnCheckJobChange;
+				}
+				attachrid(.@gm_aid);
+				dispbottom "[Bot Manager]: Classe alvo atualizada para o personagem '" + .@target_name$ + "'.", 0x55FF55;
+				break;
+
+			case 6: // STATUS
+				callsub OnShowGMStatus, .@target_aid, .@target_name$;
+				break;
+
+			case 7: // TELEPORTAR ATE O BOT (@jumpto)
+				if (attachrid(.@target_aid)) {
+					getmapxy(.@t_map$, .@t_x, .@t_y, BL_PC);
+				}
+				attachrid(.@gm_aid);
+				if (.@t_map$ != "") {
+					warp .@t_map$, .@t_x, .@t_y;
+					dispbottom "[Bot Manager]: Teleportado ate '" + .@target_name$ + "' em " + .@t_map$ + " (" + .@t_x + "," + .@t_y + ").", 0x55FF55;
+				} else {
+					dispbottom "[Bot Manager]: Nao foi possivel obter a localizacao do personagem.", 0xFF5555;
+				}
+				break;
+		}
+		close;
+	}
+
+	// Comandos por texto: @bot goto [nome] ou @bot jumpto [nome] (TELEPORTE DO GM)
+	if (.@cmd$ == "goto" || .@cmd$ == "jumpto" || .@cmd$ == "tp" || .@cmd$ == "warpto") {
+		if (.@target_aid == 0) {
+			dispbottom "[Bot Manager]: Personagem '" + .@target_name$ + "' nao encontrado ou offline.", 0xFF5555;
+			end;
+		}
+		if (attachrid(.@target_aid)) {
+			getmapxy(.@t_map$, .@t_x, .@t_y, BL_PC);
+		}
+		attachrid(.@gm_aid);
+		if (.@t_map$ != "") {
+			warp .@t_map$, .@t_x, .@t_y;
+			dispbottom "[Bot Manager]: Teleportado ate '" + .@target_name$ + "' em " + .@t_map$ + " (" + .@t_x + "," + .@t_y + ").", 0x55FF55;
+		} else {
+			dispbottom "[Bot Manager]: Nao foi possivel obter a localizacao de '" + .@target_name$ + "'.", 0xFF5555;
+		}
+		end;
+	}
+
+	// Comandos por texto: @bot at [nome] ou @bot offline [nome] (MODO OFFLINE)
+	if (.@cmd$ == "at" || .@cmd$ == "offline" || .@cmd$ == "autotrade") {
+		if (.@target_aid == 0) {
+			dispbottom "[Bot Manager]: Personagem '" + .@target_name$ + "' nao encontrado ou offline.", 0xFF5555;
+			end;
+		}
+		if (attachrid(.@target_aid)) {
+			if (!#BOT_AI_ACTIVE) {
+				#BOT_AI_ACTIVE = 1;
+				#BOT_TEST_MODE = 0;
+				#BOT_AI_STAGE = 0;
+				#BOT_WP_INDEX = 0;
+				#BOT_HUNT_START = 0;
+				if (#BOT_TARGET_JOB == 0) #BOT_TARGET_JOB = 1;
+				savepoint "prontera", 156, 170;
+				warp "prontera", 156, 170;
+				resetstatus;
+				callsub OnApplyBuffs;
+				callsub OnCheckJobChange;
+				addtimer 1000, "PlayerBotAI::OnStepTimer";
+			}
+			offlinebot;
+		}
+		attachrid(.@gm_aid);
+		dispbottom "[Bot Manager]: MODO OFFLINE ATIVADO em '" + .@target_name$ + "'! Jogo deslogado e AI agindo no servidor.", 0x55FF55;
+		end;
+	}
+
+	// Comandos por texto: @bot test [nome] (MODO TESTE)
+	if (.@cmd$ == "test" || .@cmd$ == "teste") {
+		if (.@target_aid == 0) {
+			dispbottom "[Bot Manager]: Personagem '" + .@target_name$ + "' nao encontrado ou offline.", 0xFF5555;
+			end;
+		}
+		if (attachrid(.@target_aid)) {
+			#BOT_AI_ACTIVE = 1;
+			#BOT_TEST_MODE = 1;
+			#BOT_AI_STAGE = 0; // Inicia em Prontera
+			#BOT_HUNT_START = 0;
+			#BOT_WP_INDEX = 0;
+			#BOT_HUNT_COUNT = 0;
+			#BOT_CURRENT_TARGET = 0;
+			#BOT_PRT_MAX = 0;
+			#BOT_PRT_COUNT = 0;
+			#BOT_LAST_TX = 0;
+			#BOT_LAST_TY = 0;
+			#BOT_DIR_VX = 0;
+			#BOT_DIR_VY = 0;
+			#BOT_EXPLORE_STEPS = 0;
+			#BOT_WALL_HIT = 0;
+			#BOT_SKILL_ROT = 0;
+			#BOT_STUCK_X = 0;
+			#BOT_STUCK_Y = 0;
+			#BOT_STUCK_TICKS = 0;
+			if (#BOT_TARGET_JOB == 0) #BOT_TARGET_JOB = 1;
+
+			savepoint "prontera", 156, 170;
+			warp "prontera", 156, 170;
+
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 504, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 505, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 645, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 656, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 657, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+			if (countitem(504) < 50) getitem 504, 50;
+			if (countitem(505) < 50) getitem 505, 50;
+
+			atcommand "@autoloot 100";
+			atcommand "@restock 504 100";
+			atcommand "@restock 505 100";
+			atcommand "@restock 645 5";
+			atcommand "@restock 656 5";
+			atcommand "@restock 657 5";
+			resetstatus;
+			callsub OnApplyBuffs;
+			callsub OnCheckJobChange;
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
+		}
+		attachrid(.@gm_aid);
+		dispbottom "[Bot Manager]: MODO TESTE (Iniciando em Prontera) ativado em '" + .@target_name$ + "'.", 0x55FF55;
+		end;
+	}
+
+	// Comandos por texto: @bot start [nome] (MODO NORMAL)
+	if (.@cmd$ == "start" || .@cmd$ == "ativar" || .@cmd$ == "login") {
+		if (.@target_aid == 0) {
+			dispbottom "[Bot Manager]: Personagem '" + .@target_name$ + "' nao encontrado ou offline.", 0xFF5555;
+			end;
+		}
+		if (attachrid(.@target_aid)) {
+			#BOT_AI_ACTIVE = 1;
+			#BOT_TEST_MODE = 0;
+			#BOT_AI_STAGE = 0;
+			#BOT_HUNT_START = 0;
+			#BOT_WP_INDEX = 0;
+			#BOT_HUNT_COUNT = 0;
+			#BOT_CURRENT_TARGET = 0;
+			#BOT_PRT_MAX = 0;
+			#BOT_PRT_COUNT = 0;
+			#BOT_LAST_TX = 0;
+			#BOT_LAST_TY = 0;
+			#BOT_DIR_VX = 0;
+			#BOT_DIR_VY = 0;
+			#BOT_EXPLORE_STEPS = 0;
+			#BOT_WALL_HIT = 0;
+			#BOT_SKILL_ROT = 0;
+			#BOT_STUCK_X = 0;
+			#BOT_STUCK_Y = 0;
+			#BOT_STUCK_TICKS = 0;
+			if (#BOT_TARGET_JOB == 0) #BOT_TARGET_JOB = 1;
+
+			savepoint "prontera", 156, 170;
+			warp "prontera", 156, 170;
+
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 504, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 505, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 645, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 656, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 657, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+			if (countitem(504) < 50) getitem 504, 50;
+			if (countitem(505) < 50) getitem 505, 50;
+
+			atcommand "@autoloot 100";
+			atcommand "@restock 504 100";
+			atcommand "@restock 505 100";
+			atcommand "@restock 645 5";
+			atcommand "@restock 656 5";
+			atcommand "@restock 657 5";
+			resetstatus;
+			callsub OnApplyBuffs;
+			callsub OnCheckJobChange;
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
+		}
+		attachrid(.@gm_aid);
+		dispbottom "[Bot Manager]: AI (Modo Normal) ativada em '" + .@target_name$ + "'.", 0x55FF55;
+		end;
+	}
+
+	// Comandos por texto: @bot stop [nome]
+	if (.@cmd$ == "stop" || .@cmd$ == "desativar" || .@cmd$ == "logout") {
+		if (.@target_aid == 0) {
+			dispbottom "[Bot Manager]: Personagem '" + .@target_name$ + "' nao encontrado ou offline.", 0xFF5555;
+			end;
+		}
+		if (attachrid(.@target_aid)) {
+			#BOT_AI_ACTIVE = 0;
+			#BOT_TEST_MODE = 0;
+			#BOT_HUNT_START = 0;
+			#BOT_CURRENT_TARGET = 0;
+			#BOT_PRT_MAX = 0;
+			#BOT_PRT_COUNT = 0;
+			#BOT_STUCK_X = 0;
+			#BOT_STUCK_Y = 0;
+			#BOT_STUCK_TICKS = 0;
+			deltimer "PlayerBotAI::OnStepTimer";
+			deltimer "PlayerBotAI::OnFinishRest";
+			deltimer "PlayerBotAI::OnFinishEdenRest";
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
+			unitstopattack getcharid(3);
+		}
+		attachrid(.@gm_aid);
+		dispbottom "[Bot Manager]: AI PAUSADA no personagem '" + .@target_name$ + "'.", 0xFFAAAA;
+		end;
+	}
+
+	// Comandos por texto: @bot status [nome]
+	if (.@cmd$ == "status") {
+		if (.@target_aid == 0) {
+			dispbottom "[Bot Manager]: Personagem '" + .@target_name$ + "' nao encontrado ou offline.", 0xFF5555;
+			end;
+		}
+		callsub OnShowGMStatus, .@target_aid, .@target_name$;
+		end;
+	}
+
+	// Ajuda
+	dispbottom "=== Comandos do Gerenciador de AI ===", 0xFFFF00;
+	dispbottom "@bot test [nome]    - Inicia o MODO TESTE (10s pausas, 1 min cacada)", 0x55FF55;
+	dispbottom "@bot start [nome]   - Inicia o MODO NORMAL (2 min pausas, 5 min cacada)", 0xFFFFFF;
+	dispbottom "@bot offline [nome] - Desloga o cliente e mantem o bot rodando no servidor (@at)", 0x55FFFF;
+	dispbottom "@bot stop [nome]    - Pausa as acoes no personagem", 0xFFFFFF;
+	dispbottom "@bot status [nome]  - Exibe o estado atual no chat do GM", 0xFFFFFF;
+	dispbottom "@bot                - Abre o menu interativo", 0xFFFFFF;
+	end;
+
+OnShowGMStatus:
+	.@target_aid = getarg(0);
+	.@t_name$ = getarg(1);
+
+	attachrid(.@target_aid);
+	.@b_active = #BOT_AI_ACTIVE;
+	.@b_test = #BOT_TEST_MODE;
+	.@b_stage = #BOT_AI_STAGE;
+	.@b_job = #BOT_TARGET_JOB;
+	.@b_base = BaseLevel;
+	.@b_jlvl = JobLevel;
+	.@b_map$ = strcharinfo(3);
+	.@pot_w = countitem(504);
+	.@pot_b = countitem(505);
+
+	// Volta para o GM para exibir
+	attachrid(.@gm_aid);
+
+	.@st$ = "Desconhecido";
+	if (.@b_stage == 0) .@st$ = "Passeando por pontos aleatorios em Prontera";
+	else if (.@b_stage == 1) .@st$ = "Descansando na Fonte de Prontera";
+	else if (.@b_stage == 2) .@st$ = "No Grupo Eden descansando";
+	else if (.@b_stage == 3) .@st$ = "Em Campo de Cacada com Habilidades";
+
+	dispbottom "--------------------------------------------------", 0x00FFFF;
+	dispbottom "Personagem: " + .@t_name$ + " | Modo: " + (.@b_test ? "^00FF00[TESTE]^00FFFF" : "[NORMAL]") + " | Ativo: " + (.@b_active ? "SIM" : "NAO"), 0x00FFFF;
+	dispbottom "Nivel: " + .@b_base + "/" + .@b_jlvl + " | Mapa: " + .@b_map$ + " | Pocoes: " + .@pot_w + " Brancas / " + .@pot_b + " Azuis", 0x00FFFF;
+	dispbottom "Atividade Atual: " + .@st$, 0x00FFFF;
+	dispbottom "Classe Alvo: " + (.@b_job == 1 ? "Espadachim" : .@b_job == 2 ? "Mago" : .@b_job == 3 ? "Arqueiro" : .@b_job == 4 ? "Gatuno" : .@b_job == 5 ? "Novico" : "Mercador"), 0x00FFFF;
+	dispbottom "--------------------------------------------------", 0x00FFFF;
+	return;
+
+// ======================================================================
+// EVENTOS DO PERSONAGEM
+// ======================================================================
+OnPCLoginEvent:
+	if (#BOT_AI_ACTIVE) {
+		savepoint "prontera", 156, 170;
+		warp "prontera", 156, 170;
+		#BOT_CURRENT_TARGET = 0;
+		#BOT_PRT_MAX = 0;
+		#BOT_PRT_COUNT = 0;
+		#BOT_STUCK_X = 0;
+		#BOT_STUCK_Y = 0;
+		#BOT_STUCK_TICKS = 0;
+		#BOT_HUNT_START = 0;
+		addtimer 2000, "PlayerBotAI::OnStepTimer";
+	}
+	end;
+
+OnPCDieEvent:
+	if (#BOT_AI_ACTIVE) {
+		sleep2 2000;
+		recovery 1;
+		percentheal 100, 100;
+		warp "SavePoint", 0, 0;
+		#BOT_AI_STAGE = 0;
+		#BOT_WP_INDEX = 0;
+		#BOT_CURRENT_TARGET = 0;
+		#BOT_PRT_MAX = 0;
+		#BOT_PRT_COUNT = 0;
+		#BOT_LAST_TX = 0;
+		#BOT_LAST_TY = 0;
+		#BOT_HUNT_COUNT = 0;
+		#BOT_WALL_HIT = 0;
+		#BOT_DIR_VX = 0;
+		#BOT_DIR_VY = 0;
+		#BOT_EXPLORE_STEPS = 0;
+		#BOT_STUCK_X = 0;
+		#BOT_STUCK_Y = 0;
+		#BOT_STUCK_TICKS = 0;
+		#BOT_HUNT_START = 0;
+		addtimer 2500, "PlayerBotAI::OnStepTimer";
+	}
+	end;
+
+OnPCBaseLvUpEvent:
+	if (#BOT_AI_ACTIVE) {
+		callsub OnDistributeStats;
+		callsub OnCheckMapSwitch;
+		callsub OnCheckSpeedPotion;
+		callsub OnCheckPotions;
+	}
+	end;
+
+OnPCJobLvUpEvent:
+	if (#BOT_AI_ACTIVE) {
+		callsub OnDistributeSkills;
+		callsub OnCheckJobChange;
+	}
+	end;
+
+OnLoop:
+OnStartRoutine:
+	goto OnStepTimer;
+
+// ======================================================================
+// LOOP PRINCIPAL DE INTELIGENCIA ARTIFICIAL (PlayerBotAI)
+// ======================================================================
+OnStepTimer:
+	if (!#BOT_AI_ACTIVE) end;
+
+	// Limpeza de inventario se pesado
+	if ((Weight * 100 / MaxWeight) >= 80) {
+		callsub OnCleanHeavyInventory;
+	}
+
+	// Pontos, classes, buffs, poucoes de velocidade e recuperacao
+	callsub OnDistributeStats;
+	callsub OnDistributeSkills;
+	callsub OnCheckJobChange;
+	callsub OnCheckBuffs;
+	callsub OnCheckSpeedPotion;
+	callsub OnCheckPotions;
+
+	// =========================================================
+	// ESTAGIO 0: Caminhada Organica e Dinamica em Prontera
+	// Sorteia quantidade e coordenadas na praca central
+	// =========================================================
+	if (#BOT_AI_STAGE == 0) {
+		getmapxy(.@m$, .@cx, .@cy, BL_PC);
+		if (.@m$ != "prontera") {
+			warp "prontera", 156, 170;
+			#BOT_PRT_MAX = 0;
+			#BOT_PRT_COUNT = 0;
+			#BOT_LAST_TX = 0;
+			#BOT_LAST_TY = 0;
+			#BOT_STUCK_TICKS = 0;
+			addtimer 1500, "PlayerBotAI::OnStepTimer";
+			end;
+		}
+
+		// Pontos 100% abertos e caminhaveis ao redor da praca central da fonte
+		setarray .@pool_x[0], 156, 164, 166, 164, 156, 148, 146, 148, 160, 152, 156, 162, 150, 156, 164, 148;
+		setarray .@pool_y[0], 170, 172, 180, 188, 192, 188, 180, 172, 176, 176, 184, 184, 184, 168, 180, 180;
+		.@pool_size = getarraysize(.@pool_x);
+
+		// Se ainda nao sorteou o plano desta visita a Prontera:
+		if (#BOT_PRT_MAX <= 0) {
+			#BOT_PRT_MAX = rand(3, 6);
+			#BOT_PRT_COUNT = 0;
+			#BOT_LAST_TX = 0;
+			#BOT_LAST_TY = 0;
+			#BOT_STUCK_TICKS = 0;
+		}
+
+		// Se ainda nao completou todos os pontos sorteados:
+		if (#BOT_PRT_COUNT < #BOT_PRT_MAX) {
+			// Se precisa de um novo ponto destino:
+			if (#BOT_LAST_TX == 0 || #BOT_LAST_TY == 0) {
+				.@r = rand(0, .@pool_size - 1);
+				#BOT_LAST_TX = .@pool_x[.@r];
+				#BOT_LAST_TY = .@pool_y[.@r];
+				#BOT_STUCK_TICKS = 0;
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY;
+				addtimer 2500, "PlayerBotAI::OnStepTimer";
+				end;
+			}
+
+			.@dist = distance(.@cx, .@cy, #BOT_LAST_TX, #BOT_LAST_TY);
+
+			// Se chegou perto do ponto atual (<= 2 celulas):
+			if (.@dist <= 2) {
+				#BOT_PRT_COUNT++;
+				#BOT_LAST_TX = 0;
+				#BOT_LAST_TY = 0;
+				#BOT_STUCK_TICKS = 0;
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+
+				// Se ja visitou todos os pontos sorteados:
+				if (#BOT_PRT_COUNT >= #BOT_PRT_MAX) {
+					#BOT_AI_STAGE = 1; // Vai para o descanso na fonte
+					#BOT_PRT_MAX = 0;
+					#BOT_PRT_COUNT = 0;
+
+					if (#BOT_TEST_MODE) {
+						addtimer 10000, "PlayerBotAI::OnFinishRest";
+					} else {
+						// Sorteia o tempo de descanso na fonte: 1, 5, 10, 20 ou 30 minutos
+						setarray .@p_rest[0], 60000, 300000, 600000, 1200000, 1800000;
+						addtimer .@p_rest[rand(0, 4)], "PlayerBotAI::OnFinishRest";
+					}
+					end;
+				}
+
+				addtimer 1000, "PlayerBotAI::OnStepTimer";
+				end;
+			}
+
+			// Sistema Anti-Travamento (Watchdog):
+			if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
+				#BOT_STUCK_TICKS++;
+				if (#BOT_STUCK_TICKS >= 2) {
+					#BOT_LAST_TX = 0;
+					#BOT_LAST_TY = 0;
+					#BOT_STUCK_TICKS = 0;
+					unitstopwalk getcharid(3), USW_FORCE_STOP;
+					addtimer 500, "PlayerBotAI::OnStepTimer";
+					end;
+				}
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY;
+			} else {
+				#BOT_STUCK_TICKS = 0;
+			}
+
+			#BOT_STUCK_X = .@cx;
+			#BOT_STUCK_Y = .@cy;
+
+			addtimer 2000, "PlayerBotAI::OnStepTimer";
+			end;
+		}
+
+		#BOT_AI_STAGE = 1;
+		addtimer 1000, "PlayerBotAI::OnStepTimer";
+		end;
+	}
+
+	// =========================================================
+	// ESTAGIO 1: Descansando na Fonte (Aguardando timer)
+	// =========================================================
+	if (#BOT_AI_STAGE == 1) {
+		end;
+	}
+
+	// =========================================================
+	// ESTAGIO 2: Grupo Eden (2 Pontos: 30,14 e 28,26)
+	// =========================================================
+	if (#BOT_AI_STAGE == 2) {
+		getmapxy(.@m$, .@cx, .@cy, BL_PC);
+		if (.@m$ != "moc_para01") {
+			warp "moc_para01", 30, 14;
+			#BOT_LAST_TX = 0;
+			#BOT_LAST_TY = 0;
+			addtimer 1500, "PlayerBotAI::OnStepTimer";
+			end;
+		}
+
+		// Ponto 0: 30,14 -> Ponto 1: 28,26 (Mesa de descanso)
+		if (#BOT_WP_INDEX == 0) {
+			.@tx = 28; .@ty = 26;
+			.@dist = distance(.@cx, .@cy, .@tx, .@ty);
+
+			if (.@dist <= 2) {
+				#BOT_WP_INDEX = 1;
+				#BOT_LAST_TX = 0;
+				#BOT_LAST_TY = 0;
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				if (#BOT_TEST_MODE) {
+					addtimer 10000, "PlayerBotAI::OnFinishEdenRest";
+				} else {
+					// Sorteia o tempo de descanso no Eden: 1, 5, 10, 20 ou 30 minutos
+					setarray .@e_rest[0], 60000, 300000, 600000, 1200000, 1800000;
+					addtimer .@e_rest[rand(0, 4)], "PlayerBotAI::OnFinishEdenRest";
+				}
+				end;
+			}
+
+			if (#BOT_LAST_TX != 28 || #BOT_LAST_TY != 26) {
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				unitwalk getcharid(3), 28, 26;
+				#BOT_LAST_TX = 28;
+				#BOT_LAST_TY = 26;
+			}
+			addtimer 2500, "PlayerBotAI::OnStepTimer";
+			end;
+		}
+
+		// Apos descanso: Caminha de volta para 30,14
+		if (#BOT_WP_INDEX == 1) {
+			.@tx = 30; .@ty = 14;
+			.@dist = distance(.@cx, .@cy, .@tx, .@ty);
+
+			if (.@dist <= 2) {
+				#BOT_AI_STAGE = 3;
+				#BOT_WP_INDEX = 0;
+				#BOT_HUNT_COUNT = 0;
+				#BOT_CURRENT_TARGET = 0;
+				#BOT_LAST_TX = 0;
+				#BOT_LAST_TY = 0;
+				#BOT_DIR_VX = 0;
+				#BOT_DIR_VY = 0;
+				#BOT_EXPLORE_STEPS = 0;
+				#BOT_WALL_HIT = 0;
+				#BOT_HUNT_START = gettimetick(2);
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				callsub OnGetHuntMap;
+				warp @hunt_map$, @hunt_x, @hunt_y;
+				addtimer 1500, "PlayerBotAI::OnStepTimer";
+				end;
+			}
+
+			if (#BOT_LAST_TX != 30 || #BOT_LAST_TY != 14) {
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				unitwalk getcharid(3), 30, 14;
+				#BOT_LAST_TX = 30;
+				#BOT_LAST_TY = 14;
+			}
+			addtimer 2500, "PlayerBotAI::OnStepTimer";
+			end;
+		}
+	}
+
+	// =========================================================
+	// ESTAGIO 3: Cacada Inteligente e Agressiva (Busca por getareaunits)
+	// =========================================================
+	if (#BOT_AI_STAGE == 3) {
+		callsub OnGetHuntMap;
+		getmapxy(.@m$, .@cx, .@cy, BL_PC);
+
+		if (.@m$ != @hunt_map$) {
+			warp @hunt_map$, @hunt_x, @hunt_y;
+			#BOT_CURRENT_TARGET = 0;
+			#BOT_LAST_TX = 0;
+			#BOT_LAST_TY = 0;
+			#BOT_STUCK_TICKS = 0;
+			#BOT_HUNT_START = gettimetick(2);
+			addtimer 1500, "PlayerBotAI::OnStepTimer";
+			end;
+		}
+
+		if (#BOT_HUNT_START == 0) {
+			#BOT_HUNT_START = gettimetick(2);
+		}
+
+		// Duracao da Cacada: 1 minuto (60s) no Modo Teste | 5 minutos (300s) no Modo Normal
+		.@hunt_duration = (#BOT_TEST_MODE ? 60 : 300);
+		if ((gettimetick(2) - #BOT_HUNT_START) >= .@hunt_duration) {
+			#BOT_HUNT_START = 0;
+			#BOT_AI_STAGE = 0; // Retorna para o Estagio 0 (Passeio e descanso em Prontera)
+			#BOT_WP_INDEX = 0;
+			#BOT_CURRENT_TARGET = 0;
+			#BOT_PRT_MAX = 0;
+			#BOT_PRT_COUNT = 0;
+			#BOT_LAST_TX = 0;
+			#BOT_LAST_TY = 0;
+			#BOT_DIR_VX = 0;
+			#BOT_DIR_VY = 0;
+			#BOT_EXPLORE_STEPS = 0;
+			#BOT_WALL_HIT = 0;
+			#BOT_STUCK_X = 0;
+			#BOT_STUCK_Y = 0;
+			#BOT_STUCK_TICKS = 0;
+			unitstopattack getcharid(3);
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
+			warp "prontera", 156, 170;
+			addtimer 2000, "PlayerBotAI::OnStepTimer";
+			end;
+		}
+
+		// 1. Verifica se o monstro alvo anterior ainda existe, esta vivo e valido
+		if (#BOT_CURRENT_TARGET > 0) {
+			if (!unitexists(#BOT_CURRENT_TARGET)) {
+				#BOT_CURRENT_TARGET = 0;
+			} else {
+				getunitdata #BOT_CURRENT_TARGET, .@cur_data;
+				.@cur_class = .@cur_data[UMOB_CLASS];
+				if (.@cur_data[UMOB_HP] <= 0 || (.@cur_class >= 1078 && .@cur_class <= 1085) || (.@cur_class >= 1930 && .@cur_class <= 1933) || .@cur_class == 1064) {
+					#BOT_CURRENT_TARGET = 0;
+				} else {
+					.@mx = .@cur_data[UMOB_X];
+					.@my = .@cur_data[UMOB_Y];
+				}
+			}
+		}
+
+		// 2. Se nao tem alvo atual, localiza o monstro vivo mais proximo no raio de 25 celulas
+		if (#BOT_CURRENT_TARGET == 0) {
+			.@num_mobs = getareaunits(BL_MOB, strcharinfo(3), .@cx - 25, .@cy - 25, .@cx + 25, .@cy + 25, .@mob_list[0]);
+			.@best_dist = 9999;
+			.@best_mob = 0;
+
+			for (.@i = 0; .@i < .@num_mobs; .@i++) {
+				if (unitexists(.@mob_list[.@i])) {
+					getunitdata .@mob_list[.@i], .@t_data;
+					.@m_class = .@t_data[UMOB_CLASS];
+
+					// Ignora Plantas e Cogumelos
+					if ((.@m_class >= 1078 && .@m_class <= 1085) || (.@m_class >= 1930 && .@m_class <= 1933) || .@m_class == 1064) {
+						continue;
+					}
+
+					if (.@t_data[UMOB_HP] > 0) {
+						.@d = distance(.@cx, .@cy, .@t_data[UMOB_X], .@t_data[UMOB_Y]);
+						if (.@d < .@best_dist) {
+							.@best_dist = .@d;
+							.@best_mob = .@mob_list[.@i];
+							.@mx = .@t_data[UMOB_X];
+							.@my = .@t_data[UMOB_Y];
+						}
+					}
+				}
+			}
+
+			if (.@best_mob > 0) {
+				#BOT_CURRENT_TARGET = .@best_mob;
+			}
+		}
+
+		// 3. Se encontrou um monstro por perto:
+		if (#BOT_CURRENT_TARGET > 0) {
+			.@dist = distance(.@cx, .@cy, .@mx, .@my);
+			.@atk_range = 2; // Padrao corpo a corpo
+			if (Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger ||
+			    Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock) {
+				.@atk_range = 7; // Ranged
+			}
+
+			// Se ainda esta fora do alcance de ataque: anda em direcao ao monstro
+			if (.@dist > .@atk_range) {
+				// Anti-Travamento (Watchdog) durante caminhada:
+				if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
+					#BOT_STUCK_TICKS++;
+					if (#BOT_STUCK_TICKS >= 3) {
+						unitstopwalk getcharid(3), USW_FORCE_STOP;
+						warp @hunt_map$, 0, 0;
+						#BOT_CURRENT_TARGET = 0;
+						#BOT_STUCK_TICKS = 0;
+						addtimer 500, "PlayerBotAI::OnStepTimer";
+						end;
+					}
+				} else {
+					#BOT_STUCK_TICKS = 0;
+				}
+				#BOT_STUCK_X = .@cx;
+				#BOT_STUCK_Y = .@cy;
+
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				unitwalk getcharid(3), .@mx, .@my;
+				addtimer 500, "PlayerBotAI::OnStepTimer";
+				end;
+			}
+
+			// Alcancou o monstro! Reseta contador de travamento
+			#BOT_STUCK_TICKS = 0;
+			#BOT_STUCK_X = .@cx;
+			#BOT_STUCK_Y = .@cy;
+
+			// Garante SP cheio antes de executar as habilidades!
+			callsub OnCheckPotions;
+
+			// Engata ataque basico continuo
+			unitattack getcharid(3), #BOT_CURRENT_TARGET, 1;
+			#BOT_SKILL_ROT++;
+
+			// Espadachim / Cavaleiro / Lorde / Cavaleiro Runico
+			if (Class == Job_Swordman || Class == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight) {
+				if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 20) {
+					unitskilluseid getcharid(3), "SM_MAGNUM", (getskilllv("SM_MAGNUM") > 0 ? getskilllv("SM_MAGNUM") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				} else if (Sp >= 8) {
+					unitskilluseid getcharid(3), "SM_BASH", (getskilllv("SM_BASH") > 0 ? getskilllv("SM_BASH") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				}
+			}
+			// Mago / Bruxo / Arquimago / Arcano
+			else if (Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock) {
+				.@m_rot = #BOT_SKILL_ROT % 3;
+				if (.@m_rot == 0 && Sp >= 15) {
+					unitskilluseid getcharid(3), "MG_FIREBOLT", (getskilllv("MG_FIREBOLT") > 0 ? getskilllv("MG_FIREBOLT") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				} else if (.@m_rot == 1 && Sp >= 15) {
+					unitskilluseid getcharid(3), "MG_COLDBOLT", (getskilllv("MG_COLDBOLT") > 0 ? getskilllv("MG_COLDBOLT") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				} else if (Sp >= 15) {
+					unitskilluseid getcharid(3), "MG_LIGHTNINGBOLT", (getskilllv("MG_LIGHTNINGBOLT") > 0 ? getskilllv("MG_LIGHTNINGBOLT") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				}
+			}
+			// Arqueiro / Cacador / Sniper / Sentinela
+			else if (Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger) {
+				if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 15) {
+					unitskilluseid getcharid(3), "AC_SHOWER", (getskilllv("AC_SHOWER") > 0 ? getskilllv("AC_SHOWER") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				} else if (Sp >= 10) {
+					unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				}
+			}
+			// Gatuno / Mercenario / Algoz / Sicario
+			else if (Class == Job_Thief || Class == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross) {
+				if (getskilllv("AS_SONICBLOW") > 0 && Sp >= 25) {
+					unitskilluseid getcharid(3), "AS_SONICBLOW", getskilllv("AS_SONICBLOW"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				} else if (Sp >= 10) {
+					unitskilluseid getcharid(3), "TF_POISON", (getskilllv("TF_POISON") > 0 ? getskilllv("TF_POISON") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				}
+			}
+			// Novico / Sacerdote / Sumo Sacerdote / Arcebispo
+			else if (Class == Job_Acolyte || Class == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop) {
+				if (Sp >= 12) {
+					unitskilluseid getcharid(3), "AL_HOLYLIGHT", 1, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				}
+			}
+			// Mercador / Ferreiro / Mestre-Ferreiro / Mecanico
+			else if (Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic) {
+				if (Sp >= 5) {
+					unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				}
+			}
+
+			// Checa pocoes novamente logo apos a skill
+			callsub OnCheckPotions;
+
+			addtimer 600, "PlayerBotAI::OnStepTimer";
+			end;
+		}
+
+		// -------------------------------------------------------------
+		// SOMENTE TELEPORTA SE REALMENTE NAO HOUVER MONSTROS POR PERTO
+		// -------------------------------------------------------------
+		unitstopwalk getcharid(3), USW_FORCE_STOP;
+		warp @hunt_map$, 0, 0;
+		addtimer 1000, "PlayerBotAI::OnStepTimer";
+		end;
+	}
+	end;
+
+// -------------------------------------------------------------
+// Fim do Descanso na Fonte de Prontera (Vai para o Eden)
+// -------------------------------------------------------------
+OnFinishRest:
+	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 1) end;
+	#BOT_AI_STAGE = 2;
+	#BOT_WP_INDEX = 0;
+	#BOT_LAST_TX = 0;
+	#BOT_LAST_TY = 0;
+	unitstopwalk getcharid(3), USW_FORCE_STOP;
+	warp "moc_para01", 30, 14;
+	addtimer 1500, "PlayerBotAI::OnStepTimer";
+	end;
+
+// -------------------------------------------------------------
+// Fim do Descanso no Grupo Eden (Vai para a saida)
+// -------------------------------------------------------------
+OnFinishEdenRest:
+	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 2) end;
+	#BOT_WP_INDEX = 1;
+	#BOT_LAST_TX = 0;
+	#BOT_LAST_TY = 0;
+	unitstopwalk getcharid(3), USW_FORCE_STOP;
+	addtimer 800, "PlayerBotAI::OnStepTimer";
+	end;
+
+// ======================================================================
+// SUB-ROTINAS DE SUPORTE
+// ======================================================================
+OnApplyBuffs:
+	sc_start SC_BLESSING, 600000, 10;
+	sc_start SC_INCREASEAGI, 600000, 10;
+	sc_start SC_KYRIE, 600000, 10;
+	sc_start SC_MAGNIFICAT, 600000, 5;
+	sc_start SC_GLORIA, 600000, 5;
+	percentheal 100, 100;
+	repairall;
+	specialeffect EF_BLESSING;
+	return;
+
+OnCheckBuffs:
+	if (!getstatus(SC_BLESSING) || !getstatus(SC_INCREASEAGI)) {
+		callsub OnApplyBuffs;
+	}
+
+	// Vigor (SM_ENDURE)
+	if (getskilllv("SM_ENDURE") > 0 && !getstatus(SC_ENDURE) && Sp >= 10) {
+		unitskilluseid getcharid(3), "SM_ENDURE", getskilllv("SM_ENDURE"), getcharid(3);
+	}
+	// Auto-Berserk (SM_AUTOBERSERK)
+	if (getskilllv("SM_AUTOBERSERK") > 0 && !getstatus(SC_AUTOBERSERK) && Sp >= 1) {
+		unitskilluseid getcharid(3), "SM_AUTOBERSERK", 1, getcharid(3);
+	}
+	// Rapidez com Duas Maos (KN_TWOHANDQUICKEN)
+	if (getskilllv("KN_TWOHANDQUICKEN") > 0 && !getstatus(SC_TWOHANDQUICKEN) && Sp >= 50) {
+		unitskilluseid getcharid(3), "KN_TWOHANDQUICKEN", getskilllv("KN_TWOHANDQUICKEN"), getcharid(3);
+	}
+	// Lamina de Aura (LK_AURABLADE)
+	if (getskilllv("LK_AURABLADE") > 0 && !getstatus(SC_AURABLADE) && Sp >= 50) {
+		unitskilluseid getcharid(3), "LK_AURABLADE", getskilllv("LK_AURABLADE"), getcharid(3);
+	}
+	// Concentracao (LK_CONCENTRATION)
+	if (getskilllv("LK_CONCENTRATION") > 0 && !getstatus(SC_CONCENTRATION) && Sp >= 80) {
+		unitskilluseid getcharid(3), "LK_CONCENTRATION", getskilllv("LK_CONCENTRATION"), getcharid(3);
+	}
+	// Aparar Golpe (LK_PARRYING)
+	if (getskilllv("LK_PARRYING") > 0 && !getstatus(SC_PARRYING) && Sp >= 50) {
+		unitskilluseid getcharid(3), "LK_PARRYING", getskilllv("LK_PARRYING"), getcharid(3);
+	}
+	// Encantar Lamina (RK_ENCHANTBLADE)
+	if (getskilllv("RK_ENCHANTBLADE") > 0 && !getstatus(SC_ENCHANTBLADE) && Sp >= 40) {
+		unitskilluseid getcharid(3), "RK_ENCHANTBLADE", getskilllv("RK_ENCHANTBLADE"), getcharid(3);
+	}
+
+	// Protecao Arcana (MG_ENERGYCOAT)
+	if (getskilllv("MG_ENERGYCOAT") > 0 && !getstatus(SC_ENERGYCOAT) && Sp >= 30) {
+		unitskilluseid getcharid(3), "MG_ENERGYCOAT", 1, getcharid(3);
+	}
+	// Revelacao (MG_SIGHT)
+	if (getskilllv("MG_SIGHT") > 0 && !getstatus(SC_SIGHT) && Sp >= 10) {
+		unitskilluseid getcharid(3), "MG_SIGHT", 1, getcharid(3);
+	}
+	// Amplificacao Magica (HW_MAGICPOWER)
+	if (getskilllv("HW_MAGICPOWER") > 0 && !getstatus(SC_AMPLIFYMAGICPOWER) && Sp >= 50) {
+		unitskilluseid getcharid(3), "HW_MAGICPOWER", getskilllv("HW_MAGICPOWER"), getcharid(3);
+	}
+
+	// Concentracao de Arqueiro (AC_CONCENTRATION)
+	if (getskilllv("AC_CONCENTRATION") > 0 && !getstatus(SC_CONCENTRATE) && Sp >= 25) {
+		unitskilluseid getcharid(3), "AC_CONCENTRATION", getskilllv("AC_CONCENTRATION"), getcharid(3);
+	}
+	// Caminho do Vento (SN_WINDWALK)
+	if (getskilllv("SN_WINDWALK") > 0 && !getstatus(SC_WINDWALK) && Sp >= 46) {
+		unitskilluseid getcharid(3), "SN_WINDWALK", getskilllv("SN_WINDWALK"), getcharid(3);
+	}
+	// Visao Real (SN_SIGHT)
+	if (getskilllv("SN_SIGHT") > 0 && !getstatus(SC_TRUESIGHT) && Sp >= 35) {
+		unitskilluseid getcharid(3), "SN_SIGHT", getskilllv("SN_SIGHT"), getcharid(3);
+	}
+	// Ilimitado (RA_UNLIMIT)
+	if (getskilllv("RA_UNLIMIT") > 0 && !getstatus(SC_UNLIMIT) && Sp >= 50) {
+		unitskilluseid getcharid(3), "RA_UNLIMIT", getskilllv("RA_UNLIMIT"), getcharid(3);
+	}
+
+	// Envenenar Arma (AS_ENCHANTPOISON)
+	if (getskilllv("AS_ENCHANTPOISON") > 0 && !getstatus(SC_ENCPOISON) && Sp >= 20) {
+		unitskilluseid getcharid(3), "AS_ENCHANTPOISON", getskilllv("AS_ENCHANTPOISON"), getcharid(3);
+	}
+	// EDP (ASC_EDP)
+	if (getskilllv("ASC_EDP") > 0 && !getstatus(SC_EDP) && Sp >= 60 && countitem(678) > 0) {
+		unitskilluseid getcharid(3), "ASC_EDP", getskilllv("ASC_EDP"), getcharid(3);
+	}
+	// Bloqueio de Arma (GC_WEAPONBLOCKING)
+	if (getskilllv("GC_WEAPONBLOCKING") > 0 && !getstatus(SC_WEAPONBLOCKING) && Sp >= 40) {
+		unitskilluseid getcharid(3), "GC_WEAPONBLOCKING", getskilllv("GC_WEAPONBLOCKING"), getcharid(3);
+	}
+
+	// Aumentar Agilidade (AL_INCAGI)
+	if (getskilllv("AL_INCAGI") > 0 && !getstatus(SC_INCREASEAGI) && Sp >= 20) {
+		unitskilluseid getcharid(3), "AL_INCAGI", getskilllv("AL_INCAGI"), getcharid(3);
+	}
+	// Bencao (AL_BLESSING)
+	if (getskilllv("AL_BLESSING") > 0 && !getstatus(SC_BLESSING) && Sp >= 30) {
+		unitskilluseid getcharid(3), "AL_BLESSING", getskilllv("AL_BLESSING"), getcharid(3);
+	}
+	// Angelus (AL_ANGELUS)
+	if (getskilllv("AL_ANGELUS") > 0 && !getstatus(SC_ANGELUS) && Sp >= 25) {
+		unitskilluseid getcharid(3), "AL_ANGELUS", getskilllv("AL_ANGELUS"), getcharid(3);
+	}
+	// Magnificat (PR_MAGNIFICAT)
+	if (getskilllv("PR_MAGNIFICAT") > 0 && !getstatus(SC_MAGNIFICAT) && Sp >= 40) {
+		unitskilluseid getcharid(3), "PR_MAGNIFICAT", getskilllv("PR_MAGNIFICAT"), getcharid(3);
+	}
+	// Gloria (PR_GLORIA)
+	if (getskilllv("PR_GLORIA") > 0 && !getstatus(SC_GLORIA) && Sp >= 20) {
+		unitskilluseid getcharid(3), "PR_GLORIA", getskilllv("PR_GLORIA"), getcharid(3);
+	}
+	// Impositio Manus (PR_IMPOSITIO)
+	if (getskilllv("PR_IMPOSITIO") > 0 && !getstatus(SC_IMPOSITIO) && Sp >= 15) {
+		unitskilluseid getcharid(3), "PR_IMPOSITIO", getskilllv("PR_IMPOSITIO"), getcharid(3);
+	}
+	// Kyrie Eleison (PR_KYRIE)
+	if (getskilllv("PR_KYRIE") > 0 && !getstatus(SC_KYRIE) && Sp >= 25) {
+		unitskilluseid getcharid(3), "PR_KYRIE", getskilllv("PR_KYRIE"), getcharid(3);
+	}
+	// Assumptio (HP_ASSUMPTIO)
+	if (getskilllv("HP_ASSUMPTIO") > 0 && !getstatus(SC_ASSUMPTIO) && Sp >= 30) {
+		unitskilluseid getcharid(3), "HP_ASSUMPTIO", getskilllv("HP_ASSUMPTIO"), getcharid(3);
+	}
+	// Praefatio (AB_PRAEFATIO)
+	if (getskilllv("AB_PRAEFATIO") > 0 && !getstatus(SC_PRAEFATIO) && Sp >= 50) {
+		unitskilluseid getcharid(3), "AB_PRAEFATIO", getskilllv("AB_PRAEFATIO"), getcharid(3);
+	}
+	// Auto-Cura se HP < 80%
+	if (getskilllv("AL_HEAL") > 0 && (Hp * 100 / MaxHp) < 80 && Sp >= 40) {
+		unitskilluseid getcharid(3), "AL_HEAL", getskilllv("AL_HEAL"), getcharid(3);
+	}
+
+	// Gritar de Guerra (MC_LOUD)
+	if (getskilllv("MC_LOUD") > 0 && !getstatus(SC_LOUD) && Sp >= 8) {
+		unitskilluseid getcharid(3), "MC_LOUD", 1, getcharid(3);
+	}
+	// Adrenalina Pura (BS_ADRENALINE)
+	if (getskilllv("BS_ADRENALINE") > 0 && !getstatus(SC_ADRENALINE) && Sp >= 20) {
+		unitskilluseid getcharid(3), "BS_ADRENALINE", getskilllv("BS_ADRENALINE"), getcharid(3);
+	}
+	// Manejo Perfeito (BS_WEAPONPERFECT)
+	if (getskilllv("BS_WEAPONPERFECT") > 0 && !getstatus(SC_WEAPONPERFECTION) && Sp >= 18) {
+		unitskilluseid getcharid(3), "BS_WEAPONPERFECT", getskilllv("BS_WEAPONPERFECT"), getcharid(3);
+	}
+	// Forca Excessiva (BS_OVERTHRUST)
+	if (getskilllv("BS_OVERTHRUST") > 0 && !getstatus(SC_OVERTHRUST) && Sp >= 15) {
+		unitskilluseid getcharid(3), "BS_OVERTHRUST", getskilllv("BS_OVERTHRUST"), getcharid(3);
+	}
+	// Forca Excessiva Maxima (WS_OVERTHRUSTMAX)
+	if (getskilllv("WS_OVERTHRUSTMAX") > 0 && !getstatus(SC_MAXOVERTHRUST) && Sp >= 20 && Zeny >= 5000) {
+		unitskilluseid getcharid(3), "WS_OVERTHRUSTMAX", getskilllv("WS_OVERTHRUSTMAX"), getcharid(3);
+	}
+	// Impulso no Carrinho (WS_CARTBOOST)
+	if (getskilllv("WS_CARTBOOST") > 0 && !getstatus(SC_CARTBOOST) && Sp >= 20) {
+		unitskilluseid getcharid(3), "WS_CARTBOOST", 1, getcharid(3);
+	}
+	return;
+
+OnCheckSpeedPotion:
+	if (getstatus(SC_ASPDPOTION0) || getstatus(SC_ASPDPOTION1) || getstatus(SC_ASPDPOTION2) || getstatus(SC_ASPDPOTION3)) {
+		return;
+	}
+
+	.@pot_id = 645;
+
+	if (BaseLevel >= 85) {
+		if (Class == Job_Swordman || Class == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight ||
+		    Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic ||
+		    Class == Job_Thief || Class == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross) {
+			.@pot_id = 657;
+		} else {
+			.@pot_id = 656;
+		}
+	} else if (BaseLevel >= 40 && Class != Job_Novice && Class != Job_Novice_High) {
+		.@pot_id = 656;
+	}
+
+	if (countitem(.@pot_id) > 0) {
+		delitem .@pot_id, 1;
+		if (.@pot_id == 657) sc_start SC_ASPDPOTION2, 1800000, 0;
+		else if (.@pot_id == 656) sc_start SC_ASPDPOTION1, 1800000, 0;
+		else sc_start SC_ASPDPOTION0, 1800000, 0;
+		specialeffect EF_POTION_GREEN;
+	} else {
+		atcommand "@restock " + .@pot_id + " 5";
+		atcommand "@restock";
+		if (countitem(.@pot_id) == 0) {
+			getitem .@pot_id, 5;
+		}
+		if (countitem(.@pot_id) > 0) {
+			delitem .@pot_id, 1;
+			if (.@pot_id == 657) sc_start SC_ASPDPOTION2, 1800000, 0;
+			else if (.@pot_id == 656) sc_start SC_ASPDPOTION1, 1800000, 0;
+			else sc_start SC_ASPDPOTION0, 1800000, 0;
+			specialeffect EF_POTION_GREEN;
+		}
+	}
+	return;
+
+// ======================================================================
+// Sub-rotina: Auto-Pocao HP (Branca 504 < 70%) e SP (Azul 505 < 80%)
+// ======================================================================
+OnCheckPotions:
+	// HP < 70% -> Pocao Branca (504)
+	if ((Hp * 100 / MaxHp) < 70) {
+		if (countitem(504) == 0) {
+			atcommand "@restock 504 100";
+			atcommand "@restock";
+			if (countitem(504) == 0) getitem 504, 50;
+		}
+		if (countitem(504) > 0) {
+			delitem 504, 1;
+			itemheal rand(325, 405), 0;
+			specialeffect EF_POTION_WHITE;
+		}
+	}
+
+	// SP < 80% -> Pocao Azul (505) continua ate restaurar
+	while ((Sp * 100 / MaxSp) < 80) {
+		if (countitem(505) == 0) {
+			atcommand "@restock 505 100";
+			atcommand "@restock";
+			if (countitem(505) == 0) getitem 505, 50;
+		}
+		if (countitem(505) > 0) {
+			delitem 505, 1;
+			itemheal 0, rand(40, 65);
+			specialeffect EF_POTION_BLUE;
+		} else {
+			percentheal 0, 50;
+			break;
+		}
+	}
+	return;
+
+OnCleanHeavyInventory:
+	setarray .@loot_list[0], 909, 914, 919, 929, 938, 949, 902, 904, 906, 911, 912, 913, 915, 916, 917, 918, 920, 921, 922, 923, 924, 925, 926, 927, 928, 930, 931, 932, 933, 934, 935, 936, 937, 939, 940;
+	for (.@i = 0; .@i < getarraysize(.@loot_list); .@i++) {
+		.@cnt = countitem(.@loot_list[.@i]);
+		if (.@cnt > 0) {
+			delitem .@loot_list[.@i], .@cnt;
+		}
+	}
+	return;
+
+OnGetHuntMap:
+	if (BaseLevel <= 12) {
+		@hunt_map$ = "prt_fild08"; @hunt_x = 150; @hunt_y = 150;
+	} else if (BaseLevel <= 25) {
+		@hunt_map$ = "pay_fild08"; @hunt_x = 150; @hunt_y = 150;
+	} else if (BaseLevel <= 40) {
+		@hunt_map$ = "pay_dun00"; @hunt_x = 100; @hunt_y = 100;
+	} else if (BaseLevel <= 55) {
+		@hunt_map$ = "orc_dun01"; @hunt_x = 90; @hunt_y = 90;
+	} else if (BaseLevel <= 70) {
+		@hunt_map$ = "pay_dun03"; @hunt_x = 150; @hunt_y = 150;
+	} else if (BaseLevel <= 85) {
+		@hunt_map$ = "ein_fild04"; @hunt_x = 150; @hunt_y = 150;
+	} else if (BaseLevel <= 99) {
+		@hunt_map$ = "mag_dun02"; @hunt_x = 150; @hunt_y = 150;
+	} else {
+		@hunt_map$ = "dic_fild02"; @hunt_x = 150; @hunt_y = 150;
+	}
+	return;
+
+OnCheckMapSwitch:
+	callsub OnGetHuntMap;
+	if (strcharinfo(3) != @hunt_map$ && #BOT_AI_STAGE == 3) {
+		warp @hunt_map$, @hunt_x, @hunt_y;
+	}
+	return;
+
+OnDistributeStats:
+	while (StatusPoint > 0) {
+		.@old_points = StatusPoint;
+		switch(#BOT_TARGET_JOB) {
+			case 1: // Espadachim (STR > AGI > VIT > DEX)
+				if (readparam(bStr) < 90 && StatusPoint >= 1) statusup bStr;
+				else if (readparam(bAgi) < 80 && StatusPoint >= 1) statusup bAgi;
+				else if (readparam(bDex) < 50 && StatusPoint >= 1) statusup bDex;
+				else if (readparam(bVit) < 60 && StatusPoint >= 1) statusup bVit;
+				else statusup bStr;
+				break;
+			case 2: // Mago (INT > DEX > VIT)
+				if (readparam(bInt) < 99 && StatusPoint >= 1) statusup bInt;
+				else if (readparam(bDex) < 80 && StatusPoint >= 1) statusup bDex;
+				else if (readparam(bVit) < 50 && StatusPoint >= 1) statusup bVit;
+				else statusup bInt;
+				break;
+			case 3: // Arqueiro (DEX > AGI > INT)
+				if (readparam(bDex) < 99 && StatusPoint >= 1) statusup bDex;
+				else if (readparam(bAgi) < 90 && StatusPoint >= 1) statusup bAgi;
+				else if (readparam(bInt) < 40 && StatusPoint >= 1) statusup bInt;
+				else statusup bDex;
+				break;
+			case 4: // Gatuno (AGI > STR > DEX)
+				if (readparam(bAgi) < 90 && StatusPoint >= 1) statusup bAgi;
+				else if (readparam(bStr) < 80 && StatusPoint >= 1) statusup bStr;
+				else if (readparam(bDex) < 50 && StatusPoint >= 1) statusup bDex;
+				else statusup bAgi;
+				break;
+			case 5: // Novico (INT > VIT > DEX)
+				if (readparam(bInt) < 90 && StatusPoint >= 1) statusup bInt;
+				else if (readparam(bVit) < 70 && StatusPoint >= 1) statusup bVit;
+				else if (readparam(bDex) < 60 && StatusPoint >= 1) statusup bDex;
+				else statusup bInt;
+				break;
+			default: // Mercador (STR > AGI > DEX)
+				if (readparam(bStr) < 90 && StatusPoint >= 1) statusup bStr;
+				else if (readparam(bAgi) < 80 && StatusPoint >= 1) statusup bAgi;
+				else if (readparam(bDex) < 50 && StatusPoint >= 1) statusup bDex;
+				else statusup bStr;
+				break;
+		}
+		if (StatusPoint == .@old_points) break;
+	}
+	return;
+
+OnDistributeSkills:
+	if (Class == Job_Swordman || Class == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight) {
+		skill "SM_SWORD", 10, 0;
+		skill "SM_TWOHAND", 10, 0;
+		skill "SM_RECOVERY", 10, 0;
+		skill "SM_BASH", 10, 0;
+		skill "SM_MAGNUM", 10, 0;
+		skill "SM_ENDURE", 10, 0;
+		skill "SM_PROVOKE", 10, 0;
+		skill "SM_AUTOBERSERK", 1, 0;
+	}
+	if (Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock) {
+		skill "MG_ENERGYCOAT", 1, 0;
+		skill "MG_SRECOVERY", 10, 0;
+		skill "MG_FIREBOLT", 10, 0;
+		skill "MG_COLDBOLT", 10, 0;
+		skill "MG_LIGHTNINGBOLT", 10, 0;
+		skill "MG_SIGHT", 1, 0;
+	}
+	if (Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger) {
+		skill "AC_OWL", 10, 0;
+		skill "AC_VULTURE", 10, 0;
+		skill "AC_CONCENTRATION", 10, 0;
+		skill "AC_DOUBLE", 10, 0;
+		skill "AC_SHOWER", 10, 0;
+	}
+	if (Class == Job_Thief || Class == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Job_Guillotine_Cross) {
+		skill "TF_DOUBLE", 10, 0;
+		skill "TF_MISS", 10, 0;
+		skill "TF_HIDING", 10, 0;
+		skill "TF_POISON", 10, 0;
+	}
+	if (Class == Job_Acolyte || Class == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop) {
+		skill "AL_HEAL", 10, 0;
+		skill "AL_BLESSING", 10, 0;
+		skill "AL_INCAGI", 10, 0;
+		skill "AL_DEMONBANE", 10, 0;
+		skill "AL_DP", 10, 0;
+		skill "AL_HOLYLIGHT", 1, 0;
+		skill "AL_ANGELUS", 10, 0;
+	}
+	if (Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic) {
+		skill "MC_INCCARRY", 10, 0;
+		skill "MC_DISCOUNT", 10, 0;
+		skill "MC_OVERCHARGE", 10, 0;
+		skill "MC_PUSHCART", 10, 0;
+		skill "MC_MAMMONITE", 10, 0;
+		skill "MC_LOUD", 1, 0;
+	}
+	return;
+
+OnCheckJobChange:
+	if (Class == Job_Novice || Class == Job_Novice_High) {
+		switch(#BOT_TARGET_JOB) {
+			case 1: 
+				jobchange (Class == Job_Novice_High ? Job_Swordman_High : Job_Swordman);
+				if (countitem(1124) == 0 && countitem(1104) == 0) getitem 1124, 1;
+				break;
+			case 2: 
+				jobchange (Class == Job_Novice_High ? Job_Mage_High : Job_Mage);
+				if (countitem(1601) == 0) getitem 1601, 1;
+				break;
+			case 3: 
+				jobchange (Class == Job_Novice_High ? Job_Archer_High : Job_Archer);
+				if (countitem(1704) == 0) getitem 1704, 1;
+				if (countitem(1750) < 500) getitem 1750, 2000;
+				atcommand "@restock 1750 1000";
+				query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 1750, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+				break;
+			case 4: 
+				jobchange (Class == Job_Novice_High ? Job_Thief_High : Job_Thief);
+				if (countitem(1207) == 0) getitem 1207, 1;
+				break;
+			case 5: 
+				jobchange (Class == Job_Novice_High ? Job_Acolyte_High : Job_Acolyte);
+				if (countitem(1504) == 0) getitem 1504, 1;
+				break;
+			default: 
+				jobchange (Class == Job_Novice_High ? Job_Merchant_High : Job_Merchant);
+				if (countitem(1304) == 0) getitem 1304, 1;
+				if (Zeny < 50000) Zeny += 50000;
+				break;
+		}
+		specialeffect EF_LEVELUP;
+		callsub OnDistributeSkills;
+		callsub OnDistributeStats;
+		return;
+	}
+
+	if (JobLevel >= 50) {
+		if (Class == Job_Swordman) jobchange Job_Knight;
+		else if (Class == Job_Swordman_High) jobchange Job_Lord_Knight;
+		else if (Class == Job_Mage) jobchange Job_Wizard;
+		else if (Class == Job_Mage_High) jobchange Job_High_Wizard;
+		else if (Class == Job_Archer) jobchange Job_Hunter;
+		else if (Class == Job_Archer_High) jobchange Job_Sniper;
+		else if (Class == Job_Thief) jobchange Job_Assassin;
+		else if (Class == Job_Thief_High) jobchange Job_Assassin_Cross;
+		else if (Class == Job_Acolyte) jobchange Job_Priest;
+		else if (Class == Job_Acolyte_High) jobchange Job_High_Priest;
+		else if (Class == Job_Merchant) jobchange Job_Blacksmith;
+		else if (Class == Job_Merchant_High) jobchange Job_Whitesmith;
+		else return;
+
+		specialeffect EF_ANGEL;
+		callsub OnDistributeSkills;
+		callsub OnDistributeStats;
+		return;
+	}
+
+	if (BaseLevel >= 99 && JobLevel >= 50 && Upper == 0) {
+		jobchange Job_Novice_High;
+		resetlvl 1;
+		specialeffect EF_ANGEL;
+		#BOT_AI_STAGE = 0;
+		#BOT_WP_INDEX = 0;
+		callsub OnCheckJobChange;
+		return;
+	}
+
+	if (BaseLevel >= 99 && JobLevel >= 70 && Upper == 1) {
+		if (Class == Job_Lord_Knight) jobchange Job_Rune_Knight;
+		else if (Class == Job_High_Wizard) jobchange Job_Warlock;
+		else if (Class == Job_Sniper) jobchange Job_Ranger;
+		else if (Class == Job_Assassin_Cross) jobchange Job_Guillotine_Cross;
+		else if (Class == Job_High_Priest) jobchange Job_Arch_Bishop;
+		else if (Class == Job_Whitesmith) jobchange Job_Mechanic;
+		else return;
+
+		specialeffect EF_ANGEL;
+		callsub OnDistributeSkills;
+		callsub OnDistributeStats;
+		return;
+	}
+	return;
+}
