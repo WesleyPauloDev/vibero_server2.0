@@ -10005,6 +10005,35 @@ BUILDIN_FUNC(offlinebot)
 }
 
 /**
+ * iscasting({<char_id>});
+ * Retorna 1 se o personagem ou unidade estiver conjurando uma habilidade (com barra de cast), 0 caso contrario.
+ **/
+BUILDIN_FUNC(iscasting)
+{
+	struct block_list *bl = nullptr;
+
+	if (script_hasdata(st, 2)) {
+		int32 id = script_getnum(st, 2);
+		bl = map_id2bl(id);
+	} else {
+		script_rid2bl(2, bl);
+	}
+
+	if (!bl) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	struct unit_data *ud = unit_bl2ud(bl);
+	if (ud && ud->skilltimer != INVALID_TIMER) {
+		script_pushint(st, 1);
+	} else {
+		script_pushint(st, 0);
+	}
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
 * traitstatusup <stat>{,<char_id>};
 **/
 BUILDIN_FUNC(traitstatusup)
@@ -28861,6 +28890,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(statusup,"i?"),
 	BUILDIN_DEF(statusup2,"ii?"),
 	BUILDIN_DEF(offlinebot,"?"),
+	BUILDIN_DEF(iscasting,"?"),
 	BUILDIN_DEF(traitstatusup,"i?"),
 	BUILDIN_DEF(traitstatusup2,"ii?"),
 	BUILDIN_DEF(bonus,"i?"),
