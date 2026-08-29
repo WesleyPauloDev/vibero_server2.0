@@ -50,12 +50,14 @@ OnPlayerCommand:
 		if (!#BOT_AI_ACTIVE) {
 			#BOT_AI_ACTIVE = 1;
 			#BOT_TEST_MODE = 0;
-			#BOT_AI_STAGE = 0;
+			#BOT_AI_STAGE = 0; // Inicia em Prontera
 			#BOT_WP_INDEX = 0;
 			#BOT_HUNT_START = 0;
+			#BOT_WAIT_END = 0;
+			stand;
 			callsub OnDetectTargetJob;
-			savepoint "prontera", 156, 170;
-			warp "prontera", 156, 170;
+			savepoint "prontera", 156, 178;
+			warp "prontera", 156, 178;
 			resetstatus;
 			resetskill;
 			callsub OnApplyBuffs;
@@ -77,8 +79,6 @@ OnPlayerCommand:
 		#BOT_STUCK_Y = 0;
 		#BOT_STUCK_TICKS = 0;
 		deltimer "PlayerBotAI::OnStepTimer";
-		deltimer "PlayerBotAI::OnFinishRest";
-		deltimer "PlayerBotAI::OnFinishEdenRest";
 		unitstopwalk getcharid(3), USW_FORCE_STOP;
 		unitstopattack getcharid(3);
 		dispbottom "[Iniciante AI]: Sistema desativado com sucesso.", 0xFF5555;
@@ -102,11 +102,12 @@ OnPlayerCommand:
 		#BOT_STUCK_X = 0;
 		#BOT_STUCK_Y = 0;
 		#BOT_STUCK_TICKS = 0;
+		#BOT_WAIT_END = 0;
+		stand;
 		callsub OnDetectTargetJob;
 
-		// Warp imediato e SavePoint no Centro de Prontera
-		savepoint "prontera", 156, 170;
-		warp "prontera", 156, 170;
+		savepoint "prontera", 156, 178;
+		warp "prontera", 156, 178;
 
 		// Injeta 30.000 de cada pocao no armazem da Kafra
 		query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 504, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
@@ -197,7 +198,7 @@ OnGMCommand:
 		               "Cancelar");
 
 		switch(.@opt) {
-			case 1: // MODO TESTE (Inicia em Prontera)
+			case 1: // MODO TESTE
 				if (attachrid(.@target_aid)) {
 					#BOT_AI_ACTIVE = 1;
 					#BOT_TEST_MODE = 1;
@@ -218,10 +219,12 @@ OnGMCommand:
 					#BOT_STUCK_X = 0;
 					#BOT_STUCK_Y = 0;
 					#BOT_STUCK_TICKS = 0;
+					#BOT_WAIT_END = 0;
+					stand;
 					callsub OnDetectTargetJob;
 
-					savepoint "prontera", 156, 170;
-					warp "prontera", 156, 170;
+					savepoint "prontera", 156, 178;
+					warp "prontera", 156, 178;
 
 					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 504, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
 					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 505, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
@@ -251,7 +254,7 @@ OnGMCommand:
 				if (attachrid(.@target_aid)) {
 					#BOT_AI_ACTIVE = 1;
 					#BOT_TEST_MODE = 0;
-					#BOT_AI_STAGE = 0;
+					#BOT_AI_STAGE = 0; // Inicia em Prontera
 					#BOT_HUNT_START = 0;
 					#BOT_WP_INDEX = 0;
 					#BOT_HUNT_COUNT = 0;
@@ -268,10 +271,12 @@ OnGMCommand:
 					#BOT_STUCK_X = 0;
 					#BOT_STUCK_Y = 0;
 					#BOT_STUCK_TICKS = 0;
+					#BOT_WAIT_END = 0;
+					stand;
 					callsub OnDetectTargetJob;
 
-					savepoint "prontera", 156, 170;
-					warp "prontera", 156, 170;
+					savepoint "prontera", 156, 178;
+					warp "prontera", 156, 178;
 
 					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 504, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
 					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 505, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
@@ -306,8 +311,8 @@ OnGMCommand:
 						#BOT_WP_INDEX = 0;
 						#BOT_HUNT_START = 0;
 						callsub OnDetectTargetJob;
-						savepoint "prontera", 156, 170;
-						warp "prontera", 156, 170;
+						savepoint "prontera", 156, 178;
+						warp "prontera", 156, 178;
 						resetstatus;
 						callsub OnApplyBuffs;
 						callsub OnCheckJobChange;
@@ -331,8 +336,6 @@ OnGMCommand:
 					#BOT_STUCK_Y = 0;
 					#BOT_STUCK_TICKS = 0;
 					deltimer "PlayerBotAI::OnStepTimer";
-					deltimer "PlayerBotAI::OnFinishRest";
-					deltimer "PlayerBotAI::OnFinishEdenRest";
 					unitstopwalk getcharid(3), USW_FORCE_STOP;
 					unitstopattack getcharid(3);
 				}
@@ -409,8 +412,8 @@ OnGMCommand:
 				#BOT_WP_INDEX = 0;
 				#BOT_HUNT_START = 0;
 				callsub OnDetectTargetJob;
-				savepoint "prontera", 156, 170;
-				warp "prontera", 156, 170;
+				savepoint "prontera", 156, 178;
+				warp "prontera", 156, 178;
 				resetstatus;
 				callsub OnApplyBuffs;
 				callsub OnCheckJobChange;
@@ -449,10 +452,12 @@ OnGMCommand:
 			#BOT_STUCK_X = 0;
 			#BOT_STUCK_Y = 0;
 			#BOT_STUCK_TICKS = 0;
+			#BOT_WAIT_END = 0;
+			stand;
 			callsub OnDetectTargetJob;
 
-			savepoint "prontera", 156, 170;
-			warp "prontera", 156, 170;
+			savepoint "prontera", 156, 178;
+			warp "prontera", 156, 178;
 
 			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 504, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
 			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 505, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
@@ -488,7 +493,7 @@ OnGMCommand:
 		if (attachrid(.@target_aid)) {
 			#BOT_AI_ACTIVE = 1;
 			#BOT_TEST_MODE = 0;
-			#BOT_AI_STAGE = 0;
+			#BOT_AI_STAGE = 0; // Inicia em Prontera
 			#BOT_HUNT_START = 0;
 			#BOT_WP_INDEX = 0;
 			#BOT_HUNT_COUNT = 0;
@@ -505,10 +510,12 @@ OnGMCommand:
 			#BOT_STUCK_X = 0;
 			#BOT_STUCK_Y = 0;
 			#BOT_STUCK_TICKS = 0;
+			#BOT_WAIT_END = 0;
+			stand;
 			callsub OnDetectTargetJob;
 
-			savepoint "prontera", 156, 170;
-			warp "prontera", 156, 170;
+			savepoint "prontera", 156, 178;
+			warp "prontera", 156, 178;
 
 			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 504, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
 			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 505, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
@@ -552,8 +559,6 @@ OnGMCommand:
 			#BOT_STUCK_Y = 0;
 			#BOT_STUCK_TICKS = 0;
 			deltimer "PlayerBotAI::OnStepTimer";
-			deltimer "PlayerBotAI::OnFinishRest";
-			deltimer "PlayerBotAI::OnFinishEdenRest";
 			unitstopwalk getcharid(3), USW_FORCE_STOP;
 			unitstopattack getcharid(3);
 		}
@@ -625,8 +630,8 @@ OnShowGMStatus:
 // ======================================================================
 OnPCLoginEvent:
 	if (#BOT_AI_ACTIVE) {
-		savepoint "prontera", 156, 170;
-		warp "prontera", 156, 170;
+		savepoint "prontera", 156, 178;
+		warp "prontera", 156, 178;
 		#BOT_CURRENT_TARGET = 0;
 		#BOT_PRT_MAX = 0;
 		#BOT_PRT_COUNT = 0;
@@ -640,11 +645,15 @@ OnPCLoginEvent:
 
 OnPCDieEvent:
 	if (#BOT_AI_ACTIVE) {
-		sleep2 2000;
+		sleep2 1500;
 		recovery 1;
 		percentheal 100, 100;
-		warp "SavePoint", 0, 0;
-		#BOT_AI_STAGE = 0;
+		stand; // Garante que levanta do chao apos reviver
+		callsub OnApplyBuffs;
+		callsub OnGetHuntMap;
+		warp @hunt_map$, @hunt_x, @hunt_y;
+		#BOT_AI_STAGE = 3; // Retorna imediatamente para a Cacada
+		#BOT_HUNT_START = gettimetick(2);
 		#BOT_WP_INDEX = 0;
 		#BOT_CURRENT_TARGET = 0;
 		#BOT_PRT_MAX = 0;
@@ -659,8 +668,8 @@ OnPCDieEvent:
 		#BOT_STUCK_X = 0;
 		#BOT_STUCK_Y = 0;
 		#BOT_STUCK_TICKS = 0;
-		#BOT_HUNT_START = 0;
-		addtimer 2500, "PlayerBotAI::OnStepTimer";
+		#BOT_WAIT_END = 0;
+		addtimer 1500, "PlayerBotAI::OnStepTimer";
 	}
 	end;
 
@@ -682,6 +691,9 @@ OnPCJobLvUpEvent:
 
 OnLoop:
 OnStartRoutine:
+OnFinishRest:
+OnFinishEdenEntrance:
+OnFinishEdenRest:
 	goto OnStepTimer;
 
 // ======================================================================
@@ -706,14 +718,16 @@ OnStepTimer:
 	// =========================================================
 	// =========================================================
 	// ESTAGIO 0: Caminhada Organica e Dinamica em Prontera
-	// Sorteia quantidade e coordenadas na praca central
+	// Caminhada fluida com parada obrigatoria de no minimo 1 minuto em cada ponto
 	// =========================================================
 	if (#BOT_AI_STAGE == 0) {
 		getmapxy(.@m$, .@cx, .@cy, BL_PC);
 		if (.@m$ != "prontera") {
-			warp "prontera", 156, 170;
+			stand;
+			warp "prontera", 156, 178;
 			#BOT_PRT_MAX = 0;
 			#BOT_PRT_COUNT = 0;
+			#BOT_WP_INDEX = 0;
 			#BOT_LAST_TX = 0;
 			#BOT_LAST_TY = 0;
 			#BOT_STUCK_TICKS = 0;
@@ -721,63 +735,105 @@ OnStepTimer:
 			end;
 		}
 
-		// Pontos 100% abertos e caminhaveis ao redor da praca central da fonte
-		setarray .@pool_x[0], 156, 164, 166, 164, 156, 148, 146, 148, 160, 152, 156, 162, 150, 156, 164, 148;
-		setarray .@pool_y[0], 170, 172, 180, 188, 192, 188, 180, 172, 176, 176, 184, 184, 184, 168, 180, 180;
+		// Piscina ampla de mais de 60 coordenadas abertas para total variedade e liberdade de travessia
+		setarray .@pool_x[0],
+			// Setor Sul (Y 177 ~ 190)
+			148, 152, 156, 160, 164,
+			148, 152, 156, 160, 164,
+			148, 152, 156, 160, 164,
+			148, 154, 158, 164,
+			// Setor Oeste / Diagonal Esquerda (148,177 -> 124,202 -> 121,206 -> 146,230)
+			144, 140, 136, 132, 128, 124,
+			121, 121, 124, 128, 134, 140,
+			124, 128, 134, 140,
+			124, 128, 132, 136, 140, 146,
+			// Setor Norte (Y 214 ~ 230)
+			146, 150, 154, 158, 162, 165,
+			148, 152, 156, 160, 164,
+			148, 152, 156, 160, 164,
+			148, 152, 156, 160, 164,
+			// Setor Leste / Diagonal Direita (165,230 -> 188,207 -> 186,200 -> 161,177)
+			168, 172, 176, 180, 184, 188,
+			186, 186, 182, 178, 172, 168,
+			182, 178, 172, 168,
+			186, 182, 178, 174, 170, 165, 161;
+
+		setarray .@pool_y[0],
+			// Setor Sul
+			178, 178, 178, 178, 178,
+			182, 182, 182, 182, 182,
+			186, 186, 186, 186, 186,
+			190, 190, 190, 190,
+			// Setor Oeste
+			179, 183, 187, 191, 195, 202,
+			204, 208, 206, 206, 206, 206,
+			210, 210, 210, 210,
+			214, 218, 222, 225, 228, 230,
+			// Setor Norte
+			230, 230, 230, 230, 230, 230,
+			226, 226, 226, 226, 226,
+			222, 222, 222, 222, 222,
+			216, 216, 216, 216, 216,
+			// Setor Leste
+			228, 225, 221, 217, 213, 207,
+			204, 208, 206, 206, 206, 206,
+			210, 210, 210, 210,
+			200, 196, 192, 188, 184, 180, 178;
 		.@pool_size = getarraysize(.@pool_x);
 
-		// Se ainda nao sorteou o plano desta visita a Prontera:
+		// Sorteia quantos pontos visitara nesta passagem por Prontera:
 		if (#BOT_PRT_MAX <= 0) {
 			#BOT_PRT_MAX = rand(3, 6);
 			#BOT_PRT_COUNT = 0;
+			#BOT_WP_INDEX = 0;
 			#BOT_LAST_TX = 0;
 			#BOT_LAST_TY = 0;
 			#BOT_STUCK_TICKS = 0;
 		}
 
-		// Se ainda nao completou todos os pontos sorteados:
-		if (#BOT_PRT_COUNT < #BOT_PRT_MAX) {
-			// Se precisa de um novo ponto destino:
-			if (#BOT_LAST_TX == 0 || #BOT_LAST_TY == 0) {
-				.@r = rand(0, .@pool_size - 1);
-				#BOT_LAST_TX = .@pool_x[.@r];
-				#BOT_LAST_TY = .@pool_y[.@r];
-				#BOT_STUCK_TICKS = 0;
-				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY;
-				addtimer 1000, "PlayerBotAI::OnStepTimer";
-				end;
-			}
+		// Sub-estagio 0: Sorteia o proximo ponto e inicia o passo suave
+		if (#BOT_WP_INDEX == 0) {
+			.@r = rand(0, .@pool_size - 1);
+			#BOT_LAST_TX = .@pool_x[.@r];
+			#BOT_LAST_TY = .@pool_y[.@r];
+			#BOT_WP_INDEX = 1; // Transiciona para caminhando
+			#BOT_STUCK_TICKS = 0;
+			#BOT_STUCK_X = .@cx;
+			#BOT_STUCK_Y = .@cy;
+			stand; // Garante que esta de pe para andar
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
+			unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY; // Envia o caminho suave uma unica vez
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
+			end;
+		}
 
+		// Sub-estagio 1: Caminhando suavemente ate o ponto de destino
+		if (#BOT_WP_INDEX == 1) {
 			.@dist = distance(.@cx, .@cy, #BOT_LAST_TX, #BOT_LAST_TY);
 
-			// Se chegou perto do ponto atual (<= 2 celulas):
+			// Chegou perto do ponto de destino (<= 2 celulas):
 			if (.@dist <= 2) {
-				#BOT_PRT_COUNT++;
-				#BOT_LAST_TX = 0;
-				#BOT_LAST_TY = 0;
-				#BOT_STUCK_TICKS = 0;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				#BOT_PRT_COUNT++;
+				#BOT_WP_INDEX = 2; // Transiciona para parado no ponto
+				#BOT_STUCK_TICKS = 0;
+				// Parada obrigatoria no ponto: Minimo 1 minuto (60 a 180s no modo start | 5s no teste)
+				#BOT_WAIT_END = gettimetick(2) + (#BOT_TEST_MODE ? 5 : rand(60, 180));
 
-				// Se ja visitou todos os pontos sorteados -> Vai para o Estagio 1 (Descanso na Fonte)
-				if (#BOT_PRT_COUNT >= #BOT_PRT_MAX) {
-					#BOT_AI_STAGE = 1;
-					#BOT_WP_INDEX = 0; // 0 = Caminhando para a fonte
-					#BOT_PRT_MAX = 0;
-					#BOT_PRT_COUNT = 0;
-					#BOT_STUCK_TICKS = 0;
-					addtimer 500, "PlayerBotAI::OnStepTimer";
-					end;
-				}
+				// Sorteia se descansa sentado ou fica em pe observando o movimento:
+				if (rand(0, 1)) sit;
+				else stand;
 
 				addtimer 1000, "PlayerBotAI::OnStepTimer";
 				end;
 			}
 
-			// Sistema Anti-Travamento (Watchdog) apenas se realmente nao mudou de posicao:
+			// Anti-travamento inteligente caso colida com obstaculo por mais de 5s:
 			if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
 				#BOT_STUCK_TICKS++;
-				if (#BOT_STUCK_TICKS >= 3) {
+				if (#BOT_STUCK_TICKS >= 5) {
+					// Sorteia outro ponto aberto a pe
+					#BOT_WP_INDEX = 0;
 					#BOT_LAST_TX = 0;
 					#BOT_LAST_TY = 0;
 					#BOT_STUCK_TICKS = 0;
@@ -785,8 +841,6 @@ OnStepTimer:
 					addtimer 500, "PlayerBotAI::OnStepTimer";
 					end;
 				}
-				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY;
 			} else {
 				#BOT_STUCK_TICKS = 0;
 			}
@@ -798,19 +852,49 @@ OnStepTimer:
 			end;
 		}
 
-		#BOT_AI_STAGE = 1;
-		#BOT_WP_INDEX = 0;
-		addtimer 500, "PlayerBotAI::OnStepTimer";
-		end;
+		// Sub-estagio 2: Parado no ponto descansando/observando (Minimo 1 minuto)
+		if (#BOT_WP_INDEX == 2) {
+			if (gettimetick(2) >= #BOT_WAIT_END) {
+				stand; // Levanta do chao
+				// Se ja visitou todos os pontos sorteados desta passagem -> Vai para o Eden
+				if (#BOT_PRT_COUNT >= #BOT_PRT_MAX) {
+					#BOT_AI_STAGE = 2; // Segue para o Grupo Eden
+					#BOT_WP_INDEX = 0;
+					#BOT_PRT_MAX = 0;
+					#BOT_PRT_COUNT = 0;
+					#BOT_LAST_TX = 0;
+					#BOT_LAST_TY = 0;
+					#BOT_STUCK_TICKS = 0;
+					#BOT_WAIT_END = 0;
+					unitstopwalk getcharid(3), USW_FORCE_STOP;
+					warp "moc_para01", 31, 14;
+					addtimer 1500, "PlayerBotAI::OnStepTimer";
+					end;
+				}
+
+				// Ainda tem pontos a visitar: sorteia o proximo a partir de onde esta agora
+				#BOT_WP_INDEX = 0;
+				#BOT_LAST_TX = 0;
+				#BOT_LAST_TY = 0;
+				#BOT_STUCK_TICKS = 0;
+				#BOT_WAIT_END = 0;
+				addtimer 500, "PlayerBotAI::OnStepTimer";
+				end;
+			}
+
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
+			end;
+		}
 	}
 
 	// =========================================================
-	// ESTAGIO 1: Descanso na Fonte de Prontera (156, 170)
+	// ESTAGIO 1: Descanso Distribuido em Prontera (Minimo 1 Minuto no Modo Start)
 	// =========================================================
 	if (#BOT_AI_STAGE == 1) {
 		getmapxy(.@m$, .@cx, .@cy, BL_PC);
 		if (.@m$ != "prontera") {
-			warp "prontera", 156, 170;
+			stand;
+			warp "prontera", 156, 178;
 			#BOT_WP_INDEX = 0;
 			#BOT_LAST_TX = 0;
 			#BOT_LAST_TY = 0;
@@ -819,46 +903,70 @@ OnStepTimer:
 			end;
 		}
 
-		// Sub-estagio 0: Caminhando ate o ponto de descanso da fonte (156, 170)
+		// Grade ampla de mais de 30 pontos de descanso distribuidos (todos em Y >= 177)
+		setarray .@p_rest_x[0],
+			156, 148, 164, 152, 160, 150, 162,
+			132, 126, 138, 122, 142, 130, 136,
+			156, 148, 164, 152, 160, 150, 162,
+			180, 186, 174, 188, 170, 182, 176,
+			146, 165, 126, 184, 138, 172, 144, 168;
+
+		setarray .@p_rest_y[0],
+			178, 178, 178, 184, 184, 188, 188,
+			206, 206, 206, 208, 212, 216, 222,
+			224, 224, 224, 220, 220, 216, 216,
+			206, 206, 206, 208, 212, 216, 220,
+			230, 230, 212, 212, 225, 222, 180, 180;
+		.@p_rest_size = getarraysize(.@p_rest_x);
+
+		// Sorteia o ponto de descanso de forma 100% uniforme:
+		if (#BOT_LAST_TX == 0 || #BOT_LAST_TY == 0) {
+			.@r_idx = rand(0, .@p_rest_size - 1);
+			#BOT_LAST_TX = .@p_rest_x[.@r_idx];
+			#BOT_LAST_TY = .@p_rest_y[.@r_idx];
+			#BOT_STUCK_TICKS = 0;
+		}
+
+		// Sub-estagio 0: Caminhando ate o ponto de descanso sorteado
 		if (#BOT_WP_INDEX == 0) {
-			.@dist = distance(.@cx, .@cy, 156, 170);
+			.@dist = distance(.@cx, .@cy, #BOT_LAST_TX, #BOT_LAST_TY);
 
 			if (.@dist <= 2) {
 				#BOT_WP_INDEX = 1; // Em descanso sentado
-				#BOT_LAST_TX = 0;
-				#BOT_LAST_TY = 0;
 				#BOT_STUCK_TICKS = 0;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				sit; // Senta no chao na praca da fonte
+				sit; // Senta no ponto escolhido
 
 				if (#BOT_TEST_MODE) {
-					addtimer 5000, "PlayerBotAI::OnFinishRest";
+					#BOT_WAIT_END = gettimetick(2) + 5;
 				} else {
-					// Sorteia o tempo de descanso na fonte: 1, 5, 10, 20 ou 30 minutos
-					setarray .@p_rest[0], 60000, 300000, 600000, 1200000, 1800000;
-					addtimer .@p_rest[rand(0, 4)], "PlayerBotAI::OnFinishRest";
+					// No modo Start: Minimo de 1 minuto e Maximo de 5 minutos (60 a 300 segundos)
+					#BOT_WAIT_END = gettimetick(2) + rand(60, 300);
 				}
+				addtimer 1000, "PlayerBotAI::OnStepTimer";
 				end;
 			}
 
-			// Se ainda nao iniciou a caminhada para 156,170 ou se travou:
-			if (#BOT_LAST_TX != 156 || #BOT_LAST_TY != 170 || (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy)) {
-				if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
-					#BOT_STUCK_TICKS++;
-					if (#BOT_STUCK_TICKS >= 3) {
-						warp "prontera", 156, 170;
-						#BOT_STUCK_TICKS = 0;
-						addtimer 500, "PlayerBotAI::OnStepTimer";
-						end;
-					}
-				} else {
+			// Inicia caminhada ou anti-travamento para o ponto de descanso (100% a pe):
+			if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
+				#BOT_STUCK_TICKS++;
+				if (#BOT_STUCK_TICKS >= 3) {
+					// Se encontrou obstaculo no caminho, sorteia outro ponto aberto e continua a pe
+					.@r_idx = rand(0, .@p_rest_size - 1);
+					#BOT_LAST_TX = .@p_rest_x[.@r_idx];
+					#BOT_LAST_TY = .@p_rest_y[.@r_idx];
 					#BOT_STUCK_TICKS = 0;
+					unitstopwalk getcharid(3), USW_FORCE_STOP;
+					unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY;
+					addtimer 1000, "PlayerBotAI::OnStepTimer";
+					end;
 				}
-				#BOT_LAST_TX = 156;
-				#BOT_LAST_TY = 170;
-				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				unitwalk getcharid(3), 156, 170;
+			} else {
+				#BOT_STUCK_TICKS = 0;
 			}
+
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
+			unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY;
 
 			#BOT_STUCK_X = .@cx;
 			#BOT_STUCK_Y = .@cy;
@@ -867,19 +975,35 @@ OnStepTimer:
 			end;
 		}
 
-		// Sub-estagio 1: Sentado descansando na fonte (Apenas aguarda timer OnFinishRest)
+		// Sub-estagio 1: Sentado descansando em seu ponto
 		if (#BOT_WP_INDEX == 1) {
+			if (gettimetick(2) >= #BOT_WAIT_END) {
+				stand; // Levanta do chao
+				#BOT_AI_STAGE = 2;
+				#BOT_WP_INDEX = 0;
+				#BOT_LAST_TX = 0;
+				#BOT_LAST_TY = 0;
+				#BOT_STUCK_TICKS = 0;
+				#BOT_WAIT_END = 0;
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				warp "moc_para01", 31, 14;
+				addtimer 1500, "PlayerBotAI::OnStepTimer";
+				end;
+			}
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 	}
 
 	// =========================================================
-	// ESTAGIO 2: Grupo Eden (Entrada 30,14 e Mesa 28,26 com tempos sorteados)
+	// ESTAGIO 2: Grupo Eden (Minimo 1 Minuto e Maximo 5 Minutos) - 100% a pe
 	// =========================================================
 	if (#BOT_AI_STAGE == 2) {
+		stand;
 		getmapxy(.@m$, .@cx, .@cy, BL_PC);
 		if (.@m$ != "moc_para01") {
-			warp "moc_para01", 30, 14;
+			stand;
+			warp "moc_para01", 31, 14;
 			#BOT_WP_INDEX = 0;
 			#BOT_LAST_TX = 0;
 			#BOT_LAST_TY = 0;
@@ -888,7 +1012,7 @@ OnStepTimer:
 			end;
 		}
 
-		// Sub-estagio 0: Chegou na entrada (30,14) -> Sorteia tempo de espera na entrada
+		// Sub-estagio 0: Chegou na entrada (31,14) -> Tempo de espera na entrada
 		if (#BOT_WP_INDEX == 0) {
 			#BOT_WP_INDEX = 1; // Aguardando tempo na entrada
 			#BOT_LAST_TX = 0;
@@ -897,62 +1021,84 @@ OnStepTimer:
 			unitstopwalk getcharid(3), USW_FORCE_STOP;
 
 			if (#BOT_TEST_MODE) {
-				addtimer 5000, "PlayerBotAI::OnFinishEdenEntrance";
+				#BOT_WAIT_END = gettimetick(2) + 5;
 			} else {
-				// Sorteia tempo de espera na entrada do Eden: 1, 5, 10, 20 ou 30 minutos
-				setarray .@e_wait[0], 60000, 300000, 600000, 1200000, 1800000;
-				addtimer .@e_wait[rand(0, 4)], "PlayerBotAI::OnFinishEdenEntrance";
+				// No modo Start: 1 a 3 minutos (60 a 180 segundos)
+				#BOT_WAIT_END = gettimetick(2) + rand(60, 180);
 			}
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
 		// Sub-estagio 1: Aguardando tempo na entrada do Eden
 		if (#BOT_WP_INDEX == 1) {
-			end;
-		}
-
-		// Sub-estagio 2: Caminhando da entrada (30,14) para a mesa de descanso (28,26)
-		if (#BOT_WP_INDEX == 2) {
-			.@tx = 28; .@ty = 26;
-			.@dist = distance(.@cx, .@cy, .@tx, .@ty);
-
-			// Chegou perto da mesa de descanso (<= 2 celulas)
-			if (.@dist <= 2) {
-				#BOT_WP_INDEX = 3; // Agora em descanso sentado na mesa
+			if (gettimetick(2) >= #BOT_WAIT_END) {
+				#BOT_WP_INDEX = 2; // Vai para uma mesa a pe
 				#BOT_LAST_TX = 0;
 				#BOT_LAST_TY = 0;
 				#BOT_STUCK_TICKS = 0;
+				#BOT_WAIT_END = 0;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				sit; // Senta na mesa do Eden
+				addtimer 500, "PlayerBotAI::OnStepTimer";
+				end;
+			}
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
+			end;
+		}
+
+		// Sub-estagio 2: Caminhando da entrada (31,14) para uma mesa de descanso sorteada
+		if (#BOT_WP_INDEX == 2) {
+			// Grade de mesas/assentos distribuidos no Eden
+			setarray .@eden_table_x[0], 28, 26, 30, 28, 26, 30, 32, 24, 22, 34, 28, 30;
+			setarray .@eden_table_y[0], 26, 26, 26, 28, 28, 28, 26, 26, 28, 28, 30, 30;
+			.@eden_size = getarraysize(.@eden_table_x);
+
+			if (#BOT_LAST_TX == 0 || #BOT_LAST_TY == 0) {
+				.@e_idx = rand(0, .@eden_size - 1);
+				#BOT_LAST_TX = .@eden_table_x[.@e_idx];
+				#BOT_LAST_TY = .@eden_table_y[.@e_idx];
+				#BOT_STUCK_TICKS = 0;
+			}
+
+			.@dist = distance(.@cx, .@cy, #BOT_LAST_TX, #BOT_LAST_TY);
+
+			// Chegou perto da mesa de descanso sorteada (<= 2 celulas)
+			if (.@dist <= 2) {
+				#BOT_WP_INDEX = 3; // Agora em descanso sentado na mesa
+				#BOT_STUCK_TICKS = 0;
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				sit; // Senta na mesa sorteada
 
 				if (#BOT_TEST_MODE) {
-					addtimer 5000, "PlayerBotAI::OnFinishEdenRest";
+					#BOT_WAIT_END = gettimetick(2) + 5;
 				} else {
-					// Sorteia tempo de descanso na mesa do Eden: 1, 5, 10, 20 ou 30 minutos
-					setarray .@e_rest[0], 60000, 300000, 600000, 1200000, 1800000;
-					addtimer .@e_rest[rand(0, 4)], "PlayerBotAI::OnFinishEdenRest";
+					// No modo Start: Minimo de 1 minuto e Maximo de 5 minutos (60 a 300 segundos)
+					#BOT_WAIT_END = gettimetick(2) + rand(60, 300);
 				}
+				addtimer 1000, "PlayerBotAI::OnStepTimer";
 				end;
 			}
 
-			// Inicia caminhada continua para 28,26 apenas se necessario ou se travou:
-			if (#BOT_LAST_TX != 28 || #BOT_LAST_TY != 26 || (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy)) {
-				if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
-					#BOT_STUCK_TICKS++;
-					if (#BOT_STUCK_TICKS >= 3) {
-						warp "moc_para01", 28, 26;
-						#BOT_STUCK_TICKS = 0;
-						addtimer 500, "PlayerBotAI::OnStepTimer";
-						end;
-					}
-				} else {
+			// Inicia caminhada continua para a mesa sorteada (100% a pe, sem teleporte):
+			if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
+				#BOT_STUCK_TICKS++;
+				if (#BOT_STUCK_TICKS >= 4) {
+					#BOT_WP_INDEX = 3;
+					#BOT_LAST_TX = 0;
+					#BOT_LAST_TY = 0;
 					#BOT_STUCK_TICKS = 0;
+					unitstopwalk getcharid(3), USW_FORCE_STOP;
+					sit;
+					#BOT_WAIT_END = gettimetick(2) + (#BOT_TEST_MODE ? 5 : rand(60, 300));
+					addtimer 1000, "PlayerBotAI::OnStepTimer";
+					end;
 				}
-				#BOT_LAST_TX = 28;
-				#BOT_LAST_TY = 26;
-				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				unitwalk getcharid(3), 28, 26;
+			} else {
+				#BOT_STUCK_TICKS = 0;
 			}
+
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
+			unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY;
 
 			#BOT_STUCK_X = .@cx;
 			#BOT_STUCK_Y = .@cy;
@@ -961,14 +1107,26 @@ OnStepTimer:
 			end;
 		}
 
-		// Sub-estagio 3: Descansando sentado na mesa do Eden (Apenas aguarda o timer OnFinishEdenRest)
+		// Sub-estagio 3: Descansando sentado na mesa do Eden
 		if (#BOT_WP_INDEX == 3) {
+			if (gettimetick(2) >= #BOT_WAIT_END) {
+				stand; // Levanta da mesa
+				#BOT_WP_INDEX = 4; // Vai para a saida a pe
+				#BOT_LAST_TX = 0;
+				#BOT_LAST_TY = 0;
+				#BOT_STUCK_TICKS = 0;
+				#BOT_WAIT_END = 0;
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				addtimer 800, "PlayerBotAI::OnStepTimer";
+				end;
+			}
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
-		// Sub-estagio 4: Apos descanso, caminhando de volta para a saida (30,14)
+		// Sub-estagio 4: Apos descanso, caminhando de volta para a saida (31,14)
 		if (#BOT_WP_INDEX == 4) {
-			.@tx = 30; .@ty = 14;
+			.@tx = 31; .@ty = 14;
 			.@dist = distance(.@cx, .@cy, .@tx, .@ty);
 
 			// Chegou perto da saida (<= 2 celulas) -> Vai para a cacada
@@ -994,23 +1152,32 @@ OnStepTimer:
 				end;
 			}
 
-			// Inicia caminhada continua para 30,14 apenas se necessario ou se travou:
-			if (#BOT_LAST_TX != 30 || #BOT_LAST_TY != 14 || (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy)) {
+			// Inicia caminhada continua para 31,14 (100% a pe, sem teleporte):
+			if (#BOT_LAST_TX != 31 || #BOT_LAST_TY != 14 || (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy)) {
 				if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
 					#BOT_STUCK_TICKS++;
-					if (#BOT_STUCK_TICKS >= 3) {
-						warp "moc_para01", 30, 14;
+					if (#BOT_STUCK_TICKS >= 4) {
+						#BOT_AI_STAGE = 3;
+						#BOT_WP_INDEX = 0;
+						#BOT_HUNT_COUNT = 0;
+						#BOT_CURRENT_TARGET = 0;
+						#BOT_LAST_TX = 0;
+						#BOT_LAST_TY = 0;
 						#BOT_STUCK_TICKS = 0;
-						addtimer 500, "PlayerBotAI::OnStepTimer";
+						#BOT_HUNT_START = gettimetick(2);
+						unitstopwalk getcharid(3), USW_FORCE_STOP;
+						callsub OnGetHuntMap;
+						warp @hunt_map$, @hunt_x, @hunt_y;
+						addtimer 1500, "PlayerBotAI::OnStepTimer";
 						end;
 					}
 				} else {
 					#BOT_STUCK_TICKS = 0;
 				}
-				#BOT_LAST_TX = 30;
+				#BOT_LAST_TX = 31;
 				#BOT_LAST_TY = 14;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				unitwalk getcharid(3), 30, 14;
+				unitwalk getcharid(3), 31, 14;
 			}
 
 			#BOT_STUCK_X = .@cx;
@@ -1025,10 +1192,12 @@ OnStepTimer:
 	// ESTAGIO 3: Cacada Inteligente e Agressiva (Busca por getareaunits)
 	// =========================================================
 	if (#BOT_AI_STAGE == 3) {
+		stand;
 		callsub OnGetHuntMap;
 		getmapxy(.@m$, .@cx, .@cy, BL_PC);
 
 		if (.@m$ != @hunt_map$) {
+			stand;
 			warp @hunt_map$, @hunt_x, @hunt_y;
 			#BOT_CURRENT_TARGET = 0;
 			#BOT_LAST_TX = 0;
@@ -1063,12 +1232,12 @@ OnStepTimer:
 			#BOT_STUCK_TICKS = 0;
 			unitstopattack getcharid(3);
 			unitstopwalk getcharid(3), USW_FORCE_STOP;
-			warp "prontera", 156, 170;
+			warp "prontera", 156, 178;
 			addtimer 2000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
-		// 1. Verifica se o monstro alvo anterior ainda existe, esta vivo e valido
+		// 1. Verifica se o monstro alvo anterior ainda existe, esta vivo, valido e nao esta sendo atacado por outro (Anti-KS)
 		if (#BOT_CURRENT_TARGET > 0) {
 			if (!unitexists(#BOT_CURRENT_TARGET)) {
 				#BOT_CURRENT_TARGET = 0;
@@ -1077,7 +1246,12 @@ OnStepTimer:
 			} else {
 				getunitdata #BOT_CURRENT_TARGET, .@cur_data;
 				.@cur_class = .@cur_data[UMOB_CLASS];
-				if (.@cur_data[UMOB_HP] <= 0 || (.@cur_class >= 1078 && .@cur_class <= 1085) || (.@cur_class >= 1930 && .@cur_class <= 1933) || .@cur_class == 1064) {
+				.@cur_target_id = .@cur_data[UMOB_TARGETID];
+				.@d = distance(.@cx, .@cy, .@cur_data[UMOB_X], .@cur_data[UMOB_Y]);
+
+				// Se o monstro morreu, e planta/cogumelo, se afastou mais de 14 celulas ou foi engatado por outro jogador (Anti-KS):
+				if (.@cur_data[UMOB_HP] <= 0 || (.@cur_class >= 1078 && .@cur_class <= 1085) || (.@cur_class >= 1930 && .@cur_class <= 1933) || .@cur_class == 1064 ||
+				    .@d > 14 || (.@cur_data[UMOB_HP] < .@cur_data[UMOB_MAXHP] && .@cur_target_id > 0 && .@cur_target_id != getcharid(3))) {
 					#BOT_CURRENT_TARGET = 0;
 					#BOT_LAST_TX = 0;
 					#BOT_LAST_TY = 0;
@@ -1088,9 +1262,9 @@ OnStepTimer:
 			}
 		}
 
-		// 2. Se nao tem alvo atual, localiza o monstro vivo mais proximo no raio de 25 celulas
+		// 2. Se nao tem alvo valido, procura o monstro vivo mais proximo em um raio de 14 celulas
 		if (#BOT_CURRENT_TARGET == 0) {
-			.@num_mobs = getareaunits(BL_MOB, strcharinfo(3), .@cx - 25, .@cy - 25, .@cx + 25, .@cy + 25, .@mob_list[0]);
+			.@num_mobs = getareaunits(BL_MOB, strcharinfo(3), .@cx - 14, .@cy - 14, .@cx + 14, .@cy + 14, .@mob_list[0]);
 			.@best_dist = 9999;
 			.@best_mob = 0;
 
@@ -1104,9 +1278,15 @@ OnStepTimer:
 						continue;
 					}
 
+					// Anti-KS: Se o monstro ja estiver com HP reduzido e lutando contra outro jogador, ignora!
+					.@m_target = .@t_data[UMOB_TARGETID];
+					if (.@t_data[UMOB_HP] < .@t_data[UMOB_MAXHP] && .@m_target > 0 && .@m_target != getcharid(3)) {
+						continue;
+					}
+
 					if (.@t_data[UMOB_HP] > 0) {
 						.@d = distance(.@cx, .@cy, .@t_data[UMOB_X], .@t_data[UMOB_Y]);
-						if (.@d < .@best_dist) {
+						if (.@d <= 14 && .@d < .@best_dist) {
 							.@best_dist = .@d;
 							.@best_mob = .@mob_list[.@i];
 							.@mx = .@t_data[UMOB_X];
@@ -1121,7 +1301,34 @@ OnStepTimer:
 			}
 		}
 
-		// 3. Se encontrou um monstro por perto:
+		// 3. Regra de Teleporte: Se NAO houver nenhum inimigo valido em 14 celulas -> Teleporta respeitando delay de 5 segundos!
+		if (#BOT_CURRENT_TARGET == 0) {
+			if ((gettimetick(2) - #BOT_LAST_TELEPORT) >= 5) {
+				#BOT_LAST_TELEPORT = gettimetick(2);
+				#BOT_LAST_TX = 0;
+				#BOT_LAST_TY = 0;
+				#BOT_STUCK_TICKS = 0;
+				unitstopattack getcharid(3);
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				warp @hunt_map$, 0, 0;
+				addtimer 1000, "PlayerBotAI::OnStepTimer";
+				end;
+			} else {
+				// Enquanto aguarda o delay de 5 segundos de teleporte, caminha e explora ao redor
+				if (#BOT_LAST_TX == 0 || #BOT_LAST_TY == 0 || (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy)) {
+					#BOT_LAST_TX = .@cx + rand(-8, 8);
+					#BOT_LAST_TY = .@cy + rand(-8, 8);
+					unitstopwalk getcharid(3), USW_FORCE_STOP;
+					unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY;
+				}
+				#BOT_STUCK_X = .@cx;
+				#BOT_STUCK_Y = .@cy;
+				addtimer 600, "PlayerBotAI::OnStepTimer";
+				end;
+			}
+		}
+
+		// 4. Se encontrou um monstro por perto:
 		if (#BOT_CURRENT_TARGET > 0) {
 			.@dist = distance(.@cx, .@cy, .@mx, .@my);
 			.@atk_range = 2; // Padrao corpo a corpo
@@ -1132,24 +1339,28 @@ OnStepTimer:
 
 			// Se ainda esta fora do alcance de ataque: anda em direcao ao monstro de forma fluida
 			if (.@dist > .@atk_range) {
-				// Inicia ou redireciona a caminhada apenas se o monstro mudou de posicao ou se travou:
-				if (#BOT_LAST_TX != .@mx || #BOT_LAST_TY != .@my || (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy)) {
-					if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
-						#BOT_STUCK_TICKS++;
-						if (#BOT_STUCK_TICKS >= 3) {
+				// Sistema Anti-Travamento (Tolerancia de 8 ticks / aprox. 4 segundos antes de resetar)
+				if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
+					#BOT_STUCK_TICKS++;
+					if (#BOT_STUCK_TICKS >= 8) {
+						#BOT_CURRENT_TARGET = 0;
+						#BOT_LAST_TX = 0;
+						#BOT_LAST_TY = 0;
+						#BOT_STUCK_TICKS = 0;
+						if ((gettimetick(2) - #BOT_LAST_TELEPORT) >= 5) {
+							#BOT_LAST_TELEPORT = gettimetick(2);
 							unitstopwalk getcharid(3), USW_FORCE_STOP;
 							warp @hunt_map$, 0, 0;
-							#BOT_CURRENT_TARGET = 0;
-							#BOT_LAST_TX = 0;
-							#BOT_LAST_TY = 0;
-							#BOT_STUCK_TICKS = 0;
-							addtimer 500, "PlayerBotAI::OnStepTimer";
+							addtimer 1000, "PlayerBotAI::OnStepTimer";
 							end;
 						}
-					} else {
-						#BOT_STUCK_TICKS = 0;
 					}
+				} else {
+					#BOT_STUCK_TICKS = 0;
+				}
 
+				// Envia o comando de andar apenas se o monstro mudou de posicao:
+				if (#BOT_LAST_TX != .@mx || #BOT_LAST_TY != .@my) {
 					#BOT_LAST_TX = .@mx;
 					#BOT_LAST_TY = .@my;
 					unitstopwalk getcharid(3), USW_FORCE_STOP;
@@ -1180,12 +1391,21 @@ OnStepTimer:
 			unitattack getcharid(3), #BOT_CURRENT_TARGET, 1;
 			#BOT_SKILL_ROT++;
 
+			// Calcula o atraso de ataque e pós-conjuração baseado na ASPD real do personagem
+			.@cur_aspd = readparam(bAspd);
+			if (.@cur_aspd < 100) .@cur_aspd = 100;
+			if (.@cur_aspd > 195) .@cur_aspd = 195;
+			.@aspd_delay = (200 - .@cur_aspd) * 20; // 159 ASPD = 820ms, 175 ASPD = 500ms, 185 ASPD = 300ms
+			.@skill_delay = .@aspd_delay;
+
 			// Espadachim / Cavaleiro / Lorde / Cavaleiro Runico
 			if (Class == Job_Swordman || Class == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight) {
 				if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 20) {
 					unitskilluseid getcharid(3), "SM_MAGNUM", (getskilllv("SM_MAGNUM") > 0 ? getskilllv("SM_MAGNUM") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1500; // Delay de animacao do Impacto Explosivo
 				} else if (Sp >= 8) {
 					unitskilluseid getcharid(3), "SM_BASH", (getskilllv("SM_BASH") > 0 ? getskilllv("SM_BASH") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 				}
 			}
 			// Mago / Bruxo / Arquimago / Arcano
@@ -1194,33 +1414,38 @@ OnStepTimer:
 					.@w_rot = #BOT_SKILL_ROT % 4;
 					if (.@w_rot == 0 && getskilllv("WZ_JUPITEL") > 0 && Sp >= 20) {
 						unitskilluseid getcharid(3), "WZ_JUPITEL", getskilllv("WZ_JUPITEL"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
 					} else if (.@w_rot == 1 && getskilllv("MG_FIREBALL") > 0 && Sp >= 15) {
 						unitskilluseid getcharid(3), "MG_FIREBALL", getskilllv("MG_FIREBALL"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
 					} else if (.@w_rot == 2 && getskilllv("MG_FIREBOLT") > 0 && Sp >= 15) {
 						unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
 					} else if (getskilllv("MG_SOULSTRIKE") > 0 && Sp >= 15) {
 						unitskilluseid getcharid(3), "MG_SOULSTRIKE", getskilllv("MG_SOULSTRIKE"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
 					}
 				} else {
 					// 1a Classe Mago: Alterna sequencialmente entre todas as magias ofensivas
 					.@m_rot = #BOT_SKILL_ROT % 5;
 					if (.@m_rot == 0 && getskilllv("MG_FIREBOLT") > 0 && Sp >= 12) {
-						// Lancas de Fogo (MG_FIREBOLT)
 						unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
 					} else if (.@m_rot == 1 && getskilllv("MG_FIREBALL") > 0 && Sp >= 12) {
-						// Bola de Fogo (MG_FIREBALL)
 						unitskilluseid getcharid(3), "MG_FIREBALL", getskilllv("MG_FIREBALL"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
 					} else if (.@m_rot == 2 && getskilllv("MG_COLDBOLT") > 0 && Sp >= 12) {
-						// Lancas de Gelo (MG_COLDBOLT)
 						unitskilluseid getcharid(3), "MG_COLDBOLT", getskilllv("MG_COLDBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
 					} else if (.@m_rot == 3 && getskilllv("MG_LIGHTNINGBOLT") > 0 && Sp >= 12) {
-						// Relampago (MG_LIGHTNINGBOLT)
 						unitskilluseid getcharid(3), "MG_LIGHTNINGBOLT", getskilllv("MG_LIGHTNINGBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
 					} else if (getskilllv("MG_SOULSTRIKE") > 0 && Sp >= 12) {
-						// Espiritos Ancioes / Ataque Espiritual (MG_SOULSTRIKE)
 						unitskilluseid getcharid(3), "MG_SOULSTRIKE", getskilllv("MG_SOULSTRIKE"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
 					} else if (Sp >= 12) {
 						unitskilluseid getcharid(3), "MG_FIREBOLT", (getskilllv("MG_FIREBOLT") > 0 ? getskilllv("MG_FIREBOLT") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
 					}
 				}
 			}
@@ -1228,22 +1453,27 @@ OnStepTimer:
 			else if (Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger) {
 				if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 15) {
 					unitskilluseid getcharid(3), "AC_SHOWER", (getskilllv("AC_SHOWER") > 0 ? getskilllv("AC_SHOWER") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1000; // Pós-conjuração da Chuva de Flechas
 				} else if (Sp >= 10) {
 					unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 				}
 			}
 			// Gatuno / Mercenario / Algoz / Sicario
 			else if (Class == Job_Thief || Class == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross) {
 				if (getskilllv("AS_SONICBLOW") > 0 && Sp >= 25) {
 					unitskilluseid getcharid(3), "AS_SONICBLOW", getskilllv("AS_SONICBLOW"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 2000; // 2 segundos de animação de Laminas Destruidoras
 				} else if (Sp >= 10) {
 					unitskilluseid getcharid(3), "TF_POISON", (getskilllv("TF_POISON") > 0 ? getskilllv("TF_POISON") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600); // Respeita a ASPD real do Gatuno
 				}
 			}
 			// Novico / Sacerdote / Sumo Sacerdote / Arcebispo
 			else if (Class == Job_Acolyte || Class == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop) {
 				if (Sp >= 12) {
 					unitskilluseid getcharid(3), "AL_HOLYLIGHT", 1, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = (.@aspd_delay > 800 ? .@aspd_delay : 800);
 				}
 			}
 			// Mercador / Ferreiro / Mestre-Ferreiro / Mecanico
@@ -1253,77 +1483,29 @@ OnStepTimer:
 
 				if (getskilllv("NC_AXETORNADO") > 0 && Sp >= 20) {
 					unitskilluseid getcharid(3), "NC_AXETORNADO", getskilllv("NC_AXETORNADO"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 2000; // Cooldown do Furacão a Machado
 				} else if (getskilllv("NC_POWERSWING") > 0 && Sp >= 20) {
 					unitskilluseid getcharid(3), "NC_POWERSWING", getskilllv("NC_POWERSWING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
 				} else if (getskilllv("WS_CARTTERMINATION") > 0 && Sp >= 15 && getstatus(SC_CARTBOOST)) {
 					unitskilluseid getcharid(3), "WS_CARTTERMINATION", getskilllv("WS_CARTTERMINATION"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 				} else if ((#BOT_SKILL_ROT % 2 == 0) && getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12) {
-					// Cavalo de Pau (MC_CARTREVOLUTION)
 					unitskilluseid getcharid(3), "MC_CARTREVOLUTION", 1, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = (.@aspd_delay > 700 ? .@aspd_delay : 700);
 				} else if (Sp >= 5) {
-					// Mamonita (MC_MAMMONITE)
 					unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 				}
 			}
 
 			// Checa pocoes novamente logo apos a skill
 			callsub OnCheckPotions;
 
-			addtimer 350, "PlayerBotAI::OnStepTimer";
+			addtimer .@skill_delay, "PlayerBotAI::OnStepTimer";
 			end;
 		}
-
-		// -------------------------------------------------------------
-		// SOMENTE TELEPORTA SE REALMENTE NAO HOUVER MONSTROS POR PERTO
-		// -------------------------------------------------------------
-		unitstopwalk getcharid(3), USW_FORCE_STOP;
-		warp @hunt_map$, 0, 0;
-		addtimer 1000, "PlayerBotAI::OnStepTimer";
-		end;
 	}
-	end;
-
-// -------------------------------------------------------------
-// Fim do Descanso na Fonte de Prontera (Vai para o Eden)
-// -------------------------------------------------------------
-OnFinishRest:
-	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 1) end;
-	stand; // Levanta do chao
-	#BOT_AI_STAGE = 2;
-	#BOT_WP_INDEX = 0;
-	#BOT_LAST_TX = 0;
-	#BOT_LAST_TY = 0;
-	#BOT_STUCK_TICKS = 0;
-	unitstopwalk getcharid(3), USW_FORCE_STOP;
-	warp "moc_para01", 30, 14;
-	addtimer 1500, "PlayerBotAI::OnStepTimer";
-	end;
-
-// -------------------------------------------------------------
-// Fim do Tempo de Espera na Entrada do Eden (Vai para a mesa)
-// -------------------------------------------------------------
-OnFinishEdenEntrance:
-	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 2) end;
-	#BOT_WP_INDEX = 2;
-	#BOT_LAST_TX = 0;
-	#BOT_LAST_TY = 0;
-	#BOT_STUCK_TICKS = 0;
-	unitstopwalk getcharid(3), USW_FORCE_STOP;
-	addtimer 500, "PlayerBotAI::OnStepTimer";
-	end;
-
-// -------------------------------------------------------------
-// Fim do Descanso na Mesa do Grupo Eden (Vai para a saida)
-// -------------------------------------------------------------
-OnFinishEdenRest:
-	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 2) end;
-	stand; // Levanta da mesa
-	#BOT_WP_INDEX = 4;
-	#BOT_LAST_TX = 0;
-	#BOT_LAST_TY = 0;
-	#BOT_STUCK_TICKS = 0;
-	unitstopwalk getcharid(3), USW_FORCE_STOP;
-	addtimer 800, "PlayerBotAI::OnStepTimer";
 	end;
 
 // ======================================================================
