@@ -57,6 +57,7 @@ OnPlayerCommand:
 			savepoint "prontera", 156, 170;
 			warp "prontera", 156, 170;
 			resetstatus;
+			resetskill;
 			callsub OnApplyBuffs;
 			callsub OnCheckJobChange;
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
@@ -237,6 +238,7 @@ OnGMCommand:
 					atcommand "@restock 656 5";
 					atcommand "@restock 657 5";
 					resetstatus;
+					resetskill;
 					callsub OnApplyBuffs;
 					callsub OnCheckJobChange;
 					addtimer 1000, "PlayerBotAI::OnStepTimer";
@@ -286,6 +288,7 @@ OnGMCommand:
 					atcommand "@restock 656 5";
 					atcommand "@restock 657 5";
 					resetstatus;
+					resetskill;
 					callsub OnApplyBuffs;
 					callsub OnCheckJobChange;
 					addtimer 1000, "PlayerBotAI::OnStepTimer";
@@ -466,6 +469,7 @@ OnGMCommand:
 			atcommand "@restock 656 5";
 			atcommand "@restock 657 5";
 			resetstatus;
+			resetskill;
 			callsub OnApplyBuffs;
 			callsub OnCheckJobChange;
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
@@ -521,6 +525,7 @@ OnGMCommand:
 			atcommand "@restock 656 5";
 			atcommand "@restock 657 5";
 			resetstatus;
+			resetskill;
 			callsub OnApplyBuffs;
 			callsub OnCheckJobChange;
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
@@ -740,7 +745,7 @@ OnStepTimer:
 				#BOT_STUCK_TICKS = 0;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY;
-				addtimer 2500, "PlayerBotAI::OnStepTimer";
+				addtimer 1000, "PlayerBotAI::OnStepTimer";
 				end;
 			}
 
@@ -760,8 +765,6 @@ OnStepTimer:
 					#BOT_WP_INDEX = 0; // 0 = Caminhando para a fonte
 					#BOT_PRT_MAX = 0;
 					#BOT_PRT_COUNT = 0;
-					#BOT_LAST_TX = 0;
-					#BOT_LAST_TY = 0;
 					#BOT_STUCK_TICKS = 0;
 					addtimer 500, "PlayerBotAI::OnStepTimer";
 					end;
@@ -771,10 +774,10 @@ OnStepTimer:
 				end;
 			}
 
-			// Sistema Anti-Travamento (Watchdog):
+			// Sistema Anti-Travamento (Watchdog) apenas se realmente nao mudou de posicao:
 			if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
 				#BOT_STUCK_TICKS++;
-				if (#BOT_STUCK_TICKS >= 2) {
+				if (#BOT_STUCK_TICKS >= 3) {
 					#BOT_LAST_TX = 0;
 					#BOT_LAST_TY = 0;
 					#BOT_STUCK_TICKS = 0;
@@ -791,7 +794,7 @@ OnStepTimer:
 			#BOT_STUCK_X = .@cx;
 			#BOT_STUCK_Y = .@cy;
 
-			addtimer 2000, "PlayerBotAI::OnStepTimer";
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
@@ -838,22 +841,29 @@ OnStepTimer:
 				end;
 			}
 
-			// Movimento e Anti-Stuck para 156, 170
-			if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
-				#BOT_STUCK_TICKS++;
-				if (#BOT_STUCK_TICKS >= 2) {
+			// Se ainda nao iniciou a caminhada para 156,170 ou se travou:
+			if (#BOT_LAST_TX != 156 || #BOT_LAST_TY != 170 || (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy)) {
+				if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
+					#BOT_STUCK_TICKS++;
+					if (#BOT_STUCK_TICKS >= 3) {
+						warp "prontera", 156, 170;
+						#BOT_STUCK_TICKS = 0;
+						addtimer 500, "PlayerBotAI::OnStepTimer";
+						end;
+					}
+				} else {
 					#BOT_STUCK_TICKS = 0;
-					unitstopwalk getcharid(3), USW_FORCE_STOP;
 				}
-			} else {
-				#BOT_STUCK_TICKS = 0;
+				#BOT_LAST_TX = 156;
+				#BOT_LAST_TY = 170;
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				unitwalk getcharid(3), 156, 170;
 			}
+
 			#BOT_STUCK_X = .@cx;
 			#BOT_STUCK_Y = .@cy;
 
-			unitstopwalk getcharid(3), USW_FORCE_STOP;
-			unitwalk getcharid(3), 156, 170;
-			addtimer 2000, "PlayerBotAI::OnStepTimer";
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
@@ -925,22 +935,29 @@ OnStepTimer:
 				end;
 			}
 
-			// Movimento continuo e Anti-Stuck para 28,26
-			if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
-				#BOT_STUCK_TICKS++;
-				if (#BOT_STUCK_TICKS >= 2) {
+			// Inicia caminhada continua para 28,26 apenas se necessario ou se travou:
+			if (#BOT_LAST_TX != 28 || #BOT_LAST_TY != 26 || (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy)) {
+				if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
+					#BOT_STUCK_TICKS++;
+					if (#BOT_STUCK_TICKS >= 3) {
+						warp "moc_para01", 28, 26;
+						#BOT_STUCK_TICKS = 0;
+						addtimer 500, "PlayerBotAI::OnStepTimer";
+						end;
+					}
+				} else {
 					#BOT_STUCK_TICKS = 0;
-					unitstopwalk getcharid(3), USW_FORCE_STOP;
 				}
-			} else {
-				#BOT_STUCK_TICKS = 0;
+				#BOT_LAST_TX = 28;
+				#BOT_LAST_TY = 26;
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				unitwalk getcharid(3), 28, 26;
 			}
+
 			#BOT_STUCK_X = .@cx;
 			#BOT_STUCK_Y = .@cy;
 
-			unitstopwalk getcharid(3), USW_FORCE_STOP;
-			unitwalk getcharid(3), 28, 26;
-			addtimer 2000, "PlayerBotAI::OnStepTimer";
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
@@ -977,22 +994,29 @@ OnStepTimer:
 				end;
 			}
 
-			// Movimento continuo e Anti-Stuck para 30,14
-			if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
-				#BOT_STUCK_TICKS++;
-				if (#BOT_STUCK_TICKS >= 2) {
+			// Inicia caminhada continua para 30,14 apenas se necessario ou se travou:
+			if (#BOT_LAST_TX != 30 || #BOT_LAST_TY != 14 || (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy)) {
+				if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
+					#BOT_STUCK_TICKS++;
+					if (#BOT_STUCK_TICKS >= 3) {
+						warp "moc_para01", 30, 14;
+						#BOT_STUCK_TICKS = 0;
+						addtimer 500, "PlayerBotAI::OnStepTimer";
+						end;
+					}
+				} else {
 					#BOT_STUCK_TICKS = 0;
-					unitstopwalk getcharid(3), USW_FORCE_STOP;
 				}
-			} else {
-				#BOT_STUCK_TICKS = 0;
+				#BOT_LAST_TX = 30;
+				#BOT_LAST_TY = 14;
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				unitwalk getcharid(3), 30, 14;
 			}
+
 			#BOT_STUCK_X = .@cx;
 			#BOT_STUCK_Y = .@cy;
 
-			unitstopwalk getcharid(3), USW_FORCE_STOP;
-			unitwalk getcharid(3), 30, 14;
-			addtimer 2000, "PlayerBotAI::OnStepTimer";
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 	}
@@ -1102,32 +1126,45 @@ OnStepTimer:
 				.@atk_range = 7; // Ranged
 			}
 
-			// Se ainda esta fora do alcance de ataque: anda em direcao ao monstro
+			// Se ainda esta fora do alcance de ataque: anda em direcao ao monstro de forma fluida
 			if (.@dist > .@atk_range) {
-				// Anti-Travamento (Watchdog) durante caminhada:
-				if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
-					#BOT_STUCK_TICKS++;
-					if (#BOT_STUCK_TICKS >= 3) {
-						unitstopwalk getcharid(3), USW_FORCE_STOP;
-						warp @hunt_map$, 0, 0;
-						#BOT_CURRENT_TARGET = 0;
+				// Inicia ou redireciona a caminhada apenas se o monstro mudou de posicao ou se travou:
+				if (#BOT_LAST_TX != .@mx || #BOT_LAST_TY != .@my || (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy)) {
+					if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
+						#BOT_STUCK_TICKS++;
+						if (#BOT_STUCK_TICKS >= 3) {
+							unitstopwalk getcharid(3), USW_FORCE_STOP;
+							warp @hunt_map$, 0, 0;
+							#BOT_CURRENT_TARGET = 0;
+							#BOT_LAST_TX = 0;
+							#BOT_LAST_TY = 0;
+							#BOT_STUCK_TICKS = 0;
+							addtimer 500, "PlayerBotAI::OnStepTimer";
+							end;
+						}
+					} else {
 						#BOT_STUCK_TICKS = 0;
-						addtimer 500, "PlayerBotAI::OnStepTimer";
-						end;
 					}
-				} else {
-					#BOT_STUCK_TICKS = 0;
+
+					#BOT_LAST_TX = .@mx;
+					#BOT_LAST_TY = .@my;
+					unitstopwalk getcharid(3), USW_FORCE_STOP;
+					unitwalk getcharid(3), .@mx, .@my;
 				}
+
 				#BOT_STUCK_X = .@cx;
 				#BOT_STUCK_Y = .@cy;
 
-				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				unitwalk getcharid(3), .@mx, .@my;
-				addtimer 500, "PlayerBotAI::OnStepTimer";
+				addtimer 400, "PlayerBotAI::OnStepTimer";
 				end;
 			}
 
-			// Alcancou o monstro! Reseta contador de travamento
+			// Alcancou o monstro! Para de andar suavemente
+			if (#BOT_LAST_TX != 0 || #BOT_LAST_TY != 0) {
+				#BOT_LAST_TX = 0;
+				#BOT_LAST_TY = 0;
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+			}
 			#BOT_STUCK_TICKS = 0;
 			#BOT_STUCK_X = .@cx;
 			#BOT_STUCK_Y = .@cy;
@@ -1579,6 +1616,9 @@ OnDistributeStats:
 	return;
 
 OnDistributeSkills:
+	// =========================================================
+	// 1. ESPADACHIM / CAVALEIRO / LORDE / CAVALEIRO RUNICO
+	// =========================================================
 	if (Class == Job_Swordman || Class == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight) {
 		skill "SM_SWORD", 10, 0;
 		skill "SM_TWOHAND", 10, 0;
@@ -1588,7 +1628,45 @@ OnDistributeSkills:
 		skill "SM_ENDURE", 10, 0;
 		skill "SM_PROVOKE", 10, 0;
 		skill "SM_AUTOBERSERK", 1, 0;
+		skill "SM_MOVINGRECOVERY", 1, 0;
+		skill "SM_FATALBLOW", 1, 0;
 	}
+	if (Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight) {
+		skill "KN_TWOHANDQUICKEN", 10, 0;
+		skill "KN_AUTOCOUNTER", 5, 0;
+		skill "KN_BOWLINGBASH", 10, 0;
+		skill "KN_SPEARMASTERY", 10, 0;
+		skill "KN_PIERCE", 10, 0;
+		skill "KN_BRANDISHSPEAR", 10, 0;
+		skill "KN_SPEARBOOMERANG", 5, 0;
+		skill "KN_CHARGEATK", 1, 0;
+		skill "KN_ONEHAND", 1, 0;
+	}
+	if (Class == Job_Lord_Knight || Class == Job_Rune_Knight) {
+		skill "LK_AURABLADE", 5, 0;
+		skill "LK_PARRYING", 10, 0;
+		skill "LK_CONCENTRATION", 5, 0;
+		skill "LK_TENSIONRELAX", 1, 0;
+		skill "LK_BERSERK", 1, 0;
+		skill "LK_SPIRALPIERCE", 5, 0;
+		skill "LK_HEADCRUSH", 5, 0;
+		skill "LK_JOINTBEAT", 10, 0;
+	}
+	if (Class == Job_Rune_Knight) {
+		skill "RK_RUNEMASTERY", 10, 0;
+		skill "RK_DRAGONTRAINING", 5, 0;
+		skill "RK_DRAGONBREATH", 10, 0;
+		skill "RK_DRAGONBREATH_WATER", 10, 0;
+		skill "RK_IGNITIONBREAK", 5, 0;
+		skill "RK_SONICWAVE", 5, 0;
+		skill "RK_WINDCUTTER", 5, 0;
+		skill "RK_ENCHANTBLADE", 5, 0;
+		skill "RK_HUNDREDSPEAR", 10, 0;
+	}
+
+	// =========================================================
+	// 2. MAGO / BRUXO / ARQUIMAGO / ARCANO
+	// =========================================================
 	if (Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock) {
 		skill "MG_ENERGYCOAT", 1, 0;
 		skill "MG_SRECOVERY", 10, 0;
@@ -1596,29 +1674,206 @@ OnDistributeSkills:
 		skill "MG_COLDBOLT", 10, 0;
 		skill "MG_LIGHTNINGBOLT", 10, 0;
 		skill "MG_SIGHT", 1, 0;
+		skill "MG_NAPALMBEAT", 7, 0;
+		skill "MG_SOULSTRIKE", 10, 0;
+		skill "MG_SAFETYWALL", 10, 0;
+		skill "MG_FIREBALL", 10, 0;
+		skill "MG_FIREWALL", 10, 0;
+		skill "MG_FROSTDIVER", 10, 0;
+		skill "MG_THUNDERSTORM", 10, 0;
 	}
+	if (Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock) {
+		skill "WZ_FIREPILLAR", 10, 0;
+		skill "WZ_SIGHTRASHER", 10, 0;
+		skill "WZ_METEOR", 10, 0;
+		skill "WZ_JUPITEL", 10, 0;
+		skill "WZ_VERMILION", 10, 0;
+		skill "WZ_WATERBALL", 5, 0;
+		skill "WZ_ICEWALL", 10, 0;
+		skill "WZ_FROSTNOVA", 10, 0;
+		skill "WZ_STORMGUST", 10, 0;
+		skill "WZ_EARTHSPIKE", 5, 0;
+		skill "WZ_HEAVENDRIVE", 5, 0;
+		skill "WZ_QUAGMIRE", 5, 0;
+		skill "WZ_SIGHTBLASTER", 1, 0;
+	}
+	if (Class == Job_High_Wizard || Class == Job_Warlock) {
+		skill "HW_MAGICPOWER", 10, 0;
+		skill "HW_SOULDRAIN", 10, 0;
+		skill "HW_MAGICCRASHER", 1, 0;
+		skill "HW_NAPALMVULCAN", 5, 0;
+		skill "HW_GANBANTEIN", 1, 0;
+		skill "HW_GRAVITATION", 5, 0;
+	}
+	if (Class == Job_Warlock) {
+		skill "WL_WHITEIMPRISON", 5, 0;
+		skill "WL_SOULEXPANSION", 5, 0;
+		skill "WL_FROSTMISTY", 5, 0;
+		skill "WL_JACKFROST", 5, 0;
+		skill "WL_DRAINLIFE", 5, 0;
+		skill "WL_CRIMSONROCK", 5, 0;
+		skill "WL_HELLINFERNO", 5, 0;
+		skill "WL_COMET", 5, 0;
+		skill "WL_CHAINLIGHTNING", 5, 0;
+		skill "WL_EARTHSTRAIN", 5, 0;
+		skill "WL_TETRAVORTEX", 5, 0;
+		skill "WL_RECOGNIZEDSPELL", 5, 0;
+	}
+
+	// =========================================================
+	// 3. ARQUEIRO / CACADOR / SNIPER / RANGER
+	// =========================================================
 	if (Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger) {
 		skill "AC_OWL", 10, 0;
 		skill "AC_VULTURE", 10, 0;
 		skill "AC_CONCENTRATION", 10, 0;
 		skill "AC_DOUBLE", 10, 0;
 		skill "AC_SHOWER", 10, 0;
+		skill "AC_MAKINGARROW", 1, 0;
+		skill "AC_CHARGEARROW", 1, 0;
 	}
-	if (Class == Job_Thief || Class == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Job_Guillotine_Cross) {
+	if (Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger) {
+		skill "HT_SKIDTRAP", 5, 0;
+		skill "HT_LANDMINE", 5, 0;
+		skill "HT_ANKLESNARE", 5, 0;
+		skill "HT_FREEZINGTRAP", 5, 0;
+		skill "HT_BLASTMINE", 5, 0;
+		skill "HT_CLAYMORETRAP", 5, 0;
+		skill "HT_BEASTBANE", 10, 0;
+		skill "HT_FALCON", 1, 0;
+		skill "HT_STEELCROW", 10, 0;
+		skill "HT_BLITZBEAT", 5, 0;
+		skill "HT_DETECTING", 4, 0;
+		skill "HT_SPRINGTRAP", 5, 0;
+	}
+	if (Class == Job_Sniper || Class == Job_Ranger) {
+		skill "SN_SIGHT", 10, 0;
+		skill "SN_FALCONASSAULT", 5, 0;
+		skill "SN_SHARPSHOOTING", 5, 0;
+		skill "SN_WINDWALK", 10, 0;
+	}
+	if (Class == Job_Ranger) {
+		skill "RA_AIMEDBOLT", 10, 0;
+		skill "RA_ARROWSTORM", 10, 0;
+		skill "RA_FEARTBREEZE", 5, 0;
+		skill "RA_RANGERMAIN", 10, 0;
+		skill "RA_UNLIMIT", 5, 0;
+		skill "RA_WUGMASTERY", 1, 0;
+		skill "RA_WUGSTRIKE", 5, 0;
+		skill "RA_WUGDASH", 1, 0;
+		skill "RA_WUGBITE", 5, 0;
+		skill "RA_TOOTHOFWUG", 10, 0;
+	}
+
+	// =========================================================
+	// 4. GATUNO / MERCENARIO / ALGOZ / SICARIO
+	// =========================================================
+	if (Class == Job_Thief || Class == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross) {
 		skill "TF_DOUBLE", 10, 0;
 		skill "TF_MISS", 10, 0;
+		skill "TF_STEAL", 10, 0;
 		skill "TF_HIDING", 10, 0;
 		skill "TF_POISON", 10, 0;
+		skill "TF_DETOXIFY", 1, 0;
+		skill "TF_SPRINKLESAND", 1, 0;
+		skill "TF_BACKSLIDING", 1, 0;
+		skill "TF_PICKSTONE", 1, 0;
+		skill "TF_THROWSTONE", 1, 0;
 	}
+	if (Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross) {
+		skill "AS_RIGHT", 5, 0;
+		skill "AS_LEFT", 5, 0;
+		skill "AS_KATAR", 10, 0;
+		skill "AS_CLOAKING", 10, 0;
+		skill "AS_SONICBLOW", 10, 0;
+		skill "AS_GRIMTOOTH", 5, 0;
+		skill "AS_ENCHANTPOISON", 10, 0;
+		skill "AS_POISONREACT", 10, 0;
+		skill "AS_VENOMDUST", 10, 0;
+		skill "AS_SPLASHER", 10, 0;
+		skill "AS_SONICACCEL", 1, 0;
+		skill "AS_VENOMKNIFE", 1, 0;
+	}
+	if (Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross) {
+		skill "ASC_KATAR", 10, 0;
+		skill "ASC_EDP", 5, 0;
+		skill "ASC_BREAKER", 10, 0;
+		skill "ASC_METEORASSAULT", 10, 0;
+		skill "ASC_CDP", 1, 0;
+	}
+	if (Class == Job_Guillotine_Cross) {
+		skill "GC_CROSSIMPACT", 5, 0;
+		skill "GC_CROSSRIPPERSLASHER", 5, 0;
+		skill "GC_ROLLINGCUTTER", 5, 0;
+		skill "GC_DARKILLUSION", 5, 0;
+		skill "GC_WEAPONBLOCKING", 5, 0;
+		skill "GC_COUNTERSLASH", 5, 0;
+		skill "GC_CLOAKINGEXCEED", 5, 0;
+		skill "GC_DARKCROW", 5, 0;
+	}
+
+	// =========================================================
+	// 5. NOVICO / SACERDOTE / SUMO SACERDOTE / ARCEBISPO
+	// =========================================================
 	if (Class == Job_Acolyte || Class == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop) {
 		skill "AL_HEAL", 10, 0;
+		skill "AL_CURE", 1, 0;
 		skill "AL_BLESSING", 10, 0;
 		skill "AL_INCAGI", 10, 0;
+		skill "AL_DECAGI", 10, 0;
 		skill "AL_DEMONBANE", 10, 0;
 		skill "AL_DP", 10, 0;
 		skill "AL_HOLYLIGHT", 1, 0;
 		skill "AL_ANGELUS", 10, 0;
+		skill "AL_RUWACH", 1, 0;
+		skill "AL_TELEPORT", 2, 0;
+		skill "AL_WARP", 4, 0;
+		skill "AL_PNEUMA", 1, 0;
 	}
+	if (Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop) {
+		skill "PR_SANCTUARY", 10, 0;
+		skill "PR_RECOVERY", 1, 0;
+		skill "PR_STRECOVERY", 1, 0;
+		skill "PR_RESURRECTION", 4, 0;
+		skill "PR_IMPOSITIO", 5, 0;
+		skill "PR_SUFFRAGIUM", 3, 0;
+		skill "PR_ASPERSIO", 5, 0;
+		skill "PR_BENEDICTIO", 5, 0;
+		skill "PR_KYRIE", 10, 0;
+		skill "PR_MAGNIFICAT", 5, 0;
+		skill "PR_GLORIA", 5, 0;
+		skill "PR_LEXDIVINA", 10, 0;
+		skill "PR_TURNUNDEAD", 10, 0;
+		skill "PR_LEXAETERNA", 1, 0;
+		skill "PR_MAGNUS", 10, 0;
+		skill "PR_SLOWPOISON", 4, 0;
+		skill "PR_REDEMPTIO", 1, 0;
+	}
+	if (Class == Job_High_Priest || Class == Job_Arch_Bishop) {
+		skill "HP_ASSUMPTIO", 5, 0;
+		skill "HP_BASILICA", 5, 0;
+		skill "HP_MEDITATIO", 10, 0;
+		skill "HP_MANARECHARGE", 5, 0;
+	}
+	if (Class == Job_Arch_Bishop) {
+		skill "AB_JUDEX", 5, 0;
+		skill "AB_ADORAMUS", 10, 0;
+		skill "AB_EPICLESIS", 5, 0;
+		skill "AB_PRAEFATIO", 10, 0;
+		skill "AB_COLUSEOHEAL", 5, 0;
+		skill "AB_RENOVATIO", 1, 0;
+		skill "AB_HIGHNESSHEAL", 5, 0;
+		skill "AB_SACRAMENT", 5, 0;
+		skill "AB_LAUDAAGNUS", 4, 0;
+		skill "AB_LAUDARAMUS", 4, 0;
+		skill "AB_CLEARANCE", 5, 0;
+		skill "AB_OFFERTORIUM", 5, 0;
+	}
+
+	// =========================================================
+	// 6. MERCADOR / FERREIRO / MESTRE-FERREIRO / MECANICO
+	// =========================================================
+	// 1a Classe (Mercador) - Apenas skills de 1a classe!
 	if (Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic) {
 		skill "MC_INCCARRY", 10, 0;
 		skill "MC_DISCOUNT", 10, 0;
@@ -1629,22 +1884,45 @@ OnDistributeSkills:
 		skill "MC_CHANGECART", 1, 0;
 		skill "MC_CARTDECORATION", 1, 0;
 		skill "MC_LOUD", 1, 0;
+		skill "MC_IDENTIFY", 1, 0;
+		skill "MC_VENDING", 10, 0;
+		if (!checkcart()) setcart;
+	}
+	// 2a Classe (Ferreiro)
+	if (Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic) {
 		skill "BS_HILTTOP", 1, 0;
 		skill "BS_WEAPONRESEARCH", 10, 0;
+		skill "BS_REPAIRWEAPON", 1, 0;
+		skill "BS_SKINTEMPER", 5, 0;
 		skill "BS_HAMMERFALL", 5, 0;
 		skill "BS_ADRENALINE", 5, 0;
 		skill "BS_WEAPONPERFECT", 5, 0;
 		skill "BS_OVERTHRUST", 5, 0;
 		skill "BS_MAXIMIZE", 5, 0;
+		skill "BS_IRON", 5, 0;
+		skill "BS_STEEL", 5, 0;
+		skill "BS_ENCHANTEDSTONE", 5, 0;
+		skill "BS_UNFAIRLYTRICK", 1, 0;
+		skill "BS_GREED", 1, 0;
+	}
+	// Trans (Mestre-Ferreiro)
+	if (Class == Job_Whitesmith || Class == Job_Mechanic) {
 		skill "WS_CARTBOOST", 1, 0;
 		skill "WS_OVERTHRUSTMAX", 5, 0;
 		skill "WS_CARTTERMINATION", 10, 0;
+		skill "WS_MELTDOWN", 10, 0;
+		skill "WS_WEAPONREFINE", 10, 0;
+	}
+	// 3a Classe (Mecanico)
+	if (Class == Job_Mechanic) {
 		skill "NC_AXETRAINING", 10, 0;
 		skill "NC_AXETORNADO", 5, 0;
 		skill "NC_AXEBOOMERANG", 5, 0;
 		skill "NC_POWERSWING", 10, 0;
 		skill "NC_RESEARCHFE", 5, 0;
-		if (!checkcart()) setcart;
+		skill "NC_MAGMA_ERUPTION", 5, 0;
+		skill "NC_NEUTRALBARRIER", 3, 0;
+		skill "NC_STEALTHFIELD", 3, 0;
 	}
 	return;
 
@@ -1682,6 +1960,7 @@ OnCheckJobChange:
 				break;
 		}
 		specialeffect EF_LEVELUP;
+		resetskill;
 		callsub OnDistributeSkills;
 		callsub OnDistributeStats;
 		return;
@@ -1703,6 +1982,7 @@ OnCheckJobChange:
 		else return;
 
 		specialeffect EF_ANGEL;
+		resetskill;
 		callsub OnDistributeSkills;
 		callsub OnDistributeStats;
 		return;
@@ -1711,6 +1991,7 @@ OnCheckJobChange:
 	if (BaseLevel >= 99 && JobLevel >= 50 && Upper == 0) {
 		jobchange Job_Novice_High;
 		resetlvl 1;
+		resetskill;
 		specialeffect EF_ANGEL;
 		#BOT_AI_STAGE = 0;
 		#BOT_WP_INDEX = 0;
@@ -1728,6 +2009,7 @@ OnCheckJobChange:
 		else return;
 
 		specialeffect EF_ANGEL;
+		resetskill;
 		callsub OnDistributeSkills;
 		callsub OnDistributeStats;
 		return;
