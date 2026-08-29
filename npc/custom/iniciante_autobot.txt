@@ -47,8 +47,43 @@ OnInit:
 // ======================================================================
 // COMANDO DO JOGADOR: @iniciante (para rodar no proprio char)
 // ======================================================================
-OnPlayerCommand:
-	.@subcmd$ = strtolower(.@atcmd_parameters$[0]);
+	// @iniciante test / @iniciante teste
+	if (.@subcmd$ == "test" || .@subcmd$ == "teste") {
+		#BOT_AI_ACTIVE = 1;
+		#BOT_TEST_MODE = 1;
+		#BOT_AI_STAGE = 3; // Inicia direto na Cacada
+		#BOT_HUNT_START = gettimetick(2);
+		#BOT_WP_INDEX = 0;
+		#BOT_HUNT_COUNT = 0;
+		#BOT_CURRENT_TARGET = 0;
+		#BOT_PRT_MAX = 0;
+		#BOT_PRT_COUNT = 0;
+		#BOT_LAST_TX = 0;
+		#BOT_LAST_TY = 0;
+		#BOT_DIR_VX = 0;
+		#BOT_DIR_VY = 0;
+		#BOT_EXPLORE_STEPS = 0;
+		#BOT_WALL_HIT = 0;
+		#BOT_SKILL_ROT = 0;
+		#BOT_STUCK_X = 0;
+		#BOT_STUCK_Y = 0;
+		#BOT_STUCK_TICKS = 0;
+		#BOT_WAIT_END = 0;
+		stand;
+		callsub OnDetectTargetJob;
+		callsub OnGetHuntMap;
+		warp @hunt_map$, 0, 0;
+		resetstatus;
+		resetskill;
+		callsub OnCheckJobChange;
+		callsub OnDistributeStats;
+		callsub OnDistributeSkills;
+		callsub OnApplyBuffs;
+		callsub OnCheckSpeedPotion;
+		dispbottom "[Iniciante AI]: MODO TESTE ativado direto na cacada (" + @hunt_map$ + ")!", 0x55FF55;
+		addtimer 1000, "PlayerBotAI::OnStepTimer";
+		end;
+	}
 
 	// @iniciante at / @iniciante offline
 	if (.@subcmd$ == "at" || .@subcmd$ == "offline" || .@subcmd$ == "autotrade") {
@@ -201,12 +236,12 @@ OnGMCommand:
 		               "Cancelar");
 
 		switch(.@opt) {
-			case 1: // MODO TESTE
+			case 1: // MODO TESTE (Inicia direto na cacada)
 				if (attachrid(.@target_aid)) {
 					#BOT_AI_ACTIVE = 1;
 					#BOT_TEST_MODE = 1;
-					#BOT_AI_STAGE = 0; // Inicia em Prontera
-					#BOT_HUNT_START = 0;
+					#BOT_AI_STAGE = 3; // Inicia direto na Cacada
+					#BOT_HUNT_START = gettimetick(2);
 					#BOT_WP_INDEX = 0;
 					#BOT_HUNT_COUNT = 0;
 					#BOT_CURRENT_TARGET = 0;
@@ -225,9 +260,8 @@ OnGMCommand:
 					#BOT_WAIT_END = 0;
 					stand;
 					callsub OnDetectTargetJob;
-
-					savepoint "prontera", 156, 178;
-					warp "prontera", 156, 178;
+					callsub OnGetHuntMap;
+					warp @hunt_map$, 0, 0;
 
 					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 504, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
 					query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 505, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
@@ -246,10 +280,14 @@ OnGMCommand:
 					resetstatus;
 					resetskill;
 					callsub OnCheckJobChange;
+					callsub OnDistributeStats;
+					callsub OnDistributeSkills;
+					callsub OnApplyBuffs;
+					callsub OnCheckSpeedPotion;
 					addtimer 1000, "PlayerBotAI::OnStepTimer";
 				}
 				attachrid(.@gm_aid);
-				dispbottom "[Bot Manager]: MODO TESTE (Iniciando em Prontera) ativado em '" + .@target_name$ + "'.", 0x55FF55;
+				dispbottom "[Bot Manager]: MODO TESTE (Iniciando direto na Cacada: " + @hunt_map$ + ") ativado em '" + .@target_name$ + "'.", 0x55FF55;
 				break;
 
 			case 2: // MODO NORMAL
@@ -425,7 +463,7 @@ OnGMCommand:
 		end;
 	}
 
-	// Comandos por texto: @bot test [nome] (MODO TESTE)
+	// Comandos por texto: @bot test [nome] (MODO TESTE - Inicia direto na Cacada)
 	if (.@cmd$ == "test" || .@cmd$ == "teste") {
 		if (.@target_aid == 0) {
 			dispbottom "[Bot Manager]: Personagem '" + .@target_name$ + "' nao encontrado ou offline.", 0xFF5555;
@@ -434,8 +472,8 @@ OnGMCommand:
 		if (attachrid(.@target_aid)) {
 			#BOT_AI_ACTIVE = 1;
 			#BOT_TEST_MODE = 1;
-			#BOT_AI_STAGE = 0; // Inicia em Prontera
-			#BOT_HUNT_START = 0;
+			#BOT_AI_STAGE = 3; // Inicia direto na Cacada
+			#BOT_HUNT_START = gettimetick(2);
 			#BOT_WP_INDEX = 0;
 			#BOT_HUNT_COUNT = 0;
 			#BOT_CURRENT_TARGET = 0;
@@ -454,9 +492,8 @@ OnGMCommand:
 			#BOT_WAIT_END = 0;
 			stand;
 			callsub OnDetectTargetJob;
-
-			savepoint "prontera", 156, 178;
-			warp "prontera", 156, 178;
+			callsub OnGetHuntMap;
+			warp @hunt_map$, 0, 0;
 
 			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 504, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
 			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 505, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
@@ -475,10 +512,14 @@ OnGMCommand:
 			resetstatus;
 			resetskill;
 			callsub OnCheckJobChange;
+			callsub OnDistributeStats;
+			callsub OnDistributeSkills;
+			callsub OnApplyBuffs;
+			callsub OnCheckSpeedPotion;
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
 		}
 		attachrid(.@gm_aid);
-		dispbottom "[Bot Manager]: MODO TESTE (Iniciando em Prontera) ativado em '" + .@target_name$ + "'.", 0x55FF55;
+		dispbottom "[Bot Manager]: MODO TESTE (Iniciando direto na Cacada: " + @hunt_map$ + ") ativado em '" + .@target_name$ + "'.", 0x55FF55;
 		end;
 	}
 
@@ -648,7 +689,7 @@ OnPCDieEvent:
 		stand; // Garante que levanta do chao apos reviver
 		callsub OnApplyBuffs;
 		callsub OnGetHuntMap;
-		warp @hunt_map$, @hunt_x, @hunt_y;
+		warp @hunt_map$, 0, 0;
 		#BOT_AI_STAGE = 3; // Retorna imediatamente para a Cacada
 		#BOT_HUNT_START = gettimetick(2);
 		#BOT_WP_INDEX = 0;
@@ -705,8 +746,8 @@ OnStepTimer:
 	}
 
 	// Pontos, classes e pocoes de cura
-	callsub OnDistributeStats;
-	callsub OnDistributeSkills;
+	if (StatusPoint > 0) callsub OnDistributeStats;
+	if (SkillPoint > 0 || (BaseClass == Job_Swordman && BaseLevel >= 99 && getskilllv("LG_BANISHINGPOINT") < 10)) callsub OnDistributeSkills;
 	callsub OnCheckJobChange;
 	callsub OnCheckPotions;
 
@@ -1142,7 +1183,7 @@ OnStepTimer:
 				#BOT_HUNT_START = gettimetick(2);
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				callsub OnGetHuntMap;
-				warp @hunt_map$, @hunt_x, @hunt_y;
+				warp @hunt_map$, 0, 0;
 				addtimer 1500, "PlayerBotAI::OnStepTimer";
 				end;
 			}
@@ -1162,7 +1203,7 @@ OnStepTimer:
 						#BOT_HUNT_START = gettimetick(2);
 						unitstopwalk getcharid(3), USW_FORCE_STOP;
 						callsub OnGetHuntMap;
-						warp @hunt_map$, @hunt_x, @hunt_y;
+						warp @hunt_map$, 0, 0;
 						addtimer 1500, "PlayerBotAI::OnStepTimer";
 						end;
 					}
@@ -1196,7 +1237,7 @@ OnStepTimer:
 
 		if (.@m$ != @hunt_map$) {
 			stand;
-			warp @hunt_map$, @hunt_x, @hunt_y;
+			warp @hunt_map$, 0, 0;
 			#BOT_CURRENT_TARGET = 0;
 			#BOT_LAST_TX = 0;
 			#BOT_LAST_TY = 0;
@@ -1396,19 +1437,101 @@ OnStepTimer:
 			.@aspd_delay = (200 - .@cur_aspd) * 20; // 159 ASPD = 820ms, 175 ASPD = 500ms, 185 ASPD = 300ms
 			.@skill_delay = .@aspd_delay;
 
-			// Espadachim / Cavaleiro / Lorde / Cavaleiro Runico
-			if (Class == Job_Swordman || Class == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight) {
-				if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 20) {
-					unitskilluseid getcharid(3), "SM_MAGNUM", (getskilllv("SM_MAGNUM") > 0 ? getskilllv("SM_MAGNUM") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 1500; // Delay de animacao do Impacto Explosivo
-				} else if (Sp >= 8) {
-					unitskilluseid getcharid(3), "SM_BASH", (getskilllv("SM_BASH") > 0 ? getskilllv("SM_BASH") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+			// =========================================================
+			// 1. ESPADACHIM / CAVALEIRO / GUARDIAO REAL
+			// =========================================================
+			if (BaseClass == Job_Swordman) {
+				// Guardiao Real (3rd Class):
+				if (getskilllv("LG_BANISHINGPOINT") > 0 || getskilllv("LG_PINPOINTATTACK") > 0 || getskilllv("LG_SHIELDPRESS") > 0 || getskilllv("LG_RAYOFGENESIS") > 0 || getskilllv("LG_CANNONSPEAR") > 0 || getskilllv("LG_OVERBRAND") > 0 || Class >= Job_Royal_Guard) {
+					.@rg_step = #BOT_SKILL_ROT % 5;
+
+					// Alterna Golpe Fulminante com as habilidades de 3ª classe:
+					if (.@rg_step == 0) {
+						// 1. Golpe Fulminante (SM_BASH)
+						unitskilluseid getcharid(3), "SM_BASH", 10, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					} else if (.@rg_step == 1 && getskilllv("LG_BANISHINGPOINT") > 0 && Sp >= 20) {
+						// 2. Toque do Oblívio (LG_BANISHINGPOINT)
+						unitskilluseid getcharid(3), "LG_BANISHINGPOINT", (getskilllv("LG_BANISHINGPOINT") > 0 ? getskilllv("LG_BANISHINGPOINT") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 350 ? .@aspd_delay : 350);
+					} else if (.@rg_step == 2 && getskilllv("LG_SHIELDPRESS") > 0 && Sp >= 15) {
+						// 3. Escudo Compressor (LG_SHIELDPRESS)
+						unitskilluseid getcharid(3), "LG_SHIELDPRESS", (getskilllv("LG_SHIELDPRESS") > 0 ? getskilllv("LG_SHIELDPRESS") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 700;
+					} else if (.@rg_step == 3 && getskilllv("LG_PINPOINTATTACK") > 0 && Sp >= 50 && (gettimetick(2) - #BOT_LAST_PINPOINT) >= 5) {
+						// 4. Lança do Destino (LG_PINPOINTATTACK)
+						#BOT_LAST_PINPOINT = gettimetick(2);
+						unitskilluseid getcharid(3), "LG_PINPOINTATTACK", (getskilllv("LG_PINPOINTATTACK") > 0 ? getskilllv("LG_PINPOINTATTACK") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					} else if (.@rg_step == 4 && getskilllv("LG_RAYOFGENESIS") > 0 && Sp >= 55 && (gettimetick(2) - #BOT_LAST_GENESIS) >= 3 && (getstatus(SC_INSPIRATION) || getstatus(SC_BANDING))) {
+						// 5. Luz da Criação (LG_RAYOFGENESIS)
+						#BOT_LAST_GENESIS = gettimetick(2);
+						unitskilluseid getcharid(3), "LG_RAYOFGENESIS", (getskilllv("LG_RAYOFGENESIS") > 0 ? getskilllv("LG_RAYOFGENESIS") : 10), getcharid(3), 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else {
+						// Fallback imediato: Golpe Fulminante ou Toque do Oblívio
+						if (getskilllv("LG_BANISHINGPOINT") > 0 && Sp >= 20) {
+							unitskilluseid getcharid(3), "LG_BANISHINGPOINT", (getskilllv("LG_BANISHINGPOINT") > 0 ? getskilllv("LG_BANISHINGPOINT") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = (.@aspd_delay > 350 ? .@aspd_delay : 350);
+						} else {
+							unitskilluseid getcharid(3), "SM_BASH", 10, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+						}
+					}
+				}
+				// Cavaleiro Runico / Lorde / Cavaleiro:
+				else if (getskilllv("RK_IGNITIONBREAK") > 0 || getskilllv("RK_DRAGONBREATH") > 0 || getskilllv("LK_SPIRALPIERCE") > 0 || getskilllv("KN_BOWLINGBASH") > 0 || getskilllv("KN_TWOHANDQUICKEN") > 0) {
+					if (getskilllv("RK_IGNITIONBREAK") > 0 && Sp >= 35) {
+						unitskilluseid getcharid(3), "RK_IGNITIONBREAK", getskilllv("RK_IGNITIONBREAK"), getcharid(3), 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (getskilllv("RK_DRAGONBREATH") > 0 && Sp >= 30) {
+						unitskilluseid getcharid(3), "RK_DRAGONBREATH", getskilllv("RK_DRAGONBREATH"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (getskilllv("RK_SONICWAVE") > 0 && Sp >= 25) {
+						unitskilluseid getcharid(3), "RK_SONICWAVE", getskilllv("RK_SONICWAVE"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					} else if (getskilllv("RK_HUNDREDSPEAR") > 0 && Sp >= 30) {
+						unitskilluseid getcharid(3), "RK_HUNDREDSPEAR", getskilllv("RK_HUNDREDSPEAR"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (getskilllv("LK_SPIRALPIERCE") > 0 && Sp >= 20) {
+						unitskilluseid getcharid(3), "LK_SPIRALPIERCE", getskilllv("LK_SPIRALPIERCE"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (getskilllv("KN_BOWLINGBASH") > 0 && Sp >= 15) {
+						unitskilluseid getcharid(3), "KN_BOWLINGBASH", getskilllv("KN_BOWLINGBASH"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
+					} else if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 20) {
+						unitskilluseid getcharid(3), "SM_MAGNUM", (getskilllv("SM_MAGNUM") > 0 ? getskilllv("SM_MAGNUM") : 10), getcharid(3), 0, 0, 0, 1;
+						.@skill_delay = 1200;
+					} else if (Sp >= 8) {
+						unitskilluseid getcharid(3), "SM_BASH", (getskilllv("SM_BASH") > 0 ? getskilllv("SM_BASH") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+					}
+				}
+				// Espadachim basico:
+				else {
+					if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 20 && getskilllv("SM_MAGNUM") > 0) {
+						unitskilluseid getcharid(3), "SM_MAGNUM", getskilllv("SM_MAGNUM"), getcharid(3), 0, 0, 0, 1;
+						.@skill_delay = 1200;
+					} else if (Sp >= 8) {
+						unitskilluseid getcharid(3), "SM_BASH", (getskilllv("SM_BASH") > 0 ? getskilllv("SM_BASH") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+					}
 				}
 			}
-			// Mago / Bruxo / Arquimago / Arcano
-			else if (Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock) {
-				if (Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock) {
+			// =========================================================
+			// 2. MAGO / BRUXO / ARQUIMAGO / ARCANO / FEITICEIRO
+			// =========================================================
+			else if (BaseClass == Job_Mage) {
+				if (getskilllv("WL_CHAINLIGHTNING") > 0 && Sp >= 40) {
+					unitskilluseid getcharid(3), "WL_CHAINLIGHTNING", getskilllv("WL_CHAINLIGHTNING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1000;
+				} else if (getskilllv("WL_CRIMSONROCK") > 0 && Sp >= 40) {
+					unitskilluseid getcharid(3), "WL_CRIMSONROCK", getskilllv("WL_CRIMSONROCK"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1200;
+				} else if (getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 40) {
+					unitskilluseid getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1000;
+				} else if (getskilllv("WZ_JUPITEL") > 0) {
 					.@w_rot = #BOT_SKILL_ROT % 4;
 					if (.@w_rot == 0 && getskilllv("WZ_JUPITEL") > 0 && Sp >= 20) {
 						unitskilluseid getcharid(3), "WZ_JUPITEL", getskilllv("WZ_JUPITEL"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
@@ -1424,7 +1547,7 @@ OnStepTimer:
 						.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
 					}
 				} else {
-					// 1a Classe Mago: Alterna sequencialmente entre todas as magias ofensivas
+					// 1a Classe Mago / Sabio:
 					.@m_rot = #BOT_SKILL_ROT % 5;
 					if (.@m_rot == 0 && getskilllv("MG_FIREBOLT") > 0 && Sp >= 12) {
 						unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
@@ -1447,49 +1570,90 @@ OnStepTimer:
 					}
 				}
 			}
-			// Arqueiro / Cacador / Sniper / Sentinela
-			else if (Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger) {
-				if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 15) {
-					unitskilluseid getcharid(3), "AC_SHOWER", (getskilllv("AC_SHOWER") > 0 ? getskilllv("AC_SHOWER") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 1000; // Pós-conjuração da Chuva de Flechas
+			// =========================================================
+			// 3. ARQUEIRO / SENTINELA / TROVADOR / MUSA
+			// =========================================================
+			else if (BaseClass == Job_Archer) {
+				if (getskilllv("RA_ARROWSTORM") > 0 && Sp >= 30) {
+					unitskilluseid getcharid(3), "RA_ARROWSTORM", getskilllv("RA_ARROWSTORM"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1000;
+				} else if (getskilllv("RA_AIMEDBOLT") > 0 && Sp >= 25) {
+					unitskilluseid getcharid(3), "RA_AIMEDBOLT", getskilllv("RA_AIMEDBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 800;
+				} else if (getskilllv("WA_SEVERESTRAINSTORM") > 0 && Sp >= 30) {
+					unitskilluseid getcharid(3), "WA_SEVERESTRAINSTORM", getskilllv("WA_SEVERESTRAINSTORM"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1000;
+				} else if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 15 && getskilllv("AC_SHOWER") > 0) {
+					unitskilluseid getcharid(3), "AC_SHOWER", getskilllv("AC_SHOWER"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1000;
 				} else if (Sp >= 10) {
 					unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 				}
 			}
-			// Gatuno / Mercenario / Algoz / Sicario
-			else if (Class == Job_Thief || Class == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross) {
-				if (getskilllv("AS_SONICBLOW") > 0 && Sp >= 25) {
+			// =========================================================
+			// 4. GATUNO / SICARIO / RENEGADO
+			// =========================================================
+			else if (BaseClass == Job_Thief) {
+				if (getskilllv("GC_CROSSIMPACT") > 0 && Sp >= 30) {
+					unitskilluseid getcharid(3), "GC_CROSSIMPACT", getskilllv("GC_CROSSIMPACT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 800;
+				} else if (getskilllv("GC_ROLLINGCUTTER") > 0 && Sp >= 5) {
+					unitskilluseid getcharid(3), "GC_ROLLINGCUTTER", getskilllv("GC_ROLLINGCUTTER"), getcharid(3), 0, 0, 0, 1;
+					.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+				} else if (getskilllv("SC_FATALMENACE") > 0 && Sp >= 25) {
+					unitskilluseid getcharid(3), "SC_FATALMENACE", getskilllv("SC_FATALMENACE"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 800;
+				} else if (getskilllv("AS_SONICBLOW") > 0 && Sp >= 25) {
 					unitskilluseid getcharid(3), "AS_SONICBLOW", getskilllv("AS_SONICBLOW"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 2000; // 2 segundos de animação de Laminas Destruidoras
+					.@skill_delay = 2000;
 				} else if (Sp >= 10) {
 					unitskilluseid getcharid(3), "TF_POISON", (getskilllv("TF_POISON") > 0 ? getskilllv("TF_POISON") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600); // Respeita a ASPD real do Gatuno
+					.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
 				}
 			}
-			// Novico / Sacerdote / Sumo Sacerdote / Arcebispo
-			else if (Class == Job_Acolyte || Class == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop) {
-				if (Sp >= 12) {
+			// =========================================================
+			// 5. NOVICO / ARCEBISPO / SHURA
+			// =========================================================
+			else if (BaseClass == Job_Acolyte) {
+				if (getskilllv("AB_ADORAMUS") > 0 && Sp >= 30) {
+					unitskilluseid getcharid(3), "AB_ADORAMUS", getskilllv("AB_ADORAMUS"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1000;
+				} else if (getskilllv("AB_JUDEX") > 0 && Sp >= 20) {
+					unitskilluseid getcharid(3), "AB_JUDEX", getskilllv("AB_JUDEX"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 800;
+				} else if (getskilllv("SR_TIGERCANNON") > 0 && Sp >= 40) {
+					unitskilluseid getcharid(3), "SR_TIGERCANNON", getskilllv("SR_TIGERCANNON"), getcharid(3), 0, 0, 0, 1;
+					.@skill_delay = 1000;
+				} else if (getskilllv("MO_EXTREMITYFIST") > 0 && Sp >= 100 && (Hp * 100 / MaxHp) < 50) {
+					unitskilluseid getcharid(3), "MO_EXTREMITYFIST", getskilllv("MO_EXTREMITYFIST"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1500;
+				} else if (Sp >= 12) {
 					unitskilluseid getcharid(3), "AL_HOLYLIGHT", 1, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = (.@aspd_delay > 800 ? .@aspd_delay : 800);
 				}
 			}
-			// Mercador / Ferreiro / Mestre-Ferreiro / Mecanico
-			else if (Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic) {
+			// =========================================================
+			// 6. MERCADOR / MECANICO / BIOQUIMICO
+			// =========================================================
+			else if (BaseClass == Job_Merchant) {
 				if (Zeny < 500000) Zeny += 5000000;
 				if (!checkcart()) setcart;
 
 				if (getskilllv("NC_AXETORNADO") > 0 && Sp >= 20) {
-					unitskilluseid getcharid(3), "NC_AXETORNADO", getskilllv("NC_AXETORNADO"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 2000; // Cooldown do Furacão a Machado
+					unitskilluseid getcharid(3), "NC_AXETORNADO", getskilllv("NC_AXETORNADO"), getcharid(3), 0, 0, 0, 1;
+					.@skill_delay = 2000;
 				} else if (getskilllv("NC_POWERSWING") > 0 && Sp >= 20) {
 					unitskilluseid getcharid(3), "NC_POWERSWING", getskilllv("NC_POWERSWING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
+				} else if (getskilllv("GN_CARTCANNON") > 0 && Sp >= 20) {
+					unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 800;
 				} else if (getskilllv("WS_CARTTERMINATION") > 0 && Sp >= 15 && getstatus(SC_CARTBOOST)) {
 					unitskilluseid getcharid(3), "WS_CARTTERMINATION", getskilllv("WS_CARTTERMINATION"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 				} else if ((#BOT_SKILL_ROT % 2 == 0) && getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12) {
-					unitskilluseid getcharid(3), "MC_CARTREVOLUTION", 1, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "MC_CARTREVOLUTION", 1, getcharid(3), 0, 0, 0, 1;
 					.@skill_delay = (.@aspd_delay > 700 ? .@aspd_delay : 700);
 				} else if (Sp >= 5) {
 					unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
@@ -1517,6 +1681,13 @@ OnApplyBuffs:
 	sc_start SC_KYRIE, 600000, 10;
 	sc_start SC_MAGNIFICAT, 600000, 5;
 	sc_start SC_GLORIA, 600000, 5;
+	if (BaseClass == Job_Swordman && (Class >= Job_Royal_Guard || getskilllv("LG_BANISHINGPOINT") > 0 || BaseLevel >= 99)) {
+		sc_start SC_INSPIRATION, 600000, 5;
+		sc_start SC_FORCEOFVANGUARD, 600000, 5;
+		sc_start SC_AUTOGUARD, 600000, 10;
+		sc_start SC_REFLECTSHIELD, 600000, 10;
+		sc_start SC_SPEARQUICKEN, 600000, 10;
+	}
 	percentheal 100, 100;
 	repairall;
 	specialeffect EF_BLESSING;
@@ -1540,6 +1711,34 @@ OnCheckBuffs:
 	// Rapidez com Duas Maos (KN_TWOHANDQUICKEN)
 	if (getskilllv("KN_TWOHANDQUICKEN") > 0 && !getstatus(SC_TWOHANDQUICKEN) && Sp >= 50) {
 		unitskilluseid getcharid(3), "KN_TWOHANDQUICKEN", getskilllv("KN_TWOHANDQUICKEN"), getcharid(3);
+	}
+	// Auto-Guarda (CR_AUTOGUARD)
+	if (getskilllv("CR_AUTOGUARD") > 0 && !getstatus(SC_AUTOGUARD) && Sp >= 20) {
+		unitskilluseid getcharid(3), "CR_AUTOGUARD", getskilllv("CR_AUTOGUARD"), getcharid(3);
+	}
+	// Escudo Refletor (CR_REFLECTSHIELD)
+	if (getskilllv("CR_REFLECTSHIELD") > 0 && !getstatus(SC_REFLECTSHIELD) && Sp >= 35) {
+		unitskilluseid getcharid(3), "CR_REFLECTSHIELD", getskilllv("CR_REFLECTSHIELD"), getcharid(3);
+	}
+	// Defensoria (CR_DEFENDER)
+	if (getskilllv("CR_DEFENDER") > 0 && !getstatus(SC_DEFENDER) && Sp >= 30) {
+		unitskilluseid getcharid(3), "CR_DEFENDER", getskilllv("CR_DEFENDER"), getcharid(3);
+	}
+	// Rapidez com Lanca (CR_SPEARQUICKEN)
+	if (getskilllv("CR_SPEARQUICKEN") > 0 && !getstatus(SC_SPEARQUICKEN) && Sp >= 24) {
+		unitskilluseid getcharid(3), "CR_SPEARQUICKEN", getskilllv("CR_SPEARQUICKEN"), getcharid(3);
+	}
+	// Forca de Vanguarda (LG_FORCEOFVANGUARD)
+	if (getskilllv("LG_FORCEOFVANGUARD") > 0 && !getstatus(SC_FORCEOFVANGUARD) && Sp >= 30) {
+		unitskilluseid getcharid(3), "LG_FORCEOFVANGUARD", getskilllv("LG_FORCEOFVANGUARD"), getcharid(3);
+	}
+	// Prestigio (LG_PRESTIGE)
+	if (getskilllv("LG_PRESTIGE") > 0 && !getstatus(SC_PRESTIGE) && Sp >= 40) {
+		unitskilluseid getcharid(3), "LG_PRESTIGE", getskilllv("LG_PRESTIGE"), getcharid(3);
+	}
+	// Inspiracao (LG_INSPIRATION)
+	if (getskilllv("LG_INSPIRATION") > 0 && !getstatus(SC_INSPIRATION) && Sp >= 80) {
+		unitskilluseid getcharid(3), "LG_INSPIRATION", getskilllv("LG_INSPIRATION"), getcharid(3);
 	}
 	// Lamina de Aura (LK_AURABLADE)
 	if (getskilllv("LK_AURABLADE") > 0 && !getstatus(SC_AURABLADE) && Sp >= 50) {
@@ -1767,43 +1966,43 @@ OnCleanHeavyInventory:
 
 OnGetHuntMap:
 	if (BaseLevel <= 12) {
-		@hunt_map$ = "prt_fild08"; @hunt_x = 150; @hunt_y = 150;
+		@hunt_map$ = "prt_fild08"; @hunt_x = 0; @hunt_y = 0;
 	} else if (BaseLevel <= 25) {
-		@hunt_map$ = "pay_fild08"; @hunt_x = 150; @hunt_y = 150;
+		@hunt_map$ = "pay_fild08"; @hunt_x = 0; @hunt_y = 0;
 	} else if (BaseLevel <= 40) {
-		@hunt_map$ = "pay_dun00"; @hunt_x = 100; @hunt_y = 100;
+		@hunt_map$ = "pay_dun00"; @hunt_x = 0; @hunt_y = 0;
 	} else if (BaseLevel <= 55) {
-		@hunt_map$ = "orc_dun01"; @hunt_x = 90; @hunt_y = 90;
+		@hunt_map$ = "orc_dun01"; @hunt_x = 0; @hunt_y = 0;
 	} else if (BaseLevel <= 70) {
-		@hunt_map$ = "pay_dun03"; @hunt_x = 150; @hunt_y = 150;
+		@hunt_map$ = "pay_dun03"; @hunt_x = 0; @hunt_y = 0;
 	} else if (BaseLevel <= 85) {
-		@hunt_map$ = "ein_fild04"; @hunt_x = 150; @hunt_y = 150;
+		@hunt_map$ = "ein_fild04"; @hunt_x = 0; @hunt_y = 0;
 	} else if (BaseLevel <= 99) {
-		@hunt_map$ = "mag_dun02"; @hunt_x = 150; @hunt_y = 150;
+		@hunt_map$ = "mag_dun02"; @hunt_x = 0; @hunt_y = 0;
 	} else {
-		@hunt_map$ = "dic_fild02"; @hunt_x = 150; @hunt_y = 150;
+		@hunt_map$ = "dic_fild02"; @hunt_x = 0; @hunt_y = 0;
 	}
 	return;
 
 OnCheckMapSwitch:
 	callsub OnGetHuntMap;
 	if (strcharinfo(3) != @hunt_map$ && #BOT_AI_STAGE == 3) {
-		warp @hunt_map$, @hunt_x, @hunt_y;
+		warp @hunt_map$, 0, 0;
 	}
 	return;
 
 OnDetectTargetJob:
-	if (Class == Job_Swordman || Class == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight || Class == Job_Crusader || Class == Job_Paladin || Class == Job_Royal_Guard) {
+	if (BaseClass == Job_Swordman) {
 		#BOT_TARGET_JOB = 1;
-	} else if (Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock || Class == Job_Sage || Class == Job_Professor || Class == Job_Sorcerer) {
+	} else if (BaseClass == Job_Mage) {
 		#BOT_TARGET_JOB = 2;
-	} else if (Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger || Class == Job_Bard || Class == Job_Clown || Class == Job_Minstrel || Class == Job_Dancer || Class == Job_Gypsy || Class == Job_Wanderer) {
+	} else if (BaseClass == Job_Archer) {
 		#BOT_TARGET_JOB = 3;
-	} else if (Class == Job_Thief || Class == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross || Class == Job_Rogue || Class == Job_Stalker || Class == Job_Shadow_Chaser) {
+	} else if (BaseClass == Job_Thief) {
 		#BOT_TARGET_JOB = 4;
-	} else if (Class == Job_Acolyte || Class == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop || Class == Job_Monk || Class == Job_Champion || Class == Job_Sura) {
+	} else if (BaseClass == Job_Acolyte) {
 		#BOT_TARGET_JOB = 5;
-	} else if (Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic) {
+	} else if (BaseClass == Job_Merchant) {
 		#BOT_TARGET_JOB = 6;
 	} else if (#BOT_TARGET_JOB == 0) {
 		#BOT_TARGET_JOB = 1;
@@ -1867,258 +2066,306 @@ OnDistributeStats:
 	return;
 
 OnDistributeSkills:
+	// Libera todas as habilidades da arvore de classes correspondente
+	atcommand "@allskill";
+
 	// =========================================================
 	// 1. ESPADACHIM / CAVALEIRO / LORDE / CAVALEIRO RUNICO
 	// =========================================================
 	if (Class == Job_Swordman || Class == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight) {
-		skill "SM_SWORD", 10, 0;
-		skill "SM_TWOHAND", 10, 0;
-		skill "SM_RECOVERY", 10, 0;
-		skill "SM_BASH", 10, 0;
-		skill "SM_MAGNUM", 10, 0;
-		skill "SM_ENDURE", 10, 0;
-		skill "SM_PROVOKE", 10, 0;
-		skill "SM_AUTOBERSERK", 1, 0;
-		skill "SM_MOVINGRECOVERY", 1, 0;
-		skill "SM_FATALBLOW", 1, 0;
+		skill "SM_SWORD", 10, 1;
+		skill "SM_TWOHAND", 10, 1;
+		skill "SM_RECOVERY", 10, 1;
+		skill "SM_BASH", 10, 1;
+		skill "SM_MAGNUM", 10, 1;
+		skill "SM_ENDURE", 10, 1;
+		skill "SM_PROVOKE", 10, 1;
+		skill "SM_AUTOBERSERK", 1, 1;
+		skill "SM_MOVINGRECOVERY", 1, 1;
+		skill "SM_FATALBLOW", 1, 1;
 	}
 	if (Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight) {
-		skill "KN_TWOHANDQUICKEN", 10, 0;
-		skill "KN_AUTOCOUNTER", 5, 0;
-		skill "KN_BOWLINGBASH", 10, 0;
-		skill "KN_SPEARMASTERY", 10, 0;
-		skill "KN_PIERCE", 10, 0;
-		skill "KN_BRANDISHSPEAR", 10, 0;
-		skill "KN_SPEARBOOMERANG", 5, 0;
-		skill "KN_CHARGEATK", 1, 0;
-		skill "KN_ONEHAND", 1, 0;
+		skill "KN_TWOHANDQUICKEN", 10, 1;
+		skill "KN_AUTOCOUNTER", 5, 1;
+		skill "KN_BOWLINGBASH", 10, 1;
+		skill "KN_SPEARMASTERY", 10, 1;
+		skill "KN_PIERCE", 10, 1;
+		skill "KN_BRANDISHSPEAR", 10, 1;
+		skill "KN_SPEARBOOMERANG", 5, 1;
+		skill "KN_CHARGEATK", 1, 1;
+		skill "KN_ONEHAND", 1, 1;
 	}
 	if (Class == Job_Lord_Knight || Class == Job_Rune_Knight) {
-		skill "LK_AURABLADE", 5, 0;
-		skill "LK_PARRYING", 10, 0;
-		skill "LK_CONCENTRATION", 5, 0;
-		skill "LK_TENSIONRELAX", 1, 0;
-		skill "LK_BERSERK", 1, 0;
-		skill "LK_SPIRALPIERCE", 5, 0;
-		skill "LK_HEADCRUSH", 5, 0;
-		skill "LK_JOINTBEAT", 10, 0;
+		skill "LK_AURABLADE", 5, 1;
+		skill "LK_PARRYING", 10, 1;
+		skill "LK_CONCENTRATION", 5, 1;
+		skill "LK_TENSIONRELAX", 1, 1;
+		skill "LK_BERSERK", 1, 1;
+		skill "LK_SPIRALPIERCE", 5, 1;
+		skill "LK_HEADCRUSH", 5, 1;
+		skill "LK_JOINTBEAT", 10, 1;
 	}
 	if (Class == Job_Rune_Knight) {
-		skill "RK_RUNEMASTERY", 10, 0;
-		skill "RK_DRAGONTRAINING", 5, 0;
-		skill "RK_DRAGONBREATH", 10, 0;
-		skill "RK_DRAGONBREATH_WATER", 10, 0;
-		skill "RK_IGNITIONBREAK", 5, 0;
-		skill "RK_SONICWAVE", 5, 0;
-		skill "RK_WINDCUTTER", 5, 0;
-		skill "RK_ENCHANTBLADE", 5, 0;
-		skill "RK_HUNDREDSPEAR", 10, 0;
+		skill "RK_RUNEMASTERY", 10, 1;
+		skill "RK_DRAGONTRAINING", 5, 1;
+		skill "RK_DRAGONBREATH", 10, 1;
+		skill "RK_DRAGONBREATH_WATER", 10, 1;
+		skill "RK_IGNITIONBREAK", 5, 1;
+		skill "RK_SONICWAVE", 5, 1;
+		skill "RK_WINDCUTTER", 5, 1;
+		skill "RK_ENCHANTBLADE", 5, 1;
+		skill "RK_HUNDREDSPEAR", 10, 1;
+	}
+
+	// Templario / Paladino / Guardiao Real
+	if (BaseClass == Job_Swordman && (Class == Job_Crusader || Class == Job_Paladin || Class >= Job_Royal_Guard || getskilllv("CR_AUTOGUARD") > 0 || getskilllv("LG_BANISHINGPOINT") > 0)) {
+		skill "SM_SWORD", 10, 1;
+		skill "SM_RECOVERY", 10, 1;
+		skill "SM_BASH", 10, 1;
+		skill "SM_MAGNUM", 10, 1;
+		skill "SM_ENDURE", 10, 1;
+		skill "SM_PROVOKE", 10, 1;
+		skill "SM_AUTOBERSERK", 1, 1;
+		skill "CR_TRUST", 10, 1;
+		skill "CR_AUTOGUARD", 10, 1;
+		skill "CR_SHIELDCHARGE", 5, 1;
+		skill "CR_SHIELDBOOMERANG", 5, 1;
+		skill "CR_REFLECTSHIELD", 10, 1;
+		skill "CR_HOLYCROSS", 10, 1;
+		skill "CR_GRANDCROSS", 10, 1;
+		skill "CR_DEVOTION", 5, 1;
+		skill "CR_DEFENDER", 5, 1;
+		skill "CR_SPEARQUICKEN", 10, 1;
+	}
+	if (BaseClass == Job_Swordman && (Class == Job_Paladin || Class >= Job_Royal_Guard || getskilllv("PA_SHIELDCHAIN") > 0 || getskilllv("LG_BANISHINGPOINT") > 0)) {
+		skill "PA_SACRIFICE", 5, 1;
+		skill "PA_PRESSURE", 5, 1;
+		skill "PA_SHIELDCHAIN", 5, 1;
+		skill "PA_GOSPEL", 10, 1;
+	}
+	if (BaseClass == Job_Swordman && (Class >= Job_Royal_Guard || getskilllv("LG_BANISHINGPOINT") > 0 || getskilllv("LG_RAYOFGENESIS") > 0 || BaseLevel >= 99)) {
+		skill "LG_BANISHINGPOINT", 10, 1;
+		skill "LG_PINPOINTATTACK", 5, 1;
+		skill "LG_RAYOFGENESIS", 10, 1;
+		skill "LG_SHIELDPRESS", 10, 1;
+		skill "LG_CANNONSPEAR", 5, 1;
+		skill "LG_REFLECTDAMAGE", 5, 1;
+		skill "LG_FORCEOFVANGUARD", 5, 1;
+		skill "LG_RAGEBLASTER", 5, 1;
+		skill "LG_SHIELDSPELL", 3, 1;
+		skill "LG_OVERBRAND", 5, 1;
+		skill "LG_PRESTIGE", 5, 1;
+		skill "LG_BANDING", 5, 1;
+		skill "LG_MOONSLASHER", 5, 1;
+		skill "LG_EARTHDRIVE", 5, 1;
+		skill "LG_HESPERUSLIT", 5, 1;
+		skill "LG_INSPIRATION", 5, 1;
 	}
 
 	// =========================================================
 	// 2. MAGO / BRUXO / ARQUIMAGO / ARCANO
 	// =========================================================
 	if (Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock) {
-		skill "MG_ENERGYCOAT", 1, 0;
-		skill "MG_SRECOVERY", 10, 0;
-		skill "MG_FIREBOLT", 10, 0;
-		skill "MG_COLDBOLT", 10, 0;
-		skill "MG_LIGHTNINGBOLT", 10, 0;
-		skill "MG_SIGHT", 1, 0;
-		skill "MG_NAPALMBEAT", 7, 0;
-		skill "MG_SOULSTRIKE", 10, 0;
-		skill "MG_SAFETYWALL", 10, 0;
-		skill "MG_FIREBALL", 10, 0;
-		skill "MG_FIREWALL", 10, 0;
-		skill "MG_FROSTDIVER", 10, 0;
-		skill "MG_THUNDERSTORM", 10, 0;
+		skill "MG_ENERGYCOAT", 1, 1;
+		skill "MG_SRECOVERY", 10, 1;
+		skill "MG_FIREBOLT", 10, 1;
+		skill "MG_COLDBOLT", 10, 1;
+		skill "MG_LIGHTNINGBOLT", 10, 1;
+		skill "MG_SIGHT", 1, 1;
+		skill "MG_NAPALMBEAT", 7, 1;
+		skill "MG_SOULSTRIKE", 10, 1;
+		skill "MG_SAFETYWALL", 10, 1;
+		skill "MG_FIREBALL", 10, 1;
+		skill "MG_FIREWALL", 10, 1;
+		skill "MG_FROSTDIVER", 10, 1;
+		skill "MG_THUNDERSTORM", 10, 1;
 	}
 	if (Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock) {
-		skill "WZ_FIREPILLAR", 10, 0;
-		skill "WZ_SIGHTRASHER", 10, 0;
-		skill "WZ_METEOR", 10, 0;
-		skill "WZ_JUPITEL", 10, 0;
-		skill "WZ_VERMILION", 10, 0;
-		skill "WZ_WATERBALL", 5, 0;
-		skill "WZ_ICEWALL", 10, 0;
-		skill "WZ_FROSTNOVA", 10, 0;
-		skill "WZ_STORMGUST", 10, 0;
-		skill "WZ_EARTHSPIKE", 5, 0;
-		skill "WZ_HEAVENDRIVE", 5, 0;
-		skill "WZ_QUAGMIRE", 5, 0;
-		skill "WZ_SIGHTBLASTER", 1, 0;
+		skill "WZ_FIREPILLAR", 10, 1;
+		skill "WZ_SIGHTRASHER", 10, 1;
+		skill "WZ_METEOR", 10, 1;
+		skill "WZ_JUPITEL", 10, 1;
+		skill "WZ_VERMILION", 10, 1;
+		skill "WZ_WATERBALL", 5, 1;
+		skill "WZ_ICEWALL", 10, 1;
+		skill "WZ_FROSTNOVA", 10, 1;
+		skill "WZ_STORMGUST", 10, 1;
+		skill "WZ_EARTHSPIKE", 5, 1;
+		skill "WZ_HEAVENDRIVE", 5, 1;
+		skill "WZ_QUAGMIRE", 5, 1;
+		skill "WZ_SIGHTBLASTER", 1, 1;
 	}
 	if (Class == Job_High_Wizard || Class == Job_Warlock) {
-		skill "HW_MAGICPOWER", 10, 0;
-		skill "HW_SOULDRAIN", 10, 0;
-		skill "HW_MAGICCRASHER", 1, 0;
-		skill "HW_NAPALMVULCAN", 5, 0;
-		skill "HW_GANBANTEIN", 1, 0;
-		skill "HW_GRAVITATION", 5, 0;
+		skill "HW_MAGICPOWER", 10, 1;
+		skill "HW_SOULDRAIN", 10, 1;
+		skill "HW_MAGICCRASHER", 1, 1;
+		skill "HW_NAPALMVULCAN", 5, 1;
+		skill "HW_GANBANTEIN", 1, 1;
+		skill "HW_GRAVITATION", 5, 1;
 	}
 	if (Class == Job_Warlock) {
-		skill "WL_WHITEIMPRISON", 5, 0;
-		skill "WL_SOULEXPANSION", 5, 0;
-		skill "WL_FROSTMISTY", 5, 0;
-		skill "WL_JACKFROST", 5, 0;
-		skill "WL_DRAINLIFE", 5, 0;
-		skill "WL_CRIMSONROCK", 5, 0;
-		skill "WL_HELLINFERNO", 5, 0;
-		skill "WL_COMET", 5, 0;
-		skill "WL_CHAINLIGHTNING", 5, 0;
-		skill "WL_EARTHSTRAIN", 5, 0;
-		skill "WL_TETRAVORTEX", 5, 0;
-		skill "WL_RECOGNIZEDSPELL", 5, 0;
+		skill "WL_WHITEIMPRISON", 5, 1;
+		skill "WL_SOULEXPANSION", 5, 1;
+		skill "WL_FROSTMISTY", 5, 1;
+		skill "WL_JACKFROST", 5, 1;
+		skill "WL_DRAINLIFE", 5, 1;
+		skill "WL_CRIMSONROCK", 5, 1;
+		skill "WL_HELLINFERNO", 5, 1;
+		skill "WL_COMET", 5, 1;
+		skill "WL_CHAINLIGHTNING", 5, 1;
+		skill "WL_EARTHSTRAIN", 5, 1;
+		skill "WL_TETRAVORTEX", 5, 1;
+		skill "WL_RECOGNIZEDSPELL", 5, 1;
 	}
 
 	// =========================================================
 	// 3. ARQUEIRO / CACADOR / SNIPER / RANGER
 	// =========================================================
 	if (Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger) {
-		skill "AC_OWL", 10, 0;
-		skill "AC_VULTURE", 10, 0;
-		skill "AC_CONCENTRATION", 10, 0;
-		skill "AC_DOUBLE", 10, 0;
-		skill "AC_SHOWER", 10, 0;
-		skill "AC_MAKINGARROW", 1, 0;
-		skill "AC_CHARGEARROW", 1, 0;
+		skill "AC_OWL", 10, 1;
+		skill "AC_VULTURE", 10, 1;
+		skill "AC_CONCENTRATION", 10, 1;
+		skill "AC_DOUBLE", 10, 1;
+		skill "AC_SHOWER", 10, 1;
+		skill "AC_MAKINGARROW", 1, 1;
+		skill "AC_CHARGEARROW", 1, 1;
 	}
 	if (Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger) {
-		skill "HT_SKIDTRAP", 5, 0;
-		skill "HT_LANDMINE", 5, 0;
-		skill "HT_ANKLESNARE", 5, 0;
-		skill "HT_FREEZINGTRAP", 5, 0;
-		skill "HT_BLASTMINE", 5, 0;
-		skill "HT_CLAYMORETRAP", 5, 0;
-		skill "HT_BEASTBANE", 10, 0;
-		skill "HT_FALCON", 1, 0;
-		skill "HT_STEELCROW", 10, 0;
-		skill "HT_BLITZBEAT", 5, 0;
-		skill "HT_DETECTING", 4, 0;
-		skill "HT_SPRINGTRAP", 5, 0;
+		skill "HT_SKIDTRAP", 5, 1;
+		skill "HT_LANDMINE", 5, 1;
+		skill "HT_ANKLESNARE", 5, 1;
+		skill "HT_FREEZINGTRAP", 5, 1;
+		skill "HT_BLASTMINE", 5, 1;
+		skill "HT_CLAYMORETRAP", 5, 1;
+		skill "HT_BEASTBANE", 10, 1;
+		skill "HT_FALCON", 1, 1;
+		skill "HT_STEELCROW", 10, 1;
+		skill "HT_BLITZBEAT", 5, 1;
+		skill "HT_DETECTING", 4, 1;
+		skill "HT_SPRINGTRAP", 5, 1;
 	}
 	if (Class == Job_Sniper || Class == Job_Ranger) {
-		skill "SN_SIGHT", 10, 0;
-		skill "SN_FALCONASSAULT", 5, 0;
-		skill "SN_SHARPSHOOTING", 5, 0;
-		skill "SN_WINDWALK", 10, 0;
+		skill "SN_SIGHT", 10, 1;
+		skill "SN_FALCONASSAULT", 5, 1;
+		skill "SN_SHARPSHOOTING", 5, 1;
+		skill "SN_WINDWALK", 10, 1;
 	}
 	if (Class == Job_Ranger) {
-		skill "RA_AIMEDBOLT", 10, 0;
-		skill "RA_ARROWSTORM", 10, 0;
-		skill "RA_FEARTBREEZE", 5, 0;
-		skill "RA_RANGERMAIN", 10, 0;
-		skill "RA_UNLIMIT", 5, 0;
-		skill "RA_WUGMASTERY", 1, 0;
-		skill "RA_WUGSTRIKE", 5, 0;
-		skill "RA_WUGDASH", 1, 0;
-		skill "RA_WUGBITE", 5, 0;
-		skill "RA_TOOTHOFWUG", 10, 0;
+		skill "RA_AIMEDBOLT", 10, 1;
+		skill "RA_ARROWSTORM", 10, 1;
+		skill "RA_FEARTBREEZE", 5, 1;
+		skill "RA_RANGERMAIN", 10, 1;
+		skill "RA_UNLIMIT", 5, 1;
+		skill "RA_WUGMASTERY", 1, 1;
+		skill "RA_WUGSTRIKE", 5, 1;
+		skill "RA_WUGDASH", 1, 1;
+		skill "RA_WUGBITE", 5, 1;
+		skill "RA_TOOTHOFWUG", 10, 1;
 	}
 
 	// =========================================================
 	// 4. GATUNO / MERCENARIO / ALGOZ / SICARIO
 	// =========================================================
 	if (Class == Job_Thief || Class == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross) {
-		skill "TF_DOUBLE", 10, 0;
-		skill "TF_MISS", 10, 0;
-		skill "TF_STEAL", 10, 0;
-		skill "TF_HIDING", 10, 0;
-		skill "TF_POISON", 10, 0;
-		skill "TF_DETOXIFY", 1, 0;
-		skill "TF_SPRINKLESAND", 1, 0;
-		skill "TF_BACKSLIDING", 1, 0;
-		skill "TF_PICKSTONE", 1, 0;
-		skill "TF_THROWSTONE", 1, 0;
+		skill "TF_DOUBLE", 10, 1;
+		skill "TF_MISS", 10, 1;
+		skill "TF_STEAL", 10, 1;
+		skill "TF_HIDING", 10, 1;
+		skill "TF_POISON", 10, 1;
+		skill "TF_DETOXIFY", 1, 1;
+		skill "TF_SPRINKLESAND", 1, 1;
+		skill "TF_BACKSLIDING", 1, 1;
+		skill "TF_PICKSTONE", 1, 1;
+		skill "TF_THROWSTONE", 1, 1;
 	}
 	if (Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross) {
-		skill "AS_RIGHT", 5, 0;
-		skill "AS_LEFT", 5, 0;
-		skill "AS_KATAR", 10, 0;
-		skill "AS_CLOAKING", 10, 0;
-		skill "AS_SONICBLOW", 10, 0;
-		skill "AS_GRIMTOOTH", 5, 0;
-		skill "AS_ENCHANTPOISON", 10, 0;
-		skill "AS_POISONREACT", 10, 0;
-		skill "AS_VENOMDUST", 10, 0;
-		skill "AS_SPLASHER", 10, 0;
-		skill "AS_SONICACCEL", 1, 0;
-		skill "AS_VENOMKNIFE", 1, 0;
+		skill "AS_RIGHT", 5, 1;
+		skill "AS_LEFT", 5, 1;
+		skill "AS_KATAR", 10, 1;
+		skill "AS_CLOAKING", 10, 1;
+		skill "AS_SONICBLOW", 10, 1;
+		skill "AS_GRIMTOOTH", 5, 1;
+		skill "AS_ENCHANTPOISON", 10, 1;
+		skill "AS_POISONREACT", 10, 1;
+		skill "AS_VENOMDUST", 10, 1;
+		skill "AS_SPLASHER", 10, 1;
+		skill "AS_SONICACCEL", 1, 1;
+		skill "AS_VENOMKNIFE", 1, 1;
 	}
 	if (Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross) {
-		skill "ASC_KATAR", 10, 0;
-		skill "ASC_EDP", 5, 0;
-		skill "ASC_BREAKER", 10, 0;
-		skill "ASC_METEORASSAULT", 10, 0;
-		skill "ASC_CDP", 1, 0;
+		skill "ASC_KATAR", 10, 1;
+		skill "ASC_EDP", 5, 1;
+		skill "ASC_BREAKER", 10, 1;
+		skill "ASC_METEORASSAULT", 10, 1;
+		skill "ASC_CDP", 1, 1;
 	}
 	if (Class == Job_Guillotine_Cross) {
-		skill "GC_CROSSIMPACT", 5, 0;
-		skill "GC_CROSSRIPPERSLASHER", 5, 0;
-		skill "GC_ROLLINGCUTTER", 5, 0;
-		skill "GC_DARKILLUSION", 5, 0;
-		skill "GC_WEAPONBLOCKING", 5, 0;
-		skill "GC_COUNTERSLASH", 5, 0;
-		skill "GC_CLOAKINGEXCEED", 5, 0;
-		skill "GC_DARKCROW", 5, 0;
+		skill "GC_CROSSIMPACT", 5, 1;
+		skill "GC_CROSSRIPPERSLASHER", 5, 1;
+		skill "GC_ROLLINGCUTTER", 5, 1;
+		skill "GC_DARKILLUSION", 5, 1;
+		skill "GC_WEAPONBLOCKING", 5, 1;
+		skill "GC_COUNTERSLASH", 5, 1;
+		skill "GC_CLOAKINGEXCEED", 5, 1;
+		skill "GC_DARKCROW", 5, 1;
 	}
 
 	// =========================================================
 	// 5. NOVICO / SACERDOTE / SUMO SACERDOTE / ARCEBISPO
 	// =========================================================
 	if (Class == Job_Acolyte || Class == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop) {
-		skill "AL_HEAL", 10, 0;
-		skill "AL_CURE", 1, 0;
-		skill "AL_BLESSING", 10, 0;
-		skill "AL_INCAGI", 10, 0;
-		skill "AL_DECAGI", 10, 0;
-		skill "AL_DEMONBANE", 10, 0;
-		skill "AL_DP", 10, 0;
-		skill "AL_HOLYLIGHT", 1, 0;
-		skill "AL_ANGELUS", 10, 0;
-		skill "AL_RUWACH", 1, 0;
-		skill "AL_TELEPORT", 2, 0;
-		skill "AL_WARP", 4, 0;
-		skill "AL_PNEUMA", 1, 0;
+		skill "AL_HEAL", 10, 1;
+		skill "AL_CURE", 1, 1;
+		skill "AL_BLESSING", 10, 1;
+		skill "AL_INCAGI", 10, 1;
+		skill "AL_DECAGI", 10, 1;
+		skill "AL_DEMONBANE", 10, 1;
+		skill "AL_DP", 10, 1;
+		skill "AL_HOLYLIGHT", 1, 1;
+		skill "AL_ANGELUS", 10, 1;
+		skill "AL_RUWACH", 1, 1;
+		skill "AL_TELEPORT", 2, 1;
+		skill "AL_WARP", 4, 1;
+		skill "AL_PNEUMA", 1, 1;
 	}
 	if (Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop) {
-		skill "PR_SANCTUARY", 10, 0;
-		skill "PR_RECOVERY", 1, 0;
-		skill "PR_STRECOVERY", 1, 0;
-		skill "PR_RESURRECTION", 4, 0;
-		skill "PR_IMPOSITIO", 5, 0;
-		skill "PR_SUFFRAGIUM", 3, 0;
-		skill "PR_ASPERSIO", 5, 0;
-		skill "PR_BENEDICTIO", 5, 0;
-		skill "PR_KYRIE", 10, 0;
-		skill "PR_MAGNIFICAT", 5, 0;
-		skill "PR_GLORIA", 5, 0;
-		skill "PR_LEXDIVINA", 10, 0;
-		skill "PR_TURNUNDEAD", 10, 0;
-		skill "PR_LEXAETERNA", 1, 0;
-		skill "PR_MAGNUS", 10, 0;
-		skill "PR_SLOWPOISON", 4, 0;
-		skill "PR_REDEMPTIO", 1, 0;
+		skill "PR_SANCTUARY", 10, 1;
+		skill "PR_RECOVERY", 1, 1;
+		skill "PR_STRECOVERY", 1, 1;
+		skill "PR_RESURRECTION", 4, 1;
+		skill "PR_IMPOSITIO", 5, 1;
+		skill "PR_SUFFRAGIUM", 3, 1;
+		skill "PR_ASPERSIO", 5, 1;
+		skill "PR_BENEDICTIO", 5, 1;
+		skill "PR_KYRIE", 10, 1;
+		skill "PR_MAGNIFICAT", 5, 1;
+		skill "PR_GLORIA", 5, 1;
+		skill "PR_LEXDIVINA", 10, 1;
+		skill "PR_TURNUNDEAD", 10, 1;
+		skill "PR_LEXAETERNA", 1, 1;
+		skill "PR_MAGNUS", 10, 1;
+		skill "PR_SLOWPOISON", 4, 1;
+		skill "PR_REDEMPTIO", 1, 1;
 	}
 	if (Class == Job_High_Priest || Class == Job_Arch_Bishop) {
-		skill "HP_ASSUMPTIO", 5, 0;
-		skill "HP_BASILICA", 5, 0;
-		skill "HP_MEDITATIO", 10, 0;
-		skill "HP_MANARECHARGE", 5, 0;
+		skill "HP_ASSUMPTIO", 5, 1;
+		skill "HP_BASILICA", 5, 1;
+		skill "HP_MEDITATIO", 10, 1;
+		skill "HP_MANARECHARGE", 5, 1;
 	}
 	if (Class == Job_Arch_Bishop) {
-		skill "AB_JUDEX", 5, 0;
-		skill "AB_ADORAMUS", 10, 0;
-		skill "AB_EPICLESIS", 5, 0;
-		skill "AB_PRAEFATIO", 10, 0;
-		skill "AB_COLUSEOHEAL", 5, 0;
-		skill "AB_RENOVATIO", 1, 0;
-		skill "AB_HIGHNESSHEAL", 5, 0;
-		skill "AB_SACRAMENT", 5, 0;
-		skill "AB_LAUDAAGNUS", 4, 0;
-		skill "AB_LAUDARAMUS", 4, 0;
-		skill "AB_CLEARANCE", 5, 0;
-		skill "AB_OFFERTORIUM", 5, 0;
+		skill "AB_JUDEX", 5, 1;
+		skill "AB_ADORAMUS", 10, 1;
+		skill "AB_EPICLESIS", 5, 1;
+		skill "AB_PRAEFATIO", 10, 1;
+		skill "AB_COLUSEOHEAL", 5, 1;
+		skill "AB_RENOVATIO", 1, 1;
+		skill "AB_HIGHNESSHEAL", 5, 1;
+		skill "AB_SACRAMENT", 5, 1;
+		skill "AB_LAUDAAGNUS", 4, 1;
+		skill "AB_LAUDARAMUS", 4, 1;
+		skill "AB_CLEARANCE", 5, 1;
+		skill "AB_OFFERTORIUM", 5, 1;
 	}
 
 	// =========================================================
@@ -2126,54 +2373,54 @@ OnDistributeSkills:
 	// =========================================================
 	// 1a Classe (Mercador) - Apenas skills de 1a classe!
 	if (Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic) {
-		skill "MC_INCCARRY", 10, 0;
-		skill "MC_DISCOUNT", 10, 0;
-		skill "MC_OVERCHARGE", 10, 0;
-		skill "MC_PUSHCART", 10, 0;
-		skill "MC_MAMMONITE", 10, 0;
-		skill "MC_CARTREVOLUTION", 1, 0;
-		skill "MC_CHANGECART", 1, 0;
-		skill "MC_CARTDECORATION", 1, 0;
-		skill "MC_LOUD", 1, 0;
-		skill "MC_IDENTIFY", 1, 0;
-		skill "MC_VENDING", 10, 0;
+		skill "MC_INCCARRY", 10, 1;
+		skill "MC_DISCOUNT", 10, 1;
+		skill "MC_OVERCHARGE", 10, 1;
+		skill "MC_PUSHCART", 10, 1;
+		skill "MC_MAMMONITE", 10, 1;
+		skill "MC_CARTREVOLUTION", 1, 1;
+		skill "MC_CHANGECART", 1, 1;
+		skill "MC_CARTDECORATION", 1, 1;
+		skill "MC_LOUD", 1, 1;
+		skill "MC_IDENTIFY", 1, 1;
+		skill "MC_VENDING", 10, 1;
 		if (!checkcart()) setcart;
 	}
 	// 2a Classe (Ferreiro)
 	if (Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic) {
-		skill "BS_HILTTOP", 1, 0;
-		skill "BS_WEAPONRESEARCH", 10, 0;
-		skill "BS_REPAIRWEAPON", 1, 0;
-		skill "BS_SKINTEMPER", 5, 0;
-		skill "BS_HAMMERFALL", 5, 0;
-		skill "BS_ADRENALINE", 5, 0;
-		skill "BS_WEAPONPERFECT", 5, 0;
-		skill "BS_OVERTHRUST", 5, 0;
-		skill "BS_MAXIMIZE", 5, 0;
-		skill "BS_IRON", 5, 0;
-		skill "BS_STEEL", 5, 0;
-		skill "BS_ENCHANTEDSTONE", 5, 0;
-		skill "BS_UNFAIRLYTRICK", 1, 0;
-		skill "BS_GREED", 1, 0;
+		skill "BS_HILTTOP", 1, 1;
+		skill "BS_WEAPONRESEARCH", 10, 1;
+		skill "BS_REPAIRWEAPON", 1, 1;
+		skill "BS_SKINTEMPER", 5, 1;
+		skill "BS_HAMMERFALL", 5, 1;
+		skill "BS_ADRENALINE", 5, 1;
+		skill "BS_WEAPONPERFECT", 5, 1;
+		skill "BS_OVERTHRUST", 5, 1;
+		skill "BS_MAXIMIZE", 5, 1;
+		skill "BS_IRON", 5, 1;
+		skill "BS_STEEL", 5, 1;
+		skill "BS_ENCHANTEDSTONE", 5, 1;
+		skill "BS_UNFAIRLYTRICK", 1, 1;
+		skill "BS_GREED", 1, 1;
 	}
 	// Trans (Mestre-Ferreiro)
 	if (Class == Job_Whitesmith || Class == Job_Mechanic) {
-		skill "WS_CARTBOOST", 1, 0;
-		skill "WS_OVERTHRUSTMAX", 5, 0;
-		skill "WS_CARTTERMINATION", 10, 0;
-		skill "WS_MELTDOWN", 10, 0;
-		skill "WS_WEAPONREFINE", 10, 0;
+		skill "WS_CARTBOOST", 1, 1;
+		skill "WS_OVERTHRUSTMAX", 5, 1;
+		skill "WS_CARTTERMINATION", 10, 1;
+		skill "WS_MELTDOWN", 10, 1;
+		skill "WS_WEAPONREFINE", 10, 1;
 	}
 	// 3a Classe (Mecanico)
 	if (Class == Job_Mechanic) {
-		skill "NC_AXETRAINING", 10, 0;
-		skill "NC_AXETORNADO", 5, 0;
-		skill "NC_AXEBOOMERANG", 5, 0;
-		skill "NC_POWERSWING", 10, 0;
-		skill "NC_RESEARCHFE", 5, 0;
-		skill "NC_MAGMA_ERUPTION", 5, 0;
-		skill "NC_NEUTRALBARRIER", 3, 0;
-		skill "NC_STEALTHFIELD", 3, 0;
+		skill "NC_AXETRAINING", 10, 1;
+		skill "NC_AXETORNADO", 5, 1;
+		skill "NC_AXEBOOMERANG", 5, 1;
+		skill "NC_POWERSWING", 10, 1;
+		skill "NC_RESEARCHFE", 5, 1;
+		skill "NC_MAGMA_ERUPTION", 5, 1;
+		skill "NC_NEUTRALBARRIER", 3, 1;
+		skill "NC_STEALTHFIELD", 3, 1;
 	}
 	return;
 
