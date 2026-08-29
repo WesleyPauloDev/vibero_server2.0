@@ -12,14 +12,20 @@ OnPCLoginEvent:
 OnGivePoints:
 	set .@aid, getcharid(3);
 
-	// Se o jogador não estiver online, encerra
-	if (!isloggedin(.@aid)) end;	
+	// Se o jogador nao estiver online, encerra
+	if (!isloggedin(.@aid)) end;
 
-	// Dá o ponto de presença
+	// Se o jogador estiver em autotrade (@autotrade), nao recebe pontos
+	if (checkvending() & 2) {
+		addtimer .ponto_intervalo, strnpcinfo(3) + "::OnGivePoints";
+		end;
+	}
+
+	// Da o ponto de presenca
 	set .@pontos, #presence_points + 1;
 	set #presence_points, .@pontos;
 
-	dispbottom "[Presença] Você ganhou 1 ponto de presença! Total: " + .@pontos + " ponto(s).";
+	dispbottom "[Presenca] Voce ganhou 1 ponto de presenca! Total: " + .@pontos + " ponto(s).";
 
 	// Reagendar o timer
 	addtimer .ponto_intervalo, strnpcinfo(3) + "::OnGivePoints";

@@ -9,7 +9,7 @@
 // - Caminhada Organica em Prontera: Sorteia quantidade (3 a 6) e coordenadas aleatorias
 //   na praca central da fonte com sistema anti-travamento integrado
 // - Eden em 2 pontos (30,14 e 28,26) com caminhada real
-// - Modo Teste: 10s em Prontera, 10s no Eden, 1 minuto exato de cacada
+// - Modo Teste: 5s em Prontera, 5s no Eden, 1 minuto exato de cacada
 // - Combate Completo e Agressivo:
 //     * Localizacao com getareaunits (raio 25 celulas, nunca teleporta se houver mobs na tela)
 //     * Ignora completamente Plantas e Cogumelos
@@ -22,7 +22,7 @@
 //     * Auto-Teleporte aleatorio no mapa APENAS se a tela estiver vazia de monstros
 // - Respostas de comandos do GM enviadas exclusivamente para o chat do GM
 // - Comandos GM para Controle:
-//     @bot test [nome]   -> Inicia o MODO TESTE (10s pausas, 1 min cacada)
+//     @bot test [nome]   -> Inicia o MODO TESTE (5s pausas, 1 min cacada)
 //     @bot start [nome]  -> Inicia o MODO NORMAL (2 min pausas, 5 min cacada)
 //     @bot stop [nome]   -> Pausa a AI do personagem
 //     @bot status [nome] -> Exibe informacoes para o GM
@@ -142,7 +142,13 @@ OnGMCommand:
 	}
 
 	.@cmd$ = strtolower(.@atcmd_parameters$[0]);
-	.@target_name$ = .@atcmd_parameters$[1];
+	.@target_name$ = "";
+	if (.@atcmd_numparameters > 1) {
+		.@target_name$ = .@atcmd_parameters$[1];
+		for (.@i = 2; .@i < .@atcmd_numparameters; ++.@i) {
+			.@target_name$ = .@target_name$ + " " + .@atcmd_parameters$[.@i];
+		}
+	}
 
 	if (.@target_name$ == "" && .@cmd$ != "") {
 		.@target_name$ = strcharinfo(0);
@@ -180,7 +186,7 @@ OnGMCommand:
 		mes "^0055FF[Gerenciador - " + .@target_name$ + "]^000000";
 		mes "Escolha a acao:";
 		next;
-		.@opt = select("1. Iniciar MODO TESTE (10s Pausas / 1 min Cacada):" +
+		.@opt = select("1. Iniciar MODO TESTE (5s Pausas / 1 min Cacada):" +
 		               "2. Iniciar MODO NORMAL (Pausas Realistas / 5 min Cacada):" +
 		               "3. Colocar em MODO OFFLINE / Deslogar Cliente (@at):" +
 		               "4. Parar AI (Pausar Acoes):" +
@@ -563,7 +569,7 @@ OnGMCommand:
 
 	// Ajuda
 	dispbottom "=== Comandos do Gerenciador de AI ===", 0xFFFF00;
-	dispbottom "@bot test [nome]    - Inicia o MODO TESTE (10s pausas, 1 min cacada)", 0x55FF55;
+	dispbottom "@bot test [nome]    - Inicia o MODO TESTE (5s pausas, 1 min cacada)", 0x55FF55;
 	dispbottom "@bot start [nome]   - Inicia o MODO NORMAL (2 min pausas, 5 min cacada)", 0xFFFFFF;
 	dispbottom "@bot offline [nome] - Desloga o cliente e mantem o bot rodando no servidor (@at)", 0x55FFFF;
 	dispbottom "@bot stop [nome]    - Pausa as acoes no personagem", 0xFFFFFF;
@@ -823,7 +829,7 @@ OnStepTimer:
 				sit; // Senta no chao na praca da fonte
 
 				if (#BOT_TEST_MODE) {
-					addtimer 10000, "PlayerBotAI::OnFinishRest";
+					addtimer 5000, "PlayerBotAI::OnFinishRest";
 				} else {
 					// Sorteia o tempo de descanso na fonte: 1, 5, 10, 20 ou 30 minutos
 					setarray .@p_rest[0], 60000, 300000, 600000, 1200000, 1800000;
@@ -881,7 +887,7 @@ OnStepTimer:
 			unitstopwalk getcharid(3), USW_FORCE_STOP;
 
 			if (#BOT_TEST_MODE) {
-				addtimer 10000, "PlayerBotAI::OnFinishEdenEntrance";
+				addtimer 5000, "PlayerBotAI::OnFinishEdenEntrance";
 			} else {
 				// Sorteia tempo de espera na entrada do Eden: 1, 5, 10, 20 ou 30 minutos
 				setarray .@e_wait[0], 60000, 300000, 600000, 1200000, 1800000;
@@ -910,7 +916,7 @@ OnStepTimer:
 				sit; // Senta na mesa do Eden
 
 				if (#BOT_TEST_MODE) {
-					addtimer 10000, "PlayerBotAI::OnFinishEdenRest";
+					addtimer 5000, "PlayerBotAI::OnFinishEdenRest";
 				} else {
 					// Sorteia tempo de descanso na mesa do Eden: 1, 5, 10, 20 ou 30 minutos
 					setarray .@e_rest[0], 60000, 300000, 600000, 1200000, 1800000;
@@ -1176,7 +1182,20 @@ OnStepTimer:
 			}
 			// Mercador / Ferreiro / Mestre-Ferreiro / Mecanico
 			else if (Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic) {
-				if (Sp >= 5) {
+				if (Zeny < 500000) Zeny += 5000000;
+				if (!checkcart()) setcart;
+
+				if (getskilllv("NC_AXETORNADO") > 0 && Sp >= 20) {
+					unitskilluseid getcharid(3), "NC_AXETORNADO", getskilllv("NC_AXETORNADO"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				} else if (getskilllv("NC_POWERSWING") > 0 && Sp >= 20) {
+					unitskilluseid getcharid(3), "NC_POWERSWING", getskilllv("NC_POWERSWING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				} else if (getskilllv("WS_CARTTERMINATION") > 0 && Sp >= 15 && getstatus(SC_CARTBOOST)) {
+					unitskilluseid getcharid(3), "WS_CARTTERMINATION", getskilllv("WS_CARTTERMINATION"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				} else if ((#BOT_SKILL_ROT % 2 == 0) && getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12) {
+					// Cavalo de Pau (MC_CARTREVOLUTION)
+					unitskilluseid getcharid(3), "MC_CARTREVOLUTION", 1, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				} else if (Sp >= 5) {
+					// Mamonita (MC_MAMMONITE)
 					unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
 				}
 			}
@@ -1606,7 +1625,26 @@ OnDistributeSkills:
 		skill "MC_OVERCHARGE", 10, 0;
 		skill "MC_PUSHCART", 10, 0;
 		skill "MC_MAMMONITE", 10, 0;
+		skill "MC_CARTREVOLUTION", 1, 0;
+		skill "MC_CHANGECART", 1, 0;
+		skill "MC_CARTDECORATION", 1, 0;
 		skill "MC_LOUD", 1, 0;
+		skill "BS_HILTTOP", 1, 0;
+		skill "BS_WEAPONRESEARCH", 10, 0;
+		skill "BS_HAMMERFALL", 5, 0;
+		skill "BS_ADRENALINE", 5, 0;
+		skill "BS_WEAPONPERFECT", 5, 0;
+		skill "BS_OVERTHRUST", 5, 0;
+		skill "BS_MAXIMIZE", 5, 0;
+		skill "WS_CARTBOOST", 1, 0;
+		skill "WS_OVERTHRUSTMAX", 5, 0;
+		skill "WS_CARTTERMINATION", 10, 0;
+		skill "NC_AXETRAINING", 10, 0;
+		skill "NC_AXETORNADO", 5, 0;
+		skill "NC_AXEBOOMERANG", 5, 0;
+		skill "NC_POWERSWING", 10, 0;
+		skill "NC_RESEARCHFE", 5, 0;
+		if (!checkcart()) setcart;
 	}
 	return;
 
@@ -1639,7 +1677,8 @@ OnCheckJobChange:
 			default: 
 				jobchange (Class == Job_Novice_High ? Job_Merchant_High : Job_Merchant);
 				if (countitem(1304) == 0) getitem 1304, 1;
-				if (Zeny < 50000) Zeny += 50000;
+				if (Zeny < 5000000) Zeny += 10000000;
+				if (!checkcart()) setcart;
 				break;
 		}
 		specialeffect EF_LEVELUP;
