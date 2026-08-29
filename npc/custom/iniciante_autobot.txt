@@ -76,9 +76,10 @@ OnInit:
 		resetstatus;
 		resetskill;
 		callsub OnCheckJobChange;
-		callsub OnDistributeStats;
 		callsub OnDistributeSkills;
+		callsub OnDistributeStats;
 		callsub OnApplyBuffs;
+		callsub OnCheckMounts;
 		callsub OnCheckSpeedPotion;
 		dispbottom "[Iniciante AI]: MODO TESTE ativado direto na cacada (" + @hunt_map$ + ")!", 0x55FF55;
 		addtimer 1000, "PlayerBotAI::OnStepTimer";
@@ -283,6 +284,7 @@ OnGMCommand:
 					callsub OnDistributeStats;
 					callsub OnDistributeSkills;
 					callsub OnApplyBuffs;
+					callsub OnCheckMounts;
 					callsub OnCheckSpeedPotion;
 					addtimer 1000, "PlayerBotAI::OnStepTimer";
 				}
@@ -515,6 +517,7 @@ OnGMCommand:
 			callsub OnDistributeStats;
 			callsub OnDistributeSkills;
 			callsub OnApplyBuffs;
+			callsub OnCheckMounts;
 			callsub OnCheckSpeedPotion;
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
 		}
@@ -750,6 +753,7 @@ OnStepTimer:
 	if (SkillPoint > 0 || (BaseClass == Job_Swordman && BaseLevel >= 99 && getskilllv("LG_BANISHINGPOINT") < 10)) callsub OnDistributeSkills;
 	callsub OnCheckJobChange;
 	callsub OnCheckPotions;
+	callsub OnCheckMounts;
 
 	// =========================================================
 	// =========================================================
@@ -1580,8 +1584,8 @@ OnStepTimer:
 				} else if (getskilllv("RA_AIMEDBOLT") > 0 && Sp >= 25) {
 					unitskilluseid getcharid(3), "RA_AIMEDBOLT", getskilllv("RA_AIMEDBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 800;
-				} else if (getskilllv("WA_SEVERESTRAINSTORM") > 0 && Sp >= 30) {
-					unitskilluseid getcharid(3), "WA_SEVERESTRAINSTORM", getskilllv("WA_SEVERESTRAINSTORM"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+				} else if (getskilllv("WM_SEVERE_RAINSTORM") > 0 && Sp >= 30) {
+					unitskilluseid getcharid(3), "WM_SEVERE_RAINSTORM", getskilllv("WM_SEVERE_RAINSTORM"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 1000;
 				} else if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 15 && getskilllv("AC_SHOWER") > 0) {
 					unitskilluseid getcharid(3), "AC_SHOWER", getskilllv("AC_SHOWER"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
@@ -1691,6 +1695,46 @@ OnApplyBuffs:
 	percentheal 100, 100;
 	repairall;
 	specialeffect EF_BLESSING;
+	callsub OnCheckMounts;
+	return;
+
+// ======================================================================
+// SUB-ROTINA DE MONTARIAS E ALUGUEIS AUTOMATICOS (@alugar)
+// ======================================================================
+OnCheckMounts:
+	// 1. Guardiao Real / Templario / Paladino / Cavaleiro / Lorde (Montaria / Grifo / Peco) & RK (Dragao)
+	if (BaseClass == Job_Swordman) {
+		if (Class == Job_Rune_Knight || Class == Job_Rune_Knight_T || Class == Job_Rune_Knight2 || Class == Job_Rune_Knight_T2) {
+			if (getskilllv("RK_DRAGONTRAINING") == 0) skill "RK_DRAGONTRAINING", 5, 1;
+			if (getskilllv("KN_RIDING") == 0) skill "KN_RIDING", 1, 1;
+			if (!checkdragon()) setdragon 1;
+		} else if (Class == Job_Crusader || Class == Job_Paladin || Class >= Job_Royal_Guard || Class == Job_Knight || Class == Job_Lord_Knight || getskilllv("KN_RIDING") > 0) {
+			if (getskilllv("KN_RIDING") == 0) skill "KN_RIDING", 1, 1;
+			if (!checkriding() && !checkdragon()) setriding;
+		}
+	}
+	// 2. Mecanico (Madogear) & Mercadores / Ferreiros / Bioquimicos (Carrinho)
+	else if (BaseClass == Job_Merchant) {
+		if (Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2) {
+			if (getskilllv("NC_MADOLICENCE") == 0) skill "NC_MADOLICENCE", 5, 1;
+			if (!checkmadogear()) setmadogear true;
+		} else {
+			if (getskilllv("MC_PUSHCART") == 0) skill "MC_PUSHCART", 10, 1;
+			if (!checkcart() && !checkmadogear()) setcart;
+		}
+	}
+	// 3. Sentinela (Lobo/Warg) & Cacador / Sniper (Falcao)
+	else if (BaseClass == Job_Archer) {
+		if (Class == Job_Ranger || Class == Job_Ranger_T || Class == Job_Ranger2 || Class == Job_Ranger_T2) {
+			if (getskilllv("RA_WUGMASTERY") == 0) skill "RA_WUGMASTERY", 1, 1;
+			if (getskilllv("RA_WUGRIDER") == 0) skill "RA_WUGRIDER", 1, 1;
+			if (!checkwug()) setoption OPTION_WUG, 1;
+			if (countitem(6124) == 0) getitem 6124, 1; // Flauta do Lobo
+		} else if (Class == Job_Hunter || Class == Job_Hunter_T || Class == Job_Sniper) {
+			if (getskilllv("HT_FALCON") == 0) skill "HT_FALCON", 1, 1;
+			if (!checkfalcon() && !checkwug()) setfalcon;
+		}
+	}
 	return;
 
 OnCheckBuffs:
@@ -2151,7 +2195,7 @@ OnDistributeSkills:
 		skill "LG_CANNONSPEAR", 5, 1;
 		skill "LG_REFLECTDAMAGE", 5, 1;
 		skill "LG_FORCEOFVANGUARD", 5, 1;
-		skill "LG_RAGEBLASTER", 5, 1;
+		skill "LG_RAGEBURST", 1, 1;
 		skill "LG_SHIELDSPELL", 3, 1;
 		skill "LG_OVERBRAND", 5, 1;
 		skill "LG_PRESTIGE", 5, 1;
@@ -2253,7 +2297,7 @@ OnDistributeSkills:
 	if (Class == Job_Ranger) {
 		skill "RA_AIMEDBOLT", 10, 1;
 		skill "RA_ARROWSTORM", 10, 1;
-		skill "RA_FEARTBREEZE", 5, 1;
+		skill "RA_FEARBREEZE", 5, 1;
 		skill "RA_RANGERMAIN", 10, 1;
 		skill "RA_UNLIMIT", 5, 1;
 		skill "RA_WUGMASTERY", 1, 1;
@@ -2330,9 +2374,8 @@ OnDistributeSkills:
 	}
 	if (Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop) {
 		skill "PR_SANCTUARY", 10, 1;
-		skill "PR_RECOVERY", 1, 1;
 		skill "PR_STRECOVERY", 1, 1;
-		skill "PR_RESURRECTION", 4, 1;
+		skill "ALL_RESURRECTION", 4, 1;
 		skill "PR_IMPOSITIO", 5, 1;
 		skill "PR_SUFFRAGIUM", 3, 1;
 		skill "PR_ASPERSIO", 5, 1;
@@ -2358,10 +2401,10 @@ OnDistributeSkills:
 		skill "AB_ADORAMUS", 10, 1;
 		skill "AB_EPICLESIS", 5, 1;
 		skill "AB_PRAEFATIO", 10, 1;
-		skill "AB_COLUSEOHEAL", 5, 1;
+		skill "AB_CHEAL", 5, 1;
 		skill "AB_RENOVATIO", 1, 1;
 		skill "AB_HIGHNESSHEAL", 5, 1;
-		skill "AB_SACRAMENT", 5, 1;
+		skill "AB_SECRAMENT", 5, 1;
 		skill "AB_LAUDAAGNUS", 4, 1;
 		skill "AB_LAUDARAMUS", 4, 1;
 		skill "AB_CLEARANCE", 5, 1;
@@ -2380,7 +2423,7 @@ OnDistributeSkills:
 		skill "MC_MAMMONITE", 10, 1;
 		skill "MC_CARTREVOLUTION", 1, 1;
 		skill "MC_CHANGECART", 1, 1;
-		skill "MC_CARTDECORATION", 1, 1;
+		skill "MC_CARTDECORATE", 1, 1;
 		skill "MC_LOUD", 1, 1;
 		skill "MC_IDENTIFY", 1, 1;
 		skill "MC_VENDING", 10, 1;
@@ -2388,7 +2431,7 @@ OnDistributeSkills:
 	}
 	// 2a Classe (Ferreiro)
 	if (Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic) {
-		skill "BS_HILTTOP", 1, 1;
+		skill "BS_HILTBINDING", 1, 1;
 		skill "BS_WEAPONRESEARCH", 10, 1;
 		skill "BS_REPAIRWEAPON", 1, 1;
 		skill "BS_SKINTEMPER", 5, 1;
@@ -2413,7 +2456,7 @@ OnDistributeSkills:
 	}
 	// 3a Classe (Mecanico)
 	if (Class == Job_Mechanic) {
-		skill "NC_AXETRAINING", 10, 1;
+		skill "NC_TRAININGAXE", 10, 1;
 		skill "NC_AXETORNADO", 5, 1;
 		skill "NC_AXEBOOMERANG", 5, 1;
 		skill "NC_POWERSWING", 10, 1;
