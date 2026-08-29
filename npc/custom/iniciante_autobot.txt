@@ -17,7 +17,12 @@
 //     * Auto-Pocao HP Branca (504) acionada quando HP < 70%
 //     * Auto-Ataque fisico basico ininterrupto + Habilidades Ofensivas instantaneas (ignore_range)
 //     * Auto-Buffs nativos diretos (sem doevent para evitar enfileiramento)
-//     * Auto-Pocoes de ASPD: Concentracao (645), Despertar (656), Furia Selvagem (657)
+//     * OnCheckBuffs:
+//     if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 3) return;
+//     * OnApplyBuffs:
+//     if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 3) return;
+//     * OnCheckSpeedPotion:
+//     if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 3) return;
 //     * 30.000 de cada no armazem e @restock de 5 unidades das pocoes de ASPD
 //     * Auto-Teleporte aleatorio no mapa APENAS se a tela estiver vazia de monstros
 // - Respostas de comandos do GM enviadas exclusivamente para o chat do GM
@@ -60,7 +65,6 @@ OnPlayerCommand:
 			warp "prontera", 156, 178;
 			resetstatus;
 			resetskill;
-			callsub OnApplyBuffs;
 			callsub OnCheckJobChange;
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
 		}
@@ -125,7 +129,6 @@ OnPlayerCommand:
 		atcommand "@restock 656 5";
 		atcommand "@restock 657 5";
 		resetstatus;
-		callsub OnApplyBuffs;
 		callsub OnCheckJobChange;
 		dispbottom "[Iniciante AI]: Sistema ativado no seu personagem!", 0x55FF55;
 		addtimer 1000, "PlayerBotAI::OnStepTimer";
@@ -242,7 +245,6 @@ OnGMCommand:
 					atcommand "@restock 657 5";
 					resetstatus;
 					resetskill;
-					callsub OnApplyBuffs;
 					callsub OnCheckJobChange;
 					addtimer 1000, "PlayerBotAI::OnStepTimer";
 				}
@@ -294,7 +296,6 @@ OnGMCommand:
 					atcommand "@restock 657 5";
 					resetstatus;
 					resetskill;
-					callsub OnApplyBuffs;
 					callsub OnCheckJobChange;
 					addtimer 1000, "PlayerBotAI::OnStepTimer";
 				}
@@ -314,7 +315,6 @@ OnGMCommand:
 						savepoint "prontera", 156, 178;
 						warp "prontera", 156, 178;
 						resetstatus;
-						callsub OnApplyBuffs;
 						callsub OnCheckJobChange;
 						addtimer 1000, "PlayerBotAI::OnStepTimer";
 					}
@@ -415,7 +415,6 @@ OnGMCommand:
 				savepoint "prontera", 156, 178;
 				warp "prontera", 156, 178;
 				resetstatus;
-				callsub OnApplyBuffs;
 				callsub OnCheckJobChange;
 				addtimer 1000, "PlayerBotAI::OnStepTimer";
 			}
@@ -475,7 +474,6 @@ OnGMCommand:
 			atcommand "@restock 657 5";
 			resetstatus;
 			resetskill;
-			callsub OnApplyBuffs;
 			callsub OnCheckJobChange;
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
 		}
@@ -533,7 +531,6 @@ OnGMCommand:
 			atcommand "@restock 657 5";
 			resetstatus;
 			resetskill;
-			callsub OnApplyBuffs;
 			callsub OnCheckJobChange;
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
 		}
@@ -707,12 +704,10 @@ OnStepTimer:
 		callsub OnCleanHeavyInventory;
 	}
 
-	// Pontos, classes, buffs, poucoes de velocidade e recuperacao
+	// Pontos, classes e pocoes de cura
 	callsub OnDistributeStats;
 	callsub OnDistributeSkills;
 	callsub OnCheckJobChange;
-	callsub OnCheckBuffs;
-	callsub OnCheckSpeedPotion;
 	callsub OnCheckPotions;
 
 	// =========================================================
@@ -1193,6 +1188,9 @@ OnStepTimer:
 	// =========================================================
 	if (#BOT_AI_STAGE == 3) {
 		stand;
+		callsub OnCheckBuffs;
+		callsub OnCheckSpeedPotion;
+		callsub OnCheckPotions;
 		callsub OnGetHuntMap;
 		getmapxy(.@m$, .@cx, .@cy, BL_PC);
 
@@ -1512,6 +1510,8 @@ OnStepTimer:
 // SUB-ROTINAS DE SUPORTE
 // ======================================================================
 OnApplyBuffs:
+	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 3) return;
+	stand;
 	sc_start SC_BLESSING, 600000, 10;
 	sc_start SC_INCREASEAGI, 600000, 10;
 	sc_start SC_KYRIE, 600000, 10;
@@ -1523,6 +1523,8 @@ OnApplyBuffs:
 	return;
 
 OnCheckBuffs:
+	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 3) return;
+	stand;
 	if (!getstatus(SC_BLESSING) || !getstatus(SC_INCREASEAGI)) {
 		callsub OnApplyBuffs;
 	}
@@ -1668,6 +1670,8 @@ OnCheckBuffs:
 	return;
 
 OnCheckSpeedPotion:
+	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 3) return;
+	stand;
 	if (getstatus(SC_ASPDPOTION0) || getstatus(SC_ASPDPOTION1) || getstatus(SC_ASPDPOTION2) || getstatus(SC_ASPDPOTION3)) {
 		return;
 	}
