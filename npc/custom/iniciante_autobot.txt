@@ -1390,7 +1390,10 @@ OnStepTimer:
 			    Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock ||
 			    Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class >= Job_Mechanic ||
 			    Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 ||
+			    Class == Job_Summoner || Class == 4218 || Class == Job_Spirit_Handler || Class == 4308 || BaseClass == Job_Summoner ||
 			    getskilllv("NC_ARMSCANNON") > 0 || getskilllv("GN_CARTCANNON") > 0 ||
+			    getskilllv("SU_CN_METEOR") > 0 || getskilllv("SU_SV_STEMSPEAR") > 0 || getskilllv("SU_LUNATICCARROTBEAT") > 0 ||
+			    getskilllv("SH_CHUL_HO_SONIC_CLAW") > 0 || getskilllv("SH_HYUN_ROK_CANNON") > 0 ||
 			    getskilllv("SN_SHARPSHOOTING") > 0 || getskilllv("RA_AIMEDBOLT") > 0 || getskilllv("RA_ARROWSTORM") > 0) {
 				.@atk_range = 8; // Ranged (Ataca de longe a 8-9 celulas sem se aproximar)
 			}
@@ -1819,6 +1822,65 @@ OnStepTimer:
 					}
 				}
 			}
+			// =========================================================
+			// 7. INVOCADOR / DORAM / SPIRIT HANDLER (4218 / 4308)
+			// =========================================================
+			else if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == 4218 || Class == Job_Spirit_Handler || Class == 4308 || (eaclass() & EAJ_SUMMONER) || (eaclass() & EAJ_SPIRIT_HANDLER)) {
+				if (countitem(1681) > 0 && getequipid(EQI_HAND_R) <= 0) equip 1681;
+				.@dor_step = #BOT_SKILL_ROT % 5;
+
+				// Habilidades de 4a Classe: Spirit Handler (4308)
+				if (getskilllv("SH_CHUL_HO_SONIC_CLAW") > 0 && .@dor_step == 0 && Sp >= 40) {
+					// Garras Sonicas de Chulho (Critico Ranged 11 celulas)
+					unitskilluseid getcharid(3), "SH_CHUL_HO_SONIC_CLAW", getskilllv("SH_CHUL_HO_SONIC_CLAW"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 500;
+				} else if (getskilllv("SH_HYUN_ROK_CANNON") > 0 && .@dor_step == 1 && Sp >= 40) {
+					// Canhao Hyunrok (Magico Ranged 9 celulas)
+					unitskilluseid getcharid(3), "SH_HYUN_ROK_CANNON", getskilllv("SH_HYUN_ROK_CANNON"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 600;
+				} else if (getskilllv("SH_HOWLING_OF_CHUL_HO") > 0 && .@dor_step == 2 && Sp >= 50) {
+					// Uivo de Chulho (Dano em Area Ranged)
+					unitskilluseid getcharid(3), "SH_HOWLING_OF_CHUL_HO", getskilllv("SH_HOWLING_OF_CHUL_HO"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 700;
+				} else if (getskilllv("SH_KI_SUL_WATER_SPRAYING") > 0 && .@dor_step == 3 && Sp >= 30) {
+					// Esguicho de Agua Kisul (Magico Ranged)
+					unitskilluseid getcharid(3), "SH_KI_SUL_WATER_SPRAYING", getskilllv("SH_KI_SUL_WATER_SPRAYING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 500;
+				}
+				// Habilidades de Summoner / Doram 3a Classe:
+				else if (.@dor_step == 0 && getskilllv("SU_CN_METEOR") > 0 && Sp >= 30) {
+					// Cometa de Erva-de-Gato / Chuva de Cenouras (Area Ranged)
+					unitskilluseid getcharid(3), "SU_CN_METEOR", getskilllv("SU_CN_METEOR"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1000;
+				} else if (.@dor_step == 1 && getskilllv("SU_LUNATICCARROTBEAT") > 0 && Sp >= 25) {
+					// Batida de Cenoura Lunatica (Dano Fisico Ranged em Area)
+					unitskilluseid getcharid(3), "SU_LUNATICCARROTBEAT", getskilllv("SU_LUNATICCARROTBEAT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 800;
+				} else if (.@dor_step == 2 && getskilllv("SU_SV_STEMSPEAR") > 0 && Sp >= 15) {
+					// Lanca de Espinhos (Dano Magico Concentrado Ranged)
+					unitskilluseid getcharid(3), "SU_SV_STEMSPEAR", getskilllv("SU_SV_STEMSPEAR"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+				} else if (getskilllv("SU_PICKYPECK") > 0 && Sp >= 10) {
+					// Picada de Piki (Ataque Rapido Ranged)
+					unitskilluseid getcharid(3), "SU_PICKYPECK", getskilllv("SU_PICKYPECK"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+				} else if (getskilllv("SU_CN_POWDERING") > 0 && Sp >= 20) {
+					// Poeira de Erva-de-Gato
+					unitskilluseid getcharid(3), "SU_CN_POWDERING", getskilllv("SU_CN_POWDERING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 800;
+				} else if (Sp >= 10 && getskilllv("SU_SCAROFTAROU") > 0) {
+					// Marca de Tarou
+					unitskilluseid getcharid(3), "SU_SCAROFTAROU", getskilllv("SU_SCAROFTAROU"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+				} else {
+					if (getskilllv("SU_SCRATCH") > 0 && Sp >= 5) {
+						unitskilluseid getcharid(3), "SU_SCRATCH", 1, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					} else {
+						unitattack getcharid(3), #BOT_CURRENT_TARGET;
+					}
+					.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+				}
+			}
 
 			// Checa pocoes novamente logo apos a skill
 			callsub OnCheckPotions;
@@ -1884,6 +1946,18 @@ OnApplyBuffs:
 			sc_start SC_ADRENALINE, 600000, 5;
 			if (checkcart()) sc_start SC_CARTBOOST, 600000, 1;
 		}
+	}
+	if (Class == Job_Summoner || Class == 4218 || Class == Job_Spirit_Handler || Class == 4308 || BaseClass == Job_Summoner || (eaclass() & EAJ_SUMMONER) || (eaclass() & EAJ_SPIRIT_HANDLER)) {
+		if (countitem(1681) == 0 && getequipid(EQI_HAND_R) <= 0) {
+			getitem 1681, 1;
+			equip 1681;
+		}
+		sc_start SC_SHRIMP, 600000, 5;
+		sc_start SC_FRESHSHRIMP, 600000, 5;
+		sc_start SC_TUNAPARTY, 600000, 5;
+		sc_start SC_ARCLOUSEDASH, 600000, 5;
+		sc_start SC_CHATTERING, 600000, 5;
+		sc_start SC_HISS, 600000, 5;
 	}
 	percentheal 100, 100;
 	repairall;
@@ -2074,6 +2148,14 @@ OnCheckBuffs:
 	if (getskilllv("AB_PRAEFATIO") > 0 && !getstatus(SC_PRAEFATIO) && Sp >= 50) {
 		unitskilluseid getcharid(3), "AB_PRAEFATIO", getskilllv("AB_PRAEFATIO"), getcharid(3);
 	}
+	// Cura de Atum / Barriga de Atum (SU_TUNABELLY) se HP < 80%
+	if (getskilllv("SU_TUNABELLY") > 0 && (Hp * 100 / MaxHp) < 80 && Sp >= 20) {
+		unitskilluseid getcharid(3), "SU_TUNABELLY", getskilllv("SU_TUNABELLY"), getcharid(3);
+	}
+	// Protecao de Atum (SU_TUNAPARTY)
+	if (getskilllv("SU_TUNAPARTY") > 0 && !getstatus(SC_TUNAPARTY) && Sp >= 20) {
+		unitskilluseid getcharid(3), "SU_TUNAPARTY", getskilllv("SU_TUNAPARTY"), getcharid(3);
+	}
 	// Auto-Cura se HP < 80%
 	if (getskilllv("AL_HEAL") > 0 && (Hp * 100 / MaxHp) < 80 && Sp >= 40) {
 		unitskilluseid getcharid(3), "AL_HEAL", getskilllv("AL_HEAL"), getcharid(3);
@@ -2245,6 +2327,8 @@ OnDetectTargetJob:
 		#BOT_TARGET_JOB = 5;
 	} else if (BaseClass == Job_Merchant) {
 		#BOT_TARGET_JOB = 6;
+	} else if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == 4218 || Class == Job_Spirit_Handler || Class == 4308 || (eaclass() & EAJ_SUMMONER) || (eaclass() & EAJ_SPIRIT_HANDLER)) {
+		#BOT_TARGET_JOB = 7;
 	} else if (#BOT_TARGET_JOB == 0) {
 		#BOT_TARGET_JOB = 1;
 	}
@@ -2252,7 +2336,9 @@ OnDetectTargetJob:
 
 OnDistributeStats:
 	callsub OnDetectTargetJob;
-	while (StatusPoint > 0) {
+	.@stat_loops = 0;
+	while (StatusPoint > 0 && .@stat_loops < 80) {
+		.@stat_loops++;
 		.@old_points = StatusPoint;
 		switch(#BOT_TARGET_JOB) {
 			case 1: // Espadachim (STR > AGI > VIT > DEX)
@@ -2302,6 +2388,14 @@ OnDistributeStats:
 					else if (readparam(bInt) < 120 && StatusPoint >= 1) statusup bInt;
 					else statusup bVit;
 				}
+				break;
+			case 7: // Doram / Invocador / Spirit Handler (INT > DEX > VIT > AGI)
+				if (readparam(bInt) < 99 && StatusPoint >= 1) statusup bInt;
+				else if (readparam(bDex) < 90 && StatusPoint >= 1) statusup bDex;
+				else if (readparam(bVit) < 70 && StatusPoint >= 1) statusup bVit;
+				else if (readparam(bAgi) < 60 && StatusPoint >= 1) statusup bAgi;
+				else if (readparam(bInt) < 120 && StatusPoint >= 1) statusup bInt;
+				else statusup bDex;
 				break;
 			default: // Mercador (STR > AGI > DEX > VIT)
 				if (readparam(bStr) < 90 && StatusPoint >= 1) statusup bStr;
@@ -2720,6 +2814,69 @@ OnDistributeSkills:
 		skill "NC_ARMSCANNON", 5, 1;
 		skill "NC_NEUTRALBARRIER", 3, 1;
 		skill "NC_STEALTHFIELD", 3, 1;
+	}
+
+	// =========================================================
+	// 7. INVOCADOR / DORAM (SUMMONER 4218 & SPIRIT HANDLER 4308)
+	// =========================================================
+	if (Class == Job_Summoner || Class == 4218 || Class == Job_Spirit_Handler || Class == 4308 || BaseClass == Job_Summoner || (eaclass() & EAJ_SUMMONER) || (eaclass() & EAJ_SPIRIT_HANDLER)) {
+		skill "SU_BASIC_SKILL", 1, 1;
+		skill "SU_BITE", 1, 1;
+		skill "SU_HIDE", 1, 1;
+		skill "SU_SCRATCH", 1, 1;
+		skill "SU_STOOP", 1, 1;
+		skill "SU_LOPE", 1, 1;
+		skill "SU_SPRITEMABLE", 1, 1;
+		skill "SU_POWEROFLAND", 1, 1;
+		skill "SU_SV_STEMSPEAR", 5, 1;
+		skill "SU_CN_POWDERING", 5, 1;
+		skill "SU_CN_METEOR", 5, 1;
+		skill "SU_SV_ROOTTWIST", 5, 1;
+		skill "SU_POWEROFLIFE", 1, 1;
+		skill "SU_SCAROFTAROU", 5, 1;
+		skill "SU_PICKYPECK", 5, 1;
+		skill "SU_ARCLOUSEDASH", 5, 1;
+		skill "SU_LUNATICCARROTBEAT", 5, 1;
+		skill "SU_POWEROFSEA", 1, 1;
+		skill "SU_TUNABELLY", 5, 1;
+		skill "SU_TUNAPARTY", 5, 1;
+		skill "SU_BUNCHOFSHRIMP", 5, 1;
+		skill "SU_FRESHSHRIMP", 5, 1;
+		skill "SU_SOULATTACK", 1, 1;
+		skill "SU_POWEROFFLOCK", 5, 1;
+		skill "SU_SVG_SPIRIT", 5, 1;
+		skill "SU_HISS", 5, 1;
+		skill "SU_NYANGGRASS", 5, 1;
+		skill "SU_GROOMING", 5, 1;
+		skill "SU_PURRING", 5, 1;
+		skill "SU_SHRIMPARTY", 5, 1;
+		skill "SU_SPIRITOFLIFE", 1, 1;
+		skill "SU_MEOWMEOW", 5, 1;
+		skill "SU_SPIRITOFLAND", 1, 1;
+		skill "SU_CHATTERING", 5, 1;
+		skill "SU_SPIRITOFSEA", 1, 1;
+
+		// Habilidades de 4a Classe (Spirit Handler 4308)
+		if (Class == Job_Spirit_Handler || Class == 4308 || (eaclass() & EAJ_SPIRIT_HANDLER)) {
+			skill "SH_MYSTICAL_CREATURE_MASTERY", 10, 1;
+			skill "SH_COMMUNE_WITH_CHUL_HO", 1, 1;
+			skill "SH_CHUL_HO_SONIC_CLAW", 7, 1;
+			skill "SH_HOWLING_OF_CHUL_HO", 7, 1;
+			skill "SH_HOGOGONG_STRIKE", 7, 1;
+			skill "SH_COMMUNE_WITH_KI_SUL", 1, 1;
+			skill "SH_KI_SUL_WATER_SPRAYING", 7, 1;
+			skill "SH_MARINE_FESTIVAL_OF_KI_SUL", 7, 1;
+			skill "SH_SANDY_FESTIVAL_OF_KI_SUL", 7, 1;
+			skill "SH_KI_SUL_RAMPAGE", 7, 1;
+			skill "SH_COMMUNE_WITH_HYUN_ROK", 1, 1;
+			skill "SH_COLORS_OF_HYUN_ROK", 5, 1;
+			skill "SH_HYUN_ROKS_BREEZE", 7, 1;
+			skill "SH_HYUN_ROK_CANNON", 7, 1;
+			skill "SH_TEMPORARY_COMMUNION", 5, 1;
+			skill "SH_BLESSING_OF_MYSTICAL_CREATURES", 5, 1;
+			skill "SH_CHUL_HO_BATTERING", 7, 1;
+			skill "SH_HYUN_ROK_SPIRIT_POWER", 5, 1;
+		}
 	}
 	return;
 
