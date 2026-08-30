@@ -742,6 +742,7 @@ OnFinishEdenRest:
 // ======================================================================
 OnStepTimer:
 	if (!#BOT_AI_ACTIVE) end;
+	stand; // Bot NUNCA senta, permanece sempre em pe e ativo
 
 	// Limpeza de inventario se pesado
 	if ((Weight * 100 / MaxWeight) >= 80) {
@@ -860,9 +861,8 @@ OnStepTimer:
 				// Parada obrigatoria no ponto: Minimo 1 minuto (60 a 180s no modo start | 5s no teste)
 				#BOT_WAIT_END = gettimetick(2) + (#BOT_TEST_MODE ? 5 : rand(60, 180));
 
-				// Sorteia se descansa sentado ou fica em pe observando o movimento:
-				if (rand(0, 1)) sit;
-				else stand;
+				// Permanece em pe observando o movimento (sem sentar):
+				stand;
 
 				addtimer 1000, "PlayerBotAI::OnStepTimer";
 				end;
@@ -972,10 +972,10 @@ OnStepTimer:
 			.@dist = distance(.@cx, .@cy, #BOT_LAST_TX, #BOT_LAST_TY);
 
 			if (.@dist <= 2) {
-				#BOT_WP_INDEX = 1; // Em descanso sentado
+				#BOT_WP_INDEX = 1; // Em descanso em pe
 				#BOT_STUCK_TICKS = 0;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				sit; // Senta no ponto escolhido
+				stand; // Permanece em pe no ponto escolhido
 
 				if (#BOT_TEST_MODE) {
 					#BOT_WAIT_END = gettimetick(2) + 5;
@@ -1015,10 +1015,10 @@ OnStepTimer:
 			end;
 		}
 
-		// Sub-estagio 1: Sentado descansando em seu ponto
+		// Sub-estagio 1: Em pe descansando em seu ponto
 		if (#BOT_WP_INDEX == 1) {
 			if (gettimetick(2) >= #BOT_WAIT_END) {
-				stand; // Levanta do chao
+				stand;
 				#BOT_AI_STAGE = 2;
 				#BOT_WP_INDEX = 0;
 				#BOT_LAST_TX = 0;
@@ -1104,10 +1104,10 @@ OnStepTimer:
 
 			// Chegou perto da mesa de descanso sorteada (<= 2 celulas)
 			if (.@dist <= 2) {
-				#BOT_WP_INDEX = 3; // Agora em descanso sentado na mesa
+				#BOT_WP_INDEX = 3; // Em descanso em pe na mesa
 				#BOT_STUCK_TICKS = 0;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				sit; // Senta na mesa sorteada
+				stand; // Permanece em pe na mesa sorteada
 
 				if (#BOT_TEST_MODE) {
 					#BOT_WAIT_END = gettimetick(2) + 5;
@@ -1128,7 +1128,7 @@ OnStepTimer:
 					#BOT_LAST_TY = 0;
 					#BOT_STUCK_TICKS = 0;
 					unitstopwalk getcharid(3), USW_FORCE_STOP;
-					sit;
+					stand;
 					#BOT_WAIT_END = gettimetick(2) + (#BOT_TEST_MODE ? 5 : rand(60, 300));
 					addtimer 1000, "PlayerBotAI::OnStepTimer";
 					end;
@@ -1305,16 +1305,17 @@ OnStepTimer:
 			}
 		}
 
-		// 2. Se nao tem alvo valido, procura o monstro vivo mais proximo em um raio de 14 celulas
+		// 2. Se nao tem alvo valido, procura o monstro vivo com melhor EXP (+10/+15 niveis) em um raio de 14 celulas
 		if (#BOT_CURRENT_TARGET == 0) {
 			.@num_mobs = getareaunits(BL_MOB, strcharinfo(3), .@cx - 14, .@cy - 14, .@cx + 14, .@cy + 14, .@mob_list[0]);
-			.@best_dist = 9999;
+			.@best_score = -999999;
 			.@best_mob = 0;
 
 			for (.@i = 0; .@i < .@num_mobs; .@i++) {
 				if (unitexists(.@mob_list[.@i])) {
 					getunitdata .@mob_list[.@i], .@t_data;
 					.@m_class = .@t_data[UMOB_CLASS];
+					.@m_lvl = .@t_data[UMOB_LEVEL];
 
 					// Ignora Plantas e Cogumelos
 					if ((.@m_class >= 1078 && .@m_class <= 1085) || (.@m_class >= 1930 && .@m_class <= 1933) || .@m_class == 1064) {
@@ -1329,11 +1330,21 @@ OnStepTimer:
 
 					if (.@t_data[UMOB_HP] > 0) {
 						.@d = distance(.@cx, .@cy, .@t_data[UMOB_X], .@t_data[UMOB_Y]);
-						if (.@d <= 14 && .@d < .@best_dist) {
-							.@best_dist = .@d;
-							.@best_mob = .@mob_list[.@i];
-							.@mx = .@t_data[UMOB_X];
-							.@my = .@t_data[UMOB_Y];
+						if (.@d <= 14) {
+							// Pontuacao: prioriza monstros com cerca de 10 a 20 niveis a mais para ganho acelerado de EXP
+							.@lvl_diff = .@m_lvl - BaseLevel;
+							.@score = (100 - .@d * 4);
+							if (.@lvl_diff >= 8 && .@lvl_diff <= 25) {
+								.@score += 60; // Maxima prioridade para monstros de nivel ideal (+10 a +15 niveis)
+							} else if (.@lvl_diff > 0) {
+								.@score += 30;
+							}
+							if (.@score > .@best_score) {
+								.@best_score = .@score;
+								.@best_mob = .@mob_list[.@i];
+								.@mx = .@t_data[UMOB_X];
+								.@my = .@t_data[UMOB_Y];
+							}
 						}
 					}
 				}
@@ -1376,8 +1387,12 @@ OnStepTimer:
 			.@dist = distance(.@cx, .@cy, .@mx, .@my);
 			.@atk_range = 2; // Padrao corpo a corpo
 			if (Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger ||
-			    Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock) {
-				.@atk_range = 7; // Ranged
+			    Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock ||
+			    Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class >= Job_Mechanic ||
+			    Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 ||
+			    getskilllv("NC_ARMSCANNON") > 0 || getskilllv("GN_CARTCANNON") > 0 ||
+			    getskilllv("SN_SHARPSHOOTING") > 0 || getskilllv("RA_AIMEDBOLT") > 0 || getskilllv("RA_ARROWSTORM") > 0) {
+				.@atk_range = 8; // Ranged (Ataca de longe a 8-9 celulas sem se aproximar)
 			}
 
 			// Se ainda esta fora do alcance de ataque: anda em direcao ao monstro de forma fluida
@@ -1575,24 +1590,62 @@ OnStepTimer:
 				}
 			}
 			// =========================================================
-			// 3. ARQUEIRO / SENTINELA / TROVADOR / MUSA
+			// 3. ARQUEIRO / CACADOR / SNIPER / SENTINELA / TROVADOR / MUSA
 			// =========================================================
 			else if (BaseClass == Job_Archer) {
-				if (getskilllv("RA_ARROWSTORM") > 0 && Sp >= 30) {
-					unitskilluseid getcharid(3), "RA_ARROWSTORM", getskilllv("RA_ARROWSTORM"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 1000;
-				} else if (getskilllv("RA_AIMEDBOLT") > 0 && Sp >= 25) {
-					unitskilluseid getcharid(3), "RA_AIMEDBOLT", getskilllv("RA_AIMEDBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 800;
-				} else if (getskilllv("WM_SEVERE_RAINSTORM") > 0 && Sp >= 30) {
-					unitskilluseid getcharid(3), "WM_SEVERE_RAINSTORM", getskilllv("WM_SEVERE_RAINSTORM"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 1000;
-				} else if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 15 && getskilllv("AC_SHOWER") > 0) {
-					unitskilluseid getcharid(3), "AC_SHOWER", getskilllv("AC_SHOWER"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 1000;
-				} else if (Sp >= 10) {
-					unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+				.@arc_step = #BOT_SKILL_ROT % 4;
+
+				// Sentinela (3rd Class):
+				if (getskilllv("RA_ARROWSTORM") > 0 || getskilllv("RA_AIMEDBOLT") > 0 || Class >= Job_Ranger) {
+					if (.@arc_step == 0 && getskilllv("RA_ARROWSTORM") > 0 && Sp >= 30) {
+						unitskilluseid getcharid(3), "RA_ARROWSTORM", getskilllv("RA_ARROWSTORM"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (.@arc_step == 1 && getskilllv("SN_SHARPSHOOTING") > 0 && Sp >= 18) {
+						// Tiro Preciso (Sharpshooting)
+						unitskilluseid getcharid(3), "SN_SHARPSHOOTING", getskilllv("SN_SHARPSHOOTING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+					} else if (.@arc_step == 2 && getskilllv("RA_AIMEDBOLT") > 0 && Sp >= 25) {
+						// Disparo Certeiro
+						unitskilluseid getcharid(3), "RA_AIMEDBOLT", getskilllv("RA_AIMEDBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					} else if (getskilllv("SN_SHARPSHOOTING") > 0 && Sp >= 18) {
+						unitskilluseid getcharid(3), "SN_SHARPSHOOTING", getskilllv("SN_SHARPSHOOTING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+					} else if (Sp >= 10) {
+						unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					}
+				}
+				// Sniper / Atirador de Elite:
+				else if (getskilllv("SN_SHARPSHOOTING") > 0 || getskilllv("SN_FALCONASSAULT") > 0 || Class == Job_Sniper) {
+					if ((.@arc_step % 2 == 0) && getskilllv("SN_SHARPSHOOTING") > 0 && Sp >= 18) {
+						// Tiro Preciso (Sharpshooting)
+						unitskilluseid getcharid(3), "SN_SHARPSHOOTING", (getskilllv("SN_SHARPSHOOTING") > 0 ? getskilllv("SN_SHARPSHOOTING") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+					} else if (getskilllv("SN_FALCONASSAULT") > 0 && checkfalcon() && Sp >= 30) {
+						// Assalto do Falcao
+						unitskilluseid getcharid(3), "SN_FALCONASSAULT", getskilllv("SN_FALCONASSAULT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (getskilllv("SN_SHARPSHOOTING") > 0 && Sp >= 18) {
+						unitskilluseid getcharid(3), "SN_SHARPSHOOTING", (getskilllv("SN_SHARPSHOOTING") > 0 ? getskilllv("SN_SHARPSHOOTING") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+					} else if (Sp >= 10) {
+						unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					}
+				}
+				// Cacador / Bardo / Odalisca / Arqueiro:
+				else {
+					if (getskilllv("WM_SEVERE_RAINSTORM") > 0 && Sp >= 30) {
+						unitskilluseid getcharid(3), "WM_SEVERE_RAINSTORM", getskilllv("WM_SEVERE_RAINSTORM"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 15 && getskilllv("AC_SHOWER") > 0) {
+						unitskilluseid getcharid(3), "AC_SHOWER", getskilllv("AC_SHOWER"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (Sp >= 10) {
+						unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+					}
 				}
 			}
 			// =========================================================
@@ -1617,51 +1670,153 @@ OnStepTimer:
 				}
 			}
 			// =========================================================
-			// 5. NOVICO / ARCEBISPO / SHURA
+			// 5. NOVICO / SACERDOTE / ARCEBISPO / MONGE / MESTRE / SHURA
 			// =========================================================
 			else if (BaseClass == Job_Acolyte) {
-				if (getskilllv("AB_ADORAMUS") > 0 && Sp >= 30) {
-					unitskilluseid getcharid(3), "AB_ADORAMUS", getskilllv("AB_ADORAMUS"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 1000;
-				} else if (getskilllv("AB_JUDEX") > 0 && Sp >= 20) {
-					unitskilluseid getcharid(3), "AB_JUDEX", getskilllv("AB_JUDEX"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 800;
-				} else if (getskilllv("SR_TIGERCANNON") > 0 && Sp >= 40) {
-					unitskilluseid getcharid(3), "SR_TIGERCANNON", getskilllv("SR_TIGERCANNON"), getcharid(3), 0, 0, 0, 1;
-					.@skill_delay = 1000;
-				} else if (getskilllv("MO_EXTREMITYFIST") > 0 && Sp >= 100 && (Hp * 100 / MaxHp) < 50) {
-					unitskilluseid getcharid(3), "MO_EXTREMITYFIST", getskilllv("MO_EXTREMITYFIST"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 1500;
-				} else if (Sp >= 12) {
-					unitskilluseid getcharid(3), "AL_HOLYLIGHT", 1, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = (.@aspd_delay > 800 ? .@aspd_delay : 800);
+				.@aco_step = #BOT_SKILL_ROT % 4;
+
+				// Ramo Monge / Mestre / Shura:
+				if (Class == Job_Monk || Class == Job_Champion || Class >= Job_Sura || getskilllv("MO_TRIPLEATTACK") > 0 || getskilllv("MO_INVESTIGATE") > 0 || getskilllv("SR_TIGERCANNON") > 0) {
+					// Garante que o Monge / Mestre / Shura sempre tenha Esferas Espirituais ativas para suas skills
+					if (countspiritball() < 5) {
+						if (Class >= Job_Sura || getskilllv("SR_RAISINGDRAGON") > 0) {
+							addspiritball 15, 600000;
+						} else {
+							addspiritball 5, 600000;
+						}
+					}
+					// Shura (3rd Class):
+					if (getskilllv("SR_TIGERCANNON") > 0 || getskilllv("SR_RAMPAGEBLASTER") > 0 || getskilllv("SR_KNUCKLEARROW") > 0 || Class >= Job_Sura) {
+						if (.@aco_step == 0 && getskilllv("SR_TIGERCANNON") > 0 && Sp >= 40) {
+							// Garra de Tigre
+							unitskilluseid getcharid(3), "SR_TIGERCANNON", (getskilllv("SR_TIGERCANNON") > 0 ? getskilllv("SR_TIGERCANNON") : 10), getcharid(3), 0, 0, 0, 1;
+							.@skill_delay = 1000;
+						} else if (.@aco_step == 1 && getskilllv("SR_RAMPAGEBLASTER") > 0 && Sp >= 40) {
+							// Soco Furacao
+							unitskilluseid getcharid(3), "SR_RAMPAGEBLASTER", (getskilllv("SR_RAMPAGEBLASTER") > 0 ? getskilllv("SR_RAMPAGEBLASTER") : 5), getcharid(3), 0, 0, 0, 1;
+							.@skill_delay = 1000;
+						} else if (.@aco_step == 2 && getskilllv("SR_KNUCKLEARROW") > 0 && Sp >= 20) {
+							// Disparo de Esferas Espirituais
+							unitskilluseid getcharid(3), "SR_KNUCKLEARROW", (getskilllv("SR_KNUCKLEARROW") > 0 ? getskilllv("SR_KNUCKLEARROW") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = 800;
+						} else if (getskilllv("SR_SKYNETBLOW") > 0 && Sp >= 20) {
+							// Tempestade Espiritual
+							unitskilluseid getcharid(3), "SR_SKYNETBLOW", (getskilllv("SR_SKYNETBLOW") > 0 ? getskilllv("SR_SKYNETBLOW") : 5), getcharid(3), 0, 0, 0, 1;
+							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+						} else if (getskilllv("MO_INVESTIGATE") > 0 && Sp >= 20) {
+							// Impacto Psiquico
+							unitskilluseid getcharid(3), "MO_INVESTIGATE", (getskilllv("MO_INVESTIGATE") > 0 ? getskilllv("MO_INVESTIGATE") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = 800;
+						} else if (getskilllv("MO_COMBOFINISH") > 0 && Sp >= 15) {
+							unitskilluseid getcharid(3), "MO_COMBOFINISH", (getskilllv("MO_COMBOFINISH") > 0 ? getskilllv("MO_COMBOFINISH") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+						} else if (getskilllv("MO_CHAINCOMBO") > 0 && Sp >= 15) {
+							unitskilluseid getcharid(3), "MO_CHAINCOMBO", (getskilllv("MO_CHAINCOMBO") > 0 ? getskilllv("MO_CHAINCOMBO") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+						}
+					}
+					// Monge / Mestre (2a Classe / Trans):
+					else if (getskilllv("MO_INVESTIGATE") > 0 || getskilllv("MO_FINGEROFFENSIVE") > 0 || getskilllv("CH_CHAINCRUSH") > 0 || Class == Job_Monk || Class == Job_Champion) {
+						if (.@aco_step == 0 && getskilllv("MO_INVESTIGATE") > 0 && Sp >= 20) {
+							// Impacto Psiquico
+							unitskilluseid getcharid(3), "MO_INVESTIGATE", (getskilllv("MO_INVESTIGATE") > 0 ? getskilllv("MO_INVESTIGATE") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = 800;
+						} else if (.@aco_step == 1 && getskilllv("MO_FINGEROFFENSIVE") > 0 && Sp >= 20) {
+							// Disparo de Esferas
+							unitskilluseid getcharid(3), "MO_FINGEROFFENSIVE", (getskilllv("MO_FINGEROFFENSIVE") > 0 ? getskilllv("MO_FINGEROFFENSIVE") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = 1000;
+						} else if (.@aco_step == 2 && getskilllv("CH_CHAINCRUSH") > 0 && Sp >= 30) {
+							// Combo Esmagador
+							unitskilluseid getcharid(3), "CH_CHAINCRUSH", (getskilllv("CH_CHAINCRUSH") > 0 ? getskilllv("CH_CHAINCRUSH") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = 1000;
+						} else if (.@aco_step == 3 && getskilllv("MO_COMBOFINISH") > 0 && Sp >= 15) {
+							// O Ultimo Dragao
+							unitskilluseid getcharid(3), "MO_COMBOFINISH", (getskilllv("MO_COMBOFINISH") > 0 ? getskilllv("MO_COMBOFINISH") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+						} else if (getskilllv("MO_CHAINCOMBO") > 0 && Sp >= 15) {
+							// Combo Quadruplo
+							unitskilluseid getcharid(3), "MO_CHAINCOMBO", (getskilllv("MO_CHAINCOMBO") > 0 ? getskilllv("MO_CHAINCOMBO") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+						} else if (getskilllv("MO_INVESTIGATE") > 0 && Sp >= 20) {
+							unitskilluseid getcharid(3), "MO_INVESTIGATE", (getskilllv("MO_INVESTIGATE") > 0 ? getskilllv("MO_INVESTIGATE") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = 800;
+						}
+					}
+				}
+				// Ramo Sacerdote / Sumo Sacerdote / Arcebispo:
+				else {
+					if (getskilllv("AB_ADORAMUS") > 0 && Sp >= 30) {
+						unitskilluseid getcharid(3), "AB_ADORAMUS", getskilllv("AB_ADORAMUS"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (getskilllv("AB_JUDEX") > 0 && Sp >= 20) {
+						unitskilluseid getcharid(3), "AB_JUDEX", getskilllv("AB_JUDEX"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					} else if (getskilllv("PR_MAGNUS") > 0 && Sp >= 40) {
+						unitskilluseid getcharid(3), "PR_MAGNUS", getskilllv("PR_MAGNUS"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1200;
+					} else if (Sp >= 12) {
+						unitskilluseid getcharid(3), "AL_HOLYLIGHT", 1, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
+					}
 				}
 			}
 			// =========================================================
-			// 6. MERCADOR / MECANICO / BIOQUIMICO
+			// 6. MERCADOR / FERREIRO / MESTRE-FERREIRO / MECANICO / BIOQUIMICO
 			// =========================================================
 			else if (BaseClass == Job_Merchant) {
 				if (Zeny < 500000) Zeny += 5000000;
-				if (!checkcart()) setcart;
+				if (!checkcart() && !checkmadogear() && getskilllv("MC_PUSHCART") > 0) setcart;
+				if (countitem(1304) > 0 && getequipid(EQI_HAND_R) <= 0) equip 1304;
 
-				if (getskilllv("NC_AXETORNADO") > 0 && Sp >= 20) {
-					unitskilluseid getcharid(3), "NC_AXETORNADO", getskilllv("NC_AXETORNADO"), getcharid(3), 0, 0, 0, 1;
-					.@skill_delay = 2000;
-				} else if (getskilllv("NC_POWERSWING") > 0 && Sp >= 20) {
-					unitskilluseid getcharid(3), "NC_POWERSWING", getskilllv("NC_POWERSWING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
-				} else if (getskilllv("GN_CARTCANNON") > 0 && Sp >= 20) {
-					unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 800;
-				} else if (getskilllv("WS_CARTTERMINATION") > 0 && Sp >= 15 && getstatus(SC_CARTBOOST)) {
-					unitskilluseid getcharid(3), "WS_CARTTERMINATION", getskilllv("WS_CARTTERMINATION"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
-				} else if ((#BOT_SKILL_ROT % 2 == 0) && getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12) {
-					unitskilluseid getcharid(3), "MC_CARTREVOLUTION", 1, getcharid(3), 0, 0, 0, 1;
-					.@skill_delay = (.@aspd_delay > 700 ? .@aspd_delay : 700);
-				} else if (Sp >= 5) {
-					unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+				// Identifica subtipo da arma equipada na mao direita (Machado vs Maca vs Outro)
+				.@w_id = getequipid(EQI_HAND_R);
+				.@w_type = (.@w_id > 0 ? getItemInfo(.@w_id, ITEMINFO_SUBTYPE) : -1);
+				.@has_axe = (.@w_type == W_1HAXE || .@w_type == W_2HAXE);
+
+				// Ramo Mecanico (3a Classe): EXCLUSIVO CANHAO DE BRACO A DISTANCIA (RANGED)
+				if (Class >= Job_Mechanic) {
+					if (countitem(18000) < 100) {
+						getitem 18000, 2000;
+						equip 18000;
+						atcommand "@restock 18000 1000";
+					}
+					if (getskilllv("NC_ARMSCANNON") > 0 && Sp >= 20) {
+						// Canhao de Braco (Arm Cannon - Ranged 9 celulas)
+						unitskilluseid getcharid(3), "NC_ARMSCANNON", getskilllv("NC_ARMSCANNON"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					} else if (getskilllv("NC_MAGMA_ERUPTION") > 0 && Sp >= 30) {
+						unitskilluseid getcharid(3), "NC_MAGMA_ERUPTION", getskilllv("NC_MAGMA_ERUPTION"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (Sp >= 5) {
+						unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					}
+				}
+				// Ramo Bioquimico / Criador / Alquimista:
+				else if (Class == Job_Genetic || Class == Job_Creator || Class == Job_Alchemist) {
+					if (getskilllv("GN_CARTCANNON") > 0 && Sp >= 20 && checkcart()) {
+						unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					} else if (getskilllv("CR_ACIDDEMONSTRATION") > 0 && Sp >= 30) {
+						unitskilluseid getcharid(3), "CR_ACIDDEMONSTRATION", getskilllv("CR_ACIDDEMONSTRATION"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (Sp >= 5) {
+						unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					}
+				}
+				// Ramo Ferreiro / Mestre-Ferreiro / Mercador:
+				else {
+					if (getskilllv("WS_CARTTERMINATION") > 0 && Sp >= 15 && getstatus(SC_CARTBOOST) && checkcart()) {
+						unitskilluseid getcharid(3), "WS_CARTTERMINATION", getskilllv("WS_CARTTERMINATION"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+					} else if ((#BOT_SKILL_ROT % 2 == 0) && getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12 && checkcart()) {
+						unitskilluseid getcharid(3), "MC_CARTREVOLUTION", 1, getcharid(3), 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 700 ? .@aspd_delay : 700);
+					} else if (Sp >= 5) {
+						unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+					}
 				}
 			}
 
@@ -1692,6 +1847,44 @@ OnApplyBuffs:
 		sc_start SC_REFLECTSHIELD, 600000, 10;
 		sc_start SC_SPEARQUICKEN, 600000, 10;
 	}
+	if (BaseClass == Job_Archer) {
+		sc_start SC_CONCENTRATION, 600000, 10;
+		sc_start SC_WINDWALK, 600000, 10;
+		if (Class >= Job_Ranger) {
+			sc_start SC_FEARBREEZE, 600000, 5;
+		}
+	}
+	if (BaseClass == Job_Acolyte) {
+		if (Class == Job_Monk || Class == Job_Champion || Class >= Job_Sura || getskilllv("MO_CALLSPIRITS") > 0) {
+			sc_start SC_EXPLOSIONSPIRITS, 600000, 5;
+			if (Class >= Job_Sura || getskilllv("SR_RAISINGDRAGON") > 0) {
+				sc_start SC_RAISINGDRAGON, 600000, 10;
+				sc_start SC_GENTLETOUCH_ENERGYGAIN, 600000, 5;
+				sc_start SC_GENTLETOUCH_CHANGE, 600000, 5;
+				addspiritball 15, 600000;
+			} else {
+				addspiritball 5, 600000;
+			}
+		}
+	}
+	if (BaseClass == Job_Swordman && (Class >= Job_Royal_Guard || getskilllv("LG_BANISHINGPOINT") > 0)) {
+		addspiritball 5, 600000;
+	}
+	if (BaseClass == Job_Merchant) {
+		if (Class >= Job_Mechanic || Class == Job_Genetic) {
+			if (countitem(18000) < 500) {
+				getitem 18000, 2000;
+				equip 18000;
+				atcommand "@restock 18000 1000";
+			}
+		}
+		sc_start SC_WEAPONPERFECTION, 600000, 5;
+		sc_start SC_MAXOVERTHRUST, 600000, 5;
+		if (!checkmadogear()) {
+			sc_start SC_ADRENALINE, 600000, 5;
+			if (checkcart()) sc_start SC_CARTBOOST, 600000, 1;
+		}
+	}
 	percentheal 100, 100;
 	repairall;
 	specialeffect EF_BLESSING;
@@ -1702,38 +1895,38 @@ OnApplyBuffs:
 // SUB-ROTINA DE MONTARIAS E ALUGUEIS AUTOMATICOS (@alugar)
 // ======================================================================
 OnCheckMounts:
-	// 1. Guardiao Real / Templario / Paladino / Cavaleiro / Lorde (Montaria / Grifo / Peco) & RK (Dragao)
-	if (BaseClass == Job_Swordman) {
-		if (Class == Job_Rune_Knight || Class == Job_Rune_Knight_T || Class == Job_Rune_Knight2 || Class == Job_Rune_Knight_T2) {
-			if (getskilllv("RK_DRAGONTRAINING") == 0) skill "RK_DRAGONTRAINING", 5, 1;
-			if (getskilllv("KN_RIDING") == 0) skill "KN_RIDING", 1, 1;
-			if (!checkdragon()) setdragon 1;
-		} else if (Class == Job_Crusader || Class == Job_Paladin || Class >= Job_Royal_Guard || Class == Job_Knight || Class == Job_Lord_Knight || getskilllv("KN_RIDING") > 0) {
-			if (getskilllv("KN_RIDING") == 0) skill "KN_RIDING", 1, 1;
-			if (!checkriding() && !checkdragon()) setriding;
-		}
+	if (!#BOT_AI_ACTIVE) return;
+
+	// Aprendizes nunca podem ter montaria, ajudante, falcao ou carrinho
+	if (Class == Job_Novice || Class == Job_Novice_High) {
+		if (checkfalcon()) setoption OPTION_FALCON, 0;
+		if (checkriding() || checkdragon()) setoption OPTION_RIDING|OPTION_DRAGON, 0;
+		if (checkwug()) setoption OPTION_WUG|OPTION_WUGRIDER, 0;
+		if (checkmadogear()) setmadogear false;
+		if (checkcart()) setcart 0;
+		return;
 	}
-	// 2. Mecanico (Madogear) & Mercadores / Ferreiros / Bioquimicos (Carrinho)
-	else if (BaseClass == Job_Merchant) {
-		if (Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2) {
-			if (getskilllv("NC_MADOLICENCE") == 0) skill "NC_MADOLICENCE", 5, 1;
-			if (!checkmadogear()) setmadogear true;
-		} else {
-			if (getskilllv("MC_PUSHCART") == 0) skill "MC_PUSHCART", 10, 1;
-			if (!checkcart() && !checkmadogear()) setcart;
-		}
+
+	// 1. Sentinela (Lobo/Warg) & Cacador / Sniper (Falcao)
+	if (getskilllv("RA_WUGMASTERY") > 0) {
+		if (!checkwug()) setoption OPTION_WUG, 1;
+		if (countitem(6124) == 0) getitem 6124, 1; // Flauta do Lobo
+	} else if (getskilllv("HT_FALCON") > 0) {
+		if (!checkfalcon() && !checkwug()) setfalcon;
 	}
-	// 3. Sentinela (Lobo/Warg) & Cacador / Sniper (Falcao)
-	else if (BaseClass == Job_Archer) {
-		if (Class == Job_Ranger || Class == Job_Ranger_T || Class == Job_Ranger2 || Class == Job_Ranger_T2) {
-			if (getskilllv("RA_WUGMASTERY") == 0) skill "RA_WUGMASTERY", 1, 1;
-			if (getskilllv("RA_WUGRIDER") == 0) skill "RA_WUGRIDER", 1, 1;
-			if (!checkwug()) setoption OPTION_WUG, 1;
-			if (countitem(6124) == 0) getitem 6124, 1; // Flauta do Lobo
-		} else if (Class == Job_Hunter || Class == Job_Hunter_T || Class == Job_Sniper) {
-			if (getskilllv("HT_FALCON") == 0) skill "HT_FALCON", 1, 1;
-			if (!checkfalcon() && !checkwug()) setfalcon;
-		}
+
+	// 2. Cavaleiro Runico (Dragao) & Guardiao Real / Templario / Paladino / Cavaleiro / Lorde (Grifo / Peco)
+	if (getskilllv("RK_DRAGONTRAINING") > 0) {
+		if (!checkdragon()) setdragon 1;
+	} else if (getskilllv("KN_RIDING") > 0) {
+		if (!checkriding() && !checkdragon()) setriding;
+	}
+
+	// 3. Mecanico (Madogear) & Mercadores / Ferreiros / Bioquimicos (Carrinho)
+	if (getskilllv("NC_MADOLICENCE") > 0) {
+		if (!checkmadogear()) setmadogear true;
+	} else if (getskilllv("MC_PUSHCART") > 0) {
+		if (!checkcart() && !checkmadogear()) setcart;
 	}
 	return;
 
@@ -1890,24 +2083,20 @@ OnCheckBuffs:
 	if (getskilllv("MC_LOUD") > 0 && !getstatus(SC_LOUD) && Sp >= 8) {
 		unitskilluseid getcharid(3), "MC_LOUD", 1, getcharid(3);
 	}
-	// Adrenalina Pura (BS_ADRENALINE)
-	if (getskilllv("BS_ADRENALINE") > 0 && !getstatus(SC_ADRENALINE) && Sp >= 20) {
-		unitskilluseid getcharid(3), "BS_ADRENALINE", getskilllv("BS_ADRENALINE"), getcharid(3);
+	// Adrenalina Pura (BS_ADRENALINE) - Requer Machado ou Maca e nao estar no Madogear
+	if (getskilllv("BS_ADRENALINE") > 0 && !getstatus(SC_ADRENALINE) && Sp >= 20 && !checkmadogear()) {
+		.@w_id_chk = getequipid(EQI_HAND_R);
+		.@w_sub_chk = (.@w_id_chk > 0 ? getItemInfo(.@w_id_chk, ITEMINFO_SUBTYPE) : -1);
+		if (.@w_sub_chk == W_1HAXE || .@w_sub_chk == W_2HAXE || .@w_sub_chk == W_1HMACE || .@w_sub_chk == W_2HMACE) {
+			unitskilluseid getcharid(3), "BS_ADRENALINE", getskilllv("BS_ADRENALINE"), getcharid(3);
+		}
 	}
 	// Manejo Perfeito (BS_WEAPONPERFECT)
 	if (getskilllv("BS_WEAPONPERFECT") > 0 && !getstatus(SC_WEAPONPERFECTION) && Sp >= 18) {
 		unitskilluseid getcharid(3), "BS_WEAPONPERFECT", getskilllv("BS_WEAPONPERFECT"), getcharid(3);
 	}
-	// Forca Excessiva (BS_OVERTHRUST)
-	if (getskilllv("BS_OVERTHRUST") > 0 && !getstatus(SC_OVERTHRUST) && Sp >= 15) {
-		unitskilluseid getcharid(3), "BS_OVERTHRUST", getskilllv("BS_OVERTHRUST"), getcharid(3);
-	}
-	// Forca Excessiva Maxima (WS_OVERTHRUSTMAX)
-	if (getskilllv("WS_OVERTHRUSTMAX") > 0 && !getstatus(SC_MAXOVERTHRUST) && Sp >= 20 && Zeny >= 5000) {
-		unitskilluseid getcharid(3), "WS_OVERTHRUSTMAX", getskilllv("WS_OVERTHRUSTMAX"), getcharid(3);
-	}
-	// Impulso no Carrinho (WS_CARTBOOST)
-	if (getskilllv("WS_CARTBOOST") > 0 && !getstatus(SC_CARTBOOST) && Sp >= 20) {
+	// Impulso no Carrinho (WS_CARTBOOST) - Requer Carrinho e nao estar no Madogear
+	if (getskilllv("WS_CARTBOOST") > 0 && !getstatus(SC_CARTBOOST) && Sp >= 20 && checkcart() && !checkmadogear()) {
 		unitskilluseid getcharid(3), "WS_CARTBOOST", 1, getcharid(3);
 	}
 	return;
@@ -2009,22 +2198,30 @@ OnCleanHeavyInventory:
 	return;
 
 OnGetHuntMap:
-	if (BaseLevel <= 12) {
-		@hunt_map$ = "prt_fild08"; @hunt_x = 0; @hunt_y = 0;
-	} else if (BaseLevel <= 25) {
+	if (BaseLevel <= 30) {
+		// Mobs Nv 40 (Esporos, Rabo de Verme - 640+ mobs: Up inicial ultra rapido +10 a +35 lvls)
 		@hunt_map$ = "pay_fild08"; @hunt_x = 0; @hunt_y = 0;
-	} else if (BaseLevel <= 40) {
-		@hunt_map$ = "pay_dun00"; @hunt_x = 0; @hunt_y = 0;
-	} else if (BaseLevel <= 55) {
-		@hunt_map$ = "orc_dun01"; @hunt_x = 0; @hunt_y = 0;
-	} else if (BaseLevel <= 70) {
-		@hunt_map$ = "pay_dun03"; @hunt_x = 0; @hunt_y = 0;
-	} else if (BaseLevel <= 85) {
+	} else if (BaseLevel <= 50) {
+		// Mobs Nv 50 (Guerreiro Orc, Senhora Orc - 639 mobs: +10 a +19 lvls)
+		@hunt_map$ = "gef_fild10"; @hunt_x = 0; @hunt_y = 0;
+	} else if (BaseLevel <= 65) {
+		// Mobs Nv 64-68 (Sohee, Dokebi, Horong - 169 mobs: +10 a +15 lvls)
+		@hunt_map$ = "pay_dun04"; @hunt_x = 0; @hunt_y = 0;
+	} else if (BaseLevel <= 78) {
+		// Mobs Nv 80 (Petite, Mantis - 456 mobs: +10 a +14 lvls)
+		@hunt_map$ = "gef_fild06"; @hunt_x = 0; @hunt_y = 0;
+	} else if (BaseLevel <= 88) {
+		// Mobs Nv 87-91 (Venomous, Teddy Bear - 247 mobs: +10 a +12 lvls)
 		@hunt_map$ = "ein_fild04"; @hunt_x = 0; @hunt_y = 0;
 	} else if (BaseLevel <= 99) {
-		@hunt_map$ = "mag_dun02"; @hunt_x = 0; @hunt_y = 0;
-	} else {
+		// Mobs Nv 109-110 (Roween, Magma 2 - 746 mobs: +10 a +15 lvls)
+		@hunt_map$ = "ra_fild12"; @hunt_x = 0; @hunt_y = 0;
+	} else if (BaseLevel <= 145) {
+		// Mobs Nv 160 (Dolomedes, Tatacho, Centipede - 167 mobs: +15 a +25 lvls)
 		@hunt_map$ = "dic_fild02"; @hunt_x = 0; @hunt_y = 0;
+	} else {
+		// Mobs Nv 165 (Scaraba - 263 mobs: +15 a +20 lvls)
+		@hunt_map$ = "dic_dun02"; @hunt_x = 0; @hunt_y = 0;
 	}
 	return;
 
@@ -2089,12 +2286,22 @@ OnDistributeStats:
 				else if (readparam(bStr) < 120 && StatusPoint >= 1) statusup bStr;
 				else statusup bAgi;
 				break;
-			case 5: // Novico (INT > VIT > DEX)
-				if (readparam(bInt) < 90 && StatusPoint >= 1) statusup bInt;
-				else if (readparam(bVit) < 70 && StatusPoint >= 1) statusup bVit;
-				else if (readparam(bDex) < 60 && StatusPoint >= 1) statusup bDex;
-				else if (readparam(bInt) < 120 && StatusPoint >= 1) statusup bInt;
-				else statusup bVit;
+			case 5: // Novico / Sacerdote (INT > VIT > DEX) vs Monge / Shura (STR > AGI > DEX > VIT > INT)
+				if (Class == Job_Monk || Class == Job_Champion || Class >= Job_Sura || getskilllv("MO_TRIPLEATTACK") > 0 || getskilllv("MO_INVESTIGATE") > 0) {
+					if (readparam(bStr) < 90 && StatusPoint >= 1) statusup bStr;
+					else if (readparam(bAgi) < 80 && StatusPoint >= 1) statusup bAgi;
+					else if (readparam(bDex) < 60 && StatusPoint >= 1) statusup bDex;
+					else if (readparam(bVit) < 50 && StatusPoint >= 1) statusup bVit;
+					else if (readparam(bStr) < 120 && StatusPoint >= 1) statusup bStr;
+					else if (readparam(bInt) < 40 && StatusPoint >= 1) statusup bInt;
+					else statusup bAgi;
+				} else {
+					if (readparam(bInt) < 90 && StatusPoint >= 1) statusup bInt;
+					else if (readparam(bVit) < 70 && StatusPoint >= 1) statusup bVit;
+					else if (readparam(bDex) < 60 && StatusPoint >= 1) statusup bDex;
+					else if (readparam(bInt) < 120 && StatusPoint >= 1) statusup bInt;
+					else statusup bVit;
+				}
 				break;
 			default: // Mercador (STR > AGI > DEX > VIT)
 				if (readparam(bStr) < 90 && StatusPoint >= 1) statusup bStr;
@@ -2355,9 +2562,9 @@ OnDistributeSkills:
 	}
 
 	// =========================================================
-	// 5. NOVICO / SACERDOTE / SUMO SACERDOTE / ARCEBISPO
+	// 5. NOVICO / SACERDOTE / SUMO SACERDOTE / ARCEBISPO / MONGE / MESTRE / SHURA
 	// =========================================================
-	if (Class == Job_Acolyte || Class == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop) {
+	if (Class == Job_Acolyte || Class == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop || Class == Job_Monk || Class == Job_Champion || Class == Job_Sura) {
 		skill "AL_HEAL", 10, 1;
 		skill "AL_CURE", 1, 1;
 		skill "AL_BLESSING", 10, 1;
@@ -2372,6 +2579,7 @@ OnDistributeSkills:
 		skill "AL_WARP", 4, 1;
 		skill "AL_PNEUMA", 1, 1;
 	}
+	// Ramo Sacerdote / Arcebispo
 	if (Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop) {
 		skill "PR_SANCTUARY", 10, 1;
 		skill "PR_STRECOVERY", 1, 1;
@@ -2409,6 +2617,51 @@ OnDistributeSkills:
 		skill "AB_LAUDARAMUS", 4, 1;
 		skill "AB_CLEARANCE", 5, 1;
 		skill "AB_OFFERTORIUM", 5, 1;
+	}
+	// Ramo Monge / Mestre / Shura
+	if (Class == Job_Monk || Class == Job_Champion || Class == Job_Sura) {
+		skill "MO_IRONHAND", 10, 1;
+		skill "MO_SPIRITSRECOVERY", 5, 1;
+		skill "MO_CALLSPIRITS", 5, 1;
+		skill "MO_ABSORBSPIRITS", 1, 1;
+		skill "MO_TRIPLEATTACK", 10, 1;
+		skill "MO_BODYRELOCATION", 1, 1;
+		skill "MO_DODGE", 10, 1;
+		skill "MO_INVESTIGATE", 5, 1;
+		skill "MO_FINGEROFFENSIVE", 5, 1;
+		skill "MO_STEELBODY", 5, 1;
+		skill "MO_BLADESTOP", 5, 1;
+		skill "MO_EXPLOSIONSPIRITS", 5, 1;
+		skill "MO_EXTREMITYFIST", 5, 1;
+		skill "MO_CHAINCOMBO", 5, 1;
+		skill "MO_COMBOFINISH", 5, 1;
+	}
+	if (Class == Job_Champion || Class == Job_Sura) {
+		skill "CH_PALMSTRIKE", 5, 1;
+		skill "CH_TIGERFIST", 5, 1;
+		skill "CH_CHAINCRUSH", 10, 1;
+		skill "CH_SOULCOLLECT", 1, 1;
+	}
+	if (Class == Job_Sura) {
+		skill "SR_DRAGONCOMBO", 10, 1;
+		skill "SR_SKYNETBLOW", 5, 1;
+		skill "SR_EARTHSHAKER", 5, 1;
+		skill "SR_FALLENEMPIRE", 10, 1;
+		skill "SR_TIGERCANNON", 10, 1;
+		skill "SR_GATEOFHELL", 10, 1;
+		skill "SR_RAMPAGEBLASTER", 5, 1;
+		skill "SR_CRESCENTELBOW", 5, 1;
+		skill "SR_CURSEDCIRCLE", 5, 1;
+		skill "SR_LIGHTNINGWALK", 5, 1;
+		skill "SR_KNUCKLEARROW", 10, 1;
+		skill "SR_WINDMILL", 5, 1;
+		skill "SR_RAISINGDRAGON", 10, 1;
+		skill "SR_GENTLETOUCH_ENERGYGAIN", 5, 1;
+		skill "SR_GENTLETOUCH_CHANGE", 5, 1;
+		skill "SR_GENTLETOUCH_REVITALIZE", 5, 1;
+		skill "SR_HOWLINGOFLION", 5, 1;
+		skill "SR_RIDEINLIGHTNING", 5, 1;
+		skill "SR_FLASHCOMBO", 5, 1;
 	}
 
 	// =========================================================
@@ -2462,6 +2715,9 @@ OnDistributeSkills:
 		skill "NC_POWERSWING", 10, 1;
 		skill "NC_RESEARCHFE", 5, 1;
 		skill "NC_MAGMA_ERUPTION", 5, 1;
+		skill "NC_MADOLICENCE", 5, 1;
+		skill "NC_BOOSTKNUCKLE", 5, 1;
+		skill "NC_ARMSCANNON", 5, 1;
 		skill "NC_NEUTRALBARRIER", 3, 1;
 		skill "NC_STEALTHFIELD", 3, 1;
 	}
@@ -2496,8 +2752,8 @@ OnCheckJobChange:
 			default: 
 				jobchange (Class == Job_Novice_High ? Job_Merchant_High : Job_Merchant);
 				if (countitem(1304) == 0) getitem 1304, 1;
+				equip 1304;
 				if (Zeny < 5000000) Zeny += 10000000;
-				if (!checkcart()) setcart;
 				break;
 		}
 		specialeffect EF_LEVELUP;
@@ -2542,11 +2798,28 @@ OnCheckJobChange:
 
 	if (BaseLevel >= 99 && JobLevel >= 70 && Upper == 1) {
 		if (Class == Job_Lord_Knight) jobchange Job_Rune_Knight;
+		else if (Class == Job_Paladin) jobchange Job_Royal_Guard;
 		else if (Class == Job_High_Wizard) jobchange Job_Warlock;
+		else if (Class == Job_Professor) jobchange Job_Sorcerer;
 		else if (Class == Job_Sniper) jobchange Job_Ranger;
 		else if (Class == Job_Assassin_Cross) jobchange Job_Guillotine_Cross;
+		else if (Class == Job_Stalker) jobchange Job_Shadow_Chaser;
 		else if (Class == Job_High_Priest) jobchange Job_Arch_Bishop;
-		else if (Class == Job_Whitesmith) jobchange Job_Mechanic;
+		else if (Class == Job_Champion) jobchange Job_Sura;
+		else if (Class == Job_Whitesmith) {
+			jobchange Job_Mechanic;
+			if (countitem(18000) < 500) getitem 18000, 2000;
+			equip 18000;
+			atcommand "@restock 18000 1000";
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 18000, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+		}
+		else if (Class == Job_Creator) {
+			jobchange Job_Genetic;
+			if (countitem(18000) < 500) getitem 18000, 2000;
+			equip 18000;
+			atcommand "@restock 18000 1000";
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 18000, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+		}
 		else return;
 
 		specialeffect EF_ANGEL;
