@@ -3788,7 +3788,7 @@ void pc_set_reborn_drop(map_session_data* sd, int val)
 
     sd->reborn_drop = val;
 
-	// Força recalcular status
+	// Forï¿½a recalcular status
     status_calc_pc(sd, SCO_NONE);
 }
 
@@ -3800,7 +3800,7 @@ void pc_set_reborn_exp(map_session_data* sd, int val)
 
     sd->reborn_exp = val;
 
-    // força recalcular status (opcional, caso queira que já reflita em cálculos dependentes)
+    // forï¿½a recalcular status (opcional, caso queira que jï¿½ reflita em cï¿½lculos dependentes)
     status_calc_pc(sd, SCO_NONE);
 }
 
@@ -8526,7 +8526,8 @@ int32 pc_checkbaselevelup(map_session_data *sd) {
 			sd->status.base_exp = next-1;
 
 		sd->status.status_point += statpoint_db.pc_gets_status_point(sd->status.base_level);
-		sd->status.trait_point += statpoint_db.pc_gets_trait_point(sd->status.base_level);
+		if ((sd->class_ & MAPID_BASEMASK) != MAPID_SUMMONER)
+			sd->status.trait_point += statpoint_db.pc_gets_trait_point(sd->status.base_level);
 		sd->status.base_level++;
 
 		if( pc_is_maxbaselv(sd) ){
@@ -8744,7 +8745,7 @@ void pc_gainexp(map_session_data *sd, struct block_list *src, t_exp base_exp, t_
 	if (!(exp_flag&2)) {
 		pc_calcexp(sd, &base_exp, &job_exp, src);
 
-		// --- Bônus Reborn de EXP (pode ser negativo) ---
+		// --- Bï¿½nus Reborn de EXP (pode ser negativo) ---
 		if (sd->reborn_exp != 0) {
 			// converte para int64 temporariamente
 			int64_t base_mod = (int64_t)base_exp * sd->reborn_exp / 100;
@@ -9648,8 +9649,11 @@ int32 pc_resetstate(map_session_data* sd)
 		sd->status.status_point += battle_config.transcendent_status_points;
 	}
 
-	if ((sd->class_&JOBL_FOURTH) != 0) {
+	if ((sd->class_ & JOBL_FOURTH) != 0 && (sd->class_ & MAPID_BASEMASK) != MAPID_SUMMONER) {
 		sd->status.trait_point += battle_config.trait_points_job_change;
+	}
+	if ((sd->class_ & MAPID_BASEMASK) == MAPID_SUMMONER) {
+		sd->status.trait_point = 0;
 	}
 
 	pc_setstat(sd, SP_STR, 1);
@@ -10705,7 +10709,8 @@ bool pc_setparam(map_session_data *sd,int64 type,int64 val_tmp)
 		if (val > sd->status.base_level) {
 			for( int32 i = 0; i < (int32)( val - sd->status.base_level ); i++ ){
 				sd->status.status_point += statpoint_db.pc_gets_status_point( sd->status.base_level + i );
-				sd->status.trait_point += statpoint_db.pc_gets_trait_point( sd->status.base_level + i );
+				if ((sd->class_ & MAPID_BASEMASK) != MAPID_SUMMONER)
+					sd->status.trait_point += statpoint_db.pc_gets_trait_point( sd->status.base_level + i );
 			}
 		}
 		sd->status.base_level = val;
@@ -11237,7 +11242,7 @@ bool pc_jobchange(map_session_data *sd,int32 job, char upper)
 	}
 
 	// Give or reduce trait status points
-	if ((b_class & JOBL_FOURTH) && !(previous_class & JOBL_FOURTH)) {// Change to a 4th job.
+	if ((b_class & JOBL_FOURTH) && !(previous_class & JOBL_FOURTH) && (b_class & MAPID_BASEMASK) != MAPID_SUMMONER) {// Change to a 4th job.
 		sd->status.trait_point += battle_config.trait_points_job_change;
 		clif_updatestatus(*sd, SP_TRAITPOINT);
 		clif_updatestatus(*sd, SP_UPOW);
@@ -11260,6 +11265,11 @@ bool pc_jobchange(map_session_data *sd,int32 job, char upper)
 			clif_updatestatus(*sd, SP_UCON);
 			clif_updatestatus(*sd, SP_UCRT);
 		}
+	}
+
+	if ((b_class & MAPID_BASEMASK) == MAPID_SUMMONER) {
+		sd->status.trait_point = 0;
+		clif_updatestatus(*sd, SP_TRAITPOINT);
 	}
 
 	clif_updatestatus(*sd,SP_JOBLEVEL);

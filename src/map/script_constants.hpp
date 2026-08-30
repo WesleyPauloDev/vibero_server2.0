@@ -1953,6 +1953,7 @@
 	export_constant(SC_MARINE_FESTIVAL);
 	export_constant(SC_SANDY_FESTIVAL);
 	export_constant(SC_KI_SUL_RAMPAGE);
+	export_constant(SC_KI_SUL_RAMPAGE_BUFF);
 	export_constant(SC_COLORS_OF_HYUN_ROK_1);
 	export_constant(SC_COLORS_OF_HYUN_ROK_2);
 	export_constant(SC_COLORS_OF_HYUN_ROK_3);

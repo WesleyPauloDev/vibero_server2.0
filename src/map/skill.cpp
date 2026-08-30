@@ -4432,6 +4432,11 @@ void skill_consume_hpspap(block_list* bl, uint16 skill_id, int32 hp, int32 sp, i
 {
 	nullpo_retv(bl);
 
+	map_session_data *sd = BL_CAST(BL_PC, bl);
+	if ((sd && (sd->class_ & MAPID_BASEMASK) == MAPID_SUMMONER) || (skill_id >= SH_MYSTICAL_CREATURE_MASTERY && skill_id <= SH_BLESSING_OF_MYSTICAL_CREATURES) || skill_id == SH_CHUL_HO_BATTERING || skill_id == SH_HYUN_ROK_SPIRIT_POWER) {
+		ap = 0;
+	}
+
 	switch (skill_id) {
 		//Skills that require HP but do not consume them
 	case SM_MAGNUM:
@@ -9770,16 +9775,16 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 		sd->vend_coin_selected = (pc_readglobalreg(sd, add_str("vend_coin_selected")) != 0);
 		sd->vend_coin_type = (int)pc_readglobalreg(sd, add_str("vend_coin_type"));
 
-		// Se ainda não escolheu moeda:
+		// Se ainda nï¿½o escolheu moeda:
 		if (!sd->vend_coin_selected) {
 
-			// Salva o nível original para usar depois
+			// Salva o nï¿½vel original para usar depois
 			sd->vend_skill_lv = skill_lv;
 
 			// Chama script menu
 			npc_event_do_id("VendingScriptFake::OnVendingMenu", sd->id);
 
-			return 0; // Impede vending original até escolher moeda
+			return 0; // Impede vending original atï¿½ escolher moeda
 		} else {		
 			//Prevent vending of GMs with unnecessary Level to trade/drop. [Skotlex]
 			if ( !pc_can_give_items(sd) )
@@ -13137,7 +13142,7 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 		if (dstmd && (dstmd->mob_id == MOBID_EMPERIUM || status_get_class_(bl) == CLASS_BATTLEFIELD))
 			heal = 0;
 		else if (status_get_hp(bl) != status_get_max_hp(bl))
-			heal = ((2 * skill_lv - 1) * 10) * status_get_max_hp(bl) / 100;
+			heal = ((2 * skill_lv - 1) * 5) * status_get_max_hp(bl) / 100;
 		clif_skill_nodamage(src, *bl, skill_id, skill_lv);
 		status_heal(bl, heal, 0, 0);
 	}
@@ -13641,23 +13646,16 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 
 	case SH_KI_SUL_RAMPAGE:
 		if( flag&2 ){
-			if( src == bl ){
-				break;
-			}
-
-			int64 ap = 2;
-
+			int32 res_bonus = 10 * skill_lv;
 			if( flag&4 ){
-				ap += 4;
+				res_bonus += 30;
 			}
-
-			status_heal( bl, 0, 0, ap, 0 );
+			sc_start4(src, bl, SC_KI_SUL_RAMPAGE_BUFF, 100, skill_lv, res_bonus, 0, 0, 5000);
 		}else if( flag&1 ){
 			int32 range = skill_get_splash( skill_id, skill_lv );
 
 			if( pc_checkskill( sd, SH_COMMUNE_WITH_KI_SUL ) > 0 || ( sc != nullptr && sc->getSCE( SC_TEMPORARY_COMMUNION ) != nullptr ) ){
 				range += 2;
-				// Set a flag for AP increase
 				flag |= 4;
 			}
 
@@ -13667,6 +13665,11 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 			// No party check required
 			clif_skill_nodamage(src, *bl, skill_id, skill_lv);
 			sc_start(src, bl, type, 100, skill_lv, skill_get_time(skill_id, skill_lv));
+			int32 res_bonus = 10 * skill_lv;
+			if( pc_checkskill( sd, SH_COMMUNE_WITH_KI_SUL ) > 0 || ( sc != nullptr && sc->getSCE( SC_TEMPORARY_COMMUNION ) != nullptr ) ){
+				res_bonus += 30;
+			}
+			sc_start4(src, bl, SC_KI_SUL_RAMPAGE_BUFF, 100, skill_lv, res_bonus, 0, 0, skill_get_time(skill_id, skill_lv));
 		}
 		break;
 
@@ -20142,12 +20145,17 @@ struct s_skill_condition skill_get_requirement(map_session_data* sd, uint16 skil
 			req.sp += req.sp * (20 * sc->getSCE(SC_CRESCIVEBOLT)->val1) / 100;
 	}
 
-	req.ap = skill->require.ap[skill_lv - 1];
-	ap_rate = skill->require.ap_rate[skill_lv - 1];
-	if (ap_rate > 0)
-		req.ap += (status->ap * ap_rate) / 100;
-	else
-		req.ap += (status->max_ap * (-ap_rate)) / 100;
+	if ((sd && (sd->class_ & MAPID_BASEMASK) == MAPID_SUMMONER) || (skill_id >= SH_MYSTICAL_CREATURE_MASTERY && skill_id <= SH_BLESSING_OF_MYSTICAL_CREATURES) || skill_id == SH_CHUL_HO_BATTERING || skill_id == SH_HYUN_ROK_SPIRIT_POWER) {
+		req.ap = 0;
+		ap_rate = 0;
+	} else {
+		req.ap = skill->require.ap[skill_lv - 1];
+		ap_rate = skill->require.ap_rate[skill_lv - 1];
+		if (ap_rate > 0)
+			req.ap += (status->ap * ap_rate) / 100;
+		else
+			req.ap += (status->max_ap * (-ap_rate)) / 100;
+	}
 
 	req.zeny = skill->require.zeny[skill_lv-1];
 
@@ -23721,16 +23729,16 @@ bool skill_produce_mix(map_session_data *sd, uint16 skill_id, t_itemid nameid, i
 				return true;
 			}
 		} else if (tmp_item.amount) { //Success
-			if (nameid == 547) { // Poção Branca Compacta normal
+			if (nameid == 547) { // Poï¿½ï¿½o Branca Compacta normal
 				unsigned char rank = pc_famerank(sd->status.char_id, MAPID_ALCHEMIST);
 
 				if (rank > 0 && rank <= 10) {
-					// Substitui pela poção personalizada (9681)
+					// Substitui pela poï¿½ï¿½o personalizada (9681)
 					nameid = 9681;
 					tmp_item.nameid = 9681;
 
 					clif_displaymessage(sd->fd,
-						"Você Criou uma Poção Compacta Branca Rankeada.");
+						"Vocï¿½ Criou uma Poï¿½ï¿½o Compacta Branca Rankeada.");
 				}
 			}
 			if ((flag = pc_additem(sd,&tmp_item,tmp_item.amount,LOG_TYPE_PRODUCE))) {

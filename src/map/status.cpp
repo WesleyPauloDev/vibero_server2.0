@@ -8821,6 +8821,8 @@ static int16 status_calc_res(struct block_list *bl, status_change *sc, int32 res
 		res += sc->getSCE(SC_MUSICAL_INTERLUDE)->val2;
 	if (sc->getSCE(SC_GOLDENE_TONE))
 		res += sc->getSCE(SC_GOLDENE_TONE)->val2;
+	if (sc->getSCE(SC_KI_SUL_RAMPAGE_BUFF))
+		res += sc->getSCE(SC_KI_SUL_RAMPAGE_BUFF)->val2;
 	if (sc->getSCE(SC_SHADOW_STRIP) && bl->type != BL_PC)
 		res -= res * sc->getSCE(SC_SHADOW_STRIP)->val2 / 100;
 	if (sc->getSCE(SC_AIN_RHAPSODY))
@@ -8845,6 +8847,8 @@ static int16 status_calc_mres(struct block_list *bl, status_change *sc, int32 mr
 
 	if (sc->getSCE(SC_GOLDENE_TONE))
 		mres += sc->getSCE(SC_GOLDENE_TONE)->val2;
+	if (sc->getSCE(SC_KI_SUL_RAMPAGE_BUFF))
+		mres += sc->getSCE(SC_KI_SUL_RAMPAGE_BUFF)->val2;
 	if (sc->getSCE(SC_SHADOW_STRIP) && bl->type != BL_PC)
 		mres -= mres * sc->getSCE(SC_SHADOW_STRIP)->val2 / 100;
 	if (sc->getSCE(SC_GEF_NOCTURN))
@@ -13168,6 +13172,10 @@ static bool status_change_start_post_delay(block_list* src, block_list* bl, sc_t
 		case SC_KI_SUL_RAMPAGE:
 			tick_time = 100;
 			val4 = tick / 1000;
+			break;
+		case SC_KI_SUL_RAMPAGE_BUFF:
+			if (!val2)
+				val2 = val1 * 10;
 			break;
 		case SC_BLESSING_OF_M_CREATURES:
 			val2 = val1 * 10;

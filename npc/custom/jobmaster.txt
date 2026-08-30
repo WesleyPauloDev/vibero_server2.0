@@ -24,12 +24,6 @@ function Get_Job_Equip;
 // closes if not, returns if yes
 function	Require_Level	{
 
-	if ( eaclass() & EAJL_THIRD || Class == 4215 || Class == 4211 || Class == 4212 || Class == 4218) {
-		mes "Nao ha mais classes disponiveis para este tipo.";
-		close;
-		end;
-	}
-
 	if (BaseLevel < getarg(0) || JobLevel < getarg(1)) {
 		.@blvl = getarg(0) - BaseLevel;
 		.@jlvl = getarg(1) - JobLevel;
@@ -210,6 +204,11 @@ function	Job_Options	{
 	if (.FourthExpanded && .@eac == EAJ_SUPER_NOVICE_E) {
 		Require_Level(.Req_Fourth[0], .Req_Fourth[1]);
 		Job_Options(.@job_opt, roclass(EAJ_HYPER_NOVICE));
+	}
+
+	if (.@eac == EAJ_SUMMONER) {
+		Require_Level(.Req_SHandler[0], .Req_SHandler[1]);
+		Job_Options(.@job_opt, Job_Spirit_Handler);
 	}
 	
 
@@ -424,7 +423,8 @@ function	Job_Menu	{
 
 						// Rebellion, Doram e outros
 						case Job_Rebellion:      .@jobname$ = "Rebelde"; break;
-						case Job_Summoner:       .@jobname$ = "Doram"; break;
+						case Job_Summoner:       .@jobname$ = "Doram (Invocador)"; break;
+						case Job_Spirit_Handler: .@jobname$ = "Invocador de Espiritos"; break;
 
 						// Classe de renascimento
 						case Job_Novice_High:    .@jobname$ = "Renascimento"; break;
@@ -480,6 +480,8 @@ function	Job_Change	{
 		resetstatus;
 		resetskill;
 		set SkillPoint,0;
+	} else if (.@to_cls == Job_Spirit_Handler) {
+		set TraitPoint, 0;
 	}
 	specialeffect2 EF_ANGEL2;
 	specialeffect2 EF_ELECTRIC;
@@ -670,7 +672,7 @@ OnInit:
 	setarray .Req_Fourth[0],175,70;		// Minimum base level, job level to change to fourth class
 	setarray .Req_Exp_NJ_GS[0],99,70; 	// Minimum base level, job level to turn into Expanded Ninja and Gunslinger
 	setarray .Req_Exp_SNOVI[0],99,99; 	// Minimum base level, job level to turn into Expanded Super Novice
-	setarray .Req_SHandler[0],175,60;	// Minimum base level, job level to turn into Spirit Handler
+	setarray .Req_SHandler[0],99,70;	// Minimum base level, job level to turn into Spirit Handler
 	.SNovice = 45;						// Minimum base level to turn into Super Novice
 	
 	// Setting adjustments by PACKETVER
