@@ -2966,17 +2966,16 @@ void pc_clean_skilltree(map_session_data *sd)
 uint64 pc_calc_skilltree_normalize_job_sub( map_session_data *sd ){
 	int32 skill_point = pc_calc_skillpoint( sd );
 
-	if( sd->class_ & MAPID_SUMMONER ){
-		// Novice's skill points for basic skill.
-		std::shared_ptr<s_job_info> summoner_job = job_db.find( JOB_SUMMONER );
+	if( (sd->class_ & MAPID_BASEMASK) == MAPID_SUMMONER ){
+		if (sd->class_ & JOBL_FOURTH) {
+			std::shared_ptr<s_job_info> summoner_job = job_db.find( JOB_SUMMONER );
+			int32 summoner_skills = summoner_job ? (summoner_job->max_job_level - 1) : 69;
 
-		int32 summoner_skills = summoner_job->max_job_level - 1;
-
-		if( skill_point < summoner_skills ){
-			return MAPID_SUMMONER;
+			if( skill_point < summoner_skills ){
+				return MAPID_SUMMONER;
+			}
 		}
-
-		skill_point -= summoner_skills;
+		return sd->class_;
 	}else{
 		// Novice's skill points for basic skill.
 		std::shared_ptr<s_job_info> novice_job = job_db.find( JOB_NOVICE );
