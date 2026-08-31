@@ -267,6 +267,7 @@ struct Battle_Config
 	int32 pet_equip_required;
 	int32 pet_unequip_destroy;
 	int32 pet_master_dead;
+	int32 pet_owner_die_intimacy_loss;
 
 	int32 skill_min_damage;
 	int32 finger_offensive_type;

@@ -628,16 +628,17 @@ function	script	F_InstanceFinishBase	{
 		return 0;
 	if (getd(.@status_var$) != 1 && getd(.@status_var$) != 2)
 		return 0;
-	// Check the complete reward at once. Separate checks can both pass even
-	// when the combined weight (especially during Instance 2x) does not fit.
+	// Check the complete reward at once. If it does not fit, finish the run
+	// normally and send the reward by RodEx instead of leaving it OPEN.
+	.@send_reward_by_mail = 0;
 	if (.@coin_amount > 0 && .@ticket_amount > 0) {
 		if (!checkweight(9608, .@coin_amount, 9198, .@ticket_amount))
-			return -1;
+			.@send_reward_by_mail = 1;
 	}
 	else if (.@coin_amount > 0 && !checkweight(9608, .@coin_amount))
-		return -1;
+		.@send_reward_by_mail = 1;
 	else if (.@ticket_amount > 0 && !checkweight(9198, .@ticket_amount))
-		return -1;
+		.@send_reward_by_mail = 1;
 	if (.@rep_amount > 0)
 		callfunc("F_AddRep", .@rep_id, .@rep_amount, .@rep_achievement, .@rep_cap);
 	callfunc("F_DiaryRefreshDaily");
@@ -652,10 +653,26 @@ function	script	F_InstanceFinishBase	{
 			setd(.@roulette_status_var$, 2);
 	}
 	callfunc("F_InstanceRouletteComplete", .@instance_name$, .@roulette_match_name$);
-	if (.@coin_amount > 0)
-		getitem 9608, .@coin_amount;
-	if (.@ticket_amount > 0)
-		getitem 9198, .@ticket_amount;
+	if (.@send_reward_by_mail) {
+		.@mail_count = 0;
+		if (.@coin_amount > 0) {
+			.@mail_item[.@mail_count] = 9608;
+			.@mail_amount[.@mail_count] = .@coin_amount;
+			.@mail_count++;
+		}
+		if (.@ticket_amount > 0) {
+			.@mail_item[.@mail_count] = 9198;
+			.@mail_amount[.@mail_count] = .@ticket_amount;
+		}
+		mail getcharid(0), "Sistema de Instancias", "Recompensa da instancia", "Seu inventario estava sem espaco. A recompensa foi enviada por RodEx.", 0, .@mail_item, .@mail_amount;
+		dispbottom "[Instancias] Inventario sem espaco: recompensa enviada por RodEx.";
+	}
+	else {
+		if (.@coin_amount > 0)
+			getitem 9608, .@coin_amount;
+		if (.@ticket_amount > 0)
+			getitem 9198, .@ticket_amount;
+	}
 	if (.@reward_multiplier > 1)
 		dispbottom "[Evento] Instancia 2x: premios de conclusao dobrados.";
 	setd(.@status_var$, .@final_status);
@@ -783,7 +800,6 @@ function	script	F_InstanceSyncVillaDeception	{
 	}
 	return;
 }
-
 
 
 
