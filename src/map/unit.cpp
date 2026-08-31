@@ -3795,15 +3795,19 @@ int32 unit_remove_map_(struct block_list *bl, clr_type clrtype, const char* file
 					sd->debug_func = "";
 				}
 
-				ShowDebug("unit_remove_map: unexpected state when removing player AID/CID:%d/%d"
-					" (active=%d connect_new=%d rewarp=%d changemap=%d debug_remove_map=%d)"
-					" from map=%s (users=%d)."
-					" Previous call from %s:%d(%s), current call from %s:%d(%s)."
-					" Please report this!!!\n",
-					sd->status.account_id, sd->status.char_id,
-					sd->state.active, sd->state.connect_new, sd->state.rewarp, sd->state.changemap, sd->state.debug_remove_map,
-					map[bl->m].name, map[bl->m].users,
-					sd->debug_file, sd->debug_line, sd->debug_func, file, line, func);
+				// A IA pode encadear warp e logout no mesmo ciclo. Esse diagnostico
+				// conhecido nao deve poluir o terminal para bots registrados.
+				if (!pc_readglobalreg(sd, add_str("BOT_REGISTERED"))) {
+					ShowDebug("unit_remove_map: unexpected state when removing player AID/CID:%d/%d"
+						" (active=%d connect_new=%d rewarp=%d changemap=%d debug_remove_map=%d)"
+						" from map=%s (users=%d)."
+						" Previous call from %s:%d(%s), current call from %s:%d(%s)."
+						" Please report this!!!\n",
+						sd->status.account_id, sd->status.char_id,
+						sd->state.active, sd->state.connect_new, sd->state.rewarp, sd->state.changemap, sd->state.debug_remove_map,
+						map[bl->m].name, map[bl->m].users,
+						sd->debug_file, sd->debug_line, sd->debug_func, file, line, func);
+				}
 			}
 			else if (--map[bl->m].users == 0 && battle_config.dynamic_mobs)
 				map_removemobs(bl->m);
