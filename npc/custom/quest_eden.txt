@@ -1,10 +1,10 @@
--	script	ContadorEden	FAKE_NPC,{
-	OnNPCKillEvent:
+function	script	F_ContadorEdenKill	{
+		.@mob_id = getarg(0, killedrid);
 		if (!eden_missao_ativa) {
-			end;
+			return;
 		}
 		// Incrementa kill de mob1
-		if (killedrid == eden_mob1_id && eden_mob1_kill < eden_mob_quant) {
+		if (.@mob_id == eden_mob1_id && eden_mob1_kill < eden_mob_quant) {
             eden_mob1_kill++;
             if (eden_mob1_kill >= eden_mob_quant) {
 				message strcharinfo(0), eden_mob1_name$+" completo!";
@@ -13,7 +13,7 @@
             }
         }
         // Incrementa kill de mob2 (se existir)
-        else if (eden_mob2_id > 0 && killedrid == eden_mob2_id && eden_mob2_kill < eden_mob_quant) {
+		else if (eden_mob2_id > 0 && .@mob_id == eden_mob2_id && eden_mob2_kill < eden_mob_quant) {
             eden_mob2_kill++;
             if (eden_mob2_kill >= eden_mob_quant) {
 				message strcharinfo(0), eden_mob2_name$+" completo!";
@@ -22,12 +22,12 @@
             }
         }
 
-		// Verifica se concluiu a missão
+		// Verifica se concluiu a missao
 		if (eden_mob1_kill >= eden_mob_quant && (eden_mob2_id == 0 || eden_mob2_kill >= eden_mob_quant)) {
 			if (!eden_missao_concluida) {
 				eden_missao_concluida = 1;
-				dispbottom "[Missão Éden] Você concluiu todos os objetivos! Volte ao NPC para receber sua recompensa.";
+				dispbottom "[Missao Eden] Voce concluiu todos os objetivos! Volte ao NPC para receber sua recompensa.";
 			}
 		}
-		end;
+		return;
 }

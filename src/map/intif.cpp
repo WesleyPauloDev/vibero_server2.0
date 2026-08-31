@@ -3512,8 +3512,10 @@ static bool intif_parse_StorageReceived(int32 fd)
 		case TABLE_CART:
 			pc_check_available_item(sd, ITMCHK_CART);
 			if (sd->state.autotrade) {
+				bool restored_bot = sd->state.autotrade == 7;
 				clif_parse_LoadEndAck(sd->fd, sd);
-				sd->autotrade_tid = add_timer(gettick() + battle_config.feature_autotrade_open_delay, pc_autotrade_timer, sd->id, 0);
+				if (!restored_bot)
+					sd->autotrade_tid = add_timer(gettick() + battle_config.feature_autotrade_open_delay, pc_autotrade_timer, sd->id, 0);
 			}else if( sd->state.prevend ){
 				clif_clearcart(sd->fd);
 				clif_cartlist(sd);

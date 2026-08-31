@@ -10005,6 +10005,34 @@ BUILDIN_FUNC(offlinebot)
 }
 
 /**
+ * restorebot(<account_id>, <char_id>, <sex>);
+ * Restaura um bot registrado diretamente pelo char-server, sem senha e sem cliente.
+ **/
+BUILDIN_FUNC(restorebot)
+{
+	uint32 account_id = static_cast<uint32>(script_getnum(st, 2));
+	uint32 char_id = static_cast<uint32>(script_getnum(st, 3));
+	int32 sex = script_getnum(st, 4);
+
+	if (account_id == 0 || char_id == 0 || sex < SEX_FEMALE || sex > SEX_MALE || map_id2sd(account_id) != nullptr || map_charid2sd(char_id) != nullptr || chrif_search(account_id) != nullptr) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	map_session_data* sd;
+	CREATE(sd, map_session_data, 1);
+	new (sd) map_session_data();
+	pc_setnewpc(sd, account_id, char_id, 0, gettick(), sex, 0);
+	// 7 e uma combinacao reservada: offline + vending + buyingstore.
+	// Um personagem nao pode ser vendedor e comprador ao mesmo tempo.
+	sd->state.autotrade = 7;
+	chrif_authreq(sd, true);
+
+	script_pushint(st, 1);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
  * iscasting({<char_id>});
  * Retorna 1 se o personagem ou unidade estiver conjurando uma habilidade (com barra de cast), 0 caso contrario.
  **/
@@ -28890,6 +28918,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(statusup,"i?"),
 	BUILDIN_DEF(statusup2,"ii?"),
 	BUILDIN_DEF(offlinebot,"?"),
+	BUILDIN_DEF(restorebot,"iii"),
 	BUILDIN_DEF(iscasting,"?"),
 	BUILDIN_DEF(traitstatusup,"i?"),
 	BUILDIN_DEF(traitstatusup2,"ii?"),

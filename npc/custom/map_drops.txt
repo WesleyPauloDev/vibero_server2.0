@@ -4,8 +4,8 @@ function	script	CustomMapDrop	{
     .@rates = getarg(2); 
     
     if (strcharinfo(3) == .@map$ || strcharinfo(3) == instance_mapname(.@map$)) { // se o player estiver no mapa certo
-        // Usa o drop final do Honey no MI como referência de bônus.
-        // Dividido por 2 para que o valor base sem bônus resulte em 100,
+        // Usa o drop final do Honey no MI como referencia de bonus.
+        // Dividido por 2 para que o valor base sem bonus resulte em 100,
         // mantendo uma taxa enviada como 20 = 20% real.
         .@bonus = max(get_drop_bonus(1018, 518) / 2, 100);
 
@@ -39,10 +39,17 @@ function	script	BossniaMapDrop	{
 	return;
 }
 
-// Cobre monstros que nao possuem um evento de morte proprio.
--	script	BossniaMapDropEvent	-1,{
+// Um unico evento distribui as mortes para os sistemas customizados.
+// Assim eles ocupam apenas uma vaga na fila de eventos do jogador.
+-	script	GlobalKillDispatcher	-1,{
 OnNPCKillEvent:
+	callfunc("F_ContadorEdenKill", killedrid);
+	callfunc("F_BattlePassSync");
 	callfunc("BossniaMapDrop");
+	callfunc("F_ContadorPoringKill", killedrid);
+	callfunc("F_MapCustomDropsKill", killedrid);
+	callfunc("F_MVP_PointsRegister", killedrid);
+	callfunc("F_MVP_KillsRegister", killedrid);
 	end;
 }
 

@@ -11223,7 +11223,9 @@ void clif_parse_LoadEndAck(int32 fd,map_session_data *sd)
 			map_foreachpc( clif_friendslist_toggle_sub, sd->status.account_id, sd->status.char_id, static_cast<int32>( true ) );
 		}
 
-		if (!sd->state.autotrade) { // Don't trigger NPC event or opening vending/buyingstore will be failed
+		if (!sd->state.autotrade || sd->state.autotrade == 7) { // Bots restaurados precisam inicializar sua AI.
+			if (sd->state.autotrade == 7)
+				sd->state.autotrade = 1;
 			npc_script_event( *sd, NPCE_LOGIN );
 		}
 
@@ -11369,7 +11371,7 @@ void clif_parse_LoadEndAck(int32 fd,map_session_data *sd)
 	}
 
 	// Don't trigger NPC event or opening vending/buyingstore will be failed
-	if(!sd->state.autotrade && mapdata->getMapFlag(MF_LOADEVENT)) // Lance
+	if((!sd->state.autotrade || sd->state.autotrade == 7) && mapdata->getMapFlag(MF_LOADEVENT)) // Lance
 		npc_script_event( *sd, NPCE_LOADMAP );
 
 
@@ -12197,7 +12199,7 @@ void clif_parse_WisMessage(int32 fd, map_session_data* sd)
 	}
 
 	// if player is autotrading / offline bot: acknowledge whisper as normal success
-	if (dstsd->state.autotrade == 1) {
+	if (dstsd->state.autotrade) {
 		clif_wis_end(*sd, ACKWHISPER_SUCCESS);
 		return;
 	}
