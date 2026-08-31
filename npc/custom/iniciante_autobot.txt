@@ -1390,7 +1390,7 @@ OnStepTimer:
 			    Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock ||
 			    Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class >= Job_Mechanic ||
 			    Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 ||
-			    Class == Job_Summoner || Class == 4218 || Class == Job_Spirit_Handler || Class == 4308 || BaseClass == Job_Summoner ||
+			    Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308 || BaseClass == Job_Summoner ||
 			    getskilllv("NC_ARMSCANNON") > 0 || getskilllv("GN_CARTCANNON") > 0 ||
 			    getskilllv("SU_CN_METEOR") > 0 || getskilllv("SU_SV_STEMSPEAR") > 0 || getskilllv("SU_LUNATICCARROTBEAT") > 0 ||
 			    getskilllv("SH_CHUL_HO_SONIC_CLAW") > 0 || getskilllv("SH_HYUN_ROK_CANNON") > 0 ||
@@ -1825,7 +1825,7 @@ OnStepTimer:
 			// =========================================================
 			// 7. INVOCADOR / DORAM / SPIRIT HANDLER (4218 / 4308)
 			// =========================================================
-			else if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == 4218 || Class == Job_Spirit_Handler || Class == 4308 || (eaclass() & EAJ_SUMMONER) || (eaclass() & EAJ_SPIRIT_HANDLER)) {
+			else if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308) {
 				if (countitem(1681) > 0 && getequipid(EQI_HAND_R) <= 0) equip 1681;
 				.@dor_step = @BOT_SKILL_ROT % 5;
 
@@ -1947,7 +1947,7 @@ OnApplyBuffs:
 			if (checkcart()) sc_start SC_CARTBOOST, 600000, 1;
 		}
 	}
-	if (Class == Job_Summoner || Class == 4218 || Class == Job_Spirit_Handler || Class == 4308 || BaseClass == Job_Summoner || (eaclass() & EAJ_SUMMONER) || (eaclass() & EAJ_SPIRIT_HANDLER)) {
+	if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308) {
 		if (countitem(1681) == 0 && getequipid(EQI_HAND_R) <= 0) {
 			getitem 1681, 1;
 			equip 1681;
@@ -1998,7 +1998,10 @@ OnCheckMounts:
 
 	// 3. Mecanico (Madogear) & Mercadores / Ferreiros / Bioquimicos (Carrinho)
 	if (getskilllv("NC_MADOLICENCE") > 0) {
-		if (!checkmadogear()) setmadogear true;
+		if (!checkmadogear() && MADO_MODEL != 0) {
+			if (MADO_MODEL == 2) setmadogear true, MADO_SUIT;
+			else setmadogear true;
+		}
 	} else if (getskilllv("MC_PUSHCART") > 0) {
 		if (!checkcart() && !checkmadogear()) setcart;
 	}
@@ -2327,7 +2330,7 @@ OnDetectTargetJob:
 		@BOT_TARGET_JOB = 5;
 	} else if (BaseClass == Job_Merchant) {
 		@BOT_TARGET_JOB = 6;
-	} else if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == 4218 || Class == Job_Spirit_Handler || Class == 4308 || (eaclass() & EAJ_SUMMONER) || (eaclass() & EAJ_SPIRIT_HANDLER)) {
+	} else if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308) {
 		@BOT_TARGET_JOB = 7;
 	} else if (@BOT_TARGET_JOB == 0) {
 		@BOT_TARGET_JOB = 1;
@@ -2819,7 +2822,7 @@ OnDistributeSkills:
 	// =========================================================
 	// 7. INVOCADOR / DORAM (SUMMONER 4218 & SPIRIT HANDLER 4308)
 	// =========================================================
-	if (Class == Job_Summoner || Class == 4218 || Class == Job_Spirit_Handler || Class == 4308 || BaseClass == Job_Summoner || (eaclass() & EAJ_SUMMONER) || (eaclass() & EAJ_SPIRIT_HANDLER)) {
+	if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308) {
 		skill "SU_BASIC_SKILL", 1, 1;
 		skill "SU_BITE", 1, 1;
 		skill "SU_HIDE", 1, 1;
@@ -2857,7 +2860,7 @@ OnDistributeSkills:
 		skill "SU_SPIRITOFSEA", 1, 1;
 
 		// Habilidades de 4a Classe (Spirit Handler 4308)
-		if (Class == Job_Spirit_Handler || Class == 4308 || (eaclass() & EAJ_SPIRIT_HANDLER)) {
+		if (Class == Job_Spirit_Handler || Class == 4308) {
 			skill "SH_MYSTICAL_CREATURE_MASTERY", 10, 1;
 			skill "SH_COMMUNE_WITH_CHUL_HO", 1, 1;
 			skill "SH_CHUL_HO_SONIC_CLAW", 7, 1;
