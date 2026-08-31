@@ -18,11 +18,11 @@
 //     * Auto-Ataque fisico basico ininterrupto + Habilidades Ofensivas instantaneas (ignore_range)
 //     * Auto-Buffs nativos diretos (sem doevent para evitar enfileiramento)
 //     * OnCheckBuffs:
-//     if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 3) return;
+//     if (!@BOT_AI_ACTIVE || @BOT_AI_STAGE != 3) return;
 //     * OnApplyBuffs:
-//     if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 3) return;
+//     if (!@BOT_AI_ACTIVE || @BOT_AI_STAGE != 3) return;
 //     * OnCheckSpeedPotion:
-//     if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 3) return;
+//     if (!@BOT_AI_ACTIVE || @BOT_AI_STAGE != 3) return;
 //     * 30.000 de cada no armazem e @restock de 5 unidades das pocoes de ASPD
 //     * Auto-Teleporte aleatorio no mapa APENAS se a tela estiver vazia de monstros
 // - Respostas de comandos do GM enviadas exclusivamente para o chat do GM
@@ -49,26 +49,26 @@ OnInit:
 // ======================================================================
 	// @iniciante test / @iniciante teste
 	if (.@subcmd$ == "test" || .@subcmd$ == "teste") {
-		#BOT_AI_ACTIVE = 1;
-		#BOT_TEST_MODE = 1;
-		#BOT_AI_STAGE = 3; // Inicia direto na Cacada
-		#BOT_HUNT_START = gettimetick(2);
-		#BOT_WP_INDEX = 0;
-		#BOT_HUNT_COUNT = 0;
-		#BOT_CURRENT_TARGET = 0;
-		#BOT_PRT_MAX = 0;
-		#BOT_PRT_COUNT = 0;
-		#BOT_LAST_TX = 0;
-		#BOT_LAST_TY = 0;
-		#BOT_DIR_VX = 0;
-		#BOT_DIR_VY = 0;
-		#BOT_EXPLORE_STEPS = 0;
-		#BOT_WALL_HIT = 0;
-		#BOT_SKILL_ROT = 0;
-		#BOT_STUCK_X = 0;
-		#BOT_STUCK_Y = 0;
-		#BOT_STUCK_TICKS = 0;
-		#BOT_WAIT_END = 0;
+		@BOT_AI_ACTIVE = 1;
+		@BOT_TEST_MODE = 1;
+		@BOT_AI_STAGE = 3; // Inicia direto na Cacada
+		@BOT_HUNT_START = gettimetick(2);
+		@BOT_WP_INDEX = 0;
+		@BOT_HUNT_COUNT = 0;
+		@BOT_CURRENT_TARGET = 0;
+		@BOT_PRT_MAX = 0;
+		@BOT_PRT_COUNT = 0;
+		@BOT_LAST_TX = 0;
+		@BOT_LAST_TY = 0;
+		@BOT_DIR_VX = 0;
+		@BOT_DIR_VY = 0;
+		@BOT_EXPLORE_STEPS = 0;
+		@BOT_WALL_HIT = 0;
+		@BOT_SKILL_ROT = 0;
+		@BOT_STUCK_X = 0;
+		@BOT_STUCK_Y = 0;
+		@BOT_STUCK_TICKS = 0;
+		@BOT_WAIT_END = 0;
 		stand;
 		callsub OnDetectTargetJob;
 		callsub OnGetHuntMap;
@@ -88,13 +88,13 @@ OnInit:
 
 	// @iniciante at / @iniciante offline
 	if (.@subcmd$ == "at" || .@subcmd$ == "offline" || .@subcmd$ == "autotrade") {
-		if (!#BOT_AI_ACTIVE) {
-			#BOT_AI_ACTIVE = 1;
-			#BOT_TEST_MODE = 0;
-			#BOT_AI_STAGE = 0; // Inicia em Prontera
-			#BOT_WP_INDEX = 0;
-			#BOT_HUNT_START = 0;
-			#BOT_WAIT_END = 0;
+		if (!@BOT_AI_ACTIVE) {
+			@BOT_AI_ACTIVE = 1;
+			@BOT_TEST_MODE = 0;
+			@BOT_AI_STAGE = 0; // Inicia em Prontera
+			@BOT_WP_INDEX = 0;
+			@BOT_HUNT_START = 0;
+			@BOT_WAIT_END = 0;
 			stand;
 			callsub OnDetectTargetJob;
 			savepoint "prontera", 156, 178;
@@ -108,41 +108,41 @@ OnInit:
 		end;
 	}
 
-	if (#BOT_AI_ACTIVE) {
-		#BOT_AI_ACTIVE = 0;
-		#BOT_TEST_MODE = 0;
-		#BOT_HUNT_START = 0;
-		#BOT_CURRENT_TARGET = 0;
-		#BOT_PRT_MAX = 0;
-		#BOT_PRT_COUNT = 0;
-		#BOT_STUCK_X = 0;
-		#BOT_STUCK_Y = 0;
-		#BOT_STUCK_TICKS = 0;
+	if (@BOT_AI_ACTIVE) {
+		@BOT_AI_ACTIVE = 0;
+		@BOT_TEST_MODE = 0;
+		@BOT_HUNT_START = 0;
+		@BOT_CURRENT_TARGET = 0;
+		@BOT_PRT_MAX = 0;
+		@BOT_PRT_COUNT = 0;
+		@BOT_STUCK_X = 0;
+		@BOT_STUCK_Y = 0;
+		@BOT_STUCK_TICKS = 0;
 		deltimer "PlayerBotAI::OnStepTimer";
 		unitstopwalk getcharid(3), USW_FORCE_STOP;
 		unitstopattack getcharid(3);
 		dispbottom "[Iniciante AI]: Sistema desativado com sucesso.", 0xFF5555;
 	} else {
-		#BOT_AI_ACTIVE = 1;
-		#BOT_TEST_MODE = 0; // Padrao normal
-		#BOT_AI_STAGE = 0;  // Inicia em Prontera
-		#BOT_HUNT_START = 0;
-		#BOT_WP_INDEX = 0;
-		#BOT_HUNT_COUNT = 0;
-		#BOT_CURRENT_TARGET = 0;
-		#BOT_PRT_MAX = 0;
-		#BOT_PRT_COUNT = 0;
-		#BOT_LAST_TX = 0;
-		#BOT_LAST_TY = 0;
-		#BOT_DIR_VX = 0;
-		#BOT_DIR_VY = 0;
-		#BOT_EXPLORE_STEPS = 0;
-		#BOT_WALL_HIT = 0;
-		#BOT_SKILL_ROT = 0;
-		#BOT_STUCK_X = 0;
-		#BOT_STUCK_Y = 0;
-		#BOT_STUCK_TICKS = 0;
-		#BOT_WAIT_END = 0;
+		@BOT_AI_ACTIVE = 1;
+		@BOT_TEST_MODE = 0; // Padrao normal
+		@BOT_AI_STAGE = 0;  // Inicia em Prontera
+		@BOT_HUNT_START = 0;
+		@BOT_WP_INDEX = 0;
+		@BOT_HUNT_COUNT = 0;
+		@BOT_CURRENT_TARGET = 0;
+		@BOT_PRT_MAX = 0;
+		@BOT_PRT_COUNT = 0;
+		@BOT_LAST_TX = 0;
+		@BOT_LAST_TY = 0;
+		@BOT_DIR_VX = 0;
+		@BOT_DIR_VY = 0;
+		@BOT_EXPLORE_STEPS = 0;
+		@BOT_WALL_HIT = 0;
+		@BOT_SKILL_ROT = 0;
+		@BOT_STUCK_X = 0;
+		@BOT_STUCK_Y = 0;
+		@BOT_STUCK_TICKS = 0;
+		@BOT_WAIT_END = 0;
 		stand;
 		callsub OnDetectTargetJob;
 
@@ -239,26 +239,26 @@ OnGMCommand:
 		switch(.@opt) {
 			case 1: // MODO TESTE (Inicia direto na cacada)
 				if (attachrid(.@target_aid)) {
-					#BOT_AI_ACTIVE = 1;
-					#BOT_TEST_MODE = 1;
-					#BOT_AI_STAGE = 3; // Inicia direto na Cacada
-					#BOT_HUNT_START = gettimetick(2);
-					#BOT_WP_INDEX = 0;
-					#BOT_HUNT_COUNT = 0;
-					#BOT_CURRENT_TARGET = 0;
-					#BOT_PRT_MAX = 0;
-					#BOT_PRT_COUNT = 0;
-					#BOT_LAST_TX = 0;
-					#BOT_LAST_TY = 0;
-					#BOT_DIR_VX = 0;
-					#BOT_DIR_VY = 0;
-					#BOT_EXPLORE_STEPS = 0;
-					#BOT_WALL_HIT = 0;
-					#BOT_SKILL_ROT = 0;
-					#BOT_STUCK_X = 0;
-					#BOT_STUCK_Y = 0;
-					#BOT_STUCK_TICKS = 0;
-					#BOT_WAIT_END = 0;
+					@BOT_AI_ACTIVE = 1;
+					@BOT_TEST_MODE = 1;
+					@BOT_AI_STAGE = 3; // Inicia direto na Cacada
+					@BOT_HUNT_START = gettimetick(2);
+					@BOT_WP_INDEX = 0;
+					@BOT_HUNT_COUNT = 0;
+					@BOT_CURRENT_TARGET = 0;
+					@BOT_PRT_MAX = 0;
+					@BOT_PRT_COUNT = 0;
+					@BOT_LAST_TX = 0;
+					@BOT_LAST_TY = 0;
+					@BOT_DIR_VX = 0;
+					@BOT_DIR_VY = 0;
+					@BOT_EXPLORE_STEPS = 0;
+					@BOT_WALL_HIT = 0;
+					@BOT_SKILL_ROT = 0;
+					@BOT_STUCK_X = 0;
+					@BOT_STUCK_Y = 0;
+					@BOT_STUCK_TICKS = 0;
+					@BOT_WAIT_END = 0;
 					stand;
 					callsub OnDetectTargetJob;
 					callsub OnGetHuntMap;
@@ -294,26 +294,26 @@ OnGMCommand:
 
 			case 2: // MODO NORMAL
 				if (attachrid(.@target_aid)) {
-					#BOT_AI_ACTIVE = 1;
-					#BOT_TEST_MODE = 0;
-					#BOT_AI_STAGE = 0; // Inicia em Prontera
-					#BOT_HUNT_START = 0;
-					#BOT_WP_INDEX = 0;
-					#BOT_HUNT_COUNT = 0;
-					#BOT_CURRENT_TARGET = 0;
-					#BOT_PRT_MAX = 0;
-					#BOT_PRT_COUNT = 0;
-					#BOT_LAST_TX = 0;
-					#BOT_LAST_TY = 0;
-					#BOT_DIR_VX = 0;
-					#BOT_DIR_VY = 0;
-					#BOT_EXPLORE_STEPS = 0;
-					#BOT_WALL_HIT = 0;
-					#BOT_SKILL_ROT = 0;
-					#BOT_STUCK_X = 0;
-					#BOT_STUCK_Y = 0;
-					#BOT_STUCK_TICKS = 0;
-					#BOT_WAIT_END = 0;
+					@BOT_AI_ACTIVE = 1;
+					@BOT_TEST_MODE = 0;
+					@BOT_AI_STAGE = 0; // Inicia em Prontera
+					@BOT_HUNT_START = 0;
+					@BOT_WP_INDEX = 0;
+					@BOT_HUNT_COUNT = 0;
+					@BOT_CURRENT_TARGET = 0;
+					@BOT_PRT_MAX = 0;
+					@BOT_PRT_COUNT = 0;
+					@BOT_LAST_TX = 0;
+					@BOT_LAST_TY = 0;
+					@BOT_DIR_VX = 0;
+					@BOT_DIR_VY = 0;
+					@BOT_EXPLORE_STEPS = 0;
+					@BOT_WALL_HIT = 0;
+					@BOT_SKILL_ROT = 0;
+					@BOT_STUCK_X = 0;
+					@BOT_STUCK_Y = 0;
+					@BOT_STUCK_TICKS = 0;
+					@BOT_WAIT_END = 0;
 					stand;
 					callsub OnDetectTargetJob;
 
@@ -345,12 +345,12 @@ OnGMCommand:
 
 			case 3: // MODO OFFLINE (@at)
 				if (attachrid(.@target_aid)) {
-					if (!#BOT_AI_ACTIVE) {
-						#BOT_AI_ACTIVE = 1;
-						#BOT_TEST_MODE = 0;
-						#BOT_AI_STAGE = 0;
-						#BOT_WP_INDEX = 0;
-						#BOT_HUNT_START = 0;
+					if (!@BOT_AI_ACTIVE) {
+						@BOT_AI_ACTIVE = 1;
+						@BOT_TEST_MODE = 0;
+						@BOT_AI_STAGE = 0;
+						@BOT_WP_INDEX = 0;
+						@BOT_HUNT_START = 0;
 						callsub OnDetectTargetJob;
 						savepoint "prontera", 156, 178;
 						warp "prontera", 156, 178;
@@ -366,15 +366,15 @@ OnGMCommand:
 
 			case 4: // PARAR AI
 				if (attachrid(.@target_aid)) {
-					#BOT_AI_ACTIVE = 0;
-					#BOT_TEST_MODE = 0;
-					#BOT_HUNT_START = 0;
-					#BOT_CURRENT_TARGET = 0;
-					#BOT_PRT_MAX = 0;
-					#BOT_PRT_COUNT = 0;
-					#BOT_STUCK_X = 0;
-					#BOT_STUCK_Y = 0;
-					#BOT_STUCK_TICKS = 0;
+					@BOT_AI_ACTIVE = 0;
+					@BOT_TEST_MODE = 0;
+					@BOT_HUNT_START = 0;
+					@BOT_CURRENT_TARGET = 0;
+					@BOT_PRT_MAX = 0;
+					@BOT_PRT_COUNT = 0;
+					@BOT_STUCK_X = 0;
+					@BOT_STUCK_Y = 0;
+					@BOT_STUCK_TICKS = 0;
 					deltimer "PlayerBotAI::OnStepTimer";
 					unitstopwalk getcharid(3), USW_FORCE_STOP;
 					unitstopattack getcharid(3);
@@ -392,7 +392,7 @@ OnGMCommand:
 				                   "Novico -> Sacerdote / Sumo Sacerdote:" +
 				                   "Mercador -> Ferreiro / Mestre-Ferreiro");
 				if (attachrid(.@target_aid)) {
-					#BOT_TARGET_JOB = .@jchoice;
+					@BOT_TARGET_JOB = .@jchoice;
 					callsub OnCheckJobChange;
 				}
 				attachrid(.@gm_aid);
@@ -445,12 +445,12 @@ OnGMCommand:
 			end;
 		}
 		if (attachrid(.@target_aid)) {
-			if (!#BOT_AI_ACTIVE) {
-				#BOT_AI_ACTIVE = 1;
-				#BOT_TEST_MODE = 0;
-				#BOT_AI_STAGE = 0;
-				#BOT_WP_INDEX = 0;
-				#BOT_HUNT_START = 0;
+			if (!@BOT_AI_ACTIVE) {
+				@BOT_AI_ACTIVE = 1;
+				@BOT_TEST_MODE = 0;
+				@BOT_AI_STAGE = 0;
+				@BOT_WP_INDEX = 0;
+				@BOT_HUNT_START = 0;
 				callsub OnDetectTargetJob;
 				savepoint "prontera", 156, 178;
 				warp "prontera", 156, 178;
@@ -472,26 +472,26 @@ OnGMCommand:
 			end;
 		}
 		if (attachrid(.@target_aid)) {
-			#BOT_AI_ACTIVE = 1;
-			#BOT_TEST_MODE = 1;
-			#BOT_AI_STAGE = 3; // Inicia direto na Cacada
-			#BOT_HUNT_START = gettimetick(2);
-			#BOT_WP_INDEX = 0;
-			#BOT_HUNT_COUNT = 0;
-			#BOT_CURRENT_TARGET = 0;
-			#BOT_PRT_MAX = 0;
-			#BOT_PRT_COUNT = 0;
-			#BOT_LAST_TX = 0;
-			#BOT_LAST_TY = 0;
-			#BOT_DIR_VX = 0;
-			#BOT_DIR_VY = 0;
-			#BOT_EXPLORE_STEPS = 0;
-			#BOT_WALL_HIT = 0;
-			#BOT_SKILL_ROT = 0;
-			#BOT_STUCK_X = 0;
-			#BOT_STUCK_Y = 0;
-			#BOT_STUCK_TICKS = 0;
-			#BOT_WAIT_END = 0;
+			@BOT_AI_ACTIVE = 1;
+			@BOT_TEST_MODE = 1;
+			@BOT_AI_STAGE = 3; // Inicia direto na Cacada
+			@BOT_HUNT_START = gettimetick(2);
+			@BOT_WP_INDEX = 0;
+			@BOT_HUNT_COUNT = 0;
+			@BOT_CURRENT_TARGET = 0;
+			@BOT_PRT_MAX = 0;
+			@BOT_PRT_COUNT = 0;
+			@BOT_LAST_TX = 0;
+			@BOT_LAST_TY = 0;
+			@BOT_DIR_VX = 0;
+			@BOT_DIR_VY = 0;
+			@BOT_EXPLORE_STEPS = 0;
+			@BOT_WALL_HIT = 0;
+			@BOT_SKILL_ROT = 0;
+			@BOT_STUCK_X = 0;
+			@BOT_STUCK_Y = 0;
+			@BOT_STUCK_TICKS = 0;
+			@BOT_WAIT_END = 0;
 			stand;
 			callsub OnDetectTargetJob;
 			callsub OnGetHuntMap;
@@ -533,26 +533,26 @@ OnGMCommand:
 			end;
 		}
 		if (attachrid(.@target_aid)) {
-			#BOT_AI_ACTIVE = 1;
-			#BOT_TEST_MODE = 0;
-			#BOT_AI_STAGE = 0; // Inicia em Prontera
-			#BOT_HUNT_START = 0;
-			#BOT_WP_INDEX = 0;
-			#BOT_HUNT_COUNT = 0;
-			#BOT_CURRENT_TARGET = 0;
-			#BOT_PRT_MAX = 0;
-			#BOT_PRT_COUNT = 0;
-			#BOT_LAST_TX = 0;
-			#BOT_LAST_TY = 0;
-			#BOT_DIR_VX = 0;
-			#BOT_DIR_VY = 0;
-			#BOT_EXPLORE_STEPS = 0;
-			#BOT_WALL_HIT = 0;
-			#BOT_SKILL_ROT = 0;
-			#BOT_STUCK_X = 0;
-			#BOT_STUCK_Y = 0;
-			#BOT_STUCK_TICKS = 0;
-			#BOT_WAIT_END = 0;
+			@BOT_AI_ACTIVE = 1;
+			@BOT_TEST_MODE = 0;
+			@BOT_AI_STAGE = 0; // Inicia em Prontera
+			@BOT_HUNT_START = 0;
+			@BOT_WP_INDEX = 0;
+			@BOT_HUNT_COUNT = 0;
+			@BOT_CURRENT_TARGET = 0;
+			@BOT_PRT_MAX = 0;
+			@BOT_PRT_COUNT = 0;
+			@BOT_LAST_TX = 0;
+			@BOT_LAST_TY = 0;
+			@BOT_DIR_VX = 0;
+			@BOT_DIR_VY = 0;
+			@BOT_EXPLORE_STEPS = 0;
+			@BOT_WALL_HIT = 0;
+			@BOT_SKILL_ROT = 0;
+			@BOT_STUCK_X = 0;
+			@BOT_STUCK_Y = 0;
+			@BOT_STUCK_TICKS = 0;
+			@BOT_WAIT_END = 0;
 			stand;
 			callsub OnDetectTargetJob;
 
@@ -590,15 +590,15 @@ OnGMCommand:
 			end;
 		}
 		if (attachrid(.@target_aid)) {
-			#BOT_AI_ACTIVE = 0;
-			#BOT_TEST_MODE = 0;
-			#BOT_HUNT_START = 0;
-			#BOT_CURRENT_TARGET = 0;
-			#BOT_PRT_MAX = 0;
-			#BOT_PRT_COUNT = 0;
-			#BOT_STUCK_X = 0;
-			#BOT_STUCK_Y = 0;
-			#BOT_STUCK_TICKS = 0;
+			@BOT_AI_ACTIVE = 0;
+			@BOT_TEST_MODE = 0;
+			@BOT_HUNT_START = 0;
+			@BOT_CURRENT_TARGET = 0;
+			@BOT_PRT_MAX = 0;
+			@BOT_PRT_COUNT = 0;
+			@BOT_STUCK_X = 0;
+			@BOT_STUCK_Y = 0;
+			@BOT_STUCK_TICKS = 0;
 			deltimer "PlayerBotAI::OnStepTimer";
 			unitstopwalk getcharid(3), USW_FORCE_STOP;
 			unitstopattack getcharid(3);
@@ -633,11 +633,11 @@ OnShowGMStatus:
 	.@t_name$ = getarg(1);
 
 	attachrid(.@target_aid);
-	.@b_active = #BOT_AI_ACTIVE;
-	.@b_test = #BOT_TEST_MODE;
-	.@b_stage = #BOT_AI_STAGE;
-	.@b_wp = #BOT_WP_INDEX;
-	.@b_job = #BOT_TARGET_JOB;
+	.@b_active = @BOT_AI_ACTIVE;
+	.@b_test = @BOT_TEST_MODE;
+	.@b_stage = @BOT_AI_STAGE;
+	.@b_wp = @BOT_WP_INDEX;
+	.@b_job = @BOT_TARGET_JOB;
 	.@b_base = BaseLevel;
 	.@b_jlvl = JobLevel;
 	.@b_map$ = strcharinfo(3);
@@ -670,22 +670,22 @@ OnShowGMStatus:
 // EVENTOS DO PERSONAGEM
 // ======================================================================
 OnPCLoginEvent:
-	if (#BOT_AI_ACTIVE) {
+	if (@BOT_AI_ACTIVE) {
 		savepoint "prontera", 156, 178;
 		warp "prontera", 156, 178;
-		#BOT_CURRENT_TARGET = 0;
-		#BOT_PRT_MAX = 0;
-		#BOT_PRT_COUNT = 0;
-		#BOT_STUCK_X = 0;
-		#BOT_STUCK_Y = 0;
-		#BOT_STUCK_TICKS = 0;
-		#BOT_HUNT_START = 0;
+		@BOT_CURRENT_TARGET = 0;
+		@BOT_PRT_MAX = 0;
+		@BOT_PRT_COUNT = 0;
+		@BOT_STUCK_X = 0;
+		@BOT_STUCK_Y = 0;
+		@BOT_STUCK_TICKS = 0;
+		@BOT_HUNT_START = 0;
 		addtimer 2000, "PlayerBotAI::OnStepTimer";
 	}
 	end;
 
 OnPCDieEvent:
-	if (#BOT_AI_ACTIVE) {
+	if (@BOT_AI_ACTIVE) {
 		sleep2 1500;
 		recovery 1;
 		percentheal 100, 100;
@@ -693,29 +693,29 @@ OnPCDieEvent:
 		callsub OnApplyBuffs;
 		callsub OnGetHuntMap;
 		warp @hunt_map$, 0, 0;
-		#BOT_AI_STAGE = 3; // Retorna imediatamente para a Cacada
-		#BOT_HUNT_START = gettimetick(2);
-		#BOT_WP_INDEX = 0;
-		#BOT_CURRENT_TARGET = 0;
-		#BOT_PRT_MAX = 0;
-		#BOT_PRT_COUNT = 0;
-		#BOT_LAST_TX = 0;
-		#BOT_LAST_TY = 0;
-		#BOT_HUNT_COUNT = 0;
-		#BOT_WALL_HIT = 0;
-		#BOT_DIR_VX = 0;
-		#BOT_DIR_VY = 0;
-		#BOT_EXPLORE_STEPS = 0;
-		#BOT_STUCK_X = 0;
-		#BOT_STUCK_Y = 0;
-		#BOT_STUCK_TICKS = 0;
-		#BOT_WAIT_END = 0;
+		@BOT_AI_STAGE = 3; // Retorna imediatamente para a Cacada
+		@BOT_HUNT_START = gettimetick(2);
+		@BOT_WP_INDEX = 0;
+		@BOT_CURRENT_TARGET = 0;
+		@BOT_PRT_MAX = 0;
+		@BOT_PRT_COUNT = 0;
+		@BOT_LAST_TX = 0;
+		@BOT_LAST_TY = 0;
+		@BOT_HUNT_COUNT = 0;
+		@BOT_WALL_HIT = 0;
+		@BOT_DIR_VX = 0;
+		@BOT_DIR_VY = 0;
+		@BOT_EXPLORE_STEPS = 0;
+		@BOT_STUCK_X = 0;
+		@BOT_STUCK_Y = 0;
+		@BOT_STUCK_TICKS = 0;
+		@BOT_WAIT_END = 0;
 		addtimer 1500, "PlayerBotAI::OnStepTimer";
 	}
 	end;
 
 OnPCBaseLvUpEvent:
-	if (#BOT_AI_ACTIVE) {
+	if (@BOT_AI_ACTIVE) {
 		callsub OnDistributeStats;
 		callsub OnCheckMapSwitch;
 		callsub OnCheckSpeedPotion;
@@ -724,7 +724,7 @@ OnPCBaseLvUpEvent:
 	end;
 
 OnPCJobLvUpEvent:
-	if (#BOT_AI_ACTIVE) {
+	if (@BOT_AI_ACTIVE) {
 		callsub OnDistributeSkills;
 		callsub OnCheckJobChange;
 	}
@@ -741,7 +741,7 @@ OnFinishEdenRest:
 // LOOP PRINCIPAL DE INTELIGENCIA ARTIFICIAL (PlayerBotAI)
 // ======================================================================
 OnStepTimer:
-	if (!#BOT_AI_ACTIVE) end;
+	if (!@BOT_AI_ACTIVE) end;
 	stand; // Bot NUNCA senta, permanece sempre em pe e ativo
 
 	// Limpeza de inventario se pesado
@@ -761,17 +761,17 @@ OnStepTimer:
 	// ESTAGIO 0: Caminhada Organica e Dinamica em Prontera
 	// Caminhada fluida com parada obrigatoria de no minimo 1 minuto em cada ponto
 	// =========================================================
-	if (#BOT_AI_STAGE == 0) {
+	if (@BOT_AI_STAGE == 0) {
 		getmapxy(.@m$, .@cx, .@cy, BL_PC);
 		if (.@m$ != "prontera") {
 			stand;
 			warp "prontera", 156, 178;
-			#BOT_PRT_MAX = 0;
-			#BOT_PRT_COUNT = 0;
-			#BOT_WP_INDEX = 0;
-			#BOT_LAST_TX = 0;
-			#BOT_LAST_TY = 0;
-			#BOT_STUCK_TICKS = 0;
+			@BOT_PRT_MAX = 0;
+			@BOT_PRT_COUNT = 0;
+			@BOT_WP_INDEX = 0;
+			@BOT_LAST_TX = 0;
+			@BOT_LAST_TY = 0;
+			@BOT_STUCK_TICKS = 0;
 			addtimer 1500, "PlayerBotAI::OnStepTimer";
 			end;
 		}
@@ -823,43 +823,43 @@ OnStepTimer:
 		.@pool_size = getarraysize(.@pool_x);
 
 		// Sorteia quantos pontos visitara nesta passagem por Prontera:
-		if (#BOT_PRT_MAX <= 0) {
-			#BOT_PRT_MAX = rand(3, 6);
-			#BOT_PRT_COUNT = 0;
-			#BOT_WP_INDEX = 0;
-			#BOT_LAST_TX = 0;
-			#BOT_LAST_TY = 0;
-			#BOT_STUCK_TICKS = 0;
+		if (@BOT_PRT_MAX <= 0) {
+			@BOT_PRT_MAX = rand(3, 6);
+			@BOT_PRT_COUNT = 0;
+			@BOT_WP_INDEX = 0;
+			@BOT_LAST_TX = 0;
+			@BOT_LAST_TY = 0;
+			@BOT_STUCK_TICKS = 0;
 		}
 
 		// Sub-estagio 0: Sorteia o proximo ponto e inicia o passo suave
-		if (#BOT_WP_INDEX == 0) {
+		if (@BOT_WP_INDEX == 0) {
 			.@r = rand(0, .@pool_size - 1);
-			#BOT_LAST_TX = .@pool_x[.@r];
-			#BOT_LAST_TY = .@pool_y[.@r];
-			#BOT_WP_INDEX = 1; // Transiciona para caminhando
-			#BOT_STUCK_TICKS = 0;
-			#BOT_STUCK_X = .@cx;
-			#BOT_STUCK_Y = .@cy;
+			@BOT_LAST_TX = .@pool_x[.@r];
+			@BOT_LAST_TY = .@pool_y[.@r];
+			@BOT_WP_INDEX = 1; // Transiciona para caminhando
+			@BOT_STUCK_TICKS = 0;
+			@BOT_STUCK_X = .@cx;
+			@BOT_STUCK_Y = .@cy;
 			stand; // Garante que esta de pe para andar
 			unitstopwalk getcharid(3), USW_FORCE_STOP;
-			unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY; // Envia o caminho suave uma unica vez
+			unitwalk getcharid(3), @BOT_LAST_TX, @BOT_LAST_TY; // Envia o caminho suave uma unica vez
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
 		// Sub-estagio 1: Caminhando suavemente ate o ponto de destino
-		if (#BOT_WP_INDEX == 1) {
-			.@dist = distance(.@cx, .@cy, #BOT_LAST_TX, #BOT_LAST_TY);
+		if (@BOT_WP_INDEX == 1) {
+			.@dist = distance(.@cx, .@cy, @BOT_LAST_TX, @BOT_LAST_TY);
 
 			// Chegou perto do ponto de destino (<= 2 celulas):
 			if (.@dist <= 2) {
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				#BOT_PRT_COUNT++;
-				#BOT_WP_INDEX = 2; // Transiciona para parado no ponto
-				#BOT_STUCK_TICKS = 0;
+				@BOT_PRT_COUNT++;
+				@BOT_WP_INDEX = 2; // Transiciona para parado no ponto
+				@BOT_STUCK_TICKS = 0;
 				// Parada obrigatoria no ponto: Minimo 1 minuto (60 a 180s no modo start | 5s no teste)
-				#BOT_WAIT_END = gettimetick(2) + (#BOT_TEST_MODE ? 5 : rand(60, 180));
+				@BOT_WAIT_END = gettimetick(2) + (@BOT_TEST_MODE ? 5 : rand(60, 180));
 
 				// Permanece em pe observando o movimento (sem sentar):
 				stand;
@@ -869,43 +869,43 @@ OnStepTimer:
 			}
 
 			// Anti-travamento inteligente caso colida com obstaculo por mais de 5s:
-			if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
-				#BOT_STUCK_TICKS++;
-				if (#BOT_STUCK_TICKS >= 5) {
+			if (@BOT_STUCK_X == .@cx && @BOT_STUCK_Y == .@cy) {
+				@BOT_STUCK_TICKS++;
+				if (@BOT_STUCK_TICKS >= 5) {
 					// Sorteia outro ponto aberto a pe
-					#BOT_WP_INDEX = 0;
-					#BOT_LAST_TX = 0;
-					#BOT_LAST_TY = 0;
-					#BOT_STUCK_TICKS = 0;
+					@BOT_WP_INDEX = 0;
+					@BOT_LAST_TX = 0;
+					@BOT_LAST_TY = 0;
+					@BOT_STUCK_TICKS = 0;
 					unitstopwalk getcharid(3), USW_FORCE_STOP;
 					addtimer 500, "PlayerBotAI::OnStepTimer";
 					end;
 				}
 			} else {
-				#BOT_STUCK_TICKS = 0;
+				@BOT_STUCK_TICKS = 0;
 			}
 
-			#BOT_STUCK_X = .@cx;
-			#BOT_STUCK_Y = .@cy;
+			@BOT_STUCK_X = .@cx;
+			@BOT_STUCK_Y = .@cy;
 
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
 		// Sub-estagio 2: Parado no ponto descansando/observando (Minimo 1 minuto)
-		if (#BOT_WP_INDEX == 2) {
-			if (gettimetick(2) >= #BOT_WAIT_END) {
+		if (@BOT_WP_INDEX == 2) {
+			if (gettimetick(2) >= @BOT_WAIT_END) {
 				stand; // Levanta do chao
 				// Se ja visitou todos os pontos sorteados desta passagem -> Vai para o Eden
-				if (#BOT_PRT_COUNT >= #BOT_PRT_MAX) {
-					#BOT_AI_STAGE = 2; // Segue para o Grupo Eden
-					#BOT_WP_INDEX = 0;
-					#BOT_PRT_MAX = 0;
-					#BOT_PRT_COUNT = 0;
-					#BOT_LAST_TX = 0;
-					#BOT_LAST_TY = 0;
-					#BOT_STUCK_TICKS = 0;
-					#BOT_WAIT_END = 0;
+				if (@BOT_PRT_COUNT >= @BOT_PRT_MAX) {
+					@BOT_AI_STAGE = 2; // Segue para o Grupo Eden
+					@BOT_WP_INDEX = 0;
+					@BOT_PRT_MAX = 0;
+					@BOT_PRT_COUNT = 0;
+					@BOT_LAST_TX = 0;
+					@BOT_LAST_TY = 0;
+					@BOT_STUCK_TICKS = 0;
+					@BOT_WAIT_END = 0;
 					unitstopwalk getcharid(3), USW_FORCE_STOP;
 					warp "moc_para01", 31, 14;
 					addtimer 1500, "PlayerBotAI::OnStepTimer";
@@ -913,11 +913,11 @@ OnStepTimer:
 				}
 
 				// Ainda tem pontos a visitar: sorteia o proximo a partir de onde esta agora
-				#BOT_WP_INDEX = 0;
-				#BOT_LAST_TX = 0;
-				#BOT_LAST_TY = 0;
-				#BOT_STUCK_TICKS = 0;
-				#BOT_WAIT_END = 0;
+				@BOT_WP_INDEX = 0;
+				@BOT_LAST_TX = 0;
+				@BOT_LAST_TY = 0;
+				@BOT_STUCK_TICKS = 0;
+				@BOT_WAIT_END = 0;
 				addtimer 500, "PlayerBotAI::OnStepTimer";
 				end;
 			}
@@ -930,15 +930,15 @@ OnStepTimer:
 	// =========================================================
 	// ESTAGIO 1: Descanso Distribuido em Prontera (Minimo 1 Minuto no Modo Start)
 	// =========================================================
-	if (#BOT_AI_STAGE == 1) {
+	if (@BOT_AI_STAGE == 1) {
 		getmapxy(.@m$, .@cx, .@cy, BL_PC);
 		if (.@m$ != "prontera") {
 			stand;
 			warp "prontera", 156, 178;
-			#BOT_WP_INDEX = 0;
-			#BOT_LAST_TX = 0;
-			#BOT_LAST_TY = 0;
-			#BOT_STUCK_TICKS = 0;
+			@BOT_WP_INDEX = 0;
+			@BOT_LAST_TX = 0;
+			@BOT_LAST_TY = 0;
+			@BOT_STUCK_TICKS = 0;
 			addtimer 1500, "PlayerBotAI::OnStepTimer";
 			end;
 		}
@@ -960,71 +960,71 @@ OnStepTimer:
 		.@p_rest_size = getarraysize(.@p_rest_x);
 
 		// Sorteia o ponto de descanso de forma 100% uniforme:
-		if (#BOT_LAST_TX == 0 || #BOT_LAST_TY == 0) {
+		if (@BOT_LAST_TX == 0 || @BOT_LAST_TY == 0) {
 			.@r_idx = rand(0, .@p_rest_size - 1);
-			#BOT_LAST_TX = .@p_rest_x[.@r_idx];
-			#BOT_LAST_TY = .@p_rest_y[.@r_idx];
-			#BOT_STUCK_TICKS = 0;
+			@BOT_LAST_TX = .@p_rest_x[.@r_idx];
+			@BOT_LAST_TY = .@p_rest_y[.@r_idx];
+			@BOT_STUCK_TICKS = 0;
 		}
 
 		// Sub-estagio 0: Caminhando ate o ponto de descanso sorteado
-		if (#BOT_WP_INDEX == 0) {
-			.@dist = distance(.@cx, .@cy, #BOT_LAST_TX, #BOT_LAST_TY);
+		if (@BOT_WP_INDEX == 0) {
+			.@dist = distance(.@cx, .@cy, @BOT_LAST_TX, @BOT_LAST_TY);
 
 			if (.@dist <= 2) {
-				#BOT_WP_INDEX = 1; // Em descanso em pe
-				#BOT_STUCK_TICKS = 0;
+				@BOT_WP_INDEX = 1; // Em descanso em pe
+				@BOT_STUCK_TICKS = 0;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				stand; // Permanece em pe no ponto escolhido
 
-				if (#BOT_TEST_MODE) {
-					#BOT_WAIT_END = gettimetick(2) + 5;
+				if (@BOT_TEST_MODE) {
+					@BOT_WAIT_END = gettimetick(2) + 5;
 				} else {
 					// No modo Start: Minimo de 1 minuto e Maximo de 5 minutos (60 a 300 segundos)
-					#BOT_WAIT_END = gettimetick(2) + rand(60, 300);
+					@BOT_WAIT_END = gettimetick(2) + rand(60, 300);
 				}
 				addtimer 1000, "PlayerBotAI::OnStepTimer";
 				end;
 			}
 
 			// Inicia caminhada ou anti-travamento para o ponto de descanso (100% a pe):
-			if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
-				#BOT_STUCK_TICKS++;
-				if (#BOT_STUCK_TICKS >= 3) {
+			if (@BOT_STUCK_X == .@cx && @BOT_STUCK_Y == .@cy) {
+				@BOT_STUCK_TICKS++;
+				if (@BOT_STUCK_TICKS >= 3) {
 					// Se encontrou obstaculo no caminho, sorteia outro ponto aberto e continua a pe
 					.@r_idx = rand(0, .@p_rest_size - 1);
-					#BOT_LAST_TX = .@p_rest_x[.@r_idx];
-					#BOT_LAST_TY = .@p_rest_y[.@r_idx];
-					#BOT_STUCK_TICKS = 0;
+					@BOT_LAST_TX = .@p_rest_x[.@r_idx];
+					@BOT_LAST_TY = .@p_rest_y[.@r_idx];
+					@BOT_STUCK_TICKS = 0;
 					unitstopwalk getcharid(3), USW_FORCE_STOP;
-					unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY;
+					unitwalk getcharid(3), @BOT_LAST_TX, @BOT_LAST_TY;
 					addtimer 1000, "PlayerBotAI::OnStepTimer";
 					end;
 				}
 			} else {
-				#BOT_STUCK_TICKS = 0;
+				@BOT_STUCK_TICKS = 0;
 			}
 
 			unitstopwalk getcharid(3), USW_FORCE_STOP;
-			unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY;
+			unitwalk getcharid(3), @BOT_LAST_TX, @BOT_LAST_TY;
 
-			#BOT_STUCK_X = .@cx;
-			#BOT_STUCK_Y = .@cy;
+			@BOT_STUCK_X = .@cx;
+			@BOT_STUCK_Y = .@cy;
 
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
 		// Sub-estagio 1: Em pe descansando em seu ponto
-		if (#BOT_WP_INDEX == 1) {
-			if (gettimetick(2) >= #BOT_WAIT_END) {
+		if (@BOT_WP_INDEX == 1) {
+			if (gettimetick(2) >= @BOT_WAIT_END) {
 				stand;
-				#BOT_AI_STAGE = 2;
-				#BOT_WP_INDEX = 0;
-				#BOT_LAST_TX = 0;
-				#BOT_LAST_TY = 0;
-				#BOT_STUCK_TICKS = 0;
-				#BOT_WAIT_END = 0;
+				@BOT_AI_STAGE = 2;
+				@BOT_WP_INDEX = 0;
+				@BOT_LAST_TX = 0;
+				@BOT_LAST_TY = 0;
+				@BOT_STUCK_TICKS = 0;
+				@BOT_WAIT_END = 0;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				warp "moc_para01", 31, 14;
 				addtimer 1500, "PlayerBotAI::OnStepTimer";
@@ -1038,46 +1038,46 @@ OnStepTimer:
 	// =========================================================
 	// ESTAGIO 2: Grupo Eden (Minimo 1 Minuto e Maximo 5 Minutos) - 100% a pe
 	// =========================================================
-	if (#BOT_AI_STAGE == 2) {
+	if (@BOT_AI_STAGE == 2) {
 		stand;
 		getmapxy(.@m$, .@cx, .@cy, BL_PC);
 		if (.@m$ != "moc_para01") {
 			stand;
 			warp "moc_para01", 31, 14;
-			#BOT_WP_INDEX = 0;
-			#BOT_LAST_TX = 0;
-			#BOT_LAST_TY = 0;
-			#BOT_STUCK_TICKS = 0;
+			@BOT_WP_INDEX = 0;
+			@BOT_LAST_TX = 0;
+			@BOT_LAST_TY = 0;
+			@BOT_STUCK_TICKS = 0;
 			addtimer 1500, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
 		// Sub-estagio 0: Chegou na entrada (31,14) -> Tempo de espera na entrada
-		if (#BOT_WP_INDEX == 0) {
-			#BOT_WP_INDEX = 1; // Aguardando tempo na entrada
-			#BOT_LAST_TX = 0;
-			#BOT_LAST_TY = 0;
-			#BOT_STUCK_TICKS = 0;
+		if (@BOT_WP_INDEX == 0) {
+			@BOT_WP_INDEX = 1; // Aguardando tempo na entrada
+			@BOT_LAST_TX = 0;
+			@BOT_LAST_TY = 0;
+			@BOT_STUCK_TICKS = 0;
 			unitstopwalk getcharid(3), USW_FORCE_STOP;
 
-			if (#BOT_TEST_MODE) {
-				#BOT_WAIT_END = gettimetick(2) + 5;
+			if (@BOT_TEST_MODE) {
+				@BOT_WAIT_END = gettimetick(2) + 5;
 			} else {
 				// No modo Start: 1 a 3 minutos (60 a 180 segundos)
-				#BOT_WAIT_END = gettimetick(2) + rand(60, 180);
+				@BOT_WAIT_END = gettimetick(2) + rand(60, 180);
 			}
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
 		// Sub-estagio 1: Aguardando tempo na entrada do Eden
-		if (#BOT_WP_INDEX == 1) {
-			if (gettimetick(2) >= #BOT_WAIT_END) {
-				#BOT_WP_INDEX = 2; // Vai para uma mesa a pe
-				#BOT_LAST_TX = 0;
-				#BOT_LAST_TY = 0;
-				#BOT_STUCK_TICKS = 0;
-				#BOT_WAIT_END = 0;
+		if (@BOT_WP_INDEX == 1) {
+			if (gettimetick(2) >= @BOT_WAIT_END) {
+				@BOT_WP_INDEX = 2; // Vai para uma mesa a pe
+				@BOT_LAST_TX = 0;
+				@BOT_LAST_TY = 0;
+				@BOT_STUCK_TICKS = 0;
+				@BOT_WAIT_END = 0;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				addtimer 500, "PlayerBotAI::OnStepTimer";
 				end;
@@ -1087,75 +1087,75 @@ OnStepTimer:
 		}
 
 		// Sub-estagio 2: Caminhando da entrada (31,14) para uma mesa de descanso sorteada
-		if (#BOT_WP_INDEX == 2) {
+		if (@BOT_WP_INDEX == 2) {
 			// Grade de mesas/assentos distribuidos no Eden
 			setarray .@eden_table_x[0], 28, 26, 30, 28, 26, 30, 32, 24, 22, 34, 28, 30;
 			setarray .@eden_table_y[0], 26, 26, 26, 28, 28, 28, 26, 26, 28, 28, 30, 30;
 			.@eden_size = getarraysize(.@eden_table_x);
 
-			if (#BOT_LAST_TX == 0 || #BOT_LAST_TY == 0) {
+			if (@BOT_LAST_TX == 0 || @BOT_LAST_TY == 0) {
 				.@e_idx = rand(0, .@eden_size - 1);
-				#BOT_LAST_TX = .@eden_table_x[.@e_idx];
-				#BOT_LAST_TY = .@eden_table_y[.@e_idx];
-				#BOT_STUCK_TICKS = 0;
+				@BOT_LAST_TX = .@eden_table_x[.@e_idx];
+				@BOT_LAST_TY = .@eden_table_y[.@e_idx];
+				@BOT_STUCK_TICKS = 0;
 			}
 
-			.@dist = distance(.@cx, .@cy, #BOT_LAST_TX, #BOT_LAST_TY);
+			.@dist = distance(.@cx, .@cy, @BOT_LAST_TX, @BOT_LAST_TY);
 
 			// Chegou perto da mesa de descanso sorteada (<= 2 celulas)
 			if (.@dist <= 2) {
-				#BOT_WP_INDEX = 3; // Em descanso em pe na mesa
-				#BOT_STUCK_TICKS = 0;
+				@BOT_WP_INDEX = 3; // Em descanso em pe na mesa
+				@BOT_STUCK_TICKS = 0;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				stand; // Permanece em pe na mesa sorteada
 
-				if (#BOT_TEST_MODE) {
-					#BOT_WAIT_END = gettimetick(2) + 5;
+				if (@BOT_TEST_MODE) {
+					@BOT_WAIT_END = gettimetick(2) + 5;
 				} else {
 					// No modo Start: Minimo de 1 minuto e Maximo de 5 minutos (60 a 300 segundos)
-					#BOT_WAIT_END = gettimetick(2) + rand(60, 300);
+					@BOT_WAIT_END = gettimetick(2) + rand(60, 300);
 				}
 				addtimer 1000, "PlayerBotAI::OnStepTimer";
 				end;
 			}
 
 			// Inicia caminhada continua para a mesa sorteada (100% a pe, sem teleporte):
-			if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
-				#BOT_STUCK_TICKS++;
-				if (#BOT_STUCK_TICKS >= 4) {
-					#BOT_WP_INDEX = 3;
-					#BOT_LAST_TX = 0;
-					#BOT_LAST_TY = 0;
-					#BOT_STUCK_TICKS = 0;
+			if (@BOT_STUCK_X == .@cx && @BOT_STUCK_Y == .@cy) {
+				@BOT_STUCK_TICKS++;
+				if (@BOT_STUCK_TICKS >= 4) {
+					@BOT_WP_INDEX = 3;
+					@BOT_LAST_TX = 0;
+					@BOT_LAST_TY = 0;
+					@BOT_STUCK_TICKS = 0;
 					unitstopwalk getcharid(3), USW_FORCE_STOP;
 					stand;
-					#BOT_WAIT_END = gettimetick(2) + (#BOT_TEST_MODE ? 5 : rand(60, 300));
+					@BOT_WAIT_END = gettimetick(2) + (@BOT_TEST_MODE ? 5 : rand(60, 300));
 					addtimer 1000, "PlayerBotAI::OnStepTimer";
 					end;
 				}
 			} else {
-				#BOT_STUCK_TICKS = 0;
+				@BOT_STUCK_TICKS = 0;
 			}
 
 			unitstopwalk getcharid(3), USW_FORCE_STOP;
-			unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY;
+			unitwalk getcharid(3), @BOT_LAST_TX, @BOT_LAST_TY;
 
-			#BOT_STUCK_X = .@cx;
-			#BOT_STUCK_Y = .@cy;
+			@BOT_STUCK_X = .@cx;
+			@BOT_STUCK_Y = .@cy;
 
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
 		// Sub-estagio 3: Descansando sentado na mesa do Eden
-		if (#BOT_WP_INDEX == 3) {
-			if (gettimetick(2) >= #BOT_WAIT_END) {
+		if (@BOT_WP_INDEX == 3) {
+			if (gettimetick(2) >= @BOT_WAIT_END) {
 				stand; // Levanta da mesa
-				#BOT_WP_INDEX = 4; // Vai para a saida a pe
-				#BOT_LAST_TX = 0;
-				#BOT_LAST_TY = 0;
-				#BOT_STUCK_TICKS = 0;
-				#BOT_WAIT_END = 0;
+				@BOT_WP_INDEX = 4; // Vai para a saida a pe
+				@BOT_LAST_TX = 0;
+				@BOT_LAST_TY = 0;
+				@BOT_STUCK_TICKS = 0;
+				@BOT_WAIT_END = 0;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				addtimer 800, "PlayerBotAI::OnStepTimer";
 				end;
@@ -1165,26 +1165,26 @@ OnStepTimer:
 		}
 
 		// Sub-estagio 4: Apos descanso, caminhando de volta para a saida (31,14)
-		if (#BOT_WP_INDEX == 4) {
+		if (@BOT_WP_INDEX == 4) {
 			.@tx = 31; .@ty = 14;
 			.@dist = distance(.@cx, .@cy, .@tx, .@ty);
 
 			// Chegou perto da saida (<= 2 celulas) -> Vai para a cacada
 			if (.@dist <= 2) {
-				#BOT_AI_STAGE = 3;
-				#BOT_WP_INDEX = 0;
-				#BOT_HUNT_COUNT = 0;
-				#BOT_CURRENT_TARGET = 0;
-				#BOT_LAST_TX = 0;
-				#BOT_LAST_TY = 0;
-				#BOT_DIR_VX = 0;
-				#BOT_DIR_VY = 0;
-				#BOT_EXPLORE_STEPS = 0;
-				#BOT_WALL_HIT = 0;
-				#BOT_STUCK_X = 0;
-				#BOT_STUCK_Y = 0;
-				#BOT_STUCK_TICKS = 0;
-				#BOT_HUNT_START = gettimetick(2);
+				@BOT_AI_STAGE = 3;
+				@BOT_WP_INDEX = 0;
+				@BOT_HUNT_COUNT = 0;
+				@BOT_CURRENT_TARGET = 0;
+				@BOT_LAST_TX = 0;
+				@BOT_LAST_TY = 0;
+				@BOT_DIR_VX = 0;
+				@BOT_DIR_VY = 0;
+				@BOT_EXPLORE_STEPS = 0;
+				@BOT_WALL_HIT = 0;
+				@BOT_STUCK_X = 0;
+				@BOT_STUCK_Y = 0;
+				@BOT_STUCK_TICKS = 0;
+				@BOT_HUNT_START = gettimetick(2);
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				callsub OnGetHuntMap;
 				warp @hunt_map$, 0, 0;
@@ -1193,18 +1193,18 @@ OnStepTimer:
 			}
 
 			// Inicia caminhada continua para 31,14 (100% a pe, sem teleporte):
-			if (#BOT_LAST_TX != 31 || #BOT_LAST_TY != 14 || (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy)) {
-				if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
-					#BOT_STUCK_TICKS++;
-					if (#BOT_STUCK_TICKS >= 4) {
-						#BOT_AI_STAGE = 3;
-						#BOT_WP_INDEX = 0;
-						#BOT_HUNT_COUNT = 0;
-						#BOT_CURRENT_TARGET = 0;
-						#BOT_LAST_TX = 0;
-						#BOT_LAST_TY = 0;
-						#BOT_STUCK_TICKS = 0;
-						#BOT_HUNT_START = gettimetick(2);
+			if (@BOT_LAST_TX != 31 || @BOT_LAST_TY != 14 || (@BOT_STUCK_X == .@cx && @BOT_STUCK_Y == .@cy)) {
+				if (@BOT_STUCK_X == .@cx && @BOT_STUCK_Y == .@cy) {
+					@BOT_STUCK_TICKS++;
+					if (@BOT_STUCK_TICKS >= 4) {
+						@BOT_AI_STAGE = 3;
+						@BOT_WP_INDEX = 0;
+						@BOT_HUNT_COUNT = 0;
+						@BOT_CURRENT_TARGET = 0;
+						@BOT_LAST_TX = 0;
+						@BOT_LAST_TY = 0;
+						@BOT_STUCK_TICKS = 0;
+						@BOT_HUNT_START = gettimetick(2);
 						unitstopwalk getcharid(3), USW_FORCE_STOP;
 						callsub OnGetHuntMap;
 						warp @hunt_map$, 0, 0;
@@ -1212,16 +1212,16 @@ OnStepTimer:
 						end;
 					}
 				} else {
-					#BOT_STUCK_TICKS = 0;
+					@BOT_STUCK_TICKS = 0;
 				}
-				#BOT_LAST_TX = 31;
-				#BOT_LAST_TY = 14;
+				@BOT_LAST_TX = 31;
+				@BOT_LAST_TY = 14;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				unitwalk getcharid(3), 31, 14;
 			}
 
-			#BOT_STUCK_X = .@cx;
-			#BOT_STUCK_Y = .@cy;
+			@BOT_STUCK_X = .@cx;
+			@BOT_STUCK_Y = .@cy;
 
 			addtimer 1000, "PlayerBotAI::OnStepTimer";
 			end;
@@ -1231,7 +1231,7 @@ OnStepTimer:
 	// =========================================================
 	// ESTAGIO 3: Cacada Inteligente e Agressiva (Busca por getareaunits)
 	// =========================================================
-	if (#BOT_AI_STAGE == 3) {
+	if (@BOT_AI_STAGE == 3) {
 		stand;
 		callsub OnCheckBuffs;
 		callsub OnCheckSpeedPotion;
@@ -1242,37 +1242,37 @@ OnStepTimer:
 		if (.@m$ != @hunt_map$) {
 			stand;
 			warp @hunt_map$, 0, 0;
-			#BOT_CURRENT_TARGET = 0;
-			#BOT_LAST_TX = 0;
-			#BOT_LAST_TY = 0;
-			#BOT_STUCK_TICKS = 0;
-			#BOT_HUNT_START = gettimetick(2);
+			@BOT_CURRENT_TARGET = 0;
+			@BOT_LAST_TX = 0;
+			@BOT_LAST_TY = 0;
+			@BOT_STUCK_TICKS = 0;
+			@BOT_HUNT_START = gettimetick(2);
 			addtimer 1500, "PlayerBotAI::OnStepTimer";
 			end;
 		}
 
-		if (#BOT_HUNT_START == 0) {
-			#BOT_HUNT_START = gettimetick(2);
+		if (@BOT_HUNT_START == 0) {
+			@BOT_HUNT_START = gettimetick(2);
 		}
 
 		// Duracao da Cacada: 1 minuto (60s) no Modo Teste | 5 minutos (300s) no Modo Normal
-		.@hunt_duration = (#BOT_TEST_MODE ? 60 : 300);
-		if ((gettimetick(2) - #BOT_HUNT_START) >= .@hunt_duration) {
-			#BOT_HUNT_START = 0;
-			#BOT_AI_STAGE = 0; // Retorna para o Estagio 0 (Passeio e descanso em Prontera)
-			#BOT_WP_INDEX = 0;
-			#BOT_CURRENT_TARGET = 0;
-			#BOT_PRT_MAX = 0;
-			#BOT_PRT_COUNT = 0;
-			#BOT_LAST_TX = 0;
-			#BOT_LAST_TY = 0;
-			#BOT_DIR_VX = 0;
-			#BOT_DIR_VY = 0;
-			#BOT_EXPLORE_STEPS = 0;
-			#BOT_WALL_HIT = 0;
-			#BOT_STUCK_X = 0;
-			#BOT_STUCK_Y = 0;
-			#BOT_STUCK_TICKS = 0;
+		.@hunt_duration = (@BOT_TEST_MODE ? 60 : 300);
+		if ((gettimetick(2) - @BOT_HUNT_START) >= .@hunt_duration) {
+			@BOT_HUNT_START = 0;
+			@BOT_AI_STAGE = 0; // Retorna para o Estagio 0 (Passeio e descanso em Prontera)
+			@BOT_WP_INDEX = 0;
+			@BOT_CURRENT_TARGET = 0;
+			@BOT_PRT_MAX = 0;
+			@BOT_PRT_COUNT = 0;
+			@BOT_LAST_TX = 0;
+			@BOT_LAST_TY = 0;
+			@BOT_DIR_VX = 0;
+			@BOT_DIR_VY = 0;
+			@BOT_EXPLORE_STEPS = 0;
+			@BOT_WALL_HIT = 0;
+			@BOT_STUCK_X = 0;
+			@BOT_STUCK_Y = 0;
+			@BOT_STUCK_TICKS = 0;
 			unitstopattack getcharid(3);
 			unitstopwalk getcharid(3), USW_FORCE_STOP;
 			warp "prontera", 156, 178;
@@ -1281,13 +1281,13 @@ OnStepTimer:
 		}
 
 		// 1. Verifica se o monstro alvo anterior ainda existe, esta vivo, valido e nao esta sendo atacado por outro (Anti-KS)
-		if (#BOT_CURRENT_TARGET > 0) {
-			if (!unitexists(#BOT_CURRENT_TARGET)) {
-				#BOT_CURRENT_TARGET = 0;
-				#BOT_LAST_TX = 0;
-				#BOT_LAST_TY = 0;
+		if (@BOT_CURRENT_TARGET > 0) {
+			if (!unitexists(@BOT_CURRENT_TARGET)) {
+				@BOT_CURRENT_TARGET = 0;
+				@BOT_LAST_TX = 0;
+				@BOT_LAST_TY = 0;
 			} else {
-				getunitdata #BOT_CURRENT_TARGET, .@cur_data;
+				getunitdata @BOT_CURRENT_TARGET, .@cur_data;
 				.@cur_class = .@cur_data[UMOB_CLASS];
 				.@cur_target_id = .@cur_data[UMOB_TARGETID];
 				.@d = distance(.@cx, .@cy, .@cur_data[UMOB_X], .@cur_data[UMOB_Y]);
@@ -1295,9 +1295,9 @@ OnStepTimer:
 				// Se o monstro morreu, e planta/cogumelo, se afastou mais de 14 celulas ou foi engatado por outro jogador (Anti-KS):
 				if (.@cur_data[UMOB_HP] <= 0 || (.@cur_class >= 1078 && .@cur_class <= 1085) || (.@cur_class >= 1930 && .@cur_class <= 1933) || .@cur_class == 1064 ||
 				    .@d > 14 || (.@cur_data[UMOB_HP] < .@cur_data[UMOB_MAXHP] && .@cur_target_id > 0 && .@cur_target_id != getcharid(3))) {
-					#BOT_CURRENT_TARGET = 0;
-					#BOT_LAST_TX = 0;
-					#BOT_LAST_TY = 0;
+					@BOT_CURRENT_TARGET = 0;
+					@BOT_LAST_TX = 0;
+					@BOT_LAST_TY = 0;
 				} else {
 					.@mx = .@cur_data[UMOB_X];
 					.@my = .@cur_data[UMOB_Y];
@@ -1306,7 +1306,7 @@ OnStepTimer:
 		}
 
 		// 2. Se nao tem alvo valido, procura o monstro vivo com melhor EXP (+10/+15 niveis) em um raio de 14 celulas
-		if (#BOT_CURRENT_TARGET == 0) {
+		if (@BOT_CURRENT_TARGET == 0) {
 			.@num_mobs = getareaunits(BL_MOB, strcharinfo(3), .@cx - 14, .@cy - 14, .@cx + 14, .@cy + 14, .@mob_list[0]);
 			.@best_score = -999999;
 			.@best_mob = 0;
@@ -1351,17 +1351,17 @@ OnStepTimer:
 			}
 
 			if (.@best_mob > 0) {
-				#BOT_CURRENT_TARGET = .@best_mob;
+				@BOT_CURRENT_TARGET = .@best_mob;
 			}
 		}
 
 		// 3. Regra de Teleporte: Se NAO houver nenhum inimigo valido em 14 celulas -> Teleporta respeitando delay de 5 segundos!
-		if (#BOT_CURRENT_TARGET == 0) {
-			if ((gettimetick(2) - #BOT_LAST_TELEPORT) >= 5) {
-				#BOT_LAST_TELEPORT = gettimetick(2);
-				#BOT_LAST_TX = 0;
-				#BOT_LAST_TY = 0;
-				#BOT_STUCK_TICKS = 0;
+		if (@BOT_CURRENT_TARGET == 0) {
+			if ((gettimetick(2) - @BOT_LAST_TELEPORT) >= 5) {
+				@BOT_LAST_TELEPORT = gettimetick(2);
+				@BOT_LAST_TX = 0;
+				@BOT_LAST_TY = 0;
+				@BOT_STUCK_TICKS = 0;
 				unitstopattack getcharid(3);
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				warp @hunt_map$, 0, 0;
@@ -1369,21 +1369,21 @@ OnStepTimer:
 				end;
 			} else {
 				// Enquanto aguarda o delay de 5 segundos de teleporte, caminha e explora ao redor
-				if (#BOT_LAST_TX == 0 || #BOT_LAST_TY == 0 || (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy)) {
-					#BOT_LAST_TX = .@cx + rand(-8, 8);
-					#BOT_LAST_TY = .@cy + rand(-8, 8);
+				if (@BOT_LAST_TX == 0 || @BOT_LAST_TY == 0 || (@BOT_STUCK_X == .@cx && @BOT_STUCK_Y == .@cy)) {
+					@BOT_LAST_TX = .@cx + rand(-8, 8);
+					@BOT_LAST_TY = .@cy + rand(-8, 8);
 					unitstopwalk getcharid(3), USW_FORCE_STOP;
-					unitwalk getcharid(3), #BOT_LAST_TX, #BOT_LAST_TY;
+					unitwalk getcharid(3), @BOT_LAST_TX, @BOT_LAST_TY;
 				}
-				#BOT_STUCK_X = .@cx;
-				#BOT_STUCK_Y = .@cy;
+				@BOT_STUCK_X = .@cx;
+				@BOT_STUCK_Y = .@cy;
 				addtimer 600, "PlayerBotAI::OnStepTimer";
 				end;
 			}
 		}
 
 		// 4. Se encontrou um monstro por perto:
-		if (#BOT_CURRENT_TARGET > 0) {
+		if (@BOT_CURRENT_TARGET > 0) {
 			.@dist = distance(.@cx, .@cy, .@mx, .@my);
 			.@atk_range = 2; // Padrao corpo a corpo
 			if (Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger ||
@@ -1401,15 +1401,15 @@ OnStepTimer:
 			// Se ainda esta fora do alcance de ataque: anda em direcao ao monstro de forma fluida
 			if (.@dist > .@atk_range) {
 				// Sistema Anti-Travamento (Tolerancia de 8 ticks / aprox. 4 segundos antes de resetar)
-				if (#BOT_STUCK_X == .@cx && #BOT_STUCK_Y == .@cy) {
-					#BOT_STUCK_TICKS++;
-					if (#BOT_STUCK_TICKS >= 8) {
-						#BOT_CURRENT_TARGET = 0;
-						#BOT_LAST_TX = 0;
-						#BOT_LAST_TY = 0;
-						#BOT_STUCK_TICKS = 0;
-						if ((gettimetick(2) - #BOT_LAST_TELEPORT) >= 5) {
-							#BOT_LAST_TELEPORT = gettimetick(2);
+				if (@BOT_STUCK_X == .@cx && @BOT_STUCK_Y == .@cy) {
+					@BOT_STUCK_TICKS++;
+					if (@BOT_STUCK_TICKS >= 8) {
+						@BOT_CURRENT_TARGET = 0;
+						@BOT_LAST_TX = 0;
+						@BOT_LAST_TY = 0;
+						@BOT_STUCK_TICKS = 0;
+						if ((gettimetick(2) - @BOT_LAST_TELEPORT) >= 5) {
+							@BOT_LAST_TELEPORT = gettimetick(2);
 							unitstopwalk getcharid(3), USW_FORCE_STOP;
 							warp @hunt_map$, 0, 0;
 							addtimer 1000, "PlayerBotAI::OnStepTimer";
@@ -1417,40 +1417,40 @@ OnStepTimer:
 						}
 					}
 				} else {
-					#BOT_STUCK_TICKS = 0;
+					@BOT_STUCK_TICKS = 0;
 				}
 
 				// Envia o comando de andar apenas se o monstro mudou de posicao:
-				if (#BOT_LAST_TX != .@mx || #BOT_LAST_TY != .@my) {
-					#BOT_LAST_TX = .@mx;
-					#BOT_LAST_TY = .@my;
+				if (@BOT_LAST_TX != .@mx || @BOT_LAST_TY != .@my) {
+					@BOT_LAST_TX = .@mx;
+					@BOT_LAST_TY = .@my;
 					unitstopwalk getcharid(3), USW_FORCE_STOP;
 					unitwalk getcharid(3), .@mx, .@my;
 				}
 
-				#BOT_STUCK_X = .@cx;
-				#BOT_STUCK_Y = .@cy;
+				@BOT_STUCK_X = .@cx;
+				@BOT_STUCK_Y = .@cy;
 
 				addtimer 400, "PlayerBotAI::OnStepTimer";
 				end;
 			}
 
 			// Alcancou o monstro! Para de andar suavemente
-			if (#BOT_LAST_TX != 0 || #BOT_LAST_TY != 0) {
-				#BOT_LAST_TX = 0;
-				#BOT_LAST_TY = 0;
+			if (@BOT_LAST_TX != 0 || @BOT_LAST_TY != 0) {
+				@BOT_LAST_TX = 0;
+				@BOT_LAST_TY = 0;
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
 			}
-			#BOT_STUCK_TICKS = 0;
-			#BOT_STUCK_X = .@cx;
-			#BOT_STUCK_Y = .@cy;
+			@BOT_STUCK_TICKS = 0;
+			@BOT_STUCK_X = .@cx;
+			@BOT_STUCK_Y = .@cy;
 
 			// Garante SP cheio antes de executar as habilidades!
 			callsub OnCheckPotions;
 
 			// Engata ataque basico continuo
-			unitattack getcharid(3), #BOT_CURRENT_TARGET, 1;
-			#BOT_SKILL_ROT++;
+			unitattack getcharid(3), @BOT_CURRENT_TARGET, 1;
+			@BOT_SKILL_ROT++;
 
 			// Calcula o atraso de ataque e pós-conjuração baseado na ASPD real do personagem
 			.@cur_aspd = readparam(bAspd);
@@ -1465,38 +1465,38 @@ OnStepTimer:
 			if (BaseClass == Job_Swordman) {
 				// Guardiao Real (3rd Class):
 				if (getskilllv("LG_BANISHINGPOINT") > 0 || getskilllv("LG_PINPOINTATTACK") > 0 || getskilllv("LG_SHIELDPRESS") > 0 || getskilllv("LG_RAYOFGENESIS") > 0 || getskilllv("LG_CANNONSPEAR") > 0 || getskilllv("LG_OVERBRAND") > 0 || Class >= Job_Royal_Guard) {
-					.@rg_step = #BOT_SKILL_ROT % 5;
+					.@rg_step = @BOT_SKILL_ROT % 5;
 
 					// Alterna Golpe Fulminante com as habilidades de 3ª classe:
 					if (.@rg_step == 0) {
 						// 1. Golpe Fulminante (SM_BASH)
-						unitskilluseid getcharid(3), "SM_BASH", 10, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "SM_BASH", 10, @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 					} else if (.@rg_step == 1 && getskilllv("LG_BANISHINGPOINT") > 0 && Sp >= 20) {
 						// 2. Toque do Oblívio (LG_BANISHINGPOINT)
-						unitskilluseid getcharid(3), "LG_BANISHINGPOINT", (getskilllv("LG_BANISHINGPOINT") > 0 ? getskilllv("LG_BANISHINGPOINT") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "LG_BANISHINGPOINT", (getskilllv("LG_BANISHINGPOINT") > 0 ? getskilllv("LG_BANISHINGPOINT") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 350 ? .@aspd_delay : 350);
 					} else if (.@rg_step == 2 && getskilllv("LG_SHIELDPRESS") > 0 && Sp >= 15) {
 						// 3. Escudo Compressor (LG_SHIELDPRESS)
-						unitskilluseid getcharid(3), "LG_SHIELDPRESS", (getskilllv("LG_SHIELDPRESS") > 0 ? getskilllv("LG_SHIELDPRESS") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "LG_SHIELDPRESS", (getskilllv("LG_SHIELDPRESS") > 0 ? getskilllv("LG_SHIELDPRESS") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 700;
-					} else if (.@rg_step == 3 && getskilllv("LG_PINPOINTATTACK") > 0 && Sp >= 50 && (gettimetick(2) - #BOT_LAST_PINPOINT) >= 5) {
+					} else if (.@rg_step == 3 && getskilllv("LG_PINPOINTATTACK") > 0 && Sp >= 50 && (gettimetick(2) - @BOT_LAST_PINPOINT) >= 5) {
 						// 4. Lança do Destino (LG_PINPOINTATTACK)
-						#BOT_LAST_PINPOINT = gettimetick(2);
-						unitskilluseid getcharid(3), "LG_PINPOINTATTACK", (getskilllv("LG_PINPOINTATTACK") > 0 ? getskilllv("LG_PINPOINTATTACK") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						@BOT_LAST_PINPOINT = gettimetick(2);
+						unitskilluseid getcharid(3), "LG_PINPOINTATTACK", (getskilllv("LG_PINPOINTATTACK") > 0 ? getskilllv("LG_PINPOINTATTACK") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 800;
-					} else if (.@rg_step == 4 && getskilllv("LG_RAYOFGENESIS") > 0 && Sp >= 55 && (gettimetick(2) - #BOT_LAST_GENESIS) >= 3 && (getstatus(SC_INSPIRATION) || getstatus(SC_BANDING))) {
+					} else if (.@rg_step == 4 && getskilllv("LG_RAYOFGENESIS") > 0 && Sp >= 55 && (gettimetick(2) - @BOT_LAST_GENESIS) >= 3 && (getstatus(SC_INSPIRATION) || getstatus(SC_BANDING))) {
 						// 5. Luz da Criação (LG_RAYOFGENESIS)
-						#BOT_LAST_GENESIS = gettimetick(2);
+						@BOT_LAST_GENESIS = gettimetick(2);
 						unitskilluseid getcharid(3), "LG_RAYOFGENESIS", (getskilllv("LG_RAYOFGENESIS") > 0 ? getskilllv("LG_RAYOFGENESIS") : 10), getcharid(3), 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else {
 						// Fallback imediato: Golpe Fulminante ou Toque do Oblívio
 						if (getskilllv("LG_BANISHINGPOINT") > 0 && Sp >= 20) {
-							unitskilluseid getcharid(3), "LG_BANISHINGPOINT", (getskilllv("LG_BANISHINGPOINT") > 0 ? getskilllv("LG_BANISHINGPOINT") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							unitskilluseid getcharid(3), "LG_BANISHINGPOINT", (getskilllv("LG_BANISHINGPOINT") > 0 ? getskilllv("LG_BANISHINGPOINT") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 							.@skill_delay = (.@aspd_delay > 350 ? .@aspd_delay : 350);
 						} else {
-							unitskilluseid getcharid(3), "SM_BASH", 10, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							unitskilluseid getcharid(3), "SM_BASH", 10, @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 						}
 					}
@@ -1507,35 +1507,35 @@ OnStepTimer:
 						unitskilluseid getcharid(3), "RK_IGNITIONBREAK", getskilllv("RK_IGNITIONBREAK"), getcharid(3), 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (getskilllv("RK_DRAGONBREATH") > 0 && Sp >= 30) {
-						unitskilluseid getcharid(3), "RK_DRAGONBREATH", getskilllv("RK_DRAGONBREATH"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "RK_DRAGONBREATH", getskilllv("RK_DRAGONBREATH"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (getskilllv("RK_SONICWAVE") > 0 && Sp >= 25) {
-						unitskilluseid getcharid(3), "RK_SONICWAVE", getskilllv("RK_SONICWAVE"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "RK_SONICWAVE", getskilllv("RK_SONICWAVE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 800;
 					} else if (getskilllv("RK_HUNDREDSPEAR") > 0 && Sp >= 30) {
-						unitskilluseid getcharid(3), "RK_HUNDREDSPEAR", getskilllv("RK_HUNDREDSPEAR"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "RK_HUNDREDSPEAR", getskilllv("RK_HUNDREDSPEAR"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (getskilllv("LK_SPIRALPIERCE") > 0 && Sp >= 20) {
-						unitskilluseid getcharid(3), "LK_SPIRALPIERCE", getskilllv("LK_SPIRALPIERCE"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "LK_SPIRALPIERCE", getskilllv("LK_SPIRALPIERCE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (getskilllv("KN_BOWLINGBASH") > 0 && Sp >= 15) {
-						unitskilluseid getcharid(3), "KN_BOWLINGBASH", getskilllv("KN_BOWLINGBASH"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "KN_BOWLINGBASH", getskilllv("KN_BOWLINGBASH"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
-					} else if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 20) {
+					} else if ((@BOT_SKILL_ROT % 2 == 0) && Sp >= 20) {
 						unitskilluseid getcharid(3), "SM_MAGNUM", (getskilllv("SM_MAGNUM") > 0 ? getskilllv("SM_MAGNUM") : 10), getcharid(3), 0, 0, 0, 1;
 						.@skill_delay = 1200;
 					} else if (Sp >= 8) {
-						unitskilluseid getcharid(3), "SM_BASH", (getskilllv("SM_BASH") > 0 ? getskilllv("SM_BASH") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "SM_BASH", (getskilllv("SM_BASH") > 0 ? getskilllv("SM_BASH") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 					}
 				}
 				// Espadachim basico:
 				else {
-					if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 20 && getskilllv("SM_MAGNUM") > 0) {
+					if ((@BOT_SKILL_ROT % 2 == 0) && Sp >= 20 && getskilllv("SM_MAGNUM") > 0) {
 						unitskilluseid getcharid(3), "SM_MAGNUM", getskilllv("SM_MAGNUM"), getcharid(3), 0, 0, 0, 1;
 						.@skill_delay = 1200;
 					} else if (Sp >= 8) {
-						unitskilluseid getcharid(3), "SM_BASH", (getskilllv("SM_BASH") > 0 ? getskilllv("SM_BASH") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "SM_BASH", (getskilllv("SM_BASH") > 0 ? getskilllv("SM_BASH") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 					}
 				}
@@ -1545,49 +1545,49 @@ OnStepTimer:
 			// =========================================================
 			else if (BaseClass == Job_Mage) {
 				if (getskilllv("WL_CHAINLIGHTNING") > 0 && Sp >= 40) {
-					unitskilluseid getcharid(3), "WL_CHAINLIGHTNING", getskilllv("WL_CHAINLIGHTNING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "WL_CHAINLIGHTNING", getskilllv("WL_CHAINLIGHTNING"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 1000;
 				} else if (getskilllv("WL_CRIMSONROCK") > 0 && Sp >= 40) {
-					unitskilluseid getcharid(3), "WL_CRIMSONROCK", getskilllv("WL_CRIMSONROCK"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "WL_CRIMSONROCK", getskilllv("WL_CRIMSONROCK"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 1200;
 				} else if (getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 40) {
-					unitskilluseid getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 1000;
 				} else if (getskilllv("WZ_JUPITEL") > 0) {
-					.@w_rot = #BOT_SKILL_ROT % 4;
+					.@w_rot = @BOT_SKILL_ROT % 4;
 					if (.@w_rot == 0 && getskilllv("WZ_JUPITEL") > 0 && Sp >= 20) {
-						unitskilluseid getcharid(3), "WZ_JUPITEL", getskilllv("WZ_JUPITEL"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "WZ_JUPITEL", getskilllv("WZ_JUPITEL"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (.@w_rot == 1 && getskilllv("MG_FIREBALL") > 0 && Sp >= 15) {
-						unitskilluseid getcharid(3), "MG_FIREBALL", getskilllv("MG_FIREBALL"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "MG_FIREBALL", getskilllv("MG_FIREBALL"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (.@w_rot == 2 && getskilllv("MG_FIREBOLT") > 0 && Sp >= 15) {
-						unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (getskilllv("MG_SOULSTRIKE") > 0 && Sp >= 15) {
-						unitskilluseid getcharid(3), "MG_SOULSTRIKE", getskilllv("MG_SOULSTRIKE"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "MG_SOULSTRIKE", getskilllv("MG_SOULSTRIKE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
 					}
 				} else {
 					// 1a Classe Mago / Sabio:
-					.@m_rot = #BOT_SKILL_ROT % 5;
+					.@m_rot = @BOT_SKILL_ROT % 5;
 					if (.@m_rot == 0 && getskilllv("MG_FIREBOLT") > 0 && Sp >= 12) {
-						unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (.@m_rot == 1 && getskilllv("MG_FIREBALL") > 0 && Sp >= 12) {
-						unitskilluseid getcharid(3), "MG_FIREBALL", getskilllv("MG_FIREBALL"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "MG_FIREBALL", getskilllv("MG_FIREBALL"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (.@m_rot == 2 && getskilllv("MG_COLDBOLT") > 0 && Sp >= 12) {
-						unitskilluseid getcharid(3), "MG_COLDBOLT", getskilllv("MG_COLDBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "MG_COLDBOLT", getskilllv("MG_COLDBOLT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (.@m_rot == 3 && getskilllv("MG_LIGHTNINGBOLT") > 0 && Sp >= 12) {
-						unitskilluseid getcharid(3), "MG_LIGHTNINGBOLT", getskilllv("MG_LIGHTNINGBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "MG_LIGHTNINGBOLT", getskilllv("MG_LIGHTNINGBOLT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (getskilllv("MG_SOULSTRIKE") > 0 && Sp >= 12) {
-						unitskilluseid getcharid(3), "MG_SOULSTRIKE", getskilllv("MG_SOULSTRIKE"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "MG_SOULSTRIKE", getskilllv("MG_SOULSTRIKE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
 					} else if (Sp >= 12) {
-						unitskilluseid getcharid(3), "MG_FIREBOLT", (getskilllv("MG_FIREBOLT") > 0 ? getskilllv("MG_FIREBOLT") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "MG_FIREBOLT", (getskilllv("MG_FIREBOLT") > 0 ? getskilllv("MG_FIREBOLT") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					}
 				}
@@ -1596,26 +1596,26 @@ OnStepTimer:
 			// 3. ARQUEIRO / CACADOR / SNIPER / SENTINELA / TROVADOR / MUSA
 			// =========================================================
 			else if (BaseClass == Job_Archer) {
-				.@arc_step = #BOT_SKILL_ROT % 4;
+				.@arc_step = @BOT_SKILL_ROT % 4;
 
 				// Sentinela (3rd Class):
 				if (getskilllv("RA_ARROWSTORM") > 0 || getskilllv("RA_AIMEDBOLT") > 0 || Class >= Job_Ranger) {
 					if (.@arc_step == 0 && getskilllv("RA_ARROWSTORM") > 0 && Sp >= 30) {
-						unitskilluseid getcharid(3), "RA_ARROWSTORM", getskilllv("RA_ARROWSTORM"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "RA_ARROWSTORM", getskilllv("RA_ARROWSTORM"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (.@arc_step == 1 && getskilllv("SN_SHARPSHOOTING") > 0 && Sp >= 18) {
 						// Tiro Preciso (Sharpshooting)
-						unitskilluseid getcharid(3), "SN_SHARPSHOOTING", getskilllv("SN_SHARPSHOOTING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "SN_SHARPSHOOTING", getskilllv("SN_SHARPSHOOTING"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 					} else if (.@arc_step == 2 && getskilllv("RA_AIMEDBOLT") > 0 && Sp >= 25) {
 						// Disparo Certeiro
-						unitskilluseid getcharid(3), "RA_AIMEDBOLT", getskilllv("RA_AIMEDBOLT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "RA_AIMEDBOLT", getskilllv("RA_AIMEDBOLT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 800;
 					} else if (getskilllv("SN_SHARPSHOOTING") > 0 && Sp >= 18) {
-						unitskilluseid getcharid(3), "SN_SHARPSHOOTING", getskilllv("SN_SHARPSHOOTING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "SN_SHARPSHOOTING", getskilllv("SN_SHARPSHOOTING"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 					} else if (Sp >= 10) {
-						unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 					}
 				}
@@ -1623,30 +1623,30 @@ OnStepTimer:
 				else if (getskilllv("SN_SHARPSHOOTING") > 0 || getskilllv("SN_FALCONASSAULT") > 0 || Class == Job_Sniper) {
 					if ((.@arc_step % 2 == 0) && getskilllv("SN_SHARPSHOOTING") > 0 && Sp >= 18) {
 						// Tiro Preciso (Sharpshooting)
-						unitskilluseid getcharid(3), "SN_SHARPSHOOTING", (getskilllv("SN_SHARPSHOOTING") > 0 ? getskilllv("SN_SHARPSHOOTING") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "SN_SHARPSHOOTING", (getskilllv("SN_SHARPSHOOTING") > 0 ? getskilllv("SN_SHARPSHOOTING") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 					} else if (getskilllv("SN_FALCONASSAULT") > 0 && checkfalcon() && Sp >= 30) {
 						// Assalto do Falcao
-						unitskilluseid getcharid(3), "SN_FALCONASSAULT", getskilllv("SN_FALCONASSAULT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "SN_FALCONASSAULT", getskilllv("SN_FALCONASSAULT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (getskilllv("SN_SHARPSHOOTING") > 0 && Sp >= 18) {
-						unitskilluseid getcharid(3), "SN_SHARPSHOOTING", (getskilllv("SN_SHARPSHOOTING") > 0 ? getskilllv("SN_SHARPSHOOTING") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "SN_SHARPSHOOTING", (getskilllv("SN_SHARPSHOOTING") > 0 ? getskilllv("SN_SHARPSHOOTING") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 					} else if (Sp >= 10) {
-						unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 					}
 				}
 				// Cacador / Bardo / Odalisca / Arqueiro:
 				else {
 					if (getskilllv("WM_SEVERE_RAINSTORM") > 0 && Sp >= 30) {
-						unitskilluseid getcharid(3), "WM_SEVERE_RAINSTORM", getskilllv("WM_SEVERE_RAINSTORM"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "WM_SEVERE_RAINSTORM", getskilllv("WM_SEVERE_RAINSTORM"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
-					} else if ((#BOT_SKILL_ROT % 2 == 0) && Sp >= 15 && getskilllv("AC_SHOWER") > 0) {
-						unitskilluseid getcharid(3), "AC_SHOWER", getskilllv("AC_SHOWER"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					} else if ((@BOT_SKILL_ROT % 2 == 0) && Sp >= 15 && getskilllv("AC_SHOWER") > 0) {
+						unitskilluseid getcharid(3), "AC_SHOWER", getskilllv("AC_SHOWER"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (Sp >= 10) {
-						unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 					}
 				}
@@ -1656,19 +1656,19 @@ OnStepTimer:
 			// =========================================================
 			else if (BaseClass == Job_Thief) {
 				if (getskilllv("GC_CROSSIMPACT") > 0 && Sp >= 30) {
-					unitskilluseid getcharid(3), "GC_CROSSIMPACT", getskilllv("GC_CROSSIMPACT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "GC_CROSSIMPACT", getskilllv("GC_CROSSIMPACT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 800;
 				} else if (getskilllv("GC_ROLLINGCUTTER") > 0 && Sp >= 5) {
 					unitskilluseid getcharid(3), "GC_ROLLINGCUTTER", getskilllv("GC_ROLLINGCUTTER"), getcharid(3), 0, 0, 0, 1;
 					.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 				} else if (getskilllv("SC_FATALMENACE") > 0 && Sp >= 25) {
-					unitskilluseid getcharid(3), "SC_FATALMENACE", getskilllv("SC_FATALMENACE"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "SC_FATALMENACE", getskilllv("SC_FATALMENACE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 800;
 				} else if (getskilllv("AS_SONICBLOW") > 0 && Sp >= 25) {
-					unitskilluseid getcharid(3), "AS_SONICBLOW", getskilllv("AS_SONICBLOW"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "AS_SONICBLOW", getskilllv("AS_SONICBLOW"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 2000;
 				} else if (Sp >= 10) {
-					unitskilluseid getcharid(3), "TF_POISON", (getskilllv("TF_POISON") > 0 ? getskilllv("TF_POISON") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "TF_POISON", (getskilllv("TF_POISON") > 0 ? getskilllv("TF_POISON") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
 				}
 			}
@@ -1676,7 +1676,7 @@ OnStepTimer:
 			// 5. NOVICO / SACERDOTE / ARCEBISPO / MONGE / MESTRE / SHURA
 			// =========================================================
 			else if (BaseClass == Job_Acolyte) {
-				.@aco_step = #BOT_SKILL_ROT % 4;
+				.@aco_step = @BOT_SKILL_ROT % 4;
 
 				// Ramo Monge / Mestre / Shura:
 				if (Class == Job_Monk || Class == Job_Champion || Class >= Job_Sura || getskilllv("MO_TRIPLEATTACK") > 0 || getskilllv("MO_INVESTIGATE") > 0 || getskilllv("SR_TIGERCANNON") > 0) {
@@ -1700,7 +1700,7 @@ OnStepTimer:
 							.@skill_delay = 1000;
 						} else if (.@aco_step == 2 && getskilllv("SR_KNUCKLEARROW") > 0 && Sp >= 20) {
 							// Disparo de Esferas Espirituais
-							unitskilluseid getcharid(3), "SR_KNUCKLEARROW", (getskilllv("SR_KNUCKLEARROW") > 0 ? getskilllv("SR_KNUCKLEARROW") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							unitskilluseid getcharid(3), "SR_KNUCKLEARROW", (getskilllv("SR_KNUCKLEARROW") > 0 ? getskilllv("SR_KNUCKLEARROW") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 							.@skill_delay = 800;
 						} else if (getskilllv("SR_SKYNETBLOW") > 0 && Sp >= 20) {
 							// Tempestade Espiritual
@@ -1708,13 +1708,13 @@ OnStepTimer:
 							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 						} else if (getskilllv("MO_INVESTIGATE") > 0 && Sp >= 20) {
 							// Impacto Psiquico
-							unitskilluseid getcharid(3), "MO_INVESTIGATE", (getskilllv("MO_INVESTIGATE") > 0 ? getskilllv("MO_INVESTIGATE") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							unitskilluseid getcharid(3), "MO_INVESTIGATE", (getskilllv("MO_INVESTIGATE") > 0 ? getskilllv("MO_INVESTIGATE") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 							.@skill_delay = 800;
 						} else if (getskilllv("MO_COMBOFINISH") > 0 && Sp >= 15) {
-							unitskilluseid getcharid(3), "MO_COMBOFINISH", (getskilllv("MO_COMBOFINISH") > 0 ? getskilllv("MO_COMBOFINISH") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							unitskilluseid getcharid(3), "MO_COMBOFINISH", (getskilllv("MO_COMBOFINISH") > 0 ? getskilllv("MO_COMBOFINISH") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 						} else if (getskilllv("MO_CHAINCOMBO") > 0 && Sp >= 15) {
-							unitskilluseid getcharid(3), "MO_CHAINCOMBO", (getskilllv("MO_CHAINCOMBO") > 0 ? getskilllv("MO_CHAINCOMBO") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							unitskilluseid getcharid(3), "MO_CHAINCOMBO", (getskilllv("MO_CHAINCOMBO") > 0 ? getskilllv("MO_CHAINCOMBO") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 						}
 					}
@@ -1722,26 +1722,26 @@ OnStepTimer:
 					else if (getskilllv("MO_INVESTIGATE") > 0 || getskilllv("MO_FINGEROFFENSIVE") > 0 || getskilllv("CH_CHAINCRUSH") > 0 || Class == Job_Monk || Class == Job_Champion) {
 						if (.@aco_step == 0 && getskilllv("MO_INVESTIGATE") > 0 && Sp >= 20) {
 							// Impacto Psiquico
-							unitskilluseid getcharid(3), "MO_INVESTIGATE", (getskilllv("MO_INVESTIGATE") > 0 ? getskilllv("MO_INVESTIGATE") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							unitskilluseid getcharid(3), "MO_INVESTIGATE", (getskilllv("MO_INVESTIGATE") > 0 ? getskilllv("MO_INVESTIGATE") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 							.@skill_delay = 800;
 						} else if (.@aco_step == 1 && getskilllv("MO_FINGEROFFENSIVE") > 0 && Sp >= 20) {
 							// Disparo de Esferas
-							unitskilluseid getcharid(3), "MO_FINGEROFFENSIVE", (getskilllv("MO_FINGEROFFENSIVE") > 0 ? getskilllv("MO_FINGEROFFENSIVE") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							unitskilluseid getcharid(3), "MO_FINGEROFFENSIVE", (getskilllv("MO_FINGEROFFENSIVE") > 0 ? getskilllv("MO_FINGEROFFENSIVE") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 							.@skill_delay = 1000;
 						} else if (.@aco_step == 2 && getskilllv("CH_CHAINCRUSH") > 0 && Sp >= 30) {
 							// Combo Esmagador
-							unitskilluseid getcharid(3), "CH_CHAINCRUSH", (getskilllv("CH_CHAINCRUSH") > 0 ? getskilllv("CH_CHAINCRUSH") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							unitskilluseid getcharid(3), "CH_CHAINCRUSH", (getskilllv("CH_CHAINCRUSH") > 0 ? getskilllv("CH_CHAINCRUSH") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 							.@skill_delay = 1000;
 						} else if (.@aco_step == 3 && getskilllv("MO_COMBOFINISH") > 0 && Sp >= 15) {
 							// O Ultimo Dragao
-							unitskilluseid getcharid(3), "MO_COMBOFINISH", (getskilllv("MO_COMBOFINISH") > 0 ? getskilllv("MO_COMBOFINISH") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							unitskilluseid getcharid(3), "MO_COMBOFINISH", (getskilllv("MO_COMBOFINISH") > 0 ? getskilllv("MO_COMBOFINISH") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 						} else if (getskilllv("MO_CHAINCOMBO") > 0 && Sp >= 15) {
 							// Combo Quadruplo
-							unitskilluseid getcharid(3), "MO_CHAINCOMBO", (getskilllv("MO_CHAINCOMBO") > 0 ? getskilllv("MO_CHAINCOMBO") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							unitskilluseid getcharid(3), "MO_CHAINCOMBO", (getskilllv("MO_CHAINCOMBO") > 0 ? getskilllv("MO_CHAINCOMBO") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 						} else if (getskilllv("MO_INVESTIGATE") > 0 && Sp >= 20) {
-							unitskilluseid getcharid(3), "MO_INVESTIGATE", (getskilllv("MO_INVESTIGATE") > 0 ? getskilllv("MO_INVESTIGATE") : 5), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							unitskilluseid getcharid(3), "MO_INVESTIGATE", (getskilllv("MO_INVESTIGATE") > 0 ? getskilllv("MO_INVESTIGATE") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 							.@skill_delay = 800;
 						}
 					}
@@ -1749,16 +1749,16 @@ OnStepTimer:
 				// Ramo Sacerdote / Sumo Sacerdote / Arcebispo:
 				else {
 					if (getskilllv("AB_ADORAMUS") > 0 && Sp >= 30) {
-						unitskilluseid getcharid(3), "AB_ADORAMUS", getskilllv("AB_ADORAMUS"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "AB_ADORAMUS", getskilllv("AB_ADORAMUS"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (getskilllv("AB_JUDEX") > 0 && Sp >= 20) {
-						unitskilluseid getcharid(3), "AB_JUDEX", getskilllv("AB_JUDEX"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "AB_JUDEX", getskilllv("AB_JUDEX"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 800;
 					} else if (getskilllv("PR_MAGNUS") > 0 && Sp >= 40) {
-						unitskilluseid getcharid(3), "PR_MAGNUS", getskilllv("PR_MAGNUS"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "PR_MAGNUS", getskilllv("PR_MAGNUS"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1200;
 					} else if (Sp >= 12) {
-						unitskilluseid getcharid(3), "AL_HOLYLIGHT", 1, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "AL_HOLYLIGHT", 1, @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
 					}
 				}
@@ -1785,39 +1785,39 @@ OnStepTimer:
 					}
 					if (getskilllv("NC_ARMSCANNON") > 0 && Sp >= 20) {
 						// Canhao de Braco (Arm Cannon - Ranged 9 celulas)
-						unitskilluseid getcharid(3), "NC_ARMSCANNON", getskilllv("NC_ARMSCANNON"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "NC_ARMSCANNON", getskilllv("NC_ARMSCANNON"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 					} else if (getskilllv("NC_MAGMA_ERUPTION") > 0 && Sp >= 30) {
-						unitskilluseid getcharid(3), "NC_MAGMA_ERUPTION", getskilllv("NC_MAGMA_ERUPTION"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "NC_MAGMA_ERUPTION", getskilllv("NC_MAGMA_ERUPTION"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (Sp >= 5) {
-						unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 					}
 				}
 				// Ramo Bioquimico / Criador / Alquimista:
 				else if (Class == Job_Genetic || Class == Job_Creator || Class == Job_Alchemist) {
 					if (getskilllv("GN_CARTCANNON") > 0 && Sp >= 20 && checkcart()) {
-						unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 800;
 					} else if (getskilllv("CR_ACIDDEMONSTRATION") > 0 && Sp >= 30) {
-						unitskilluseid getcharid(3), "CR_ACIDDEMONSTRATION", getskilllv("CR_ACIDDEMONSTRATION"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "CR_ACIDDEMONSTRATION", getskilllv("CR_ACIDDEMONSTRATION"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (Sp >= 5) {
-						unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 					}
 				}
 				// Ramo Ferreiro / Mestre-Ferreiro / Mercador:
 				else {
 					if (getskilllv("WS_CARTTERMINATION") > 0 && Sp >= 15 && getstatus(SC_CARTBOOST) && checkcart()) {
-						unitskilluseid getcharid(3), "WS_CARTTERMINATION", getskilllv("WS_CARTTERMINATION"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "WS_CARTTERMINATION", getskilllv("WS_CARTTERMINATION"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
-					} else if ((#BOT_SKILL_ROT % 2 == 0) && getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12 && checkcart()) {
+					} else if ((@BOT_SKILL_ROT % 2 == 0) && getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12 && checkcart()) {
 						unitskilluseid getcharid(3), "MC_CARTREVOLUTION", 1, getcharid(3), 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 700 ? .@aspd_delay : 700);
 					} else if (Sp >= 5) {
-						unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 					}
 				}
@@ -1827,56 +1827,56 @@ OnStepTimer:
 			// =========================================================
 			else if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == 4218 || Class == Job_Spirit_Handler || Class == 4308 || (eaclass() & EAJ_SUMMONER) || (eaclass() & EAJ_SPIRIT_HANDLER)) {
 				if (countitem(1681) > 0 && getequipid(EQI_HAND_R) <= 0) equip 1681;
-				.@dor_step = #BOT_SKILL_ROT % 5;
+				.@dor_step = @BOT_SKILL_ROT % 5;
 
 				// Habilidades de 4a Classe: Spirit Handler (4308)
 				if (getskilllv("SH_CHUL_HO_SONIC_CLAW") > 0 && .@dor_step == 0 && Sp >= 40) {
 					// Garras Sonicas de Chulho (Critico Ranged 11 celulas)
-					unitskilluseid getcharid(3), "SH_CHUL_HO_SONIC_CLAW", getskilllv("SH_CHUL_HO_SONIC_CLAW"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "SH_CHUL_HO_SONIC_CLAW", getskilllv("SH_CHUL_HO_SONIC_CLAW"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 500;
 				} else if (getskilllv("SH_HYUN_ROK_CANNON") > 0 && .@dor_step == 1 && Sp >= 40) {
 					// Canhao Hyunrok (Magico Ranged 9 celulas)
-					unitskilluseid getcharid(3), "SH_HYUN_ROK_CANNON", getskilllv("SH_HYUN_ROK_CANNON"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "SH_HYUN_ROK_CANNON", getskilllv("SH_HYUN_ROK_CANNON"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 600;
 				} else if (getskilllv("SH_HOWLING_OF_CHUL_HO") > 0 && .@dor_step == 2 && Sp >= 50) {
 					// Uivo de Chulho (Dano em Area Ranged)
-					unitskilluseid getcharid(3), "SH_HOWLING_OF_CHUL_HO", getskilllv("SH_HOWLING_OF_CHUL_HO"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "SH_HOWLING_OF_CHUL_HO", getskilllv("SH_HOWLING_OF_CHUL_HO"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 700;
 				} else if (getskilllv("SH_KI_SUL_WATER_SPRAYING") > 0 && .@dor_step == 3 && Sp >= 30) {
 					// Esguicho de Agua Kisul (Magico Ranged)
-					unitskilluseid getcharid(3), "SH_KI_SUL_WATER_SPRAYING", getskilllv("SH_KI_SUL_WATER_SPRAYING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "SH_KI_SUL_WATER_SPRAYING", getskilllv("SH_KI_SUL_WATER_SPRAYING"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 500;
 				}
 				// Habilidades de Summoner / Doram 3a Classe:
 				else if (.@dor_step == 0 && getskilllv("SU_CN_METEOR") > 0 && Sp >= 30) {
 					// Cometa de Erva-de-Gato / Chuva de Cenouras (Area Ranged)
-					unitskilluseid getcharid(3), "SU_CN_METEOR", getskilllv("SU_CN_METEOR"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "SU_CN_METEOR", getskilllv("SU_CN_METEOR"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 1000;
 				} else if (.@dor_step == 1 && getskilllv("SU_LUNATICCARROTBEAT") > 0 && Sp >= 25) {
 					// Batida de Cenoura Lunatica (Dano Fisico Ranged em Area)
-					unitskilluseid getcharid(3), "SU_LUNATICCARROTBEAT", getskilllv("SU_LUNATICCARROTBEAT"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "SU_LUNATICCARROTBEAT", getskilllv("SU_LUNATICCARROTBEAT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 800;
 				} else if (.@dor_step == 2 && getskilllv("SU_SV_STEMSPEAR") > 0 && Sp >= 15) {
 					// Lanca de Espinhos (Dano Magico Concentrado Ranged)
-					unitskilluseid getcharid(3), "SU_SV_STEMSPEAR", getskilllv("SU_SV_STEMSPEAR"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "SU_SV_STEMSPEAR", getskilllv("SU_SV_STEMSPEAR"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 				} else if (getskilllv("SU_PICKYPECK") > 0 && Sp >= 10) {
 					// Picada de Piki (Ataque Rapido Ranged)
-					unitskilluseid getcharid(3), "SU_PICKYPECK", getskilllv("SU_PICKYPECK"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "SU_PICKYPECK", getskilllv("SU_PICKYPECK"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 				} else if (getskilllv("SU_CN_POWDERING") > 0 && Sp >= 20) {
 					// Poeira de Erva-de-Gato
-					unitskilluseid getcharid(3), "SU_CN_POWDERING", getskilllv("SU_CN_POWDERING"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "SU_CN_POWDERING", getskilllv("SU_CN_POWDERING"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 800;
 				} else if (Sp >= 10 && getskilllv("SU_SCAROFTAROU") > 0) {
 					// Marca de Tarou
-					unitskilluseid getcharid(3), "SU_SCAROFTAROU", getskilllv("SU_SCAROFTAROU"), #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					unitskilluseid getcharid(3), "SU_SCAROFTAROU", getskilllv("SU_SCAROFTAROU"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
 				} else {
 					if (getskilllv("SU_SCRATCH") > 0 && Sp >= 5) {
-						unitskilluseid getcharid(3), "SU_SCRATCH", 1, #BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "SU_SCRATCH", 1, @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					} else {
-						unitattack getcharid(3), #BOT_CURRENT_TARGET;
+						unitattack getcharid(3), @BOT_CURRENT_TARGET;
 					}
 					.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 				}
@@ -1895,7 +1895,7 @@ OnStepTimer:
 // SUB-ROTINAS DE SUPORTE
 // ======================================================================
 OnApplyBuffs:
-	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 3) return;
+	if (!@BOT_AI_ACTIVE || @BOT_AI_STAGE != 3) return;
 	stand;
 	sc_start SC_BLESSING, 600000, 10;
 	sc_start SC_INCREASEAGI, 600000, 10;
@@ -1969,7 +1969,7 @@ OnApplyBuffs:
 // SUB-ROTINA DE MONTARIAS E ALUGUEIS AUTOMATICOS (@alugar)
 // ======================================================================
 OnCheckMounts:
-	if (!#BOT_AI_ACTIVE) return;
+	if (!@BOT_AI_ACTIVE) return;
 
 	// Aprendizes nunca podem ter montaria, ajudante, falcao ou carrinho
 	if (Class == Job_Novice || Class == Job_Novice_High) {
@@ -2005,7 +2005,7 @@ OnCheckMounts:
 	return;
 
 OnCheckBuffs:
-	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 3) return;
+	if (!@BOT_AI_ACTIVE || @BOT_AI_STAGE != 3) return;
 	stand;
 	if (!getstatus(SC_BLESSING) || !getstatus(SC_INCREASEAGI)) {
 		callsub OnApplyBuffs;
@@ -2073,8 +2073,8 @@ OnCheckBuffs:
 		unitskilluseid getcharid(3), "MG_ENERGYCOAT", 1, getcharid(3);
 	}
 	// Revelacao / Chama Reveladora (MG_SIGHT) - Delay de 5 minutos (300 segundos)
-	if (getskilllv("MG_SIGHT") > 0 && !getstatus(SC_SIGHT) && Sp >= 10 && (gettimetick(2) - #BOT_LAST_SIGHT) >= 300) {
-		#BOT_LAST_SIGHT = gettimetick(2);
+	if (getskilllv("MG_SIGHT") > 0 && !getstatus(SC_SIGHT) && Sp >= 10 && (gettimetick(2) - @BOT_LAST_SIGHT) >= 300) {
+		@BOT_LAST_SIGHT = gettimetick(2);
 		unitskilluseid getcharid(3), "MG_SIGHT", 1, getcharid(3);
 	}
 	// Amplificacao Magica (HW_MAGICPOWER)
@@ -2184,7 +2184,7 @@ OnCheckBuffs:
 	return;
 
 OnCheckSpeedPotion:
-	if (!#BOT_AI_ACTIVE || #BOT_AI_STAGE != 3) return;
+	if (!@BOT_AI_ACTIVE || @BOT_AI_STAGE != 3) return;
 	stand;
 	if (getstatus(SC_ASPDPOTION0) || getstatus(SC_ASPDPOTION1) || getstatus(SC_ASPDPOTION2) || getstatus(SC_ASPDPOTION3)) {
 		return;
@@ -2309,28 +2309,28 @@ OnGetHuntMap:
 
 OnCheckMapSwitch:
 	callsub OnGetHuntMap;
-	if (strcharinfo(3) != @hunt_map$ && #BOT_AI_STAGE == 3) {
+	if (strcharinfo(3) != @hunt_map$ && @BOT_AI_STAGE == 3) {
 		warp @hunt_map$, 0, 0;
 	}
 	return;
 
 OnDetectTargetJob:
 	if (BaseClass == Job_Swordman) {
-		#BOT_TARGET_JOB = 1;
+		@BOT_TARGET_JOB = 1;
 	} else if (BaseClass == Job_Mage) {
-		#BOT_TARGET_JOB = 2;
+		@BOT_TARGET_JOB = 2;
 	} else if (BaseClass == Job_Archer) {
-		#BOT_TARGET_JOB = 3;
+		@BOT_TARGET_JOB = 3;
 	} else if (BaseClass == Job_Thief) {
-		#BOT_TARGET_JOB = 4;
+		@BOT_TARGET_JOB = 4;
 	} else if (BaseClass == Job_Acolyte) {
-		#BOT_TARGET_JOB = 5;
+		@BOT_TARGET_JOB = 5;
 	} else if (BaseClass == Job_Merchant) {
-		#BOT_TARGET_JOB = 6;
+		@BOT_TARGET_JOB = 6;
 	} else if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == 4218 || Class == Job_Spirit_Handler || Class == 4308 || (eaclass() & EAJ_SUMMONER) || (eaclass() & EAJ_SPIRIT_HANDLER)) {
-		#BOT_TARGET_JOB = 7;
-	} else if (#BOT_TARGET_JOB == 0) {
-		#BOT_TARGET_JOB = 1;
+		@BOT_TARGET_JOB = 7;
+	} else if (@BOT_TARGET_JOB == 0) {
+		@BOT_TARGET_JOB = 1;
 	}
 	return;
 
@@ -2340,7 +2340,7 @@ OnDistributeStats:
 	while (StatusPoint > 0 && .@stat_loops < 80) {
 		.@stat_loops++;
 		.@old_points = StatusPoint;
-		switch(#BOT_TARGET_JOB) {
+		switch(@BOT_TARGET_JOB) {
 			case 1: // Espadachim (STR > AGI > VIT > DEX)
 				if (readparam(bStr) < 90 && StatusPoint >= 1) statusup bStr;
 				else if (readparam(bAgi) < 80 && StatusPoint >= 1) statusup bAgi;
@@ -2882,7 +2882,7 @@ OnDistributeSkills:
 
 OnCheckJobChange:
 	if (Class == Job_Novice || Class == Job_Novice_High) {
-		switch(#BOT_TARGET_JOB) {
+		switch(@BOT_TARGET_JOB) {
 			case 1: 
 				jobchange (Class == Job_Novice_High ? Job_Swordman_High : Job_Swordman);
 				if (countitem(1124) == 0 && countitem(1104) == 0) getitem 1124, 1;
@@ -2947,8 +2947,8 @@ OnCheckJobChange:
 		resetlvl 1;
 		resetskill;
 		specialeffect EF_ANGEL;
-		#BOT_AI_STAGE = 0;
-		#BOT_WP_INDEX = 0;
+		@BOT_AI_STAGE = 0;
+		@BOT_WP_INDEX = 0;
 		callsub OnCheckJobChange;
 		return;
 	}
