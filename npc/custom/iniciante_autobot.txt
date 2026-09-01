@@ -183,12 +183,9 @@ OnStartSingleBot:
 	@BOT_AI_STAGE = 3;
 	BOT_SAVED_STAGE = 3;
 
-	if (BOT_SAVED_JOB > 0) {
-		@BOT_TARGET_JOB = BOT_SAVED_JOB;
-	} else {
-		callsub OnDetectTargetJob;
-		BOT_SAVED_JOB = @BOT_TARGET_JOB;
-	}
+	// BOT_FINAL_JOB guarda a terceira classe escolhida; @BOT_TARGET_JOB continua
+	// representando apenas o arquetipo usado pelos atributos e pela IA.
+	callsub OnDetectTargetJob;
 
 	@BOT_WP_INDEX = 0;
 	@BOT_HUNT_COUNT = 0;
@@ -206,6 +203,9 @@ OnStartSingleBot:
 	@BOT_STUCK_Y = 0;
 	@BOT_STUCK_TICKS = 0;
 	@BOT_WAIT_END = 0;
+	// Atualiza somente os slots que estao equipados neste inicio. Slots vazios
+	// preservam o conjunto salvo para que Strip/quebra nao apaguem a referencia.
+	callsub OnCaptureBotEquipment;
 	stand;
 
 	if (@BOT_AI_STAGE == 3) {
@@ -253,6 +253,51 @@ OnStartHuntTimer:
 	@BOT_HUNT_DURATION = (@BOT_TEST_MODE ? 60 : rand(5, 10) * 60);
 	return;
 
+// Salva o conjunto escolhido manualmente para este personagem.
+OnCaptureBotEquipment:
+	for (.@slot = EQI_ACC_L; .@slot < EQI_MAX; .@slot++) {
+		.@item_id = getequipid(.@slot);
+		if (.@item_id > 0) {
+			BOT_EQUIP_ID[.@slot] = .@item_id;
+			BOT_EQUIP_UID$[.@slot] = getequipuniqueid(.@slot);
+		}
+	}
+	return;
+
+// Repara e reequipa o conjunto salvo caso um monstro quebre ou remova uma peca.
+OnMaintainBotEquipment:
+	if (gettimetick(2) < @BOT_NEXT_EQUIP_CHECK) return;
+	@BOT_NEXT_EQUIP_CHECK = gettimetick(2) + 600;
+
+	.@missing = 0;
+	for (.@slot = EQI_ACC_L; .@slot < EQI_MAX; .@slot++) {
+		if (BOT_EQUIP_ID[.@slot] > 0 && getequipid(.@slot) <= 0) {
+			.@missing = 1;
+			break;
+		}
+	}
+	if (!.@missing) return;
+
+	// Strip impede reequipar enquanto o estado estiver ativo.
+	sc_end SC_STRIPWEAPON;
+	sc_end SC_STRIPSHIELD;
+	sc_end SC_STRIPARMOR;
+	sc_end SC_STRIPHELM;
+	sc_end SC__STRIPACCESSORY;
+	sc_end SC_SHADOW_STRIP;
+	repairall;
+
+	for (.@slot = EQI_ACC_L; .@slot < EQI_MAX; .@slot++) {
+		if (BOT_EQUIP_ID[.@slot] <= 0 || getequipid(.@slot) > 0) continue;
+
+		.@equipped = 0;
+		if (BOT_EQUIP_UID$[.@slot] != "" && BOT_EQUIP_UID$[.@slot] != "0")
+			.@equipped = equipuniqueid(BOT_EQUIP_UID$[.@slot]);
+		if (!.@equipped && countitem(BOT_EQUIP_ID[.@slot]) > 0)
+			equip BOT_EQUIP_ID[.@slot];
+	}
+	return;
+
 // Pausa o bot e salva o estado atual
 OnPauseSingleBot:
 	// getarg(0): 1 = pausa automatica do agendador (preserva a habilitacao)
@@ -272,6 +317,7 @@ OnPauseSingleBot:
 	@BOT_STUCK_X = 0;
 	@BOT_STUCK_Y = 0;
 	@BOT_STUCK_TICKS = 0;
+	@BOT_NEXT_EQUIP_CHECK = 0;
 	deltimer "PlayerBotAI::OnStepTimer";
 	unitstopwalk getcharid(3), USW_FORCE_STOP;
 	unitstopattack getcharid(3);
@@ -1195,16 +1241,30 @@ OnGMCommand:
 				break;
 
 			case 6: // CONFIGURAR CLASSE
-				mes "^0055FF[Escolha da Classe Alvo]^000000";
-				.@jchoice = select("Espadachim -> Cavaleiro / Lorde:" +
-				                   "Mago -> Bruxo / Arquimago:" +
-				                   "Arqueiro -> Cacador / Atirador de Elite:" +
-				                   "Gatuno -> Mercenario / Algoz:" +
-				                   "Novico -> Sacerdote / Sumo Sacerdote:" +
-				                   "Mercador -> Ferreiro / Mestre-Ferreiro");
+				mes "^0055FF[Escolha da Classe Final]^000000";
+				mes "O bot seguira toda a arvore, incluindo o renascimento quando existir transclasse.";
+				next;
+				.@jchoice = select("Cavaleiro Runico (Espadachim > Cavaleiro > Lorde):" +
+				                   "Guardiao Real (Espadachim > Templario > Paladino):" +
+				                   "Arcano (Mago > Bruxo > Arquimago):" +
+				                   "Feiticeiro (Mago > Sabio > Professor):" +
+				                   "Sentinela (Arqueiro > Cacador > Atirador de Elite):" +
+				                   "Trovador/Musa (Arqueiro > Bardo/Odalisca > Menestrel/Cigana):" +
+				                   "Sicario (Gatuno > Mercenario > Algoz):" +
+				                   "Renegado (Gatuno > Arruaceiro > Desordeiro):" +
+				                   "Arcebispo (Novico > Sacerdote > Sumo Sacerdote):" +
+				                   "Shura (Novico > Monge > Mestre):" +
+				                   "Mecanico (Mercador > Ferreiro > Mestre-Ferreiro):" +
+				                   "Bioquimico (Mercador > Alquimista > Criador):" +
+				                   "Invocador de Espiritos (Doram, sem transclasse):" +
+				                   "Mestre Estelar (Taekwon > Mestre Taekwon, sem transclasse):" +
+				                   "Ceifador de Almas (Taekwon > Espiritualista, sem transclasse):" +
+				                   "Kagerou/Oboro (Ninja, sem transclasse):" +
+				                   "Super Novico Expandido (Super Novico, sem transclasse):" +
+				                   "Insurgente/Rebellion (Justiceiro, sem transclasse)");
 				if (attachrid(.@target_aid)) {
-					@BOT_TARGET_JOB = .@jchoice;
-					BOT_SAVED_JOB = .@jchoice;
+					BOT_FINAL_JOB = 100 + .@jchoice;
+					callsub OnDetectTargetJob;
 					callsub OnCheckJobChange;
 				}
 				attachrid(.@gm_aid);
@@ -1501,6 +1561,8 @@ OnShowGMStatus:
 	.@b_stage = @BOT_AI_STAGE;
 	.@b_wp = @BOT_WP_INDEX;
 	.@b_job = @BOT_TARGET_JOB;
+	.@b_final_job = BOT_FINAL_JOB;
+	.@b_sex = Sex;
 	.@b_base = BaseLevel;
 	.@b_jlvl = JobLevel;
 	.@b_map$ = strcharinfo(3);
@@ -1525,7 +1587,26 @@ OnShowGMStatus:
 	dispbottom "Personagem: " + .@t_name$ + " | Modo: " + (.@b_test ? "^00FF00[TESTE]^00FFFF" : "[NORMAL]") + " | Ativo: " + (.@b_active ? "SIM" : "NAO"), 0x00FFFF;
 	dispbottom "Nivel: " + .@b_base + "/" + .@b_jlvl + " | Mapa: " + .@b_map$ + " | Pocoes: " + .@pot_w + " Brancas / " + .@pot_b + " Azuis", 0x00FFFF;
 	dispbottom "Atividade Atual: " + .@st$, 0x00FFFF;
-	dispbottom "Classe Alvo: " + (.@b_job == 1 ? "Espadachim" : .@b_job == 2 ? "Mago" : .@b_job == 3 ? "Arqueiro" : .@b_job == 4 ? "Gatuno" : .@b_job == 5 ? "Novico" : "Mercador"), 0x00FFFF;
+	.@final_name$ = "Nao definida";
+	if (.@b_final_job == 101) .@final_name$ = "Cavaleiro Runico";
+	else if (.@b_final_job == 102) .@final_name$ = "Guardiao Real";
+	else if (.@b_final_job == 103) .@final_name$ = "Arcano";
+	else if (.@b_final_job == 104) .@final_name$ = "Feiticeiro";
+	else if (.@b_final_job == 105) .@final_name$ = "Sentinela";
+	else if (.@b_final_job == 106) .@final_name$ = (.@b_sex == SEX_MALE ? "Trovador" : "Musa");
+	else if (.@b_final_job == 107) .@final_name$ = "Sicario";
+	else if (.@b_final_job == 108) .@final_name$ = "Renegado";
+	else if (.@b_final_job == 109) .@final_name$ = "Arcebispo";
+	else if (.@b_final_job == 110) .@final_name$ = "Shura";
+	else if (.@b_final_job == 111) .@final_name$ = "Mecanico";
+	else if (.@b_final_job == 112) .@final_name$ = "Bioquimico";
+	else if (.@b_final_job == 113) .@final_name$ = "Invocador de Espiritos";
+	else if (.@b_final_job == 114) .@final_name$ = "Mestre Estelar (ramo Mestre Taekwon)";
+	else if (.@b_final_job == 115) .@final_name$ = "Ceifador de Almas (ramo Espiritualista)";
+	else if (.@b_final_job == 116) .@final_name$ = (.@b_sex == SEX_MALE ? "Kagerou" : "Oboro");
+	else if (.@b_final_job == 117) .@final_name$ = "Super Novico Expandido";
+	else if (.@b_final_job == 118) .@final_name$ = "Insurgente/Rebellion";
+	dispbottom "Classe Final: " + .@final_name$, 0x00FFFF;
 	dispbottom "Local de Descanso: " + (BOT_REST_MAP$ != "" ? BOT_REST_MAP$ + " (" + BOT_REST_X + "," + BOT_REST_Y + ") [Individual]" : $BOT_REST_MAP$ + " (" + $BOT_REST_X + "," + $BOT_REST_Y + ") [Global]"), 0x00FFFF;
 	if (BOT_SCHED_CUSTOM) {
 		dispbottom "Horario de Atividade: " + (BOT_SCHED_START_H < 10 ? "0" : "") + BOT_SCHED_START_H + ":" + (BOT_SCHED_START_M < 10 ? "0" : "") + BOT_SCHED_START_M + " as " + (BOT_SCHED_END_H < 10 ? "0" : "") + BOT_SCHED_END_H + ":" + (BOT_SCHED_END_M < 10 ? "0" : "") + BOT_SCHED_END_M + " [Individual]", 0x00FFFF;
@@ -1641,6 +1722,7 @@ OnFinishEdenRest:
 OnStepTimer:
 	if (!@BOT_AI_ACTIVE) end;
 	stand; // Bot NUNCA senta, permanece sempre em pe e ativo
+	callsub OnMaintainBotEquipment;
 
 	// Limpeza de inventario se pesado
 	if ((Weight * 100 / MaxWeight) >= 80) {
@@ -2305,11 +2387,15 @@ OnStepTimer:
 			.@atk_range = 2; // Padrao corpo a corpo
 
 			// Classes ou builds com habilidades de longo alcance podem iniciar o combate a 7-8 celulas:
-			if (BaseClass == Job_Archer || BaseClass == Job_Mage || BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308 ||
+			if (BaseClass == Job_Archer || BaseClass == Job_Mage || BaseClass == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro || Class == Job_Super_Novice || Class == Job_Super_Novice_E || Class == Job_Gunslinger || Class == Job_Rebellion || BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308 ||
 			    (BaseClass == Job_Merchant && (Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Meister || Class == Job_Meister2 || Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 || Class == Job_Biolo || Class == Job_Biolo2 || getskilllv("NC_ARMSCANNON") > 0 || getskilllv("GN_CARTCANNON") > 0)) ||
 			    (BaseClass == Job_Swordman && (getskilllv("LG_BANISHINGPOINT") > 0 || getskilllv("LG_PINPOINTATTACK") > 0 || getskilllv("LG_CANNONSPEAR") > 0 || getskilllv("RK_DRAGONBREATH") > 0 || getskilllv("RK_SONICWAVE") > 0))) {
 				.@atk_range = 7; // Pode iniciar disparo a distancia
 			}
+			// Fire Dance atinge a area ao redor do personagem; com revolver o
+			// Rebellion se aproxima o suficiente para a habilidade acertar o alvo.
+			if (Class == Job_Rebellion && getequipid(EQI_HAND_R) > 0 && getItemInfo(getequipid(EQI_HAND_R), ITEMINFO_SUBTYPE) == W_REVOLVER)
+				.@atk_range = 3;
 
 			// Se ainda esta fora do alcance de ataque: anda em direcao ao monstro de forma fluida
 			if (.@dist > .@atk_range) {
@@ -2768,7 +2854,101 @@ OnStepTimer:
 				}
 			}
 			// =========================================================
-			// 7. INVOCADOR / DORAM / SPIRIT HANDLER (4218 / 4308)
+			// 7. NINJA / KAGEROU / OBORO
+			// =========================================================
+			else if (BaseClass == Job_Ninja || Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro) {
+				// Esta arvore usa somente ataques fisicos. As magias ofensivas de
+				// Ninja/Kagerou/Oboro sao elementais ou dependem de talismas.
+				.@nin_step = @BOT_SKILL_ROT % 4;
+				.@nin_weapon_id = getequipid(EQI_HAND_R);
+				.@nin_weapon_type = (.@nin_weapon_id > 0 ? getItemInfo(.@nin_weapon_id, ITEMINFO_SUBTYPE) : -1);
+				if (.@nin_step == 0 && getskilllv("KO_BAKURETSU") > 0 && Sp >= 9) {
+					// Explosao de Kunai: ataque fisico em area e de longo alcance.
+					unitskilluseid getcharid(3), "KO_BAKURETSU", getskilllv("KO_BAKURETSU"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1200;
+				} else if (.@nin_step == 1 && getskilllv("KO_JYUMONJIKIRI") > 0 && Sp >= 20) {
+					// Corte da Cruz: ataque fisico confiavel a distancia.
+					unitskilluseid getcharid(3), "KO_JYUMONJIKIRI", getskilllv("KO_JYUMONJIKIRI"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 800;
+				} else if (.@nin_step == 2 && .@nin_weapon_type == W_HUUMA && getskilllv("KO_HUUMARANKA") > 0 && Sp >= 40) {
+					// Petala Giratoria: ataque fisico em area exclusivo de Huuma.
+					unitskilluseid getcharid(3), "KO_HUUMARANKA", getskilllv("KO_HUUMARANKA"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1800;
+				} else if (.@nin_step == 3 && .@dist <= 2 && getskilllv("KO_SETSUDAN") > 0 && Sp >= 28) {
+					// Corte Espiritual: ataque fisico de curto alcance.
+					unitskilluseid getcharid(3), "KO_SETSUDAN", getskilllv("KO_SETSUDAN"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 800;
+				} else if (.@nin_weapon_type == W_HUUMA && getskilllv("NJ_HUUMA") > 0 && Sp >= 35) {
+					unitskilluseid getcharid(3), "NJ_HUUMA", getskilllv("NJ_HUUMA"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1500;
+				} else if (.@dist <= 2 && getskilllv("NJ_KASUMIKIRI") > 0 && Sp >= 8) {
+					unitskilluseid getcharid(3), "NJ_KASUMIKIRI", getskilllv("NJ_KASUMIKIRI"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 800;
+				} else {
+					unitattack getcharid(3), @BOT_CURRENT_TARGET, 1;
+					.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+				}
+			}
+			// =========================================================
+			// 8. SUPER NOVICO / SUPER NOVICO EXPANDIDO (4190)
+			// =========================================================
+			else if (Class == Job_Novice || Class == Job_Super_Novice || Class == Job_Super_Novice_E) {
+				.@sn_step = @BOT_SKILL_ROT % 4;
+				if (.@sn_step == 0 && getskilllv("MG_FIREBOLT") > 0 && Sp >= 12) {
+					unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1000;
+				} else if (.@sn_step == 1 && getskilllv("MG_COLDBOLT") > 0 && Sp >= 12) {
+					unitskilluseid getcharid(3), "MG_COLDBOLT", getskilllv("MG_COLDBOLT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1000;
+				} else if (.@sn_step == 2 && getskilllv("MG_LIGHTNINGBOLT") > 0 && Sp >= 12) {
+					unitskilluseid getcharid(3), "MG_LIGHTNINGBOLT", getskilllv("MG_LIGHTNINGBOLT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1000;
+				} else if (getskilllv("MG_SOULSTRIKE") > 0 && Sp >= 18) {
+					unitskilluseid getcharid(3), "MG_SOULSTRIKE", getskilllv("MG_SOULSTRIKE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 800;
+				} else if (.@dist <= 2 && getskilllv("SM_BASH") > 0 && Sp >= 8) {
+					unitskilluseid getcharid(3), "SM_BASH", getskilllv("SM_BASH"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+				} else {
+					unitattack getcharid(3), @BOT_CURRENT_TARGET, 1;
+					.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+				}
+			}
+			// =========================================================
+			// 9. JUSTICEIRO / INSURGENTE / REBELLION (4215)
+			// =========================================================
+			else if (Class == Job_Gunslinger || Class == Job_Rebellion) {
+				// Mantem balas comuns disponiveis, sem trocar uma municao manual ja equipada.
+				if (countitem(13200) < 500) {
+					getitem 13200, 2000;
+					atcommand "@restock 13200 1000";
+				}
+				if (getequipid(EQI_AMMO) <= 0) equip 13200;
+
+				.@gun_step = @BOT_SKILL_ROT % 4;
+				.@gun_id = getequipid(EQI_HAND_R);
+				.@gun_type = (.@gun_id > 0 ? getItemInfo(.@gun_id, ITEMINFO_SUBTYPE) : -1);
+				if (Class == Job_Rebellion && .@gun_step == 0 && getskilllv("RL_S_STORM") > 0 && Sp >= 50) {
+					// Tempestade Destruidora aceita qualquer tipo de arma de fogo.
+					unitskilluseid getcharid(3), "RL_S_STORM", getskilllv("RL_S_STORM"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 2000;
+				} else if (Class == Job_Rebellion && .@gun_step == 1 && .@dist <= 3 && .@gun_type == W_REVOLVER && getskilllv("RL_FIREDANCE") > 0 && Sp >= 40) {
+					// Fire Dance: dano fisico em area ao redor do bot.
+					unitskilluseid getcharid(3), "RL_FIREDANCE", getskilllv("RL_FIREDANCE"), getcharid(3), 0, 0, 0, 1;
+					.@skill_delay = 700;
+				} else if ((.@gun_type == W_REVOLVER || .@gun_type == W_RIFLE) && getskilllv("GS_PIERCINGSHOT") > 0 && Sp >= 15) {
+					unitskilluseid getcharid(3), "GS_PIERCINGSHOT", getskilllv("GS_PIERCINGSHOT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1200;
+				} else if ((.@gun_type == W_REVOLVER || .@gun_type == W_RIFLE) && getskilllv("GS_TRACKING") > 0 && Sp >= 20) {
+					unitskilluseid getcharid(3), "GS_TRACKING", getskilllv("GS_TRACKING"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1800;
+				} else {
+					unitattack getcharid(3), @BOT_CURRENT_TARGET, 1;
+					.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+				}
+			}
+			// =========================================================
+			// 10. INVOCADOR / DORAM / SPIRIT HANDLER (4218 / 4308)
 			// =========================================================
 			else if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308) {
 				if (countitem(1681) > 0 && getequipid(EQI_HAND_R) <= 0) equip 1681;
@@ -3264,23 +3444,52 @@ OnCheckMapSwitch:
 	return;
 
 OnDetectTargetJob:
-	if (BaseClass == Job_Swordman) {
-		@BOT_TARGET_JOB = 1;
-	} else if (BaseClass == Job_Mage) {
-		@BOT_TARGET_JOB = 2;
-	} else if (BaseClass == Job_Archer) {
-		@BOT_TARGET_JOB = 3;
-	} else if (BaseClass == Job_Thief) {
-		@BOT_TARGET_JOB = 4;
-	} else if (BaseClass == Job_Acolyte) {
-		@BOT_TARGET_JOB = 5;
-	} else if (BaseClass == Job_Merchant) {
-		@BOT_TARGET_JOB = 6;
-	} else if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308) {
-		@BOT_TARGET_JOB = 7;
-	} else if (@BOT_TARGET_JOB == 0) {
-		@BOT_TARGET_JOB = 1;
+	// Corrige bots Ninja antigos que foram classificados na arvore padrao antes
+	// de Kagerou/Oboro receber suporte dedicado.
+	if (Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro)
+		BOT_FINAL_JOB = 116;
+	else if (Class == Job_Super_Novice || Class == Job_Super_Novice_E)
+		BOT_FINAL_JOB = 117;
+	else if (Class == Job_Gunslinger || Class == Job_Rebellion)
+		BOT_FINAL_JOB = 118;
+
+	// Migra automaticamente a configuracao antiga (1..7), que guardava apenas
+	// a primeira classe, para uma terceira classe final padrao.
+	if (BOT_FINAL_JOB < 101 || BOT_FINAL_JOB > 118) {
+		if (Class == Job_Crusader || Class == Job_Paladin || Class == Job_Royal_Guard) BOT_FINAL_JOB = 102;
+		else if (Class == Job_Sage || Class == Job_Professor || Class == Job_Sorcerer) BOT_FINAL_JOB = 104;
+		else if (Class == Job_Bard || Class == Job_Dancer || Class == Job_Clown || Class == Job_Gypsy || Class == Job_Minstrel || Class == Job_Wanderer) BOT_FINAL_JOB = 106;
+		else if (Class == Job_Rogue || Class == Job_Stalker || Class == Job_Shadow_Chaser) BOT_FINAL_JOB = 108;
+		else if (Class == Job_Monk || Class == Job_Champion || Class == Job_Sura) BOT_FINAL_JOB = 110;
+		else if (Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic) BOT_FINAL_JOB = 112;
+		else if (Class == Job_Star_Gladiator || Class == Job_Star_Gladiator2 || Class == Job_Star_Emperor) BOT_FINAL_JOB = 114;
+		else if (Class == Job_Soul_Linker || Class == Job_Soul_Reaper) BOT_FINAL_JOB = 115;
+		else if (Class == Job_Taekwon) BOT_FINAL_JOB = 114;
+		else if (Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro) BOT_FINAL_JOB = 116;
+		else if (Class == Job_Super_Novice || Class == Job_Super_Novice_E) BOT_FINAL_JOB = 117;
+		else if (Class == Job_Gunslinger || Class == Job_Rebellion) BOT_FINAL_JOB = 118;
+		else if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308 || BOT_SAVED_JOB == 7) BOT_FINAL_JOB = 113;
+		else if (BaseClass == Job_Mage || BOT_SAVED_JOB == 2) BOT_FINAL_JOB = 103;
+		else if (BaseClass == Job_Archer || BOT_SAVED_JOB == 3) BOT_FINAL_JOB = 105;
+		else if (BaseClass == Job_Thief || BOT_SAVED_JOB == 4) BOT_FINAL_JOB = 107;
+		else if (BaseClass == Job_Acolyte || BOT_SAVED_JOB == 5) BOT_FINAL_JOB = 109;
+		else if (BaseClass == Job_Merchant || BOT_SAVED_JOB == 6) BOT_FINAL_JOB = 111;
+		else BOT_FINAL_JOB = 101;
 	}
+
+	if (BOT_FINAL_JOB == 101 || BOT_FINAL_JOB == 102) @BOT_TARGET_JOB = 1;
+	else if (BOT_FINAL_JOB == 103 || BOT_FINAL_JOB == 104) @BOT_TARGET_JOB = 2;
+	else if (BOT_FINAL_JOB == 105 || BOT_FINAL_JOB == 106) @BOT_TARGET_JOB = 3;
+	else if (BOT_FINAL_JOB == 107 || BOT_FINAL_JOB == 108) @BOT_TARGET_JOB = 4;
+	else if (BOT_FINAL_JOB == 109 || BOT_FINAL_JOB == 110) @BOT_TARGET_JOB = 5;
+	else if (BOT_FINAL_JOB == 111 || BOT_FINAL_JOB == 112) @BOT_TARGET_JOB = 6;
+	else if (BOT_FINAL_JOB == 113) @BOT_TARGET_JOB = 7;
+	else if (BOT_FINAL_JOB == 114) @BOT_TARGET_JOB = 8;
+	else if (BOT_FINAL_JOB == 115) @BOT_TARGET_JOB = 9;
+	else if (BOT_FINAL_JOB == 116) @BOT_TARGET_JOB = 10;
+	else if (BOT_FINAL_JOB == 117) @BOT_TARGET_JOB = 11;
+	else @BOT_TARGET_JOB = 12;
+	BOT_SAVED_JOB = @BOT_TARGET_JOB;
 	return;
 
 OnDistributeStats:
@@ -3345,6 +3554,46 @@ OnDistributeStats:
 				else if (readparam(bAgi) < 60 && StatusPoint >= 1) statusup bAgi;
 				else if (readparam(bInt) < 120 && StatusPoint >= 1) statusup bInt;
 				else statusup bDex;
+				break;
+			case 8: // Mestre Taekwon / Mestre Estelar (STR > AGI > DEX > VIT)
+				if (readparam(bStr) < 99 && StatusPoint >= 1) statusup bStr;
+				else if (readparam(bAgi) < 90 && StatusPoint >= 1) statusup bAgi;
+				else if (readparam(bDex) < 70 && StatusPoint >= 1) statusup bDex;
+				else if (readparam(bVit) < 60 && StatusPoint >= 1) statusup bVit;
+				else if (readparam(bStr) < 120 && StatusPoint >= 1) statusup bStr;
+				else statusup bAgi;
+				break;
+			case 9: // Espiritualista / Ceifador de Almas (INT > DEX > VIT > AGI)
+				if (readparam(bInt) < 99 && StatusPoint >= 1) statusup bInt;
+				else if (readparam(bDex) < 90 && StatusPoint >= 1) statusup bDex;
+				else if (readparam(bVit) < 70 && StatusPoint >= 1) statusup bVit;
+				else if (readparam(bAgi) < 50 && StatusPoint >= 1) statusup bAgi;
+				else if (readparam(bInt) < 120 && StatusPoint >= 1) statusup bInt;
+				else statusup bDex;
+				break;
+			case 10: // Ninja / Kagerou / Oboro hibrido (INT > DEX > STR > VIT)
+				if (readparam(bInt) < 90 && StatusPoint >= 1) statusup bInt;
+				else if (readparam(bDex) < 80 && StatusPoint >= 1) statusup bDex;
+				else if (readparam(bStr) < 70 && StatusPoint >= 1) statusup bStr;
+				else if (readparam(bVit) < 60 && StatusPoint >= 1) statusup bVit;
+				else if (readparam(bInt) < 120 && StatusPoint >= 1) statusup bInt;
+				else statusup bDex;
+				break;
+			case 11: // Super Novico Expandido hibrido magico (INT > DEX > VIT > AGI)
+				if (readparam(bInt) < 99 && StatusPoint >= 1) statusup bInt;
+				else if (readparam(bDex) < 90 && StatusPoint >= 1) statusup bDex;
+				else if (readparam(bVit) < 70 && StatusPoint >= 1) statusup bVit;
+				else if (readparam(bAgi) < 50 && StatusPoint >= 1) statusup bAgi;
+				else if (readparam(bInt) < 120 && StatusPoint >= 1) statusup bInt;
+				else statusup bDex;
+				break;
+			case 12: // Justiceiro / Rebellion (DEX > AGI > VIT > INT)
+				if (readparam(bDex) < 99 && StatusPoint >= 1) statusup bDex;
+				else if (readparam(bAgi) < 90 && StatusPoint >= 1) statusup bAgi;
+				else if (readparam(bVit) < 60 && StatusPoint >= 1) statusup bVit;
+				else if (readparam(bInt) < 50 && StatusPoint >= 1) statusup bInt;
+				else if (readparam(bDex) < 120 && StatusPoint >= 1) statusup bDex;
+				else statusup bAgi;
 				break;
 			default: // Mercador (STR > AGI > DEX > VIT)
 				if (readparam(bStr) < 90 && StatusPoint >= 1) statusup bStr;
@@ -3830,8 +4079,28 @@ OnDistributeSkills:
 	return;
 
 OnCheckJobChange:
+	callsub OnDetectTargetJob;
+
+	// Novico segue para a primeira classe correspondente. Novico T. sempre
+	// segue para a primeira classe trans da mesma arvore.
 	if (Class == Job_Novice || Class == Job_Novice_High) {
-		switch(@BOT_TARGET_JOB) {
+		if (BOT_FINAL_JOB == 117) {
+			// Super Novico exige nivel de base 45 e nao possui renascimento.
+			if (BaseLevel < 45) return;
+			jobchange Job_Super_Novice;
+		} else if (BOT_FINAL_JOB == 118) {
+			jobchange Job_Gunslinger;
+			if (countitem(13200) < 500) getitem 13200, 2000;
+			if (getequipid(EQI_AMMO) <= 0) equip 13200;
+			atcommand "@restock 13200 1000";
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 13200, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+		} else if (BOT_FINAL_JOB == 113) {
+			jobchange Job_Summoner;
+		} else if (BOT_FINAL_JOB == 114 || BOT_FINAL_JOB == 115) {
+			jobchange Job_Taekwon;
+		} else if (BOT_FINAL_JOB == 116) {
+			jobchange Job_Ninja;
+		} else switch(@BOT_TARGET_JOB) {
 			case 1: 
 				jobchange (Class == Job_Novice_High ? Job_Swordman_High : Job_Swordman);
 				if (countitem(1124) == 0 && countitem(1104) == 0) getitem 1124, 1;
@@ -3855,7 +4124,7 @@ OnCheckJobChange:
 				jobchange (Class == Job_Novice_High ? Job_Acolyte_High : Job_Acolyte);
 				if (countitem(1504) == 0) getitem 1504, 1;
 				break;
-			default: 
+			case 6:
 				jobchange (Class == Job_Novice_High ? Job_Merchant_High : Job_Merchant);
 				if (countitem(1304) == 0) getitem 1304, 1;
 				// Nao troca a arma que ja foi entregue/equipada no personagem.
@@ -3863,77 +4132,147 @@ OnCheckJobChange:
 				if (Zeny < 5000000) Zeny += 10000000;
 				break;
 		}
-		specialeffect EF_LEVELUP;
-		resetskill;
-		callsub OnDistributeSkills;
-		callsub OnDistributeStats;
+		callsub OnFinalizeBotJobChange;
 		return;
 	}
 
-	if (JobLevel >= 50) {
-		if (Class == Job_Swordman) jobchange Job_Knight;
-		else if (Class == Job_Swordman_High) jobchange Job_Lord_Knight;
-		else if (Class == Job_Mage) jobchange Job_Wizard;
-		else if (Class == Job_Mage_High) jobchange Job_High_Wizard;
-		else if (Class == Job_Archer) jobchange Job_Hunter;
-		else if (Class == Job_Archer_High) jobchange Job_Sniper;
-		else if (Class == Job_Thief) jobchange Job_Assassin;
-		else if (Class == Job_Thief_High) jobchange Job_Assassin_Cross;
-		else if (Class == Job_Acolyte) jobchange Job_Priest;
-		else if (Class == Job_Acolyte_High) jobchange Job_High_Priest;
-		else if (Class == Job_Merchant) jobchange Job_Blacksmith;
-		else if (Class == Job_Merchant_High) jobchange Job_Whitesmith;
-		else return;
-
-		specialeffect EF_ANGEL;
-		resetskill;
-		callsub OnDistributeSkills;
-		callsub OnDistributeStats;
+	// Doram nao possui renascimento/transclasse: evolucao direta normal.
+	if (BOT_FINAL_JOB == 113 && Class == Job_Summoner && BaseLevel >= 200 && JobLevel >= 60) {
+		jobchange Job_Spirit_Handler;
+		callsub OnFinalizeBotJobChange;
 		return;
 	}
 
-	if (BaseLevel >= 99 && JobLevel >= 50 && Upper == 0) {
+	// Taekwon tambem nao renasce. Primeiro escolhe Mestre Taekwon ou
+	// Espiritualista; depois evolui diretamente para a classe expandida final.
+	if ((BOT_FINAL_JOB == 114 || BOT_FINAL_JOB == 115) && Class == Job_Taekwon && JobLevel >= 50) {
+		jobchange (BOT_FINAL_JOB == 114 ? Job_Star_Gladiator : Job_Soul_Linker);
+		callsub OnFinalizeBotJobChange;
+		return;
+	}
+	if (BOT_FINAL_JOB == 114 && (Class == Job_Star_Gladiator || Class == Job_Star_Gladiator2) && BaseLevel >= 99 && JobLevel >= 50) {
+		jobchange Job_Star_Emperor;
+		callsub OnFinalizeBotJobChange;
+		return;
+	}
+	if (BOT_FINAL_JOB == 115 && Class == Job_Soul_Linker && BaseLevel >= 99 && JobLevel >= 50) {
+		jobchange Job_Soul_Reaper;
+		callsub OnFinalizeBotJobChange;
+		return;
+	}
+
+	// Ninja evolui diretamente, sem renascimento, conforme o sexo do personagem.
+	if (BOT_FINAL_JOB == 116 && Class == Job_Ninja && BaseLevel >= 99 && JobLevel >= 70) {
+		jobchange (Sex == SEX_MALE ? Job_Kagerou : Job_Oboro);
+		callsub OnFinalizeBotJobChange;
+		return;
+	}
+
+	// Super Novico e Justiceiro tambem seguem as evolucoes expandidas sem renascer.
+	if (BOT_FINAL_JOB == 117 && Class == Job_Super_Novice && BaseLevel >= 99 && JobLevel >= 99) {
+		jobchange Job_Super_Novice_E;
+		callsub OnFinalizeBotJobChange;
+		return;
+	}
+	if (BOT_FINAL_JOB == 118 && Class == Job_Gunslinger && BaseLevel >= 99 && JobLevel >= 70) {
+		jobchange Job_Rebellion;
+		if (countitem(13200) < 500) getitem 13200, 2000;
+		if (getequipid(EQI_AMMO) <= 0) equip 13200;
+		atcommand "@restock 13200 1000";
+		query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 13200, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+		callsub OnFinalizeBotJobChange;
+		return;
+	}
+
+	// Toda segunda classe normal das arvores classicas deve renascer em 99/50.
+	if (BaseLevel >= 99 && JobLevel >= 50 && Upper == 0 &&
+	   (Class == Job_Knight || Class == Job_Crusader || Class == Job_Wizard || Class == Job_Sage ||
+	    Class == Job_Hunter || Class == Job_Bard || Class == Job_Dancer || Class == Job_Assassin ||
+	    Class == Job_Rogue || Class == Job_Priest || Class == Job_Monk || Class == Job_Blacksmith ||
+	    Class == Job_Alchemist)) {
 		jobchange Job_Novice_High;
 		resetlvl 1;
 		resetskill;
 		specialeffect EF_ANGEL;
-		@BOT_AI_STAGE = 0;
-		@BOT_WP_INDEX = 0;
 		callsub OnCheckJobChange;
 		return;
 	}
 
-	if (BaseLevel >= 99 && JobLevel >= 70 && Upper == 1) {
-		if (Class == Job_Lord_Knight) jobchange Job_Rune_Knight;
-		else if (Class == Job_Paladin) jobchange Job_Royal_Guard;
-		else if (Class == Job_High_Wizard) jobchange Job_Warlock;
-		else if (Class == Job_Professor) jobchange Job_Sorcerer;
-		else if (Class == Job_Sniper) jobchange Job_Ranger;
-		else if (Class == Job_Assassin_Cross) jobchange Job_Guillotine_Cross;
-		else if (Class == Job_Stalker) jobchange Job_Shadow_Chaser;
-		else if (Class == Job_High_Priest) jobchange Job_Arch_Bishop;
-		else if (Class == Job_Champion) jobchange Job_Sura;
-		else if (Class == Job_Whitesmith) {
-			jobchange Job_Mechanic;
-			if (countitem(18000) < 500) getitem 18000, 2000;
-			if (getequipid(EQI_AMMO) <= 0) equip 18000;
-			atcommand "@restock 18000 1000";
-			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 18000, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+	// Primeira classe normal escolhe a ramificacao definida pelo GM.
+	if (JobLevel >= 50 && Upper == 0) {
+		.@changed = 1;
+		if (Class == Job_Swordman) jobchange (BOT_FINAL_JOB == 102 ? Job_Crusader : Job_Knight);
+		else if (Class == Job_Mage) jobchange (BOT_FINAL_JOB == 104 ? Job_Sage : Job_Wizard);
+		else if (Class == Job_Archer) {
+			if (BOT_FINAL_JOB == 106) jobchange (Sex == SEX_MALE ? Job_Bard : Job_Dancer);
+			else jobchange Job_Hunter;
 		}
-		else if (Class == Job_Creator) {
-			jobchange Job_Genetic;
-			if (countitem(18000) < 500) getitem 18000, 2000;
-			if (getequipid(EQI_AMMO) <= 0) equip 18000;
-			atcommand "@restock 18000 1000";
-			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 18000, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+		else if (Class == Job_Thief) jobchange (BOT_FINAL_JOB == 108 ? Job_Rogue : Job_Assassin);
+		else if (Class == Job_Acolyte) jobchange (BOT_FINAL_JOB == 110 ? Job_Monk : Job_Priest);
+		else if (Class == Job_Merchant) jobchange (BOT_FINAL_JOB == 112 ? Job_Alchemist : Job_Blacksmith);
+		else .@changed = 0;
+
+		if (.@changed) {
+			callsub OnFinalizeBotJobChange;
+			return;
 		}
+	}
+
+	// Espadachim T./Mago T./etc. escolhe a transclasse da ramificacao final.
+	if (JobLevel >= 50 && Upper == 1) {
+		.@changed = 1;
+		if (Class == Job_Swordman_High) jobchange (BOT_FINAL_JOB == 102 ? Job_Paladin : Job_Lord_Knight);
+		else if (Class == Job_Mage_High) jobchange (BOT_FINAL_JOB == 104 ? Job_Professor : Job_High_Wizard);
+		else if (Class == Job_Archer_High) {
+			if (BOT_FINAL_JOB == 106) jobchange (Sex == SEX_MALE ? Job_Clown : Job_Gypsy);
+			else jobchange Job_Sniper;
+		}
+		else if (Class == Job_Thief_High) jobchange (BOT_FINAL_JOB == 108 ? Job_Stalker : Job_Assassin_Cross);
+		else if (Class == Job_Acolyte_High) jobchange (BOT_FINAL_JOB == 110 ? Job_Champion : Job_High_Priest);
+		else if (Class == Job_Merchant_High) jobchange (BOT_FINAL_JOB == 112 ? Job_Creator : Job_Whitesmith);
+		else .@changed = 0;
+
+		if (.@changed) {
+			callsub OnFinalizeBotJobChange;
+			return;
+		}
+	}
+
+	// A transclasse evolui em 99/70 para a terceira classe escolhida.
+	if (BaseLevel >= 99 && JobLevel >= 70 && Upper == 1 &&
+	   (Class == Job_Lord_Knight || Class == Job_Paladin || Class == Job_High_Wizard || Class == Job_Professor ||
+	    Class == Job_Sniper || Class == Job_Clown || Class == Job_Gypsy || Class == Job_Assassin_Cross ||
+	    Class == Job_Stalker || Class == Job_High_Priest || Class == Job_Champion || Class == Job_Whitesmith ||
+	    Class == Job_Creator)) {
+		if (BOT_FINAL_JOB == 101) jobchange Job_Rune_Knight;
+		else if (BOT_FINAL_JOB == 102) jobchange Job_Royal_Guard;
+		else if (BOT_FINAL_JOB == 103) jobchange Job_Warlock;
+		else if (BOT_FINAL_JOB == 104) jobchange Job_Sorcerer;
+		else if (BOT_FINAL_JOB == 105) jobchange Job_Ranger;
+		else if (BOT_FINAL_JOB == 106) jobchange (Sex == SEX_MALE ? Job_Minstrel : Job_Wanderer);
+		else if (BOT_FINAL_JOB == 107) jobchange Job_Guillotine_Cross;
+		else if (BOT_FINAL_JOB == 108) jobchange Job_Shadow_Chaser;
+		else if (BOT_FINAL_JOB == 109) jobchange Job_Arch_Bishop;
+		else if (BOT_FINAL_JOB == 110) jobchange Job_Sura;
+		else if (BOT_FINAL_JOB == 111) jobchange Job_Mechanic;
+		else if (BOT_FINAL_JOB == 112) jobchange Job_Genetic;
 		else return;
 
-		specialeffect EF_ANGEL;
-		resetskill;
-		callsub OnDistributeSkills;
-		callsub OnDistributeStats;
+		if (BOT_FINAL_JOB == 111 || BOT_FINAL_JOB == 112) {
+			if (countitem(18000) < 500) getitem 18000, 2000;
+			if (getequipid(EQI_AMMO) <= 0) equip 18000;
+			atcommand "@restock 18000 1000";
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 18000, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+		}
+		callsub OnFinalizeBotJobChange;
 		return;
 	}
+	return;
+
+OnFinalizeBotJobChange:
+	specialeffect EF_ANGEL;
+	resetskill;
+	callsub OnDistributeSkills;
+	callsub OnDistributeStats;
 	return;
 }

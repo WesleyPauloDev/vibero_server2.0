@@ -17297,6 +17297,44 @@ BUILDIN_FUNC(equip) {
 	return SCRIPT_CMD_FAILURE;
 }
 
+/**
+ * equipuniqueid <unique id>{,<char_id>};
+ * Equipa a instancia exata de um item existente no inventario.
+ **/
+BUILDIN_FUNC(equipuniqueid) {
+	TBL_PC *sd;
+
+	if (!script_charid2sd(3, sd))
+		return SCRIPT_CMD_FAILURE;
+
+	const char* unique_id_str = script_getstr(st, 2);
+	char* end = nullptr;
+	errno = 0;
+	uint64 unique_id = std::strtoull(unique_id_str, &end, 10);
+
+	if (errno != 0 || end == unique_id_str || *end != '\0' || unique_id == 0) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	for (int32 i = 0; i < MAX_INVENTORY; ++i) {
+		struct item& item = sd->inventory.u.items_inventory[i];
+		if (item.nameid == 0 || item.amount == 0 || item.unique_id != unique_id)
+			continue;
+
+		std::shared_ptr<item_data> data = item_db.find(item.nameid);
+		if (data == nullptr || !itemdb_isequip2(data.get()))
+			break;
+
+		pc_equipitem(sd, i, data->equip);
+		script_pushint(st, 1);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	script_pushint(st, 0);
+	return SCRIPT_CMD_SUCCESS;
+}
+
 BUILDIN_FUNC(autoequip)
 {
 	t_itemid nameid=script_getnum(st,2);
@@ -29197,6 +29235,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(npcshopdelitem,"si*"),
 	BUILDIN_DEF(npcshopattach,"s?"),
 	BUILDIN_DEF(equip,"i?"),
+	BUILDIN_DEF(equipuniqueid,"s?"),
 	BUILDIN_DEF(autoequip,"ii"),
 	BUILDIN_DEF(setbattleflag,"si?"),
 	BUILDIN_DEF(getbattleflag,"s"),
