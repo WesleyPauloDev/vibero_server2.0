@@ -63,6 +63,11 @@ OnInit:
 		$BOT_REST_X = 241;
 		$BOT_REST_Y = 166;
 	}
+	// Simulacao individual de instancias: cada bot elegivel entra em um
+	// intervalo diferente para evitar anuncios simultaneos.
+	if ($BOT_INSTANCE_MIN_MINUTES <= 0) $BOT_INSTANCE_MIN_MINUTES = 30;
+	if ($BOT_INSTANCE_MAX_MINUTES < $BOT_INSTANCE_MIN_MINUTES) $BOT_INSTANCE_MAX_MINUTES = 60;
+	if ($BOT_INSTANCE_STAY_SECONDS <= 0) $BOT_INSTANCE_STAY_SECONDS = 300;
 
 	initnpctimer;
 	end;
@@ -203,6 +208,11 @@ OnStartSingleBot:
 	@BOT_STUCK_Y = 0;
 	@BOT_STUCK_TICKS = 0;
 	@BOT_WAIT_END = 0;
+	@BOT_INSTANCE_ACTIVE = 0;
+	@BOT_INSTANCE_END_TICK = 0;
+	@BOT_INSTANCE_NAME$ = "";
+	@BOT_INSTANCE_MAP$ = "";
+	@BOT_NEXT_INSTANCE_TICK = gettimetick(2) + rand($BOT_INSTANCE_MIN_MINUTES, $BOT_INSTANCE_MAX_MINUTES) * 60;
 	// Atualiza somente os slots que estao equipados neste inicio. Slots vazios
 	// preservam o conjunto salvo para que Strip/quebra nao apaguem a referencia.
 	callsub OnCaptureBotEquipment;
@@ -318,6 +328,10 @@ OnPauseSingleBot:
 	@BOT_STUCK_Y = 0;
 	@BOT_STUCK_TICKS = 0;
 	@BOT_NEXT_EQUIP_CHECK = 0;
+	@BOT_INSTANCE_ACTIVE = 0;
+	@BOT_INSTANCE_END_TICK = 0;
+	@BOT_INSTANCE_NAME$ = "";
+	@BOT_INSTANCE_MAP$ = "";
 	deltimer "PlayerBotAI::OnStepTimer";
 	unitstopwalk getcharid(3), USW_FORCE_STOP;
 	unitstopattack getcharid(3);
@@ -1563,6 +1577,7 @@ OnShowGMStatus:
 	.@b_job = @BOT_TARGET_JOB;
 	.@b_final_job = BOT_FINAL_JOB;
 	.@b_sex = Sex;
+	.@b_instance_name$ = @BOT_INSTANCE_NAME$;
 	.@b_base = BaseLevel;
 	.@b_jlvl = JobLevel;
 	.@b_map$ = strcharinfo(3);
@@ -1582,6 +1597,7 @@ OnShowGMStatus:
 		else .@st$ = "No Grupo Eden (Caminhando para a Saida 30,14)";
 	}
 	else if (.@b_stage == 3) .@st$ = "Em Campo de Cacada com Habilidades";
+	else if (.@b_stage == 4) .@st$ = "Simulando a instancia " + .@b_instance_name$ + " (parado por 5 minutos)";
 
 	dispbottom "--------------------------------------------------", 0x00FFFF;
 	dispbottom "Personagem: " + .@t_name$ + " | Modo: " + (.@b_test ? "^00FF00[TESTE]^00FFFF" : "[NORMAL]") + " | Ativo: " + (.@b_active ? "SIM" : "NAO"), 0x00FFFF;
@@ -1665,6 +1681,13 @@ OnPCDieEvent:
 		recovery 1;
 		percentheal 100, 100;
 		stand; // Garante que levanta do chao apos reviver
+		// Durante a simulacao, permanece na instancia ate completar os 5 minutos.
+		if (@BOT_AI_STAGE == 4 && @BOT_INSTANCE_ACTIVE && @BOT_INSTANCE_MAP$ != "") {
+			warp @BOT_INSTANCE_MAP$, @BOT_INSTANCE_X, @BOT_INSTANCE_Y;
+			deltimer "PlayerBotAI::OnStepTimer";
+			addtimer 1500, "PlayerBotAI::OnStepTimer";
+			end;
+		}
 		callsub OnApplyBuffs;
 		callsub OnGetHuntMap;
 		warp @hunt_map$, 0, 0;
@@ -1722,6 +1745,11 @@ OnFinishEdenRest:
 OnStepTimer:
 	if (!@BOT_AI_ACTIVE) end;
 	stand; // Bot NUNCA senta, permanece sempre em pe e ativo
+	// O estagio 4 e reservado para a permanencia simulada em instancia.
+	if (@BOT_AI_STAGE == 4) {
+		callsub OnHandleBotInstance;
+		end;
+	}
 	callsub OnMaintainBotEquipment;
 
 	// Limpeza de inventario se pesado
@@ -1735,6 +1763,7 @@ OnStepTimer:
 	callsub OnCheckJobChange;
 	callsub OnCheckPotions;
 	callsub OnCheckMounts;
+	if (callsub(OnTryBotInstance)) end;
 
 	// =========================================================
 	// =========================================================
@@ -3019,6 +3048,141 @@ OnStepTimer:
 // ======================================================================
 // SUB-ROTINAS DE SUPORTE
 // ======================================================================
+// Somente terceira/quarta classe ou segunda classe expandida pode simular.
+// Na arvore Taekwon, EAJL_THIRD libera apenas Mestre Estelar/Ceifador,
+// mantendo Mestre Taekwon e Espiritualista fora da selecao.
+OnCanSimulateInstance:
+	if (eaclass() & (EAJL_THIRD | EAJL_FOURTH)) return 1;
+	if (Class == Job_Super_Novice_E || Class == Job_Super_Baby_E ||
+	    Class == Job_Kagerou || Class == Job_Oboro || Class == Job_Rebellion ||
+	    Class == Job_Baby_Kagerou || Class == Job_Baby_Oboro || Class == Job_Baby_Rebellion)
+		return 1;
+	return 0;
+
+OnScheduleNextInstance:
+	@BOT_NEXT_INSTANCE_TICK = gettimetick(2) + rand($BOT_INSTANCE_MIN_MINUTES, $BOT_INSTANCE_MAX_MINUTES) * 60;
+	return;
+
+OnTryBotInstance:
+	if (!@BOT_AI_ACTIVE || @BOT_AI_STAGE == 4 || @BOT_INSTANCE_ACTIVE) return 0;
+	if (@BOT_NEXT_INSTANCE_TICK <= 0) {
+		callsub OnScheduleNextInstance;
+		return 0;
+	}
+	if (gettimetick(2) < @BOT_NEXT_INSTANCE_TICK) return 0;
+	if (!callsub(OnCanSimulateInstance)) {
+		// Reavalia depois: o personagem pode evoluir para uma classe elegivel.
+		@BOT_NEXT_INSTANCE_TICK = gettimetick(2) + 600;
+		return 0;
+	}
+
+	// Mesma faixa apresentada pela Roleta das Instancias: Vila dos Porings
+	// ate Labirinto de Oz. Torre Sem Fim foi intencionalmente removida.
+	setarray .@instance_name$[0],
+		"Vila dos Porings", "Batalha dos Orcs", "Ninho de Nidhog", "Maldicao de Glast Heim",
+		"Caverna do Polvo", "Altar do Selo", "Laboratorio Werner", "Torneio da Magia",
+		"Esgoto de Malangdo", "Memorias de Sara", "Espaco Infinito", "Wave Mode - Floresta",
+		"Wave Mode - Ceu", "Floresta Nebulosa", "Ritual da Bencao", "Hospital Abandonado",
+		"Lago Bakonawa", "Palacio das Magoas", "Assalto ao Dirigivel", "Caverna Buwaya",
+		"Tumulo do Monarca", "Charleston em Crise", "Edda do Quarto Crescente", "Queda de Glast Heim",
+		"Purificacao de Glast Heim", "Purificacao de Glast Heim Hard", "Torre do Demonio", "Laboratorio Central",
+		"Interior de Eclage", "Fabrica de Brinquedos de Terror", "Salao de Ymir", "Base da Guerra Heart Hunter",
+		"Sarah e Fenrir", "Jardim de Vermuth", "Fazenda de Pitayas", "Laboratorio Wolfchev",
+		"Templo do Rei Demonio", "Ilha de Bios", "Caverna do Morse", "Operacao OS",
+		"Memorial COR", "Base Militar", "Labirinto de Oz";
+	setarray .@instance_map$[0],
+		"1@begi", "1@orcs", "1@nyd", "1@gl_k",
+		"1@cash", "1@cata", "1@slw", "1@gef",
+		"1@pump", "1@sara", "1@infi", "1@def01",
+		"1@def02", "1@mist", "2@mir", "1@ma_h",
+		"1@ma_b", "1@spa", "1@air1", "1@ma_c",
+		"1@md_gef", "1@mcd", "1@pop1", "1@gl_prq",
+		"1@gl_prq", "1@gl_prq", "1@tnm1", "1@lab",
+		"1@ecl", "1@xm_d", "1@mir", "1@swat",
+		"1@glast", "1@herbs", "1@lost", "1@lhz",
+		"1@eom", "1@dth1", "1@rev", "1@os_a",
+		"1@cor", "1@tcamp", "1@oz";
+	setarray .@instance_x[0],
+		100,179,32,150,199,100,187,119,63,250,30,50,29,89,101,40,64,42,244,35,106,127,
+		47,299,79,79,50,120,60,111,101,35,367,51,161,45,101,17,26,30,176,103,284;
+	setarray .@instance_y[0],
+		22,15,36,20,99,224,24,209,98,155,10,21,35,29,12,157,51,196,73,57,129,282,
+		133,19,22,22,104,30,50,22,10,65,304,273,42,148,16,93,181,352,169,237,167;
+
+	.@instance_index = rand(0, getarraysize(.@instance_name$) - 1);
+	@BOT_INSTANCE_NAME$ = .@instance_name$[.@instance_index];
+	@BOT_INSTANCE_MAP$ = .@instance_map$[.@instance_index];
+	@BOT_INSTANCE_X = .@instance_x[.@instance_index];
+	@BOT_INSTANCE_Y = .@instance_y[.@instance_index];
+	@BOT_INSTANCE_ACTIVE = 1;
+	@BOT_INSTANCE_END_TICK = gettimetick(2) + $BOT_INSTANCE_STAY_SECONDS;
+	@BOT_AI_STAGE = 4;
+	BOT_SAVED_STAGE = 4;
+	@BOT_CURRENT_TARGET = 0;
+	@BOT_HUNT_START = 0;
+	@BOT_HUNT_DURATION = 0;
+	unitstopattack getcharid(3);
+	unitstopwalk getcharid(3), USW_FORCE_STOP;
+
+	if (getcharid(1) > 0)
+		announce "[Instancias] " + strcharinfo(0) + " criou " + @BOT_INSTANCE_NAME$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, 0xFF9900;
+	else
+		announce "[Instancias] " + strcharinfo(0) + " criou " + @BOT_INSTANCE_NAME$ + " em modo solo.", bc_all, 0xFF9900;
+
+	warp @BOT_INSTANCE_MAP$, @BOT_INSTANCE_X, @BOT_INSTANCE_Y;
+	addtimer 1000, "PlayerBotAI::OnStepTimer";
+	return 1;
+
+OnHandleBotInstance:
+	if (!@BOT_INSTANCE_ACTIVE || @BOT_INSTANCE_NAME$ == "" || @BOT_INSTANCE_MAP$ == "") {
+		@BOT_INSTANCE_ACTIVE = 0;
+		@BOT_INSTANCE_END_TICK = 0;
+		@BOT_INSTANCE_NAME$ = "";
+		@BOT_INSTANCE_MAP$ = "";
+		callsub OnScheduleNextInstance;
+		@BOT_AI_STAGE = 0;
+		BOT_SAVED_STAGE = 0;
+		@BOT_WP_INDEX = 99;
+		@BOT_WAIT_END = gettimetick(2) + 2;
+		warp "prontera", 156, 191;
+		callsub OnQueuePronteraBuff;
+		addtimer 2000, "PlayerBotAI::OnStepTimer";
+		return;
+	}
+
+	unitstopattack getcharid(3);
+	unitstopwalk getcharid(3), USW_FORCE_STOP;
+	stand;
+	if (gettimetick(2) < @BOT_INSTANCE_END_TICK) {
+		getmapxy(.@instance_current_map$, .@instance_current_x, .@instance_current_y, BL_PC);
+		if (.@instance_current_map$ != @BOT_INSTANCE_MAP$)
+			warp @BOT_INSTANCE_MAP$, @BOT_INSTANCE_X, @BOT_INSTANCE_Y;
+		addtimer 1000, "PlayerBotAI::OnStepTimer";
+		return;
+	}
+
+	if (getcharid(1) > 0)
+		announce "[Instancias] " + strcharinfo(0) + " concluiu " + @BOT_INSTANCE_NAME$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, 0xFF9900;
+	else
+		announce "[Instancias] " + strcharinfo(0) + " concluiu " + @BOT_INSTANCE_NAME$ + " em modo solo.", bc_all, 0xFF9900;
+
+	@BOT_INSTANCE_ACTIVE = 0;
+	@BOT_INSTANCE_END_TICK = 0;
+	@BOT_INSTANCE_NAME$ = "";
+	@BOT_INSTANCE_MAP$ = "";
+	callsub OnScheduleNextInstance;
+	@BOT_AI_STAGE = 0;
+	BOT_SAVED_STAGE = 0;
+	@BOT_WP_INDEX = 99;
+	@BOT_WAIT_END = gettimetick(2) + 2;
+	@BOT_PRT_MAX = 0;
+	@BOT_PRT_COUNT = 0;
+	savepoint "prontera", 156, 191;
+	warp "prontera", 156, 191;
+	callsub OnQueuePronteraBuff;
+	addtimer 2000, "PlayerBotAI::OnStepTimer";
+	return;
+
 OnApplyBuffs:
 	if (!@BOT_AI_ACTIVE || @BOT_AI_STAGE != 3) return;
 	stand;
