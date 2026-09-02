@@ -42,6 +42,7 @@
 
 OnInit:
 	bindatcmd("bot", "PlayerBotAI::OnGMCommand", 60, 99);
+	bindatcmd("botmvpcheck", "PlayerBotAI::OnMvpCheckCommand", 60, 99);
 	bindatcmd("iniciante", "PlayerBotAI::OnPlayerCommand", 0, 99);
 	.boot_restore_done = 0;
 
@@ -70,9 +71,8 @@ OnInit:
 	if ($BOT_INSTANCE_STAY_SECONDS <= 0) $BOT_INSTANCE_STAY_SECONDS = 300;
 	// Cacada automatica de MVP abandonado: verificacao leve, a cada 5 minutos.
 	if ($BOT_MVP_CHECK_SECONDS <= 0) $BOT_MVP_CHECK_SECONDS = 300;
-	// TEMPORARIO PARA TESTE: aceita MVP vivo ha pelo menos 1 segundo.
-	// Restaurar para 3600 depois de confirmar teleporte, kill e retorno.
-	$BOT_MVP_MIN_ALIVE_SECONDS = 1;
+	// O MVP precisa estar vivo ha pelo menos uma hora antes da cacada.
+	$BOT_MVP_MIN_ALIVE_SECONDS = 3600;
 	if ($BOT_MVP_MAX_LEVEL <= 0) $BOT_MVP_MAX_LEVEL = 150;
 
 	initnpctimer;
@@ -427,6 +427,30 @@ OnPlayerCommand:
 // ======================================================================
 // COMANDOS DO GM: @bot <acao> [nome | all]
 // ======================================================================
+// ======================================================================
+// CONFIGURACAO DO INTERVALO DA CACADA MVP
+// Uso: @botmvpcheck             (consulta o intervalo atual)
+//      @botmvpcheck <minutos>   (altera o intervalo; minimo 1 minuto)
+// ======================================================================
+OnMvpCheckCommand:
+	if (getgmlevel() < 60) {
+		dispbottom "[Bot MVP]: Voce nao tem permissao para usar este comando.", 0xFF5555;
+		end;
+	}
+
+	if (.@atcmd_numparameters < 1 || atoi(.@atcmd_parameters$[0]) <= 0) {
+		dispbottom "[Bot MVP]: Verificacao atual a cada " + ($BOT_MVP_CHECK_SECONDS / 60) + " minuto(s).", 0xFFFF00;
+		dispbottom "Uso: @botmvpcheck <minutos> (ex.: @botmvpcheck 10).", 0xFFFFFF;
+		end;
+	}
+
+	.@minutes = atoi(.@atcmd_parameters$[0]);
+	if (.@minutes < 1) .@minutes = 1;
+	if (.@minutes > 1440) .@minutes = 1440;
+	$BOT_MVP_CHECK_SECONDS = .@minutes * 60;
+	dispbottom "[Bot MVP]: Verificacao configurada para cada " + .@minutes + " minuto(s).", 0x55FF55;
+	end;
+
 OnGMCommand:
 	.@gm_aid = getcharid(3);
 
