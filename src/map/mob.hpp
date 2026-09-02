@@ -374,6 +374,7 @@ struct mob_data : public block_list {
 	uint32 spotted_log[DAMAGELOG_SIZE];
 	struct spawn_data *spawn; //Spawn data.
 	int32 spawn_timer; //Required for Convex Mirror
+	t_tick spawned_tick; // Tick em que a vida atual do monstro comecou.
 	int16 centerX, centerY; // Spawn center of this individual monster
 	struct s_mob_lootitem *lootitems;
 	int16 mob_id;

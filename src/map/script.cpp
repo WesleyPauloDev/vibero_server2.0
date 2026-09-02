@@ -66,6 +66,7 @@
 #include "pet.hpp"
 #include "quest.hpp"
 #include "storage.hpp"
+#include "status.hpp"
 
 using namespace rathena;
 
@@ -10028,6 +10029,125 @@ BUILDIN_FUNC(restorebot)
 	sd->state.autotrade = 7;
 	chrif_authreq(sd, true);
 
+	script_pushint(st, 1);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+struct s_bot_mvp_search {
+	t_tick now = 0;
+	t_tick minimum_alive = 0;
+	int32 maximum_level = 0;
+	mob_data* target = nullptr;
+};
+
+static int32 bot_mvp_count_players_sub(block_list* bl, va_list)
+{
+	map_session_data* map_sd = BL_CAST(BL_PC, bl);
+	if (map_sd == nullptr)
+		return 0;
+	return pc_readglobalreg(map_sd, add_str("BOT_REGISTERED")) ? 0 : 1;
+}
+
+static bool bot_mvp_map_has_player(int16 map_id)
+{
+	map_data* mapdata = map_getmapdata(map_id);
+	return mapdata != nullptr && mapdata->users > 0 &&
+		map_foreachinmap(bot_mvp_count_players_sub, map_id, BL_PC) > 0;
+}
+
+static int32 bot_mvp_search_sub(mob_data* md, va_list args)
+{
+	s_bot_mvp_search* search = va_arg(args, s_bot_mvp_search*);
+
+	if (md == nullptr || search == nullptr || md->prev == nullptr || md->status.hp <= 0 ||
+		md->spawn == nullptr || !md->spawn->state.boss || md->get_bosstype() != BOSSTYPE_MVP ||
+		md->level >= search->maximum_level || md->guardian_data != nullptr)
+		return 0;
+
+	map_data* mapdata = map_getmapdata(md->m);
+	if (mapdata == nullptr || mapdata->instance_id > 0 ||
+		map_getmapflag(md->m, MF_NOTOMB) || !battle_config.mvp_tomb_enabled)
+		return 0;
+
+	if (bot_mvp_map_has_player(md->m))
+		return 0;
+
+	if (md->spawned_tick <= 0 || DIFF_TICK(search->now, md->spawned_tick) < search->minimum_alive)
+		return 0;
+
+	// Havendo mais de um candidato, prioriza o que nasceu primeiro.
+	if (search->target == nullptr ||
+		search->target->spawned_tick > md->spawned_tick)
+		search->target = md;
+
+	return 1;
+}
+
+/**
+ * botmvphunt({<minimum_alive_seconds>{,<maximum_mvp_level>}});
+ * Procura um MVP natural em mapa vazio, teleporta o bot e aplica a morte
+ * como dano do proprio personagem para preservar credito, drops e tumulo.
+ **/
+BUILDIN_FUNC(botmvphunt)
+{
+	map_session_data* sd;
+
+	if (!script_rid2sd(sd)) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	int32 minimum_alive_seconds = script_hasdata(st, 2) ? script_getnum(st, 2) : 3600;
+	int32 maximum_mvp_level = script_hasdata(st, 3) ? script_getnum(st, 3) : 150;
+	if (minimum_alive_seconds < 1)
+		minimum_alive_seconds = 1;
+	if (maximum_mvp_level < 1)
+		maximum_mvp_level = 1;
+
+	// Restricao dupla: somente personagem registrado como bot e nivel 130+.
+	if (!pc_readglobalreg(sd, add_str("BOT_REGISTERED")) || sd->status.base_level < 130) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	s_bot_mvp_search search;
+	search.now = gettick();
+	search.minimum_alive = static_cast<t_tick>(minimum_alive_seconds) * 1000;
+	search.maximum_level = maximum_mvp_level;
+	map_foreachmob(bot_mvp_search_sub, &search);
+
+	mob_data* md = search.target;
+	if (md == nullptr || md->prev == nullptr || md->status.hp <= 0) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	map_data* mapdata = map_getmapdata(md->m);
+	if (mapdata == nullptr || bot_mvp_map_has_player(md->m)) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	int16 target_x = md->x;
+	int16 target_y = md->y;
+	map_search_freecell(md, md->m, &target_x, &target_y, 3, 3, 1);
+	char mvp_name[NAME_LENGTH];
+	safestrncpy(mvp_name, md->name, sizeof(mvp_name));
+
+	unit_stop_attack(sd);
+	unit_stop_walking(sd, USW_FORCE_STOP);
+	if (pc_setpos(sd, map_id2index(md->m), target_x, target_y, CLR_TELEPORT) != SETPOS_OK) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	// status_damage registra o bot no damage log antes de executar mob_dead.
+	// Assim ele se torna o MVP real e o nome chega naturalmente ao tumulo.
+	status_damage(sd, md, md->status.hp, 0, 0, 0, 0, 0);
+
+	char announcement[CHAT_SIZE_MAX];
+	snprintf(announcement, sizeof(announcement), "[Cacada MVP] %s derrotou %s!", sd->status.name, mvp_name);
+	intif_broadcast(announcement, strlen(announcement) + 1, BC_DEFAULT);
 	script_pushint(st, 1);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -28957,6 +29077,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(statusup2,"ii?"),
 	BUILDIN_DEF(offlinebot,"?"),
 	BUILDIN_DEF(restorebot,"iii"),
+	BUILDIN_DEF(botmvphunt,"??"),
 	BUILDIN_DEF(iscasting,"?"),
 	BUILDIN_DEF(traitstatusup,"i?"),
 	BUILDIN_DEF(traitstatusup2,"ii?"),

@@ -68,6 +68,10 @@ OnInit:
 	if ($BOT_INSTANCE_MIN_MINUTES <= 0) $BOT_INSTANCE_MIN_MINUTES = 30;
 	if ($BOT_INSTANCE_MAX_MINUTES < $BOT_INSTANCE_MIN_MINUTES) $BOT_INSTANCE_MAX_MINUTES = 60;
 	if ($BOT_INSTANCE_STAY_SECONDS <= 0) $BOT_INSTANCE_STAY_SECONDS = 300;
+	// Cacada automatica de MVP abandonado: verificacao leve, uma vez por minuto.
+	if ($BOT_MVP_CHECK_SECONDS <= 0) $BOT_MVP_CHECK_SECONDS = 60;
+	if ($BOT_MVP_MIN_ALIVE_SECONDS <= 0) $BOT_MVP_MIN_ALIVE_SECONDS = 3600;
+	if ($BOT_MVP_MAX_LEVEL <= 0) $BOT_MVP_MAX_LEVEL = 150;
 
 	initnpctimer;
 	end;
@@ -195,6 +199,12 @@ OnStartSingleBot:
 	@BOT_WP_INDEX = 0;
 	@BOT_HUNT_COUNT = 0;
 	@BOT_CURRENT_TARGET = 0;
+	@BOT_TARGET_TRACK_ID = 0;
+	@BOT_TARGET_LAST_HP = 0;
+	@BOT_TARGET_PROGRESS_TICK = 0;
+	@BOT_BLOCKED_TARGET = 0;
+	@BOT_BLOCKED_UNTIL = 0;
+	@BOT_NEXT_MVP_CHECK = gettimetick(2) + rand(10, $BOT_MVP_CHECK_SECONDS);
 	@BOT_PRT_MAX = 0;
 	@BOT_PRT_COUNT = 0;
 	@BOT_LAST_TX = 0;
@@ -322,6 +332,12 @@ OnPauseSingleBot:
 	@BOT_HUNT_START = 0;
 	@BOT_HUNT_DURATION = 0;
 	@BOT_CURRENT_TARGET = 0;
+	@BOT_TARGET_TRACK_ID = 0;
+	@BOT_TARGET_LAST_HP = 0;
+	@BOT_TARGET_PROGRESS_TICK = 0;
+	@BOT_BLOCKED_TARGET = 0;
+	@BOT_BLOCKED_UNTIL = 0;
+	@BOT_NEXT_MVP_CHECK = 0;
 	@BOT_PRT_MAX = 0;
 	@BOT_PRT_COUNT = 0;
 	@BOT_STUCK_X = 0;
@@ -1752,6 +1768,22 @@ OnStepTimer:
 	}
 	callsub OnMaintainBotEquipment;
 
+	// Bots ativos de nivel 130+ procuram, no maximo uma vez por minuto, um
+	// MVP abaixo do nivel 150 que esteja vivo ha uma hora em mapa sem jogadores.
+	if (BaseLevel >= 130 && gettimetick(2) >= @BOT_NEXT_MVP_CHECK) {
+		@BOT_NEXT_MVP_CHECK = gettimetick(2) + $BOT_MVP_CHECK_SECONDS;
+		if (botmvphunt($BOT_MVP_MIN_ALIVE_SECONDS, $BOT_MVP_MAX_LEVEL)) {
+			@BOT_CURRENT_TARGET = 0;
+			@BOT_TARGET_TRACK_ID = 0;
+			@BOT_TARGET_LAST_HP = 0;
+			@BOT_TARGET_PROGRESS_TICK = 0;
+			@BOT_LAST_TX = 0;
+			@BOT_LAST_TY = 0;
+			addtimer 1500, "PlayerBotAI::OnStepTimer";
+			end;
+		}
+	}
+
 	// Limpeza de inventario se pesado
 	if ((Weight * 100 / MaxWeight) >= 80) {
 		callsub OnCleanHeavyInventory;
@@ -2269,6 +2301,11 @@ OnStepTimer:
 			stand;
 			warp @hunt_map$, 0, 0;
 			@BOT_CURRENT_TARGET = 0;
+			@BOT_TARGET_TRACK_ID = 0;
+			@BOT_TARGET_LAST_HP = 0;
+			@BOT_TARGET_PROGRESS_TICK = 0;
+			@BOT_BLOCKED_TARGET = 0;
+			@BOT_BLOCKED_UNTIL = 0;
 			@BOT_LAST_TX = 0;
 			@BOT_LAST_TY = 0;
 			@BOT_STUCK_TICKS = 0;
@@ -2308,10 +2345,19 @@ OnStepTimer:
 			end;
 		}
 
+		// Libera o monstro bloqueado depois do tempo de seguranca.
+		if (@BOT_BLOCKED_TARGET > 0 && gettimetick(2) >= @BOT_BLOCKED_UNTIL) {
+			@BOT_BLOCKED_TARGET = 0;
+			@BOT_BLOCKED_UNTIL = 0;
+		}
+
 		// 1. Verifica se o monstro alvo anterior ainda existe, esta vivo, valido e nao esta sendo atacado por outro (Anti-KS)
 		if (@BOT_CURRENT_TARGET > 0) {
 			if (!unitexists(@BOT_CURRENT_TARGET)) {
 				@BOT_CURRENT_TARGET = 0;
+				@BOT_TARGET_TRACK_ID = 0;
+				@BOT_TARGET_LAST_HP = 0;
+				@BOT_TARGET_PROGRESS_TICK = 0;
 				@BOT_LAST_TX = 0;
 				@BOT_LAST_TY = 0;
 			} else {
@@ -2324,11 +2370,36 @@ OnStepTimer:
 				if (.@cur_data[UMOB_HP] <= 0 || (.@cur_class >= 1078 && .@cur_class <= 1085) || (.@cur_class >= 1930 && .@cur_class <= 1933) || .@cur_class == 1064 ||
 				    .@d > 14 || (.@cur_data[UMOB_HP] < .@cur_data[UMOB_MAXHP] && .@cur_target_id > 0 && .@cur_target_id != getcharid(3))) {
 					@BOT_CURRENT_TARGET = 0;
+					@BOT_TARGET_TRACK_ID = 0;
+					@BOT_TARGET_LAST_HP = 0;
+					@BOT_TARGET_PROGRESS_TICK = 0;
 					@BOT_LAST_TX = 0;
 					@BOT_LAST_TY = 0;
 				} else {
 					.@mx = .@cur_data[UMOB_X];
 					.@my = .@cur_data[UMOB_Y];
+
+					// Se o bot ja iniciou o ataque e o HP nao diminui por 8 segundos,
+					// existe provavelmente uma parede ou obstaculo entre os dois.
+					if (@BOT_TARGET_TRACK_ID == @BOT_CURRENT_TARGET) {
+						if (.@cur_data[UMOB_HP] < @BOT_TARGET_LAST_HP) {
+							@BOT_TARGET_LAST_HP = .@cur_data[UMOB_HP];
+							@BOT_TARGET_PROGRESS_TICK = gettimetick(2);
+						} else if ((gettimetick(2) - @BOT_TARGET_PROGRESS_TICK) >= 8) {
+							@BOT_BLOCKED_TARGET = @BOT_CURRENT_TARGET;
+							@BOT_BLOCKED_UNTIL = gettimetick(2) + 20;
+							@BOT_CURRENT_TARGET = 0;
+							@BOT_TARGET_TRACK_ID = 0;
+							@BOT_TARGET_LAST_HP = 0;
+							@BOT_TARGET_PROGRESS_TICK = 0;
+							@BOT_LAST_TX = 0;
+							@BOT_LAST_TY = 0;
+							unitstopattack getcharid(3);
+							unitstopwalk getcharid(3), USW_FORCE_STOP;
+						} else if (.@cur_data[UMOB_HP] > @BOT_TARGET_LAST_HP) {
+							@BOT_TARGET_LAST_HP = .@cur_data[UMOB_HP];
+						}
+					}
 				}
 			}
 		}
@@ -2341,6 +2412,9 @@ OnStepTimer:
 
 			for (.@i = 0; .@i < .@num_mobs; .@i++) {
 				if (unitexists(.@mob_list[.@i])) {
+					// Nao seleciona imediatamente o alvo inacessivel que acabou de travar a IA.
+					if (.@mob_list[.@i] == @BOT_BLOCKED_TARGET && gettimetick(2) < @BOT_BLOCKED_UNTIL)
+						continue;
 					getunitdata .@mob_list[.@i], .@t_data;
 					.@m_class = .@t_data[UMOB_CLASS];
 					.@m_lvl = .@t_data[UMOB_LEVEL];
@@ -2475,6 +2549,15 @@ OnStepTimer:
 
 			// Garante SP cheio antes de executar as habilidades!
 			callsub OnCheckPotions;
+
+			// A partir daqui o bot realmente comecou a atacar. O HP deste alvo
+			// passa a ser acompanhado para detectar parede/linha de visao bloqueada.
+			if (@BOT_TARGET_TRACK_ID != @BOT_CURRENT_TARGET) {
+				getunitdata @BOT_CURRENT_TARGET, .@attack_data;
+				@BOT_TARGET_TRACK_ID = @BOT_CURRENT_TARGET;
+				@BOT_TARGET_LAST_HP = .@attack_data[UMOB_HP];
+				@BOT_TARGET_PROGRESS_TICK = gettimetick(2);
+			}
 
 			// Engata ataque basico continuo
 			unitattack getcharid(3), @BOT_CURRENT_TARGET, 1;
@@ -3573,31 +3656,64 @@ OnCleanHeavyInventory:
 	return;
 
 OnGetHuntMap:
-	if (BaseLevel <= 30) {
-		// Mobs Nv 40 (Esporos, Rabo de Verme - 640+ mobs: Up inicial ultra rapido +10 a +35 lvls)
-		@hunt_map$ = "pay_fild08"; @hunt_x = 0; @hunt_y = 0;
-	} else if (BaseLevel <= 50) {
-		// Mobs Nv 50 (Guerreiro Orc, Senhora Orc - 639 mobs: +10 a +19 lvls)
-		@hunt_map$ = "gef_fild10"; @hunt_x = 0; @hunt_y = 0;
-	} else if (BaseLevel <= 65) {
-		// Mobs Nv 64-68 (Sohee, Dokebi, Horong - 169 mobs: +10 a +15 lvls)
-		@hunt_map$ = "pay_dun04"; @hunt_x = 0; @hunt_y = 0;
-	} else if (BaseLevel <= 78) {
-		// Mobs Nv 80 (Petite, Mantis - 456 mobs: +10 a +14 lvls)
-		@hunt_map$ = "gef_fild06"; @hunt_x = 0; @hunt_y = 0;
-	} else if (BaseLevel <= 88) {
-		// Mobs Nv 87-91 (Venomous, Teddy Bear - 247 mobs: +10 a +12 lvls)
-		@hunt_map$ = "ein_fild04"; @hunt_x = 0; @hunt_y = 0;
-	} else if (BaseLevel <= 99) {
-		// Mobs Nv 109-110 (Roween, Magma 2 - 746 mobs: +10 a +15 lvls)
-		@hunt_map$ = "ra_fild12"; @hunt_x = 0; @hunt_y = 0;
-	} else if (BaseLevel <= 145) {
-		// Mobs Nv 160 (Dolomedes, Tatacho, Centipede - 167 mobs: +15 a +25 lvls)
-		@hunt_map$ = "dic_fild02"; @hunt_x = 0; @hunt_y = 0;
-	} else {
-		// Mobs Nv 165 (Scaraba - 263 mobs: +15 a +20 lvls)
-		@hunt_map$ = "dic_dun02"; @hunt_x = 0; @hunt_y = 0;
-	}
+	// Ate o nivel 98, segue os mapas das missoes de treinamento do Grupo Eden.
+	if (BaseLevel < 20)
+		@hunt_map$ = "prt_fild08"; // Iniciante
+	else if (BaseLevel <= 25)
+		@hunt_map$ = "prt_sewb1"; // Eden 20-25: Bueiros de Prontera
+	else if (BaseLevel <= 32)
+		@hunt_map$ = "pay_dun00"; // Eden 26-32: Caverna de Payon
+	else if (BaseLevel <= 39)
+		@hunt_map$ = "anthell01"; // Eden 33-39: Formigueiro Infernal
+	else if (BaseLevel <= 49)
+		@hunt_map$ = "gef_fild10"; // Eden 40-49: Vila dos Orcs
+	else if (BaseLevel <= 59)
+		@hunt_map$ = "orcsdun01"; // Eden 50-59: Calabouco dos Orcs
+	else if (BaseLevel <= 69)
+		@hunt_map$ = "beach_dun2"; // Eden 60-69: Golem Estalactitico
+	else if (BaseLevel <= 79)
+		@hunt_map$ = "gl_church"; // Eden 70-79: Wraith e Druida Maligno
+	else if (BaseLevel <= 84)
+		@hunt_map$ = "ein_fild08"; // Eden 80-84: Porcellio
+	else if (BaseLevel <= 89)
+		@hunt_map$ = "ein_fild04"; // Eden 85-89: Venomous e Ursinho
+	else if (BaseLevel <= 98)
+		@hunt_map$ = "ice_dun01"; // Eden 90-98: Siroma
+	// Do nivel 99 ao 170, segue a progressao do Guia_UP do warper.
+	else if (BaseLevel <= 99)
+		@hunt_map$ = "ra_fild12"; // Roween
+	else if (BaseLevel <= 104)
+		@hunt_map$ = "mag_dun02"; // Magma 02
+	else if (BaseLevel <= 109)
+		@hunt_map$ = "ra_fild04"; // Vento da Colina
+	else if (BaseLevel <= 114)
+		@hunt_map$ = "ra_fild05"; // Kobold
+	else if (BaseLevel <= 119)
+		@hunt_map$ = "ra_fild01"; // Lobo do Deserto
+	else if (BaseLevel <= 124)
+		@hunt_map$ = "ice_dun01"; // Siroma
+	else if (BaseLevel <= 129)
+		@hunt_map$ = "ve_fild03"; // Magmaring
+	else if (BaseLevel <= 134)
+		@hunt_map$ = "juperos_01"; // Juperos
+	else if (BaseLevel <= 139)
+		@hunt_map$ = "ra_san02"; // Templo de Rachel
+	else if (BaseLevel <= 144)
+		@hunt_map$ = "abyss_01"; // Abismo 01
+	else if (BaseLevel <= 149)
+		@hunt_map$ = "tha_t08"; // Torre de Thanatos 08
+	else if (BaseLevel <= 154)
+		@hunt_map$ = "dic_fild01"; // El Dicastes 01
+	else if (BaseLevel <= 159)
+		@hunt_map$ = "dic_dun02"; // Scaraba
+	else if (BaseLevel <= 164)
+		@hunt_map$ = "abbey03"; // Monasterio 03
+	else if (BaseLevel <= 169)
+		@hunt_map$ = "odin_tem03"; // Templo de Odin
+	else
+		@hunt_map$ = "thor_v01"; // Nivel 170: Vulcao de Thor
+	@hunt_x = 0;
+	@hunt_y = 0;
 	return;
 
 OnCheckMapSwitch:

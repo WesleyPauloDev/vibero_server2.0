@@ -2801,6 +2801,7 @@ int32 status_calc_mob_(struct mob_data* md, uint8 opt)
 	int32 flag=0;
 
 	if (opt&SCO_FIRST) { // Set basic level on respawn.
+		md->spawned_tick = gettick();
 		if (md->level > 0 && md->level <= MAX_LEVEL && md->level != md->db->lv)
 			;
 		else

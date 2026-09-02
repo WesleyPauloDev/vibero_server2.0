@@ -663,8 +663,8 @@ function	script	F_Fenda_RecycleEnchant	{
 			mes "[Reciclagem da Fenda]";
 			mes "Custo: 1000 pontos da Fenda + 1 encanto correspondente.";
 			mes "Voce pode trocar:";
-			mes "^0055FFFeitico da Benevolencia^000000 por ^FF0000Feitico da Maldade^000000.";
-			mes "^FF0000Feitico da Maldade^000000 por ^0055FFFeitico da Benevolencia^000000.";
+			mes "- " + mesitemlink(312014, false) + " por " + mesitemlink(312021, false);
+			mes "- " + mesitemlink(312021, false) + " por " + mesitemlink(312014, false);
 			next;
 
 			.@menu$ = "";
@@ -696,9 +696,9 @@ function	script	F_Fenda_RecycleEnchant	{
 			.@to_id = .@to[.@pick];
 			mes "[Reciclagem da Fenda]";
 			mes "Trocar:";
-			mes "^FF0000" + getitemname(.@from_id) + "^000000";
+			mes "- " + mesitemlink(.@from_id, false);
 			mes "por:";
-			mes "^0055FF" + getitemname(.@to_id) + "^000000";
+			mes "- " + mesitemlink(.@to_id, false);
 			mes "Custo: " + .@cost + " pontos da Fenda.";
 			next;
 			if (select("Confirmar:Cancelar") == 2)
@@ -726,15 +726,10 @@ function	script	F_Fenda_RecycleEnchant	{
 			getitem .@to_id, 1;
 			mes "[Reciclagem da Fenda]";
 			mes "Reciclagem concluida.";
-			mes "Voce recebeu ^0055FF" + getitemname(.@to_id) + "^000000.";
+			mes "Voce recebeu " + mesitemlink(.@to_id, false) + ".";
 			mes "Saldo atual: " + #FendaShopPoints + " pontos.";
 			close;
 		case 2:
-			mes "[Reciclagem da Fenda]";
-			mes "Custo: 1000 pontos da Fenda + 1 encanto de botas.";
-			mes "Escolha qual encanto deseja entregar.";
-			next;
-
 			setarray .@boots_enchants[0], 29509,29371,311365,4875,4876,4877,4878,4879,4880,311074,310321;
 			.@menu$ = "";
 			.@count = 0;
@@ -752,15 +747,30 @@ function	script	F_Fenda_RecycleEnchant	{
 				close;
 			}
 
+			mes "[Reciclagem da Fenda]";
+			mes "Custo: 1000 pontos da Fenda + 1 encanto de botas.";
+			mes "Seus encantos disponiveis:";
+			for (.@i = 0; .@i < .@count; ++.@i)
+				mes "- " + mesitemlink(.@from[.@i], false);
+			mes " ";
+			mes "Escolha qual encanto deseja entregar:";
+
 			.@from_pick = select(.@menu$ + "Cancelar") - 1;
 			if (.@from_pick >= .@count)
 				close;
 			.@from_id = .@from[.@from_pick];
 
 			mes "[Reciclagem da Fenda]";
-			mes "Voce entregara:";
-			mes "^FF0000" + getitemname(.@from_id) + "^000000";
-			mes "Agora escolha qual encanto deseja receber.";
+			mes "Voce entregara: " + mesitemlink(.@from_id, false);
+			mes " ";
+			mes "Encantos disponiveis para troca:";
+			for (.@i = 0; .@i < getarraysize(.@boots_enchants); ++.@i) {
+				if (.@boots_enchants[.@i] == .@from_id)
+					continue;
+				mes "- " + mesitemlink(.@boots_enchants[.@i], false);
+			}
+			mes " ";
+			mes "Clique nos itens acima para ler as descricoes.";
 			next;
 
 			.@menu$ = "";
@@ -773,6 +783,8 @@ function	script	F_Fenda_RecycleEnchant	{
 				.@count++;
 			}
 
+			mes "[Reciclagem da Fenda]";
+			mes "Escolha qual encanto deseja receber:";
 			.@to_pick = select(.@menu$ + "Cancelar") - 1;
 			if (.@to_pick >= .@count)
 				close;
@@ -781,9 +793,9 @@ function	script	F_Fenda_RecycleEnchant	{
 
 			mes "[Reciclagem da Fenda]";
 			mes "Trocar:";
-			mes "^FF0000" + getitemname(.@from_id) + "^000000";
+			mes "- " + mesitemlink(.@from_id, false);
 			mes "por:";
-			mes "^0055FF" + getitemname(.@to_id) + "^000000";
+			mes "- " + mesitemlink(.@to_id, false);
 			mes "Custo: " + .@cost + " pontos da Fenda.";
 			next;
 			if (select("Confirmar:Cancelar") == 2)
@@ -811,7 +823,7 @@ function	script	F_Fenda_RecycleEnchant	{
 			getitem .@to_id, 1;
 			mes "[Reciclagem da Fenda]";
 			mes "Reciclagem concluida.";
-			mes "Voce recebeu ^0055FF" + getitemname(.@to_id) + "^000000.";
+			mes "Voce recebeu " + mesitemlink(.@to_id, false) + ".";
 			mes "Saldo atual: " + #FendaShopPoints + " pontos.";
 			close;
 		default:
