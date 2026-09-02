@@ -70,7 +70,9 @@ OnInit:
 	if ($BOT_INSTANCE_STAY_SECONDS <= 0) $BOT_INSTANCE_STAY_SECONDS = 300;
 	// Cacada automatica de MVP abandonado: verificacao leve, a cada 5 minutos.
 	if ($BOT_MVP_CHECK_SECONDS <= 0) $BOT_MVP_CHECK_SECONDS = 300;
-	if ($BOT_MVP_MIN_ALIVE_SECONDS <= 0) $BOT_MVP_MIN_ALIVE_SECONDS = 3600;
+	// TEMPORARIO PARA TESTE: aceita MVP vivo ha pelo menos 1 segundo.
+	// Restaurar para 3600 depois de confirmar teleporte, kill e retorno.
+	$BOT_MVP_MIN_ALIVE_SECONDS = 1;
 	if ($BOT_MVP_MAX_LEVEL <= 0) $BOT_MVP_MAX_LEVEL = 150;
 
 	initnpctimer;
@@ -205,6 +207,8 @@ OnStartSingleBot:
 	@BOT_BLOCKED_TARGET = 0;
 	@BOT_BLOCKED_UNTIL = 0;
 	@BOT_NEXT_MVP_CHECK = gettimetick(2) + rand(10, $BOT_MVP_CHECK_SECONDS);
+	@BOT_MVP_TARGET_ID = 0;
+	@BOT_MVP_KILL_TICK = 0;
 	@BOT_PRT_MAX = 0;
 	@BOT_PRT_COUNT = 0;
 	@BOT_LAST_TX = 0;
@@ -338,6 +342,8 @@ OnPauseSingleBot:
 	@BOT_BLOCKED_TARGET = 0;
 	@BOT_BLOCKED_UNTIL = 0;
 	@BOT_NEXT_MVP_CHECK = 0;
+	@BOT_MVP_TARGET_ID = 0;
+	@BOT_MVP_KILL_TICK = 0;
 	@BOT_PRT_MAX = 0;
 	@BOT_PRT_COUNT = 0;
 	@BOT_STUCK_X = 0;
@@ -1766,13 +1772,39 @@ OnStepTimer:
 		callsub OnHandleBotInstance;
 		end;
 	}
+	// Estagio 5: MVP encontrado. Aguarda 15 segundos no mapa antes de matar.
+	if (@BOT_AI_STAGE == 5) {
+		stand;
+		unitstopattack getcharid(3);
+		unitstopwalk getcharid(3), USW_FORCE_STOP;
+		if (gettimetick(2) < @BOT_MVP_KILL_TICK) {
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
+			end;
+		}
+		botmvpkill(@BOT_MVP_TARGET_ID);
+		@BOT_MVP_TARGET_ID = 0;
+		@BOT_MVP_KILL_TICK = 0;
+		@BOT_AI_STAGE = 0;
+		BOT_SAVED_STAGE = 0;
+		@BOT_WP_INDEX = 99;
+		@BOT_WAIT_END = gettimetick(2) + 2;
+		warp "prontera", 156, 191;
+		callsub OnQueuePronteraBuff;
+		addtimer 2000, "PlayerBotAI::OnStepTimer";
+		end;
+	}
 	callsub OnMaintainBotEquipment;
 
 	// Bots ativos de nivel 130+ procuram, no maximo a cada 5 minutos, um
 	// MVP abaixo do nivel 150 que esteja vivo ha uma hora em mapa sem jogadores.
 	if (BaseLevel >= 130 && gettimetick(2) >= @BOT_NEXT_MVP_CHECK) {
 		@BOT_NEXT_MVP_CHECK = gettimetick(2) + $BOT_MVP_CHECK_SECONDS;
-		if (botmvphunt($BOT_MVP_MIN_ALIVE_SECONDS, $BOT_MVP_MAX_LEVEL)) {
+		.@mvp_result = botmvphunt($BOT_MVP_MIN_ALIVE_SECONDS, $BOT_MVP_MAX_LEVEL);
+		if (.@mvp_result > 0) {
+			@BOT_MVP_TARGET_ID = .@mvp_result;
+			@BOT_MVP_KILL_TICK = gettimetick(2) + 15;
+			@BOT_AI_STAGE = 5;
+			BOT_SAVED_STAGE = 5;
 			@BOT_CURRENT_TARGET = 0;
 			@BOT_TARGET_TRACK_ID = 0;
 			@BOT_TARGET_LAST_HP = 0;
@@ -1781,6 +1813,15 @@ OnStepTimer:
 			@BOT_LAST_TY = 0;
 			addtimer 1500, "PlayerBotAI::OnStepTimer";
 			end;
+		} else if (.@mvp_result < 0) {
+			switch (.@mvp_result) {
+			case -1: dispbottom "[Bot MVP] Bloqueado: bot nao registrado/ativo ou nivel abaixo de 130."; break;
+			case -2: dispbottom "[Bot MVP] Nenhum MVP abaixo do nivel 150 foi encontrado."; break;
+			case -3: dispbottom "[Bot MVP] MVP encontrado, mas o mapa possui jogador humano."; break;
+			case -4: dispbottom "[Bot MVP] MVP encontrado, mas ainda nao esta vivo ha tempo suficiente."; break;
+			case -5: dispbottom "[Bot MVP] MVP encontrado em mapa sem tumulo habilitado."; break;
+			default: dispbottom "[Bot MVP] Cacada impedida por uma condicao de mapa ou transporte."; break;
+			}
 		}
 	}
 

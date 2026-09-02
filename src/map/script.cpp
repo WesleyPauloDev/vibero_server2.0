@@ -10038,6 +10038,10 @@ struct s_bot_mvp_search {
 	t_tick minimum_alive = 0;
 	int32 maximum_level = 0;
 	mob_data* target = nullptr;
+	bool found_mvp = false;
+	bool blocked_by_player = false;
+	bool blocked_by_age = false;
+	bool blocked_by_tomb = false;
 };
 
 static int32 bot_mvp_count_players_sub(block_list* bl, va_list)
@@ -10060,20 +10064,31 @@ static int32 bot_mvp_search_sub(mob_data* md, va_list args)
 	s_bot_mvp_search* search = va_arg(args, s_bot_mvp_search*);
 
 	if (md == nullptr || search == nullptr || md->prev == nullptr || md->status.hp <= 0 ||
-		md->spawn == nullptr || !md->spawn->state.boss || md->get_bosstype() != BOSSTYPE_MVP ||
+		md->db == nullptr || md->db->get_bosstype() != BOSSTYPE_MVP ||
 		md->level >= search->maximum_level || md->guardian_data != nullptr)
 		return 0;
+	search->found_mvp = true;
 
 	map_data* mapdata = map_getmapdata(md->m);
 	if (mapdata == nullptr || mapdata->instance_id > 0 ||
-		map_getmapflag(md->m, MF_NOTOMB) || !battle_config.mvp_tomb_enabled)
+		map_getmapflag(md->m, MF_NOTOMB) || !battle_config.mvp_tomb_enabled) {
+		search->blocked_by_tomb = true;
 		return 0;
+	}
 
-	if (bot_mvp_map_has_player(md->m))
+	if (bot_mvp_map_has_player(md->m)) {
+		search->blocked_by_player = true;
 		return 0;
+	}
 
-	if (md->spawned_tick <= 0 || DIFF_TICK(search->now, md->spawned_tick) < search->minimum_alive)
+	// Durante o teste de 1 segundo, MVPs que ja estavam vivos antes da
+	// rotina ser carregada podem nao possuir spawned_tick; aceite-os.
+	// Na configuracao real (3600s), a idade desconhecida continua bloqueada.
+	if ((md->spawned_tick <= 0 && search->minimum_alive > 1000) ||
+		(md->spawned_tick > 0 && DIFF_TICK(search->now, md->spawned_tick) < search->minimum_alive)) {
+		search->blocked_by_age = true;
 		return 0;
+	}
 
 	// Havendo mais de um candidato, prioriza o que nasceu primeiro.
 	if (search->target == nullptr ||
@@ -10093,7 +10108,7 @@ BUILDIN_FUNC(botmvphunt)
 	map_session_data* sd;
 
 	if (!script_rid2sd(sd)) {
-		script_pushint(st, 0);
+		script_pushint(st, -1);
 		return SCRIPT_CMD_SUCCESS;
 	}
 
@@ -10106,7 +10121,7 @@ BUILDIN_FUNC(botmvphunt)
 
 	// Restricao dupla: somente personagem registrado como bot e nivel 130+.
 	if (!pc_readglobalreg(sd, add_str("BOT_REGISTERED")) || sd->status.base_level < 130) {
-		script_pushint(st, 0);
+		script_pushint(st, -1);
 		return SCRIPT_CMD_SUCCESS;
 	}
 
@@ -10118,36 +10133,62 @@ BUILDIN_FUNC(botmvphunt)
 
 	mob_data* md = search.target;
 	if (md == nullptr || md->prev == nullptr || md->status.hp <= 0) {
-		script_pushint(st, 0);
+		if (!search.found_mvp)
+			script_pushint(st, -2); // Nenhum MVP abaixo do nivel limite.
+		else if (search.blocked_by_player)
+			script_pushint(st, -3); // Mapa com jogador humano.
+		else if (search.blocked_by_age)
+			script_pushint(st, -4); // MVP ainda nao completou a idade minima.
+		else if (search.blocked_by_tomb)
+			script_pushint(st, -5); // Mapa sem tumulo habilitado.
+		else
+			script_pushint(st, -6);
 		return SCRIPT_CMD_SUCCESS;
 	}
 
 	map_data* mapdata = map_getmapdata(md->m);
 	if (mapdata == nullptr || bot_mvp_map_has_player(md->m)) {
-		script_pushint(st, 0);
+		script_pushint(st, -3);
 		return SCRIPT_CMD_SUCCESS;
 	}
 
 	int16 target_x = md->x;
 	int16 target_y = md->y;
 	map_search_freecell(md, md->m, &target_x, &target_y, 3, 3, 1);
-	char mvp_name[NAME_LENGTH];
-	safestrncpy(mvp_name, md->name, sizeof(mvp_name));
 
 	unit_stop_attack(sd);
 	unit_stop_walking(sd, USW_FORCE_STOP);
 	if (pc_setpos(sd, map_id2index(md->m), target_x, target_y, CLR_TELEPORT) != SETPOS_OK) {
+		script_pushint(st, -6);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	// Retorna o GID para que o script aguarde alguns segundos antes da morte.
+	script_pushint(st, md->id);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * botmvpkill(<mob_gid>);
+ * Finaliza a cacada apos a espera, registrando o bot como atacante real.
+ **/
+BUILDIN_FUNC(botmvpkill)
+{
+	map_session_data* sd;
+	if (!script_rid2sd(sd) || !pc_readglobalreg(sd, add_str("BOT_REGISTERED")) || sd->status.base_level < 130) {
 		script_pushint(st, 0);
 		return SCRIPT_CMD_SUCCESS;
 	}
 
-	// status_damage registra o bot no damage log antes de executar mob_dead.
-	// Assim ele se torna o MVP real e o nome chega naturalmente ao tumulo.
-	status_damage(sd, md, md->status.hp, 0, 0, 0, 0, 0);
+	int32 mob_gid = script_getnum(st, 2);
+	mob_data* md = BL_CAST(BL_MOB, map_id2bl(mob_gid));
+	if (md == nullptr || md->prev == nullptr || md->status.hp <= 0 || md->db == nullptr ||
+		md->db->get_bosstype() != BOSSTYPE_MVP || sd->m != md->m) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
 
-	char announcement[CHAT_SIZE_MAX];
-	snprintf(announcement, sizeof(announcement), "[Cacada MVP] %s derrotou %s!", sd->status.name, mvp_name);
-	intif_broadcast(announcement, strlen(announcement) + 1, BC_DEFAULT);
+	status_damage(sd, md, md->status.hp, 0, 0, 0, 0, 0);
 	script_pushint(st, 1);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -29078,6 +29119,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(offlinebot,"?"),
 	BUILDIN_DEF(restorebot,"iii"),
 	BUILDIN_DEF(botmvphunt,"??"),
+	BUILDIN_DEF(botmvpkill,"i"),
 	BUILDIN_DEF(iscasting,"?"),
 	BUILDIN_DEF(traitstatusup,"i?"),
 	BUILDIN_DEF(traitstatusup2,"ii?"),
