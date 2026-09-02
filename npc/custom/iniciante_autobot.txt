@@ -68,8 +68,8 @@ OnInit:
 	if ($BOT_INSTANCE_MIN_MINUTES <= 0) $BOT_INSTANCE_MIN_MINUTES = 30;
 	if ($BOT_INSTANCE_MAX_MINUTES < $BOT_INSTANCE_MIN_MINUTES) $BOT_INSTANCE_MAX_MINUTES = 60;
 	if ($BOT_INSTANCE_STAY_SECONDS <= 0) $BOT_INSTANCE_STAY_SECONDS = 300;
-	// Cacada automatica de MVP abandonado: verificacao leve, uma vez por minuto.
-	if ($BOT_MVP_CHECK_SECONDS <= 0) $BOT_MVP_CHECK_SECONDS = 60;
+	// Cacada automatica de MVP abandonado: verificacao leve, a cada 5 minutos.
+	if ($BOT_MVP_CHECK_SECONDS <= 0) $BOT_MVP_CHECK_SECONDS = 300;
 	if ($BOT_MVP_MIN_ALIVE_SECONDS <= 0) $BOT_MVP_MIN_ALIVE_SECONDS = 3600;
 	if ($BOT_MVP_MAX_LEVEL <= 0) $BOT_MVP_MAX_LEVEL = 150;
 
@@ -1768,7 +1768,7 @@ OnStepTimer:
 	}
 	callsub OnMaintainBotEquipment;
 
-	// Bots ativos de nivel 130+ procuram, no maximo uma vez por minuto, um
+	// Bots ativos de nivel 130+ procuram, no maximo a cada 5 minutos, um
 	// MVP abaixo do nivel 150 que esteja vivo ha uma hora em mapa sem jogadores.
 	if (BaseLevel >= 130 && gettimetick(2) >= @BOT_NEXT_MVP_CHECK) {
 		@BOT_NEXT_MVP_CHECK = gettimetick(2) + $BOT_MVP_CHECK_SECONDS;
