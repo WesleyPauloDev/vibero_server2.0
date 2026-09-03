@@ -126,6 +126,8 @@ OnPersistBotSchedule:
 OnCheckScheduleAll:
 	if ($BOT_AUTO_SCHEDULE == 0) return;
 
+	.@caller_aid = getcharid(3);
+
 	.@now_h = gettime(DT_HOUR);
 	.@now_m = gettime(DT_MINUTE);
 	.@now_mins = .@now_h * 60 + .@now_m;
@@ -161,7 +163,7 @@ OnCheckScheduleAll:
 					if (.@now_mins >= .@start_mins || .@now_mins < .@end_mins) .@bot_in_sched = 1;
 				}
 
-				if (.@bot_in_sched && !@BOT_AI_ACTIVE && BOT_AUTO_ACTIVE > 0) {
+				if (.@bot_in_sched && !@BOT_AI_ACTIVE) {
 					callsub OnStartSingleBot, BOT_SAVED_TEST;
 				} else if (!.@bot_in_sched && @BOT_AI_ACTIVE) {
 					// Pausa causada pelo horario: mantem o bot habilitado para
@@ -173,6 +175,10 @@ OnCheckScheduleAll:
 				}
 			}
 		}
+	}
+
+	if (.@caller_aid > 0 && isloggedin(.@caller_aid)) {
+		attachrid(.@caller_aid);
 	}
 	return;
 
@@ -188,6 +194,7 @@ OnStartSingleBot:
 	BOT_REGISTERED = 1;
 	BOT_AUTO_ACTIVE = 1;
 	BOT_SAVED_TEST = .@is_test;
+	@BOT_SKILL_CLASS = 0;
 
 	// Todo inicio vai direto para a cacada. Isso distribui os bots pelos
 	// mapas de up e evita que todos aparecam juntos em Prontera apos reboot.
@@ -3183,6 +3190,129 @@ OnStepTimer:
 					.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 				}
 			}
+			// =========================================================
+			// 11. ESPIRITUALISTA / CEIFADOR DE ALMAS (SOUL REAPER 4241)
+			// =========================================================
+			else if (BOT_FINAL_JOB == 115 || Class == Job_Soul_Linker || Class == Job_Soul_Reaper || Class == Job_Soul_Reaper_B || Class == 4241 || Class == 4242) {
+				if (countitem(1601) > 0 && getequipid(EQI_HAND_R) <= 0) equip 1601;
+				.@sr_step = @BOT_SKILL_ROT % 4;
+
+				// Ceifador de Almas / Soul Reaper (Magias Ranged 9 Celulas):
+				if (Class == Job_Soul_Reaper || Class == Job_Soul_Reaper_B || Class == 4241 || Class == 4242 || getskilllv("SP_SPA") > 0 || getskilllv("SP_CURSEEXPLOSION") > 0) {
+					// Garante Energia das Almas e Esferas prontas
+					if (!getstatus(SC_SOULENERGY) && getskilllv("SP_SOULENERGY") > 0) {
+						sc_start SC_SOULENERGY, 600000, 5;
+						addspiritball 5, 600000;
+					}
+
+					// 1. Espa (SP_SPA - Dano Magico Concentrado de Longo Alcance)
+					if (.@sr_step == 0 && getskilllv("SP_SPA") > 0 && Sp >= 40) {
+						unitskilluseid getcharid(3), "SP_SPA", getskilllv("SP_SPA"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 500;
+					}
+					// 2. Eswhoo (SP_SWHOO - Dano Magico em Area Ranged)
+					else if (.@sr_step == 1 && getskilllv("SP_SWHOO") > 0 && Sp >= 45) {
+						unitskilluseid getcharid(3), "SP_SWHOO", getskilllv("SP_SWHOO"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 600;
+					}
+					// 3. Explosao de Maldicao (SP_CURSEEXPLOSION - Dano Sombrio Ranged)
+					else if (.@sr_step == 2 && getskilllv("SP_CURSEEXPLOSION") > 0 && Sp >= 50) {
+						unitskilluseid getcharid(3), "SP_CURSEEXPLOSION", getskilllv("SP_CURSEEXPLOSION"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 600;
+					}
+					// 4. Esma (SL_ESMA - Dano Magico Poderoso)
+					else if (getskilllv("SL_ESMA") > 0 && Sp >= 20) {
+						unitskilluseid getcharid(3), "SL_ESMA", getskilllv("SL_ESMA"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 500;
+					}
+					else if (getskilllv("SP_SPA") > 0 && Sp >= 40) {
+						unitskilluseid getcharid(3), "SP_SPA", getskilllv("SP_SPA"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 500;
+					}
+					else {
+						unitattack getcharid(3), @BOT_CURRENT_TARGET, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					}
+				}
+				// Espiritualista / Soul Linker (2a Classe):
+				else {
+					if (.@sr_step == 0 && getskilllv("SL_ESMA") > 0 && Sp >= 20) {
+						unitskilluseid getcharid(3), "SL_ESMA", getskilllv("SL_ESMA"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 600;
+					} else if (.@sr_step == 1 && getskilllv("SL_ESTIN") > 0 && Sp >= 15) {
+						unitskilluseid getcharid(3), "SL_ESTIN", getskilllv("SL_ESTIN"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 500;
+					} else if (getskilllv("SL_ESTURN") > 0 && Sp >= 15) {
+						unitskilluseid getcharid(3), "SL_ESTURN", getskilllv("SL_ESTURN"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 500;
+					} else {
+						unitattack getcharid(3), @BOT_CURRENT_TARGET, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					}
+				}
+			}
+			// =========================================================
+			// 12. TAEKWON / MESTRE TAEKWON / IMPERADOR ESTELAR (STAR EMPEROR 4239)
+			// =========================================================
+			else if (BOT_FINAL_JOB == 114 || Class == Job_Star_Emperor || Class == Job_Star_Emperor_B || Class == Job_Star_Gladiator || Class == Job_Star_Gladiator2 || (BaseClass == Job_Taekwon && Class == Job_Taekwon) || Class == 4239 || Class == 4240) {
+				// Imperador Estelar / Star Emperor (Combo Solar Rigoroso: Chute Prominente -> Explosao Solar)
+				if (Class == Job_Star_Emperor || Class == Job_Star_Emperor_B || Class == 4239 || Class == 4240 || getskilllv("SJ_SOLARBURST") > 0 || getskilllv("SJ_PROMINENCEKICK") > 0) {
+					// Postura do Sol e Luz Solar obrigatorias para habilidades solares
+					if (!getstatus(SC_SUNSTANCE)) {
+						sc_start SC_SUNSTANCE, 600000, 1;
+					}
+					if (!getstatus(SC_LIGHTOFSUN) && getskilllv("SJ_LIGHTOFSUN") > 0) {
+						sc_start SC_LIGHTOFSUN, 600000, 5;
+					}
+
+					// Combo Parte 2: Explosao Solar SEMPRE E SOMENTE apos o Chute Prominente
+					if (@BOT_SE_COMBO && getskilllv("SJ_SOLARBURST") > 0 && Sp >= 35) {
+						@BOT_SE_COMBO = 0;
+						unitskilluseid getcharid(3), "SJ_SOLARBURST", getskilllv("SJ_SOLARBURST"), getcharid(3), 0, 0, 0, 1;
+						.@skill_delay = 500;
+					}
+					// Combo Parte 1: Chute Prominente (Dano Solar no Alvo que ativa a janela de Explosao Solar)
+					else if (getskilllv("SJ_PROMINENCEKICK") > 0 && Sp >= 25 && (@BOT_SKILL_ROT % 2 == 0)) {
+						unitskilluseid getcharid(3), "SJ_PROMINENCEKICK", getskilllv("SJ_PROMINENCEKICK"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						@BOT_SE_COMBO = 1;
+						.@skill_delay = 500;
+					}
+					// 3. Chute Relampago (Ataque Rapido Focado)
+					else if (getskilllv("SJ_FLASHKICK") > 0 && Sp >= 15 && (@BOT_SKILL_ROT % 2 == 1)) {
+						@BOT_SE_COMBO = 0;
+						unitskilluseid getcharid(3), "SJ_FLASHKICK", getskilllv("SJ_FLASHKICK"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 500;
+					}
+					// Caso Chute Prominente esteja disponivel
+					else if (getskilllv("SJ_PROMINENCEKICK") > 0 && Sp >= 25) {
+						unitskilluseid getcharid(3), "SJ_PROMINENCEKICK", getskilllv("SJ_PROMINENCEKICK"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						@BOT_SE_COMBO = 1;
+						.@skill_delay = 500;
+					}
+					// Ataque fisico fluido com ASPD de livro caso sem SP
+					else {
+						@BOT_SE_COMBO = 0;
+						unitattack getcharid(3), @BOT_CURRENT_TARGET, 1;
+						.@skill_delay = (.@aspd_delay > 350 ? .@aspd_delay : 350);
+					}
+				}
+				// Mestre Taekwon / Taekwon (Apenas quando ainda nao e 3a classe):
+				else {
+					if (.@tk_step == 0 && getskilllv("TK_DOWNKICK") > 0 && Sp >= 10) {
+						unitskilluseid getcharid(3), "TK_DOWNKICK", getskilllv("TK_DOWNKICK"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					} else if (.@tk_step == 1 && getskilllv("TK_STORMKICK") > 0 && Sp >= 10) {
+						unitskilluseid getcharid(3), "TK_STORMKICK", getskilllv("TK_STORMKICK"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					} else if (.@tk_step == 2 && getskilllv("TK_TURNKICK") > 0 && Sp >= 10) {
+						unitskilluseid getcharid(3), "TK_TURNKICK", getskilllv("TK_TURNKICK"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					} else {
+						unitattack getcharid(3), @BOT_CURRENT_TARGET, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					}
+				}
+			}
 
 			// Checa pocoes novamente logo apos a skill
 			callsub OnCheckPotions;
@@ -3396,6 +3526,51 @@ OnApplyBuffs:
 		sc_start SC_ARCLOUSEDASH, 600000, 5;
 		sc_start SC_CHATTERING, 600000, 5;
 		sc_start SC_HISS, 600000, 5;
+	}
+	// Espiritualista / Ceifador de Almas (Soul Reaper 4241)
+	if (BOT_FINAL_JOB == 115 || Class == Job_Soul_Linker || Class == Job_Soul_Reaper || Class == Job_Soul_Reaper_B || Class == 4241 || Class == 4242) {
+		if (countitem(1601) == 0 && getequipid(EQI_HAND_R) <= 0) {
+			getitem 1601, 1; // Bastao
+			equip 1601;
+		}
+		addspiritball 5, 600000;
+		sc_start SC_SOULREAPER, 600000, 5;
+		sc_start SC_SOULENERGY, 600000, 5;
+		sc_start SC_SOULUNITY, 600000, 5;
+		sc_start SC_SOULFAIRY, 600000, 5;
+		sc_start SC_SOULSHADOW, 600000, 5;
+		sc_start SC_KAAHI, 600000, 7;
+		sc_start SC_KAUPE, 600000, 3;
+		sc_start SC_KAITE, 600000, 7;
+	}
+	// Taekwon / Mestre Taekwon / Imperador Estelar (Star Emperor 4239)
+	else if (BOT_FINAL_JOB == 114 || Class == Job_Star_Emperor || Class == Job_Star_Emperor_B || Class == Job_Star_Gladiator || Class == Job_Star_Gladiator2 || (BaseClass == Job_Taekwon && Class == Job_Taekwon) || Class == 4239 || Class == 4240) {
+		if (countitem(1550) == 0 && getequipid(EQI_HAND_R) <= 0) {
+			getitem 1550, 1; // Livro
+			equip 1550;
+		}
+		sc_end SC_DODGE; // Garante que Cambalhota nunca fique ativa
+
+		// Imperador Estelar: Apenas buffs da linha Solar
+		if (Class == Job_Star_Emperor || Class == Job_Star_Emperor_B || Class == 4239 || Class == 4240 || getskilllv("SJ_SUNSTANCE") > 0) {
+			sc_start SC_SUNSTANCE, 600000, 1;
+			sc_start SC_LIGHTOFSUN, 600000, 5;
+			sc_start SC_SUN_COMFORT, 600000, 4;
+			sc_start SC_SUN_WARM, 600000, 3;
+		}
+		// Mestre Taekwon (2a Classe):
+		else if (Class == Job_Star_Gladiator || Class == Job_Star_Gladiator2 || getskilllv("SG_SUN_COMFORT") > 0) {
+			sc_start SC_SUN_COMFORT, 600000, 4;
+			sc_start SC_SUN_WARM, 600000, 3;
+		}
+		// 1a Classe Taekwon:
+		else {
+			sc_start SC_SPURT, 600000, 10;
+			sc_start SC_READYSTORM, 600000, 1;
+			sc_start SC_READYDOWN, 600000, 1;
+			sc_start SC_READYTURN, 600000, 1;
+			sc_start SC_READYCOUNTER, 600000, 1;
+		}
 	}
 	percentheal 100, 100;
 	repairall;
@@ -3791,7 +3966,9 @@ OnCheckMapSwitch:
 OnDetectTargetJob:
 	// Corrige bots Ninja antigos que foram classificados na arvore padrao antes
 	// de Kagerou/Oboro receber suporte dedicado.
-	if (Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro)
+	if (Class == Job_Soul_Linker || Class == Job_Soul_Reaper || Class == Job_Soul_Reaper_B || Class == 4241 || Class == 4242)
+		BOT_FINAL_JOB = 115;
+	else if (Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro)
 		BOT_FINAL_JOB = 116;
 	else if (Class == Job_Super_Novice || Class == Job_Super_Novice_E)
 		BOT_FINAL_JOB = 117;
@@ -3954,8 +4131,11 @@ OnDistributeStats:
 	return;
 
 OnDistributeSkills:
-	// Libera todas as habilidades da arvore de classes correspondente
-	atcommand "@allskill";
+	// Concede todas as habilidades da arvore da classe atual exatamente 1 vez
+	if (@BOT_SKILL_CLASS != Class) {
+		@BOT_SKILL_CLASS = Class;
+		atcommand "@allskill";
+	}
 
 	// =========================================================
 	// 1. ESPADACHIM / CAVALEIRO / LORDE / CAVALEIRO RUNICO
@@ -4421,6 +4601,111 @@ OnDistributeSkills:
 			skill "SH_HYUN_ROK_SPIRIT_POWER", 5, 1;
 		}
 	}
+
+	// =========================================================
+	// 8. TAEKWON / MESTRE TAEKWON / IMPERADOR ESTELAR (STAR EMPEROR)
+	// =========================================================
+	if (BaseClass == Job_Taekwon || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Star_Gladiator2 || Class == Job_Star_Emperor || Class == Job_Star_Emperor_B || Class == 4239 || Class == 4240) {
+		// Habilidades Taekwon
+		skill "TK_RUN", 10, 1;
+		skill "TK_READYSTORM", 1, 1;
+		skill "TK_STORMKICK", 10, 1;
+		skill "TK_READYDOWN", 1, 1;
+		skill "TK_DOWNKICK", 10, 1;
+		skill "TK_READYTURN", 1, 1;
+		skill "TK_TURNKICK", 10, 1;
+		skill "TK_READYCOUNTER", 1, 1;
+		skill "TK_COUNTER", 10, 1;
+		skill "TK_JUMPKICK", 10, 1;
+		skill "TK_HPTIME", 10, 1;
+		skill "TK_SPTIME", 10, 1;
+		skill "TK_POWER", 5, 1;
+		skill "TK_SEVENWIND", 7, 1;
+		skill "TK_HIGHJUMP", 5, 1;
+
+		// Habilidades Mestre Taekwon / Star Gladiator
+		if (Class == Job_Star_Gladiator || Class == Job_Star_Gladiator2 || Class >= Job_Star_Emperor || getskilllv("SG_SUN_WARM") > 0) {
+			skill "SG_FEEL", 3, 1;
+			skill "SG_SUN_WARM", 3, 1;
+			skill "SG_MOON_WARM", 3, 1;
+			skill "SG_STAR_WARM", 3, 1;
+			skill "SG_SUN_COMFORT", 4, 1;
+			skill "SG_MOON_COMFORT", 4, 1;
+			skill "SG_STAR_COMFORT", 4, 1;
+			skill "SG_HATE", 3, 1;
+			skill "SG_SUN_ANGER", 3, 1;
+			skill "SG_MOON_ANGER", 3, 1;
+			skill "SG_STAR_ANGER", 3, 1;
+			skill "SG_SUN_BLESS", 10, 1;
+			skill "SG_MOON_BLESS", 10, 1;
+			skill "SG_STAR_BLESS", 10, 1;
+			skill "SG_DEVIL", 10, 1;
+			skill "SG_FRIEND", 3, 1;
+			skill "SG_KNOWLEDGE", 10, 1;
+			skill "SG_FUSION", 1, 1;
+		}
+
+		// Habilidades Imperador Estelar / Star Emperor (4239)
+		if (Class == Job_Star_Emperor || Class == Job_Star_Emperor_B || Class == 4239 || Class == 4240 || BaseLevel >= 99) {
+			skill "SJ_DOCUMENT", 1, 1;
+			skill "SJ_PURIFY", 1, 1;
+			skill "SJ_SUNSTANCE", 1, 1;
+			skill "SJ_LUNARSTANCE", 1, 1;
+			skill "SJ_STARSTANCE", 1, 1;
+			skill "SJ_UNIVERSESTANCE", 1, 1;
+			skill "SJ_LIGHTOFSUN", 5, 1;
+			skill "SJ_LIGHTOFMOON", 5, 1;
+			skill "SJ_LIGHTOFSTAR", 5, 1;
+			skill "SJ_SOLARBURST", 10, 1;
+			skill "SJ_PROMINENCEKICK", 7, 1;
+			skill "SJ_FULLMOONKICK", 10, 1;
+			skill "SJ_NEWMOONKICK", 7, 1;
+			skill "SJ_FLASHKICK", 7, 1;
+			skill "SJ_FALLINGSTAR", 10, 1;
+			skill "SJ_GRAVITYCONTROL", 3, 1;
+			skill "SJ_BOOKOFDIMENSION", 5, 1;
+			skill "SJ_BOOKOFCREATINGSTAR", 5, 1;
+			skill "SJ_STAREMPEROR", 5, 1;
+			skill "SJ_NOVAEXPLOSING", 5, 1;
+		}
+	}
+
+	// =========================================================
+	// 9. ESPIRITUALISTA / CEIFADOR DE ALMAS (SOUL REAPER 4241)
+	// =========================================================
+	if (BOT_FINAL_JOB == 115 || Class == Job_Soul_Linker || Class == Job_Soul_Reaper || Class == Job_Soul_Reaper_B || Class == 4241 || Class == 4242) {
+		skill "SL_STAR", 5, 1;
+		skill "SL_SOULLINKER", 5, 1;
+		skill "SL_KAINA", 5, 1;
+		skill "SL_KAAHI", 7, 1;
+		skill "SL_KAUPE", 3, 1;
+		skill "SL_KAITE", 7, 1;
+		skill "SL_ESTIN", 7, 1;
+		skill "SL_ESTURN", 7, 1;
+		skill "SL_ESMA", 10, 1;
+		skill "SL_SMA", 5, 1;
+
+		if (Class == Job_Soul_Reaper || Class == Job_Soul_Reaper_B || Class == 4241 || Class == 4242 || BaseLevel >= 99) {
+			skill "SP_SOULENERGY", 5, 1;
+			skill "SP_SOULREAPER", 5, 1;
+			skill "SP_SOULCOLLECT", 5, 1;
+			skill "SP_SOULREVOLVE", 5, 1;
+			skill "SP_SOULCURSE", 5, 1;
+			skill "SP_CURSEEXPLOSION", 10, 1;
+			skill "SP_SOULUNITY", 5, 1;
+			skill "SP_SOULSHADOW", 5, 1;
+			skill "SP_SOULFALCON", 5, 1;
+			skill "SP_SOULFAIRY", 5, 1;
+			skill "SP_SOULGOLEM", 5, 1;
+			skill "SP_SPA", 10, 1;
+			skill "SP_SWHOO", 10, 1;
+			skill "SP_SHA", 5, 1;
+			skill "SP_SOULDIVISION", 5, 1;
+			skill "SP_SOULEXPLOSION", 5, 1;
+			skill "SP_KAUTE", 5, 1;
+		}
+	}
+	SkillPoint = 0;
 	return;
 
 OnCheckJobChange:
@@ -4617,6 +4902,7 @@ OnCheckJobChange:
 OnFinalizeBotJobChange:
 	specialeffect EF_ANGEL;
 	resetskill;
+	@BOT_SKILL_CLASS = 0;
 	callsub OnDistributeSkills;
 	callsub OnDistributeStats;
 	return;
