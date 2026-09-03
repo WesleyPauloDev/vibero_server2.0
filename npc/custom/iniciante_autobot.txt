@@ -2574,6 +2574,17 @@ OnStepTimer:
 
 			// Se ainda esta fora do alcance de ataque: anda em direcao ao monstro de forma fluida
 			if (.@dist > .@atk_range) {
+				// Body Relocation salta diretamente para o monstro quando ele esta
+				// dentro do alcance da habilidade (18 celulas). Fora disso, caminha.
+				if ((Class == Job_Sura || Class >= Job_Sura) && getskilllv("MO_BODYRELOCATION") > 0 &&
+						.@dist <= 18 && Sp >= 14 && gettimetick(2) >= @BOT_LAST_BODYRELOCATION) {
+					unitstopwalk getcharid(3), USW_FORCE_STOP;
+					unitskillusepos getcharid(3), "MO_BODYRELOCATION", 1, .@mx, .@my, 0, 1, 0, 1;
+					@BOT_LAST_BODYRELOCATION = gettimetick(2) + 5;
+					addtimer 700, "PlayerBotAI::OnStepTimer";
+					end;
+				}
+
 				// Sistema Anti-Travamento (Tolerancia de 8 ticks / aprox. 4 segundos antes de resetar)
 				if (@BOT_STUCK_X == .@cx && @BOT_STUCK_Y == .@cy) {
 					@BOT_STUCK_TICKS++;
