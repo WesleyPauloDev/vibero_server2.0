@@ -21,6 +21,25 @@ prontera,147,160,6	script	Encontre o Cogumelo	1077,{
 		if (.@count > 0) {
 			mes "Restam " + .@count + " cogumelos em " + .event_map$ + "!";
 			// mes "Encontre e mate os cogumelos para ganhar " + getitemname(.prize) + "!";
+			next;
+			mes "[ Encontre o Cogumelo ]";
+			mes "Deseja ser teleportado para " + .event_map$ + "?";
+			if (select("Sim, me leve ate la!:Nao, obrigado.") == 1) {
+				.@count = mobcount( .event_map$, strnpcinfo(0) + "::OnMobKilled" );
+				if (!.status || .@count <= 0 || .event_map$ == "") {
+					mes "[ Encontre o Cogumelo ]";
+					mes "O evento acabou de terminar!";
+					close;
+				}
+				.@target_map$ = .event_map$;
+				if (.@target_map$ == "prontera") { .@wx = 156; .@wy = 191; }
+				else if (.@target_map$ == "izlude") { .@wx = 128; .@wy = 114; }
+				else if (.@target_map$ == "geffen") { .@wx = 120; .@wy = 100; }
+				else if (.@target_map$ == "morocc") { .@wx = 156; .@wy = 93; }
+				else { .@wx = 0; .@wy = 0; }
+				warp .@target_map$, .@wx, .@wy;
+				end;
+			}
 			close;
 		}
 		.event_map$ = "";

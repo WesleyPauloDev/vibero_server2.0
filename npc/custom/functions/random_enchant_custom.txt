@@ -182,25 +182,19 @@ function	script	F_CustomRandomEnchant	{
 			.@existing_random_count++;
 	}
 
-	mes "[Encantamento]";
-	mes "Equipamento selecionado: " + mesitemlink(.@item_id, false);
-	mes "Refino atual: +" + .@refine;
-	next;
-	mes "[Encantamento]";
 	if (.@existing_random_count > 0) {
+		mes "[Encantamento]";
+		mes "Equipamento selecionado: " + mesitemlink(.@item_id, false);
+		mes "Refino atual: +" + .@refine;
 		mes "O equipamento ja possui " + .@existing_random_count + " bonus aleatorio(s).";
+		mes "Deseja substituir os bonus deste equipamento?";
+		next;
 		.@mode = select("Substituir 1 bonus escolhido:Trocar todos os bonus:Cancelar");
 		if (.@mode == 3)
 			close;
 	} else {
-		mes "O equipamento ainda nao possui bonus aleatorios.";
 		.@mode = 2;
 	}
-	next;
-	mes "[Encantamento]";
-	mes "Deseja consumir " + mesitemlink(.@catalyst_id, false) + " para tentar o encantamento?";
-	if (select("Aplicar:Cancelar") == 2)
-		close;
 
 	if (countitem(.@catalyst_id) < 1) {
 		mes "[Encantamento]";
@@ -344,25 +338,30 @@ function	script	F_CustomRandomEnchant	{
 			}
 
 			mes "[Encantamento]";
-			mes "Bonus atuais:";
-			if (.@existing_random_count == 0) {
-				mes " - Nenhum";
-			} else {
+			if (.@existing_random_count > 0) {
+				mes "Bonus atuais:";
 				for (.@j = 0; .@j < 5; .@j++) {
 					if (.@old_opt_id[.@j] == 0)
 						continue;
 					mes " - Slot " + (.@j + 1) + ": " + callfunc("F_CustomRandomEnchant_OptionName", .@old_opt_id[.@j]) + " " + callfunc("F_CustomRandomEnchant_OptionValueText", .@old_opt_id[.@j], .@old_opt_val[.@j]);
 				}
+				mes "Bonus rolados:";
+				for (.@j = 0; .@j < 5; .@j++) {
+					if (.@new_opt_id[.@j] == 0)
+						continue;
+					mes " - Slot " + (.@j + 1) + ": " + callfunc("F_CustomRandomEnchant_OptionName", .@new_opt_id[.@j]) + " " + callfunc("F_CustomRandomEnchant_OptionValueText", .@new_opt_id[.@j], .@new_opt_value[.@j]);
+				}
+				next;
+				if (select("Trocar pelos novos:Manter os atuais") == 2)
+					close;
+			} else {
+				mes "Bonus obtidos:";
+				for (.@j = 0; .@j < 5; .@j++) {
+					if (.@new_opt_id[.@j] == 0)
+						continue;
+					mes " - Slot " + (.@j + 1) + ": " + callfunc("F_CustomRandomEnchant_OptionName", .@new_opt_id[.@j]) + " " + callfunc("F_CustomRandomEnchant_OptionValueText", .@new_opt_id[.@j], .@new_opt_value[.@j]);
+				}
 			}
-			mes "Bonus rolados:";
-			for (.@j = 0; .@j < 5; .@j++) {
-				if (.@new_opt_id[.@j] == 0)
-					continue;
-				mes " - Slot " + (.@j + 1) + ": " + callfunc("F_CustomRandomEnchant_OptionName", .@new_opt_id[.@j]) + " " + callfunc("F_CustomRandomEnchant_OptionValueText", .@new_opt_id[.@j], .@new_opt_value[.@j]);
-			}
-			next;
-			if (select("Trocar pelos novos:Manter os atuais") == 2)
-				close;
 
 			for (.@j = 0; .@j < 5; .@j++) {
 				.@opt_id[.@j] = .@new_opt_id[.@j];

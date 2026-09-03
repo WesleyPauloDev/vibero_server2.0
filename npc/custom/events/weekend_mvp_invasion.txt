@@ -224,10 +224,11 @@ prontera,149,178,5	script	Chefe da Guarda	586,{
 
 	.@active = getvariableofnpc(.active, "WeekendMVPInvasion");
 	.@alive = getvariableofnpc(.alive, "WeekendMVPInvasion");
+	.@map$ = getvariableofnpc(.event_map$, "WeekendMVPInvasion");
 	.@city$ = getvariableofnpc(.event_city$, "WeekendMVPInvasion");
 	.@time$ = getvariableofnpc(.last_spawn_time$, "WeekendMVPInvasion");
 
-	if (!.@active || .@alive <= 0 || .@city$ == "") {
+	if (!.@active || .@alive <= 0 || .@city$ == "" || .@map$ == "") {
 		mes "Nenhuma invasao MVP esta ativa agora.";
 		mes "Fique atento aos anuncios globais.";
 		close;
@@ -242,28 +243,61 @@ prontera,149,178,5	script	Chefe da Guarda	586,{
 
 	.@count = getvariableofnpc(.event_gid_count, "WeekendMVPInvasion");
 	.@found = 0;
+	.@lowest_lv = 9999;
+	.@best_gid = 0;
+	.@best_mob_id = 0;
+
 	if (.@count > 0) {
-		.@start = rand(.@count);
 		for (.@i = 0; .@i < .@count; .@i++) {
-			.@idx = (.@start + .@i) % .@count;
-			.@gid = getvariableofnpc(.event_gid[.@idx], "WeekendMVPInvasion");
+			.@gid = getvariableofnpc(.event_gid[.@i], "WeekendMVPInvasion");
 			if (!unitexists(.@gid))
 				continue;
 
-			getunitdata .@gid, .@data;
-			.@mob_id = getvariableofnpc(.event_mob_id[.@idx], "WeekendMVPInvasion");
-			.@found = 1;
-			break;
+			.@cur_mob_id = getvariableofnpc(.event_mob_id[.@i], "WeekendMVPInvasion");
+			.@cur_lv = getmonsterinfo(.@cur_mob_id, MOB_LV);
+
+			if (!.@found || .@cur_lv < .@lowest_lv) {
+				.@found = 1;
+				.@lowest_lv = .@cur_lv;
+				.@best_gid = .@gid;
+				.@best_mob_id = .@cur_mob_id;
+			}
 		}
+	}
+
+	if (.@found) {
+		getunitdata .@best_gid, .@data;
+		.@mob_id = .@best_mob_id;
 	}
 
 	mes "[Chefe da Guarda]";
 	if (.@found) {
-		mes "Ha boatos de que viram " + getmonsterinfo(.@mob_id, MOB_NAME) + " andando por " + .@city$ + " " + .@data[UMOB_X] + " " + .@data[UMOB_Y] + ".";
+		mes "Ha boatos de que viram " + getmonsterinfo(.@mob_id, MOB_NAME) + " (Nv. " + .@lowest_lv + ") andando por " + .@city$ + " (" + .@data[UMOB_X] + ", " + .@data[UMOB_Y] + ").";
 		mes "Se apresse antes que ele va para longe.";
 	} else {
 		mes "Ainda estou recebendo relatos confusos.";
 		mes "Procure pela cidade invadida e volte se encontrar novas pistas.";
+	}
+	next;
+	mes "[Chefe da Guarda]";
+	mes "Deseja ser teleportado para " + .@city$ + "?";
+	if (select("Sim, me leve ate la!:Nao, obrigado.") == 1) {
+		if (!getvariableofnpc(.active, "WeekendMVPInvasion") || getvariableofnpc(.alive, "WeekendMVPInvasion") <= 0) {
+			mes "[Chefe da Guarda]";
+			mes "A invasao acabou de ser contida!";
+			close;
+		}
+		if (.@map$ == "payon") { .@wx = 179; .@wy = 100; }
+		else if (.@map$ == "morocc") { .@wx = 156; .@wy = 93; }
+		else if (.@map$ == "alberta") { .@wx = 28; .@wy = 234; }
+		else if (.@map$ == "geffen") { .@wx = 120; .@wy = 100; }
+		else if (.@map$ == "aldebaran") { .@wx = 140; .@wy = 131; }
+		else if (.@map$ == "hugel") { .@wx = 96; .@wy = 145; }
+		else if (.@map$ == "comodo") { .@wx = 209; .@wy = 143; }
+		else if (.@map$ == "izlude") { .@wx = 128; .@wy = 114; }
+		else { .@wx = 0; .@wy = 0; }
+		warp .@map$, .@wx, .@wy;
+		end;
 	}
 	close;
 }
