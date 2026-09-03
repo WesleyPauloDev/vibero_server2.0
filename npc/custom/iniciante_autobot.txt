@@ -126,7 +126,8 @@ OnPersistBotSchedule:
 OnCheckScheduleAll:
 	if ($BOT_AUTO_SCHEDULE == 0) return;
 
-	.@caller_aid = getcharid(3);
+	// O agendador tambem roda pelo timer global, sem jogador anexado.
+	.@caller_aid = getattachedrid();
 
 	.@now_h = gettime(DT_HOUR);
 	.@now_m = gettime(DT_MINUTE);
@@ -3498,7 +3499,8 @@ OnApplyBuffs:
 		if (Class == Job_Monk || Class == Job_Champion || Class >= Job_Sura || getskilllv("MO_CALLSPIRITS") > 0) {
 			sc_start SC_EXPLOSIONSPIRITS, 600000, 5;
 			if (Class >= Job_Sura || getskilllv("SR_RAISINGDRAGON") > 0) {
-				sc_start SC_RAISINGDRAGON, 600000, 10;
+				if (getskilllv("SR_RAISINGDRAGON") > 0 && Sp >= 120)
+					unitskilluseid getcharid(3), "SR_RAISINGDRAGON", getskilllv("SR_RAISINGDRAGON"), getcharid(3), 0, 1, 0, 1;
 				sc_start SC_GENTLETOUCH_ENERGYGAIN, 600000, 5;
 				sc_start SC_GENTLETOUCH_CHANGE, 600000, 5;
 				addspiritball 15, 600000;
@@ -3636,6 +3638,11 @@ OnCheckBuffs:
 	stand;
 	if (!getstatus(SC_BLESSING) || !getstatus(SC_INCREASEAGI)) {
 		callsub OnApplyBuffs;
+	}
+	// Raising Dragon deve permanecer ativo durante toda a batalha.
+	// A habilidade dura 5 minutos no nivel 10 e sera renovada quando acabar.
+	if (getskilllv("SR_RAISINGDRAGON") > 0 && !getstatus(SC_RAISINGDRAGON) && Sp >= 120) {
+		unitskilluseid getcharid(3), "SR_RAISINGDRAGON", getskilllv("SR_RAISINGDRAGON"), getcharid(3), 0, 1, 0, 1;
 	}
 
 	// Vigor (SM_ENDURE)
