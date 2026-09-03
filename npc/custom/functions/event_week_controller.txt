@@ -75,7 +75,7 @@ OnAtcommand:
 	.@cmd$ = (.@atcmd_numparameters > 0 ? strtolower(.@atcmd_parameters$[0]) : "status");
 
 	if (.@cmd$ == "status") {
-		dispbottom "[Evento Semana] Ativo: " + callfunc("F_EventWeekName$", $event_week_active) + ". Proximo: " + callfunc("F_EventWeekName$", $event_week) + ". Modo: " + (($event_week_manual == 1) ? "manual" : (($event_week_manual == 2) ? "desligado" : "automatico")) + ".";
+		dispbottom "[Evento Semana] Ativo: " + callfunc("F_EventWeekName$", $event_week_active) + ". Proximo: " + callfunc("F_EventWeekName$", $event_week) + ". Ciclo: " + $event_week_cycle_id + ". Modo: " + (($event_week_manual == 1) ? "fixado" : (($event_week_manual == 2) ? "desligado" : "automatico")) + ".";
 		end;
 	}
 
@@ -89,13 +89,34 @@ OnAtcommand:
 			dispbottom "[Evento Semana] Eventos: 1 Carta MVP 5x + Instancia 2x, 2 Rates XP/Drop + Invasao MVP.";
 			end;
 		}
+		$event_week_manual = 0;
+		$event_week_auto_active = 1;
+		$event_week_cycle_id = callfunc("F_EventWeekCycleId");
+		$event_week_active = .@event;
+		$event_week = callfunc("F_EventWeekNext", .@event);
+		$Weekend_Rates_ForceOff = (.@event == 2 ? 0 : 1);
+		callsub S_Apply;
+		announce "[Evento] " + callfunc("F_EventWeekName$", .@event) + " ativado por GM.", bc_all, 0x00FF00;
+		end;
+	}
+
+	if (.@cmd$ == "fixar" || .@cmd$ == "lock") {
+		if (.@atcmd_numparameters < 2) {
+			dispbottom "[Evento Semana] Use: @eventweek fixar <1-2>";
+			end;
+		}
+		.@event = atoi(.@atcmd_parameters$[1]);
+		if (.@event < 1 || .@event > 2) {
+			dispbottom "[Evento Semana] Eventos: 1 Carta MVP 5x + Instancia 2x, 2 Rates XP/Drop + Invasao MVP.";
+			end;
+		}
 		$event_week_manual = 1;
 		$event_week_auto_active = 0;
 		$event_week_active = .@event;
 		$event_week = callfunc("F_EventWeekNext", .@event);
 		$Weekend_Rates_ForceOff = (.@event == 2 ? 0 : 1);
 		callsub S_Apply;
-		announce "[Evento] " + callfunc("F_EventWeekName$", .@event) + " ativado manualmente por GM.", bc_all, 0x00FF00;
+		announce "[Evento] " + callfunc("F_EventWeekName$", .@event) + " fixado manualmente por GM (sem rotacao automatica).", bc_all, 0x00FF00;
 		end;
 	}
 
@@ -135,11 +156,12 @@ OnAtcommand:
 	}
 
 	if (.@cmd$ == "rotate" || .@cmd$ == "rodar") {
+		$event_week_manual = 0;
 		callsub S_StartAuto;
 		end;
 	}
 
-	dispbottom "[Evento Semana] Comandos: status, ativar <1-2>, desativar, auto, proximo <1-2>, rodar.";
+	dispbottom "[Evento Semana] Comandos: status, ativar <1-2>, fixar <1-2>, desativar, auto, proximo <1-2>, rodar.";
 	end;
 
 S_Sync:
@@ -150,21 +172,40 @@ S_Sync:
 		return;
 	}
 
+	if (!callsub(S_IsAutoWindow)) {
+		$event_week_active = 0;
+		$event_week_auto_active = 0;
+		callsub S_Apply;
+		return;
+	}
+
+	// Se o modo estiver fixado manualmente, apenas reaplica o estado
 	if ($event_week_manual == 1) {
 		callsub S_Apply;
 		return;
 	}
 
-	if (!callsub(S_IsAutoWindow)) {
-		$event_week_active = 0;
-		$event_week_auto_active = 0;
+	// Detecta virada de semana automatica comparando com o ciclo de quinta-feira
+	.@current_cycle = callfunc("F_EventWeekCycleId");
+	if ($event_week_cycle_id != .@current_cycle) {
+		callsub S_StartAuto;
+		return;
 	}
+
+	if ($event_week_active < 1 || $event_week_active > 2) {
+		callsub S_StartAuto;
+		return;
+	}
+
 	callsub S_Apply;
 	return;
 
 S_StartAuto:
-	if ($event_week_manual)
+	if ($event_week_manual == 2)
 		return;
+
+	$event_week_manual = 0;
+	$event_week_cycle_id = callfunc("F_EventWeekCycleId");
 
 	.@event = $event_week;
 	if (.@event < 1 || .@event > 2)
@@ -179,14 +220,15 @@ S_StartAuto:
 	return;
 
 S_EndAuto:
-	if (!$event_week_auto_active || $event_week_manual)
+	if ($event_week_manual == 2)
 		return;
 
 	.@event = $event_week_active;
 	$event_week_active = 0;
 	$event_week_auto_active = 0;
 	callsub S_Apply;
-	announce "[Evento] Semana encerrada: " + callfunc("F_EventWeekName$", .@event) + " finalizado. Proximo: " + callfunc("F_EventWeekName$", $event_week) + ".", bc_all, 0x00AAFF;
+	if (.@event >= 1 && .@event <= 2)
+		announce "[Evento] Semana encerrada: " + callfunc("F_EventWeekName$", .@event) + " finalizado. Proximo: " + callfunc("F_EventWeekName$", $event_week) + ".", bc_all, 0x00AAFF;
 	return;
 
 S_Apply:
@@ -215,6 +257,15 @@ S_AnnounceActiveEvent:
 		return;
 	announce "[Evento Semana] " + callfunc("F_EventWeekDescription$", $event_week_active) + " Ativo ate quarta-feira as 23:59.", bc_all, 0x00FF00;
 	return;
+}
+
+function	script	F_EventWeekCycleId	{
+	// Quinta-feira inicia a semana do evento (YYYYMMDD).
+	// Domingo=0, Segunda=1, Terca=2, Quarta=3, Quinta=4, Sexta=5, Sabado=6
+	// Dias passados desde quinta: (DT_DAYOFWEEK + 3) % 7
+	.@days_since_thu = (gettime(DT_DAYOFWEEK) + 3) % 7;
+	.@tick = gettimetick(2) - (.@days_since_thu * 86400);
+	return atoi(gettimestr("%Y%m%d", 9, .@tick));
 }
 
 function	script	F_EventWeekName$	{
