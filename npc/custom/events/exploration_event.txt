@@ -789,6 +789,8 @@ function	script	F_Fenda_RecycleEnchant	{
 			mes "Voce pode trocar:";
 			mes "- " + mesitemlink(312014, false) + " por " + mesitemlink(312021, false);
 			mes "- " + mesitemlink(312021, false) + " por " + mesitemlink(312014, false);
+			mes "- " + mesitemlink(910300, false) + " por " + mesitemlink(910301, false);
+			mes "- " + mesitemlink(910301, false) + " por " + mesitemlink(910300, false);
 			next;
 
 			.@menu$ = "";
@@ -799,10 +801,22 @@ function	script	F_Fenda_RecycleEnchant	{
 				.@to[.@count] = 312021;
 				.@count++;
 			}
+			if (countitem(910300) > 0) {
+				.@menu$ += getitemname(910300) + " -> " + getitemname(910301) + ":";
+				.@from[.@count] = 910300;
+				.@to[.@count] = 910301;
+				.@count++;
+			}
 			if (countitem(312021) > 0) {
 				.@menu$ += getitemname(312021) + " -> " + getitemname(312014) + ":";
 				.@from[.@count] = 312021;
 				.@to[.@count] = 312014;
+				.@count++;
+			}
+			if (countitem(910301) > 0) {
+				.@menu$ += getitemname(910301) + " -> " + getitemname(910300) + ":";
+				.@from[.@count] = 910301;
+				.@to[.@count] = 910300;
 				.@count++;
 			}
 			if (.@count <= 0) {
