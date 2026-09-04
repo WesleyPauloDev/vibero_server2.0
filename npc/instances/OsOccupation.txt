@@ -61,6 +61,8 @@ OnStory01:
 	enablenpc instance_npcname("#171_ocp_dev_0");
 	sleep2 1000;
 	hideoffnpc instance_npcname("Est#171_ocp_0");
+	viewpointmap 'map$,1,30,360,1,0xFFFFFF;
+	navigateto("1@os_a",30,360);
 	doevent instance_npcname("Est#171_ocp_0") + "::OnEvent";
 	end;
 
@@ -147,6 +149,7 @@ OnEvent:
 	if ('ocp >= 5) {
 		mes "## Mensagem Recebida ##";
 		mes "## ultimo contato da Equipe Alpha em Oscar Sierra 52 177 ##";
+		viewpointmap 'map$,1,52,177,1,0xFFFFFF;
 		navigateto("1@os_a",52,177);
 		close;
 	}
@@ -197,6 +200,9 @@ OnEvent01:
 	mapannounce 'map$,"Est : " + strcharinfo(0) + "!! Informe sua situacao atual!!",bc_map,0x00EEEE;
 	'ocp = 1;
 	specialeffect EF_BIG_PORTAL;
+	viewpointmap 'map$,2,30,360,1,0xFFFFFF;
+	viewpointmap 'map$,1,29,360,1,0xFFFFFF;
+	navigateto("1@os_a",29,360);
 	end;
 
 OnEvent02:
@@ -214,6 +220,8 @@ OnEvent02:
 	mapannounce 'map$,"Est : " + strcharinfo(0) + "! Verifique as coordenadas da Alpha se for possivel!",bc_map,0x00EEEE;
 	'ocp = 3;
 	specialeffect EF_BIG_PORTAL;
+	viewpointmap 'map$,1,29,360,1,0xFFFFFF;
+	navigateto("1@os_a",29,360);
 	end;
 
 OnEvent03:
@@ -242,6 +250,9 @@ OnEvent03:
 	sleep2 3000;
 	'ocp = 5;
 	specialeffect EF_BIG_PORTAL;
+	viewpointmap 'map$,2,29,360,1,0xFFFFFF;
+	viewpointmap 'map$,1,52,177,1,0xFFFFFF;
+	navigateto("1@os_a",52,177);
 	donpcevent instance_npcname("#os_occupation_control") + "::OnStory03";
 	end;
 }
@@ -267,13 +278,17 @@ OnEvent03:
 		hideonnpc instance_npcname("#171_ocp_wrp_0");
 		donpcevent instance_npcname("#171_ocp_wrp_0") + "::OnMobSpawn";
 		initnpctimer instance_npcname("#171_ocp_wrp_0");
+		viewpointmap 'map$,2,52,177,1,0xFFFFFF;
+		viewpointmap 'map$,1,84,256,1,0xFFFFFF;
 	}
 	navigateto("1@os_a",84,256);
 	end;
 
 OnTouch:
-	if ('ocp == 5)
-		npctalk "Est : " + strcharinfo(0) + ", voce me escutac Se escutar, responda.";
+	if ('ocp == 5) {
+		npctalk "Est : " + strcharinfo(0) + ", voce me escuta? Se escutar, responda.";
+		viewpointmap 'map$,1,52,177,1,0xFFFFFF;
+	}
 	end;
 }
 
@@ -295,6 +310,8 @@ OnTouch:
 		case 0:
 			monster 'map$,144,275,"",2536,1,instance_npcname("#171_ocp_mob") + "::OnPoisonKill";
 			navigateto("1@os_a",163,266);
+			viewpointmap 'map$,2,84,256,1,0xFFFFFF;
+			viewpointmap 'map$,1,163,266,1,0xFFFFFF;
 			mapannounce 'map$,"Est : " + strcharinfo(0) + ", voce esta me ouvindo",bc_map,0x00EEEE;
 			sleep2 3000;
 			mapannounce 'map$,"Est : Transmiti as coordenadas da segunda busca. Tome cuidado para nao perder seus registros.",bc_map,0x00EEEE;
@@ -308,6 +325,8 @@ OnTouch:
 			break;
 		case 1:
 			navigateto("1@os_a",138,174);
+			viewpointmap 'map$,2,163,266,1,0xFFFFFF;
+			viewpointmap 'map$,1,138,174,1,0xFFFFFF;
 			initnpctimer instance_npcname("#171_ocp_wrp_2");
 			mapannounce 'map$,"Est : " + strcharinfo(0) + ", voce ainda esta vivo",bc_map,0x00EEEE;
 			sleep2 3000;
@@ -321,6 +340,8 @@ OnTouch:
 			break;
 		case 2:
 			navigateto("1@os_a",161,178);
+			viewpointmap 'map$,2,138,174,1,0xFFFFFF;
+			viewpointmap 'map$,1,161,178,1,0xFFFFFF;
 			mapannounce 'map$,"cccc : Grrr...",bc_map,0xFF9999;
 		}
 	}
@@ -391,6 +412,8 @@ OnTimer10000:
 1@os_a,162,176,5	script	#171_ocp_miguel	4_EP17_MIGUEL_D,{
 	if (isbegin_quest(12452) == 1) {
 		mes "^0000FFAcho que ele parou de respirar.^000000";
+		viewpointmap 'map$,1,165,176,1,0xFFFFFF;
+		navigateto("1@os_a",165,176);
 		close;
 	}
 	cutin "ep171_miguel01",0;
@@ -399,6 +422,8 @@ OnTimer10000:
 	next;
 	cutin "",255;
 	mes "^0000FFO mutante, ja sem forcas, esta tentando dizer alguma coisa.^000000";
+	viewpointmap 'map$,1,165,176,1,0xFFFFFF;
+	navigateto("1@os_a",165,176);
 	close;
 }
 
@@ -487,6 +512,9 @@ OnTimer10000:
 		getitem 25668,1;
 		getitem 25723,5;
 		getexp 300000,300000;
+		viewpointmap 'map$,2,165,176,1,0xFFFFFF;
+		viewpointmap 'map$,1,187,195,1,0xFFFFFF;
+		navigateto("1@os_a",187,195);
 		close;
 	}
 	select("Perguntar sobre Miguel");
@@ -507,6 +535,9 @@ OnTimer10000:
 	select("Entendi.");
 	mes "[Est]";
 	mes "Se quiser sair e receber a recompensa, fale com o Oficial da Operacao.";
+	viewpointmap 'map$,2,165,176,1,0xFFFFFF;
+	viewpointmap 'map$,1,187,195,1,0xFFFFFF;
+	navigateto("1@os_a",187,195);
 	close;
 }
 
@@ -534,6 +565,7 @@ OnTimer10000:
 		mes "Tudo bem. Nao demore demais por aqui.";
 		close;
 	}
+	viewpointmap 'map$,2,187,195,1,0xFFFFFF;
 	if (#OSOccupation_STATUS == 1 || #OSOccupation_STATUS == 2) {
 		.@finish_result = callfunc("F_InstanceFinishBase", "Operacao OS", "#OSOccupation_STATUS", 10, 2, "#inst175_name$", "#inst175_status");
 		if (.@finish_result == -1) {
@@ -675,6 +707,9 @@ OnBossKillStory:
 	enablenpc instance_npcname("#171_ocp_miguel");
 	enablenpc instance_npcname("Est#171_ocp_1");
 	enablenpc instance_npcname("Operation Officer#171_osd");
+	viewpointmap 'map$,2,161,178,1,0xFFFFFF;
+	viewpointmap 'map$,1,165,176,1,0xFFFFFF;
+	navigateto("1@os_a",165,176);
 	mapannounce 'map$,"Oficial da Operacao : A operacao terminou. Falem comigo para receber a recompensa e sair.",bc_map,0x00EEEE;
 	end;
 
@@ -683,6 +718,8 @@ OnBossKill:
 	killmonster 'map$,.@event$;
 	mapannounce 'map$,"Oficial da Operacao : Acho que cheguei um pouco atrasado!",bc_map,0x00EEEE;
 	enablenpc instance_npcname("Operation Officer#171_osd");
+	viewpointmap 'map$,1,187,195,1,0xFFFFFF;
+	navigateto("1@os_a",187,195);
 	end;
 
 OnBossSkill:
