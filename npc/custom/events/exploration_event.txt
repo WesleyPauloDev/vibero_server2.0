@@ -472,11 +472,20 @@ function	script	F_FendaHatEnchant	{
 			.@use_item_id = .@candidate[.@choice - 1];
 			.@enchant_id = .@use_item_id;
 
+			setarray .@fenda_hat_ids[0],
+				910200,910201,910202,910203,910204,910205,910206,910207,910208,910209,910210,
+				910211,910212,910213,910214,910215,910216,910217,910218,910219,910220,910221;
+
 			.@part = EQI_HEAD_TOP;
 			.@item_id = getequipid(.@part);
 			if (.@item_id <= 0) {
 				mes "[Encanto da Fenda]";
 				mes "Equipe um hat no topo para poder encantar.";
+				close;
+			}
+			if (inarray(.@fenda_hat_ids[0], .@item_id) < 0) {
+				mes "[Encanto da Fenda]";
+				mes "Este encanto so pode ser aplicado em hats da Fenda.";
 				close;
 			}
 
@@ -503,6 +512,11 @@ function	script	F_FendaHatEnchant	{
 				mes "Voce nao possui mais " + mesitemlink(.@use_item_id, false) + " no inventario.";
 				close;
 			}
+			if (getequipid(.@part) != .@item_id || inarray(.@fenda_hat_ids[0], getequipid(.@part)) < 0) {
+				mes "[Encanto da Fenda]";
+				mes "O equipamento foi alterado. Equipe um hat da Fenda e tente novamente.";
+				close;
+			}
 
 			delitem .@use_item_id, 1;
 			setitemcard .@part, 1, .@enchant_id;
@@ -523,6 +537,14 @@ function	script	F_FendaHatEnchant	{
 
 			.@slot2 = getequipcardid(.@part, 1);
 			setarray .@hat_enchants[0], 312014, 312021, 910300, 910301;
+			setarray .@fenda_hat_ids[0],
+				910200,910201,910202,910203,910204,910205,910206,910207,910208,910209,910210,
+				910211,910212,910213,910214,910215,910216,910217,910218,910219,910220,910221;
+			if (inarray(.@fenda_hat_ids[0], .@item_id) < 0) {
+				mes "[Desencanto da Fenda]";
+				mes "Este NPC remove encantos apenas dos hats da Fenda.";
+				close;
+			}
 			if (.@slot2 <= 0 || inarray(.@hat_enchants[0], .@slot2) < 0) {
 				mes "[Desencanto da Fenda]";
 				mes "O hat equipado (" + mesitemlink(.@item_id, false) + ") nao possui um encanto da Fenda no slot 2 para remover.";
