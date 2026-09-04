@@ -65,9 +65,9 @@ OnInit:
 		$BOT_REST_Y = 166;
 	}
 	// Simulacao individual de instancias: cada bot elegivel entra em um
-	// intervalo diferente para evitar anuncios simultaneos.
-	if ($BOT_INSTANCE_MIN_MINUTES <= 0) $BOT_INSTANCE_MIN_MINUTES = 30;
-	if ($BOT_INSTANCE_MAX_MINUTES < $BOT_INSTANCE_MIN_MINUTES) $BOT_INSTANCE_MAX_MINUTES = 60;
+	// intervalo diferente para evitar anuncios simultaneos (60 a 120 minutos).
+	$BOT_INSTANCE_MIN_MINUTES = 60;
+	$BOT_INSTANCE_MAX_MINUTES = 120;
 	if ($BOT_INSTANCE_STAY_SECONDS <= 0) $BOT_INSTANCE_STAY_SECONDS = 300;
 	// Cacada automatica de MVP abandonado: verificacao leve, a cada 5 minutos.
 	if ($BOT_MVP_CHECK_SECONDS <= 0) $BOT_MVP_CHECK_SECONDS = 300;
@@ -2819,14 +2819,90 @@ OnStepTimer:
 				}
 			}
 			// =========================================================
-			// 3. ARQUEIRO / CACADOR / SNIPER / SENTINELA / TROVADOR / MUSA
+			// 3. ARQUEIRO / CACADOR / SNIPER / SENTINELA / TROVADOR / MUSA / MENESTREL
 			// =========================================================
 			else if (BaseClass == Job_Archer) {
 				.@arc_step = @BOT_SKILL_ROT % 4;
 
-				// Sentinela (3rd Class):
-				if (getskilllv("RA_ARROWSTORM") > 0 || getskilllv("RA_AIMEDBOLT") > 0 || Class >= Job_Ranger) {
+				// --- 3.1 TROVADOR / MUSA (3a CLASSE) & TROUBADOUR / TROUVERE (4a CLASSE) ---
+				if (Class == Job_Minstrel || Class == Job_Minstrel_T || Class == Job_Wanderer || Class == Job_Wanderer_T ||
+				    Class == Job_Troubadour || Class == Job_Trouvere || Class == 4259 || Class == 4260 ||
+				    getskilllv("WM_METALICSOUND") > 0 || getskilllv("WM_GREAT_ECHO") > 0 || getskilllv("WM_REVERBERATION") > 0 ||
+				    getskilllv("TR_RHYTHMSHOOTING") > 0 || getskilllv("TR_ROSEBLOSSOM") > 0) {
+
+					// Habilidades de 4a Classe (Troubadour / Trouvere):
+					if (getskilllv("TR_RHYTHMSHOOTING") > 0 && Sp >= 20) {
+						unitskilluseid getcharid(3), "TR_RHYTHMSHOOTING", getskilllv("TR_RHYTHMSHOOTING"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 600;
+					} else if (getskilllv("TR_ROSEBLOSSOM") > 0 && Sp >= 30) {
+						unitskilluseid getcharid(3), "TR_ROSEBLOSSOM", getskilllv("TR_ROSEBLOSSOM"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					} else if (getskilllv("TR_METALIC_FURY") > 0 && Sp >= 35) {
+						unitskilluseid getcharid(3), "TR_METALIC_FURY", getskilllv("TR_METALIC_FURY"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					}
+					// Rotacao de 3a Classe (Trovador / Musa / Maestro):
+					else if (.@arc_step == 0 && getskilllv("WM_METALICSOUND") > 0 && Sp >= 25) {
+						// Ressonancia Metalica (Dano acustico de alvo unico)
+						unitskilluseid getcharid(3), "WM_METALICSOUND", getskilllv("WM_METALICSOUND"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 700;
+					} else if (.@arc_step == 1 && getskilllv("WM_GREAT_ECHO") > 0 && Sp >= 35) {
+						// Grande Eco (Area de som)
+						unitskilluseid getcharid(3), "WM_GREAT_ECHO", getskilllv("WM_GREAT_ECHO"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 900;
+					} else if (.@arc_step == 2 && getskilllv("CG_ARROWVULCAN") > 0 && Sp >= 20) {
+						// Vulcao de Flechas (9 disparos pesados)
+						unitskilluseid getcharid(3), "CG_ARROWVULCAN", getskilllv("CG_ARROWVULCAN"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					} else if (.@arc_step == 3 && getskilllv("WM_REVERBERATION") > 0 && Sp >= 30) {
+						// Ruido Estridente
+						unitskilluseid getcharid(3), "WM_REVERBERATION", getskilllv("WM_REVERBERATION"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					} else if (getskilllv("CG_ARROWVULCAN") > 0 && Sp >= 20) {
+						unitskilluseid getcharid(3), "CG_ARROWVULCAN", getskilllv("CG_ARROWVULCAN"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					} else if (getskilllv("WM_METALICSOUND") > 0 && Sp >= 25) {
+						unitskilluseid getcharid(3), "WM_METALICSOUND", getskilllv("WM_METALICSOUND"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 700;
+					} else if (getskilllv("WM_GREAT_ECHO") > 0 && Sp >= 35) {
+						unitskilluseid getcharid(3), "WM_GREAT_ECHO", getskilllv("WM_GREAT_ECHO"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 900;
+					} else if (getskilllv("BA_MUSICALSTRIKE") > 0 && Sp >= 10) {
+						unitskilluseid getcharid(3), "BA_MUSICALSTRIKE", getskilllv("BA_MUSICALSTRIKE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					} else if (getskilllv("DC_THROWARROW") > 0 && Sp >= 10) {
+						unitskilluseid getcharid(3), "DC_THROWARROW", getskilllv("DC_THROWARROW"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					} else if (Sp >= 10) {
+						unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					}
+				}
+				// --- 3.2 BARDO / ODALISCA / MENESTREL / CIGANA (2a CLASSE E TRANS) ---
+				else if (Class == Job_Bard || Class == Job_Dancer || Class == Job_Clown || Class == Job_Gypsy ||
+				         getskilllv("CG_ARROWVULCAN") > 0 || getskilllv("BA_MUSICALSTRIKE") > 0 || getskilllv("DC_THROWARROW") > 0) {
+					if (getskilllv("CG_ARROWVULCAN") > 0 && Sp >= 20) {
+						// Vulcao de Flechas (Golpe pesado exclusivo de Menestrel/Cigana)
+						unitskilluseid getcharid(3), "CG_ARROWVULCAN", getskilllv("CG_ARROWVULCAN"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 900;
+					} else if (getskilllv("BA_MUSICALSTRIKE") > 0 && Sp >= 10) {
+						// Golpe Musical
+						unitskilluseid getcharid(3), "BA_MUSICALSTRIKE", getskilllv("BA_MUSICALSTRIKE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					} else if (getskilllv("DC_THROWARROW") > 0 && Sp >= 10) {
+						// Estilingue
+						unitskilluseid getcharid(3), "DC_THROWARROW", getskilllv("DC_THROWARROW"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					} else if (Sp >= 10) {
+						unitskilluseid getcharid(3), "AC_DOUBLE", (getskilllv("AC_DOUBLE") > 0 ? getskilllv("AC_DOUBLE") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+					}
+				}
+				// --- 3.3 SENTINELA (3a CLASSE) & WINDHAWK (4a CLASSE) ---
+				else if (Class == Job_Ranger || Class == Job_Ranger_T || Class == Job_Windhawk || Class == 4252 ||
+				         getskilllv("RA_ARROWSTORM") > 0 || getskilllv("RA_AIMEDBOLT") > 0) {
 					if (.@arc_step == 0 && getskilllv("RA_ARROWSTORM") > 0 && Sp >= 30) {
+						// Tempestade de Flechas
 						unitskilluseid getcharid(3), "RA_ARROWSTORM", getskilllv("RA_ARROWSTORM"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (.@arc_step == 1 && getskilllv("SN_SHARPSHOOTING") > 0 && Sp >= 18) {
@@ -2845,8 +2921,9 @@ OnStepTimer:
 						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 					}
 				}
-				// Sniper / Atirador de Elite:
-				else if (getskilllv("SN_SHARPSHOOTING") > 0 || getskilllv("SN_FALCONASSAULT") > 0 || Class == Job_Sniper) {
+				// --- 3.4 CACADOR / ATIRADOR DE ELITE (2a CLASSE E TRANS) ---
+				else if (Class == Job_Hunter || Class == Job_Sniper ||
+				         getskilllv("SN_SHARPSHOOTING") > 0 || getskilllv("SN_FALCONASSAULT") > 0) {
 					if ((.@arc_step % 2 == 0) && getskilllv("SN_SHARPSHOOTING") > 0 && Sp >= 18) {
 						// Tiro Preciso (Sharpshooting)
 						unitskilluseid getcharid(3), "SN_SHARPSHOOTING", (getskilllv("SN_SHARPSHOOTING") > 0 ? getskilllv("SN_SHARPSHOOTING") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
@@ -2863,12 +2940,9 @@ OnStepTimer:
 						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 					}
 				}
-				// Cacador / Bardo / Odalisca / Arqueiro:
+				// --- 3.5 ARQUEIRO BASICO (1a CLASSE) ---
 				else {
-					if (getskilllv("WM_SEVERE_RAINSTORM") > 0 && Sp >= 30) {
-						unitskilluseid getcharid(3), "WM_SEVERE_RAINSTORM", getskilllv("WM_SEVERE_RAINSTORM"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-						.@skill_delay = 1000;
-					} else if ((@BOT_SKILL_ROT % 2 == 0) && Sp >= 15 && getskilllv("AC_SHOWER") > 0) {
+					if ((@BOT_SKILL_ROT % 2 == 0) && Sp >= 15 && getskilllv("AC_SHOWER") > 0) {
 						unitskilluseid getcharid(3), "AC_SHOWER", getskilllv("AC_SHOWER"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (Sp >= 10) {
@@ -3491,8 +3565,19 @@ OnApplyBuffs:
 	if (BaseClass == Job_Archer) {
 		sc_start SC_CONCENTRATION, 600000, 10;
 		sc_start SC_WINDWALK, 600000, 10;
-		if (Class >= Job_Ranger) {
+		if (Class == Job_Ranger || Class == Job_Ranger_T || Class == Job_Windhawk || Class == 4252) {
 			sc_start SC_FEARBREEZE, 600000, 5;
+			sc_start SC_UNLIMIT, 60000, 5;
+		}
+		else if (Class == Job_Minstrel || Class == Job_Minstrel_T || Class == Job_Wanderer || Class == Job_Wanderer_T || Class == Job_Troubadour || Class == Job_Trouvere || Class == 4259 || Class == 4260 || BOT_FINAL_JOB == 106) {
+			sc_start SC_RUSHWINDMILL, 600000, 5;
+			sc_start SC_ECHOSONG, 600000, 5;
+			sc_start SC_FRIGG_SONG, 600000, 5;
+			sc_start SC_SONGOFMANA, 600000, 5;
+			if (Class == Job_Wanderer || Class == Job_Wanderer_T || Class == Job_Trouvere || Class == 4260) {
+				sc_start SC_SWINGDANCE, 600000, 5;
+				sc_start SC_SYMPHONYOFLOVER, 600000, 5;
+			}
 		}
 	}
 	if (BaseClass == Job_Acolyte) {
@@ -3731,6 +3816,23 @@ OnCheckBuffs:
 	// Ilimitado (RA_UNLIMIT)
 	if (getskilllv("RA_UNLIMIT") > 0 && !getstatus(SC_UNLIMIT) && Sp >= 50) {
 		unitskilluseid getcharid(3), "RA_UNLIMIT", getskilllv("RA_UNLIMIT"), getcharid(3);
+	}
+
+	// Buffs de Trovador / Musa / Maestro / Troubadour (Renovados via sc_start sem travar animacao):
+	if (Class == Job_Minstrel || Class == Job_Minstrel_T || Class == Job_Wanderer || Class == Job_Wanderer_T || Class == Job_Troubadour || Class == Job_Trouvere || Class == 4259 || Class == 4260 || BOT_FINAL_JOB == 106) {
+		if (!getstatus(SC_RUSHWINDMILL) || !getstatus(SC_FRIGG_SONG) || !getstatus(SC_SONGOFMANA)) {
+			sc_start SC_RUSHWINDMILL, 600000, 5;
+			sc_start SC_ECHOSONG, 600000, 5;
+			sc_start SC_FRIGG_SONG, 600000, 5;
+			sc_start SC_SONGOFMANA, 600000, 5;
+			if (Class == Job_Wanderer || Class == Job_Wanderer_T || Class == Job_Trouvere || Class == 4260) {
+				sc_start SC_SWINGDANCE, 600000, 5;
+				sc_start SC_SYMPHONYOFLOVER, 600000, 5;
+			}
+		}
+		if (getskilllv("TR_MYSTIC_SYMPHONY") > 0 && !getstatus(SC_MYSTIC_SYMPHONY) && Sp >= 60) {
+			sc_start SC_MYSTIC_SYMPHONY, 150000, 1;
+		}
 	}
 
 	// Envenenar Arma (AS_ENCHANTPOISON)
@@ -3982,9 +4084,12 @@ OnCheckMapSwitch:
 	return;
 
 OnDetectTargetJob:
-	// Corrige bots Ninja antigos que foram classificados na arvore padrao antes
-	// de Kagerou/Oboro receber suporte dedicado.
-	if (Class == Job_Soul_Linker || Class == Job_Soul_Reaper || Class == Job_Soul_Reaper_B || Class == 4241 || Class == 4242)
+	// Detecta classes especificas da arvore de Arqueiro e Expandidas
+	if (Class == Job_Bard || Class == Job_Dancer || Class == Job_Clown || Class == Job_Gypsy || Class == Job_Minstrel || Class == Job_Minstrel_T || Class == Job_Wanderer || Class == Job_Wanderer_T || Class == Job_Troubadour || Class == Job_Trouvere || Class == 4259 || Class == 4260)
+		BOT_FINAL_JOB = 106;
+	else if (Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger || Class == Job_Ranger_T || Class == Job_Windhawk || Class == 4252)
+		BOT_FINAL_JOB = 105;
+	else if (Class == Job_Soul_Linker || Class == Job_Soul_Reaper || Class == Job_Soul_Reaper_B || Class == 4241 || Class == 4242)
 		BOT_FINAL_JOB = 115;
 	else if (Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro)
 		BOT_FINAL_JOB = 116;
@@ -4305,9 +4410,9 @@ OnDistributeSkills:
 	}
 
 	// =========================================================
-	// 3. ARQUEIRO / CACADOR / SNIPER / RANGER
+	// 3. ARQUEIRO / CACADOR / SNIPER / SENTINELA / BARDO / MENESTREL / TROVADOR / MUSA
 	// =========================================================
-	if (Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger) {
+	if (BaseClass == Job_Archer || Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger || Class == Job_Ranger_T || Class == Job_Bard || Class == Job_Dancer || Class == Job_Clown || Class == Job_Gypsy || Class == Job_Minstrel || Class == Job_Minstrel_T || Class == Job_Wanderer || Class == Job_Wanderer_T || Class == Job_Windhawk || Class == Job_Troubadour || Class == Job_Trouvere || Class == 4252 || Class == 4259 || Class == 4260) {
 		skill "AC_OWL", 10, 1;
 		skill "AC_VULTURE", 10, 1;
 		skill "AC_CONCENTRATION", 10, 1;
@@ -4316,7 +4421,7 @@ OnDistributeSkills:
 		skill "AC_MAKINGARROW", 1, 1;
 		skill "AC_CHARGEARROW", 1, 1;
 	}
-	if (Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger) {
+	if (Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger || Class == Job_Ranger_T || Class == Job_Windhawk || Class == 4252) {
 		skill "HT_SKIDTRAP", 5, 1;
 		skill "HT_LANDMINE", 5, 1;
 		skill "HT_ANKLESNARE", 5, 1;
@@ -4330,13 +4435,13 @@ OnDistributeSkills:
 		skill "HT_DETECTING", 4, 1;
 		skill "HT_SPRINGTRAP", 5, 1;
 	}
-	if (Class == Job_Sniper || Class == Job_Ranger) {
+	if (Class == Job_Sniper || Class == Job_Ranger || Class == Job_Ranger_T || Class == Job_Windhawk || Class == 4252) {
 		skill "SN_SIGHT", 10, 1;
 		skill "SN_FALCONASSAULT", 5, 1;
 		skill "SN_SHARPSHOOTING", 5, 1;
 		skill "SN_WINDWALK", 10, 1;
 	}
-	if (Class == Job_Ranger) {
+	if (Class == Job_Ranger || Class == Job_Ranger_T || Class == Job_Windhawk || Class == 4252) {
 		skill "RA_AIMEDBOLT", 10, 1;
 		skill "RA_ARROWSTORM", 10, 1;
 		skill "RA_FEARBREEZE", 5, 1;
@@ -4347,6 +4452,85 @@ OnDistributeSkills:
 		skill "RA_WUGDASH", 1, 1;
 		skill "RA_WUGBITE", 5, 1;
 		skill "RA_TOOTHOFWUG", 10, 1;
+	}
+	if (Class == Job_Bard || Class == Job_Clown || Class == Job_Minstrel || Class == Job_Minstrel_T || Class == Job_Troubadour || Class == 4259) {
+		skill "BA_MUSICALLESSON", 10, 1;
+		skill "BA_MUSICALSTRIKE", 5, 1;
+		skill "BA_DISSONANCE", 5, 1;
+		skill "BA_FROSTJOKER", 5, 1;
+		skill "BA_WHISTLE", 10, 1;
+		skill "BA_ASSASSINCROSS", 10, 1;
+		skill "BA_POEMBRAGI", 10, 1;
+		skill "BA_APPLEIDUN", 10, 1;
+		skill "BA_PANGVOICE", 1, 1;
+	}
+	if (Class == Job_Dancer || Class == Job_Gypsy || Class == Job_Wanderer || Class == Job_Wanderer_T || Class == Job_Trouvere || Class == 4260) {
+		skill "DC_DANCINGLESSON", 10, 1;
+		skill "DC_THROWARROW", 5, 1;
+		skill "DC_UGLYDANCE", 5, 1;
+		skill "DC_SCREAM", 5, 1;
+		skill "DC_HUMMING", 10, 1;
+		skill "DC_DONTFORGETME", 10, 1;
+		skill "DC_FORTUNEKISS", 10, 1;
+		skill "DC_SERVICEFORYOU", 10, 1;
+		skill "DC_WINKCHARM", 1, 1;
+	}
+	if (Class == Job_Clown || Class == Job_Gypsy || Class == Job_Minstrel || Class == Job_Minstrel_T || Class == Job_Wanderer || Class == Job_Wanderer_T || Class == Job_Troubadour || Class == Job_Trouvere || Class == 4259 || Class == 4260) {
+		skill "CG_ARROWVULCAN", 10, 1;
+		skill "CG_MOONLIT", 5, 1;
+		skill "CG_MARIONETTE", 1, 1;
+		skill "CG_HERMODE", 5, 1;
+		skill "CG_TAROTCARD", 5, 1;
+	}
+	if (Class == Job_Minstrel || Class == Job_Minstrel_T || Class == Job_Wanderer || Class == Job_Wanderer_T || Class == Job_Troubadour || Class == Job_Trouvere || Class == 4259 || Class == 4260) {
+		skill "WM_LESSON", 10, 1;
+		skill "WM_METALICSOUND", 5, 1;
+		skill "WM_REVERBERATION", 5, 1;
+		skill "WM_DOMINION_IMPULSE", 5, 1;
+		skill "WM_SEVERE_RAINSTORM", 5, 1;
+		skill "WM_POEMOFNETHERWORLD", 5, 1;
+		skill "WM_VOICEOFSIREN", 5, 1;
+		skill "WM_DEADHILLHERE", 1, 1;
+		skill "WM_LULLABY_DEEPSLEEP", 5, 1;
+		skill "WM_SIRCLEOFNATURE", 5, 1;
+		skill "WM_RANDOMIZESPELL", 1, 1;
+		skill "WM_GLOOMYDAY", 5, 1;
+		skill "WM_GREAT_ECHO", 5, 1;
+		skill "WM_SONG_OF_MANA", 5, 1;
+		skill "WM_DANCE_WITH_WUG", 5, 1;
+		skill "WM_SOUND_OF_DESTRUCTION", 5, 1;
+		skill "WM_SATURDAY_NIGHT_FEVER", 5, 1;
+		skill "WM_LERADS_DEW", 5, 1;
+		skill "WM_MELODYOFSINK", 5, 1;
+		skill "WM_BEYOND_OF_WARCRY", 5, 1;
+		skill "WM_UNLIMITED_HUMMING_VOICE", 5, 1;
+		skill "WM_FRIGG_SONG", 5, 1;
+		if (Class == Job_Minstrel || Class == Job_Minstrel_T || Class == Job_Troubadour || Class == 4259) {
+			skill "MI_RUSH_WINDMILL", 5, 1;
+			skill "MI_ECHOSONG", 5, 1;
+			skill "MI_HARMONIZE", 5, 1;
+		} else {
+			skill "WA_SWING_DANCE", 5, 1;
+			skill "WA_SYMPHONY_OF_LOVER", 5, 1;
+			skill "WA_MOONLIT_SERENADE", 5, 1;
+		}
+	}
+	if (Class == Job_Troubadour || Class == Job_Trouvere || Class == 4259 || Class == 4260) {
+		skill "TR_STAGE_MANNER", 5, 1;
+		skill "TR_RETROSPECTION", 5, 1;
+		skill "TR_MYSTIC_SYMPHONY", 5, 1;
+		skill "TR_KVASIR_SONATA", 5, 1;
+		skill "TR_ROSEBLOSSOM", 5, 1;
+		skill "TR_RHYTHMSHOOTING", 5, 1;
+		skill "TR_METALIC_FURY", 5, 1;
+		skill "TR_SOUNDBLEND", 5, 1;
+		skill "TR_GEF_NOCTURN", 5, 1;
+		skill "TR_ROKI_CAPRICCIO", 5, 1;
+		skill "TR_AIN_RHAPSODY", 5, 1;
+		skill "TR_MUSICAL_INTERLUDE", 5, 1;
+		skill "TR_JAWAII_SERENADE", 5, 1;
+		skill "TR_NIPELHEIM_REQUIEM", 5, 1;
+		skill "TR_PRON_MARCH", 5, 1;
 	}
 
 	// =========================================================
