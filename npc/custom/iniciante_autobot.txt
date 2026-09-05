@@ -3616,10 +3616,12 @@ OnTryBotInstance:
 	unitstopattack getcharid(3);
 	unitstopwalk getcharid(3), USW_FORCE_STOP;
 
-	if (getcharid(1) > 0)
-		announce "[Instancias] " + strcharinfo(0) + " criou " + @BOT_INSTANCE_NAME$ + " para o grupo " + getpartyname(getcharid(1)) + ".", bc_all, 0xFF9900;
-	else
+	if (@BOT_INSTANCE_NAME$ == "Torneio da Magia" || @BOT_INSTANCE_NAME$ == "Torneio Magico" || @BOT_INSTANCE_NAME$ == "Torneio Magico de Geffen") {
 		announce "[Instancias] " + strcharinfo(0) + " criou " + @BOT_INSTANCE_NAME$ + " em modo solo.", bc_all, 0xFF9900;
+	} else {
+		.@party_name$ = (getcharid(1) > 0 ? getpartyname(getcharid(1)) : strcharinfo(0));
+		announce "[Instancias] " + strcharinfo(0) + " criou " + @BOT_INSTANCE_NAME$ + " para o grupo " + .@party_name$ + ".", bc_all, 0xFF9900;
+	}
 
 	warp @BOT_INSTANCE_MAP$, @BOT_INSTANCE_X, @BOT_INSTANCE_Y;
 	addtimer 1000, "PlayerBotAI::OnStepTimer";
@@ -3653,10 +3655,12 @@ OnHandleBotInstance:
 		return;
 	}
 
-	if (getcharid(1) > 0)
-		announce "[Instancias] " + strcharinfo(0) + " concluiu " + @BOT_INSTANCE_NAME$ + " com o grupo " + getpartyname(getcharid(1)) + ".", bc_all, 0xFF9900;
-	else
+	if (@BOT_INSTANCE_NAME$ == "Torneio da Magia" || @BOT_INSTANCE_NAME$ == "Torneio Magico" || @BOT_INSTANCE_NAME$ == "Torneio Magico de Geffen") {
 		announce "[Instancias] " + strcharinfo(0) + " concluiu " + @BOT_INSTANCE_NAME$ + " em modo solo.", bc_all, 0xFF9900;
+	} else {
+		.@party_name$ = (getcharid(1) > 0 ? getpartyname(getcharid(1)) : strcharinfo(0));
+		announce "[Instancias] " + strcharinfo(0) + " concluiu " + @BOT_INSTANCE_NAME$ + " com o grupo " + .@party_name$ + ".", bc_all, 0xFF9900;
+	}
 
 	@BOT_INSTANCE_ACTIVE = 0;
 	@BOT_INSTANCE_END_TICK = 0;
