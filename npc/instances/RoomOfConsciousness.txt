@@ -909,12 +909,10 @@ OnStop:
 		setquest 7701;// Lost Imir Heart
 		ep16_royal = 20;
 	}
-	getitem 9608,10;	// Moeda de Instancia
-	getitem 9198,2;
-	set #RoomConsciousness_STATUS, 3;
-	callfunc("F_InstanceFinishAnnounce", "Salao de Ymir");
-	if (#instancia == 1) {
-		#instancia = 2;
+	if (#RoomConsciousness_STATUS == 0)
+		#RoomConsciousness_STATUS = 2;
+	if (#RoomConsciousness_STATUS == 1 || #RoomConsciousness_STATUS == 2) {
+		callfunc("F_InstanceFinishBase", "Salao de Ymir", "#RoomConsciousness_STATUS", 10, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Salao de Ymir", 1);
 	}
 	warp "SavePoint",0,0;
 	end;

@@ -255,31 +255,14 @@ moro_cav,57,69,3	script	Flor Vermelha#a1	CLEAR_NPC,{
 	case 2:
 		break;
 	}
-	if (select( "Nao entrar na Flor Vermelha.", "Entrar na Flor Vermelha." ) == 1) {
-		mes "- Voce sente uma energia sinistra. -";
-		close;
-	}
-	switch( instance_enter("Morse's Cave") ) {
-	case IE_OTHER:
-		mes "Ocorreu um erro desconhecido.";
-		close;
-	case IE_NOINSTANCE:
-		mes "A instancia Caverna do Morse nao existe.";
-		mes "Seu lider de grupo ainda nao criou a instancia.";
-		close;
-	case IE_NOMEMBER:
-		mes "Somente membros do grupo podem entrar nesta instancia.";
-		close;
-	case IE_OK:
-		mapannounce "moro_cav", "O grupo " + getpartyname( getcharid(1) ) + " de " + strcharinfo(0) + " esta entrando na Caverna do Morse.", bc_map,0xFF99;
-		if (isbegin_quest(9319) > 0)
-			erasequest 9319;// Pursuing Hiding Morocc Continues
-		if (isbegin_quest(9318) > 0)
-			erasequest 9318;
-		setquest 9318;// Pursuing Hiding Morocc
-		// warp "1@rev",26,181;
-		end;
-	}
+	callfunc("F_InstanceEntry",
+		"Morse's Cave",
+		"Rastreador Veterano",
+		"morse_cave",
+		"MorseCave",
+		160,
+		"Caverna do Morse"
+	);
 	end;
 
 OnInit:
@@ -1419,6 +1402,8 @@ OnTouch:
 	if (select( "Nao.", "Sim." ) == 1)
 		close;
 	mes "- Teleportando... -";
+	if (#MorseCave_STATUS == 0)
+		#MorseCave_STATUS = 2;
 	if (#MorseCave_STATUS == 1 || #MorseCave_STATUS == 2) {
 		.@finish_result = callfunc("F_InstanceFinishBase", "Caverna do Morse", "#MorseCave_STATUS");
 		if (.@finish_result == -1) {

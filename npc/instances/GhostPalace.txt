@@ -76,12 +76,15 @@ dali02,43,129,5	script	Guarda Real Desagradavel#	4_M_SAKRAYROYAL,{
 	while (true) {
 		switch(select( "Eu vou ajudar.", "Guia resumido", "Agora nao e uma boa hora." )) {
 		case 1:
-			instance_create("Ghost Palace");
-			mes "[Guarda Real Desagradavel]";
-			mes "Obrigado..";
-			mes "Vou abrir a passagem secreta para o ^0000ffPalacio das Magoas^000000.";
-			mes "Esteja pronto!";
-			close;
+			callfunc("F_InstanceEntry",
+				"Ghost Palace",
+				"Guarda Real Desagradavel",
+				"ghost_palace",
+				"GhostPalace",
+				120,
+				"Palacio das Magoas"
+			);
+			end;
 		case 2:
 			mes "[Guarda Real Desagradavel]";
 			mes "Guia resumido do Palacio das Magoas:";
@@ -165,23 +168,15 @@ dali02,40,134,5	script	Interdimensional Device#dk	PORTAL,{
 		close;
 	}
 
-	.@md_name$ = "Ghost Palace";
-	switch( instance_enter(.@md_name$) ) {
-	case IE_OTHER:
-		mes "Ocorreu um erro desconhecido.";
-		close;
-	case IE_NOINSTANCE:
-		mes "^ff0000Dentro do dispositivo ha um buraco escuro. Se quiser entrar, fale primeiro com o Guarda Real Desagradavel.^000000";
-		close;
-	case IE_NOMEMBER:
-		mes "Somente membros registrados podem entrar na instancia " + .@md_name$ + ".";
-		close;
-	case IE_OK:
-		mapannounce "dali", strcharinfo(0) + " do grupo " + getpartyname(.@party_id) + " esta entrando no Palacio das Magoas.", bc_map, 0x00ff99;
-		// warp "1@spa",42,196;
-		setquest 1261;// Cursed Swordman
-		end;
-	}
+	callfunc("F_InstanceEntry",
+		"Ghost Palace",
+		"Guarda Real Desagradavel",
+		"ghost_palace",
+		"GhostPalace",
+		120,
+		"Palacio das Magoas"
+	);
+	end;
 }
 
 // 1st floor
@@ -973,6 +968,8 @@ OnTouch_:
 		getexp 900000,500000;
 		getitem 6672,2;// Gray Shard
 	}
+	if (#GhostPalace_STATUS == 0)
+		#GhostPalace_STATUS = 2;
 	if (#GhostPalace_STATUS == 1 || #GhostPalace_STATUS == 2) {
 		.@finish_result = callfunc("F_InstanceFinishBase", "Palacio das Magoas", "#GhostPalace_STATUS");
 		if (.@finish_result == -1) {

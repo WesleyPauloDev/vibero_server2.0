@@ -75,40 +75,14 @@ que_thr,133,53,5	script	Maram#Armybase1	4_EP18_MARAM,{
 		// player is leader of the party
 		.@create$ = "Solicitar entrada em " + .@md_name$ + "";
 
-	switch( select( .@create$, "Entrar em " + .@md_name$ + "" ) ) {
-	case 1:
-		cutin "ep18_maram_01.png",2;
-		mes "[Maram]";
-		mes "Quando a solicitacao terminar, fale comigo de novo e selecione ^0000CD" + .@md_name$ + " para entrar^000000";
-		if (instance_create(.@md_name$) < 0) {
-			mes "Grupo: " + getpartyname(getcharid(1)) + "";
-			mes "Lider: " + strcharinfo(0) + "";
-			mes "^0000ff" + .@md_name$ + " ^000000- Erro desconhecido";
-			close3;
-		}
-		close3;
-	case 2:
-		// Note: instance not forced solo
-		switch( instance_enter(.@md_name$) ) {
-		case IE_OTHER:
-			mes "[Maram]";
-			mes "^ff0000Ocorreu um erro desconhecido.^000000";
-			close;
-		case IE_NOINSTANCE:
-			cutin "ep18_maram_01.png",2;
-			mes "[Maram]";
-			mes "Parece que voce ainda nao criou a instancia. Verifique novamente em instantes.";
-			close3;
-		case IE_NOMEMBER:
-			mes "[Maram]";
-			mes "^ff0000Somente um membro do grupo pode entrar na Memorial Dungeon.^000000";
-			close;
-		case IE_OK:
-			mapannounce "que_thr", "" + strcharinfo(0) + " do grupo " + getpartyname( getcharid(1) ) + " esta entrando em " + .@md_name$ + ".", bc_map, 0xFF99;
-			// warp 1@tcamp,103,237;
-			end;
-		}
-	}
+	callfunc("F_InstanceEntry",
+		"Thor Military Base",
+		"Maram",
+		"thor_gunsu_base",
+		"ThorGunsuBase",
+		170,
+		"Base Militar"
+	);
 	end;
 
 OnInit:
@@ -496,7 +470,11 @@ OnInstanceInit:
 					continue;
 				if (!attachrid($@partymemberaid[.@i]))
 					continue;
-				if (strcharinfo(3) != 'map_tcamp$ || (#ThorGunsuBase_STATUS != 1 && #ThorGunsuBase_STATUS != 2))
+				if (strcharinfo(3) != 'map_tcamp$)
+					continue;
+				if (#ThorGunsuBase_STATUS == 0)
+					#ThorGunsuBase_STATUS = 2;
+				if (#ThorGunsuBase_STATUS != 1 && #ThorGunsuBase_STATUS != 2)
 					continue;
 				.@finish_result = callfunc("F_InstanceFinishBase", "Base Militar", "#ThorGunsuBase_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Base Militar", 1);
 				if (.@finish_result == 1) {
@@ -507,12 +485,16 @@ OnInstanceInit:
 			}
 			attachrid(.@speaker_aid);
 		}
-		else if (#ThorGunsuBase_STATUS == 1 || #ThorGunsuBase_STATUS == 2) {
-			.@finish_result = callfunc("F_InstanceFinishBase", "Base Militar", "#ThorGunsuBase_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Base Militar", 1);
-			if (.@finish_result == 1) {
-				getitem 25669,5;
-				getitem 25723,5;
-				getitem 25668,1;
+		else {
+			if (#ThorGunsuBase_STATUS == 0)
+				#ThorGunsuBase_STATUS = 2;
+			if (#ThorGunsuBase_STATUS == 1 || #ThorGunsuBase_STATUS == 2) {
+				.@finish_result = callfunc("F_InstanceFinishBase", "Base Militar", "#ThorGunsuBase_STATUS", 20, 2, "", "", 1, 10, 110002, 3000, 3, 0, "Base Militar", 1);
+				if (.@finish_result == 1) {
+					getitem 25669,5;
+					getitem 25723,5;
+					getitem 25668,1;
+				}
 			}
 		}
 		'reward_announced = 1;

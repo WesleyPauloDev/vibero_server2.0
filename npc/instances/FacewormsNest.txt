@@ -355,21 +355,15 @@ dali,80,60,4	script	Magic Scholar	4_M_SAGE_C,{
 			next;
 			switch( select("Reservar Ninho dos Faceworms:O que voce esta fazendo aqui?:Parar de conversar.") ) {
 			case 1:
-				switch( instance_create(.@md_name$) ) {
-				case -3:
-					dispbottom "Memorial Dungeon, '" + .@md_name$ + "' is already in progress.",0xFFFFFF;
-					break;
-				case -4:
-				case -2:
-				case -1:
-					mes "[Erudito Arcano]";
-					mes "Oops, minhas maos escorregaram. E preciso ativar as fendas novamente.";
-					close;
-				}
-				mes "[Erudito Arcano]";
-				mes "Os espacos estao sob controle.";
-				mes "Por favor, aguarde um instante.";
-				close;
+				callfunc("F_InstanceEntry",
+					"Faceworm's Nest",
+					"Erudito Arcano",
+					"faceworms_nest",
+					"FacewormsNest",
+					175,
+					"Covil da Rainha Verme"
+				);
+				end;
 			case 2:
 				break;
 			case 3:
@@ -412,43 +406,20 @@ dali,72,55,4	script	Interdimensional Device	CLEAR_NPC,{
 		close;
 	}
 	.@party_id = getcharid(1);
-	.@md_name$ = "Faceworm's Nest";
 	if (.@party_id < 1) {
 		mes "[Dispositivo Interdimensional]";
 		mes "Sem party? Volte depois de criar uma, mesmo que tenha vindo sozinho.";
 		close;
 	}
-	switch( checkquest(12325,PLAYTIME) ) {
-	case -1:
-		switch( instance_enter(.@md_name$) ) {
-		case IE_OTHER:
-			mes "[Dispositivo Interdimensional]";
-			mes "Ocorreu um erro desconhecido.";
-			close;
-		case IE_NOINSTANCE:
-			mes "[Dispositivo Interdimensional]";
-			mes "A passagem para a viagem espacial ainda nao foi ativada.";
-			close;
-		case IE_NOMEMBER:// Custom text
-			mes "[Dispositivo Interdimensional]";
-			mes "Voce nao tem permissao para acessar este dispositivo.";
-			close;
-		case IE_OK:
-			mapannounce "dali", getpartyname(.@party_id) + " membro do grupo " + strcharinfo(0) + " entrou em " + .@md_name$ + ".",bc_map,"0x00ff99";
-			setquest 12325;// Faceworm's Nest after-effects
-			//warp "1@face",112,374;
-			end;
-		}
-	case 0:
-	case 1:
-		mes "[Dispositivo Interdimensional]";
-		mes "Foram detectados vestigios de uma viagem espacial recente. Acesso negado.";
-		close;
-	case 2:
-		mes "^0000ffOs vestigios da viagem dimensional desapareceram. Agora voce pode se mover entre dimensoes.^000000";
-		erasequest 12325;
-		close;
-	}
+	callfunc("F_InstanceEntry",
+		"Faceworm's Nest",
+		"Erudito Arcano",
+		"faceworms_nest",
+		"FacewormsNest",
+		175,
+		"Covil da Rainha Verme"
+	);
+	end;
 }
 
 // Instance Scripts :: in_face
@@ -2036,6 +2007,8 @@ OnInstanceInit:
 	mes "[Dimensional Device]";
 	mes "Seu tempo aqui terminou. Voce pode olhar ao redor ou ir embora. O que deseja fazer?";
 	next;
+	if (#FacewormsNest_STATUS == 0)
+		#FacewormsNest_STATUS = 2;
 	if (#FacewormsNest_STATUS == 1 || #FacewormsNest_STATUS == 2) {
 		.@finish_result = callfunc("F_InstanceFinishBase", "Covil da Rainha Verme", "#FacewormsNest_STATUS", 20, 2, "#inst175_name$", "#inst175_status", 1, 20, 110002, 3000, 3, 0, "Faceworm's Nest");
 		if (.@finish_result == -1) {

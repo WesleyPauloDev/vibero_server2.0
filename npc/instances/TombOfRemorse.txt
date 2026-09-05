@@ -174,33 +174,14 @@ dali02,78,116,3	script	Princess of Remorse#remorse3	4_F_MAYSEL,{
 			erasequest 16464;
 			break;
 	}
-	.@party_id = getcharid(1);
-	if(!.@party_id){
-		mes "[ Princess of Remorse ]";
-		mes "Voce precisa estar em um grupo para entrar na Tumba do Remorso.";
-		close;
-	}
-	mes "[ Princess of Remorse ]";
-	mes "Voce vem comigo?";
-	mes "Ao palacio onde os espectros vagam em corpos cansados, para a Tumba do Remorso...";
-	next;
-	.@md_name$ = "Tomb of Remorse";
-	if(select((is_party_leader()?"Criar Tumba do Remorso":""),"Entrar na Tumba do Remorso") == 1){
-		if(instance_create(.@md_name$) == -3){
-			mes "[ Princess of Remorse ]";
-			mes "Somente o lider do grupo pode criar a instancia.";
-			close;
-		}
-		mes "[ Princess of Remorse ]";
-		mes "Depois que a instancia for criada, fale comigo de novo para entrar na ^0000CDTumba do Remorso^000000.";
-	} else {
-		if(instance_enter(.@md_name$) == IE_OK){
-			.@party_name$ = getpartyname(.@party_id);
-			setquest 16464;
-			mapannounce "dali02", strcharinfo(0) + " do grupo " + .@party_name$ + " esta entrando em " + .@md_name$ + ".", bc_map, "0x00FF99";
-		} else
-			mes "^0000FFA instancia ainda nao foi criada ou voce esta tentando entrar em uma instancia diferente da criada.^000000";
-	}
+	callfunc("F_InstanceEntry",
+		"Tomb of Remorse",
+		"Princess of Remorse",
+		"tomb_remorse",
+		"TombRemorse",
+		200,
+		"Tumba do Remorso"
+	);
 	end;
 	
 OnInit:
@@ -1246,6 +1227,21 @@ OnTouch:
 		case 1: .@x = 57; .@y = 22; break;
 		case 2: .@x = 212; .@y = 54; break;
 		case 3:
+			if ('final_ready) {
+				if (#TombRemorse_STATUS == 0)
+					#TombRemorse_STATUS = 2;
+				if (#TombRemorse_STATUS == 1 || #TombRemorse_STATUS == 2) {
+					.@finish_result = callfunc("F_InstanceFinishBase", "Tumba do Remorso", "#TombRemorse_STATUS", 30, 3, "", "", 1, 20, 110002, 3000, 3, 0, "Tumba do Remorso", 1);
+					if (.@finish_result == -1) {
+						mes "[ Marquis of Remorse ]";
+						mes "^FF0000Voce esta com peso demais para receber as recompensas da instancia.^000000";
+						close;
+					}
+					if (.@finish_result == 1) {
+						dispbottom "[Tumba do Remorso] Recompensa de conclusao recebida com sucesso!";
+					}
+				}
+			}
 			if(isbegin_quest(16469) || isbegin_quest(16471)){
 				mes "[ Marquis of Remorse ]";
 				mes "Espere, voce nao tem algo para resolver comigo?";
@@ -1273,20 +1269,18 @@ end;
 1@spa2,212,87,0	duplicate(#rms_warp_0)	#rms_warp_3	WARPNPC,2,2
 
 1@spa2,214,64,3	script	Marquis of Remorse#rms_0	4_M_SAKRAY,{
-	if('final_ready && (#TombRemorse_STATUS == 1 || #TombRemorse_STATUS == 2)){
-		if(checkweight(9608,30,9198,3) == 0){
-			mes "^FF0000Voce esta com muitos itens ou peso demais. Organize seu inventario.^000000";
-			close;
-		}
-		.@finish_result = callfunc("F_InstanceFinishBase", "Tumba do Remorso", "#TombRemorse_STATUS", 30, 3);
-		if (.@finish_result == -1) {
-			mes "^FF0000Voce esta com muitos itens ou peso demais. Organize seu inventario.^000000";
-			close;
-		}
-		if (.@finish_result != 1) {
-			mes "^FF0000Nao foi possivel registrar a conclusao agora.^000000";
-			mes "Tente novamente antes de sair da instancia.";
-			close;
+	if('final_ready){
+		if (#TombRemorse_STATUS == 0)
+			#TombRemorse_STATUS = 2;
+		if (#TombRemorse_STATUS == 1 || #TombRemorse_STATUS == 2) {
+			.@finish_result = callfunc("F_InstanceFinishBase", "Tumba do Remorso", "#TombRemorse_STATUS", 30, 3, "", "", 1, 20, 110002, 3000, 3, 0, "Tumba do Remorso", 1);
+			if (.@finish_result == -1) {
+				mes "^FF0000Voce esta com muitos itens ou peso demais. Organize seu inventario.^000000";
+				close;
+			}
+			if (.@finish_result == 1) {
+				dispbottom "[Tumba do Remorso] Recompensa de conclusao recebida com sucesso!";
+			}
 		}
 	}
 	mes "[ Marquis of Remorse ]";
@@ -1295,12 +1289,16 @@ end;
 	next;
 	switch(select("Fios quebrados do destino.:Derramando lagrimas.:Fragmentos de memoria.:Fragmentos do passado.:Comprar Nebula.")){
 		case 1:
-			.@qid = 16465;
-			if(checkquest(.@qid,HUNTING) < 2){
+			if(!'final_ready){
 				mes "[ Marquis of Remorse ]";
 				mes "Ainda nao acho que haja nada para esclarecer sobre o Espadachim Magico.";
 				mes "Por favor, cuide bem da princesa.";
 			} else {
+				if (@rms_claimed_sakray) {
+					mes "[ Marquis of Remorse ]";
+					mes "Voce ja resgatou esta recompensa nesta jornada.";
+					close;
+				}
 				mes "[ Marquis of Remorse ]";
 				mes "A princesa pode ficar triste.";
 				mes "Mas agora que esse vinculo foi perdido e apagado, nao restara mais nada.";
@@ -1314,17 +1312,21 @@ end;
 				next;
 				mes "[ Marquis of Remorse ]";
 				mes "E uma recompensa pequena, mas e tudo o que posso dar agora. Foi uma decisao da Princesa do Remorso.";
-				erasequest .@qid;
+				@rms_claimed_sakray = 1;
 				getitem 1000367,10;
 			}
 			close;
 		
 		case 2:
-			.@qid = 16467;
-			if(checkquest(.@qid,HUNTING) < 2){
+			if('rms < 3){
 				mes "[ Marquis of Remorse ]";
 				mes "Ainda nao acho que haja nada para esclarecer sobre a Princesa.";
 			} else {
+				if (@rms_claimed_tiara) {
+					mes "[ Marquis of Remorse ]";
+					mes "Voce ja resgatou esta recompensa nesta jornada.";
+					close;
+				}
 				mes "[ Marquis of Remorse ]";
 				mes "Voce conseguiu dar descanso a princesa.";
 				mes "Oh, nao e bom ser um aventureiro? Em tese isso deveria ser trabalho de um principe.";
@@ -1337,7 +1339,7 @@ end;
 				next;
 				mes "[ Marquis of Remorse ]";
 				mes "E uma recompensa pequena, mas e tudo o que posso dar agora. Foi uma decisao da Princesa do Remorso.";
-				erasequest .@qid;
+				@rms_claimed_tiara = 1;
 				getitem 1000367,8;
 			}
 			close;

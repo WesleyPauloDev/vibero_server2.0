@@ -57,16 +57,7 @@ ecl_hub01,132,12,3	script	Chefe da Guarda#tl02	435,{
 		next;
 		switch (select("Entrar.:Deixar pra la.")) {
 		case 1:
-			if (instance_create(.@md_name$) < 0) {
-				mes "[Shenime]";
-				mes "Ha soldados enviados pelo Prefeito la dentro ha pouco tempo.";
-				mes "Espero mesmo que voce nao seja o problema que eles estao procurando, certo?";
-				close;
-			}
-			ecl_interior_time = gettimetick(2) + 20 * 60;
-			mes "[Shenime]";
-			mes "A seguranca la dentro esta apertada, entao se prepare.";
-			mes "Espere aqui por um instante.";
+			callfunc("F_InstanceEntry", "Eclage Interior", "Shenime", "eclage_interior", "EclageInterior", 55, "Interior de Eclage");
 			close;
 		case 2:
 			mes "[Shenime]";
@@ -109,6 +100,8 @@ ecl_hub01,130,15,0	script	Esta bem fechado.	844,{
 				close;
 			case IE_OK:
 				mapannounce "ecl_hub01","O lider da party " + getpartyname(.@party_id) + ", " + strcharinfo(0) + ", esta entrando em " + .@md_name$ + ".",bc_map,"0x00ff99";
+				if (#EclageInterior_STATUS == 0)
+					#EclageInterior_STATUS = 2;
 				end;
 			default:
 			}
@@ -493,6 +486,8 @@ OnMyMobDead:
 	ep14_2_mylord = 30;
 	if (checkquest(7450, PLAYTIME) > -1 || checkquest(7450, HUNTING) > -1)
 		changequest 7450,7451;
+	if (#EclageInterior_STATUS == 0)
+		#EclageInterior_STATUS = 2;
 	if (#EclageInterior_STATUS == 1 || #EclageInterior_STATUS == 2) {
 		.@finish_result = callfunc("F_InstanceFinishBase", "Interior de Eclage", "#EclageInterior_STATUS");
 		if (.@finish_result == -1) {
