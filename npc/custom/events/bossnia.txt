@@ -222,7 +222,8 @@ OnTalk:
 							21422,21423,21424,21425,21426,21427,21428,21429,21430,21431,
 							21432,21433,21434,21435,21438,21440,21441;
 
-		 set .@spawn_count, 2; // quantidade de cada mob
+		 set .@spawn_count, 2; // quantidade de cada mob em bossnia_01
+		 set .@spawn_count_02, .@spawn_count * 2; // 2x mais mobs em bossnia_02 (4 de cada mob)
 
 		for (.@i = 0; .@i < getarraysize(.@mob_list); .@i++) {
 			for (.@q = 0; .@q < .@spawn_count; .@q++) {
@@ -241,7 +242,7 @@ OnTalk:
 			sleep 5;
 		}
 		for (.@i = 0; .@i < getarraysize(.@mob_list); .@i++) {
-			for (.@q = 0; .@q < .@spawn_count; .@q++) {
+			for (.@q = 0; .@q < .@spawn_count_02; .@q++) {
 				monster "bossnia_02",0,0,"--ja--",.@mob_list[.@i],1,"NpcCheffenia::OnBossDead2";
 
 				// Aplica setunitdata ao ultimo GID spawnado

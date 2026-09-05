@@ -2564,7 +2564,7 @@ OnStepTimer:
 
 			// Classes ou builds com habilidades de longo alcance podem iniciar o combate a 7-8 celulas:
 			if (BaseClass == Job_Archer || BaseClass == Job_Mage || BaseClass == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro || Class == Job_Super_Novice || Class == Job_Super_Novice_E || Class == Job_Gunslinger || Class == Job_Rebellion || BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308 ||
-			    (BaseClass == Job_Merchant && (Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Meister || Class == Job_Meister2 || Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 || Class == Job_Biolo || Class == Job_Biolo2 || getskilllv("NC_ARMSCANNON") > 0 || getskilllv("GN_CARTCANNON") > 0)) ||
+			    (BaseClass == Job_Merchant && (Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Meister || Class == Job_Meister2 || Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 || Class == Job_Biolo || Class == Job_Biolo2 || BOT_FINAL_JOB == 111 || BOT_FINAL_JOB == 112 || getskilllv("NC_ARMSCANNON") > 0 || getskilllv("GN_CARTCANNON") > 0 || getskilllv("GN_SPORE_EXPLOSION") > 0)) ||
 			    (BaseClass == Job_Swordman && (getskilllv("LG_BANISHINGPOINT") > 0 || getskilllv("LG_PINPOINTATTACK") > 0 || getskilllv("LG_CANNONSPEAR") > 0 || getskilllv("RK_DRAGONBREATH") > 0 || getskilllv("RK_SONICWAVE") > 0))) {
 				.@atk_range = 7; // Pode iniciar disparo a distancia
 			}
@@ -2770,32 +2770,125 @@ OnStepTimer:
 			// 2. MAGO / BRUXO / ARQUIMAGO / ARCANO / FEITICEIRO
 			// =========================================================
 			else if (BaseClass == Job_Mage) {
-				if (getskilllv("WL_CHAINLIGHTNING") > 0 && Sp >= 40) {
-					unitskilluseid getcharid(3), "WL_CHAINLIGHTNING", getskilllv("WL_CHAINLIGHTNING"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 1000;
-				} else if (getskilllv("WL_CRIMSONROCK") > 0 && Sp >= 40) {
-					unitskilluseid getcharid(3), "WL_CRIMSONROCK", getskilllv("WL_CRIMSONROCK"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 1200;
-				} else if (getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 40) {
-					unitskilluseid getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-					.@skill_delay = 1000;
-				} else if (getskilllv("WZ_JUPITEL") > 0) {
-					.@w_rot = @BOT_SKILL_ROT % 4;
-					if (.@w_rot == 0 && getskilllv("WZ_JUPITEL") > 0 && Sp >= 20) {
+				// --- 2.1 ARCANO / WARLOCK (3a CLASSE) & ARCH MAGE (4a CLASSE) ---
+				if (Class == Job_Warlock || Class >= 4254 || getskilllv("WL_CHAINLIGHTNING") > 0 || getskilllv("WL_CRIMSONROCK") > 0 || getskilllv("WL_JACKFROST") > 0 || getskilllv("WL_SOULEXPANSION") > 0) {
+					.@wl_rot = @BOT_SKILL_ROT % 4;
+					if (.@wl_rot == 0 && getskilllv("WL_CHAINLIGHTNING") > 0 && Sp >= 40) {
+						// Corrente Eletrica (Target Skill - Dano em cadeia)
+						unitskilluseid getcharid(3), "WL_CHAINLIGHTNING", getskilllv("WL_CHAINLIGHTNING"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (.@wl_rot == 1 && getskilllv("WL_CRIMSONROCK") > 0 && Sp >= 40) {
+						// Meteoro Escarlate (Target Skill - Impacto massivo de fogo em area)
+						unitskilluseid getcharid(3), "WL_CRIMSONROCK", getskilllv("WL_CRIMSONROCK"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1200;
+					} else if (.@wl_rot == 2 && getskilllv("WL_JACKFROST") > 0 && Sp >= 35) {
+						// Zero Absoluto / Congelamento Geral (Target Skill)
+						unitskilluseid getcharid(3), "WL_JACKFROST", getskilllv("WL_JACKFROST"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (.@wl_rot == 3 && getskilllv("WL_SOULEXPANSION") > 0 && Sp >= 30) {
+						// Expansao Espiritual (Target Skill - Dano fantasma rapido)
+						unitskilluseid getcharid(3), "WL_SOULEXPANSION", getskilllv("WL_SOULEXPANSION"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 700;
+					} else if (getskilllv("WL_CHAINLIGHTNING") > 0 && Sp >= 40) {
+						unitskilluseid getcharid(3), "WL_CHAINLIGHTNING", getskilllv("WL_CHAINLIGHTNING"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (getskilllv("WL_CRIMSONROCK") > 0 && Sp >= 40) {
+						unitskilluseid getcharid(3), "WL_CRIMSONROCK", getskilllv("WL_CRIMSONROCK"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1200;
+					} else if (getskilllv("WZ_JUPITEL") > 0 && Sp >= 20) {
 						unitskilluseid getcharid(3), "WZ_JUPITEL", getskilllv("WZ_JUPITEL"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
-					} else if (.@w_rot == 1 && getskilllv("MG_FIREBALL") > 0 && Sp >= 15) {
+					} else if (Sp >= 12) {
+						unitskilluseid getcharid(3), "MG_FIREBOLT", (getskilllv("MG_FIREBOLT") > 0 ? getskilllv("MG_FIREBOLT") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					}
+				}
+				// --- 2.2 FEITICEIRO / SORCERER (3a CLASSE) & ELEMENTAL MASTER (4a CLASSE) ---
+				else if (Class == Job_Sorcerer || Class >= 4255 || getskilllv("SO_PSYCHIC_WAVE") > 0 || getskilllv("SO_DIAMONDDUST") > 0 || getskilllv("SO_VARETYR_SPEAR") > 0 || getskilllv("SO_EARTHGRAVE") > 0 || getskilllv("SO_CLOUD_KILL") > 0) {
+					.@so_rot = @BOT_SKILL_ROT % 4;
+					if (.@so_rot == 0 && getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 40) {
+						// Onda Psiquica (Ground Skill - Lancada na posicao do alvo)
+						unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (.@so_rot == 1 && getskilllv("SO_DIAMONDDUST") > 0 && Sp >= 35) {
+						// Po de Diamante (Ground Skill - Lancada na posicao do alvo)
+						unitskillusepos getcharid(3), "SO_DIAMONDDUST", getskilllv("SO_DIAMONDDUST"), .@mx, .@my, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (.@so_rot == 2 && getskilllv("SO_VARETYR_SPEAR") > 0 && Sp >= 35) {
+						// Lanca dos Eteres (Target Skill - Dano de Vento direto no alvo)
+						unitskilluseid getcharid(3), "SO_VARETYR_SPEAR", getskilllv("SO_VARETYR_SPEAR"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 900;
+					} else if (.@so_rot == 3 && getskilllv("SO_EARTHGRAVE") > 0 && Sp >= 35) {
+						// Castigo de Terra (Ground Skill - Lancada na posicao do alvo)
+						unitskillusepos getcharid(3), "SO_EARTHGRAVE", getskilllv("SO_EARTHGRAVE"), .@mx, .@my, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (getskilllv("SO_VARETYR_SPEAR") > 0 && Sp >= 35) {
+						unitskilluseid getcharid(3), "SO_VARETYR_SPEAR", getskilllv("SO_VARETYR_SPEAR"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 900;
+					} else if (getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 40) {
+						unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (getskilllv("WZ_EARTHSPIKE") > 0 && Sp >= 15) {
+						// Coluna de Pedra (Target Skill)
+						unitskilluseid getcharid(3), "WZ_EARTHSPIKE", getskilllv("WZ_EARTHSPIKE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					} else if (Sp >= 12) {
+						unitskilluseid getcharid(3), "MG_FIREBOLT", (getskilllv("MG_FIREBOLT") > 0 ? getskilllv("MG_FIREBOLT") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					}
+				}
+				// --- 2.3 BRUXO / ARQUIMAGO (2a CLASSE E TRANS) ---
+				else if (Class == Job_Wizard || Class == Job_High_Wizard || getskilllv("WZ_JUPITEL") > 0 || getskilllv("WZ_METEOR") > 0 || getskilllv("WZ_STORMGUST") > 0) {
+					.@w_rot = @BOT_SKILL_ROT % 4;
+					if (.@w_rot == 0 && getskilllv("WZ_JUPITEL") > 0 && Sp >= 20) {
+						// Trovao de Jupter (Target Skill)
+						unitskilluseid getcharid(3), "WZ_JUPITEL", getskilllv("WZ_JUPITEL"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (.@w_rot == 1 && getskilllv("WZ_METEOR") > 0 && Sp >= 40) {
+						// Chuva de Meteoros (Ground Skill)
+						unitskillusepos getcharid(3), "WZ_METEOR", getskilllv("WZ_METEOR"), .@mx, .@my, 0, 0, 0, 1;
+						.@skill_delay = 1200;
+					} else if (.@w_rot == 2 && getskilllv("MG_FIREBALL") > 0 && Sp >= 15) {
+						// Bola de Fogo (Target Skill)
 						unitskilluseid getcharid(3), "MG_FIREBALL", getskilllv("MG_FIREBALL"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
-					} else if (.@w_rot == 2 && getskilllv("MG_FIREBOLT") > 0 && Sp >= 15) {
+					} else if (.@w_rot == 3 && getskilllv("MG_FIREBOLT") > 0 && Sp >= 15) {
+						// Lanca de Fogo (Target Skill)
 						unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (getskilllv("WZ_JUPITEL") > 0 && Sp >= 20) {
+						unitskilluseid getcharid(3), "WZ_JUPITEL", getskilllv("WZ_JUPITEL"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
 					} else if (getskilllv("MG_SOULSTRIKE") > 0 && Sp >= 15) {
 						unitskilluseid getcharid(3), "MG_SOULSTRIKE", getskilllv("MG_SOULSTRIKE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
 					}
-				} else {
-					// 1a Classe Mago / Sabio:
+				}
+				// --- 2.4 SABIO / PROFESSOR (2a CLASSE E TRANS SAGE) ---
+				else if (Class == Job_Sage || Class == Job_Professor || getskilllv("WZ_HEAVENDRIVE") > 0 || getskilllv("WZ_EARTHSPIKE") > 0 || getskilllv("PF_DOUBLECASTING") > 0) {
+					.@sag_rot = @BOT_SKILL_ROT % 3;
+					if (.@sag_rot == 0 && getskilllv("WZ_HEAVENDRIVE") > 0 && Sp >= 25) {
+						// Furia da Terra (Ground Skill)
+						unitskillusepos getcharid(3), "WZ_HEAVENDRIVE", getskilllv("WZ_HEAVENDRIVE"), .@mx, .@my, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (.@sag_rot == 1 && getskilllv("WZ_EARTHSPIKE") > 0 && Sp >= 15) {
+						// Coluna de Pedra (Target Skill)
+						unitskilluseid getcharid(3), "WZ_EARTHSPIKE", getskilllv("WZ_EARTHSPIKE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					} else if (.@sag_rot == 2 && getskilllv("MG_FIREBOLT") > 0 && Sp >= 15) {
+						// Lanca de Fogo (Target Skill)
+						unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (getskilllv("WZ_EARTHSPIKE") > 0 && Sp >= 15) {
+						unitskilluseid getcharid(3), "WZ_EARTHSPIKE", getskilllv("WZ_EARTHSPIKE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					} else if (Sp >= 12) {
+						unitskilluseid getcharid(3), "MG_FIREBOLT", (getskilllv("MG_FIREBOLT") > 0 ? getskilllv("MG_FIREBOLT") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					}
+				}
+				// --- 2.5 MAGO BASICO (1a CLASSE) ---
+				else {
 					.@m_rot = @BOT_SKILL_ROT % 5;
 					if (.@m_rot == 0 && getskilllv("MG_FIREBOLT") > 0 && Sp >= 12) {
 						unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
@@ -3064,7 +3157,7 @@ OnStepTimer:
 				}
 			}
 			// =========================================================
-			// 6. MERCADOR / FERREIRO / MESTRE-FERREIRO / MECANICO / BIOQUIMICO
+			// 6. MERCADOR / FERREIRO / MESTRE-FERREIRO / MECANICO / ALQUIMISTA / CRIADOR / BIOQUIMICO
 			// =========================================================
 			else if (BaseClass == Job_Merchant) {
 				if (Zeny < 500000) Zeny += 5000000;
@@ -3076,8 +3169,40 @@ OnStepTimer:
 				.@w_type = (.@w_id > 0 ? getItemInfo(.@w_id, ITEMINFO_SUBTYPE) : -1);
 				.@has_axe = (.@w_type == W_1HAXE || .@w_type == W_2HAXE);
 
-				// Ramo Mecanico (3a Classe): EXCLUSIVO CANHAO DE BRACO A DISTANCIA (RANGED)
-				if (Class >= Job_Mechanic) {
+				// --- 6.1 BIOQUIMICO / GENETIC (3a CLASSE) & BIOLO (4a CLASSE) ---
+				if (Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 || Class == Job_Biolo || Class == Job_Biolo2 || Class == 4257 || Class == 4258 || BOT_FINAL_JOB == 112 || getskilllv("GN_CARTCANNON") > 0 || getskilllv("GN_SPORE_EXPLOSION") > 0) {
+					if (countitem(18000) < 100) {
+						getitem 18000, 2000;
+						if (getequipid(EQI_AMMO) <= 0) equip 18000;
+						atcommand "@restock 18000 1000";
+					}
+					// Rotacao de Combate do Bioquimico: Esporo Explosivo + Canhao de Protons
+					.@gn_rot = @BOT_SKILL_ROT % 2;
+					if (.@gn_rot == 0 && getskilllv("GN_SPORE_EXPLOSION") > 0 && Sp >= 48) {
+						// Esporo Explosivo (Spore Explosion - Dano massivo com detonacao)
+						unitskilluseid getcharid(3), "GN_SPORE_EXPLOSION", getskilllv("GN_SPORE_EXPLOSION"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 700;
+					} else if (.@gn_rot == 1 && getskilllv("GN_CARTCANNON") > 0 && Sp >= 40 && checkcart()) {
+						// Canhao de Protons (Cart Cannon - Disparo a distancia com projeteis de canhao)
+						unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 700;
+					} else if (getskilllv("GN_CARTCANNON") > 0 && Sp >= 40 && checkcart()) {
+						unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 700;
+					} else if (getskilllv("GN_SPORE_EXPLOSION") > 0 && Sp >= 48) {
+						unitskilluseid getcharid(3), "GN_SPORE_EXPLOSION", getskilllv("GN_SPORE_EXPLOSION"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 700;
+					} else if (getskilllv("CR_ACIDDEMONSTRATION") > 0 && Sp >= 30) {
+						// Bomba Acida (Acid Demonstration)
+						unitskilluseid getcharid(3), "CR_ACIDDEMONSTRATION", getskilllv("CR_ACIDDEMONSTRATION"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 1000;
+					} else if (getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12 && checkcart()) {
+						unitskilluseid getcharid(3), "MC_CARTREVOLUTION", 1, getcharid(3), 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
+					}
+				}
+				// --- 6.2 MECANICO / MECHANIC (3a CLASSE) & MEISTER (4a CLASSE) ---
+				else if (Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Meister || Class == Job_Meister2 || Class == 4256 || BOT_FINAL_JOB == 111 || getskilllv("NC_ARMSCANNON") > 0) {
 					if (countitem(18000) < 100) {
 						getitem 18000, 2000;
 						// Nunca substitui a municao escolhida manualmente pelo jogador.
@@ -3096,20 +3221,23 @@ OnStepTimer:
 						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 					}
 				}
-				// Ramo Bioquimico / Criador / Alquimista:
-				else if (Class == Job_Genetic || Class == Job_Creator || Class == Job_Alchemist) {
-					if (getskilllv("GN_CARTCANNON") > 0 && Sp >= 20 && checkcart()) {
-						unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-						.@skill_delay = 800;
-					} else if (getskilllv("CR_ACIDDEMONSTRATION") > 0 && Sp >= 30) {
+				// --- 6.3 ALQUIMISTA / CRIADOR (2a CLASSE E TRANS ALCHEMIST) ---
+				else if (Class == Job_Alchemist || Class == Job_Creator || getskilllv("CR_ACIDDEMONSTRATION") > 0 || getskilllv("AM_ACIDTERROR") > 0) {
+					if (getskilllv("CR_ACIDDEMONSTRATION") > 0 && Sp >= 30) {
 						unitskilluseid getcharid(3), "CR_ACIDDEMONSTRATION", getskilllv("CR_ACIDDEMONSTRATION"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = 1000;
+					} else if (getskilllv("AM_ACIDTERROR") > 0 && Sp >= 15) {
+						unitskilluseid getcharid(3), "AM_ACIDTERROR", getskilllv("AM_ACIDTERROR"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = 800;
+					} else if (getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12 && checkcart()) {
+						unitskilluseid getcharid(3), "MC_CARTREVOLUTION", 1, getcharid(3), 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
 					} else if (Sp >= 5) {
 						unitskilluseid getcharid(3), "MC_MAMMONITE", (getskilllv("MC_MAMMONITE") > 0 ? getskilllv("MC_MAMMONITE") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 					}
 				}
-				// Ramo Ferreiro / Mestre-Ferreiro / Mercador:
+				// --- 6.4 FERREIRO / MESTRE-FERREIRO / MERCADOR ---
 				else {
 					if (getskilllv("WS_CARTTERMINATION") > 0 && Sp >= 15 && getstatus(SC_CARTBOOST) && checkcart()) {
 						unitskilluseid getcharid(3), "WS_CARTTERMINATION", getskilllv("WS_CARTTERMINATION"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
@@ -3555,6 +3683,18 @@ OnApplyBuffs:
 	sc_start SC_KYRIE, 600000, 10;
 	sc_start SC_MAGNIFICAT, 600000, 5;
 	sc_start SC_GLORIA, 600000, 5;
+	if (BaseClass == Job_Mage) {
+		sc_start SC_ENERGYCOAT, 600000, 1;
+		if (Class == Job_High_Wizard || Class == Job_Warlock || Class >= 4254 || BOT_FINAL_JOB == 103) {
+			sc_start SC_MAGICPOWER, 600000, 10;
+			sc_start SC_RECOGNIZEDSPELL, 600000, 5;
+		}
+		else if (Class == Job_Professor || Class == Job_Sorcerer || Class >= 4255 || BOT_FINAL_JOB == 104) {
+			sc_start SC_DOUBLECAST, 600000, 5;
+			sc_start SC_STRIKING, 600000, 5;
+			sc_start SC_MEMORIZE, 600000, 1;
+		}
+	}
 	if (BaseClass == Job_Swordman && (Class >= Job_Royal_Guard || getskilllv("LG_BANISHINGPOINT") > 0 || BaseLevel >= 99)) {
 		sc_start SC_INSPIRATION, 600000, 5;
 		sc_start SC_FORCEOFVANGUARD, 600000, 5;
@@ -3598,7 +3738,7 @@ OnApplyBuffs:
 		addspiritball 5, 600000;
 	}
 	if (BaseClass == Job_Merchant) {
-		if (Class >= Job_Mechanic || Class == Job_Genetic) {
+		if (Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Meister || Class == Job_Meister2 || Class == 4256 || Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 || Class == Job_Biolo || Class == Job_Biolo2 || Class == 4257 || Class == 4258 || BOT_FINAL_JOB == 111 || BOT_FINAL_JOB == 112) {
 			if (countitem(18000) < 500) {
 				getitem 18000, 2000;
 				// Preenche apenas o slot vazio; preserva a municao equipada.
@@ -3608,9 +3748,21 @@ OnApplyBuffs:
 		}
 		sc_start SC_WEAPONPERFECTION, 600000, 5;
 		sc_start SC_MAXOVERTHRUST, 600000, 5;
-		if (!checkmadogear()) {
-			sc_start SC_ADRENALINE, 600000, 5;
-			if (checkcart()) sc_start SC_CARTBOOST, 600000, 1;
+		// Buffs exclusivos da arvore de Ferreiro / Mestre-Ferreiro / Mecanico:
+		if (Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Meister || Class == Job_Meister2 || Class == 4256 || BOT_FINAL_JOB == 111) {
+			if (!checkmadogear()) {
+				sc_start SC_ADRENALINE, 600000, 5;
+				if (checkcart()) sc_start SC_CARTBOOST, 600000, 1;
+			}
+		}
+		// Buffs exclusivos da arvore de Alquimista / Criador / Bioquimico / Biolo:
+		if (Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 || Class == Job_Biolo || Class == Job_Biolo2 || Class == 4257 || Class == 4258 || BOT_FINAL_JOB == 112) {
+			sc_start SC_CP_WEAPON, 600000, 5;
+			sc_start SC_CP_SHIELD, 600000, 5;
+			sc_start SC_CP_ARMOR, 600000, 5;
+			sc_start SC_CP_HELM, 600000, 5;
+			if (checkcart()) sc_start SC_GN_CARTBOOST, 600000, 5;
+			callsub OnCheckHomunculus;
 		}
 	}
 	if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308) {
@@ -3787,18 +3939,19 @@ OnCheckBuffs:
 		unitskilluseid getcharid(3), "RK_ENCHANTBLADE", getskilllv("RK_ENCHANTBLADE"), getcharid(3);
 	}
 
-	// Protecao Arcana (MG_ENERGYCOAT)
-	if (getskilllv("MG_ENERGYCOAT") > 0 && !getstatus(SC_ENERGYCOAT) && Sp >= 30) {
-		unitskilluseid getcharid(3), "MG_ENERGYCOAT", 1, getcharid(3);
+	// Protecao Arcana & Reconhecimento Magico (Mago / Bruxo / Arcano):
+	if (BaseClass == Job_Mage) {
+		if (getskilllv("MG_ENERGYCOAT") > 0 && !getstatus(SC_ENERGYCOAT) && Sp >= 30) {
+			unitskilluseid getcharid(3), "MG_ENERGYCOAT", 1, getcharid(3);
+		}
+		if (getskilllv("WL_RECOGNIZEDSPELL") > 0 && !getstatus(SC_RECOGNIZEDSPELL) && Sp >= 50) {
+			unitskilluseid getcharid(3), "WL_RECOGNIZEDSPELL", getskilllv("WL_RECOGNIZEDSPELL"), getcharid(3);
+		}
 	}
 	// Revelacao / Chama Reveladora (MG_SIGHT) - Delay de 5 minutos (300 segundos)
 	if (getskilllv("MG_SIGHT") > 0 && !getstatus(SC_SIGHT) && Sp >= 10 && (gettimetick(2) - @BOT_LAST_SIGHT) >= 300) {
 		@BOT_LAST_SIGHT = gettimetick(2);
 		unitskilluseid getcharid(3), "MG_SIGHT", 1, getcharid(3);
-	}
-	// Amplificacao Magica (HW_MAGICPOWER)
-	if (getskilllv("HW_MAGICPOWER") > 0 && !getstatus(SC_AMPLIFYMAGICPOWER) && Sp >= 50) {
-		unitskilluseid getcharid(3), "HW_MAGICPOWER", getskilllv("HW_MAGICPOWER"), getcharid(3);
 	}
 
 	// Concentracao de Arqueiro (AC_CONCENTRATION)
@@ -3913,9 +4066,58 @@ OnCheckBuffs:
 	if (getskilllv("BS_WEAPONPERFECT") > 0 && !getstatus(SC_WEAPONPERFECTION) && Sp >= 18) {
 		unitskilluseid getcharid(3), "BS_WEAPONPERFECT", getskilllv("BS_WEAPONPERFECT"), getcharid(3);
 	}
-	// Impulso no Carrinho (WS_CARTBOOST) - Requer Carrinho e nao estar no Madogear
+	// Impulso no Carrinho do Mestre-Ferreiro (WS_CARTBOOST) - Requer Carrinho e nao estar no Madogear
 	if (getskilllv("WS_CARTBOOST") > 0 && !getstatus(SC_CARTBOOST) && Sp >= 20 && checkcart() && !checkmadogear()) {
 		unitskilluseid getcharid(3), "WS_CARTBOOST", 1, getcharid(3);
+	}
+	// Propulsao do Carrinho do Bioquimico (GN_CARTBOOST) - Sempre renova quando acabar
+	if (getskilllv("GN_CARTBOOST") > 0 && !getstatus(SC_GN_CARTBOOST) && Sp >= 20 && checkcart()) {
+		unitskilluseid getcharid(3), "GN_CARTBOOST", getskilllv("GN_CARTBOOST"), getcharid(3);
+	}
+
+	// Manutencao e Convocacao Continua do Homunculo (Alquimista / Criador / Bioquimico / Biolo)
+	callsub OnCheckHomunculus;
+	return;
+
+OnCheckHomunculus:
+	if (Class != Job_Alchemist && Class != Job_Creator && Class != Job_Genetic && Class != Job_Genetic_T && Class != Job_Genetic2 && Class != Job_Genetic_T2 && Class != Job_Biolo && Class != Job_Biolo2 && Class != 4257 && Class != 4258 && BOT_FINAL_JOB != 112)
+		return;
+
+	// Garante que as habilidades essenciais de homunculo estejam aprendidas
+	if (getskilllv("AM_BIOETHICS") <= 0) skill "AM_BIOETHICS", 1, 0;
+	if (getskilllv("AM_CALLHOMUN") <= 0) skill "AM_CALLHOMUN", 1, 0;
+	if (getskilllv("AM_RESURRECTHOMUN") <= 0) skill "AM_RESURRECTHOMUN", 5, 0;
+
+	.@h_db_id = gethominfo(0);
+	.@h_gid = gethominfo(7);
+	.@h_alive = (.@h_gid > 0 && unitexists(.@h_gid));
+
+	// 1. Se ainda nao possui nenhum homunculo criado (ou sumiu/deletado): cria um novo
+	if (.@h_db_id == 0 || checkhomcall() == -1) {
+		if (countitem(7142) < 5) getitem 7142, 5; // Embriao
+		atcommand "@makehomun " + (6001 + rand(4)); // Cria Lif (6001), Amistr (6002), Filir (6003) ou Vanilmirth (6004)
+		atcommand "@homfriendly 1000";
+		atcommand "@homhungry 90";
+		return;
+	}
+
+	// 2. Mantem lealdade e alimentacao cheias para prevencao de fuga
+	if (gethominfo(3) < 50000) atcommand "@homfriendly 1000";
+	if (gethominfo(4) < 30) atcommand "@homhungry 90";
+
+	// 3. Se o homunculo NAO esta vivo e ativo na tela:
+	if (!.@h_alive) {
+		if ((gettimetick(2) - @BOT_LAST_HOMUN_REVIVE) >= 2) {
+			@BOT_LAST_HOMUN_REVIVE = gettimetick(2);
+			// Se o homunculo esta morto, usa Ressuscitar Homunculo
+			if (Sp >= 50 && getskilllv("AM_RESURRECTHOMUN") > 0) {
+				unitskilluseid getcharid(3), "AM_RESURRECTHOMUN", getskilllv("AM_RESURRECTHOMUN"), getcharid(3), 0, 1, 0, 1;
+			}
+			// Se estava vaporizado ou nao reviveu, chama com AM_CALLHOMUN
+			if (Sp >= 10 && getskilllv("AM_CALLHOMUN") > 0) {
+				unitskilluseid getcharid(3), "AM_CALLHOMUN", 1, getcharid(3), 0, 1, 0, 1;
+			}
+		}
 	}
 	return;
 
@@ -4084,8 +4286,16 @@ OnCheckMapSwitch:
 	return;
 
 OnDetectTargetJob:
-	// Detecta classes especificas da arvore de Arqueiro e Expandidas
-	if (Class == Job_Bard || Class == Job_Dancer || Class == Job_Clown || Class == Job_Gypsy || Class == Job_Minstrel || Class == Job_Minstrel_T || Class == Job_Wanderer || Class == Job_Wanderer_T || Class == Job_Troubadour || Class == Job_Trouvere || Class == 4259 || Class == 4260)
+	// Detecta classes especificas da arvore de Arqueiro, Mago, Mercador e Expandidas
+	if (Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 || Class == Job_Biolo || Class == Job_Biolo2 || Class == 4257 || Class == 4258)
+		BOT_FINAL_JOB = 112;
+	else if (Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Meister || Class == Job_Meister2 || Class == 4256)
+		BOT_FINAL_JOB = 111;
+	else if (Class == Job_Sage || Class == Job_Professor || Class == Job_Sorcerer || Class == 4255)
+		BOT_FINAL_JOB = 104;
+	else if (Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock || Class == 4254)
+		BOT_FINAL_JOB = 103;
+	else if (Class == Job_Bard || Class == Job_Dancer || Class == Job_Clown || Class == Job_Gypsy || Class == Job_Minstrel || Class == Job_Minstrel_T || Class == Job_Wanderer || Class == Job_Wanderer_T || Class == Job_Troubadour || Class == Job_Trouvere || Class == 4259 || Class == 4260)
 		BOT_FINAL_JOB = 106;
 	else if (Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger || Class == Job_Ranger_T || Class == Job_Windhawk || Class == 4252)
 		BOT_FINAL_JOB = 105;
@@ -4354,9 +4564,9 @@ OnDistributeSkills:
 	}
 
 	// =========================================================
-	// 2. MAGO / BRUXO / ARQUIMAGO / ARCANO
+	// 2. MAGO / BRUXO / ARQUIMAGO / ARCANO / SABIO / PROFESSOR / FEITICEIRO
 	// =========================================================
-	if (Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock) {
+	if (BaseClass == Job_Mage || Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock || Class == Job_Sage || Class == Job_Professor || Class == Job_Sorcerer || Class >= 4254) {
 		skill "MG_ENERGYCOAT", 1, 1;
 		skill "MG_SRECOVERY", 10, 1;
 		skill "MG_FIREBOLT", 10, 1;
@@ -4371,7 +4581,7 @@ OnDistributeSkills:
 		skill "MG_FROSTDIVER", 10, 1;
 		skill "MG_THUNDERSTORM", 10, 1;
 	}
-	if (Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock) {
+	if (Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock || Class == 4254) {
 		skill "WZ_FIREPILLAR", 10, 1;
 		skill "WZ_SIGHTRASHER", 10, 1;
 		skill "WZ_METEOR", 10, 1;
@@ -4386,7 +4596,7 @@ OnDistributeSkills:
 		skill "WZ_QUAGMIRE", 5, 1;
 		skill "WZ_SIGHTBLASTER", 1, 1;
 	}
-	if (Class == Job_High_Wizard || Class == Job_Warlock) {
+	if (Class == Job_High_Wizard || Class == Job_Warlock || Class == 4254) {
 		skill "HW_MAGICPOWER", 10, 1;
 		skill "HW_SOULDRAIN", 10, 1;
 		skill "HW_MAGICCRASHER", 1, 1;
@@ -4394,7 +4604,7 @@ OnDistributeSkills:
 		skill "HW_GANBANTEIN", 1, 1;
 		skill "HW_GRAVITATION", 5, 1;
 	}
-	if (Class == Job_Warlock) {
+	if (Class == Job_Warlock || Class == 4254) {
 		skill "WL_WHITEIMPRISON", 5, 1;
 		skill "WL_SOULEXPANSION", 5, 1;
 		skill "WL_FROSTMISTY", 5, 1;
@@ -4407,6 +4617,48 @@ OnDistributeSkills:
 		skill "WL_EARTHSTRAIN", 5, 1;
 		skill "WL_TETRAVORTEX", 5, 1;
 		skill "WL_RECOGNIZEDSPELL", 5, 1;
+	}
+	if (Class == Job_Sage || Class == Job_Professor || Class == Job_Sorcerer || Class == 4255) {
+		skill "SA_CASTCANCEL", 5, 1;
+		skill "SA_FREECAST", 10, 1;
+		skill "SA_AUTOSPELL", 10, 1;
+		skill "SA_VOLCANO", 5, 1;
+		skill "SA_DELUGE", 5, 1;
+		skill "SA_VIOLENTGALE", 5, 1;
+		skill "SA_LANDPROTECTOR", 5, 1;
+		skill "SA_DISPELL", 5, 1;
+		skill "SA_DRAGONOLOGY", 5, 1;
+		skill "SA_ABRACADABRA", 10, 1;
+		skill "WZ_EARTHSPIKE", 5, 1;
+		skill "WZ_HEAVENDRIVE", 5, 1;
+	}
+	if (Class == Job_Professor || Class == Job_Sorcerer || Class == 4255) {
+		skill "PF_SOULCHANGE", 1, 1;
+		skill "PF_SOULBURN", 5, 1;
+		skill "PF_MINDBREAKER", 5, 1;
+		skill "PF_MEMORIZE", 1, 1;
+		skill "PF_DOUBLECASTING", 5, 1;
+		skill "PF_SPIDERWEB", 1, 1;
+	}
+	if (Class == Job_Sorcerer || Class == 4255) {
+		skill "SO_PSYCHIC_WAVE", 5, 1;
+		skill "SO_DIAMONDDUST", 5, 1;
+		skill "SO_EARTHGRAVE", 5, 1;
+		skill "SO_VARETYR_SPEAR", 5, 1;
+		skill "SO_CLOUD_KILL", 5, 1;
+		skill "SO_POISON_BUSTER", 5, 1;
+		skill "SO_STRIKING", 5, 1;
+		skill "SO_WARMER", 5, 1;
+		skill "SO_VACUUM_EXTREME", 5, 1;
+		skill "SO_SPELLFIST", 5, 1;
+		skill "SO_FIREWALK", 5, 1;
+		skill "SO_ELECTRICWALK", 5, 1;
+		skill "SO_FIRE_INSIGNIA", 3, 1;
+		skill "SO_WATER_INSIGNIA", 3, 1;
+		skill "SO_WIND_INSIGNIA", 3, 1;
+		skill "SO_EARTH_INSIGNIA", 3, 1;
+		skill "SO_ELEMENTAL_SHIELD", 5, 1;
+		skill "SO_ARRULLO", 5, 1;
 	}
 
 	// =========================================================
@@ -4684,10 +4936,10 @@ OnDistributeSkills:
 	}
 
 	// =========================================================
-	// 6. MERCADOR / FERREIRO / MESTRE-FERREIRO / MECANICO
+	// 6. MERCADOR / FERREIRO / MESTRE-FERREIRO / MECANICO / ALQUIMISTA / CRIADOR / BIOQUIMICO
 	// =========================================================
-	// 1a Classe (Mercador) - Apenas skills de 1a classe!
-	if (Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic) {
+	// 1a Classe (Mercador) - Para todas as classes da arvore
+	if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class >= 4256) {
 		skill "MC_INCCARRY", 10, 1;
 		skill "MC_DISCOUNT", 10, 1;
 		skill "MC_OVERCHARGE", 10, 1;
@@ -4702,7 +4954,7 @@ OnDistributeSkills:
 		if (!checkcart()) setcart;
 	}
 	// 2a Classe (Ferreiro)
-	if (Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic) {
+	if (Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == 4256) {
 		skill "BS_HILTBINDING", 1, 1;
 		skill "BS_WEAPONRESEARCH", 10, 1;
 		skill "BS_REPAIRWEAPON", 1, 1;
@@ -4719,15 +4971,15 @@ OnDistributeSkills:
 		skill "BS_GREED", 1, 1;
 	}
 	// Trans (Mestre-Ferreiro)
-	if (Class == Job_Whitesmith || Class == Job_Mechanic) {
+	if (Class == Job_Whitesmith || Class == Job_Mechanic || Class == 4256) {
 		skill "WS_CARTBOOST", 1, 1;
 		skill "WS_OVERTHRUSTMAX", 5, 1;
 		skill "WS_CARTTERMINATION", 10, 1;
 		skill "WS_MELTDOWN", 10, 1;
 		skill "WS_WEAPONREFINE", 10, 1;
 	}
-	// 3a Classe (Mecanico)
-	if (Class == Job_Mechanic) {
+	// 3a Classe (Mecanico) & 4a Classe (Meister)
+	if (Class == Job_Mechanic || Class == 4256) {
 		skill "NC_TRAININGAXE", 10, 1;
 		skill "NC_AXETORNADO", 5, 1;
 		skill "NC_AXEBOOMERANG", 5, 1;
@@ -4739,6 +4991,58 @@ OnDistributeSkills:
 		skill "NC_ARMSCANNON", 5, 1;
 		skill "NC_NEUTRALBARRIER", 3, 1;
 		skill "NC_STEALTHFIELD", 3, 1;
+	}
+	// 2a Classe (Alquimista)
+	if (Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == 4257 || Class == 4258) {
+		skill "AM_AXEMASTERY", 10, 1;
+		skill "AM_LEARNINGPOTION", 10, 1;
+		skill "AM_PHARMACY", 10, 1;
+		skill "AM_POTIONPITCHER", 5, 1;
+		skill "AM_CP_HELM", 5, 1;
+		skill "AM_CP_SHIELD", 5, 1;
+		skill "AM_CP_ARMOR", 5, 1;
+		skill "AM_CP_WEAPON", 5, 1;
+		skill "AM_SPHEREMINE", 5, 1;
+		skill "AM_BIOETHICS", 1, 1;
+		skill "AM_CALLHOMUN", 1, 1;
+		skill "AM_REST", 1, 1;
+		skill "AM_RESURRECTHOMUN", 5, 1;
+		skill "AM_ACIDTERROR", 5, 1;
+		skill "AM_DEMONSTRATION", 5, 1;
+		skill "AM_BERSERKPITCHER", 1, 1;
+		skill "AM_CANNIBALIZE", 5, 1;
+	}
+	// Trans (Criador)
+	if (Class == Job_Creator || Class == Job_Genetic || Class == 4257 || Class == 4258) {
+		skill "CR_SLIMPITCHER", 10, 1;
+		skill "CR_FULLPROTECTION", 5, 1;
+		skill "CR_ACIDDEMONSTRATION", 10, 1;
+		skill "CR_CULTIVATION", 2, 1;
+		skill "CR_SYNTHESISPOTION", 5, 1;
+	}
+	// 3a Classe (Bioquimico) & 4a Classe (Biolo)
+	if (Class == Job_Genetic || Class == 4257 || Class == 4258) {
+		skill "GN_TRAINING_SWORD", 5, 1;
+		skill "GN_REMODELING_CART", 5, 1;
+		skill "GN_CART_TORNADO", 10, 1;
+		skill "GN_CARTCANNON", 5, 1;
+		skill "GN_CARTBOOST", 5, 1;
+		skill "GN_SPORE_EXPLOSION", 10, 1;
+		skill "GN_THORNS_TRAP", 5, 1;
+		skill "GN_BLOOD_SUCKER", 5, 1;
+		skill "GN_WALLOFTHORN", 5, 1;
+		skill "GN_CRAZYWEED", 10, 1;
+		skill "GN_DEMONIC_FIRE", 5, 1;
+		skill "GN_FIRE_EXPANSION", 5, 1;
+		skill "GN_HELLS_PLANT", 10, 1;
+		skill "GN_MANDRAGORA", 5, 1;
+		skill "GN_SLINGITEM", 1, 1;
+		skill "GN_CHANGEMATERIAL", 1, 1;
+		skill "GN_MIX_COOKING", 2, 1;
+		skill "GN_MAKEBOMB", 2, 1;
+		skill "GN_S_PHARMACY", 10, 1;
+		skill "GN_ILLUSIONDOPING", 5, 1;
+		callsub OnCheckHomunculus;
 	}
 
 	// =========================================================
