@@ -596,12 +596,13 @@ function	script	F_InstanceFinishAnnounce	{
 	callfunc("F_InstanceRouletteComplete", .@db_name$);
 	if (#instancia == 1)
 		#instancia = 2;
-	if (.@db_name$ == "Torneio da Magia" || .@db_name$ == "Torneio Magico" || .@db_name$ == "Torneio Magico de Geffen" || .@db_name$ == "Geffen Magic Tournament") {
-		announce "[Instancias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " em modo solo.", bc_all, "0xFF9900";
-	} else {
-		.@party_name$ = (getcharid(1) > 0 ? getpartyname(getcharid(1)) : strcharinfo(0));
-		announce "[Instancias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + .@party_name$ + ".", bc_all, "0xFF9900";
-	}
+	if (getcharid(1) > 0)
+		.@party_name$ = getpartyname(getcharid(1));
+	else if (BOT_PARTY_NAME$ != "")
+		.@party_name$ = BOT_PARTY_NAME$;
+	else
+		.@party_name$ = strcharinfo(0);
+	announce "[Instancias] " + strcharinfo(0) + " concluiu " + .@db_name$ + " com o grupo " + .@party_name$ + ".", bc_all, "0xFF9900";
 	return;
 }
 

@@ -106,7 +106,7 @@ S_Entry:
 			mes "Nao foi possivel criar a instancia.";
 			close;
 		}
-		announce "[Instancias] " + strcharinfo(0) + " criou " + .@display_name$ + " em modo solo.", bc_all, "0xFF9900";
+		announce "[Instancias] " + strcharinfo(0) + " criou " + .@display_name$ + " para o grupo " + (getcharid(1) > 0 ? getpartyname(getcharid(1)) : strcharinfo(0)) + ".", bc_all, "0xFF9900";
 		callfunc("F_InstanceProgressTouch", .@status_var$, .@display_name$);
 		setd(.@cooldown_name$, gettimetick(2) + callfunc("get_daily_reset"));
 		setd(.@status_name$, 1);

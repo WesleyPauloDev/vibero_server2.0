@@ -3551,6 +3551,24 @@ OnCanSimulateInstance:
 		return 1;
 	return 0;
 
+OnGetBotPartyName:
+	if (getcharid(1) > 0)
+		return getpartyname(getcharid(1));
+
+	if (BOT_PARTY_NAME$ == "") {
+		setarray .@party_pool$[0],
+			"upando", "farmin", "asdfdf", "todos", "testsevai",
+			"so vai", "dropa tudo", "rush", "sem parar", "bora que bora",
+			"foco no drop", "up ate o 175", "farme do bom", "so os brutos", "vai dar bom",
+			"party do up", "sem choro", "deixa vim", "os de verdade", "tudo nosso",
+			"cai dentro", "so lendas", "full drop", "upa upa", "gogo",
+			"so progresso", "instanciando", "na fe", "so os crias", "mete marcha",
+			"speed run", "sem lag hj", "farmezinho", "vem que tem", "partiu";
+		.@pool_idx = getcharid(0) % getarraysize(.@party_pool$);
+		BOT_PARTY_NAME$ = .@party_pool$[.@pool_idx];
+	}
+	return BOT_PARTY_NAME$;
+
 OnScheduleNextInstance:
 	@BOT_NEXT_INSTANCE_TICK = gettimetick(2) + rand($BOT_INSTANCE_MIN_MINUTES, $BOT_INSTANCE_MAX_MINUTES) * 60;
 	return;
@@ -3616,12 +3634,8 @@ OnTryBotInstance:
 	unitstopattack getcharid(3);
 	unitstopwalk getcharid(3), USW_FORCE_STOP;
 
-	if (@BOT_INSTANCE_NAME$ == "Torneio da Magia" || @BOT_INSTANCE_NAME$ == "Torneio Magico" || @BOT_INSTANCE_NAME$ == "Torneio Magico de Geffen") {
-		announce "[Instancias] " + strcharinfo(0) + " criou " + @BOT_INSTANCE_NAME$ + " em modo solo.", bc_all, 0xFF9900;
-	} else {
-		.@party_name$ = (getcharid(1) > 0 ? getpartyname(getcharid(1)) : strcharinfo(0));
-		announce "[Instancias] " + strcharinfo(0) + " criou " + @BOT_INSTANCE_NAME$ + " para o grupo " + .@party_name$ + ".", bc_all, 0xFF9900;
-	}
+	.@party_name$ = callsub(OnGetBotPartyName);
+	announce "[Instancias] " + strcharinfo(0) + " criou " + @BOT_INSTANCE_NAME$ + " para o grupo " + .@party_name$ + ".", bc_all, 0xFF9900;
 
 	warp @BOT_INSTANCE_MAP$, @BOT_INSTANCE_X, @BOT_INSTANCE_Y;
 	addtimer 1000, "PlayerBotAI::OnStepTimer";
@@ -3655,12 +3669,8 @@ OnHandleBotInstance:
 		return;
 	}
 
-	if (@BOT_INSTANCE_NAME$ == "Torneio da Magia" || @BOT_INSTANCE_NAME$ == "Torneio Magico" || @BOT_INSTANCE_NAME$ == "Torneio Magico de Geffen") {
-		announce "[Instancias] " + strcharinfo(0) + " concluiu " + @BOT_INSTANCE_NAME$ + " em modo solo.", bc_all, 0xFF9900;
-	} else {
-		.@party_name$ = (getcharid(1) > 0 ? getpartyname(getcharid(1)) : strcharinfo(0));
-		announce "[Instancias] " + strcharinfo(0) + " concluiu " + @BOT_INSTANCE_NAME$ + " com o grupo " + .@party_name$ + ".", bc_all, 0xFF9900;
-	}
+	.@party_name$ = callsub(OnGetBotPartyName);
+	announce "[Instancias] " + strcharinfo(0) + " concluiu " + @BOT_INSTANCE_NAME$ + " com o grupo " + .@party_name$ + ".", bc_all, 0xFF9900;
 
 	@BOT_INSTANCE_ACTIVE = 0;
 	@BOT_INSTANCE_END_TICK = 0;
