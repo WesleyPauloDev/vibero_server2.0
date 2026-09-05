@@ -64,10 +64,12 @@ OnTalk:
 				case 4212: .@class_id = 4211; break; // Oboro -> Kagerou
 			}
 
+			.@rate_event_active = (getbattleflag("base_exp_rate") >= 300 || getvariableofnpc(.weekend_rates_active, "Weekend_Rates") || $Event_Exp2x);
+			.@required_base = (.@rate_event_active ? 175 : 200);
 			.@required_job = (.@class_id == Job_Summoner ? 60 : 70);
-			if (BaseLevel < 175 || JobLevel < .@required_job) {
+			if (BaseLevel < .@required_base || JobLevel < .@required_job) {
 				mes "[Dominio das Classes]";
-				mes "Voce ainda nao alcancou o nivel necessario (175/" + .@required_job + ").";
+				mes "Voce ainda nao alcancou o nivel necessario (" + .@required_base + "/" + .@required_job + ").";
 				close;
 			}
 
