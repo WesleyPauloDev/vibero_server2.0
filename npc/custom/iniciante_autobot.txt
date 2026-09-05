@@ -1864,7 +1864,7 @@ OnStepTimer:
 
 	// Pontos, classes e pocoes de cura
 	if (StatusPoint > 0) callsub OnDistributeStats;
-	if (SkillPoint > 0 || (BaseClass == Job_Swordman && BaseLevel >= 99 && getskilllv("LG_BANISHINGPOINT") < 10)) callsub OnDistributeSkills;
+	if (SkillPoint > 0) callsub OnDistributeSkills;
 	callsub OnCheckJobChange;
 	callsub OnCheckPotions;
 	callsub OnCheckMounts;
@@ -2565,7 +2565,7 @@ OnStepTimer:
 			// Classes ou builds com habilidades de longo alcance podem iniciar o combate a 7-8 celulas:
 			if (BaseClass == Job_Archer || BaseClass == Job_Mage || BaseClass == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro || Class == Job_Super_Novice || Class == Job_Super_Novice_E || Class == Job_Gunslinger || Class == Job_Rebellion || BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308 ||
 			    (BaseClass == Job_Merchant && (Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Meister || Class == Job_Meister2 || Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 || Class == Job_Biolo || Class == Job_Biolo2 || BOT_FINAL_JOB == 111 || BOT_FINAL_JOB == 112 || getskilllv("NC_ARMSCANNON") > 0 || getskilllv("GN_CARTCANNON") > 0 || getskilllv("GN_SPORE_EXPLOSION") > 0)) ||
-			    (BaseClass == Job_Swordman && (getskilllv("LG_BANISHINGPOINT") > 0 || getskilllv("LG_PINPOINTATTACK") > 0 || getskilllv("LG_CANNONSPEAR") > 0 || getskilllv("RK_DRAGONBREATH") > 0 || getskilllv("RK_SONICWAVE") > 0))) {
+			    (BaseClass == Job_Swordman && (getskilllv("LG_BANISHINGPOINT") > 0 || getskilllv("LG_PINPOINTATTACK") > 0 || getskilllv("LG_CANNONSPEAR") > 0 || getskilllv("RK_DRAGONBREATH") > 0 || getskilllv("RK_DRAGONBREATH_WATER") > 0 || getskilllv("RK_SONICWAVE") > 0 || getskilllv("RK_HUNDREDSPEAR") > 0 || getskilllv("LK_SPIRALPIERCE") > 0))) {
 				.@atk_range = 7; // Pode iniciar disparo a distancia
 			}
 			// Fire Dance atinge a area ao redor do personagem; com revolver o
@@ -2655,71 +2655,22 @@ OnStepTimer:
 			.@skill_delay = .@aspd_delay;
 
 			// =========================================================
-			// 1. ESPADACHIM / CAVALEIRO / GUARDIAO REAL
+			// 1. ESPADACHIM / CAVALEIRO / CAVALEIRO RUNICO / GUARDIAO REAL
 			// =========================================================
 			if (BaseClass == Job_Swordman) {
-				// Guardiao Real (3rd Class):
-				if (getskilllv("LG_BANISHINGPOINT") > 0 || getskilllv("LG_PINPOINTATTACK") > 0 || getskilllv("LG_SHIELDPRESS") > 0 || getskilllv("LG_RAYOFGENESIS") > 0 || getskilllv("LG_CANNONSPEAR") > 0 || getskilllv("LG_OVERBRAND") > 0 || Class >= Job_Royal_Guard) {
-					.@rg_step = @BOT_SKILL_ROT % 5;
+				// --- 1.1 CAVALEIRO RUNICO / LORDE / CAVALEIRO (BOT_FINAL_JOB == 101) ---
+				if (Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight || Class == Job_Rune_Knight_T || Class == Job_Rune_Knight2 || Class == Job_Rune_Knight_T2 || Class == Job_Dragon_Knight || Class == 4253 || BOT_FINAL_JOB == 101 || getskilllv("RK_IGNITIONBREAK") > 0 || getskilllv("RK_DRAGONBREATH") > 0 || getskilllv("RK_WINDCUTTER") > 0 || getskilllv("LK_SPIRALPIERCE") > 0 || getskilllv("KN_BOWLINGBASH") > 0) {
+					.@rk_step = @BOT_SKILL_ROT % 3;
 
-					// Se estiver longe (> 2 celulas): Usa exclusivamente habilidades de longo alcance (Ranged)!
-					if (.@dist > 2) {
-						if (getskilllv("LG_BANISHINGPOINT") > 0 && Sp >= 20) {
-							// Toque do Oblívio (Ranged 7 celulas)
-							unitskilluseid getcharid(3), "LG_BANISHINGPOINT", (getskilllv("LG_BANISHINGPOINT") > 0 ? getskilllv("LG_BANISHINGPOINT") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-							.@skill_delay = (.@aspd_delay > 350 ? .@aspd_delay : 350);
-						} else if (getskilllv("LG_PINPOINTATTACK") > 0 && Sp >= 50 && (gettimetick(2) - @BOT_LAST_PINPOINT) >= 5) {
-							// Lança do Destino (Ranged 9 celulas)
-							@BOT_LAST_PINPOINT = gettimetick(2);
-							unitskilluseid getcharid(3), "LG_PINPOINTATTACK", (getskilllv("LG_PINPOINTATTACK") > 0 ? getskilllv("LG_PINPOINTATTACK") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-							.@skill_delay = 800;
-						} else if (getskilllv("LG_CANNONSPEAR") > 0 && Sp >= 30) {
-							// Disparo de Canhão (Ranged 11 celulas)
-							unitskilluseid getcharid(3), "LG_CANNONSPEAR", getskilllv("LG_CANNONSPEAR"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-							.@skill_delay = 800;
-						} else {
-							// Se nao tiver skill ranged disponivel com SP, anda para alcancar corpo a corpo
-							unitwalk getcharid(3), .@mx, .@my;
-							.@skill_delay = 400;
-						}
-					}
-					// Se estiver corpo a corpo (<= 2 celulas): Executa combo completo incluindo Luz da Criacao (Self AoE)!
-					else {
-						if (.@rg_step == 0 && getskilllv("LG_RAYOFGENESIS") > 0 && Sp >= 55 && (gettimetick(2) - @BOT_LAST_GENESIS) >= 3 && (getstatus(SC_INSPIRATION) || getstatus(SC_BANDING))) {
-							// 1. Luz da Criação / Raio de Gênesis (Self AoE em volta do RG)
-							@BOT_LAST_GENESIS = gettimetick(2);
-							unitskilluseid getcharid(3), "LG_RAYOFGENESIS", (getskilllv("LG_RAYOFGENESIS") > 0 ? getskilllv("LG_RAYOFGENESIS") : 10), getcharid(3), 0, 0, 0, 1;
-							.@skill_delay = 1000;
-						} else if (.@rg_step == 1 && getskilllv("LG_BANISHINGPOINT") > 0 && Sp >= 20) {
-							// 2. Toque do Oblívio (LG_BANISHINGPOINT)
-							unitskilluseid getcharid(3), "LG_BANISHINGPOINT", (getskilllv("LG_BANISHINGPOINT") > 0 ? getskilllv("LG_BANISHINGPOINT") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-							.@skill_delay = (.@aspd_delay > 350 ? .@aspd_delay : 350);
-						} else if (.@rg_step == 2 && getskilllv("LG_SHIELDPRESS") > 0 && Sp >= 15) {
-							// 3. Escudo Compressor (LG_SHIELDPRESS)
-							unitskilluseid getcharid(3), "LG_SHIELDPRESS", (getskilllv("LG_SHIELDPRESS") > 0 ? getskilllv("LG_SHIELDPRESS") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-							.@skill_delay = 700;
-						} else if (.@rg_step == 3 && getskilllv("LG_PINPOINTATTACK") > 0 && Sp >= 50 && (gettimetick(2) - @BOT_LAST_PINPOINT) >= 5) {
-							// 4. Lança do Destino (LG_PINPOINTATTACK)
-							@BOT_LAST_PINPOINT = gettimetick(2);
-							unitskilluseid getcharid(3), "LG_PINPOINTATTACK", (getskilllv("LG_PINPOINTATTACK") > 0 ? getskilllv("LG_PINPOINTATTACK") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-							.@skill_delay = 800;
-						} else if (getskilllv("LG_OVERBRAND") > 0 && Sp >= 30) {
-							// 5. Exceder Limite / Brandir Lança (LG_OVERBRAND)
-							unitskilluseid getcharid(3), "LG_OVERBRAND", getskilllv("LG_OVERBRAND"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-							.@skill_delay = 800;
-						} else if (Sp >= 8) {
-							// Golpe Fulminante (SM_BASH)
-							unitskilluseid getcharid(3), "SM_BASH", 10, @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
-						}
-					}
-				}
-				// Cavaleiro Runico / Lorde / Cavaleiro:
-				else if (getskilllv("RK_IGNITIONBREAK") > 0 || getskilllv("RK_DRAGONBREATH") > 0 || getskilllv("LK_SPIRALPIERCE") > 0 || getskilllv("KN_BOWLINGBASH") > 0 || getskilllv("KN_TWOHANDQUICKEN") > 0) {
-					// Se estiver longe (> 2 celulas): Usa habilidades de alcance (Sopro do Dragao, Onda de Choque, Perfurar em Espiral)
+					// Se estiver longe (> 2 celulas): Usa habilidades de alcance (Sopro do Dragao [no chao], Sopro de Gelo [no chao], Onda de Choque, Perfurar em Espiral, Mil Lancas)
 					if (.@dist > 2) {
 						if (getskilllv("RK_DRAGONBREATH") > 0 && Sp >= 30) {
-							unitskilluseid getcharid(3), "RK_DRAGONBREATH", getskilllv("RK_DRAGONBREATH"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							// Sopro do Dragão (Habilidade em área de chão)
+							unitskillusepos getcharid(3), "RK_DRAGONBREATH", getskilllv("RK_DRAGONBREATH"), .@mx, .@my;
+							.@skill_delay = 1000;
+						} else if (getskilllv("RK_DRAGONBREATH_WATER") > 0 && Sp >= 30) {
+							// Sopro de Gelo (Habilidade em área de chão)
+							unitskillusepos getcharid(3), "RK_DRAGONBREATH_WATER", getskilllv("RK_DRAGONBREATH_WATER"), .@mx, .@my;
 							.@skill_delay = 1000;
 						} else if (getskilllv("RK_SONICWAVE") > 0 && Sp >= 25) {
 							unitskilluseid getcharid(3), "RK_SONICWAVE", getskilllv("RK_SONICWAVE"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
@@ -2735,18 +2686,34 @@ OnStepTimer:
 							.@skill_delay = 400;
 						}
 					}
-					// Se estiver corpo a corpo (<= 2 celulas): Executa Impacto Flamejante (Self AoE), Impacto de Tyr, etc.
+					// Se estiver corpo a corpo (<= 2 celulas): Executa combo alternando Vento Cortante, Impacto Flamejante, Sopro, Impacto de Tyr, etc.
 					else {
-						if (getskilllv("RK_IGNITIONBREAK") > 0 && Sp >= 35) {
+						if (.@rk_step == 0 && getskilllv("RK_WINDCUTTER") > 0 && Sp >= 25) {
+							// Vento Cortante (Self AoE ao redor do RK)
+							unitskilluseid getcharid(3), "RK_WINDCUTTER", getskilllv("RK_WINDCUTTER"), getcharid(3), 0, 0, 0, 1;
+							.@skill_delay = 700;
+						} else if (.@rk_step == 1 && getskilllv("RK_IGNITIONBREAK") > 0 && Sp >= 35) {
+							// Impacto Flamejante (Self AoE ao redor do RK)
 							unitskilluseid getcharid(3), "RK_IGNITIONBREAK", getskilllv("RK_IGNITIONBREAK"), getcharid(3), 0, 0, 0, 1;
 							.@skill_delay = 1000;
 						} else if (getskilllv("RK_DRAGONBREATH") > 0 && Sp >= 30) {
-							unitskilluseid getcharid(3), "RK_DRAGONBREATH", getskilllv("RK_DRAGONBREATH"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							// Sopro do Dragão no chão do alvo
+							unitskillusepos getcharid(3), "RK_DRAGONBREATH", getskilllv("RK_DRAGONBREATH"), .@mx, .@my;
+							.@skill_delay = 1000;
+						} else if (getskilllv("RK_DRAGONBREATH_WATER") > 0 && Sp >= 30) {
+							// Sopro de Gelo no chão do alvo
+							unitskillusepos getcharid(3), "RK_DRAGONBREATH_WATER", getskilllv("RK_DRAGONBREATH_WATER"), .@mx, .@my;
+							.@skill_delay = 1000;
+						} else if (getskilllv("RK_WINDCUTTER") > 0 && Sp >= 25) {
+							unitskilluseid getcharid(3), "RK_WINDCUTTER", getskilllv("RK_WINDCUTTER"), getcharid(3), 0, 0, 0, 1;
+							.@skill_delay = 700;
+						} else if (getskilllv("RK_IGNITIONBREAK") > 0 && Sp >= 35) {
+							unitskilluseid getcharid(3), "RK_IGNITIONBREAK", getskilllv("RK_IGNITIONBREAK"), getcharid(3), 0, 0, 0, 1;
 							.@skill_delay = 1000;
 						} else if (getskilllv("KN_BOWLINGBASH") > 0 && Sp >= 15) {
 							unitskilluseid getcharid(3), "KN_BOWLINGBASH", getskilllv("KN_BOWLINGBASH"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 							.@skill_delay = (.@aspd_delay > 600 ? .@aspd_delay : 600);
-						} else if ((@BOT_SKILL_ROT % 2 == 0) && Sp >= 20) {
+						} else if ((@BOT_SKILL_ROT % 2 == 0) && Sp >= 20 && getskilllv("SM_MAGNUM") > 0) {
 							unitskilluseid getcharid(3), "SM_MAGNUM", (getskilllv("SM_MAGNUM") > 0 ? getskilllv("SM_MAGNUM") : 10), getcharid(3), 0, 0, 0, 1;
 							.@skill_delay = 1200;
 						} else if (Sp >= 8) {
@@ -2755,18 +2722,69 @@ OnStepTimer:
 						}
 					}
 				}
-				// Espadachim basico:
+				// --- 1.2 GUARDIAO REAL / PALADINO / TEMPLARIO (BOT_FINAL_JOB == 102) ---
+				else if (Class == Job_Crusader || Class == Job_Paladin || Class == Job_Royal_Guard || Class == Job_Royal_Guard_T || Class == Job_Royal_Guard2 || Class == Job_Royal_Guard_T2 || Class == Job_Imperial_Guard || Class == 4254 || BOT_FINAL_JOB == 102 || getskilllv("LG_BANISHINGPOINT") > 0 || getskilllv("LG_PINPOINTATTACK") > 0 || getskilllv("LG_RAYOFGENESIS") > 0 || getskilllv("PA_SHIELDCHAIN") > 0 || getskilllv("CR_HOLYCROSS") > 0) {
+					.@rg_step = @BOT_SKILL_ROT % 5;
+
+					// Se estiver longe (> 2 celulas):
+					if (.@dist > 2) {
+						if (getskilllv("LG_BANISHINGPOINT") > 0 && Sp >= 20) {
+							unitskilluseid getcharid(3), "LG_BANISHINGPOINT", (getskilllv("LG_BANISHINGPOINT") > 0 ? getskilllv("LG_BANISHINGPOINT") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = (.@aspd_delay > 350 ? .@aspd_delay : 350);
+						} else if (getskilllv("LG_PINPOINTATTACK") > 0 && Sp >= 50 && (gettimetick(2) - @BOT_LAST_PINPOINT) >= 5) {
+							@BOT_LAST_PINPOINT = gettimetick(2);
+							unitskilluseid getcharid(3), "LG_PINPOINTATTACK", (getskilllv("LG_PINPOINTATTACK") > 0 ? getskilllv("LG_PINPOINTATTACK") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = 800;
+						} else if (getskilllv("LG_CANNONSPEAR") > 0 && Sp >= 30) {
+							unitskilluseid getcharid(3), "LG_CANNONSPEAR", getskilllv("LG_CANNONSPEAR"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = 800;
+						} else if (getskilllv("PA_SHIELDCHAIN") > 0 && Sp >= 28) {
+							unitskilluseid getcharid(3), "PA_SHIELDCHAIN", getskilllv("PA_SHIELDCHAIN"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = 800;
+						} else {
+							unitwalk getcharid(3), .@mx, .@my;
+							.@skill_delay = 400;
+						}
+					}
+					// Se estiver corpo a corpo (<= 2 celulas):
+					else {
+						if (.@rg_step == 0 && getskilllv("LG_RAYOFGENESIS") > 0 && Sp >= 55 && (gettimetick(2) - @BOT_LAST_GENESIS) >= 3 && (getstatus(SC_INSPIRATION) || getstatus(SC_BANDING))) {
+							@BOT_LAST_GENESIS = gettimetick(2);
+							unitskilluseid getcharid(3), "LG_RAYOFGENESIS", (getskilllv("LG_RAYOFGENESIS") > 0 ? getskilllv("LG_RAYOFGENESIS") : 10), getcharid(3), 0, 0, 0, 1;
+							.@skill_delay = 1000;
+						} else if (.@rg_step == 1 && getskilllv("LG_BANISHINGPOINT") > 0 && Sp >= 20) {
+							unitskilluseid getcharid(3), "LG_BANISHINGPOINT", (getskilllv("LG_BANISHINGPOINT") > 0 ? getskilllv("LG_BANISHINGPOINT") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = (.@aspd_delay > 350 ? .@aspd_delay : 350);
+						} else if (.@rg_step == 2 && getskilllv("LG_SHIELDPRESS") > 0 && Sp >= 15) {
+							unitskilluseid getcharid(3), "LG_SHIELDPRESS", (getskilllv("LG_SHIELDPRESS") > 0 ? getskilllv("LG_SHIELDPRESS") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = 700;
+						} else if (.@rg_step == 3 && getskilllv("LG_PINPOINTATTACK") > 0 && Sp >= 50 && (gettimetick(2) - @BOT_LAST_PINPOINT) >= 5) {
+							@BOT_LAST_PINPOINT = gettimetick(2);
+							unitskilluseid getcharid(3), "LG_PINPOINTATTACK", (getskilllv("LG_PINPOINTATTACK") > 0 ? getskilllv("LG_PINPOINTATTACK") : 5), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = 800;
+						} else if (getskilllv("LG_OVERBRAND") > 0 && Sp >= 30) {
+							unitskilluseid getcharid(3), "LG_OVERBRAND", getskilllv("LG_OVERBRAND"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = 800;
+						} else if (getskilllv("CR_HOLYCROSS") > 0 && Sp >= 15) {
+							unitskilluseid getcharid(3), "CR_HOLYCROSS", getskilllv("CR_HOLYCROSS"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = 700;
+						} else if (Sp >= 8) {
+							unitskilluseid getcharid(3), "SM_BASH", 10, @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+							.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+						}
+					}
+				}
+				// --- 1.3 ESPADACHIM BASICO ---
 				else {
 					if ((@BOT_SKILL_ROT % 2 == 0) && Sp >= 20 && getskilllv("SM_MAGNUM") > 0) {
-						unitskilluseid getcharid(3), "SM_MAGNUM", getskilllv("SM_MAGNUM"), getcharid(3), 0, 0, 0, 1;
+						unitskilluseid getcharid(3), "SM_MAGNUM", 10, getcharid(3), 0, 0, 0, 1;
 						.@skill_delay = 1200;
 					} else if (Sp >= 8) {
-						unitskilluseid getcharid(3), "SM_BASH", (getskilllv("SM_BASH") > 0 ? getskilllv("SM_BASH") : 10), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
-						.@skill_delay = (.@aspd_delay > 500 ? .@aspd_delay : 500);
+						unitskilluseid getcharid(3), "SM_BASH", 10, @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+						.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
 					}
 				}
 			}
-			// =========================================================
 			// 2. MAGO / BRUXO / ARQUIMAGO / ARCANO / FEITICEIRO
 			// =========================================================
 			else if (BaseClass == Job_Mage) {
@@ -3709,12 +3727,22 @@ OnApplyBuffs:
 			sc_start SC_MEMORIZE, 600000, 1;
 		}
 	}
-	if (BaseClass == Job_Swordman && (Class >= Job_Royal_Guard || getskilllv("LG_BANISHINGPOINT") > 0 || BaseLevel >= 99)) {
-		sc_start SC_INSPIRATION, 600000, 5;
-		sc_start SC_FORCEOFVANGUARD, 600000, 5;
-		sc_start SC_AUTOGUARD, 600000, 10;
-		sc_start SC_REFLECTSHIELD, 600000, 10;
-		sc_start SC_SPEARQUICKEN, 600000, 10;
+	if (BaseClass == Job_Swordman) {
+		// Buffs exclusivos de Guardiao Real / Paladino / Templario:
+		if (Class == Job_Crusader || Class == Job_Paladin || Class == Job_Royal_Guard || Class == Job_Royal_Guard_T || Class == Job_Royal_Guard2 || Class == Job_Royal_Guard_T2 || Class == Job_Imperial_Guard || Class == 4254 || BOT_FINAL_JOB == 102) {
+			sc_start SC_INSPIRATION, 600000, 5;
+			sc_start SC_FORCEOFVANGUARD, 600000, 5;
+			sc_start SC_AUTOGUARD, 600000, 10;
+			sc_start SC_REFLECTSHIELD, 600000, 10;
+			sc_start SC_SPEARQUICKEN, 600000, 10;
+		}
+		// Buffs exclusivos de Cavaleiro Runico / Lorde / Cavaleiro:
+		if (Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight || Class == Job_Rune_Knight_T || Class == Job_Rune_Knight2 || Class == Job_Rune_Knight_T2 || Class == Job_Dragon_Knight || Class == 4253 || BOT_FINAL_JOB == 101) {
+			sc_start SC_TWOHANDQUICKEN, 600000, 10;
+			sc_start SC_AURABLADE, 600000, 5;
+			sc_start SC_CONCENTRATION, 600000, 5;
+			sc_start SC_ENCHANTBLADE, 600000, 5;
+		}
 	}
 	if (BaseClass == Job_Archer) {
 		sc_start SC_CONCENTRATION, 600000, 10;
@@ -3748,7 +3776,7 @@ OnApplyBuffs:
 			}
 		}
 	}
-	if (BaseClass == Job_Swordman && (Class >= Job_Royal_Guard || getskilllv("LG_BANISHINGPOINT") > 0)) {
+	if (BaseClass == Job_Swordman && (Class == Job_Royal_Guard || Class == Job_Royal_Guard_T || Class == Job_Royal_Guard2 || Class == Job_Royal_Guard_T2 || Class == Job_Imperial_Guard || Class == 4254 || BOT_FINAL_JOB == 102)) {
 		addspiritball 5, 600000;
 	}
 	if (BaseClass == Job_Merchant) {
@@ -4300,8 +4328,12 @@ OnCheckMapSwitch:
 	return;
 
 OnDetectTargetJob:
-	// Detecta classes especificas da arvore de Arqueiro, Mago, Mercador e Expandidas
-	if (Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 || Class == Job_Biolo || Class == Job_Biolo2 || Class == 4257 || Class == 4258)
+	// Detecta classes especificas da arvore de Espadachim, Arqueiro, Mago, Mercador e Expandidas
+	if (Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight || Class == Job_Rune_Knight_T || Class == Job_Rune_Knight2 || Class == Job_Rune_Knight_T2 || Class == Job_Dragon_Knight || Class == 4253)
+		BOT_FINAL_JOB = 101;
+	else if (Class == Job_Crusader || Class == Job_Paladin || Class == Job_Royal_Guard || Class == Job_Royal_Guard_T || Class == Job_Royal_Guard2 || Class == Job_Royal_Guard_T2 || Class == Job_Imperial_Guard || Class == 4254)
+		BOT_FINAL_JOB = 102;
+	else if (Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 || Class == Job_Biolo || Class == Job_Biolo2 || Class == 4257 || Class == 4258)
 		BOT_FINAL_JOB = 112;
 	else if (Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Meister || Class == Job_Meister2 || Class == 4256)
 		BOT_FINAL_JOB = 111;
@@ -4485,9 +4517,9 @@ OnDistributeSkills:
 	}
 
 	// =========================================================
-	// 1. ESPADACHIM / CAVALEIRO / LORDE / CAVALEIRO RUNICO
+	// 1. ESPADACHIM / CAVALEIRO / LORDE / CAVALEIRO RUNICO / DRAGON KNIGHT
 	// =========================================================
-	if (Class == Job_Swordman || Class == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight) {
+	if (Class == Job_Swordman || Class == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight || Class == 4253 || BOT_FINAL_JOB == 101) {
 		skill "SM_SWORD", 10, 1;
 		skill "SM_TWOHAND", 10, 1;
 		skill "SM_RECOVERY", 10, 1;
@@ -4499,7 +4531,7 @@ OnDistributeSkills:
 		skill "SM_MOVINGRECOVERY", 1, 1;
 		skill "SM_FATALBLOW", 1, 1;
 	}
-	if (Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight) {
+	if (Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight || Class == 4253 || BOT_FINAL_JOB == 101) {
 		skill "KN_TWOHANDQUICKEN", 10, 1;
 		skill "KN_AUTOCOUNTER", 5, 1;
 		skill "KN_BOWLINGBASH", 10, 1;
@@ -4510,7 +4542,7 @@ OnDistributeSkills:
 		skill "KN_CHARGEATK", 1, 1;
 		skill "KN_ONEHAND", 1, 1;
 	}
-	if (Class == Job_Lord_Knight || Class == Job_Rune_Knight) {
+	if (Class == Job_Lord_Knight || Class == Job_Rune_Knight || Class == 4253 || (BOT_FINAL_JOB == 101 && Upper == 1)) {
 		skill "LK_AURABLADE", 5, 1;
 		skill "LK_PARRYING", 10, 1;
 		skill "LK_CONCENTRATION", 5, 1;
@@ -4520,7 +4552,7 @@ OnDistributeSkills:
 		skill "LK_HEADCRUSH", 5, 1;
 		skill "LK_JOINTBEAT", 10, 1;
 	}
-	if (Class == Job_Rune_Knight) {
+	if (Class == Job_Rune_Knight || Class == 4253) {
 		skill "RK_RUNEMASTERY", 10, 1;
 		skill "RK_DRAGONTRAINING", 5, 1;
 		skill "RK_DRAGONBREATH", 10, 1;
@@ -4532,8 +4564,10 @@ OnDistributeSkills:
 		skill "RK_HUNDREDSPEAR", 10, 1;
 	}
 
-	// Templario / Paladino / Guardiao Real
-	if (BaseClass == Job_Swordman && (Class == Job_Crusader || Class == Job_Paladin || Class >= Job_Royal_Guard || getskilllv("CR_AUTOGUARD") > 0 || getskilllv("LG_BANISHINGPOINT") > 0)) {
+	// =========================================================
+	// 1.2 ESPADACHIM / TEMPLARIO / PALADINO / GUARDIAO REAL / IMPERIAL GUARD
+	// =========================================================
+	if (Class == Job_Crusader || Class == Job_Paladin || Class == Job_Royal_Guard || Class == 4254 || BOT_FINAL_JOB == 102) {
 		skill "SM_SWORD", 10, 1;
 		skill "SM_RECOVERY", 10, 1;
 		skill "SM_BASH", 10, 1;
@@ -4552,13 +4586,13 @@ OnDistributeSkills:
 		skill "CR_DEFENDER", 5, 1;
 		skill "CR_SPEARQUICKEN", 10, 1;
 	}
-	if (BaseClass == Job_Swordman && (Class == Job_Paladin || Class >= Job_Royal_Guard || getskilllv("PA_SHIELDCHAIN") > 0 || getskilllv("LG_BANISHINGPOINT") > 0)) {
+	if (Class == Job_Paladin || Class == Job_Royal_Guard || Class == 4254 || (BOT_FINAL_JOB == 102 && Upper == 1)) {
 		skill "PA_SACRIFICE", 5, 1;
 		skill "PA_PRESSURE", 5, 1;
 		skill "PA_SHIELDCHAIN", 5, 1;
 		skill "PA_GOSPEL", 10, 1;
 	}
-	if (BaseClass == Job_Swordman && (Class >= Job_Royal_Guard || getskilllv("LG_BANISHINGPOINT") > 0 || getskilllv("LG_RAYOFGENESIS") > 0 || BaseLevel >= 99)) {
+	if (Class == Job_Royal_Guard || Class == 4254) {
 		skill "LG_BANISHINGPOINT", 10, 1;
 		skill "LG_PINPOINTATTACK", 5, 1;
 		skill "LG_RAYOFGENESIS", 10, 1;
@@ -4577,7 +4611,6 @@ OnDistributeSkills:
 		skill "LG_INSPIRATION", 5, 1;
 	}
 
-	// =========================================================
 	// 2. MAGO / BRUXO / ARQUIMAGO / ARCANO / SABIO / PROFESSOR / FEITICEIRO
 	// =========================================================
 	if (BaseClass == Job_Mage || Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock || Class == Job_Sage || Class == Job_Professor || Class == Job_Sorcerer || Class >= 4254) {
