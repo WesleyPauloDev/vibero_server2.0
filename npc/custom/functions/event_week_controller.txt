@@ -68,7 +68,7 @@ OnPCLoginEvent:
 
 OnLoginNotice:
 	if ($event_week_active >= 1 && $event_week_active <= 2)
-		dispbottom "[Evento Semana] " + callfunc("F_EventWeekDescription$", $event_week_active) + " Ativo ate quarta-feira as 23:59.";
+		dispbottom "[Evento Semanal] " + callfunc("F_EventWeekDescription$", $event_week_active) + " (Ate quarta as 23:59).";
 	end;
 
 OnAtcommand:
@@ -255,7 +255,7 @@ S_IsAutoWindow:
 S_AnnounceActiveEvent:
 	if ($event_week_active < 1 || $event_week_active > 2)
 		return;
-	announce "[Evento Semana] " + callfunc("F_EventWeekDescription$", $event_week_active) + " Ativo ate quarta-feira as 23:59.", bc_all, 0x00FF00;
+	announce "[Evento Semanal] " + callfunc("F_EventWeekDescription$", $event_week_active) + " (Ate quarta as 23:59).", bc_all, 0x00FF00;
 	return;
 }
 
@@ -282,11 +282,11 @@ function	script	F_EventWeekName$	{
 function	script	F_EventWeekDescription$	{
 	switch (getarg(0, 0)) {
 	case 1:
-		return "Carta MVP 5x + Instancia 2x ativa: drop de cartas MVP multiplicado por 5 e premios de conclusao de instancias dobrados.";
+		return "Carta MVP 5x e Instancias 2x ativas";
 	case 2:
-		return "Rates XP/Drop + Invasao MVP ativas: Base/Job EXP 300%, Drop 1.5x e invasao de chefes a cada 3 horas.";
+		return "EXP 300%, Drop 1.5x e Invasao MVP a cada 3h";
 	default:
-		return "Nenhum evento semanal ativo.";
+		return "Nenhum evento semanal ativo";
 	}
 }
 

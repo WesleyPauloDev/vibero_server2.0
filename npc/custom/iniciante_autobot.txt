@@ -1962,11 +1962,14 @@ OnStepTimer:
 			@BOT_STUCK_TICKS = 0;
 		}
 
-		// Sub-estagio 0: Sorteia o proximo ponto e inicia o passo suave
+		// Sub-estagio 0: Sorteia o proximo ponto garantindo celula livre e inicia o passo suave
 		if (@BOT_WP_INDEX == 0) {
 			.@r = rand(0, .@pool_size - 1);
-			@BOT_LAST_TX = .@pool_x[.@r];
-			@BOT_LAST_TY = .@pool_y[.@r];
+			.@cand_x = .@pool_x[.@r];
+			.@cand_y = .@pool_y[.@r];
+			callsub OnFindFreeCellAround, .@m$, .@cand_x, .@cand_y, 3;
+			@BOT_LAST_TX = @BOT_FREE_X;
+			@BOT_LAST_TY = @BOT_FREE_Y;
 			@BOT_WP_INDEX = 1; // Transiciona para caminhando
 			@BOT_STUCK_TICKS = 0;
 			@BOT_STUCK_X = .@cx;
@@ -1985,6 +1988,15 @@ OnStepTimer:
 			// Chegou perto do ponto de destino (<= 2 celulas):
 			if (.@dist <= 2) {
 				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				// Se a celula onde o bot parou estiver ocupada por outra entidade, ajusta para uma celula livre vizinha
+				if (callsub(OnIsCellOccupied, .@m$, .@cx, .@cy)) {
+					callsub OnFindFreeCellAround, .@m$, .@cx, .@cy, 3;
+					if (@BOT_FREE_X != .@cx || @BOT_FREE_Y != .@cy) {
+						unitwalk getcharid(3), @BOT_FREE_X, @BOT_FREE_Y;
+						addtimer 600, "PlayerBotAI::OnStepTimer";
+						end;
+					}
+				}
 				@BOT_PRT_COUNT++;
 				@BOT_WP_INDEX = 2; // Transiciona para parado no ponto
 				@BOT_STUCK_TICKS = 0;
@@ -2024,6 +2036,17 @@ OnStepTimer:
 
 		// Sub-estagio 2: Parado no ponto descansando/observando (Minimo 1 minuto)
 		if (@BOT_WP_INDEX == 2) {
+			// Se outra pessoa/bot entrou na mesma celula deste bot, da um passo para celula livre vizinha
+			if (callsub(OnIsCellOccupied, .@m$, .@cx, .@cy)) {
+				callsub OnFindFreeCellAround, .@m$, .@cx, .@cy, 2;
+				if (@BOT_FREE_X != .@cx || @BOT_FREE_Y != .@cy) {
+					stand;
+					unitwalk getcharid(3), @BOT_FREE_X, @BOT_FREE_Y;
+					addtimer 800, "PlayerBotAI::OnStepTimer";
+					end;
+				}
+			}
+
 			if (gettimetick(2) >= @BOT_WAIT_END) {
 				stand; // Levanta do chao
 				// Se ja visitou todos os pontos sorteados desta passagem -> Vai para o Eden
@@ -2057,7 +2080,6 @@ OnStepTimer:
 		}
 	}
 
-	// =========================================================
 	// ESTAGIO 1: Descanso Distribuido em Prontera (Minimo 1 Minuto no Modo Start)
 	// =========================================================
 	if (@BOT_AI_STAGE == 1) {
@@ -2090,11 +2112,14 @@ OnStepTimer:
 			230, 230, 212, 212, 225, 222, 180, 180;
 		.@p_rest_size = getarraysize(.@p_rest_x);
 
-		// Sorteia o ponto de descanso de forma 100% uniforme:
+		// Sorteia o ponto de descanso garantindo celula livre:
 		if (@BOT_LAST_TX == 0 || @BOT_LAST_TY == 0) {
 			.@r_idx = rand(0, .@p_rest_size - 1);
-			@BOT_LAST_TX = .@p_rest_x[.@r_idx];
-			@BOT_LAST_TY = .@p_rest_y[.@r_idx];
+			.@cand_x = .@p_rest_x[.@r_idx];
+			.@cand_y = .@p_rest_y[.@r_idx];
+			callsub OnFindFreeCellAround, .@m$, .@cand_x, .@cand_y, 3;
+			@BOT_LAST_TX = @BOT_FREE_X;
+			@BOT_LAST_TY = @BOT_FREE_Y;
 			@BOT_STUCK_TICKS = 0;
 		}
 
@@ -2103,9 +2128,18 @@ OnStepTimer:
 			.@dist = distance(.@cx, .@cy, @BOT_LAST_TX, @BOT_LAST_TY);
 
 			if (.@dist <= 2) {
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				// Se a celula onde o bot parou estiver ocupada, ajusta para uma celula livre vizinha
+				if (callsub(OnIsCellOccupied, .@m$, .@cx, .@cy)) {
+					callsub OnFindFreeCellAround, .@m$, .@cx, .@cy, 3;
+					if (@BOT_FREE_X != .@cx || @BOT_FREE_Y != .@cy) {
+						unitwalk getcharid(3), @BOT_FREE_X, @BOT_FREE_Y;
+						addtimer 600, "PlayerBotAI::OnStepTimer";
+						end;
+					}
+				}
 				@BOT_WP_INDEX = 1; // Em descanso em pe
 				@BOT_STUCK_TICKS = 0;
-				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				stand; // Permanece em pe no ponto escolhido
 
 				if (@BOT_TEST_MODE) {
@@ -2124,8 +2158,11 @@ OnStepTimer:
 				if (@BOT_STUCK_TICKS >= 3) {
 					// Se encontrou obstaculo no caminho, sorteia outro ponto aberto e continua a pe
 					.@r_idx = rand(0, .@p_rest_size - 1);
-					@BOT_LAST_TX = .@p_rest_x[.@r_idx];
-					@BOT_LAST_TY = .@p_rest_y[.@r_idx];
+					.@cand_x = .@p_rest_x[.@r_idx];
+					.@cand_y = .@p_rest_y[.@r_idx];
+					callsub OnFindFreeCellAround, .@m$, .@cand_x, .@cand_y, 3;
+					@BOT_LAST_TX = @BOT_FREE_X;
+					@BOT_LAST_TY = @BOT_FREE_Y;
 					@BOT_STUCK_TICKS = 0;
 					unitstopwalk getcharid(3), USW_FORCE_STOP;
 					unitwalk getcharid(3), @BOT_LAST_TX, @BOT_LAST_TY;
@@ -2148,6 +2185,17 @@ OnStepTimer:
 
 		// Sub-estagio 1: Em pe descansando em seu ponto
 		if (@BOT_WP_INDEX == 1) {
+			// Se outra pessoa/bot entrou na mesma celula deste bot, afasta-se para celula livre vizinha
+			if (callsub(OnIsCellOccupied, .@m$, .@cx, .@cy)) {
+				callsub OnFindFreeCellAround, .@m$, .@cx, .@cy, 2;
+				if (@BOT_FREE_X != .@cx || @BOT_FREE_Y != .@cy) {
+					stand;
+					unitwalk getcharid(3), @BOT_FREE_X, @BOT_FREE_Y;
+					addtimer 800, "PlayerBotAI::OnStepTimer";
+					end;
+				}
+			}
+
 			if (gettimetick(2) >= @BOT_WAIT_END) {
 				stand;
 				@BOT_AI_STAGE = 2;
@@ -2190,6 +2238,13 @@ OnStepTimer:
 			@BOT_LAST_TY = 0;
 			@BOT_STUCK_TICKS = 0;
 			unitstopwalk getcharid(3), USW_FORCE_STOP;
+			// A celula de warp 31,14 costuma ter sobreposicao; afasta-se suavemente para um ponto livre no corredor
+			if (callsub(OnIsCellOccupied, .@m$, .@cx, .@cy)) {
+				callsub OnFindFreeCellAround, .@m$, .@cx, .@cy + 2, 3;
+				if (@BOT_FREE_X != .@cx || @BOT_FREE_Y != .@cy) {
+					unitwalk getcharid(3), @BOT_FREE_X, @BOT_FREE_Y;
+				}
+			}
 
 			if (@BOT_TEST_MODE) {
 				@BOT_WAIT_END = gettimetick(2) + 5;
@@ -2203,6 +2258,17 @@ OnStepTimer:
 
 		// Sub-estagio 1: Aguardando tempo na entrada do Eden
 		if (@BOT_WP_INDEX == 1) {
+			// Se outra pessoa/bot entrou na mesma celula deste bot, afasta-se para celula livre vizinha
+			if (callsub(OnIsCellOccupied, .@m$, .@cx, .@cy)) {
+				callsub OnFindFreeCellAround, .@m$, .@cx, .@cy, 2;
+				if (@BOT_FREE_X != .@cx || @BOT_FREE_Y != .@cy) {
+					stand;
+					unitwalk getcharid(3), @BOT_FREE_X, @BOT_FREE_Y;
+					addtimer 800, "PlayerBotAI::OnStepTimer";
+					end;
+				}
+			}
+
 			if (gettimetick(2) >= @BOT_WAIT_END) {
 				@BOT_WP_INDEX = 2; // Vai para uma mesa a pe
 				@BOT_LAST_TX = 0;
@@ -2226,8 +2292,11 @@ OnStepTimer:
 
 			if (@BOT_LAST_TX == 0 || @BOT_LAST_TY == 0) {
 				.@e_idx = rand(0, .@eden_size - 1);
-				@BOT_LAST_TX = .@eden_table_x[.@e_idx];
-				@BOT_LAST_TY = .@eden_table_y[.@e_idx];
+				.@cand_x = .@eden_table_x[.@e_idx];
+				.@cand_y = .@eden_table_y[.@e_idx];
+				callsub OnFindFreeCellAround, .@m$, .@cand_x, .@cand_y, 2;
+				@BOT_LAST_TX = @BOT_FREE_X;
+				@BOT_LAST_TY = @BOT_FREE_Y;
 				@BOT_STUCK_TICKS = 0;
 			}
 
@@ -2235,9 +2304,18 @@ OnStepTimer:
 
 			// Chegou perto da mesa de descanso sorteada (<= 2 celulas)
 			if (.@dist <= 2) {
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				// Se a celula onde o bot parou estiver ocupada, ajusta para uma celula livre vizinha
+				if (callsub(OnIsCellOccupied, .@m$, .@cx, .@cy)) {
+					callsub OnFindFreeCellAround, .@m$, .@cx, .@cy, 3;
+					if (@BOT_FREE_X != .@cx || @BOT_FREE_Y != .@cy) {
+						unitwalk getcharid(3), @BOT_FREE_X, @BOT_FREE_Y;
+						addtimer 600, "PlayerBotAI::OnStepTimer";
+						end;
+					}
+				}
 				@BOT_WP_INDEX = 3; // Em descanso em pe na mesa
 				@BOT_STUCK_TICKS = 0;
-				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				stand; // Permanece em pe na mesa sorteada
 
 				if (@BOT_TEST_MODE) {
@@ -2278,8 +2356,19 @@ OnStepTimer:
 			end;
 		}
 
-		// Sub-estagio 3: Descansando sentado na mesa do Eden
+		// Sub-estagio 3: Descansando na mesa do Eden
 		if (@BOT_WP_INDEX == 3) {
+			// Se outra pessoa/bot entrou na mesma celula deste bot, afasta-se para celula livre vizinha
+			if (callsub(OnIsCellOccupied, .@m$, .@cx, .@cy)) {
+				callsub OnFindFreeCellAround, .@m$, .@cx, .@cy, 2;
+				if (@BOT_FREE_X != .@cx || @BOT_FREE_Y != .@cy) {
+					stand;
+					unitwalk getcharid(3), @BOT_FREE_X, @BOT_FREE_Y;
+					addtimer 800, "PlayerBotAI::OnStepTimer";
+					end;
+				}
+			}
+
 			if (gettimetick(2) >= @BOT_WAIT_END) {
 				stand; // Levanta da mesa
 				@BOT_WP_INDEX = 4; // Vai para a saida a pe
@@ -2359,7 +2448,6 @@ OnStepTimer:
 		}
 	}
 
-	// =========================================================
 	// ESTAGIO 3: Cacada Inteligente e Agressiva (Busca por getareaunits)
 	// =========================================================
 	if (@BOT_AI_STAGE == 3) {
@@ -4248,6 +4336,65 @@ OnCheckPotions:
 		}
 	}
 	return;
+
+OnIsCellOccupied:
+	.@chk_m$ = getarg(0);
+	.@chk_x = getarg(1);
+	.@chk_y = getarg(2);
+
+	// 1. Celula nao passavel (parede/agua/abismo)
+	if (!checkcell(.@chk_m$, .@chk_x, .@chk_y, cell_chkpass)) return 1;
+
+	// 2. Celula com NPC fisico ou bloqueio de celula
+	if (checkcell(.@chk_m$, .@chk_x, .@chk_y, cell_chknpc)) return 1;
+
+	// 3. Verifica unidades presentes na celula (jogadores, bots, npcs)
+	deletearray .@chk_u[0], getarraysize(.@chk_u);
+	.@chk_count = getareaunits(BL_PC | BL_NPC, .@chk_m$, .@chk_x, .@chk_y, .@chk_x, .@chk_y, .@chk_u[0]);
+	for (.@ci = 0; .@ci < .@chk_count; .@ci++) {
+		if (.@chk_u[.@ci] != getcharid(3)) {
+			return 1; // Celula ocupada por outra entidade!
+		}
+	}
+	return 0; // Celula 100% livre!
+
+OnFindFreeCellAround:
+	.@f_m$ = getarg(0);
+	.@f_x = getarg(1);
+	.@f_y = getarg(2);
+	.@f_rad = getarg(3, 3);
+
+	// Se a propria celula ja estiver livre:
+	if (!callsub(OnIsCellOccupied, .@f_m$, .@f_x, .@f_y)) {
+		@BOT_FREE_X = .@f_x;
+		@BOT_FREE_Y = .@f_y;
+		return 1;
+	}
+
+	// Ordem de offsets para testar celulas vizinhas em circulo/espiral:
+	setarray .@dx[0],  0,  1,  0, -1,  1, -1,  1, -1,  0,  2,  0, -2,  1, -1,  2, -2,  2, -2,  1, -1,  2, -2,  3, -3,  0,  0,  1, -1,  3, -3;
+	setarray .@dy[0],  1,  0, -1,  0,  1,  1, -1, -1,  2,  0, -2,  0,  2,  2,  1,  1, -1, -1, -2, -2,  2, -2,  0,  0,  3, -3,  3,  3,  1, -1;
+	.@num_offsets = getarraysize(.@dx);
+
+	// Embaralha o ponto de partida do teste para distribuir o movimento
+	.@start_i = rand(0, .@num_offsets - 1);
+	for (.@k = 0; .@k < .@num_offsets; .@k++) {
+		.@idx = (.@start_i + .@k) % .@num_offsets;
+		.@nx = .@f_x + .@dx[.@idx];
+		.@ny = .@f_y + .@dy[.@idx];
+		if (distance(.@f_x, .@f_y, .@nx, .@ny) <= .@f_rad) {
+			if (!callsub(OnIsCellOccupied, .@f_m$, .@nx, .@ny)) {
+				@BOT_FREE_X = .@nx;
+				@BOT_FREE_Y = .@ny;
+				return 1;
+			}
+		}
+	}
+
+	// Caso nao encontre nenhuma livre no raio, mantem as coordenadas originais
+	@BOT_FREE_X = .@f_x;
+	@BOT_FREE_Y = .@f_y;
+	return 0;
 
 OnCleanHeavyInventory:
 	setarray .@loot_list[0], 909, 914, 919, 929, 938, 949, 902, 904, 906, 911, 912, 913, 915, 916, 917, 918, 920, 921, 922, 923, 924, 925, 926, 927, 928, 930, 931, 932, 933, 934, 935, 936, 937, 939, 940;
