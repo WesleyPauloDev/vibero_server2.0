@@ -39,6 +39,22 @@ function	script	BossniaMapDrop	{
 	return;
 }
 
+// Drop das Joias Etereas (1000325~~1000328) do Errante da Fenda (31900):
+// Taxa original: 1/10000 (0,01%). Reduzida pela metade: 1/20000 (0,005%).
+// Usa 1% (100/10000) com get_adjusted_drop_rate para preservar os bonus pessoais do jogador.
+function	script	FendaMapDrop	{
+	if (killedrid != 31900)
+		return;
+
+	.@adjusted_rate = get_adjusted_drop_rate(31900, 100);
+	setarray .@etel_items[0], 1000325, 1000326, 1000327, 1000328;
+	for (.@i = 0; .@i < 4; ++.@i) {
+		if (rand(2000000) < .@adjusted_rate)
+			partylootitem .@etel_items[.@i], 1, .@adjusted_rate;
+	}
+	return;
+}
+
 // Um unico evento distribui as mortes para os sistemas customizados.
 // Assim eles ocupam apenas uma vaga na fila de eventos do jogador.
 -	script	GlobalKillDispatcher	-1,{
@@ -46,6 +62,7 @@ OnNPCKillEvent:
 	callfunc("F_ContadorEdenKill", killedrid);
 	callfunc("F_BattlePassSync");
 	callfunc("BossniaMapDrop");
+	callfunc("FendaMapDrop");
 	callfunc("F_ContadorPoringKill", killedrid);
 	callfunc("F_MapCustomDropsKill", killedrid);
 	callfunc("F_MVP_PointsRegister", killedrid);

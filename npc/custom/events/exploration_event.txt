@@ -399,7 +399,9 @@ function	script	F_Fenda_Reward	{
 		mes "Voce ja recebeu a recompensa desta expedicao.";
 		close;
 	}
-	if (!checkweight(9608, 50) || !checkweight(9198, 5)) {
+	.@level = max(1, 'Fenda_Level);
+	.@instance_coins = 50 + ((.@level - 1) * 25);
+	if (!checkweight(9608, .@instance_coins) || !checkweight(9198, 5)) {
 		mes "[Fenda]";
 		mes "Libere peso no inventario antes de receber os premios.";
 		close;
@@ -417,12 +419,12 @@ function	script	F_Fenda_Reward	{
 	#FendaShopPoints += .@fenda_points;
 	if (FendaMaxLevel <= 'Fenda_Level)
 		FendaMaxLevel = 'Fenda_Level + 1;
-	getitem 9608, 50;
+	getitem 9608, .@instance_coins;
 	getitem 9198, 5;
 	announce "[Fenda] " + strcharinfo(0) + " concluiu a Fenda nivel " + 'Fenda_Level + ".", bc_all;
 	mes "[Fenda]";
 	mes "Sua recompensa foi entregue.";
-	mes "Voce recebeu 50 moedas de instancia e 5 tickets de minerios.";
+	mes "Voce recebeu " + .@instance_coins + " moedas de instancia e 5 tickets de minerios.";
 	mes "Grupo na Fenda: " + .@party_count + " membro(s).";
 	mes "Pontos base: " + .@base_fenda_points + ". Reducao aplicada: " + (100 - .@reward_percent) + "%.";
 	mes "Voce recebeu " + .@fenda_points + " pontos da Fenda.";
@@ -1184,6 +1186,16 @@ function	script	F_Fenda_MvpDrop	{
 			}
 		}
 	}
+	if ('Fenda_Level >= 4) {
+		.@complex_chance = (2 + ('Fenda_Level - 4)) * 100; // 2% no nivel 4, +1% por nivel acima do 4
+		if (.@complex_chance > 10000)
+			.@complex_chance = 10000;
+		.@complex_chance = get_adjusted_drop_rate(31902, .@complex_chance);
+		if (rand(10000) < .@complex_chance) {
+			partylootitem 9696, 1, .@complex_chance;
+			announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Refinadora Complexa ao derrotar o Senhor da Fenda!", bc_all;
+		}
+	}
 	return;
 }
 
@@ -1307,6 +1319,7 @@ OnNormalDead:
 		end;
 	}
 	if (killedrid == 31900) {
+		callfunc "FendaMapDrop";
 		.@drop_rate = get_adjusted_drop_rate(31900, 1);
 		if (rand(10000) < .@drop_rate)
 			partylootitem 9198, 1, .@drop_rate;
@@ -1354,7 +1367,7 @@ S_AddPoints:
 		'Fenda_NextAnnounce = (('Fenda_Points / 20) + 1) * 20;
 	}
 
-	if (!'Fenda_SpecialSpawned && 'Fenda_Points >= 500 && 'Fenda_Points <= 600 && rand(10000) < 10) {
+	if (!'Fenda_SpecialSpawned && 'Fenda_Points >= 500 && 'Fenda_Points <= 600 && rand(10000) < 20) {
 		'Fenda_SpecialSpawned = 1;
 		getmapxy .@rare_map$, .@rare_x, .@rare_y, BL_PC;
 		monster .@rare_map$, 0, 0, "Especial da Fenda", 31903, 1,
