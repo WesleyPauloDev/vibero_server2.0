@@ -6169,7 +6169,7 @@ static void pc_restock_from_storage(map_session_data* sd, t_itemid nameid)
 		break;
 	}
 
-	if (configured_amount <= 0 || configured_amount > MAX_AMOUNT)
+	if (configured_amount < RESTOCK_MIN_AMOUNT || configured_amount > MAX_AMOUNT)
 		return;
 
 	std::shared_ptr<item_data> data = item_db.find(nameid);

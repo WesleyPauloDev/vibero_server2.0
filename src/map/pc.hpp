@@ -126,6 +126,7 @@ enum e_additem_result : uint8 {
 
 // Maximum number of personal-storage restock entries configured per character.
 constexpr uint8 RESTOCK_MAX_ITEMS = 10;
+constexpr int32 RESTOCK_MIN_AMOUNT = 10;
 constexpr const char* RESTOCK_ITEM_VAR = "RestockItem";
 constexpr const char* RESTOCK_AMOUNT_VAR = "RestockAmount";
 

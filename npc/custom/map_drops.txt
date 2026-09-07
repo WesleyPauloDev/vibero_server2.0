@@ -19,21 +19,25 @@ function	script	CustomMapDrop	{
     return;
 }
 
-// Drop global da Cheffenia: 1/100000 = 0,001% por monstro derrotado.
+// Drop global da Cheffenia:
+// bossnia_01 e bossnia_02: Album Mini Boss (1001466) com chance dobrada: 1/50000 = 0,002%.
+// bossnia_03 e bossnia_04: Album MVP (1001467) com chance padrao: 1/100000 = 0,001%.
 function	script	BossniaMapDrop	{
 	.@map$ = strcharinfo(3);
 
-	if (.@map$ == "bossnia_01" || .@map$ == "bossnia_02")
+	if (.@map$ == "bossnia_01" || .@map$ == "bossnia_02") {
 		.@item_id = 1001466;
-	else if (.@map$ == "bossnia_03" || .@map$ == "bossnia_04")
+		.@rand_max = 5000000;
+	} else if (.@map$ == "bossnia_03" || .@map$ == "bossnia_04") {
 		.@item_id = 1001467;
-	else
+		.@rand_max = 10000000;
+	} else
 		return;
 
 	// Usa 1% (100/10000) como referencia para obter o multiplicador pessoal
-	// do killer e conserva a precisao da taxa base de 0,001%.
+	// do killer e conserva a precisao da taxa base.
 	.@adjusted_rate = get_adjusted_drop_rate(killedrid, 100);
-	if (rand(10000000) < .@adjusted_rate)
+	if (rand(.@rand_max) < .@adjusted_rate)
 		partylootitem .@item_id, 1, 1;
 
 	return;

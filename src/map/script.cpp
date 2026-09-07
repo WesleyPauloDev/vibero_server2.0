@@ -19456,6 +19456,290 @@ BUILDIN_FUNC(getitemsource)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+// getwhodrops(<item_id_or_name>, .@mob_ids, .@mob_names$, .@mob_rates, .@mob_types)
+BUILDIN_FUNC(getwhodrops)
+{
+	std::shared_ptr<item_data> i_data = nullptr;
+
+	if (script_isstring(st, 2)) {
+		const char* str = script_getstr(st, 2);
+		t_itemid itemid = strtoul(str, nullptr, 10);
+		if (itemid > 0)
+			i_data = item_db.find(itemid);
+		if (!i_data)
+			i_data = item_db.searchname(str);
+	} else {
+		i_data = item_db.find(script_getnum(st, 2));
+	}
+
+	if (!i_data) {
+		script_pushint(st, -1);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	map_session_data* sd = nullptr;
+	if (!script_rid2sd(sd)) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	pc_setreg(sd, add_str("@whodrops_item_id"), i_data->nameid);
+	pc_setregstr(sd, add_str("@whodrops_item_name$"), i_data->name.empty() ? i_data->ename.c_str() : i_data->name.c_str());
+
+	struct script_data* mob_id_data = script_getdata(st, 3);
+	struct script_data* mob_name_data = script_getdata(st, 4);
+	struct script_data* rate_data = script_getdata(st, 5);
+	struct script_data* type_data = script_getdata(st, 6);
+
+	if (!data_isreference(mob_id_data) || is_string_variable(reference_getname(mob_id_data)) ||
+		!data_isreference(mob_name_data) || !is_string_variable(reference_getname(mob_name_data)) ||
+		!data_isreference(rate_data) || is_string_variable(reference_getname(rate_data)) ||
+		!data_isreference(type_data) || is_string_variable(reference_getname(type_data))) {
+		ShowError("buildin_getwhodrops: Expected integer, string, integer, integer array references.\n");
+		script_pushint(st, 0);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	struct s_whodrops_entry {
+		int32 mob_id;
+		std::string mob_name;
+		int32 rate; // centesimos: 18 = 0.18%, 750 = 7.50%
+		int32 is_mvp;
+	};
+
+	std::unordered_map<std::string, s_whodrops_entry> common_map;
+	std::unordered_map<std::string, s_whodrops_entry> mvp_map;
+
+	for (const auto& pair : mob_db) {
+		std::shared_ptr<s_mob_db> mob = pair.second;
+		if (!mob)
+			continue;
+		if (mob_is_clone(pair.first))
+			continue;
+
+		// 1. Regular drops
+		int32 drop_modifier = 100;
+#ifdef RENEWAL_DROP
+		if (battle_config.atcommand_mobinfo_type) {
+			drop_modifier = pc_level_penalty_mod(sd, PENALTY_DROP, mob);
+		}
+#endif
+		for (const auto& entry : mob->dropitem) {
+			if (entry->nameid == i_data->nameid && entry->rate > 0) {
+				int32 droprate = mob_getdroprate(sd, mob, entry->rate, drop_modifier);
+				if (droprate > 0) {
+					auto it = common_map.find(mob->jname);
+					if (it == common_map.end() || droprate > it->second.rate) {
+						common_map[mob->jname] = { (int32)pair.first, mob->jname, droprate, 0 };
+					}
+				}
+			}
+		}
+
+		// 2. MVP drops
+		if (!mob->mvpitem.empty()) {
+			float mvpremain = 100.0f;
+			for (const auto& entry : mob->mvpitem) {
+				if (entry->nameid == 0)
+					continue;
+				float mvppercent = (float)entry->rate * mvpremain / 10000.0f;
+				if (battle_config.item_drop_mvp_mode == 0) {
+					mvpremain -= mvppercent;
+				}
+				int32 mvp_rate_int = (int32)(mvppercent * 100.0f + 0.5f);
+				if (entry->nameid == i_data->nameid && mvp_rate_int > 0) {
+					auto it = mvp_map.find(mob->jname);
+					if (it == mvp_map.end() || mvp_rate_int > it->second.rate) {
+						mvp_map[mob->jname] = { (int32)pair.first, mob->jname, mvp_rate_int, 1 };
+					}
+				}
+			}
+		}
+	}
+
+	std::vector<s_whodrops_entry> list;
+	list.reserve(common_map.size() + mvp_map.size());
+	for (auto& p : common_map) {
+		list.push_back(std::move(p.second));
+	}
+	for (auto& p : mvp_map) {
+		list.push_back(std::move(p.second));
+	}
+
+	std::sort(list.begin(), list.end(), [](const s_whodrops_entry& a, const s_whodrops_entry& b) {
+		if (a.rate != b.rate)
+			return a.rate > b.rate;
+		return a.mob_id < b.mob_id;
+	});
+
+	size_t count = list.size();
+	if (count > 50)
+		count = 50;
+
+	for (size_t i = 0; i < count; ++i) {
+		const s_whodrops_entry& entry = list[i];
+		const uint32 mob_id_index = reference_getindex(mob_id_data) + static_cast<uint32>(i);
+		const uint32 mob_name_index = reference_getindex(mob_name_data) + static_cast<uint32>(i);
+		const uint32 rate_index = reference_getindex(rate_data) + static_cast<uint32>(i);
+		const uint32 type_index = reference_getindex(type_data) + static_cast<uint32>(i);
+
+		set_reg_num(st, sd, reference_uid(reference_getid(mob_id_data), mob_id_index), reference_getname(mob_id_data), entry.mob_id, reference_getref(mob_id_data));
+		set_reg_str(st, sd, reference_uid(reference_getid(mob_name_data), mob_name_index), reference_getname(mob_name_data), entry.mob_name.c_str(), reference_getref(mob_name_data));
+		set_reg_num(st, sd, reference_uid(reference_getid(rate_data), rate_index), reference_getname(rate_data), entry.rate, reference_getref(rate_data));
+		set_reg_num(st, sd, reference_uid(reference_getid(type_data), type_index), reference_getname(type_data), entry.is_mvp, reference_getref(type_data));
+	}
+
+	script_pushint64(st, count);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+// getwhereis(<mob_id>, .@map_names$, .@mob_qtys)
+BUILDIN_FUNC(getwhereis)
+{
+	const int32 mob_id = script_getnum(st, 2);
+
+	if (!mobdb_checkid(mob_id)) {
+		script_pushint(st, -1);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	map_session_data* sd = nullptr;
+	if (!script_rid2sd(sd)) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	struct script_data* map_name_data = script_getdata(st, 3);
+	struct script_data* qty_data = script_getdata(st, 4);
+
+	if (!data_isreference(map_name_data) || !is_string_variable(reference_getname(map_name_data)) ||
+		!data_isreference(qty_data) || is_string_variable(reference_getname(qty_data))) {
+		ShowError("buildin_getwhereis: Expected string and integer array references.\n");
+		script_pushint(st, 0);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	const std::vector<spawn_info> spawns = mob_get_spawns(static_cast<uint16>(mob_id));
+	std::unordered_map<std::string, int32> map_qty;
+	std::vector<std::string> map_order;
+
+	for (const auto& spawn : spawns) {
+		int16 mapid = map_mapindex2mapid(spawn.mapindex);
+		if (mapid < 0)
+			continue;
+		std::string mname = map_getmapdata(mapid)->name;
+		if (map_qty.find(mname) == map_qty.end()) {
+			map_order.push_back(mname);
+		}
+		map_qty[mname] += spawn.qty;
+	}
+
+	size_t count = map_order.size();
+	if (count > 50)
+		count = 50;
+
+	for (size_t i = 0; i < count; ++i) {
+		const std::string& mname = map_order[i];
+		const int32 qty = map_qty[mname];
+		const uint32 map_name_index = reference_getindex(map_name_data) + static_cast<uint32>(i);
+		const uint32 qty_index = reference_getindex(qty_data) + static_cast<uint32>(i);
+
+		set_reg_str(st, sd, reference_uid(reference_getid(map_name_data), map_name_index), reference_getname(map_name_data), mname.c_str(), reference_getref(map_name_data));
+		set_reg_num(st, sd, reference_uid(reference_getid(qty_data), qty_index), reference_getname(qty_data), qty, reference_getref(qty_data));
+	}
+
+	script_pushint64(st, count);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+// searchmob(<mob_name_or_id>, .@mob_ids, .@mob_names$)
+BUILDIN_FUNC(searchmob)
+{
+	std::vector<uint16> mob_ids;
+
+	if (script_isstring(st, 2)) {
+		const char* str = script_getstr(st, 2);
+		int32 id = atoi(str);
+		if (id > 0 && mobdb_checkid(id)) {
+			mob_ids.push_back(static_cast<uint16>(id));
+		} else {
+			uint16 buf[50] = {0};
+			uint16 count = mobdb_searchname_array(str, buf, 50);
+			for (uint16 i = 0; i < count; ++i) {
+				mob_ids.push_back(buf[i]);
+			}
+		}
+	} else {
+		int32 id = script_getnum(st, 2);
+		if (id > 0 && mobdb_checkid(id)) {
+			mob_ids.push_back(static_cast<uint16>(id));
+		}
+	}
+
+	if (mob_ids.empty()) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	map_session_data* sd = nullptr;
+	if (!script_rid2sd(sd)) {
+		script_pushint(st, 0);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	struct script_data* id_data = script_getdata(st, 3);
+	struct script_data* name_data = script_getdata(st, 4);
+
+	if (!data_isreference(id_data) || is_string_variable(reference_getname(id_data)) ||
+		!data_isreference(name_data) || !is_string_variable(reference_getname(name_data))) {
+		ShowError("buildin_searchmob: Expected integer and string array references.\n");
+		script_pushint(st, 0);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	// Deduplicate by mob name, preferring mob instances that have active spawns
+	std::vector<uint16> unique_mobs;
+	std::unordered_map<std::string, uint16> seen_names;
+
+	for (uint16 mid : mob_ids) {
+		std::shared_ptr<s_mob_db> mob = mob_db.find(mid);
+		if (!mob)
+			continue;
+		auto it = seen_names.find(mob->jname);
+		if (it == seen_names.end()) {
+			seen_names[mob->jname] = mid;
+			unique_mobs.push_back(mid);
+		} else {
+			if (mob_get_spawns(it->second).empty() && !mob_get_spawns(mid).empty()) {
+				for (size_t u = 0; u < unique_mobs.size(); ++u) {
+					if (unique_mobs[u] == it->second) {
+						unique_mobs[u] = mid;
+						it->second = mid;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	size_t count = unique_mobs.size();
+	if (count > 30)
+		count = 30;
+
+	for (size_t i = 0; i < count; ++i) {
+		uint16 mid = unique_mobs[i];
+		std::shared_ptr<s_mob_db> mob = mob_db.find(mid);
+		const uint32 id_index = reference_getindex(id_data) + static_cast<uint32>(i);
+		const uint32 name_index = reference_getindex(name_data) + static_cast<uint32>(i);
+
+		set_reg_num(st, sd, reference_uid(reference_getid(id_data), id_index), reference_getname(id_data), mid, reference_getref(id_data));
+		set_reg_str(st, sd, reference_uid(reference_getid(name_data), name_index), reference_getname(name_data), mob->jname.c_str(), reference_getref(name_data));
+	}
+
+	script_pushint64(st, count);
+	return SCRIPT_CMD_SUCCESS;
+}
+
 static bool item_has_active_mob_source(t_itemid nameid) {
 	for (const auto& mob_pair : mob_db) {
 		if (mob_spawn_data.find(static_cast<uint16>(mob_pair.first)) == mob_spawn_data.end())
@@ -29475,6 +29759,9 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(checkwall,"s"),
 	BUILDIN_DEF(searchitem,"rs"),
 	BUILDIN_DEF(getitemsource,"irrrr"),
+	BUILDIN_DEF(getwhodrops,"vrrrr"),
+	BUILDIN_DEF(getwhereis,"irr"),
+	BUILDIN_DEF(searchmob,"vrr"),
 	BUILDIN_DEF(getitemboxsource,"ir"),
 	BUILDIN_DEF(getitemclientname,"is"),
 	BUILDIN_DEF(mercenary_create,"ii"),

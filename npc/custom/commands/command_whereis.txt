@@ -1,0 +1,107 @@
+//==============================================================
+// Sistema Aprimorado de Onde Nasce (@whereis e @whereis2)
+//==============================================================
+-	script	SistemaWhereis	-1,{
+
+OnInit:
+	bindatcmd "whereis2", strnpcinfo(3) + "::OnAtcommand", 0, 99;
+	bindatcmd "whereis", strnpcinfo(3) + "::OnAtcommand", 0, 99;
+	end;
+
+OnAtcommand:
+	.@query$ = "";
+	if (.@atcmd_numparameters > 0) {
+		.@query$ = .@atcmd_parameters$[0];
+		// Se o nome tiver espacos, concatena os parametros
+		for (.@p = 1; .@p < .@atcmd_numparameters; .@p++) {
+			.@query$ = .@query$ + " " + .@atcmd_parameters$[.@p];
+		}
+	} else {
+		mes "[Onde Nasce]";
+		mes "Digite o ^0000FFNome^000000 ou ^0000FFID^000000 do monstro que deseja buscar:";
+		input .@query$;
+		if (.@query$ == "") {
+			close;
+		}
+	}
+
+	deletearray .@mob_ids[0], getarraysize(.@mob_ids);
+	deletearray .@mob_names$[0], getarraysize(.@mob_names$);
+
+	.@count = searchmob(.@query$, .@mob_ids, .@mob_names$);
+
+	if (.@count <= 0) {
+		mes "[Onde Nasce]";
+		mes "O monstro ^FF0000" + .@query$ + "^000000 nao foi encontrado no banco de dados.";
+		close;
+	}
+
+	.@selected_mob_id = 0;
+	.@selected_mob_name$ = "";
+
+	if (.@count == 1) {
+		.@selected_mob_id = .@mob_ids[0];
+		.@selected_mob_name$ = .@mob_names$[0];
+	} else {
+		.@menu$ = "";
+		for (.@i = 0; .@i < .@count; .@i++) {
+			.@menu$ = .@menu$ + .@mob_names$[.@i] + " (ID: " + .@mob_ids[.@i] + "):";
+		}
+		.@menu$ = .@menu$ + "^777777Cancelar^000000";
+
+		mes "[Onde Nasce]";
+		mes "Monstros encontrados: ^0000FF" + .@count + "^000000";
+		mes "Selecione o monstro desejado:";
+		.@sel = select(.@menu$) - 1;
+		if (.@sel >= .@count) {
+			close;
+		}
+		.@selected_mob_id = .@mob_ids[.@sel];
+		.@selected_mob_name$ = .@mob_names$[.@sel];
+		next;
+	}
+
+	// Busca os mapas onde o monstro nasce (sem repetir mapas)
+	deletearray .@map_names$[0], getarraysize(.@map_names$);
+	deletearray .@mob_qtys[0], getarraysize(.@mob_qtys);
+
+	.@map_count = getwhereis(.@selected_mob_id, .@map_names$, .@mob_qtys);
+
+	mes "[Onde Nasce]";
+	mes "Monstro: ^0000FF" + .@selected_mob_name$ + "^000000 (ID: " + .@selected_mob_id + ")";
+
+	if (.@map_count <= 0) {
+		mes "^FF0000Este monstro nao nasce naturalmente em mapas abertos^000000 (instancia, quest ou invocacao).";
+		close;
+	}
+
+	mes "Mapas encontrados:";
+	for (.@i = 0; .@i < .@map_count; .@i++) {
+		mes " - ^0000FF" + .@map_names$[.@i] + "^000000 (Qtd: " + .@mob_qtys[.@i] + ")";
+	}
+
+	mes " ";
+	mes "Selecione o mapa para teleportar:";
+	.@map_menu$ = "";
+	for (.@i = 0; .@i < .@map_count; .@i++) {
+		.@map_menu$ = .@map_menu$ + .@map_names$[.@i] + " [x" + .@mob_qtys[.@i] + "]:";
+	}
+	.@map_menu$ = .@map_menu$ + "^777777Cancelar^000000";
+
+	.@map_sel = select(.@map_menu$) - 1;
+	if (.@map_sel >= .@map_count) {
+		close;
+	}
+
+	.@target_map$ = .@map_names$[.@map_sel];
+
+	next;
+	mes "[Teleporte]";
+	mes "Deseja se teleportar para o mapa ^0000FF" + .@target_map$ + "^000000?";
+	if (select("Sim, teleportar agora!:Nao, cancelar.") == 1) {
+		// Teleporta em coordenadas 0,0 para nao cair em celula invalida
+		warp .@target_map$, 0, 0;
+		end;
+	}
+	close;
+}

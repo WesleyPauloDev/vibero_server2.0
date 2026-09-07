@@ -1,0 +1,136 @@
+//==============================================================
+// Sistema Aprimorado de Busca de Drops (@whodrops e @whodrops2)
+//==============================================================
+-	script	SistemaWhodrops	-1,{
+
+OnInit:
+	.client_iteminfo$ = "C:/Users/wesley/Desktop/VibeRO - Client/System/iteminfo_ptbr.lub";
+	.client_iteminfo_custom$ = "C:/Users/wesley/Desktop/VibeRO - Client/System/iteminfo_item.lub";
+	.client_iteminfo_fallback$ = "C:/Users/wesley/Desktop/MeuRag/System/iteminfo_ptbr.lub";
+	.client_iteminfo_custom_fb$ = "C:/Users/wesley/Desktop/MeuRag/System/iteminfo_item.lub";
+
+	bindatcmd "whodrops2", strnpcinfo(3) + "::OnAtcommand", 0, 99;
+	bindatcmd "whodrops", strnpcinfo(3) + "::OnAtcommand", 0, 99;
+	end;
+
+OnAtcommand:
+	.@query$ = "";
+	if (.@atcmd_numparameters > 0) {
+		.@query$ = .@atcmd_parameters$[0];
+		// Se o nome tiver espacos, concatena os parametros
+		for (.@p = 1; .@p < .@atcmd_numparameters; .@p++) {
+			.@query$ = .@query$ + " " + .@atcmd_parameters$[.@p];
+		}
+	} else {
+		mes "[Pesquisa de Drop]";
+		mes "Digite o ^0000FFNome^000000 ou ^0000FFID^000000 do item que deseja buscar:";
+		input .@query$;
+		if (.@query$ == "") {
+			close;
+		}
+	}
+
+	deletearray .@mob_ids[0], getarraysize(.@mob_ids);
+	deletearray .@mob_names$[0], getarraysize(.@mob_names$);
+	deletearray .@mob_rates[0], getarraysize(.@mob_rates);
+	deletearray .@mob_types[0], getarraysize(.@mob_types);
+
+	.@count = getwhodrops(.@query$, .@mob_ids, .@mob_names$, .@mob_rates, .@mob_types);
+
+	if (.@count < 0) {
+		mes "[Pesquisa de Drop]";
+		mes "O item ^FF0000" + .@query$ + "^000000 nao foi encontrado no banco de dados.";
+		close;
+	}
+
+	.@item_id = @whodrops_item_id;
+	.@item_name$ = getitemclientname(.@item_id, .client_iteminfo$);
+	if (.@item_name$ == "")
+		.@item_name$ = getitemclientname(.@item_id, .client_iteminfo_custom$);
+	if (.@item_name$ == "")
+		.@item_name$ = getitemclientname(.@item_id, .client_iteminfo_fallback$);
+	if (.@item_name$ == "")
+		.@item_name$ = getitemclientname(.@item_id, .client_iteminfo_custom_fb$);
+	if (.@item_name$ == "")
+		.@item_name$ = @whodrops_item_name$;
+	if (.@item_name$ == "" || .@item_name$ == "null")
+		.@item_name$ = getitemname(.@item_id);
+	if (.@item_name$ == "" || .@item_name$ == "null")
+		.@item_name$ = replacestr(getiteminfo(.@item_id, ITEMINFO_AEGISNAME), "_", " ");
+
+	if (.@count == 0) {
+		mes "[Pesquisa de Drop]";
+		mes "Item: ^0000FF" + .@item_name$ + "^000000 (ID: " + .@item_id + ")";
+		mes "Nenhum monstro derruba este item.";
+		close;
+	}
+
+	// Menu de selecao de monstro
+	.@menu$ = "";
+	for (.@i = 0; .@i < .@count; .@i++) {
+		.@rate_int = .@mob_rates[.@i] / 100;
+		.@rate_dec = .@mob_rates[.@i] % 100;
+		.@rate_str$ = sprintf("%d.%02d%%", .@rate_int, .@rate_dec);
+		.@mvp_tag$ = (.@mob_types[.@i] ? " ^FF0000[MVP]^000000" : "");
+		.@menu$ = .@menu$ + .@mob_names$[.@i] + " (" + .@rate_str$ + ")" + .@mvp_tag$ + ":";
+	}
+	.@menu$ = .@menu$ + "^777777Cancelar^000000";
+
+	mes "[Pesquisa de Drop]";
+	mes "Item: ^0000FF" + .@item_name$ + "^000000 (ID: " + .@item_id + ")";
+	mes "Monstros encontrados: ^0000FF" + .@count + "^000000";
+	mes "Selecione um monstro para ver onde ele nasce:";
+
+	.@sel = select(.@menu$) - 1;
+	if (.@sel >= .@count) {
+		close;
+	}
+
+	.@selected_mob_id = .@mob_ids[.@sel];
+	.@selected_mob_name$ = .@mob_names$[.@sel];
+
+	// Busca os mapas onde o monstro nasce (whereis) sem repetir mapas
+	deletearray .@map_names$[0], getarraysize(.@map_names$);
+	deletearray .@mob_qtys[0], getarraysize(.@mob_qtys);
+
+	.@map_count = getwhereis(.@selected_mob_id, .@map_names$, .@mob_qtys);
+
+	next;
+	mes "[Onde Nasce]";
+	mes "Monstro: ^0000FF" + .@selected_mob_name$ + "^000000 (ID: " + .@selected_mob_id + ")";
+
+	if (.@map_count <= 0) {
+		mes "^FF0000Este monstro nao nasce naturalmente em mapas abertos^000000 (instancia, quest ou invocacao).";
+		close;
+	}
+
+	mes "Mapas encontrados:";
+	for (.@i = 0; .@i < .@map_count; .@i++) {
+		mes " - ^0000FF" + .@map_names$[.@i] + "^000000 (Qtd: " + .@mob_qtys[.@i] + ")";
+	}
+
+	mes " ";
+	mes "Selecione o mapa para teleportar:";
+	.@map_menu$ = "";
+	for (.@i = 0; .@i < .@map_count; .@i++) {
+		.@map_menu$ = .@map_menu$ + .@map_names$[.@i] + " [x" + .@mob_qtys[.@i] + "]:";
+	}
+	.@map_menu$ = .@map_menu$ + "^777777Cancelar^000000";
+
+	.@map_sel = select(.@map_menu$) - 1;
+	if (.@map_sel >= .@map_count) {
+		close;
+	}
+
+	.@target_map$ = .@map_names$[.@map_sel];
+
+	next;
+	mes "[Teleporte]";
+	mes "Deseja se teleportar para o mapa ^0000FF" + .@target_map$ + "^000000?";
+	if (select("Sim, teleportar agora!:Nao, cancelar.") == 1) {
+		// Teleporta em coordenadas 0,0 para nao cair em celula invalida
+		warp .@target_map$, 0, 0;
+		end;
+	}
+	close;
+}

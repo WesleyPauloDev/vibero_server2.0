@@ -355,7 +355,7 @@ dali02,78,112,3	script	Marquis of Remorse#remorse	4_M_SAKRAY,{
 			mes "Se voce tiver uma joia dada pela princesa, uma pedra onde o remorso dela se reuniu,";
 			mes "isso nao tera utilidade para voce, heroi. Se precisar de algo, posso trocar por ela.";
 			next;
-			switch(select("Troca de Joias.:Troca de Armas.:Comprar Nebula.:Cancelar")){
+			switch(select("Troca de Joias.:Troca de Armas.:Comprar Nebula.:Comprar Coroas.:Encantar Poenitentia:Cancelar")){
 				case 1:
 					callshop "remorse_item",1;
 					break;
@@ -367,8 +367,17 @@ dali02,78,112,3	script	Marquis of Remorse#remorse	4_M_SAKRAY,{
 				case 3:
 					callshop "remorse_nebula",1;
 					break;
-					
+
 				case 4:
+					callshop "remorse_crown",1;
+					break;
+
+				case 5:
+					close2;
+					item_enchant(48);
+					end;
+					
+				case 6:
 					break;
 			}
 			end;
@@ -412,7 +421,7 @@ moc_para01,52,33,4	script	Marques do Remorso#eden	4_M_SAKRAY,{
 	mes "[ Marques do Remorso ]";
 	mes "Se voce trouxe Mineas, eu posso troca-las por itens ou armas da Tumba do Remorso.";
 	next;
-	switch(select("Troca de Itens.:Troca de Armas.:Comprar Nebula.:Encantar Poenitentia:Cancelar.")){
+	switch(select("Troca de Itens.:Troca de Armas.:Comprar Nebula.:Comprar Coroas.:Encantar Poenitentia:Cancelar.")){
 		case 1:
 			callshop "remorse_item",1;
 			end;
@@ -423,8 +432,11 @@ moc_para01,52,33,4	script	Marques do Remorso#eden	4_M_SAKRAY,{
 			callshop "remorse_nebula",1;
 			end;
 		case 4:
+			callshop "remorse_crown",1;
+			end;
+		case 5:
 			close2;
-			item_enchant(24);
+			item_enchant(48);
 			end;
 		default:
 			close;

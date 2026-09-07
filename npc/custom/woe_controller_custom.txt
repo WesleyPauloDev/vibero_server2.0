@@ -26,6 +26,22 @@ prontera,156,197,4	script	Informacoes de Guerra	111,{
                 mes "Voce precisa estar em uma guild para entrar no castelo.";
                 close;
             }
+
+            if (agitcheck()) {
+                .@my_ip$ = getcharip();
+                if (.@my_ip$ == "")
+                    query_sql("SELECT `last_ip` FROM `login` WHERE `account_id` = " + getcharid(3), .@my_ip$);
+
+                if (.@my_ip$ != "") {
+                    .@existing_ip_idx = inarray($WOE_ENTRY_IP$, .@my_ip$);
+                    if (.@existing_ip_idx >= 0 && $WOE_ENTRY_CID[.@existing_ip_idx] != getcharid(0)) {
+                        mes "[WoE - Informacoes]";
+                        mes "^FF0000Entrada bloqueada.^000000";
+                        mes "Um jogador com este IP ja foi registrado na Guerra com o personagem ^0055FF" + $WOE_ENTRY_CNAME$[.@existing_ip_idx] + "^000000.";
+                        close;
+                    }
+                }
+            }
             
 			warp .Castle$, 164, 174;
 			close;
@@ -93,14 +109,32 @@ OnPCLoadMapEvent:
     if (strcharinfo(3) != .Castle$) end;
     if (!agitcheck()) end;
 
-    deltimer strnpcinfo(3)+"::OnKvmPointMinute";
-    addtimer 60000, strnpcinfo(3)+"::OnKvmPointMinute";
-
     .@gid = getcharid(2);
     .@cid = getcharid(0);
     .@aid = getcharid(3);
 
-    if (.@gid <= 0) end;
+    if (.@gid <= 0) {
+        warp "SavePoint", 0, 0;
+        dispbottom "[WoE] Voce precisa estar em uma guild para entrar no castelo.";
+        end;
+    }
+
+    .@ip$ = getcharip();
+    if (.@ip$ == "")
+        query_sql("SELECT `last_ip` FROM `login` WHERE `account_id` = " + .@aid, .@ip$);
+
+    // Se outro personagem deste mesmo IP ja entrou na guerra, bloqueia e expulsa
+    if (.@ip$ != "") {
+        .@existing_ip_idx = inarray($WOE_ENTRY_IP$, .@ip$);
+        if (.@existing_ip_idx >= 0 && $WOE_ENTRY_CID[.@existing_ip_idx] != .@cid) {
+            warp "SavePoint", 0, 0;
+            dispbottom "[WoE] Entrada bloqueada: um jogador com este IP ja foi registrado na Guerra com o personagem '" + $WOE_ENTRY_CNAME$[.@existing_ip_idx] + "'.";
+            end;
+        }
+    }
+
+    deltimer strnpcinfo(3)+"::OnKvmPointMinute";
+    addtimer 60000, strnpcinfo(3)+"::OnKvmPointMinute";
 
     woe_streak_combo = 0;
     woe_streak_total = 0;
@@ -108,12 +142,16 @@ OnPCLoadMapEvent:
 
     if (inarray($WOE_ENTRY_CID, .@cid) >= 0) end;
 
-    $WOE_ENTRY_CID[getarraysize($WOE_ENTRY_CID)] = .@cid;
-    $WOE_ENTRY_AID[getarraysize($WOE_ENTRY_AID)] = .@aid;
-    $WOE_ENTRY_GID[getarraysize($WOE_ENTRY_GID)] = .@gid;
+    .@entry_idx = getarraysize($WOE_ENTRY_CID);
+    $WOE_ENTRY_CID[.@entry_idx] = .@cid;
+    $WOE_ENTRY_AID[.@entry_idx] = .@aid;
+    $WOE_ENTRY_GID[.@entry_idx] = .@gid;
+    $WOE_ENTRY_IP$[.@entry_idx] = .@ip$;
+    $WOE_ENTRY_CNAME$[.@entry_idx] = strcharinfo(0);
     $WOE_ENTRY_COUNT[.@gid] = $WOE_ENTRY_COUNT[.@gid] + 1;
     if (inarray($WOE_ENTRY_LIST, .@gid) < 0)
         $WOE_ENTRY_LIST[getarraysize($WOE_ENTRY_LIST)] = .@gid;
+    dispbottom "[WoE] Voce foi registrado para a Guerra do Emperium.";
     end;
 
 OnKvmPointMinute:
@@ -169,6 +207,8 @@ OnStartWoE:
     deletearray $WOE_ENTRY_CID;
     deletearray $WOE_ENTRY_AID;
     deletearray $WOE_ENTRY_GID;
+    deletearray $WOE_ENTRY_IP$;
+    deletearray $WOE_ENTRY_CNAME$;
     deletearray $WOE_ENTRY_LIST;
     deletearray $WOE_ENTRY_COUNT;
     deletearray $WOE_TIME;
@@ -502,8 +542,17 @@ OnReward:
     //-----------------------------------------
     // 1. PREMIOS PARA TODOS QUE PARTICIPARAM
     //-----------------------------------------
+    deletearray .@rewarded_ips$;
     for (.@i = 0; .@i < getarraysize($WOE_ENTRY_CID); .@i++) {
         .@participant_gid = $WOE_ENTRY_GID[.@i];
+        .@participant_ip$ = $WOE_ENTRY_IP$[.@i];
+
+        // Seguranca adicional: impede premiacao duplicada por IP
+        if (.@participant_ip$ != "") {
+            if (inarray(.@rewarded_ips$, .@participant_ip$) >= 0)
+                continue;
+            .@rewarded_ips$[getarraysize(.@rewarded_ips$)] = .@participant_ip$;
+        }
 
         .@title$ = "Premio de Participacao (WoE)";
         .@body$  = "Voce participou da WoE. Esta caixa contem os premios de participacao.";
@@ -568,6 +617,8 @@ OnReward:
     deletearray $WOE_ENTRY_CID;
     deletearray $WOE_ENTRY_AID;
     deletearray $WOE_ENTRY_GID;
+    deletearray $WOE_ENTRY_IP$;
+    deletearray $WOE_ENTRY_CNAME$;
     deletearray $WOE_ENTRY_LIST;
     deletearray $WOE_ENTRY_COUNT;
     $WOE_WIN_TIME = 0;

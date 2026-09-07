@@ -9,6 +9,8 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <vector>
+#include <algorithm>
 
 #include <common/cbasetypes.hpp>
 #include <common/database.hpp>
@@ -7113,8 +7115,10 @@ ACMD_FUNC(restock)
 
 	char* end = nullptr;
 	const unsigned long parsed_id = strtoul(action, &end, 10);
-	if (end == nullptr || *end != '\0' || parsed_id == 0 || parsed_id > UINT32_MAX || amount <= 0 || amount > MAX_AMOUNT) {
-		clif_displaymessage(fd, "Uso: @restock <ID> <quantidade entre 1 e 30000>");
+	if (end == nullptr || *end != '\0' || parsed_id == 0 || parsed_id > UINT32_MAX || amount < RESTOCK_MIN_AMOUNT || amount > MAX_AMOUNT) {
+		char output[CHAT_SIZE_MAX];
+		snprintf(output, sizeof(output), "Uso: @restock <ID> <quantidade entre %d e %d>", RESTOCK_MIN_AMOUNT, MAX_AMOUNT);
+		clif_displaymessage(fd, output);
 		return -1;
 	}
 
@@ -8803,9 +8807,9 @@ ACMD_FUNC(iteminfo)
 }
 
 /*==========================================
- * Show who drops the item.
+ * Show who drops the item (improved version with MVP drops & real rate).
  *------------------------------------------*/
-ACMD_FUNC(whodrops)
+ACMD_FUNC(whodrops2)
 {
 	if (!message || !*message) {
 		clif_displaymessage(fd, msg_txt(sd,1284)); // Please enter item name/ID (usage: @whodrops <item name/ID>).
@@ -8832,40 +8836,127 @@ ACMD_FUNC(whodrops)
 		sprintf(atcmd_output, msg_txt(sd,269), MAX_SEARCH); // Displaying first %d matches
 		clif_displaymessage(fd, atcmd_output);
 	}
+
+	struct s_whodrops_entry {
+		int32 mob_id;
+		std::string mob_name;
+		float rate;
+	};
+
 	for (const auto &result : item_array) {
 		std::shared_ptr<item_data> id = result.second;
 
 		sprintf(atcmd_output, msg_txt(sd,1285), item_db.create_item_link( id ).c_str(), id->nameid); // Item: '%s' (ID:%u)
 		clif_displaymessage(fd, atcmd_output);
 
-		if (id->mob[0].chance == 0) {
+		// Maps to deduplicate by monster name (keeping the entry with the highest drop rate)
+		std::unordered_map<std::string, s_whodrops_entry> common_map;
+		std::unordered_map<std::string, s_whodrops_entry> mvp_map;
+
+		for (const auto& pair : mob_db) {
+			std::shared_ptr<s_mob_db> mob = pair.second;
+			if (!mob)
+				continue;
+			if (mob_is_clone(pair.first))
+				continue;
+
+			// 1. Regular drops
+			int32 drop_modifier = 100;
+#ifdef RENEWAL_DROP
+			if (battle_config.atcommand_mobinfo_type) {
+				drop_modifier = pc_level_penalty_mod(sd, PENALTY_DROP, mob);
+			}
+#endif
+			for (const auto& entry : mob->dropitem) {
+				if (entry->nameid == id->nameid && entry->rate > 0) {
+					int32 droprate = mob_getdroprate(sd, mob, entry->rate, drop_modifier);
+					float percent = (float)droprate / 100.0f;
+					if (percent > 0.0f) {
+						auto it = common_map.find(mob->jname);
+						if (it == common_map.end() || percent > it->second.rate) {
+							common_map[mob->jname] = { (int32)pair.first, mob->jname, percent };
+						}
+					}
+				}
+			}
+
+			// 2. MVP drops
+			if (!mob->mvpitem.empty()) {
+				float mvpremain = 100.0f;
+				for (const auto& entry : mob->mvpitem) {
+					if (entry->nameid == 0)
+						continue;
+					float mvppercent = (float)entry->rate * mvpremain / 10000.0f;
+					if (battle_config.item_drop_mvp_mode == 0) {
+						mvpremain -= mvppercent;
+					}
+					if (entry->nameid == id->nameid && mvppercent > 0.0f) {
+						auto it = mvp_map.find(mob->jname);
+						if (it == mvp_map.end() || mvppercent > it->second.rate) {
+							mvp_map[mob->jname] = { (int32)pair.first, mob->jname, mvppercent };
+						}
+					}
+				}
+			}
+		}
+
+		// Convert to vector and sort
+		std::vector<s_whodrops_entry> common_list;
+		common_list.reserve(common_map.size());
+		for (auto& p : common_map) {
+			common_list.push_back(std::move(p.second));
+		}
+		std::sort(common_list.begin(), common_list.end(), [](const s_whodrops_entry& a, const s_whodrops_entry& b) {
+			if (a.rate != b.rate)
+				return a.rate > b.rate;
+			return a.mob_id < b.mob_id;
+		});
+
+		std::vector<s_whodrops_entry> mvp_list;
+		mvp_list.reserve(mvp_map.size());
+		for (auto& p : mvp_map) {
+			mvp_list.push_back(std::move(p.second));
+		}
+		std::sort(mvp_list.begin(), mvp_list.end(), [](const s_whodrops_entry& a, const s_whodrops_entry& b) {
+			if (a.rate != b.rate)
+				return a.rate > b.rate;
+			return a.mob_id < b.mob_id;
+		});
+
+		if (common_list.empty() && mvp_list.empty()) {
 			strcpy(atcmd_output, msg_txt(sd,1286)); //  - Item is not dropped by mobs.
 			clif_displaymessage(fd, atcmd_output);
-		} else {
+			continue;
+		}
+
+		if (!common_list.empty()) {
 			sprintf(atcmd_output, msg_txt(sd,1287), MAX_SEARCH); //  - Common mobs with highest drop chance (only max %d are listed):
 			clif_displaymessage(fd, atcmd_output);
 
-			for (uint16 j=0; j < MAX_SEARCH && id->mob[j].chance > 0; j++)
-			{
-				int32 dropchance = id->mob[j].chance;
-				std::shared_ptr<s_mob_db> mob = mob_db.find(id->mob[j].id);
-				if(!mob) continue;
+			size_t max_j = (std::min)((size_t)MAX_SEARCH, common_list.size());
+			for (size_t j = 0; j < max_j; j++) {
+				sprintf(atcmd_output, "- %s (%d): %02.02f%%", common_list[j].mob_name.c_str(), common_list[j].mob_id, common_list[j].rate);
+				clif_displaymessage(fd, atcmd_output);
+			}
+		}
 
-#ifdef RENEWAL_DROP
-				if( battle_config.atcommand_mobinfo_type ) {
-					dropchance = dropchance * pc_level_penalty_mod( sd, PENALTY_DROP, mob ) / 100;
-					if (dropchance <= 0 && !battle_config.drop_rate0item)
-						dropchance = 1;
-				}
-#endif
-				if (pc_isvip(sd)) // Display item rate increase for VIP
-					dropchance += (dropchance * battle_config.vip_drop_increase) / 100;
-				sprintf(atcmd_output, "- %s (%d): %02.02f%%", mob->jname.c_str(), id->mob[j].id, dropchance/100.);
+		if (!mvp_list.empty()) {
+			sprintf(atcmd_output, " - Monstros MVP com maiores chances de drop (somente máx %d são listados):", MAX_SEARCH);
+			clif_displaymessage(fd, atcmd_output);
+
+			size_t max_j = (std::min)((size_t)MAX_SEARCH, mvp_list.size());
+			for (size_t j = 0; j < max_j; j++) {
+				sprintf(atcmd_output, "- %s (%d): %02.02f%%", mvp_list[j].mob_name.c_str(), mvp_list[j].mob_id, mvp_list[j].rate);
 				clif_displaymessage(fd, atcmd_output);
 			}
 		}
 	}
 	return 0;
+}
+
+ACMD_FUNC(whodrops)
+{
+	return atcommand_whodrops2(fd, sd, command, message);
 }
 
 ACMD_FUNC(whereis)
@@ -8923,6 +9014,11 @@ ACMD_FUNC(whereis)
 	}
 
 	return 0;
+}
+
+ACMD_FUNC(whereis2)
+{
+	return atcommand_whereis(fd, sd, command, message);
 }
 
 ACMD_FUNC(version)
@@ -12258,7 +12354,9 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(rates),
 		ACMD_DEF(iteminfo),
 		ACMD_DEF(whodrops),
+		ACMD_DEF(whodrops2),
 		ACMD_DEF(whereis),
+		ACMD_DEF(whereis2),
 		ACMD_DEF(mapflag),
 		ACMD_DEF(me),
 		ACMD_DEF(monsterignore),
