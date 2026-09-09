@@ -9,8 +9,8 @@
 // - Caminhada Organica em Prontera: Sorteia quantidade (3 a 6) e coordenadas aleatorias
 //   na praca central da fonte com sistema anti-travamento integrado
 // - Eden em 2 pontos (30,14 e 28,26) com caminhada real
-// - Modo Teste: 5s em Prontera, 5s no Eden, 1 minuto exato de cacada
-// - Modo Normal: cada parada em Prontera/Eden sorteia de 1 a 10 minutos inteiros
+// - Modo Teste: 5s em Prontera, 5s no Eden, 2 minutos de cacada
+// - Modo Normal: cada parada em Prontera/Eden sorteia de 1 a 10 minutos inteiros (10 a 20 min cacada)
 // - Combate Completo e Agressivo:
 //     * Localizacao com getareaunits (raio 25 celulas, nunca teleporta se houver mobs na tela)
 //     * Ignora completamente Plantas e Cogumelos
@@ -28,8 +28,8 @@
 //     * Auto-Teleporte aleatorio no mapa APENAS se a tela estiver vazia de monstros
 // - Respostas de comandos do GM enviadas exclusivamente para o chat do GM
 // - Comandos GM para Controle:
-//     @bot test [nome]   -> Inicia o MODO TESTE (5s pausas, 1 min cacada)
-//     @bot start [nome]  -> Inicia o MODO NORMAL (2 min pausas, 5 min cacada)
+//     @bot test [nome]   -> Inicia o MODO TESTE (5s pausas, 2 min cacada)
+//     @bot start [nome]  -> Inicia o MODO NORMAL (Pausas realistas, 10 a 20 min cacada)
 //     @bot stop [nome]   -> Pausa a AI do personagem
 //     @bot status [nome] -> Exibe informacoes para o GM
 //     @bot               -> Menu Interativo do GM
@@ -279,10 +279,10 @@ OnStartSingleBot:
 	return;
 
 // Inicia um ciclo com duracao fixa, sorteada apenas uma vez.
-// Teste: 1 minuto. Normal: 5, 6, 7, 8, 9 ou 10 minutos.
+// Teste: 2 minutos. Normal: 10, 12, 14, ... ou 20 minutos (dobro do tempo).
 OnStartHuntTimer:
 	@BOT_HUNT_START = gettimetick(2);
-	@BOT_HUNT_DURATION = (@BOT_TEST_MODE ? 60 : rand(5, 10) * 60);
+	@BOT_HUNT_DURATION = (@BOT_TEST_MODE ? 120 : rand(10, 20) * 60);
 	return;
 
 // Salva o conjunto escolhido manualmente para este personagem.
@@ -1253,8 +1253,8 @@ OnGMCommand:
 		mes "^0055FF[Gerenciador - " + .@target_name$ + "]^000000";
 		mes "Escolha a acao:";
 		next;
-		.@opt = select("1. Iniciar MODO TESTE (5s Pausas / 1 min Cacada):" +
-		               "2. Iniciar MODO NORMAL (Pausas Realistas / 5 min Cacada):" +
+		.@opt = select("1. Iniciar MODO TESTE (5s Pausas / 2 min Cacada):" +
+		               "2. Iniciar MODO NORMAL (Pausas Realistas / 10 a 20 min Cacada):" +
 		               "3. Colocar em MODO OFFLINE / Deslogar Cliente (@at):" +
 		               "4. Parar AI (Pausar Acoes e Salvar Estado):" +
 		               "5. Cadastrar/Descadastrar como Bot Oficial:" +

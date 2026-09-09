@@ -25082,8 +25082,6 @@ void clif_enchantwindow_result( map_session_data& sd, bool success, t_itemid enc
 	p.ITID = enchant;
 
 	clif_send( &p, sizeof( p ), &sd, SELF );
-
-	sd.state.item_enchant_index = 0;
 #endif
 }
 

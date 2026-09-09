@@ -916,7 +916,7 @@ end;
 	end;
 	
 OnTouch:
-	if (#ConfusedSnakeNest_STATUS == 2 && !checkweight(101183, 1)) {
+	if (#ConfusedSnakeNest_STATUS == 2 && (!checkweight(1000608, 50) || !checkweight(1001217, 30))) {
 		dispbottom "[Instancia] Voce esta carregando peso demais para receber as recompensas. Libere espaco e passe pelo portal novamente.";
 		end;
 	}
@@ -926,7 +926,8 @@ OnTouch:
 		end;
 	}
 	if (.@finish_result == 1) {
-		getitem 101183, 1;
+		getitem 1000608, 50; // Flor da Neve
+		getitem 1001217, 30; // Bigodes de Gato Sagrado
 		'csn_done = 1;
 	}
 	warp "SavePoint",0,0;
@@ -1624,3 +1625,61 @@ end;
 1@jorchs,21,97,5	duplicate(Stranded Rgan#19m10)	Stranded Rgan#19m11	21600,5,5
 1@jorchs,23,57,5	duplicate(dummy_csn)	Stranded Rgan#19m60	21600
 1@jorchs,21,97,5	duplicate(dummy_csn)	Stranded Rgan#19m61	21600
+
+// =========================================================================
+// Custom Drops for Chaotic Snake Nest
+// Drops:
+// 1001029: EP19_D_P_Ore (Encroached Magical Ore)
+// 1001030: EP19_N_P_Ore (Neutralized Magical Ore)
+// 1001248: EP20_D_P_Ore (Pure Magical Ore)
+// 1001031: EP19_D_P_Crystal (Encroached Magical Crystal)
+// 1001032: EP19_N_P_Crystal (Neutralized Magical Crystal)
+// 1001249: EP20_D_P_Crystal (Pure Magical Crystal)
+// =========================================================================
+-	script	#csn_custom_drops	-1,{
+OnNPCKillEvent:
+	if (instance_id() <= 0)
+		end;
+
+	.@map$ = strcharinfo(3);
+	if (.@map$ != instance_mapname("1@jorchs"))
+		end;
+
+	// Chaotic Snake Nest monsters:
+	// 21534: Modified Superior Rgan
+	// 21535: Twisted / Crushed / Deformed Rgan
+	// 21536: Heart Hunter / Modified Heart Hunter
+	// 21590: Furious Rgan
+	// 2529: Faceworm Queen (Boss)
+	if (killedrid != 21534 && killedrid != 21535 && killedrid != 21536 && killedrid != 21590 && killedrid != 2529)
+		end;
+
+	getmapxy(.@m$, .@x, .@y, BL_PC);
+
+	if (killedrid == 2529) {
+		// Boss Faceworm Queen drops 1 of each Ore & Crystal guaranteed
+		makeitem 1001029, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+		makeitem 1001030, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+		makeitem 1001248, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+		makeitem 1001031, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+		makeitem 1001032, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+		makeitem 1001249, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+
+		// Boss has 25% chance to drop each of the rare 3rd slot materials:
+		// 1001033: EP19_D_P_Stone (Miasmal Spell)
+		// 1001250: EP20_D_P_Extract (Pure Magic Extract)
+		// 1001251: EP20_D_Scale (Scale of the Snake God)
+		if (rand(100) < 25) makeitem 1001033, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+		if (rand(100) < 25) makeitem 1001250, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+		if (rand(100) < 25) makeitem 1001251, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+	} else {
+		// Regular monsters (~100 in instance): 5% chance for each item (~5 of each per run)
+		if (rand(100) < 5) makeitem 1001029, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+		if (rand(100) < 5) makeitem 1001030, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+		if (rand(100) < 5) makeitem 1001248, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+		if (rand(100) < 5) makeitem 1001031, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+		if (rand(100) < 5) makeitem 1001032, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+		if (rand(100) < 5) makeitem 1001249, 1, .@m$, .@x + rand(-1, 1), .@y + rand(-1, 1);
+	}
+	end;
+}

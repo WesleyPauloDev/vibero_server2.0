@@ -166306,11 +166306,11 @@ Body:
     View: 480
   - Id: 400105
     AegisName: Glacier_Helm_1
-    Name: Issgard Warrior Crown
+    Name: Coroa do Guerreiro de Isgard
     Type: Armor
     Weight: 400
     Defense: 100
-    Slots: 2
+    Slots: 1
     Locations:
       Head_Top: true
     ArmorLevel: 2
@@ -166355,7 +166355,7 @@ Body:
       }
   - Id: 400106
     AegisName: Glacier_Helm_2
-    Name: Issgard Magician Crown
+    Name: Coroa do Mago de Isgard
     Type: Armor
     Weight: 100
     Defense: 20
@@ -166397,7 +166397,7 @@ Body:
       }
   - Id: 400107
     AegisName: Glacier_Helm_3
-    Name: Issgard Ranger Crown
+    Name: Coroa do Caçador de Isgard
     Type: Armor
     Weight: 200
     Defense: 50
@@ -194561,51 +194561,34 @@ Body:
     Name: Glacier Manteau
     Type: Armor
     Weight: 1600
-    Defense: 100
-    Slots: 2
+    Defense: 112
+    Slots: 1
     Locations:
       Garment: true
     ArmorLevel: 2
-    EquipLevelMin: 175
+    EquipLevelMin: 200
     Refineable: true
     Gradable: true
     Script: |
       .@g = getenchantgrade();
       .@r = getrefine();
-
-      bonus bMDef,30;      
-
-      bonus bMaxHPRate,20;
-      bonus bMaxSPRate,20;
-
-      if (.@r>0) {
-        bonus bDef,10 * .@r;
-        bonus bMDef,5 * .@r;
+      bonus bMaxHP,2500+200*(.@r/2);
+      bonus bMaxSP,500+50*(.@r/2);
+      if (.@r>=7) {
+         bonus bAspdRate,7;
+         if (.@r>=9) {
+            bonus bPow,3;
+            if (.@r>=10) {
+               bonus bVariableCastrate,-5;
+            }
+         }
       }
-
       if (.@g>=ENCHANTGRADE_D) {
-          bonus bDef,50;
-          bonus bMDef,30;
-          bonus bFlee,50;
-          bonus bFlee2,10;
-          if (.@g>=ENCHANTGRADE_C) {
-              bonus bDef,50;
-              bonus bMDef,30;
-              bonus bFlee,50;
-              bonus bFlee2,10;
-              if (.@g>=ENCHANTGRADE_B) {
-                  bonus bDef,50;
-                  bonus bMDef,30;
-                  bonus bFlee,50;
-                  bonus bFlee2,10;
-                  if (.@g>=ENCHANTGRADE_A) {
-                      bonus bDef,50;
-                      bonus bMDef,30;
-                      bonus bFlee,50;
-                      bonus bFlee2,10;
-                  }
-              }
-          }
+         bonus bPAtk,2;
+         bonus bAtkRate,3;
+         if (.@g>=ENCHANTGRADE_C) {
+            bonus bVariableCastrate,-10;
+         }
       }
   - Id: 450267
     AegisName: Glacier_Muffler
@@ -194647,7 +194630,7 @@ Body:
     Type: Armor
     Weight: 1000
     Defense: 100
-    Slots: 2
+    Slots: 1
     Locations:
       Shoes: true
     ArmorLevel: 2
@@ -203846,14 +203829,14 @@ Body:
          }
       }
       if (.@g>=ENCHANTGRADE_D) {
-         bonus bAtkRate,2;
+         bonus bPAtk,2;
          if (.@g>=ENCHANTGRADE_C) {
+            bonus bPAtk,3;
             bonus bFixedCast,-1000;
             if (.@g>=ENCHANTGRADE_B) {
-               bonus bPAtk,2;
-               bonus bAtkRate,1;
+               bonus bPAtk,5;
                if (.@g>=ENCHANTGRADE_A) {
-                  bonus bAtkRate,2;
+                  bonus bPAtk,5;
                }
             }
          }
@@ -221321,8 +221304,8 @@ Body:
     ArmorLevel: 2
     EquipLevelMin: 175
     Script: |
-      bonus bAtkRate,8;
-      bonus bMaxSPrate,7;
+      bonus bPAtk,5;
+      bonus bMaxSPrate,10;
   - Id: 490328
     AegisName: Glacier_Pendant
     Name: Glacier Pendant
@@ -221334,8 +221317,8 @@ Body:
     ArmorLevel: 2
     EquipLevelMin: 175
     Script: |
-      bonus bAtkRate,8;
-      bonus bMaxHPrate,7;
+      bonus bPAtk,5;
+      bonus bMaxHPrate,10;
   - Id: 490329
     AegisName: Glacier_Earring
     Name: Glacier Earring

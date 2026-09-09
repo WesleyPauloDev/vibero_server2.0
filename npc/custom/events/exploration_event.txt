@@ -1135,6 +1135,11 @@ function	script	F_Fenda_Menu	{
 			mes "Crie uma nova expedicao para continuar.";
 			close;
 		}
+		if (!callfunc("F_CheckInstanceIPPermission")) {
+			mes "[Fenda]";
+			mes "Jogadores com o mesmo IP so podem participar da Fenda se estiverem em grupos diferentes.";
+			close;
+		}
 		switch(instance_enter("Fenda")) {
 			case IE_OK:
 				FendaJoinedInstance = instance_id(IM_PARTY);

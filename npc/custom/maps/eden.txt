@@ -8,54 +8,107 @@ moc_para01,37,22,4	shop	Loja de Utilidades#eden	850,643:100,512:100,601:100,602:
 
 moc_para01,43,22,4	script	Pesquisador Glacial#eden	793,{
 	mes "[Pesquisador Glacial]";
-	mes "Posso fornecer equipamentos glaciais ou abrir a interface de encantamento.";
+	mes "Ola, aventureiro! Sou especialista nos equipamentos dos povos de Isgard e na forja das armas glaciais.";
+	mes "Como posso te ajudar hoje?";
+	next;
 
-	switch(select("Loja de equipamentos:Loja de armas:Loja de elixir para armas:Encantar equipamentos Flor de Neve:Encantar armas Dim Glacier:Sair")) {
+	switch(select("Lojas de Troca (Barter):Encantar Equipamentos (Interface):Sair")) {
 		case 1:
-			close2;
-			callshop "barter_eden_snowflower_equipment", 1;
-			end;
-		case 2:
-			close2;
-			callshop "barter_eden_dim_glacier_weapon", 1;
-			end;
-		case 3:
-			close2;
-			callshop "barter_eden_dim_glacier_elixir", 1;
-			end;
-		case 4:
 			mes "[Pesquisador Glacial]";
-			mes "Escolha qual tipo de equipamento Flor de Neve deseja encantar na interface:";
+			mes "Selecione a categoria de equipamentos que deseja negociar:";
 			next;
-			switch(select("Armadura / Robe:Capa / Cachecol:Botas / Sapatos:Pendente / Colar:Anel / Brinco:Cancelar")) {
+			switch(select("Flor de Neve (Tier 1 - Equipamentos e Acessorios):Glacial (Tier 2 - Armaduras, Capas, Sapatos e Escudo):Glacial (Tier 2 - Armas Glaciais):Capacetes de Isgard (Tier 2/3):Dim Glacier (Tier 3 - Armaduras, Capas e Sapatos):Dim Glacier (Tier 3 - Armas Endgame):Elixires, Extratos e Materiais:Voltar")) {
 				case 1:
 					close2;
-					item_enchant(26);
+					callshop "barter_eden_snowflower_equipment", 1;
 					end;
 				case 2:
 					close2;
-					item_enchant(27);
+					callshop "barter_eden_glacier_equipment", 1;
 					end;
 				case 3:
 					close2;
-					item_enchant(28);
+					callshop "barter_eden_glacier_weapon", 1;
 					end;
 				case 4:
 					close2;
-					item_enchant(29);
+					callshop "barter_eden_glacier_helm", 1;
 					end;
 				case 5:
 					close2;
-					item_enchant(30);
+					callshop "barter_eden_dim_glacier_equipment", 1;
+					end;
+				case 6:
+					close2;
+					callshop "barter_eden_dim_glacier_weapon", 1;
+					end;
+				case 7:
+					close2;
+					callshop "barter_eden_dim_glacier_elixir", 1;
 					end;
 				default:
 					close;
 			}
 			end;
-		case 5:
-			close2;
-			item_enchant(47);
+
+		case 2:
+			mes "[Pesquisador Glacial]";
+			mes "Selecione a categoria de itens para abrir a interface de encantamento:";
+			next;
+			switch(select("Equipamentos Flor de Neve (Tier 1):Equipamentos Glaciais Normais (Tier 2):Capacetes de Isgard (Tier 2/3):Equipamentos e Armas Dim Glacier (Tier 3):Voltar")) {
+				case 1:
+					mes "[Pesquisador Glacial]";
+					mes "Escolha o tipo de equipamento Flor de Neve:";
+					next;
+					switch(select("Armadura / Robe:Capa / Cachecol:Botas / Sapatos:Pendente / Colar (e Pingente de Cristal):Anel / Brinco:Cancelar")) {
+						case 1: close2; item_enchant(26); end;
+						case 2: close2; item_enchant(27); end;
+						case 3: close2; item_enchant(28); end;
+						case 4: close2; item_enchant(29); end;
+						case 5: close2; item_enchant(30); end;
+						default: close;
+					}
+					end;
+
+				case 2:
+					mes "[Pesquisador Glacial]";
+					mes "Escolha o tipo de equipamento Glacial Normal:";
+					next;
+					switch(select("Armas Glaciais:Armadura / Robe:Capa / Muffler:Sapatos / Botas:Escudo Glacial:Pendente / Colar:Anel / Brinco:Cancelar")) {
+						case 1: close2; item_enchant(31); end;
+						case 2: close2; item_enchant(89); end;
+						case 3: close2; item_enchant(90); end;
+						case 4: close2; item_enchant(91); end;
+						case 5: close2; item_enchant(92); end;
+						case 6: close2; item_enchant(93); end;
+						case 7: close2; item_enchant(94); end;
+						default: close;
+					}
+					end;
+
+				case 3:
+					close2;
+					item_enchant(98);
+					end;
+
+				case 4:
+					mes "[Pesquisador Glacial]";
+					mes "Escolha o tipo de equipamento Dim Glacier:";
+					next;
+					switch(select("Armas Dim Glacier:Armadura / Robe Dim Glacier:Capa / Muffler Dim Glacier:Sapatos / Botas Dim Glacier:Cancelar")) {
+						case 1: close2; item_enchant(47); end;
+						case 2: close2; item_enchant(95); end;
+						case 3: close2; item_enchant(96); end;
+						case 4: close2; item_enchant(97); end;
+						default: close;
+					}
+					end;
+
+				default:
+					close;
+			}
 			end;
+
 		default:
 			close;
 	}
