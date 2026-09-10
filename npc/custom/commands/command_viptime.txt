@@ -1,0 +1,113 @@
+//==============================================================
+// Sistema de Consulta de Tempo VIP (@tempovip, @viptime, etc.)
+//==============================================================
+-	script	CommandVIPTime	-1,{
+
+OnInit:
+	bindatcmd "tempovip",  strnpcinfo(3) + "::OnAtcommand", 0, 99;
+	bindatcmd "viptime",   strnpcinfo(3) + "::OnAtcommand", 0, 99;
+	bindatcmd "vipinfo",   strnpcinfo(3) + "::OnAtcommand", 0, 99;
+	bindatcmd "meuvip",    strnpcinfo(3) + "::OnAtcommand", 0, 99;
+	bindatcmd "checkvip",  strnpcinfo(3) + "::OnAtcommand", 0, 99;
+	bindatcmd "vipstatus", strnpcinfo(3) + "::OnAtcommand", 0, 99;
+	end;
+
+OnAtcommand:
+	.@target_name$ = "";
+
+	// Permite que administradores/GMs consultem o VIP de outros jogadores
+	if (.@atcmd_numparameters > 0 && (getgroupid() > 0 || getgmlevel() > 0)) {
+		.@target_name$ = .@atcmd_parameters$[0];
+		for (.@i = 1; .@i < .@atcmd_numparameters; .@i++) {
+			.@target_name$ = .@target_name$ + " " + .@atcmd_parameters$[.@i];
+		}
+	}
+
+	// Consulta de outro jogador (modo GM)
+	if (.@target_name$ != "") {
+		.@t_aid = getcharid(3, .@target_name$);
+		.@t_cid = getcharid(0, .@target_name$);
+
+		if (!isloggedin(.@t_aid, .@t_cid)) {
+			dispbottom "[VIP] O jogador '" + .@target_name$ + "' nao foi encontrado ou esta offline.";
+			end;
+		}
+
+		.@is_vip = vip_status(VIP_STATUS_ACTIVE, .@target_name$);
+		.@rem    = vip_status(VIP_STATUS_REMAINING, .@target_name$);
+		.@expire = vip_status(VIP_STATUS_EXPIRE, .@target_name$);
+
+		dispbottom "=========================================";
+		dispbottom "        INFORMACOES VIP (GM)             ";
+		dispbottom "=========================================";
+		dispbottom " Jogador: " + .@target_name$;
+
+		if (!.@is_vip || .@rem <= 0) {
+			dispbottom " Status: Inativo";
+			dispbottom " O jogador nao possui VIP ativo.";
+		} else {
+			.@days    = .@rem / 86400;
+			.@rem     = .@rem % 86400;
+			.@hours   = .@rem / 3600;
+			.@rem     = .@rem % 3600;
+			.@minutes = .@rem / 60;
+			.@seconds = .@rem % 60;
+
+			.@time_str$ = "";
+			if (.@days > 0)
+				.@time_str$ = .@time_str$ + .@days + " dia(s) ";
+			if (.@hours > 0 || .@days > 0)
+				.@time_str$ = .@time_str$ + .@hours + " hora(s) ";
+			if (.@minutes > 0 || .@hours > 0 || .@days > 0)
+				.@time_str$ = .@time_str$ + .@minutes + " minuto(s) ";
+			.@time_str$ = .@time_str$ + .@seconds + " segundo(s)";
+
+			.@expire_str$ = gettimestr("%d/%m/%Y as %H:%M:%S", 25, .@expire);
+
+			dispbottom " Status: Ativo";
+			dispbottom " Tempo Restante: " + .@time_str$;
+			dispbottom " Expira em: " + .@expire_str$;
+		}
+		dispbottom "=========================================";
+		end;
+	}
+
+	// Consulta do proprio jogador
+	.@is_vip = vip_status(VIP_STATUS_ACTIVE);
+	.@rem    = vip_status(VIP_STATUS_REMAINING);
+	.@expire = vip_status(VIP_STATUS_EXPIRE);
+
+	dispbottom "=========================================";
+	dispbottom "             PAINEL VIP                  ";
+	dispbottom "=========================================";
+
+	if (!.@is_vip || .@rem <= 0) {
+		dispbottom " Status: Inativo";
+		dispbottom " Voce nao possui tempo VIP ativo no momento.";
+		dispbottom " Adquira seu Ticket VIP atraves da loja ou barters!";
+	} else {
+		.@days    = .@rem / 86400;
+		.@rem     = .@rem % 86400;
+		.@hours   = .@rem / 3600;
+		.@rem     = .@rem % 3600;
+		.@minutes = .@rem / 60;
+		.@seconds = .@rem % 60;
+
+		.@time_str$ = "";
+		if (.@days > 0)
+			.@time_str$ = .@time_str$ + .@days + " dia(s) ";
+		if (.@hours > 0 || .@days > 0)
+			.@time_str$ = .@time_str$ + .@hours + " hora(s) ";
+		if (.@minutes > 0 || .@hours > 0 || .@days > 0)
+			.@time_str$ = .@time_str$ + .@minutes + " minuto(s) ";
+		.@time_str$ = .@time_str$ + .@seconds + " segundo(s)";
+
+		.@expire_str$ = gettimestr("%d/%m/%Y as %H:%M:%S", 25, .@expire);
+
+		dispbottom " Status: Ativo";
+		dispbottom " Tempo Restante: " + .@time_str$;
+		dispbottom " Expira em: " + .@expire_str$;
+	}
+	dispbottom "=========================================";
+	end;
+}
