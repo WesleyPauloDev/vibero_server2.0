@@ -329,29 +329,26 @@ moc_para01,42,36,3	script	Operador OS	4_M_REPAIR,{
 	mes "Posso trocar equipamentos e modulos usando Componentes Misteriosos e Cor Cores.";
 	next;
 
-	switch(select("Equipamentos Grace:Modulo de Arma:Modulo de Armadura:Arma OS:Equipamentos OS:Armadura Ilusional:Armas Illusion:Automatic:Cancelar")) {
+	switch(select("Equipamentos Grace:Armas OS:Equipamentos OS:Modulo de Armadura:Armadura Ilusional:Armas Illusion:Automatic:Cancelar")) {
 	case 1:
 		callsub L_Grace;
 		end;
 	case 2:
-		callsub L_WeaponModule;
-		end;
-	case 3:
-		callsub L_ArmorModule;
-		end;
-	case 4:
 		callsub L_OSWeapon;
 		end;
-	case 5:
+	case 3:
 		callsub L_OSEquip;
 		end;
-	case 6:
+	case 4:
+		callsub L_ArmorModule;
+		end;
+	case 5:
 		callsub L_IllusionArmor;
 		end;
-	case 7:
+	case 6:
 		callsub L_IllusionWeapons;
 		end;
-	case 8:
+	case 7:
 		callsub L_Automatic;
 		end;
 	default:
@@ -508,21 +505,740 @@ L_ArmorModule:
 
 L_OSWeapon:
 	mes "[Operador OS]";
-	mes "Entao, voce se interessou pelas armas OS.";
+	mes "As armas OS sao armas de tecnologia avancada que podem ser fabricadas, reformadas para OS-AD e encantadas.";
 	next;
+
+	switch(select("Fabricar Armas OS (Barter):Reformar Arma OS (+7 para OS-AD):Encantar Armas OS-AD:Modulos de Arma (Fisico/Magico):Comprar Materiais OS / Reforma:Informacoes e Requisitos:Cancelar")) {
+	case 1:
+		mes "[Operador OS]";
+		mes "Estas sao as armas OS que eu posso montar.";
+		mes "Escolha na janela de troca a arma que deseja.";
+		close2;
+		callshop "barter_os_weapon";
+		end;
+	case 2:
+		callsub L_OSReform;
+		end;
+	case 3:
+		callsub L_OSEnchant;
+		end;
+	case 4:
+		callsub L_WeaponModule;
+		end;
+	case 5:
+		callsub L_BuyOSMaterials;
+		end;
+	case 6:
+		callsub L_OSInfo;
+		end;
+	default:
+		close;
+	}
+
+L_OSReform:
 	mes "[Operador OS]";
-	mes "Estas sao as armas OS que eu posso montar.";
+	mes "^0000FFReforma de Armas OS para OS-AD^000000:";
+	mes "- Requer a Arma OS com refino no minimo ^0000FF+7^000000.";
+	mes "- 70x " + mesitemlink(1000430);
+	mes "- 200x " + mesitemlink(25669);
+	mes "- 40x " + mesitemlink(25723);
+	mes "- O nivel de refino e cartas sao preservados na evolucao!";
 	next;
-	mes "Escolha na janela de troca a arma que deseja.";
-	mes "La voce vera todos os materiais exigidos visualmente.";
+	switch(select("Reformar Arma Equipada (Mao Direita):Comprar Materiais Faltantes:Cancelar")) {
+	case 1:
+		callsub L_OSReformDirect;
+		end;
+	case 2:
+		callsub L_BuyOSMaterials;
+		end;
+	default:
+		close;
+	}
+
+L_OSReformDirect:
+	.@equip_id = getequipid(EQI_HAND_R);
+	.@refine = getequiprefinerycnt(EQI_HAND_R);
+	.@equip_name$ = getequipname(EQI_HAND_R);
+
+	// Tabela de conversao OS -> OS-AD
+	setarray .@os_base[0],   13493,  21047,  28038,  28136,  18178,  18179,  18180,  28253,  1862,   16088,  16089,  26151,  26164,  28629,  28755,  32019;
+	setarray .@os_result[0], 500051, 600028, 610039, 620018, 700054, 700055, 700056, 810013, 560034, 590043, 590044, 550075, 550076, 540051, 510066, 530031;
+
+	.@found_idx = -1;
+	for (.@i = 0; .@i < getarraysize(.@os_base); .@i++) {
+		if (.@equip_id == .@os_base[.@i]) {
+			.@found_idx = .@i;
+			break;
+		}
+	}
+
+	if (.@found_idx == -1) {
+		mes "[Operador OS]";
+		mes "Voce nao possui uma Arma OS compativel equipada na mao direita.";
+		mes "Por favor, equipe sua Arma OS (+7 ou mais) na mao direita e tente novamente.";
+		close;
+	}
+
+	.@result_id = .@os_result[.@found_idx];
+
+	if (.@refine < 7) {
+		mes "[Operador OS]";
+		mes "Sua arma equipada: " + mesitemlink(.@equip_id) + " ^0000FF(+" + .@refine + ")^000000.";
+		mes "O refino minimo exigido para a reforma e ^FF0000+7^000000.";
+		close;
+	}
+
+	.@c_stone = countitem(1000430);
+	.@c_comp  = countitem(25669);
+	.@c_core  = countitem(25723);
+
+	mes "[Operador OS]";
+	mes "Arma detectada: " + mesitemlink(.@equip_id) + " ^0000FF(+" + .@refine + ")^000000";
+	mes "Resultado da reforma: " + mesitemlink(.@result_id) + " ^007700(+" + .@refine + ")^000000";
+	mes "----------------------------------------";
+	mes "Materiais no inventario:";
+	mes "- " + mesitemlink(1000430) + ": " + (.@c_stone >= 70 ? "^00FF00" : "^FF0000") + .@c_stone + "/70^000000";
+	mes "- " + mesitemlink(25669) + ": " + (.@c_comp >= 200 ? "^00FF00" : "^FF0000") + .@c_comp + "/200^000000";
+	mes "- " + mesitemlink(25723) + ": " + (.@c_core >= 40 ? "^00FF00" : "^FF0000") + .@c_core + "/40^000000";
+	mes "----------------------------------------";
+	next;
+
+	if (.@c_stone < 70 || .@c_comp < 200 || .@c_core < 40) {
+		mes "[Operador OS]";
+		mes "Voce ainda nao possui todos os materiais necessarios para a reforma.";
+		next;
+		if (select("Comprar Materiais Disponiveis:Cancelar") == 1) {
+			callsub L_BuyOSMaterials;
+			end;
+		}
+		close;
+	}
+
+	mes "[Operador OS]";
+	mes "Tem certeza que deseja reformar sua " + mesitemlink(.@equip_id) + " ^0000FF(+" + .@refine + ")^000000 em " + mesitemlink(.@result_id) + " ^007700(+" + .@refine + ")^000000?";
+	next;
+
+	if (select("Sim, reformar agora!:Nao, cancelar") == 2)
+		close;
+
+	// Salva cartas, refino e opcoes aleatorias
+	for (.@i = 0; .@i < 4; .@i++) {
+		.@card[.@i] = getequipcardid(EQI_HAND_R, .@i);
+	}
+	for (.@i = 0; .@i < 5; .@i++) {
+		.@opt_id[.@i]    = getequiprandomoption(EQI_HAND_R, .@i, ROA_ID);
+		.@opt_val[.@i]   = getequiprandomoption(EQI_HAND_R, .@i, ROA_VALUE);
+		.@opt_param[.@i] = getequiprandomoption(EQI_HAND_R, .@i, ROA_PARAM);
+	}
+
+	if (callfunc("F_IsEquipIDHack", EQI_HAND_R, .@equip_id) || callfunc("F_IsEquipRefineHack", EQI_HAND_R, .@refine) || callfunc("F_IsEquipCardHack", EQI_HAND_R, .@card[0], .@card[1], .@card[2], .@card[3]))
+		end;
+
+	// Consome os materiais
+	delitem 1000430, 70;
+	delitem 25669, 200;
+	delitem 25723, 40;
+
+	delequip EQI_HAND_R;
+	getitem3 .@result_id, 1, 1, .@refine, 0, .@card[0], .@card[1], .@card[2], .@card[3], .@opt_id, .@opt_val, .@opt_param;
+
+	specialeffect2 EF_REPAIRWEAPON;
+	mes "[Operador OS]";
+	mes "Parabens! Sua arma foi reformada com sucesso.";
+	mes "Entreguei sua nova " + mesitemlink(.@result_id) + " ^007700(+" + .@refine + ")^000000 no seu inventario!";
+	close;
+
+L_OSEnchant:
+	.@equip_id = getequipid(EQI_HAND_R);
+	.@refine = getequiprefinerycnt(EQI_HAND_R);
+
+	// Tabela de armas OS-AD compativeis (16 armas)
+	setarray .@os_ad[0], 500051, 600028, 610039, 620018, 700054, 700055, 700056, 810013, 560034, 590043, 590044, 550075, 550076, 540051, 510066, 530031;
+
+	.@found_idx = -1;
+	for (.@i = 0; .@i < getarraysize(.@os_ad); .@i++) {
+		if (.@equip_id == .@os_ad[.@i]) {
+			.@found_idx = .@i;
+			break;
+		}
+	}
+
+	if (.@found_idx == -1) {
+		mes "[Operador OS]";
+		mes "Voce nao possui uma ^0000FFArma OS-AD^000000 equipada na mao direita.";
+		mes "Por favor, equipe sua arma OS-AD na mao direita para poder encantar ou resetar os encantos.";
+		mes "----------------------------------------";
+		mes "Armas compativeis: Cannon Rapier-OS-AD, Burning Knuckle-OS-AD, Beam Claymore-OS-AD, Virtual Bow-OS-AD e demais armas OS-AD.";
+		mes "Se ainda possuir uma Arma OS comum (+7 ou mais), use a opcao de Reformar Arma OS primeiro.";
+		next;
+		if (select("Comprar Materiais OS:Fechar") == 1) {
+			callsub L_BuyOSMaterials;
+			end;
+		}
+		close;
+	}
+
+	// Identifica os encantos atuais nos slots 4 (index 3) e 3 (index 2)
+	.@s4_id = getequipcardid(EQI_HAND_R, 3);
+	.@s3_id = getequipcardid(EQI_HAND_R, 2);
+
+	mes "[Operador OS]";
+	mes "Arma: " + mesitemlink(.@equip_id) + " ^0000FF(+" + .@refine + ")^000000";
+	mes "----------------------------------------";
+	mes "4o Slot (Base): " + (.@s4_id ? mesitemlink(.@s4_id) : "^777777[Vazio]^000000");
+	mes "3o Slot (Especial): " + (.@s3_id ? mesitemlink(.@s3_id) : "^777777[Vazio]^000000");
+	mes "----------------------------------------";
+	mes "Selecione a operacao desejada:";
+	next;
+
+	switch(select(
+		"Encantar / Aprimorar 4o Slot:" +
+		"Encantar / Aprimorar 3o Slot:" +
+		"Resetar Encantamentos (500k Zeny):" +
+		"Comprar Materiais OS:" +
+		"Cancelar"
+	)) {
+	case 1:
+		callsub L_EnchantSlot4;
+		end;
+	case 2:
+		callsub L_EnchantSlot3;
+		end;
+	case 3:
+		callsub L_ResetEnchants;
+		end;
+	case 4:
+		callsub L_BuyOSMaterials;
+		end;
+	default:
+		close;
+	}
+
+L_EnchantSlot4:
+	.@equip_id = getequipid(EQI_HAND_R);
+	.@refine = getequiprefinerycnt(EQI_HAND_R);
+	.@s4_id = getequipcardid(EQI_HAND_R, 3);
+
+	// Arrays de encanto do 4o Slot (Index 3)
+	setarray .@sharp_ids[1],   4818, 4817, 4816, 4843, 4844;
+	setarray .@hit_ids[1],     311395, 311396, 311397, 311398, 311399;
+	setarray .@delay_ids[1],   4869, 4872, 4873, 4881, 311394;
+	setarray .@caster_ids[1],  311400, 311401, 311402, 311403, 311404;
+
+	.@s4_type = -1; // 0=Sharp, 1=Hit, 2=Delay, 3=Caster
+	.@s4_lv = 0;
+
+	for (.@lv = 1; .@lv <= 5; .@lv++) {
+		if (.@s4_id == .@sharp_ids[.@lv])  { .@s4_type = 0; .@s4_lv = .@lv; break; }
+		if (.@s4_id == .@hit_ids[.@lv])    { .@s4_type = 1; .@s4_lv = .@lv; break; }
+		if (.@s4_id == .@delay_ids[.@lv])  { .@s4_type = 2; .@s4_lv = .@lv; break; }
+		if (.@s4_id == .@caster_ids[.@lv]) { .@s4_type = 3; .@s4_lv = .@lv; break; }
+	}
+
+	if (.@s4_id == 0) {
+		// Encantamento Inicial (Nv 1)
+		mes "[Operador OS]";
+		mes "O 4o Slot esta vazio. Escolha o encantamento inicial (Nivel 1):";
+		mes "Custo: 20x " + mesitemlink(25669) + " + 100.000 Zeny (100% Sucesso)";
+		next;
+
+		switch(select("Sharp 1 (Critico +6, Precisao +2):Hit Plus 1 (Precisao +10):Attack Delay 1 (Vel. de Ataque ASPD +4%):Caster 1 (Conjuracao -4%, MATK +6):Cancelar")) {
+		case 1: .@new_enc = .@sharp_ids[1];  break;
+		case 2: .@new_enc = .@hit_ids[1];    break;
+		case 3: .@new_enc = .@delay_ids[1];  break;
+		case 4: .@new_enc = .@caster_ids[1]; break;
+		default: close;
+		}
+
+		.@target_lv = 1;
+		.@req_comp = 20;
+		.@req_zeny = 100000;
+	} else if (.@s4_type != -1) {
+		// Aprimoramento
+		if (.@s4_lv >= 5) {
+			mes "[Operador OS]";
+			mes "Seu 4o Slot ja esta no nivel MAXIMO (" + mesitemlink(.@s4_id) + ")!";
+			close;
+		}
+
+		.@target_lv = .@s4_lv + 1;
+		if (.@s4_type == 0)      .@new_enc = .@sharp_ids[.@target_lv];
+		else if (.@s4_type == 1) .@new_enc = .@hit_ids[.@target_lv];
+		else if (.@s4_type == 2) .@new_enc = .@delay_ids[.@target_lv];
+		else if (.@s4_type == 3) .@new_enc = .@caster_ids[.@target_lv];
+
+		.@req_comp = .@target_lv * 20;
+		.@req_zeny = .@target_lv * 100000;
+
+		mes "[Operador OS]";
+		mes "Aprimoramento do 4o Slot:";
+		mes "Atual: " + mesitemlink(.@s4_id) + " (Nivel " + .@s4_lv + ")";
+		mes "Proximo: " + mesitemlink(.@new_enc) + " (Nivel " + .@target_lv + ")";
+		mes "----------------------------------------";
+		mes "Custo do Aprimoramento:";
+		mes "- " + .@req_comp + "x " + mesitemlink(25669);
+		mes "- " + callfunc("F_InsertComma", .@req_zeny) + " Zeny";
+		mes "----------------------------------------";
+		next;
+
+		if (select("Aprimorar Agora:Cancelar") == 2)
+			close;
+	} else {
+		mes "[Operador OS]";
+		mes "O 4o Slot contem um item nao reconhecido (" + .@s4_id + ").";
+		mes "Se desejar, utilize a opcao de resetar encantamentos.";
+		close;
+	}
+
+	// Verificacao de materiais
+	.@has_comp = countitem(25669);
+	if (.@has_comp < .@req_comp || Zeny < .@req_zeny) {
+		mes "[Operador OS]";
+		mes "Voce nao possui todos os recursos necessarios:";
+		mes "- " + mesitemlink(25669) + ": " + (.@has_comp >= .@req_comp ? "^00FF00" : "^FF0000") + .@has_comp + "/" + .@req_comp + "^000000";
+		mes "- Zeny: " + (Zeny >= .@req_zeny ? "^00FF00" : "^FF0000") + callfunc("F_InsertComma", Zeny) + "/" + callfunc("F_InsertComma", .@req_zeny) + "^000000";
+		next;
+		if (select("Comprar Componentes Misteriosos:Cancelar") == 1) {
+			callsub L_BuyOSMaterials;
+			end;
+		}
+		close;
+	}
+
+	// Confirmacao final
+	mes "[Operador OS]";
+	mes "Confirmar encantamento no 4o Slot para " + mesitemlink(.@new_enc) + "?";
+	next;
+	if (select("Sim, encantar!:Nao, cancelar") == 2)
+		close;
+
+	// Salva cartas, refino e random options
+	for (.@i = 0; .@i < 4; .@i++) {
+		.@card[.@i] = getequipcardid(EQI_HAND_R, .@i);
+	}
+	for (.@i = 0; .@i < 5; .@i++) {
+		.@opt_id[.@i]    = getequiprandomoption(EQI_HAND_R, .@i, ROA_ID);
+		.@opt_val[.@i]   = getequiprandomoption(EQI_HAND_R, .@i, ROA_VALUE);
+		.@opt_param[.@i] = getequiprandomoption(EQI_HAND_R, .@i, ROA_PARAM);
+	}
+
+	if (callfunc("F_IsEquipIDHack", EQI_HAND_R, .@equip_id) || callfunc("F_IsEquipRefineHack", EQI_HAND_R, .@refine) || callfunc("F_IsEquipCardHack", EQI_HAND_R, .@card[0], .@card[1], .@card[2], .@card[3]))
+		end;
+
+	delitem 25669, .@req_comp;
+	Zeny -= .@req_zeny;
+
+	.@card[3] = .@new_enc;
+
+	delequip EQI_HAND_R;
+	getitem3 .@equip_id, 1, 1, .@refine, 0, .@card[0], .@card[1], .@card[2], .@card[3], .@opt_id, .@opt_val, .@opt_param;
+
+	specialeffect2 EF_REPAIRWEAPON;
+	mes "[Operador OS]";
+	mes "Encantamento inserido com sucesso no 4o Slot: " + mesitemlink(.@new_enc) + "!";
+	close;
+
+L_EnchantSlot3:
+	.@equip_id = getequipid(EQI_HAND_R);
+	.@refine = getequiprefinerycnt(EQI_HAND_R);
+	.@s4_id = getequipcardid(EQI_HAND_R, 3);
+	.@s3_id = getequipcardid(EQI_HAND_R, 2);
+
+	if (.@s4_id == 0) {
+		mes "[Operador OS]";
+		mes "O ^0000FF4o Slot^000000 precisa ser encantado antes de encantar o 3o Slot.";
+		mes "Por favor, encante o 4o Slot primeiro!";
+		close;
+	}
+
+	// Arrays de encanto do 3o Slot (Index 2)
+	setarray .@archer_ids[1],  4832, 4833, 4834, 4835, 4836;
+	setarray .@fighter_ids[1], 311384, 311385, 311386, 311387, 311388;
+	setarray .@mage_ids[1],    311389, 311390, 311391, 311392, 311393;
+
+	.@s3_type = -1; // 0=Archer, 1=Fighter, 2=Mage
+	.@s3_lv = 0;
+
+	for (.@lv = 1; .@lv <= 5; .@lv++) {
+		if (.@s3_id == .@archer_ids[.@lv])  { .@s3_type = 0; .@s3_lv = .@lv; break; }
+		if (.@s3_id == .@fighter_ids[.@lv]) { .@s3_type = 1; .@s3_lv = .@lv; break; }
+		if (.@s3_id == .@mage_ids[.@lv])    { .@s3_type = 2; .@s3_lv = .@lv; break; }
+	}
+
+	if (.@s3_id == 0) {
+		// Encantamento Inicial (Nv 1)
+		mes "[Operador OS]";
+		mes "O 3o Slot esta vazio. Escolha o encantamento especial (Nivel 1):";
+		mes "Custo: 20x " + mesitemlink(25669) + " + 5x " + mesitemlink(25723) + " + 100.000 Zeny";
+		next;
+
+		switch(select("Expert Archer 1 (Dano Fisico a Distancia +4%):Expert Fighter 1 (Dano Fisico Corpo a Corpo +4%):Expert Magician 1 (Dano Magico Todas Propriedades +4%):Cancelar")) {
+		case 1: .@new_enc = .@archer_ids[1];  break;
+		case 2: .@new_enc = .@fighter_ids[1]; break;
+		case 3: .@new_enc = .@mage_ids[1];    break;
+		default: close;
+		}
+
+		.@target_lv = 1;
+		.@req_comp = 20;
+		.@req_core = 5;
+		.@req_zeny = 100000;
+	} else if (.@s3_type != -1) {
+		// Aprimoramento
+		if (.@s3_lv >= 5) {
+			mes "[Operador OS]";
+			mes "Seu 3o Slot ja esta no nivel MAXIMO (" + mesitemlink(.@s3_id) + ")!";
+			close;
+		}
+
+		.@target_lv = .@s3_lv + 1;
+		if (.@s3_type == 0)      .@new_enc = .@archer_ids[.@target_lv];
+		else if (.@s3_type == 1) .@new_enc = .@fighter_ids[.@target_lv];
+		else if (.@s3_type == 2) .@new_enc = .@mage_ids[.@target_lv];
+
+		.@req_comp = .@target_lv * 20;
+		.@req_core = .@target_lv * 5;
+		.@req_zeny = .@target_lv * 100000;
+
+		mes "[Operador OS]";
+		mes "Aprimoramento do 3o Slot:";
+		mes "Atual: " + mesitemlink(.@s3_id) + " (Nivel " + .@s3_lv + ")";
+		mes "Proximo: " + mesitemlink(.@new_enc) + " (Nivel " + .@target_lv + ")";
+		mes "----------------------------------------";
+		mes "Custo do Aprimoramento:";
+		mes "- " + .@req_comp + "x " + mesitemlink(25669);
+		mes "- " + .@req_core + "x " + mesitemlink(25723);
+		mes "- " + callfunc("F_InsertComma", .@req_zeny) + " Zeny";
+		mes "----------------------------------------";
+		next;
+
+		if (select("Aprimorar Agora:Cancelar") == 2)
+			close;
+	} else {
+		mes "[Operador OS]";
+		mes "O 3o Slot contem um item nao reconhecido (" + .@s3_id + ").";
+		mes "Se desejar, utilize a opcao de resetar encantamentos.";
+		close;
+	}
+
+	// Verificacao de materiais
+	.@has_comp = countitem(25669);
+	.@has_core = countitem(25723);
+	if (.@has_comp < .@req_comp || .@has_core < .@req_core || Zeny < .@req_zeny) {
+		mes "[Operador OS]";
+		mes "Voce nao possui todos os recursos necessarios:";
+		mes "- " + mesitemlink(25669) + ": " + (.@has_comp >= .@req_comp ? "^00FF00" : "^FF0000") + .@has_comp + "/" + .@req_comp + "^000000";
+		mes "- " + mesitemlink(25723) + ": " + (.@has_core >= .@req_core ? "^00FF00" : "^FF0000") + .@has_core + "/" + .@req_core + "^000000";
+		mes "- Zeny: " + (Zeny >= .@req_zeny ? "^00FF00" : "^FF0000") + callfunc("F_InsertComma", Zeny) + "/" + callfunc("F_InsertComma", .@req_zeny) + "^000000";
+		next;
+		if (select("Comprar Materiais Disponiveis:Cancelar") == 1) {
+			callsub L_BuyOSMaterials;
+			end;
+		}
+		close;
+	}
+
+	// Confirmacao final
+	mes "[Operador OS]";
+	mes "Confirmar encantamento no 3o Slot para " + mesitemlink(.@new_enc) + "?";
+	next;
+	if (select("Sim, encantar!:Nao, cancelar") == 2)
+		close;
+
+	// Salva cartas, refino e random options
+	for (.@i = 0; .@i < 4; .@i++) {
+		.@card[.@i] = getequipcardid(EQI_HAND_R, .@i);
+	}
+	for (.@i = 0; .@i < 5; .@i++) {
+		.@opt_id[.@i]    = getequiprandomoption(EQI_HAND_R, .@i, ROA_ID);
+		.@opt_val[.@i]   = getequiprandomoption(EQI_HAND_R, .@i, ROA_VALUE);
+		.@opt_param[.@i] = getequiprandomoption(EQI_HAND_R, .@i, ROA_PARAM);
+	}
+
+	if (callfunc("F_IsEquipIDHack", EQI_HAND_R, .@equip_id) || callfunc("F_IsEquipRefineHack", EQI_HAND_R, .@refine) || callfunc("F_IsEquipCardHack", EQI_HAND_R, .@card[0], .@card[1], .@card[2], .@card[3]))
+		end;
+
+	delitem 25669, .@req_comp;
+	delitem 25723, .@req_core;
+	Zeny -= .@req_zeny;
+
+	.@card[2] = .@new_enc;
+
+	delequip EQI_HAND_R;
+	getitem3 .@equip_id, 1, 1, .@refine, 0, .@card[0], .@card[1], .@card[2], .@card[3], .@opt_id, .@opt_val, .@opt_param;
+
+	specialeffect2 EF_REPAIRWEAPON;
+	mes "[Operador OS]";
+	mes "Encantamento inserido com sucesso no 3o Slot: " + mesitemlink(.@new_enc) + "!";
+	close;
+
+L_ResetEnchants:
+	.@equip_id = getequipid(EQI_HAND_R);
+	.@refine = getequiprefinerycnt(EQI_HAND_R);
+	.@s4_id = getequipcardid(EQI_HAND_R, 3);
+	.@s3_id = getequipcardid(EQI_HAND_R, 2);
+
+	if (.@s4_id == 0 && .@s3_id == 0) {
+		mes "[Operador OS]";
+		mes "Sua arma equipada nao possui nenhum encantamento nos slots 3 ou 4 para resetar.";
+		close;
+	}
+
+	mes "[Operador OS]";
+	mes "^0000FFResetar Encantamentos^000000:";
+	mes "- Custo: ^0000FF500.000 Zeny^000000";
+	mes "- Chance de Sucesso: ^00FF00100%^000000 (Sem risco de perder o item)";
+	mes "- O refino (+"+.@refine+"), cartas e opcoes aleatorias sao ^00FF00100% PRESERVADOS^000000!";
+	mes "- Apenas os encantamentos dos slots 3 e 4 serao removidos.";
+	mes "----------------------------------------";
+	mes "Encantamentos a remover:";
+	if (.@s4_id) mes "- 4o Slot: " + mesitemlink(.@s4_id);
+	if (.@s3_id) mes "- 3o Slot: " + mesitemlink(.@s3_id);
+	mes "----------------------------------------";
+	next;
+
+	if (Zeny < 500000) {
+		mes "[Operador OS]";
+		mes "Voce nao possui 500.000 Zeny para realizar o reset.";
+		close;
+	}
+
+	if (select("Confirmar Reset (500k Zeny):Cancelar") == 2)
+		close;
+
+	// Salva cartas, refino e random options
+	for (.@i = 0; .@i < 4; .@i++) {
+		.@card[.@i] = getequipcardid(EQI_HAND_R, .@i);
+	}
+	for (.@i = 0; .@i < 5; .@i++) {
+		.@opt_id[.@i]    = getequiprandomoption(EQI_HAND_R, .@i, ROA_ID);
+		.@opt_val[.@i]   = getequiprandomoption(EQI_HAND_R, .@i, ROA_VALUE);
+		.@opt_param[.@i] = getequiprandomoption(EQI_HAND_R, .@i, ROA_PARAM);
+	}
+
+	if (callfunc("F_IsEquipIDHack", EQI_HAND_R, .@equip_id) || callfunc("F_IsEquipRefineHack", EQI_HAND_R, .@refine) || callfunc("F_IsEquipCardHack", EQI_HAND_R, .@card[0], .@card[1], .@card[2], .@card[3]))
+		end;
+
+	Zeny -= 500000;
+	.@card[2] = 0;
+	.@card[3] = 0;
+
+	delequip EQI_HAND_R;
+	getitem3 .@equip_id, 1, 1, .@refine, 0, .@card[0], .@card[1], .@card[2], .@card[3], .@opt_id, .@opt_val, .@opt_param;
+
+	specialeffect2 EF_REPAIRWEAPON;
+	mes "[Operador OS]";
+	mes "Encantamentos resetados com sucesso! Sua arma foi limpa e esta pronta para novos encantos.";
+	close;
+
+L_BuyOSMaterials:
+	mes "[Operador OS]";
+	mes "Se faltar algum material para fabricar, reformar ou modificar suas armas OS, voce pode comprar diretamente aqui por Zeny.";
+	next;
 	close2;
-	callshop "barter_os_weapon";
+	callshop "shop_os_materials", 1;
 	end;
 
+L_OSInfo:
+	mes "[Operador OS]";
+	mes "^0000FF=== Guia de Armas OS ===^000000";
+	mes "1. ^007700Fabricacao^000000: 1x Arma Danificada + 50x Componentes Misteriosos.";
+	mes "2. ^007700Opcoes Aleatorias (OS Base)^000000: Use Modificadores Fisicos/Magicos no inventario para adicionar bonus aleatorios.";
+	mes "3. ^007700Reforma (OS-AD)^000000: Com refino +7 ou mais, evolua para OS-AD usando 70x Pedras de Evolucao, 200x Componentes e 40x Cor Cores.";
+	mes "4. ^007700Encantamento (OS-AD)^000000: Encante e aprimore os slots 4 e 3 com Componentes Misteriosos.";
+	next;
+	close;
+
 L_OSEquip:
-	close2;
-	callshop "barter_os_equip";
-	end;
+	mes "[Operador OS]";
+	mes "^0000FFEquipamentos e Elmos OS^000000:";
+	mes "- Fabricacao de Elmos OS com Componentes Misteriosos.";
+	mes "- Reforma de Elmos OS (+9 ou mais) para a versao avancada OS-LT.";
+	mes "- Visualizacao de Combos e Efeitos com Armas OS e OS-AD.";
+	next;
+
+	switch(select("Fabricar Elmos OS (Barter):Reformar Elmo OS (+9 para OS-LT):Guia de Combos Elmos e Armas OS:Cancelar")) {
+	case 1:
+		mes "[Operador OS]";
+		mes "Abrindo a loja de fabricacao de Elmos OS.";
+		close2;
+		callshop "barter_os_equip";
+		end;
+	case 2:
+		callsub L_OSHeadgearReform;
+		end;
+	case 3:
+		callsub L_OSCombosInfo;
+		end;
+	default:
+		close;
+	}
+
+L_OSHeadgearReform:
+	.@equip_id = getequipid(EQI_HEAD_TOP);
+	.@refine = getequiprefinerycnt(EQI_HEAD_TOP);
+
+	// Tabela de conversao Elmos OS -> OS-LT
+	setarray .@os_head_base[0],   400044, 400059, 400021, 400054, 400022, 400061, 400049;
+	setarray .@os_head_result[0], 400265, 400262, 400267, 400263, 400266, 400261, 400264;
+
+	.@found_idx = -1;
+	for (.@i = 0; .@i < getarraysize(.@os_head_base); .@i++) {
+		if (.@equip_id == .@os_head_base[.@i]) {
+			.@found_idx = .@i;
+			break;
+		}
+	}
+
+	if (.@found_idx == -1) {
+		mes "[Operador OS]";
+		mes "Voce nao possui um ^0000FFElmo OS^000000 compativel equipado no Topo da Cabeca.";
+		mes "Por favor, equipe seu Elmo OS (+9 ou mais) no Topo e tente novamente.";
+		mes "----------------------------------------";
+		mes "Elmos compativeis:";
+		mes "- Phantom of Masquerade, Scorpio Celestial Coronet";
+		mes "- Red Clark Casquette, Great Magician's Ceremonial Crown";
+		mes "- Ignis Cap, Sagittarius Celestial Coronet, Stripe Hat";
+		close;
+	}
+
+	.@result_id = .@os_head_result[.@found_idx];
+
+	if (.@refine < 9) {
+		mes "[Operador OS]";
+		mes "Seu elmo equipado: " + mesitemlink(.@equip_id) + " ^0000FF(+" + .@refine + ")^000000.";
+		mes "O refino minimo exigido para a evolucao LT e ^FF0000+9^000000.";
+		close;
+	}
+
+	.@c_stone = countitem(1000434);
+	.@c_comp  = countitem(25669);
+	.@c_core  = countitem(25723);
+
+	mes "[Operador OS]";
+	mes "Elmo detectado: " + mesitemlink(.@equip_id) + " ^0000FF(+" + .@refine + ")^000000";
+	mes "Resultado da reforma: " + mesitemlink(.@result_id) + " ^007700(+" + .@refine + ")^000000";
+	mes "----------------------------------------";
+	mes "Materiais no inventario:";
+	mes "- " + mesitemlink(1000434) + ": " + (.@c_stone >= 100 ? "^00FF00" : "^FF0000") + .@c_stone + "/100^000000";
+	mes "- " + mesitemlink(25669) + ": " + (.@c_comp >= 100 ? "^00FF00" : "^FF0000") + .@c_comp + "/100^000000";
+	mes "- " + mesitemlink(25723) + ": " + (.@c_core >= 20 ? "^00FF00" : "^FF0000") + .@c_core + "/20^000000";
+	mes "----------------------------------------";
+	mes "O refino (+"+.@refine+"), cartas e opcoes aleatorias sao ^00FF00100% PRESERVADOS^000000!";
+	next;
+
+	if (.@c_stone < 100 || .@c_comp < 100 || .@c_core < 20) {
+		mes "[Operador OS]";
+		mes "Voce ainda nao possui todos os materiais necessarios para a reforma do elmo.";
+		next;
+		if (select("Comprar Materiais OS:Cancelar") == 1) {
+			callsub L_BuyOSMaterials;
+			end;
+		}
+		close;
+	}
+
+	mes "[Operador OS]";
+	mes "Tem certeza que deseja reformar seu " + mesitemlink(.@equip_id) + " ^0000FF(+" + .@refine + ")^000000 em " + mesitemlink(.@result_id) + " ^007700(+" + .@refine + ")^000000?";
+	next;
+
+	if (select("Sim, reformar agora!:Nao, cancelar") == 2)
+		close;
+
+	// Salva cartas, refino e opcoes aleatorias
+	for (.@i = 0; .@i < 4; .@i++) {
+		.@card[.@i] = getequipcardid(EQI_HEAD_TOP, .@i);
+	}
+	for (.@i = 0; .@i < 5; .@i++) {
+		.@opt_id[.@i]    = getequiprandomoption(EQI_HEAD_TOP, .@i, ROA_ID);
+		.@opt_val[.@i]   = getequiprandomoption(EQI_HEAD_TOP, .@i, ROA_VALUE);
+		.@opt_param[.@i] = getequiprandomoption(EQI_HEAD_TOP, .@i, ROA_PARAM);
+	}
+
+	if (callfunc("F_IsEquipIDHack", EQI_HEAD_TOP, .@equip_id) || callfunc("F_IsEquipRefineHack", EQI_HEAD_TOP, .@refine) || callfunc("F_IsEquipCardHack", EQI_HEAD_TOP, .@card[0], .@card[1], .@card[2], .@card[3]))
+		end;
+
+	// Consome os materiais
+	delitem 1000434, 100;
+	delitem 25669, 100;
+	delitem 25723, 20;
+
+	delequip EQI_HEAD_TOP;
+	getitem3 .@result_id, 1, 1, .@refine, 0, .@card[0], .@card[1], .@card[2], .@card[3], .@opt_id, .@opt_val, .@opt_param;
+
+	specialeffect2 EF_REPAIRWEAPON;
+	mes "[Operador OS]";
+	mes "Parabens! Seu elmo foi reformado com sucesso para a versao LT.";
+	mes "Entreguei seu novo " + mesitemlink(.@result_id) + " ^007700(+" + .@refine + ")^000000 no seu inventario!";
+	close;
+
+L_OSCombosInfo:
+	mes "[Operador OS]";
+	mes "^0000FF=== Combos dos Elmos OS / OS-LT ===^000000";
+	mes "Escolha o elmo para ver seus combos com as armas:";
+	next;
+
+	switch(select("Phantom Cap:Scorpio Celestial Coronet:Red Clock Casquette:Great Magician Crown:Ignis Cap:Sagittarius Celestial Coronet:Stripe Hat:Voltar")) {
+	case 1:
+		mes "[Operador OS]";
+		mes "^0000FFPhantom Cap (OS / LT)^000000:";
+		mes "- ^007700Rutilus Stick OS/AD^000000: Dano em Espirito da Alma e Espirito Explosivo (Soul Reaper).";
+		mes "- ^007700Electric Fox OS/AD^000000: -1s Cooldown Chuva de Meteoros Catnip (Doram).";
+		mes "- ^007700Ultio Spes OS/AD^000000: +Dano Magico Sagrado e Adoramus (Arch Bishop).";
+		next;
+		break;
+	case 2:
+		mes "[Operador OS]";
+		mes "^0000FFScorpio Celestial Coronet (OS / LT)^000000:";
+		mes "- ^007700Cannon Rapier OS/AD^000000: -1s Cooldown e +Dano em Luz da Criacao (Royal Guard).";
+		mes "- ^007700Rutilus Stick OS/AD^000000: -1s Cooldown e +Dano em Onda Psiquica (Sorcerer).";
+		mes "- ^007700Ultio Spes OS/AD^000000: +Dano Magico Sagrado e Judex (Arch Bishop).";
+		next;
+		break;
+	case 3:
+		mes "[Operador OS]";
+		mes "^0000FFRed Clock Casquette (OS / LT)^000000:";
+		mes "- ^007700Circuit Board OS/AD^000000: +ATK e +Dano em Explosao Solar (Star Emperor).";
+		mes "- ^007700Beam Claymore OS/AD^000000: -1s Cooldown e +Dano em Impacto Flamejante (Rune Knight).";
+		mes "- ^007700Meuchler OS/AD^000000: +ATK e +Dano em Laminas de Vento (Guillotine Cross).";
+		next;
+		break;
+	case 4:
+		mes "[Operador OS]";
+		mes "^0000FFGreat Magician's Ceremonial Crown (OS / LT)^000000:";
+		mes "- ^007700Cannon Rapier OS/AD^000000: +MATK e +Dano em Chamas de Hela (Warlock).";
+		mes "- ^007700Kuroiro OS/AD^000000: +Dano em Danca das Sombras e Kunai (Kagerou/Oboro).";
+		mes "- ^007700Rutilus Stick OS/AD^000000: +MATK e +Dano em Meteoro Escarlate e Cometa (Warlock).";
+		next;
+		break;
+	case 5:
+		mes "[Operador OS]";
+		mes "^0000FFIgnis Cap (OS / LT)^000000:";
+		mes "- ^007700Saphir Hall OS/AD^000000: +ATK e +Dano em Canhao de Projeteis (Genetic).";
+		mes "- ^007700Blasti OS/AD^000000: +ATK e +Dano em Canhao (Mechanic).";
+		mes "- ^007700Virtual Bow OS/AD^000000: -2.5s Cooldown Tempestade de Flechas e +Dano Disparo Certeiro (Ranger).";
+		next;
+		break;
+	case 6:
+		mes "[Operador OS]";
+		mes "^0000FFSagittarius Celestial Coronet (OS / LT)^000000:";
+		mes "- ^007700Burning Knuckle OS/AD^000000: -1s Cooldown Impacto Tiranico e +Dano a Distancia (Sura).";
+		mes "- ^007700Saphir Hall OS/AD^000000: -10% Var. Cast e +Dano em Bomba Acida (Genetic).";
+		mes "- ^007700HR-S55 OS/AD^000000: +Dano a Distancia e +Dano em Martelo de Deus (Rebellion).";
+		next;
+		break;
+	case 7:
+		mes "[Operador OS]";
+		mes "^0000FFStripe Hat (OS / LT)^000000:";
+		mes "- ^007700Boost Lance OS/AD^000000: -0.5s Cooldown e +Dano em Disparo Perfurante (Royal Guard).";
+		mes "- ^007700MH-P89 OS/AD^000000: -0.5s Cooldown e +Dano em Temporal de Mil Flechas (Minstrel/Wanderer).";
+		mes "- ^007700AC-B44 OS/AD^000000: -15% Pos-conjuracao e +Dano em Disparo Triplo (Shadow Chaser).";
+		next;
+		break;
+	default:
+		close;
+	}
+	close;
 
 L_IllusionArmor:
 	mes "[Operador OS]";
@@ -535,8 +1251,29 @@ L_IllusionArmor:
 
 L_IllusionWeapons:
 	mes "[Operador OS]";
-	mes "Posso abrir as trocas oficiais de equipamentos Illusion.";
-	mes "Cada loja mostra os itens e materiais exigidos visualmente.";
+	mes "^0000FFArmas Ilusionais (Illusion Weapons)^000000:";
+	mes "- Fabricacao de Armas Illusion por calabouco.";
+	mes "- Encantamento oficial de Armas Illusion (Slots 4 e 3).";
+	mes "- Reset de encantamentos preservando refino e cartas.";
+	next;
+
+	switch(select("Fabricar Armas Illusion (Lojas):Encantar Arma Illusion (Mao Direita):Resetar Encantamentos Illusion:Cancelar")) {
+	case 1:
+		callsub L_IllusionShopSelect;
+		end;
+	case 2:
+		callsub L_IllusionEnchant;
+		end;
+	case 3:
+		callsub L_IllusionReset;
+		end;
+	default:
+		close;
+	}
+
+L_IllusionShopSelect:
+	mes "[Operador OS]";
+	mes "Escolha o calabouco ilusional para abrir a loja de fabricacao:";
 	next;
 
 	switch(select(
@@ -581,6 +1318,169 @@ L_IllusionWeapons:
 	close2;
 	callshop .@shop$;
 	end;
+
+L_IllusionEnchant:
+	.@equip_id = getequipid(EQI_HAND_R);
+	.@refine = getequiprefinerycnt(EQI_HAND_R);
+
+	// Lista com todas as 38 Armas Illusion
+	setarray .@ill_weap[0],
+		16063, 26007, 26109, 28725, 28022, 28023, 2039, 18149, 28612,
+		1846, 13337, 28922, 28745, 28244, 2051, 13469, 1326, 32005,
+		13338, 16065, 550030, 550031, 530015, 500030, 620010, 510034,
+		28626, 18174, 28254, 21050, 32301, 28762, 570008, 580008,
+		630006, 610012, 600011, 630007;
+
+	.@found = 0;
+	for (.@i = 0; .@i < getarraysize(.@ill_weap); .@i++) {
+		if (.@equip_id == .@ill_weap[.@i]) {
+			.@found = 1;
+			break;
+		}
+	}
+
+	if (!.@found) {
+		mes "[Operador OS]";
+		mes "Voce nao possui uma ^0000FFArma Illusion^000000 equipada na mao direita.";
+		mes "Por favor, equipe uma arma da linha Illusion na mao direita e tente novamente.";
+		close;
+	}
+
+	.@s4_id = getequipcardid(EQI_HAND_R, 3);
+	.@s3_id = getequipcardid(EQI_HAND_R, 2);
+
+	mes "[Operador OS]";
+	mes "Arma: " + mesitemlink(.@equip_id) + " ^0000FF(+" + .@refine + ")^000000";
+	mes "----------------------------------------";
+	mes "4o Slot: " + (.@s4_id ? mesitemlink(.@s4_id) : "^777777[Vazio]^000000");
+	mes "3o Slot: " + (.@s3_id ? mesitemlink(.@s3_id) : "^777777[Vazio]^000000");
+	mes "----------------------------------------";
+
+	if (.@s4_id > 0 && .@s3_id > 0) {
+		mes "Sua arma ja possui o limite maximo de 2 encantamentos.";
+		mes "Caso deseje novos encantos, utilize a opcao de Resetar Encantamentos.";
+		close;
+	}
+
+	.@target_slot = (.@s4_id == 0 ? 3 : 2);
+	.@slot_name$ = (.@target_slot == 3 ? "4o Slot" : "3o Slot");
+
+	mes "Encantando o " + .@slot_name$ + ".";
+	mes "Custo: 5x " + mesitemlink(25271) + " (100% Sucesso)";
+	mes "Escolha a categoria do encantamento:";
+	next;
+
+	switch(select("Fisico / Corpo a Corpo (Melee):Longo Alcance / Precisao (Ranged):Magico / Arcano (Magic):Cancelar")) {
+	case 1:
+		setarray .@pool[0], 4701, 4702, 4703, 4721, 4722, 4723, 4751, 4752, 4753, 4811, 4810, 4809, 4808, 4820, 4807, 4842, 29081, 29082, 29083, 29084, 29085, 29061, 29062, 29063, 29064, 29065;
+		break;
+	case 2:
+		setarray .@pool[0], 4731, 4732, 4733, 4721, 4722, 4723, 4751, 4752, 4753, 4832, 4833, 4834, 4835, 4836, 4807, 4842, 29091, 29092, 29093, 29094, 29095, 29071, 29072, 29073, 29074, 29075;
+		break;
+	case 3:
+		setarray .@pool[0], 4711, 4712, 4713, 4721, 4722, 4723, 4751, 4752, 4753, 4815, 4814, 4813, 4812, 4826, 311400, 311401, 311402, 311403, 311404, 29111, 29112, 29113, 29114, 29115;
+		break;
+	default:
+		close;
+	}
+
+	.@c_stone = countitem(25271);
+	if (.@c_stone < 5) {
+		mes "[Operador OS]";
+		mes "Voce precisa de 5x " + mesitemlink(25271) + " para encantar.";
+		mes "Voce possui: " + .@c_stone + "/5.";
+		next;
+		if (select("Comprar Pedras de Ilusao:Cancelar") == 1) {
+			callsub L_BuyOSMaterials;
+			end;
+		}
+		close;
+	}
+
+	// Sorteia o encantamento da categoria escolhida
+	.@new_enc = .@pool[rand(getarraysize(.@pool))];
+
+	// Salva cartas, refino e opcoes aleatorias
+	for (.@i = 0; .@i < 4; .@i++) {
+		.@card[.@i] = getequipcardid(EQI_HAND_R, .@i);
+	}
+	for (.@i = 0; .@i < 5; .@i++) {
+		.@opt_id[.@i]    = getequiprandomoption(EQI_HAND_R, .@i, ROA_ID);
+		.@opt_val[.@i]   = getequiprandomoption(EQI_HAND_R, .@i, ROA_VALUE);
+		.@opt_param[.@i] = getequiprandomoption(EQI_HAND_R, .@i, ROA_PARAM);
+	}
+
+	if (callfunc("F_IsEquipIDHack", EQI_HAND_R, .@equip_id) || callfunc("F_IsEquipRefineHack", EQI_HAND_R, .@refine) || callfunc("F_IsEquipCardHack", EQI_HAND_R, .@card[0], .@card[1], .@card[2], .@card[3]))
+		end;
+
+	delitem 25271, 5;
+	.@card[.@target_slot] = .@new_enc;
+
+	delequip EQI_HAND_R;
+	getitem3 .@equip_id, 1, 1, .@refine, 0, .@card[0], .@card[1], .@card[2], .@card[3], .@opt_id, .@opt_val, .@opt_param;
+
+	specialeffect2 EF_REPAIRWEAPON;
+	mes "[Operador OS]";
+	mes "Encantamento inserido com sucesso no " + .@slot_name$ + ": " + mesitemlink(.@new_enc) + "!";
+	close;
+
+L_IllusionReset:
+	.@equip_id = getequipid(EQI_HAND_R);
+	.@refine = getequiprefinerycnt(EQI_HAND_R);
+	.@s4_id = getequipcardid(EQI_HAND_R, 3);
+	.@s3_id = getequipcardid(EQI_HAND_R, 2);
+
+	if (.@s4_id == 0 && .@s3_id == 0) {
+		mes "[Operador OS]";
+		mes "Sua arma equipada nao possui nenhum encantamento para resetar.";
+		close;
+	}
+
+	mes "[Operador OS]";
+	mes "^0000FFReset de Encantamentos Illusion^000000:";
+	mes "- Custo: ^0000FF100.000 Zeny^000000";
+	mes "- Chance de Sucesso: ^00FF00100%^000000 (Sem risco de perder o item)";
+	mes "- Refino (+"+.@refine+"), cartas e opcoes aleatorias sao ^00FF00100% PRESERVADOS^000000!";
+	mes "----------------------------------------";
+	mes "Encantamentos a remover:";
+	if (.@s4_id) mes "- 4o Slot: " + mesitemlink(.@s4_id);
+	if (.@s3_id) mes "- 3o Slot: " + mesitemlink(.@s3_id);
+	mes "----------------------------------------";
+	next;
+
+	if (Zeny < 100000) {
+		mes "[Operador OS]";
+		mes "Voce nao possui 100.000 Zeny.";
+		close;
+	}
+
+	if (select("Confirmar Reset (100k Zeny):Cancelar") == 2)
+		close;
+
+	// Salva cartas, refino e opcoes aleatorias
+	for (.@i = 0; .@i < 4; .@i++) {
+		.@card[.@i] = getequipcardid(EQI_HAND_R, .@i);
+	}
+	for (.@i = 0; .@i < 5; .@i++) {
+		.@opt_id[.@i]    = getequiprandomoption(EQI_HAND_R, .@i, ROA_ID);
+		.@opt_val[.@i]   = getequiprandomoption(EQI_HAND_R, .@i, ROA_VALUE);
+		.@opt_param[.@i] = getequiprandomoption(EQI_HAND_R, .@i, ROA_PARAM);
+	}
+
+	if (callfunc("F_IsEquipIDHack", EQI_HAND_R, .@equip_id) || callfunc("F_IsEquipRefineHack", EQI_HAND_R, .@refine) || callfunc("F_IsEquipCardHack", EQI_HAND_R, .@card[0], .@card[1], .@card[2], .@card[3]))
+		end;
+
+	Zeny -= 100000;
+	.@card[2] = 0;
+	.@card[3] = 0;
+
+	delequip EQI_HAND_R;
+	getitem3 .@equip_id, 1, 1, .@refine, 0, .@card[0], .@card[1], .@card[2], .@card[3], .@opt_id, .@opt_val, .@opt_param;
+
+	specialeffect2 EF_REPAIRWEAPON;
+	mes "[Operador OS]";
+	mes "Encantamentos resetados com sucesso! Sua arma Illusion esta limpa.";
+	close;
 
 L_Automatic:
 	mes "[Operador OS]";
@@ -866,3 +1766,6 @@ L_AutomaticInfo:
 		close;
 	}
 }
+
+-	shop	shop_os_materials	-1,25668:500000,25669:50000,25723:200000,25271:100000,23776:1000000,23777:2500000,23778:5000000,23779:1000000,23780:2500000,23781:5000000
+
