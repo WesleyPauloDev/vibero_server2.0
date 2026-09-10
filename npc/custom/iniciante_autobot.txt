@@ -2877,7 +2877,7 @@ OnStepTimer:
 			// =========================================================
 			else if (BaseClass == Job_Mage) {
 				// --- 2.1 ARCANO / WARLOCK (3a CLASSE) & ARCH MAGE (4a CLASSE) ---
-				if (Class == Job_Warlock || Class >= 4254 || getskilllv("WL_CHAINLIGHTNING") > 0 || getskilllv("WL_CRIMSONROCK") > 0 || getskilllv("WL_JACKFROST") > 0 || getskilllv("WL_SOULEXPANSION") > 0) {
+				if (Class == Job_Warlock || Class == 4254 || BOT_FINAL_JOB == 103 || getskilllv("WL_CHAINLIGHTNING") > 0 || getskilllv("WL_CRIMSONROCK") > 0 || getskilllv("WL_JACKFROST") > 0 || getskilllv("WL_SOULEXPANSION") > 0) {
 					.@wl_rot = @BOT_SKILL_ROT % 4;
 					if (.@wl_rot == 0 && getskilllv("WL_CHAINLIGHTNING") > 0 && Sp >= 40) {
 						// Corrente Eletrica (Target Skill - Dano em cadeia)
@@ -2910,7 +2910,7 @@ OnStepTimer:
 					}
 				}
 				// --- 2.2 FEITICEIRO / SORCERER (3a CLASSE) & ELEMENTAL MASTER (4a CLASSE) ---
-				else if (Class == Job_Sorcerer || Class >= 4255 || getskilllv("SO_PSYCHIC_WAVE") > 0 || getskilllv("SO_DIAMONDDUST") > 0 || getskilllv("SO_VARETYR_SPEAR") > 0 || getskilllv("SO_EARTHGRAVE") > 0 || getskilllv("SO_CLOUD_KILL") > 0) {
+				else if (Class == Job_Sorcerer || Class == 4255 || BOT_FINAL_JOB == 104 || getskilllv("SO_PSYCHIC_WAVE") > 0 || getskilllv("SO_DIAMONDDUST") > 0 || getskilllv("SO_VARETYR_SPEAR") > 0 || getskilllv("SO_EARTHGRAVE") > 0 || getskilllv("SO_CLOUD_KILL") > 0) {
 					.@so_rot = @BOT_SKILL_ROT % 4;
 					if (.@so_rot == 0 && getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 40) {
 						// Onda Psiquica (Ground Skill - Lancada na posicao do alvo)
@@ -3805,11 +3805,11 @@ OnApplyBuffs:
 	sc_start SC_GLORIA, 600000, 5;
 	if (BaseClass == Job_Mage) {
 		sc_start SC_ENERGYCOAT, 600000, 1;
-		if (Class == Job_High_Wizard || Class == Job_Warlock || Class >= 4254 || BOT_FINAL_JOB == 103) {
+		if (Class == Job_High_Wizard || Class == Job_Warlock || Class == 4254 || BOT_FINAL_JOB == 103) {
 			sc_start SC_MAGICPOWER, 600000, 10;
 			sc_start SC_RECOGNIZEDSPELL, 600000, 5;
 		}
-		else if (Class == Job_Professor || Class == Job_Sorcerer || Class >= 4255 || BOT_FINAL_JOB == 104) {
+		else if (Class == Job_Professor || Class == Job_Sorcerer || Class == 4255 || BOT_FINAL_JOB == 104) {
 			sc_start SC_DOUBLECAST, 600000, 5;
 			sc_start SC_STRIKING, 600000, 5;
 			sc_start SC_MEMORIZE, 600000, 1;
@@ -3974,29 +3974,48 @@ OnCheckMounts:
 		return;
 	}
 
+	// Apenas Mercadores/Ferreiros/Mecanicos/Alquimistas/Bioquimicos podem ter carrinho
+	if (BaseClass != Job_Merchant && BOT_FINAL_JOB != 111 && BOT_FINAL_JOB != 112) {
+		if (checkcart()) setcart 0;
+	}
+
+	// Apenas Arqueiros/Sentinelas podem ter falcao ou warg
+	if (BaseClass != Job_Archer && BOT_FINAL_JOB != 105 && BOT_FINAL_JOB != 106) {
+		if (checkfalcon()) setoption OPTION_FALCON, 0;
+		if (checkwug()) setoption OPTION_WUG|OPTION_WUGRIDER, 0;
+	}
+
+	// Apenas Espadachins podem ter Peco/Grifo/Dragao
+	if (BaseClass != Job_Swordman && BOT_FINAL_JOB != 101 && BOT_FINAL_JOB != 102) {
+		if (checkriding() || checkdragon()) setoption OPTION_RIDING|OPTION_DRAGON, 0;
+	}
+
 	// 1. Sentinela (Lobo/Warg) & Cacador / Sniper (Falcao)
 	if (getskilllv("RA_WUGMASTERY") > 0) {
 		if (!checkwug()) setoption OPTION_WUG, 1;
 		if (countitem(6124) == 0) getitem 6124, 1; // Flauta do Lobo
-	} else if (getskilllv("HT_FALCON") > 0) {
+	} else if (getskilllv("HT_FALCON") > 0 && (BaseClass == Job_Archer || BOT_FINAL_JOB == 105 || BOT_FINAL_JOB == 106)) {
 		if (!checkfalcon() && !checkwug()) setfalcon;
 	}
 
 	// 2. Cavaleiro Runico (Dragao) & Guardiao Real / Templario / Paladino / Cavaleiro / Lorde (Grifo / Peco)
-	if (getskilllv("RK_DRAGONTRAINING") > 0) {
+	if (getskilllv("RK_DRAGONTRAINING") > 0 && (Class == Job_Rune_Knight || Class == Job_Rune_Knight_T || Class == Job_Rune_Knight2 || Class == Job_Rune_Knight_T2 || Class == Job_Dragon_Knight || Class == 4253 || BOT_FINAL_JOB == 101)) {
 		if (!checkdragon()) setdragon 1;
-	} else if (getskilllv("KN_RIDING") > 0) {
+	} else if (getskilllv("KN_RIDING") > 0 && (BaseClass == Job_Swordman || BOT_FINAL_JOB == 101 || BOT_FINAL_JOB == 102)) {
 		if (!checkriding() && !checkdragon()) setriding;
 	}
 
 	// 3. Mecanico (Madogear) & Mercadores / Ferreiros / Bioquimicos (Carrinho)
-	if (getskilllv("NC_MADOLICENCE") > 0) {
+	if (getskilllv("NC_MADOLICENCE") > 0 && (Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Meister || Class == Job_Meister2 || Class == 4256 || BOT_FINAL_JOB == 111)) {
 		if (!checkmadogear() && MADO_MODEL != 0) {
 			if (MADO_MODEL == 2) setmadogear true, MADO_SUIT;
 			else setmadogear true;
 		}
-	} else if (getskilllv("MC_PUSHCART") > 0) {
+	} else if (getskilllv("MC_PUSHCART") > 0 && (BaseClass == Job_Merchant || BOT_FINAL_JOB == 111 || BOT_FINAL_JOB == 112)) {
 		if (!checkcart() && !checkmadogear()) setcart;
+	} else {
+		if (checkcart()) setcart 0;
+		if (checkmadogear()) setmadogear false;
 	}
 	return;
 
@@ -4760,7 +4779,7 @@ OnDistributeSkills:
 
 	// 2. MAGO / BRUXO / ARQUIMAGO / ARCANO / SABIO / PROFESSOR / FEITICEIRO
 	// =========================================================
-	if (BaseClass == Job_Mage || Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock || Class == Job_Sage || Class == Job_Professor || Class == Job_Sorcerer || Class >= 4254) {
+	if (BaseClass == Job_Mage || Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock || Class == Job_Sage || Class == Job_Professor || Class == Job_Sorcerer || Class == 4254 || Class == 4255 || BOT_FINAL_JOB == 103 || BOT_FINAL_JOB == 104) {
 		skill "MG_ENERGYCOAT", 1, 1;
 		skill "MG_SRECOVERY", 10, 1;
 		skill "MG_FIREBOLT", 10, 1;
@@ -5133,7 +5152,7 @@ OnDistributeSkills:
 	// 6. MERCADOR / FERREIRO / MESTRE-FERREIRO / MECANICO / ALQUIMISTA / CRIADOR / BIOQUIMICO
 	// =========================================================
 	// 1a Classe (Mercador) - Para todas as classes da arvore
-	if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class >= 4256) {
+	if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Meister || Class == Job_Meister2 || Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 || Class == Job_Biolo || Class == Job_Biolo2 || Class == 4256 || Class == 4257 || Class == 4258 || BOT_FINAL_JOB == 111 || BOT_FINAL_JOB == 112) {
 		skill "MC_INCCARRY", 10, 1;
 		skill "MC_DISCOUNT", 10, 1;
 		skill "MC_OVERCHARGE", 10, 1;
