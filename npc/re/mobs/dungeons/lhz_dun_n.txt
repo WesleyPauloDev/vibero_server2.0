@@ -68,6 +68,9 @@ OnInit:
 	end;
 
 OnRegularDead:	
+	// Executa uma unica vez pelo evento de morte especifico do monstro.
+	// Nao colocar em OnNPCKillEvent, pois esse label tambem e global.
+	callfunc("Bio5HardCardMapDrop");
 	monster strcharinfo(3),0,0,"--ja--",killedrid,1,"lhz_dun_n::OnRegularDead";	
 	if (strcharinfo(3) == "lhz_dun_n" || strcharinfo(3) == "lhz_dun_n2") {
 

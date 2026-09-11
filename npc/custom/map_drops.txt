@@ -59,6 +59,44 @@ function	script	FendaMapDrop	{
 	return;
 }
 
+// Cartas do Bio5 Hard em lhz_dun_n3 e lhz_dun_n4.
+// Mapdrop 5 = 5/100000 (0,005%, ou 1/20000) antes dos bonus pessoais.
+// A referencia de 1% preserva Goma de Mascar, VIP, bonus por raca/classe,
+// bonus de renascimento e a penalidade de nivel calculados pelo map-server.
+function	script	Bio5HardCardMapDrop	{
+	.@map$ = strcharinfo(3);
+	if (.@map$ != "lhz_dun_n3" && .@map$ != "lhz_dun_n4")
+		return;
+
+	switch (killedrid) {
+	case 25000: .@card_id = 4674; break; // GuillotineCross_Card
+	case 25001: .@card_id = 4675; break; // Archbishop_Card
+	case 25002: .@card_id = 4678; break; // Warlock_Card
+	case 25003: .@card_id = 4676; break; // Ranger_Card
+	case 25004: .@card_id = 4677; break; // Mechanic_Card
+	case 25005: .@card_id = 4679; break; // RuneKnight_Card
+	case 25006: .@card_id = 4680; break; // RoyalGuard_Card
+	case 25007: .@card_id = 4681; break; // Genetic_Card
+	case 25008: .@card_id = 4671; break; // Sorcerer_Card
+	case 25009: .@card_id = 4672; break; // Sura_Card
+	case 25010: .@card_id = 4682; break; // ShadowChaser_Card
+	case 25011: .@card_id = 4673; break; // Minstrel_Card
+	case 25012: .@card_id = 4683; break; // Wanderer_Card
+	default:
+		return;
+	}
+
+	.@mapdrop_rate = 5;
+	.@bonus_reference = get_adjusted_drop_rate(killedrid, 100);
+	.@adjusted_rate = .@mapdrop_rate * .@bonus_reference;
+
+	// Denominador 100000 * 100 para conservar fracoes abaixo de 1/10000.
+	if (rand(10000000) < .@adjusted_rate)
+		partylootitem .@card_id, 1, max(1, .@adjusted_rate / 1000);
+
+	return;
+}
+
 // Um unico evento distribui as mortes para os sistemas customizados.
 // Assim eles ocupam apenas uma vaga na fila de eventos do jogador.
 -	script	GlobalKillDispatcher	-1,{
