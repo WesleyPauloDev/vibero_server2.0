@@ -112,42 +112,106 @@ L_RecycleBiolabHats:
 
 L_SchmidtEnchant:
 	mes "[Oscar de Glast Heim]";
-	mes "Escolha o equipamento Schmidt equipado que deseja encantar.";
-	mes "Eu trabalho com armadura, capa e insignia nos acessorios.";
+	mes "Eu realizo os encantamentos do conjunto do ^0000CDRei Schmidt^000000 (Edda Glast Heim).";
+	mes "Os encantamentos concedem grandes poderes de dano, conjuracao, atributos e combos lendarios.";
+	mes "Escolha o equipamento que deseja consultar ou encantar:";
 	next;
 
-	switch(select("Armadura:Capa:Acessorio Esquerdo:Acessorio Direito:Cancelar")) {
+	.@menu_sel = select("Armadura do Rei Schmidt:Capa do Rei Schmidt:Insignia (Acessorio Esquerdo):Insignia (Acessorio Direito):Ver Resumo Geral de Todos os Encantos:Cancelar");
+	switch(.@menu_sel) {
 	case 1:
 		.@part = EQI_ARMOR;
-		.@equip_id = getequipid(.@part);
+		.@part_name$ = "Armadura";
+		.@target_name$ = getitemname(15388);
 		setarray .@valid_ids[0],15388;
 		setarray .@requirement[0],25739,5,6608,5;
+
+		mes "[Oscar de Glast Heim]";
+		mes "^0000CD" + .@target_name$ + "^000000";
+		mes "Custo por tentativa: ^0055FF5x " + getitemname(25739) + "^000000 e ^0055FF5x " + getitemname(6608) + "^000000.";
+		mes "Possui 3 slots de encantamento (100% de sucesso):";
+		mes "--------------------------------";
+		mes "^880000[Slots 4 e 3 (1 e 2 Encanto)]^000000";
+		mes " Atributos: FOR, INT, DEX, AGI, VIT ou SOR (+1 a +3)";
+		mes "^880000[Slot 2 (3 Encanto - Especial)]^000000";
+		mes " Dano Fisico Melee / Ranged +10%";
+		mes " Dano Magico (ATQM) +10%";
+		mes " MaxHP +10%  |  MaxSP +10%";
+		mes " Pos-conjuracao -10%  |  Conjuracao Variavel -10%";
+		mes " Dano Critico +15%  |  Velocidade de Ataque (ASPD) +10%";
+		mes "--------------------------------";
+		next;
+		if (select("Prosseguir para Encantar / Resetar:Voltar") == 2)
+			callsub L_SchmidtEnchant;
 		break;
 	case 2:
 		.@part = EQI_GARMENT;
-		.@equip_id = getequipid(.@part);
+		.@part_name$ = "Capa";
+		.@target_name$ = getitemname(15389);
 		setarray .@valid_ids[0],15389;
 		setarray .@requirement[0],25739,5,6608,5;
+
+		mes "[Oscar de Glast Heim]";
+		mes "^0000CD" + .@target_name$ + "^000000";
+		mes "Custo por tentativa: ^0055FF5x " + getitemname(25739) + "^000000 e ^0055FF5x " + getitemname(6608) + "^000000.";
+		mes "Possui 3 slots de encantamento (100% de sucesso):";
+		mes "--------------------------------";
+		mes "^880000[Slots 4, 3 e 2 (1, 2 e 3 Encanto)]^000000";
+		mes " Espirito do Lutador 1~2 (ATQ / Precisao)";
+		mes " Mira Apurada 1~2 (Dano Fisico a Distancia)";
+		mes " Pedra do Feitico 1~2 (ATQM / Reducao de Cast)";
+		mes " Critico 1~2  |  Fatal 1~3 (Taxa e Dano Critico)";
+		mes " Esquiva +3/+6  |  Esquiva Perfeita +1/+2";
+		mes "--------------------------------";
+		mes "^008800Dica:^000000 Ativa combos extraordinarios ao ser equipada junto com as Insignias do Rei Schmidt!";
+		mes "--------------------------------";
+		next;
+		if (select("Prosseguir para Encantar / Resetar:Voltar") == 2)
+			callsub L_SchmidtEnchant;
 		break;
 	case 3:
-		.@part = EQI_ACC_L;
-		.@equip_id = getequipid(.@part);
-		setarray .@valid_ids[0],32228,32229,32230,32231,32232,32233;
-		setarray .@requirement[0],25740,5,6755,5;
-		break;
 	case 4:
-		.@part = EQI_ACC_R;
-		.@equip_id = getequipid(.@part);
+		.@part = (.@menu_sel == 3 ? EQI_ACC_L : EQI_ACC_R);
+		.@part_name$ = (.@menu_sel == 3 ? "Acessorio Esquerdo" : "Acessorio Direito");
+		.@target_name$ = "Insignia do Rei Schmidt (FOR, INT, DEX, AGI, VIT ou SOR)";
 		setarray .@valid_ids[0],32228,32229,32230,32231,32232,32233;
 		setarray .@requirement[0],25740,5,6755,5;
+
+		mes "[Oscar de Glast Heim]";
+		mes "^0000CD" + .@target_name$ + "^000000";
+		mes "Custo aleatorio: ^0055FF5x " + getitemname(25740) + "^000000 e ^0055FF5x " + getitemname(6755) + "^000000.";
+		mes "Possui opcao de ^0055FFEncantamento Perfeito^000000 (escolha direta sem falha por 15x materiais).";
+		mes "--------------------------------";
+		mes "^880000[Slot 4 (1 Encanto)]^000000: Atributos +1 a +5 (FOR, INT, DEX, AGI, VIT, SOR)";
+		mes "^880000[Slot 3 (2 Encanto)]^000000:";
+		mes " Lutador 4~7 (ATQ +15~24) | Feitico 3~5 (ATQM +12~18, Cast -6%~-10%)";
+		mes " Mira Apurada 3~5 (Ranged +6%~10%) | Fatal 2~3 / Critico 3~5";
+		mes "^880000[Slot 2 (3 Encanto - Poderes Lendarios Schmidt)]^000000:";
+		mes "- " + mesitemlink(29587);
+		mes "- " + mesitemlink(29588);
+		mes "- " + mesitemlink(29589);
+		mes "- " + mesitemlink(29590);
+		mes "- " + mesitemlink(29591);
+		mes "- " + mesitemlink(29592);
+		mes "--------------------------------";
+		next;
+		if (select("Prosseguir para Encantar / Resetar:Voltar") == 2)
+			callsub L_SchmidtEnchant;
 		break;
+	case 5:
+		callsub L_SchmidtInfo;
+		end;
 	default:
 		close;
 	}
 
+	.@equip_id = getequipid(.@part);
 	if (inarray(.@valid_ids, .@equip_id) == -1) {
 		mes "[Oscar de Glast Heim]";
-		mes "Voce nao esta usando um equipamento Schmidt valido nessa posicao.";
+		mes "Voce nao esta com o equipamento compativel equipado em ^0000CD" + .@part_name$ + "^000000.";
+		mes "Equipamento compativel: ^0055FF" + .@target_name$ + "^000000.";
+		mes "";
+		mes "Voce pode adquirir esses equipamentos na opcao ^0055FF'Trocar equipamentos'^000000 usando materiais da Edda Glast Heim!";
 		close;
 	}
 
@@ -320,6 +384,76 @@ L_SchmidtEnchant:
 		mes "O encantamento falhou, mas o equipamento foi preservado.";
 	}
 	close;
+
+L_SchmidtInfo:
+	while (true) {
+		mes "[Guia de Encantos Schmidt]";
+		mes "Escolha qual categoria deseja consultar detalhadamente:";
+		next;
+		switch(select("Bonus da Armadura:Bonus da Capa:Bonus das Insignias:Combos Lendarios (Insignia + Capa):Voltar ao Menu de Encantamento")) {
+		case 1:
+			mes "[Armadura do Rei Schmidt [1]]";
+			mes "Requisitos: ^0055FF5x Mana Cristalizada^000000 + ^0055FF5x Gema Amarela^000000";
+			mes "Possui 3 slots (100% de sucesso):";
+			mes "- ^880000Slots 4 e 3^000000: Atributos FOR, INT, DEX, AGI, VIT ou SOR (+1 a +3)";
+			mes "- ^880000Slot 2 (Especial)^000000:";
+			mes "  - Dano Fisico Melee / Ranged +10%";
+			mes "  - Dano Magico (ATQM) +10%";
+			mes "  - MaxHP +10%  |  MaxSP +10%";
+			mes "  - Pos-conjuracao -10%  |  Conjuracao Variavel -10%";
+			mes "  - Dano Critico +15%  |  ASPD +10%";
+			next;
+			break;
+		case 2:
+			mes "[Manteau do Rei Schmidt [1]]";
+			mes "Requisitos: ^0055FF5x Mana Cristalizada^000000 + ^0055FF5x Gema Amarela^000000";
+			mes "Possui 3 slots (100% de sucesso):";
+			mes "- ^880000Slots 4, 3 e 2^000000:";
+			mes "  - Espirito do Lutador 1~2 (ATQ / Precisao)";
+			mes "  - Mira Apurada 1~2 (Dano Fisico a Distancia)";
+			mes "  - Pedra do Feitico 1~2 (ATQM / Reducao de Cast)";
+			mes "  - Critico 1~2  |  Fatal 1~3 (Taxa e Dano Critico)";
+			mes "  - Esquiva +3/+6  |  Esquiva Perfeita +1/+2";
+			mes "- ^008800Ativa super combos lendarios com as Insignias!^000000";
+			next;
+			break;
+		case 3:
+			mes "[Insignias do Rei Schmidt [1]]";
+			mes "Requisitos: ^0055FF5x Insignia da Maldicao^000000 + ^0055FF5x Gema Azul^000000";
+			mes "- ^880000Slot 4^000000: Atributos FOR, INT, DEX, AGI, VIT, SOR (+1 a +5)";
+			mes "- ^880000Slot 3^000000:";
+			mes "  - Lutador 4~7 (ATQ +15~24)";
+			mes "  - Feitico 3~5 (ATQM +12~18, Cast -6%~-10%)";
+			mes "  - Mira Apurada 3~5 (Dano a Distancia +6%~10%)";
+			mes "  - Fatal 2~3  |  Critico 3~5";
+			mes "- ^880000Slot 2 (Poderes Lendarios do Rei Schmidt)^000000:";
+			mes "  - " + mesitemlink(29587);
+			mes "  - " + mesitemlink(29588);
+			mes "  - " + mesitemlink(29589);
+			mes "  - " + mesitemlink(29590);
+			mes "  - " + mesitemlink(29591);
+			mes "  - " + mesitemlink(29592);
+			mes "- ^0055FFModo Perfeito:^000000 Escolha direta do encanto maximo por 15x materiais!";
+			next;
+			break;
+		case 4:
+			mes "[Combos Lendarios: Insignia + Capa Schmidt]";
+			mes "Ao equipar o Manteau do Rei Schmidt com uma Insignia contendo o 3 encanto:";
+			mes "--------------------------------";
+			mes "- " + mesitemlink(29587) + " + Manteau Schmidt";
+			mes "- " + mesitemlink(29588) + " + Manteau Schmidt";
+			mes "- " + mesitemlink(29589) + " + Manteau Schmidt";
+			mes "- " + mesitemlink(29590) + " + Manteau Schmidt";
+			mes "- " + mesitemlink(29591) + " + Manteau Schmidt";
+			mes "- " + mesitemlink(29592) + " + Manteau Schmidt";
+			next;
+			break;
+		default:
+			callsub L_SchmidtEnchant;
+			end;
+		}
+	}
+	end;
 }
 
 moc_para01,42,36,3	script	Operador OS	4_M_REPAIR,{
@@ -682,11 +816,21 @@ L_OSEnchant:
 	.@s4_id = getequipcardid(EQI_HAND_R, 3);
 	.@s3_id = getequipcardid(EQI_HAND_R, 2);
 
+	if (.@s4_id > 0)
+		.@s4_txt$ = mesitemlink(.@s4_id);
+	else
+		.@s4_txt$ = "^777777[Vazio]^000000";
+
+	if (.@s3_id > 0)
+		.@s3_txt$ = mesitemlink(.@s3_id);
+	else
+		.@s3_txt$ = "^777777[Vazio]^000000";
+
 	mes "[Operador OS]";
 	mes "Arma: " + mesitemlink(.@equip_id) + " ^0000FF(+" + .@refine + ")^000000";
 	mes "----------------------------------------";
-	mes "4o Slot (Base): " + (.@s4_id ? mesitemlink(.@s4_id) : "^777777[Vazio]^000000");
-	mes "3o Slot (Especial): " + (.@s3_id ? mesitemlink(.@s3_id) : "^777777[Vazio]^000000");
+	mes "4o Slot (Base): " + .@s4_txt$;
+	mes "3o Slot (Especial): " + .@s3_txt$;
 	mes "----------------------------------------";
 	mes "Selecione a operacao desejada:";
 	next;
@@ -1349,11 +1493,21 @@ L_IllusionEnchant:
 	.@s4_id = getequipcardid(EQI_HAND_R, 3);
 	.@s3_id = getequipcardid(EQI_HAND_R, 2);
 
+	if (.@s4_id > 0)
+		.@s4_txt$ = mesitemlink(.@s4_id);
+	else
+		.@s4_txt$ = "^777777[Vazio]^000000";
+
+	if (.@s3_id > 0)
+		.@s3_txt$ = mesitemlink(.@s3_id);
+	else
+		.@s3_txt$ = "^777777[Vazio]^000000";
+
 	mes "[Operador OS]";
 	mes "Arma: " + mesitemlink(.@equip_id) + " ^0000FF(+" + .@refine + ")^000000";
 	mes "----------------------------------------";
-	mes "4o Slot: " + (.@s4_id ? mesitemlink(.@s4_id) : "^777777[Vazio]^000000");
-	mes "3o Slot: " + (.@s3_id ? mesitemlink(.@s3_id) : "^777777[Vazio]^000000");
+	mes "4o Slot: " + .@s4_txt$;
+	mes "3o Slot: " + .@s3_txt$;
 	mes "----------------------------------------";
 
 	if (.@s4_id > 0 && .@s3_id > 0) {
@@ -1722,6 +1876,7 @@ L_AutomaticInsert:
 	mes "[Operador OS]";
 	mes "Modulo inserido com sucesso.";
 	close;
+
 L_AutomaticInfo:
 	mes "[Operador OS]";
 	mes "O sistema Automatic usa equipamentos da linha Illusion, Barmil Ticket e modulos.";

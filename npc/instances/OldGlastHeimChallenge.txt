@@ -291,9 +291,21 @@ L_SelectEnchantEquip:
 	}
 
 	if (.@total == 0) {
+		.@inv_count = 0;
+		for (.@j = 19474; .@j <= 19492; .@j++) {
+			if (countitem(.@j) > 0) .@inv_count++;
+		}
+		for (.@j = 0; .@j < getarraysize(.@accessory_ids); .@j++) {
+			if (countitem(.@accessory_ids[.@j]) > 0) .@inv_count++;
+		}
 		mes "[Oscar]";
-		mes "Nao encontrei nenhum equipamento temporal valido.";
-		mes "Equipe um Circlet Temporal ou um dos acessorios temporais da loja.";
+		if (.@inv_count > 0) {
+			mes "Detectei que voce possui equipamento(s) temporal(is) no seu inventario, mas ^FF0000ele nao esta equipado^000000!";
+			mes "Por favor, ^0055FFequipe o Circlet Temporal ou Acessorio^000000 no seu personagem para que eu possa encanta-lo!";
+		} else {
+			mes "Nao encontrei nenhum equipamento temporal valido equipado.";
+			mes "Equipe um Circlet Temporal ou um dos acessorios temporais da loja.";
+		}
 		close;
 	}
 
@@ -309,6 +321,284 @@ L_SelectEnchantEquip:
 		close;
 
 	return .@available_part[.@choice];
+
+L_TemporalEnchant:
+	.@part = callsub(L_SelectEnchantEquip);
+	.@equip_id = getequipid(.@part);
+	.@refine = getequiprefinerycnt(.@part);
+	.@equip_name$ = getequipname(.@part);
+	for (.@i = 0; .@i < 4; .@i++) {
+		.@card[.@i] = getequipcardid(.@part, .@i);
+		.@check[.@i] = .@card[.@i];
+	}
+
+	mes "[Oscar]";
+	mes "^0000CD" + .@equip_name$ + "^000000";
+	mes "--------------------------------";
+	mes "1o Slot (Carta): " + (.@card[0] ? "^0055FF" + getitemname(.@card[0]) + "^000000" : "^777777[Vazio / Sem carta]^000000");
+	mes "2o Slot (Especial): " + (.@card[1] ? "^0055FF" + getitemname(.@card[1]) + "^000000" : "^777777[Vazio]^000000");
+	mes "3o Slot (Atributos / Joia): " + (.@card[2] ? "^0055FF" + getitemname(.@card[2]) + "^000000" : "^777777[Vazio]^000000");
+	mes "4o Slot (Atributos Basicos): " + (.@card[3] ? "^0055FF" + getitemname(.@card[3]) + "^000000" : "^777777[Vazio]^000000");
+	mes "--------------------------------";
+	next;
+
+	// Se o 4o slot estiver vazio
+	if (.@card[3] == 0) {
+		mes "[Oscar]";
+		mes "Vamos encantar o ^0055FF4o slot^000000 (Atributos Basicos +1 a +4).";
+		mes "- Aleatorio: ^0055FF10x " + getitemname(25867) + "^000000";
+		mes "- Perfeito (Escolha): ^0055FF30x " + getitemname(25867) + "^000000";
+		next;
+		.@opt = select("Encantar Aleatorio (10x Fragmento):Encantar Perfeito (30x Fragmento):Voltar");
+		if (.@opt == 3)
+			goto L_Main;
+
+		if (.@opt == 1) {
+			if (countitem(25867) < 10) {
+				mes "[Oscar]";
+				mes "Voce precisa de 10x " + getitemname(25867) + ".";
+				close;
+			}
+			if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@check[0], .@check[1], .@check[2], .@check[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine)) close;
+
+			delitem 25867, 10;
+			setarray .@s4_pool[0], 4700,4701,4702,4703, 4710,4711,4712,4713, 4720,4721,4722,4723, 4730,4731,4732,4733, 4740,4741,4742,4743, 4750,4751,4752,4753;
+			.@chosen = .@s4_pool[rand(getarraysize(.@s4_pool))];
+			setitemcard .@part, 3, .@chosen;
+			specialeffect2 EF_ENHANCE;
+			mes "[Oscar]";
+			mes "4o slot encantado com sucesso!";
+			mes "Encantamento obtido: ^0055FF" + getitemname(.@chosen) + "^000000.";
+			close;
+		} else {
+			if (countitem(25867) < 30) {
+				mes "[Oscar]";
+				mes "Voce precisa de 30x " + getitemname(25867) + ".";
+				close;
+			}
+			mes "[Oscar]";
+			mes "Escolha o atributo desejado:";
+			next;
+			.@stat_sel = select("FOR (Forca):INT (Inteligencia):DEX (Destreza):AGI (Agilidade):VIT (Vitalidade):SOR (Sorte):Cancelar");
+			if (.@stat_sel == 7) close;
+			.@base_stat = 4700 + ((.@stat_sel - 1) * 10);
+			mes "[Oscar]";
+			mes "Escolha o nivel do encantamento:";
+			next;
+			.@lv_sel = select("+1:+2:+3:+4:Cancelar");
+			if (.@lv_sel == 5) close;
+
+			if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@check[0], .@check[1], .@check[2], .@check[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine)) close;
+
+			delitem 25867, 30;
+			.@chosen = .@base_stat + (.@lv_sel - 1);
+			setitemcard .@part, 3, .@chosen;
+			specialeffect2 EF_ENHANCE;
+			mes "[Oscar]";
+			mes "4o slot encantado com sucesso!";
+			mes "Encantamento obtido: ^0055FF" + getitemname(.@chosen) + "^000000.";
+			close;
+		}
+	}
+
+	// Se o 4o slot ja tem encanto, mas o 3o slot esta vazio
+	if (.@card[2] == 0) {
+		mes "[Oscar]";
+		mes "Vamos encantar o ^0055FF3o slot^000000 (Atributos +1 a +5 ou Joias Temporais).";
+		mes "- Aleatorio: ^0055FF20x " + getitemname(25867) + "^000000";
+		mes "- Perfeito Atributos: ^0055FF60x " + getitemname(25867) + "^000000";
+		mes "- Joia Temporal Nivel 1: ^0055FF2x " + getitemname(25865) + "^000000";
+		next;
+		.@opt = select("Atributo Aleatorio (20x Fragmento):Atributo Perfeito (60x Fragmento):Joia Temporal Nv 1 (2x Joia do Tempo):Resetar Encantamentos:Voltar");
+		if (.@opt == 5) goto L_Main;
+		if (.@opt == 4) goto L_DoReset;
+
+		if (.@opt == 1) {
+			if (countitem(25867) < 20) {
+				mes "[Oscar]";
+				mes "Voce precisa de 20x " + getitemname(25867) + ".";
+				close;
+			}
+			if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@check[0], .@check[1], .@check[2], .@check[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine)) close;
+
+			delitem 25867, 20;
+			setarray .@s3_pool[0], 4700,4701,4702,4703,4704, 4710,4711,4712,4713,4714, 4720,4721,4722,4723,4724, 4730,4731,4732,4733,4734, 4740,4741,4742,4743,4744, 4750,4751,4752,4753,4754;
+			.@chosen = .@s3_pool[rand(getarraysize(.@s3_pool))];
+			setitemcard .@part, 2, .@chosen;
+			specialeffect2 EF_ENHANCE;
+			mes "[Oscar]";
+			mes "3o slot encantado com sucesso!";
+			mes "Encantamento obtido: ^0055FF" + getitemname(.@chosen) + "^000000.";
+			close;
+		} else if (.@opt == 2) {
+			if (countitem(25867) < 60) {
+				mes "[Oscar]";
+				mes "Voce precisa de 60x " + getitemname(25867) + ".";
+				close;
+			}
+			mes "[Oscar]";
+			mes "Escolha o atributo desejado:";
+			next;
+			.@stat_sel = select("FOR (Forca):INT (Inteligencia):DEX (Destreza):AGI (Agilidade):VIT (Vitalidade):SOR (Sorte):Cancelar");
+			if (.@stat_sel == 7) close;
+			.@base_stat = 4700 + ((.@stat_sel - 1) * 10);
+			mes "[Oscar]";
+			mes "Escolha o nivel do encantamento:";
+			next;
+			.@lv_sel = select("+1:+2:+3:+4:+5:Cancelar");
+			if (.@lv_sel == 6) close;
+
+			if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@check[0], .@check[1], .@check[2], .@check[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine)) close;
+
+			delitem 25867, 60;
+			.@chosen = .@base_stat + (.@lv_sel - 1);
+			setitemcard .@part, 2, .@chosen;
+			specialeffect2 EF_ENHANCE;
+			mes "[Oscar]";
+			mes "3o slot encantado com sucesso!";
+			mes "Encantamento obtido: ^0055FF" + getitemname(.@chosen) + "^000000.";
+			close;
+		} else if (.@opt == 3) {
+			if (countitem(25865) < 2) {
+				mes "[Oscar]";
+				mes "Voce precisa de 2x " + getitemname(25865) + ".";
+				close;
+			}
+			mes "[Oscar]";
+			mes "Escolha a Joia Temporal Nivel 1:";
+			next;
+			.@jewel_sel = select("Joia Temporal (FOR) Lv 1:Joia Temporal (AGI) Lv 1:Joia Temporal (VIT) Lv 1:Joia Temporal (INT) Lv 1:Joia Temporal (DEX) Lv 1:Joia Temporal (SOR) Lv 1:Cancelar");
+			if (.@jewel_sel == 7) close;
+			setarray .@jewels[1], 29672, 29675, 29678, 29681, 29684, 29687;
+
+			if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@check[0], .@check[1], .@check[2], .@check[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine)) close;
+
+			delitem 25865, 2;
+			.@chosen = .@jewels[.@jewel_sel];
+			setitemcard .@part, 2, .@chosen;
+			specialeffect2 EF_ENHANCE;
+			mes "[Oscar]";
+			mes "3o slot encantado com sucesso!";
+			mes "Encantamento obtido: ^0055FF" + getitemname(.@chosen) + "^000000.";
+			close;
+		}
+	}
+
+	// Se 4o e 3o ja foram encantados, e o 2o slot esta vazio
+	if (.@card[1] == 0) {
+		mes "[Oscar]";
+		mes "Vamos encantar o ^0055FF2o slot^000000 (Encantamentos Especiais ou Joias Temporais).";
+		mes "- Aleatorio Especial: ^0055FF2x " + getitemname(25866) + "^000000";
+		mes "- Perfeito Especial (Escolha): ^0055FF6x " + getitemname(25866) + "^000000";
+		mes "- Joia Temporal Nivel 1: ^0055FF2x " + getitemname(25865) + "^000000";
+		next;
+		.@opt = select("Especial Aleatorio (2x Magia Temporal):Especial Perfeito (6x Magia Temporal):Joia Temporal Nv 1 (2x Joia do Tempo):Resetar Encantamentos:Voltar");
+		if (.@opt == 5) goto L_Main;
+		if (.@opt == 4) goto L_DoReset;
+
+		setarray .@specials[1], 29706, 29061, 29111, 29101, 29091, 29071, 29081;
+
+		if (.@opt == 1) {
+			if (countitem(25866) < 2) {
+				mes "[Oscar]";
+				mes "Voce precisa de 2x " + getitemname(25866) + ".";
+				close;
+			}
+			if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@check[0], .@check[1], .@check[2], .@check[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine)) close;
+
+			delitem 25866, 2;
+			.@chosen = .@specials[rand(1, 7)];
+			setitemcard .@part, 1, .@chosen;
+			specialeffect2 EF_ENHANCE;
+			mes "[Oscar]";
+			mes "2o slot encantado com sucesso!";
+			mes "Encantamento obtido: ^0055FF" + getitemname(.@chosen) + "^000000.";
+			mes "^008800Dica:^000000 Voce pode aprimorar esse encantamento especial ate o nivel 10 na opcao ^0055FF'Aprimorar encantamento'^000000!";
+			close;
+		} else if (.@opt == 2) {
+			if (countitem(25866) < 6) {
+				mes "[Oscar]";
+				mes "Voce precisa de 6x " + getitemname(25866) + ".";
+				close;
+			}
+			mes "[Oscar]";
+			mes "Escolha o encantamento especial Nivel 1:";
+			next;
+			.@spec_sel = select("Insignia da Tenacidade 1 (HP/Defesa):Insignia da Potencia 1 (Dano Fisico Melee):Insignia da Afeicao 1 (Cura e Suporte):Insignia da Resiliencia 1 (Reducao Neutro/Defesa):Insignia da Maestria 1 (Dano a Distancia):Insignia da Virtude 1 (Dano Magico/ATQM):Insignia do Talento 1 (Critico/Taxa Critica):Cancelar");
+			if (.@spec_sel == 8) close;
+
+			if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@check[0], .@check[1], .@check[2], .@check[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine)) close;
+
+			delitem 25866, 6;
+			.@chosen = .@specials[.@spec_sel];
+			setitemcard .@part, 1, .@chosen;
+			specialeffect2 EF_ENHANCE;
+			mes "[Oscar]";
+			mes "2o slot encantado com sucesso!";
+			mes "Encantamento obtido: ^0055FF" + getitemname(.@chosen) + "^000000.";
+			mes "^008800Dica:^000000 Voce pode aprimorar esse encantamento especial ate o nivel 10 na opcao ^0055FF'Aprimorar encantamento'^000000!";
+			close;
+		} else if (.@opt == 3) {
+			if (countitem(25865) < 2) {
+				mes "[Oscar]";
+				mes "Voce precisa de 2x " + getitemname(25865) + ".";
+				close;
+			}
+			mes "[Oscar]";
+			mes "Escolha a Joia Temporal Nivel 1:";
+			next;
+			.@jewel_sel = select("Joia Temporal (FOR) Lv 1:Joia Temporal (AGI) Lv 1:Joia Temporal (VIT) Lv 1:Joia Temporal (INT) Lv 1:Joia Temporal (DEX) Lv 1:Joia Temporal (SOR) Lv 1:Cancelar");
+			if (.@jewel_sel == 7) close;
+			setarray .@jewels[1], 29672, 29675, 29678, 29681, 29684, 29687;
+
+			if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@check[0], .@check[1], .@check[2], .@check[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine)) close;
+
+			delitem 25865, 2;
+			.@chosen = .@jewels[.@jewel_sel];
+			setitemcard .@part, 1, .@chosen;
+			specialeffect2 EF_ENHANCE;
+			mes "[Oscar]";
+			mes "2o slot encantado com sucesso!";
+			mes "Encantamento obtido: ^0055FF" + getitemname(.@chosen) + "^000000.";
+			close;
+		}
+	}
+
+	// Se todos os slots ja estao encantados
+	mes "[Oscar]";
+	mes "Todos os slots deste equipamento ja estao encantados!";
+	mes "O que deseja fazer?";
+	next;
+	.@opt = select("Aprimorar 2o Slot (Evoluir ate Nivel 10):Resetar Todos os Encantamentos:Voltar");
+	if (.@opt == 1) goto L_Upgrade;
+	if (.@opt == 2) goto L_DoReset;
+	goto L_Main;
+
+L_DoReset:
+	mes "[Oscar]";
+	mes "Deseja remover todos os encantamentos deste equipamento?";
+	mes "Custo: ^0055FF1x " + getitemname(25867) + " + 100.000 Zeny^000000.";
+	mes "^FF0000(Refino, cartas normais e o equipamento permanecem 100% seguros!)^000000";
+	next;
+	if (select("Confirmar Reset:Cancelar") == 2) close;
+
+	if (countitem(25867) < 1 || Zeny < 100000) {
+		mes "[Oscar]";
+		mes "Voce nao possui os recursos necessarios (1x " + getitemname(25867) + " e 100.000 Zeny).";
+		close;
+	}
+
+	if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) || callfunc("F_IsEquipCardHack", .@part, .@check[0], .@check[1], .@check[2], .@check[3]) || callfunc("F_IsEquipRefineHack", .@part, .@refine)) close;
+
+	delitem 25867, 1;
+	Zeny -= 100000;
+	setitemcard .@part, 1, 0;
+	setitemcard .@part, 2, 0;
+	setitemcard .@part, 3, 0;
+	specialeffect2 EF_CLEANUP;
+	mes "[Oscar]";
+	mes "Os encantamentos foram removidos com sucesso. O equipamento esta pronto para ser re-encantado!";
+	close;
 
 L_Upgrade:
 	.@part = callsub(L_SelectEnchantEquip);

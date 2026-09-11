@@ -33,17 +33,16 @@
 //     @bot stop [nome]   -> Pausa a AI do personagem
 //     @bot status [nome] -> Exibe informacoes para o GM
 //     @bot               -> Menu Interativo do GM
-// - Comando para o proprio jogador:
-//     @iniciante         -> Ativa/Desativa a AI no proprio personagem
 // Arquivo: npc/custom/iniciante_autobot.txt
 // ======================================================================
 
 -	script	PlayerBotAI	-1,{
 
 OnInit:
-	bindatcmd("bot", "PlayerBotAI::OnGMCommand", 60, 99);
-	bindatcmd("botmvpcheck", "PlayerBotAI::OnMvpCheckCommand", 60, 99);
-	bindatcmd("iniciante", "PlayerBotAI::OnPlayerCommand", 0, 99);
+	bindatcmd("bot", "PlayerBotAI::OnGMCommand", 99, 99);
+	bindatcmd("botmvpcheck", "PlayerBotAI::OnMvpCheckCommand", 99, 99);
+	// Remove o vinculo legado caso o script seja recarregado sem reiniciar o map-server.
+	unbindatcmd("iniciante");
 	.boot_restore_done = 0;
 
 	// Inicializa variaveis globais de agendamento (se ainda nao definidas)
@@ -402,37 +401,6 @@ OnPronteraBuffTimer:
 	end;
 
 // ======================================================================
-// COMANDO DO JOGADOR: @iniciante (para rodar no proprio char)
-// ======================================================================
-OnPlayerCommand:
-	.@subcmd$ = strtolower(.@atcmd_parameters$[0]);
-
-	// @iniciante test / @iniciante teste
-	if (.@subcmd$ == "test" || .@subcmd$ == "teste") {
-		callsub OnStartSingleBot, 1;
-		dispbottom "[Iniciante AI]: MODO TESTE ativado direto na cacada (" + @hunt_map$ + ")!", 0x55FF55;
-		end;
-	}
-
-	// @iniciante at / @iniciante offline
-	if (.@subcmd$ == "at" || .@subcmd$ == "offline" || .@subcmd$ == "autotrade") {
-		if (!@BOT_AI_ACTIVE) {
-			callsub OnStartSingleBot, 0;
-		}
-		offlinebot;
-		end;
-	}
-
-	if (@BOT_AI_ACTIVE) {
-		callsub OnPauseSingleBot;
-		dispbottom "[Iniciante AI]: Sistema desativado com sucesso.", 0xFF5555;
-	} else {
-		callsub OnStartSingleBot, 0;
-		dispbottom "[Iniciante AI]: Sistema ativado no seu personagem!", 0x55FF55;
-	}
-	end;
-
-// ======================================================================
 // COMANDOS DO GM: @bot <acao> [nome | all]
 // ======================================================================
 // ======================================================================
@@ -441,7 +409,7 @@ OnPlayerCommand:
 //      @botmvpcheck <minutos>   (altera o intervalo; minimo 1 minuto)
 // ======================================================================
 OnMvpCheckCommand:
-	if (getgmlevel() < 60) {
+	if (getgmlevel() < 99) {
 		dispbottom "[Bot MVP]: Voce nao tem permissao para usar este comando.", 0xFF5555;
 		end;
 	}
@@ -462,7 +430,7 @@ OnMvpCheckCommand:
 OnGMCommand:
 	.@gm_aid = getcharid(3);
 
-	if (getgmlevel() < 60) {
+	if (getgmlevel() < 99) {
 		dispbottom "[Bot Manager]: Voce nao tem permissao para usar este comando.", 0xFF5555;
 		end;
 	}
@@ -1240,8 +1208,9 @@ OnGMCommand:
 			.@target_aid = 0;
 			.@target_cid = 0;
 			query_sql "SELECT `account_id`, `char_id` FROM `char` WHERE `name` = '" + escape_sql(.@target_name$) + "' LIMIT 1", .@target_aid, .@target_cid;
-			if (.@target_aid > 0 && !isloggedin(.@target_aid)) {
+			if (.@target_aid > 0 && !isloggedin(.@target_aid, .@target_cid)) {
 				.@target_aid = 0;
+				.@target_cid = 0;
 			}
 		}
 
@@ -1267,7 +1236,7 @@ OnGMCommand:
 
 		switch(.@opt) {
 			case 1: // MODO TESTE
-				if (attachrid(.@target_aid)) {
+				if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 					callsub OnStartSingleBot, 1;
 				}
 				attachrid(.@gm_aid);
@@ -1275,7 +1244,7 @@ OnGMCommand:
 				break;
 
 			case 2: // MODO NORMAL
-				if (attachrid(.@target_aid)) {
+				if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 					callsub OnStartSingleBot, 0;
 				}
 				attachrid(.@gm_aid);
@@ -1283,7 +1252,7 @@ OnGMCommand:
 				break;
 
 			case 3: // MODO OFFLINE (@at)
-				if (attachrid(.@target_aid)) {
+				if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 					if (!@BOT_AI_ACTIVE) callsub OnStartSingleBot, 0;
 					offlinebot;
 				}
@@ -1292,7 +1261,7 @@ OnGMCommand:
 				break;
 
 			case 4: // PARAR AI
-				if (attachrid(.@target_aid)) {
+				if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 					callsub OnPauseSingleBot;
 				}
 				attachrid(.@gm_aid);
@@ -1300,7 +1269,7 @@ OnGMCommand:
 				break;
 
 			case 5: // Registrar/Descadastrar
-				if (attachrid(.@target_aid)) {
+				if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 					BOT_REGISTERED = (BOT_REGISTERED ? 0 : 1);
 					.@is_reg = BOT_REGISTERED;
 				}
@@ -1330,7 +1299,7 @@ OnGMCommand:
 				                   "Kagerou/Oboro (Ninja, sem transclasse):" +
 				                   "Super Novico Expandido (Super Novico, sem transclasse):" +
 				                   "Insurgente/Rebellion (Justiceiro, sem transclasse)");
-				if (attachrid(.@target_aid)) {
+				if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 					BOT_FINAL_JOB = 100 + .@jchoice;
 					callsub OnDetectTargetJob;
 					callsub OnCheckJobChange;
@@ -1340,7 +1309,7 @@ OnGMCommand:
 				break;
 
 			case 7: // HORARIO DESTE BOT
-				if (attachrid(.@target_aid)) {
+				if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 					.@custom = BOT_SCHED_CUSTOM;
 					.@b_sh = (BOT_SCHED_START_H > 0 ? BOT_SCHED_START_H : $BOT_SCHED_START_H);
 					.@b_sm = BOT_SCHED_START_M;
@@ -1380,7 +1349,7 @@ OnGMCommand:
 					}
 
 					if (.@parsed) {
-						if (attachrid(.@target_aid)) {
+						if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 							BOT_SCHED_CUSTOM = 1;
 							BOT_SCHED_START_H = .@in_sh;
 							BOT_SCHED_START_M = .@in_sm;
@@ -1397,7 +1366,7 @@ OnGMCommand:
 						dispbottom "[Bot Manager]: Formato invalido. Use '01:10 01:12' ou '01 10 01 12'.", 0xFF5555;
 					}
 				} else if (.@b_opt == 2) {
-					if (attachrid(.@target_aid)) {
+					if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 						BOT_SCHED_CUSTOM = 0;
 					}
 					query_sql "DELETE FROM `char_reg_num` WHERE `char_id` = " + .@target_cid + " AND `key` IN ('BOT_SCHED_CUSTOM', 'BOT_SCHED_START_H', 'BOT_SCHED_START_M', 'BOT_SCHED_END_H', 'BOT_SCHED_END_M')";
@@ -1408,7 +1377,7 @@ OnGMCommand:
 				break;
 
 			case 8: // LOCAL DE DESCANSO DESTE BOT
-				if (attachrid(.@target_aid)) {
+				if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 					.@b_rm$ = BOT_REST_MAP$;
 					.@b_rx = BOT_REST_X;
 					.@b_ry = BOT_REST_Y;
@@ -1427,7 +1396,7 @@ OnGMCommand:
 				                     "Voltar");
 				if (.@ind_r_opt == 1) {
 					getmapxy(.@gm_map$, .@gm_x, .@gm_y, BL_PC);
-					if (attachrid(.@target_aid)) {
+					if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 						BOT_REST_MAP$ = .@gm_map$;
 						BOT_REST_X = .@gm_x;
 						BOT_REST_Y = .@gm_y;
@@ -1435,7 +1404,7 @@ OnGMCommand:
 					attachrid(.@gm_aid);
 					dispbottom "[Bot Manager]: Local de descanso de '" + .@target_name$ + "' configurado para sua posicao: " + .@gm_map$ + " (" + .@gm_x + "," + .@gm_y + ").", 0x55FF55;
 				} else if (.@ind_r_opt == 2) {
-					if (attachrid(.@target_aid)) {
+					if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 						BOT_REST_MAP$ = "prt_in";
 						BOT_REST_X = 241;
 						BOT_REST_Y = 166;
@@ -1443,7 +1412,7 @@ OnGMCommand:
 					attachrid(.@gm_aid);
 					dispbottom "[Bot Manager]: Local de descanso de '" + .@target_name$ + "' configurado para Estalagem (prt_in 241,166).", 0x55FF55;
 				} else if (.@ind_r_opt == 3) {
-					if (attachrid(.@target_aid)) {
+					if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 						BOT_REST_MAP$ = "moc_para01";
 						BOT_REST_X = 173;
 						BOT_REST_Y = 108;
@@ -1459,7 +1428,7 @@ OnGMCommand:
 						.@n_map$ = .@rparts$[0];
 						.@n_x = atoi(.@rparts$[1]);
 						.@n_y = atoi(.@rparts$[2]);
-						if (attachrid(.@target_aid)) {
+						if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 							BOT_REST_MAP$ = .@n_map$;
 							BOT_REST_X = .@n_x;
 							BOT_REST_Y = .@n_y;
@@ -1470,7 +1439,7 @@ OnGMCommand:
 						dispbottom "[Bot Manager]: Formato invalido. Use: <mapa> <x> <y> (Ex: prt_in 241 166)", 0xFF5555;
 					}
 				} else if (.@ind_r_opt == 5) {
-					if (attachrid(.@target_aid)) {
+					if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 						BOT_REST_MAP$ = "";
 						BOT_REST_X = 0;
 						BOT_REST_Y = 0;
@@ -1484,11 +1453,11 @@ OnGMCommand:
 				break;
 
 			case 9: // STATUS
-				callsub OnShowGMStatus, .@target_aid, .@target_name$;
+				callsub OnShowGMStatus, .@target_aid, .@target_cid, .@target_name$;
 				break;
 
 			case 10: // TELEPORTAR
-				if (attachrid(.@target_aid)) {
+				if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 					getmapxy(.@t_map$, .@t_x, .@t_y, BL_PC);
 				}
 				attachrid(.@gm_aid);
@@ -1507,10 +1476,12 @@ OnGMCommand:
 	// COMANDOS INDIVIDUAIS POR TEXTO: @bot <cmd> [nome]
 	// ==================================================================
 	.@target_aid = 0;
+	.@target_cid = 0;
 	if (.@target_name$ != "") {
-		query_sql "SELECT `account_id` FROM `char` WHERE `name` = '" + escape_sql(.@target_name$) + "' LIMIT 1", .@target_aid;
-		if (.@target_aid > 0 && !isloggedin(.@target_aid)) {
+		query_sql "SELECT `account_id`, `char_id` FROM `char` WHERE `name` = '" + escape_sql(.@target_name$) + "' LIMIT 1", .@target_aid, .@target_cid;
+		if (.@target_aid > 0 && !isloggedin(.@target_aid, .@target_cid)) {
 			.@target_aid = 0;
+			.@target_cid = 0;
 		}
 	}
 
@@ -1520,7 +1491,7 @@ OnGMCommand:
 			dispbottom "[Bot Manager]: Personagem '" + .@target_name$ + "' nao encontrado ou offline.", 0xFF5555;
 			end;
 		}
-		if (attachrid(.@target_aid)) {
+		if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 			getmapxy(.@t_map$, .@t_x, .@t_y, BL_PC);
 		}
 		attachrid(.@gm_aid);
@@ -1539,7 +1510,7 @@ OnGMCommand:
 			dispbottom "[Bot Manager]: Personagem '" + .@target_name$ + "' nao encontrado ou offline.", 0xFF5555;
 			end;
 		}
-		if (attachrid(.@target_aid)) {
+		if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 			if (!@BOT_AI_ACTIVE) callsub OnStartSingleBot, 0;
 			offlinebot;
 		}
@@ -1554,7 +1525,7 @@ OnGMCommand:
 			dispbottom "[Bot Manager]: Personagem '" + .@target_name$ + "' nao encontrado ou offline.", 0xFF5555;
 			end;
 		}
-		if (attachrid(.@target_aid)) {
+		if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 			callsub OnStartSingleBot, 1;
 		}
 		attachrid(.@gm_aid);
@@ -1568,7 +1539,7 @@ OnGMCommand:
 			dispbottom "[Bot Manager]: Personagem '" + .@target_name$ + "' nao encontrado ou offline.", 0xFF5555;
 			end;
 		}
-		if (attachrid(.@target_aid)) {
+		if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 			callsub OnStartSingleBot, 0;
 		}
 		attachrid(.@gm_aid);
@@ -1582,7 +1553,7 @@ OnGMCommand:
 			dispbottom "[Bot Manager]: Personagem '" + .@target_name$ + "' nao encontrado ou offline.", 0xFF5555;
 			end;
 		}
-		if (attachrid(.@target_aid)) {
+		if (isloggedin(.@target_aid, .@target_cid) && attachrid(.@target_aid) && getcharid(0) == .@target_cid) {
 			callsub OnPauseSingleBot;
 			if (.@cmd$ == "logout") atcommand "@kick " + strcharinfo(0);
 		}
@@ -1597,7 +1568,7 @@ OnGMCommand:
 			dispbottom "[Bot Manager]: Personagem '" + .@target_name$ + "' nao encontrado ou offline.", 0xFF5555;
 			end;
 		}
-		callsub OnShowGMStatus, .@target_aid, .@target_name$;
+		callsub OnShowGMStatus, .@target_aid, .@target_cid, .@target_name$;
 		end;
 	}
 
@@ -1621,9 +1592,14 @@ OnGMCommand:
 
 OnShowGMStatus:
 	.@target_aid = getarg(0);
-	.@t_name$ = getarg(1);
+	.@target_cid = getarg(1);
+	.@t_name$ = getarg(2);
 
-	attachrid(.@target_aid);
+	if (!isloggedin(.@target_aid, .@target_cid) || !attachrid(.@target_aid) || getcharid(0) != .@target_cid) {
+		attachrid(.@gm_aid);
+		dispbottom "[Bot Manager]: O personagem solicitado nao esta mais conectado.", 0xFF5555;
+		return;
+	}
 	.@b_active = @BOT_AI_ACTIVE;
 	.@b_test = @BOT_TEST_MODE;
 	.@b_stage = @BOT_AI_STAGE;
