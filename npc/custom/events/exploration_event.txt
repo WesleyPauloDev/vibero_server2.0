@@ -1175,18 +1175,23 @@ function	script	F_Fenda_MvpDrop	{
 			.@chance = 10000;
 		.@chance = get_adjusted_drop_rate(31902, .@chance);
 		if (rand(10000) < .@chance) {
-			.@rare_roll = rand(4);
-			if (.@rare_roll == 0) {
-				partylootitem $Fenda_MvpDropItem, 1, .@chance;
+			.@reward_count = 0;
+			.@reward_items[.@reward_count++] = $Fenda_MvpDropItem;
+			.@reward_items[.@reward_count++] = 501000;
+			if ('Fenda_Level >= 2)
+				.@reward_items[.@reward_count++] = 9694;
+			if ('Fenda_Level >= 3)
+				.@reward_items[.@reward_count++] = 9695;
+
+			.@reward_item = .@reward_items[rand(.@reward_count)];
+			partylootitem .@reward_item, 1, .@chance;
+			if (.@reward_item == $Fenda_MvpDropItem) {
 				announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Caixa de Encanto da Fenda ao derrotar o Senhor da Fenda!", bc_all;
-			} else if (.@rare_roll == 1) {
-				partylootitem 9695, 1, .@chance;
+			} else if (.@reward_item == 9695) {
 				announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Encanto da Fenda (Botas) ao derrotar o Senhor da Fenda!", bc_all;
-			} else if (.@rare_roll == 2) {
-				partylootitem 501000, 1, .@chance;
+			} else if (.@reward_item == 501000) {
 				announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Pedra de Grade D ao derrotar o Senhor da Fenda!", bc_all;
 			} else {
-				partylootitem 9694, 1, .@chance;
 				announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Mini Refinadora ao derrotar o Senhor da Fenda!", bc_all;
 			}
 		}
@@ -1336,7 +1341,7 @@ OnMiniBossDead:
 	if ($Fenda_MvpDropItem > 0) {
 		.@drop_rate = get_adjusted_drop_rate(31901, 1);
 		if (rand(10000) < .@drop_rate) {
-			if (rand(2) == 0) {
+			if ('Fenda_Level < 3 || rand(2) == 0) {
 				partylootitem $Fenda_MvpDropItem, 1, .@drop_rate;
 				announce "[Fenda] O grupo de " + strcharinfo(0) + " obteve Caixa de Encanto da Fenda ao derrotar um Guardiao da Fenda!", bc_all;
 			} else {

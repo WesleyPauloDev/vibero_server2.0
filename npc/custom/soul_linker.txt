@@ -1,55 +1,83 @@
+// NPC fisico: a verificacao de proximidade e valida quando ele e clicado.
 prontera,147,165,5	script	Soul Link Santa	485,{
+	callfunc "F_SoulLinkService";
+	end;
+}
+
+// O comando precisa usar um NPC sem classe/localizacao. Assim, as respostas
+// do dialogo nao falham no npc_checknear quando @soullink e usado remotamente.
+-	script	SoulLinkCommand	-1,{
 OnAtcommand:
-	set .@n$,"^0000FF[ Soul Linker NPC ]^000000";
-	set .@time, 600000; // the buff last 5 minutes
-	set .zenycost,10000;
-	
-	mes .@n$;
-	mes "Ola "+strcharinfo(0)+",";
-	mes "Voce quer que eu te conceda Soul Link?";
-	mes "Custa ^00996650,000^000000 zeny";
-	next;
-	
-	switch(select("Sim:Nao")) {
-		case 1:
-			if((zeny < (.zenycost))) goto l_nozeny;
-			set Zeny, Zeny - (.zenycost);
-			switch ( basejob ) {
-				case Job_Alchemist: set .@spirit, 445; break;
-				case Job_Monk: set .@spirit, 447; break;
-				case Job_Star_Gladiator: set .@spirit, 448; break;
-				case Job_Sage: set .@spirit, 449; break;
-				case Job_Crusader: set .@spirit, 450; break;
-				case Job_SuperNovice: set .@spirit, 451; break;
-				case Job_Knight: set .@spirit, 452; break;
-				case Job_Wizard: set .@spirit, 453; break;
-				case Job_Priest: set .@spirit, 454; break;
-				case Job_Bard: case Job_Dancer: set .@spirit, 455; break;
-				case Job_Rogue: set .@spirit, 456; break;
-				case Job_Assassin: set .@spirit, 457; break;
-				case Job_Blacksmith: set .@spirit, 458; break;
-				case Job_Hunter: set .@spirit, 460; break;
-				case Job_Soul_Linker: set .@spirit, 461; break;
-		default:
-				if ( upper == 1 && baselevel < 70 ) set .@spirit, 494;
-			}
-			if ( .@spirit ) {
-				sc_start4 sc_spirit, .@time, 5, .@spirit,0,0;
-				skilleffect .@spirit, 5;
-			}
-		case 2:
-			mes .@n$;
-			mes "Certo, ate logo!";
-			close;
-	}
-l_nozeny:
-	mes .@n$;
-	mes "Desculpe, voce nao tem zeny suficiente para um Soul Link.";
-	mes " ";
-	mes "O servico de Soul Link custa ^00996650,000^000000 zeny";
-	close;
+	callfunc "F_SoulLinkService";
+	end;
 
 OnInit:
 	bindatcmd "soullink", strnpcinfo(3)+"::OnAtcommand", 0, 0;
 	end;
+}
+
+function	script	F_SoulLinkService	{
+	set .@n$,"^0000FF[ Soul Linker NPC ]^000000";
+	set .@time, 600000; // 10 minutos
+	set .@zenycost, 50000;
+	
+	mes .@n$;
+	mes "Ola "+strcharinfo(0)+",";
+	mes "Voce quer que eu te conceda Soul Link?";
+	mes "Custa ^00996650,000^000000 zeny.";
+
+	// Envia as opcoes diretamente. Alguns clientes nao exibem corretamente o
+	// botao "proximo" quando o dialogo e aberto por um comando vinculado.
+	if (select("Sim:Nao") == 2) {
+		clear;
+		mes .@n$;
+		mes "Certo, ate logo!";
+		close;
+	}
+
+	if (Zeny < .@zenycost)
+		goto L_NoZeny;
+
+	switch (basejob) {
+		case Job_Alchemist: set .@spirit, 445; break;
+		case Job_Monk: set .@spirit, 447; break;
+		case Job_Star_Gladiator: set .@spirit, 448; break;
+		case Job_Sage: set .@spirit, 449; break;
+		case Job_Crusader: set .@spirit, 450; break;
+		case Job_SuperNovice: set .@spirit, 451; break;
+		case Job_Knight: set .@spirit, 452; break;
+		case Job_Wizard: set .@spirit, 453; break;
+		case Job_Priest: set .@spirit, 454; break;
+		case Job_Bard:
+		case Job_Dancer: set .@spirit, 455; break;
+		case Job_Rogue: set .@spirit, 456; break;
+		case Job_Assassin: set .@spirit, 457; break;
+		case Job_Blacksmith: set .@spirit, 458; break;
+		case Job_Hunter: set .@spirit, 460; break;
+		case Job_Soul_Linker: set .@spirit, 461; break;
+		default:
+			if (upper == 1 && baselevel < 70)
+				set .@spirit, 494;
+			break;
+	}
+
+	clear;
+	mes .@n$;
+	if (!.@spirit) {
+		mes "Nao existe um Soul Link disponivel para a sua classe.";
+		close;
+	}
+
+	set Zeny, Zeny - .@zenycost;
+	sc_start4 SC_SPIRIT, .@time, 5, .@spirit, 0, 0;
+	skilleffect .@spirit, 5;
+	mes "Soul Link concedido com sucesso!";
+	close;
+
+L_NoZeny:
+	clear;
+	mes .@n$;
+	mes "Desculpe, voce nao tem zeny suficiente para um Soul Link.";
+	mes "O servico de Soul Link custa ^00996650,000^000000 zeny";
+	close;
 }
