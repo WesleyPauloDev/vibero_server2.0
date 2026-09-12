@@ -198,7 +198,7 @@ L_Main:
 	mes "Servicos da ^0055FFOld Glast Heim Challenge^000000.";
 	next;
 
-	switch (select("Hats temporais:Acessorios temporais:Capas do Cavaleiro Branco:Armas reais e guardioes:Encantar equipamentos temporais:Aprimorar encantamento:Informacoes:Voltar")) {
+	switch (select("Hats temporais:Acessorios temporais:Capas do Cavaleiro Branco:Armas reais e guardioes:Encantar equipamentos temporais:Encantar Capas do Cavaleiro Branco:Informacoes:Voltar")) {
 	case 1:
 		close2;
 		callshop "barter_ogh_challenge_hats",1;
@@ -233,7 +233,9 @@ L_Main:
 		end;
 
 	case 6:
-		goto L_Upgrade;
+		close2;
+		item_enchant(166);
+		end;
 
 	case 7:
 		mes "[Oscar]";
@@ -248,8 +250,7 @@ L_Main:
 		mes "2o slot aleatorio: ^0055FF2x " + getitemname(25866) + "^000000.";
 		mes "2o slot perfeito escolhido: ^0055FF6x " + getitemname(25866) + "^000000 (3x o custo aleatorio).";
 		mes "As Joias Temporais tambem aparecem no perfeito do 2o slot por ^0055FF2x " + getitemname(25865) + "^000000.";
-		mes "A aba Upgrade oferece aprimoramento perfeito, com 100% de sucesso.";
-		mes "A opcao separada mantem o aprimoramento normal com as chances atuais.";
+		mes "Use a aba Upgrade da janela de encantamento para aprimorar os encantamentos.";
 		next;
 		mes "[Oscar]";
 		mes "Os acessorios temporais possuem combo direto com o Circlet da classe correspondente.";
@@ -259,6 +260,7 @@ L_Main:
 		mes "[Oscar]";
 		mes "As Capas do Cavaleiro Branco possuem tres especializacoes: corpo a corpo, distancia e magia.";
 		mes "O bonus com Circlet e ativado quando a soma dos refinos do elmo e da capa alcanca ^0055FF21^000000.";
+		mes "As tres capas possuem encantamento proprio pela opcao ^0055FF'Encantar Capas do Cavaleiro Branco'^000000.";
 		next;
 		goto L_Main;
 
@@ -513,7 +515,7 @@ L_TemporalEnchant:
 			mes "[Oscar]";
 			mes "2o slot encantado com sucesso!";
 			mes "Encantamento obtido: ^0055FF" + getitemname(.@chosen) + "^000000.";
-			mes "^008800Dica:^000000 Voce pode aprimorar esse encantamento especial ate o nivel 10 na opcao ^0055FF'Aprimorar encantamento'^000000!";
+			mes "^008800Dica:^000000 Voce pode aprimorar esse encantamento especial ate o nivel 10 na ^0055FFaba Upgrade da janela de encantamento^000000!";
 			close;
 		} else if (.@opt == 2) {
 			if (countitem(25866) < 6) {
@@ -536,7 +538,7 @@ L_TemporalEnchant:
 			mes "[Oscar]";
 			mes "2o slot encantado com sucesso!";
 			mes "Encantamento obtido: ^0055FF" + getitemname(.@chosen) + "^000000.";
-			mes "^008800Dica:^000000 Voce pode aprimorar esse encantamento especial ate o nivel 10 na opcao ^0055FF'Aprimorar encantamento'^000000!";
+			mes "^008800Dica:^000000 Voce pode aprimorar esse encantamento especial ate o nivel 10 na ^0055FFaba Upgrade da janela de encantamento^000000!";
 			close;
 		} else if (.@opt == 3) {
 			if (countitem(25865) < 2) {
