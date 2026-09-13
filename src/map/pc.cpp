@@ -8525,7 +8525,7 @@ int32 pc_checkbaselevelup(map_session_data *sd) {
 			sd->status.base_exp = next-1;
 
 		sd->status.status_point += statpoint_db.pc_gets_status_point(sd->status.base_level);
-		if ((sd->class_ & MAPID_BASEMASK) != MAPID_SUMMONER)
+		if ((sd->class_ & MAPID_BASEMASK) != MAPID_SUMMONER && (sd->class_ & MAPID_BASEMASK) != MAPID_NINJA)
 			sd->status.trait_point += statpoint_db.pc_gets_trait_point(sd->status.base_level);
 		sd->status.base_level++;
 
@@ -9648,10 +9648,10 @@ int32 pc_resetstate(map_session_data* sd)
 		sd->status.status_point += battle_config.transcendent_status_points;
 	}
 
-	if ((sd->class_ & JOBL_FOURTH) != 0 && (sd->class_ & MAPID_BASEMASK) != MAPID_SUMMONER) {
+	if ((sd->class_ & JOBL_FOURTH) != 0 && (sd->class_ & MAPID_BASEMASK) != MAPID_SUMMONER && (sd->class_ & MAPID_BASEMASK) != MAPID_NINJA) {
 		sd->status.trait_point += battle_config.trait_points_job_change;
 	}
-	if ((sd->class_ & MAPID_BASEMASK) == MAPID_SUMMONER) {
+	if ((sd->class_ & MAPID_BASEMASK) == MAPID_SUMMONER || (sd->class_ & MAPID_BASEMASK) == MAPID_NINJA) {
 		sd->status.trait_point = 0;
 	}
 
@@ -10708,7 +10708,7 @@ bool pc_setparam(map_session_data *sd,int64 type,int64 val_tmp)
 		if (val > sd->status.base_level) {
 			for( int32 i = 0; i < (int32)( val - sd->status.base_level ); i++ ){
 				sd->status.status_point += statpoint_db.pc_gets_status_point( sd->status.base_level + i );
-				if ((sd->class_ & MAPID_BASEMASK) != MAPID_SUMMONER)
+				if ((sd->class_ & MAPID_BASEMASK) != MAPID_SUMMONER && (sd->class_ & MAPID_BASEMASK) != MAPID_NINJA)
 					sd->status.trait_point += statpoint_db.pc_gets_trait_point( sd->status.base_level + i );
 			}
 		}
@@ -11241,7 +11241,7 @@ bool pc_jobchange(map_session_data *sd,int32 job, char upper)
 	}
 
 	// Give or reduce trait status points
-	if ((b_class & JOBL_FOURTH) && !(previous_class & JOBL_FOURTH) && (b_class & MAPID_BASEMASK) != MAPID_SUMMONER) {// Change to a 4th job.
+	if ((b_class & JOBL_FOURTH) && !(previous_class & JOBL_FOURTH) && (b_class & MAPID_BASEMASK) != MAPID_SUMMONER && (b_class & MAPID_BASEMASK) != MAPID_NINJA) {// Change to a 4th job.
 		sd->status.trait_point += battle_config.trait_points_job_change;
 		clif_updatestatus(*sd, SP_TRAITPOINT);
 		clif_updatestatus(*sd, SP_UPOW);
@@ -11266,7 +11266,7 @@ bool pc_jobchange(map_session_data *sd,int32 job, char upper)
 		}
 	}
 
-	if ((b_class & MAPID_BASEMASK) == MAPID_SUMMONER) {
+	if ((b_class & MAPID_BASEMASK) == MAPID_SUMMONER || (b_class & MAPID_BASEMASK) == MAPID_NINJA) {
 		sd->status.trait_point = 0;
 		clif_updatestatus(*sd, SP_TRAITPOINT);
 	}

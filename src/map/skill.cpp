@@ -6298,9 +6298,11 @@ int32 skill_castend_damage_id (struct block_list* src, struct block_list *bl, ui
 		break;
 	case SS_ANKOKURYUUAKUMU:
 		if (flag & 1) {
+			bool nightmare = (tsc != nullptr && tsc->getSCE( SC_NIGHTMARE ) != nullptr);
+
 			skill_attack(skill_get_type(skill_id), src, src, bl, skill_id, skill_lv, tick, flag);
 
-			if( tsc != nullptr && tsc->getSCE( SC_NIGHTMARE ) != nullptr ){
+			if( nightmare ){
 				skill_attack(skill_get_type(skill_id), src, src, bl, skill_id, skill_lv, tick, flag | SKILL_ALTDMG_FLAG);
 			}
 		}
