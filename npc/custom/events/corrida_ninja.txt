@@ -1,0 +1,338 @@
+//=============================================================
+// NPC: Evento Especial - Corrida do Ninja
+// Local: Prontera (144, 174) | ID: 556
+//=============================================================
+
+prontera,144,174,4	script	Corrida do Ninja#evento	637,{
+
+	.@npc_name$ = "[Corrida do Ninja]";
+	.@is_gm = (getgmlevel() >= 99);
+
+	mes .@npc_name$;
+	mes "^FF8800EVENTO ESPECIAL - CORRIDA DO NINJA^000000";
+	mes "Para comemorar o lancamento da evolucao Ninja (Shinkiro e Shiranui), temos um evento especial para os primeiros jogadores que alcancarem os objetivos!";
+	mes "^777777(O evento anterior da Corrida do Doram foi encerrado)^000000";
+	next;
+
+	while (true) {
+		.@menu$ = "Informacoes do Evento:" +
+		          "Reivindicar Objetivo 1 (Nivel 200/70 - Rate 1X):" +
+		          "Reivindicar Objetivo 2 (5 Reborns com Ninja):" +
+		          "Ver Vencedores da Corrida do Ninja:" +
+		          "Ver Vencedores da Corrida do Doram (Encerrada):" +
+		          "Sair";
+
+		if (.@is_gm) {
+			.@menu$ += ":Painel GM (Gerenciar Evento)";
+		}
+
+		switch (select(.@menu$)) {
+			case 1:
+				// Informacoes
+				mes .@npc_name$;
+				mes "^FF8800=== REGRAS E PREMIACOES (NINJA) ===^000000";
+				mes "";
+				mes "^00AAFFObjetivo 1 - Nivel 200/70^000000";
+				mes "Apenas personagens Ninja na ^FF0000Rate 1X^000000 serao considerados!";
+				mes "^FFAA001 Lugar:^000000 Hat do Ninja da Fenda (Fenda Crown of Good and Evil) + 20x Chicle de Bola";
+				mes "^CCCCCC2 Lugar:^000000 20x Chicle de Bola";
+				mes "^CC66003 Lugar:^000000 10x Chicle de Bola";
+				mes "";
+				mes "^FF3300Objetivo 2 - 5 Reborns com Ninja^000000";
+				mes "^FFAA001 Lugar:^000000 Arma da Fenda Ninja +11 Grade D (Holy [Fisica] ou Dark [Magica]) + 20x Chicle de Bola";
+				mes "^CCCCCC2 Lugar:^000000 Arma da Fenda Ninja +0 sem Grade (Holy [Fisica] ou Dark [Magica]) + 20x Chicle de Bola";
+				mes "^CC66003 Lugar:^000000 20x Chicle de Bola";
+				next;
+				break;
+
+			case 2:
+				// Reivindicar Objetivo 1
+				mes .@npc_name$;
+				mes "^00AAFFOBJETIVO 1: Nivel 200/70 na Rate 1X^000000";
+
+				if (#ninja_race_claimed_obj1) {
+					mes "^FF0000Voce ja resgatou a premiacao do Objetivo 1 com esta conta!^000000";
+					next;
+					break;
+				}
+
+				if ($ninja_race_obj1_count >= 3) {
+					mes "^FF0000Infelizmente todas as 3 vagas do Objetivo 1 ja foram preenchidas!^000000";
+					next;
+					break;
+				}
+
+				// Validacoes de classe Ninja
+				.@eac = eaclass();
+				.@is_baby = (.@eac & EAJL_BABY);
+				.@base_eac = .@eac & EAJ_BASEMASK;
+				.@is_ninja = (.@base_eac == EAJ_NINJA || BaseClass == Job_Ninja || Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro || Class == Job_Shinkiro || Class == Job_Shiranui);
+
+				if (!.@is_ninja || .@is_baby) {
+					mes "^FF0000Apenas personagens Ninja adultos (Ninja, Kagerou, Oboro, Shinkiro, Shiranui) podem participar deste evento!^000000";
+					next;
+					break;
+				}
+
+				// Validacao de Rate 1X
+				if (rate_escolhido != 1 && exp_base_custom > 100) {
+					mes "^FF0000Este objetivo e exclusivo para personagens na Rate 1X de Experiencia!^000000";
+					mes "Sua Rate atual: ^FFAA00" + (rate_escolhido ? rate_escolhido : (exp_base_custom / 100)) + "X^000000.";
+					next;
+					break;
+				}
+
+				// Validacao de Nivel
+				if (BaseLevel < 200 || JobLevel < 70) {
+					mes "^FF0000Voce precisa alcancar o Nivel Base 200 e Nivel de Classe 70!^000000";
+					mes "Seu nivel atual: ^FFAA00" + BaseLevel + "/" + JobLevel + "^000000.";
+					next;
+					break;
+				}
+
+				// Verificacao de peso
+				if (checkweight(12412, 20) == 0 || checkweight(910212, 1) == 0) {
+					mes "^FF0000Voce esta carregando muito peso ou seu inventario esta cheio. Libere espaco antes de resgatar o premio!^000000";
+					next;
+					break;
+				}
+
+				// Determinar colocacao
+				.@place = $ninja_race_obj1_count + 1;
+				mes "Parabens! Voce cumpriu todos os requisitos e conquistou o ^00FF00" + .@place + " Lugar^000000 no Objetivo 1!";
+				mes "Deseja resgatar sua premiacao agora?";
+				next;
+
+				if (select("Sim, resgatar meu premio!:Nao, cancelar") == 2) {
+					break;
+				}
+
+				// Rechecar trava de concorrencia
+				if ($ninja_race_obj1_count >= 3) {
+					mes .@npc_name$;
+					mes "^FF0000As vagas acabaram de ser preenchidas por outro jogador!^000000";
+					next;
+					break;
+				}
+
+				.@place = $ninja_race_obj1_count + 1;
+				$ninja_race_obj1_count++;
+				#ninja_race_claimed_obj1 = 1;
+
+				if (.@place == 1) {
+					$ninja_obj1_winner1$ = strcharinfo(0);
+					getitem 910212, 1; // Fenda_Circlet_KO (Fenda Crown of Good and Evil (Kagerou/Oboro))
+					getitem 12412, 20; // HE_Bubble_Gum (Chicle de Bola)
+					announce "[Corrida do Ninja] " + strcharinfo(0) + " e o 1 colocado no Objetivo 1 (Nv 200/70 Rate 1X) e ganhou Hat da Fenda + 20 Chicles!", bc_all, 0xFFFF00;
+				}
+				else if (.@place == 2) {
+					$ninja_obj1_winner2$ = strcharinfo(0);
+					getitem 12412, 20; // HE_Bubble_Gum (Chicle de Bola)
+					announce "[Corrida do Ninja] " + strcharinfo(0) + " conquistou o 2 lugar no Objetivo 1 (Nv 200/70 Rate 1X) e ganhou 20 Chicles de Bola!", bc_all, 0xFFFF00;
+				}
+				else if (.@place == 3) {
+					$ninja_obj1_winner3$ = strcharinfo(0);
+					getitem 12412, 10; // HE_Bubble_Gum (Chicle de Bola)
+					announce "[Corrida do Ninja] " + strcharinfo(0) + " conquistou o 3 lugar no Objetivo 1 (Nv 200/70 Rate 1X) e ganhou 10 Chicles de Bola!", bc_all, 0xFFFF00;
+				}
+
+				mes .@npc_name$;
+				mes "^00FF00Premio entregue com sucesso! Parabens pela conquista!^000000";
+				next;
+				break;
+
+			case 3:
+				// Reivindicar Objetivo 2
+				mes .@npc_name$;
+				mes "^FF3300OBJETIVO 2: 5 Reborns com Ninja^000000";
+
+				if (#ninja_race_claimed_obj2) {
+					mes "^FF0000Voce ja resgatou a premiacao do Objetivo 2 com esta conta!^000000";
+					next;
+					break;
+				}
+
+				if ($ninja_race_obj2_count >= 3) {
+					mes "^FF0000Infelizmente todas as 3 vagas do Objetivo 2 ja foram preenchidas!^000000";
+					next;
+					break;
+				}
+
+				// Validacao de Ninja
+				.@eac = eaclass();
+				.@base_eac = .@eac & EAJ_BASEMASK;
+				.@is_ninja = (.@base_eac == EAJ_NINJA || BaseClass == Job_Ninja || Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro || Class == Job_Shinkiro || Class == Job_Shiranui);
+
+				if (!.@is_ninja) {
+					mes "^FF0000Apenas a linhagem Ninja pode participar deste objetivo!^000000";
+					next;
+					break;
+				}
+
+				// Validacao de Reborns
+				if (reborn_count < 5) {
+					mes "^FF0000Voce precisa completar 5 Reborns com seu Ninja!^000000";
+					mes "Seus Reborns atuais: ^FFAA00" + reborn_count + " / 5^000000.";
+					next;
+					break;
+				}
+
+				// Verificacao de peso
+				if (checkweight(12412, 20) == 0 || checkweight(910126, 1) == 0) {
+					mes "^FF0000Voce esta carregando muito peso ou seu inventario esta cheio. Libere espaco antes de resgatar o premio!^000000";
+					next;
+					break;
+				}
+
+				.@place = $ninja_race_obj2_count + 1;
+				mes "Parabens! Voce atingiu 5 Reborns com seu Ninja e conquistou o ^00FF00" + .@place + " Lugar^000000 no Objetivo 2!";
+				next;
+
+				// Escolha de arma para 1 ou 2 colocado
+				.@weapon_id = 0;
+				if (.@place == 1 || .@place == 2) {
+					mes .@npc_name$;
+					mes "Escolha qual Arma da Fenda Ninja deseja receber:";
+					.@w_choice = select("Fenda Holy Huuma (Fisica):Fenda Dark Huuma (Magica):Cancelar");
+					if (.@w_choice == 1) {
+						.@weapon_id = 910126; // Fenda_Holy_KO_Weapon (Fenda Holy KO Weapon - Fisica)
+					} else if (.@w_choice == 2) {
+						.@weapon_id = 910127; // Fenda_Dark_KO_Weapon (Fenda Dark KO Weapon - Magica)
+					} else {
+						break;
+					}
+				}
+
+				mes .@npc_name$;
+				mes "Confirmar o resgate do premio do " + .@place + " Lugar do Objetivo 2?";
+				if (select("Sim, confirmar!:Nao, cancelar") == 2) {
+					break;
+				}
+
+				// Rechecar trava de concorrencia
+				if ($ninja_race_obj2_count >= 3) {
+					mes .@npc_name$;
+					mes "^FF0000As vagas acabaram de ser preenchidas por outro jogador!^000000";
+					next;
+					break;
+				}
+
+				.@place = $ninja_race_obj2_count + 1;
+				$ninja_race_obj2_count++;
+				#ninja_race_claimed_obj2 = 1;
+
+				if (.@place == 1) {
+					$ninja_obj2_winner1$ = strcharinfo(0);
+					// 1 colocado: Arma +11 Grade D + 20 Chicles
+					setarray .@opt_id[0], 0;
+					setarray .@opt_val[0], 0;
+					setarray .@opt_param[0], 0;
+					getitem4 .@weapon_id, 1, 1, 11, 0, 0, 0, 0, 0, ENCHANTGRADE_D, .@opt_id, .@opt_val, .@opt_param;
+					getitem 12412, 20; // HE_Bubble_Gum (Chicle de Bola)
+					announce "[Corrida do Ninja] " + strcharinfo(0) + " e o 1 colocado no Objetivo 2 (5 Reborns Ninja) e ganhou Arma da Fenda +11 Grade D + 20 Chicles!", bc_all, 0xFFFF00;
+				}
+				else if (.@place == 2) {
+					$ninja_obj2_winner2$ = strcharinfo(0);
+					// 2 colocado: Arma +0 sem grade + 20 Chicles
+					getitem .@weapon_id, 1;
+					getitem 12412, 20; // HE_Bubble_Gum (Chicle de Bola)
+					announce "[Corrida do Ninja] " + strcharinfo(0) + " conquistou o 2 lugar no Objetivo 2 (5 Reborns Ninja) e ganhou Arma da Fenda +0 + 20 Chicles!", bc_all, 0xFFFF00;
+				}
+				else if (.@place == 3) {
+					$ninja_obj2_winner3$ = strcharinfo(0);
+					// 3 colocado: 20 Chicles
+					getitem 12412, 20; // HE_Bubble_Gum (Chicle de Bola)
+					announce "[Corrida do Ninja] " + strcharinfo(0) + " conquistou o 3 lugar no Objetivo 2 (5 Reborns Ninja) e ganhou 20 Chicles de Bola!", bc_all, 0xFFFF00;
+				}
+
+				mes .@npc_name$;
+				mes "^00FF00Premio entregue com sucesso! Parabens pelo esforco e dedicacao!^000000";
+				next;
+				break;
+
+			case 4:
+				// Ver Vencedores Ninja
+				mes .@npc_name$;
+				mes "^FF8800=== QUADRO DE VENCEDORES (NINJA) ===^000000";
+				mes "";
+				mes "^00AAFFObjetivo 1 (Nivel 200/70 - Rate 1X):^000000";
+				mes "1 Lugar: " + ($ninja_obj1_winner1$ != "" ? ("^00FF00" + $ninja_obj1_winner1$ + "^000000") : "^777777[Vaga Aberta]^000000");
+				mes "2 Lugar: " + ($ninja_obj1_winner2$ != "" ? ("^00FF00" + $ninja_obj1_winner2$ + "^000000") : "^777777[Vaga Aberta]^000000");
+				mes "3 Lugar: " + ($ninja_obj1_winner3$ != "" ? ("^00FF00" + $ninja_obj1_winner3$ + "^000000") : "^777777[Vaga Aberta]^000000");
+				mes "";
+				mes "^FF3300Objetivo 2 (5 Reborns com Ninja):^000000";
+				mes "1 Lugar: " + ($ninja_obj2_winner1$ != "" ? ("^00FF00" + $ninja_obj2_winner1$ + "^000000") : "^777777[Vaga Aberta]^000000");
+				mes "2 Lugar: " + ($ninja_obj2_winner2$ != "" ? ("^00FF00" + $ninja_obj2_winner2$ + "^000000") : "^777777[Vaga Aberta]^000000");
+				mes "3 Lugar: " + ($ninja_obj2_winner3$ != "" ? ("^00FF00" + $ninja_obj2_winner3$ + "^000000") : "^777777[Vaga Aberta]^000000");
+				next;
+				break;
+
+			case 5:
+				// Ver Vencedores Doram (Encerrada)
+				mes .@npc_name$;
+				mes "^FF8800=== QUADRO DE VENCEDORES (DORAM - ENCERRADA) ===^000000";
+				mes "";
+				mes "^00AAFFObjetivo 1 (Nivel 200/70 - Rate 1X):^000000";
+				mes "1 Lugar: " + ($doram_obj1_winner1$ != "" ? ("^00FF00" + $doram_obj1_winner1$ + "^000000") : "^777777[Ninguem]^000000");
+				mes "2 Lugar: " + ($doram_obj1_winner2$ != "" ? ("^00FF00" + $doram_obj1_winner2$ + "^000000") : "^777777[Ninguem]^000000");
+				mes "3 Lugar: " + ($doram_obj1_winner3$ != "" ? ("^00FF00" + $doram_obj1_winner3$ + "^000000") : "^777777[Ninguem]^000000");
+				mes "";
+				mes "^FF3300Objetivo 2 (5 Reborns com Doram):^000000";
+				mes "1 Lugar: " + ($doram_obj2_winner1$ != "" ? ("^00FF00" + $doram_obj2_winner1$ + "^000000") : "^777777[Ninguem]^000000");
+				mes "2 Lugar: " + ($doram_obj2_winner2$ != "" ? ("^00FF00" + $doram_obj2_winner2$ + "^000000") : "^777777[Ninguem]^000000");
+				mes "3 Lugar: " + ($doram_obj2_winner3$ != "" ? ("^00FF00" + $doram_obj2_winner3$ + "^000000") : "^777777[Ninguem]^000000");
+				next;
+				break;
+
+			case 6:
+				// Sair
+				mes .@npc_name$;
+				mes "Boa sorte na corrida Ninja!";
+				close;
+
+			case 7:
+				// Painel GM
+				if (!.@is_gm) {
+					close;
+				}
+				mes "[Painel GM]";
+				mes "Opcoes administrativas:";
+				.@gm_choice = select("Limpar Vencedores Objetivo 1 Ninja:Limpar Vencedores Objetivo 2 Ninja:Resetar Toda a Corrida Ninja:Resetar Registros Doram:Voltar");
+				if (.@gm_choice == 1) {
+					$ninja_race_obj1_count = 0;
+					$ninja_obj1_winner1$ = "";
+					$ninja_obj1_winner2$ = "";
+					$ninja_obj1_winner3$ = "";
+					mes "Objetivo 1 Ninja resetado!";
+				} else if (.@gm_choice == 2) {
+					$ninja_race_obj2_count = 0;
+					$ninja_obj2_winner1$ = "";
+					$ninja_obj2_winner2$ = "";
+					$ninja_obj2_winner3$ = "";
+					mes "Objetivo 2 Ninja resetado!";
+				} else if (.@gm_choice == 3) {
+					$ninja_race_obj1_count = 0;
+					$ninja_obj1_winner1$ = "";
+					$ninja_obj1_winner2$ = "";
+					$ninja_obj1_winner3$ = "";
+					$ninja_race_obj2_count = 0;
+					$ninja_obj2_winner1$ = "";
+					$ninja_obj2_winner2$ = "";
+					$ninja_obj2_winner3$ = "";
+					mes "Corrida Ninja foi completamente resetada!";
+				} else if (.@gm_choice == 4) {
+					$doram_race_obj1_count = 0;
+					$doram_obj1_winner1$ = "";
+					$doram_obj1_winner2$ = "";
+					$doram_obj1_winner3$ = "";
+					$doram_race_obj2_count = 0;
+					$doram_obj2_winner1$ = "";
+					$doram_obj2_winner2$ = "";
+					$doram_obj2_winner3$ = "";
+					mes "Registros da Corrida Doram resetados!";
+				}
+				next;
+				break;
+		}
+	}
+}
