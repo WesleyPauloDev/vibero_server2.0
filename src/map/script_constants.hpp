@@ -4104,6 +4104,7 @@
 	export_constant(UMOB_RES);
 	export_constant(UMOB_MRES);
 	export_constant(UMOB_DAMAGETAKEN);
+	export_constant(UMOB_OUTGOING_DAMAGE_RATE);
 
 	/* unit control - homunculus */
 	export_constant(UHOM_SIZE);

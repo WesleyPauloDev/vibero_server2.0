@@ -411,6 +411,7 @@ struct mob_data : public block_list {
 	 **/
 	uint16 spawn_idx;
 	uint16 damagetaken;
+	uint16 outgoing_damage_rate = 100;
 
 	int damage_cap;
 

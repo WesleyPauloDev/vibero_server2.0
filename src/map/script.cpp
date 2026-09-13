@@ -20186,6 +20186,7 @@ BUILDIN_FUNC(getunitdata)
 			getunitdata_sub(UMOB_RES, md->status.res);
 			getunitdata_sub(UMOB_MRES, md->status.mres);
 			getunitdata_sub(UMOB_DAMAGETAKEN, md->damagetaken);
+			getunitdata_sub(UMOB_OUTGOING_DAMAGE_RATE, md->outgoing_damage_rate);
 			} break;
 
 		case BL_HOM: {
@@ -20505,12 +20506,12 @@ BUILDIN_FUNC(setunitdata)
 			case UMOB_WEAPON: clif_changelook(bl, LOOK_WEAPON, (uint16)value); break;
 			case UMOB_LOOKDIR: unit_setdir(bl, (uint8)value); break;
 			case UMOB_CANMOVETICK: md->ud.canmove_tick = value > 0 ? (uint32)value : 0; break;
-			case UMOB_STR: md->base_status->str = (uint16)value; status_calc_misc(bl, &md->status, md->level); calc_status = true; break;
-			case UMOB_AGI: md->base_status->agi = (uint16)value; status_calc_misc(bl, &md->status, md->level); calc_status = true; break;
-			case UMOB_VIT: md->base_status->vit = (uint16)value; status_calc_misc(bl, &md->status, md->level); calc_status = true; break;
-			case UMOB_INT: md->base_status->int_ = (uint16)value; status_calc_misc(bl, &md->status, md->level); calc_status = true; break;
-			case UMOB_DEX: md->base_status->dex = (uint16)value; status_calc_misc(bl, &md->status, md->level); calc_status = true; break;
-			case UMOB_LUK: md->base_status->luk = (uint16)value; status_calc_misc(bl, &md->status, md->level); calc_status = true; break;
+			case UMOB_STR: md->base_status->str = (uint16)value; calc_status = true; break;
+			case UMOB_AGI: md->base_status->agi = (uint16)value; calc_status = true; break;
+			case UMOB_VIT: md->base_status->vit = (uint16)value; calc_status = true; break;
+			case UMOB_INT: md->base_status->int_ = (uint16)value; calc_status = true; break;
+			case UMOB_DEX: md->base_status->dex = (uint16)value; calc_status = true; break;
+			case UMOB_LUK: md->base_status->luk = (uint16)value; calc_status = true; break;
 			case UMOB_SLAVECPYMSTRMD:
 				if (value > 0) {
 					TBL_MOB *md2 = nullptr;
@@ -20562,6 +20563,7 @@ BUILDIN_FUNC(setunitdata)
 			case UMOB_RES: md->base_status->res = (int16)value; calc_status = true; break;
 			case UMOB_MRES: md->base_status->mres = (int16)value; calc_status = true; break;
 			case UMOB_DAMAGETAKEN: md->damagetaken = (uint16)value; break;
+			case UMOB_OUTGOING_DAMAGE_RATE: md->outgoing_damage_rate = (uint16)cap_value(value, 1, USHRT_MAX); break;
 			default:
 				ShowError("buildin_setunitdata: Unknown data identifier %d for BL_MOB.\n", type);
 				return SCRIPT_CMD_FAILURE;

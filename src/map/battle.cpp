@@ -62,6 +62,21 @@ static int64 battle_apply_combat_rate(struct block_list *target, int64 damage)
 	return i64max(damage * cap_value(rate, 0, 100) / 100, 1);
 }
 
+static void battle_apply_mob_outgoing_damage_rate(struct block_list *src, struct Damage *damage)
+{
+	if (src == nullptr || src->type != BL_MOB || damage == nullptr)
+		return;
+
+	mob_data *md = BL_CAST(BL_MOB, src);
+	if (md == nullptr || md->outgoing_damage_rate <= 100)
+		return;
+
+	if (damage->damage > 0)
+		damage->damage = apply_rate(damage->damage, md->outgoing_damage_rate);
+	if (damage->damage2 > 0)
+		damage->damage2 = apply_rate(damage->damage2, md->outgoing_damage_rate);
+}
+
 /**
  * Returns the current/list skill used by the bl
  * @param bl
@@ -8139,6 +8154,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 #endif
 
 	battle_calc_weapon_final_atk_modifiers(&wd, src, target, skill_id, skill_lv);
+	battle_apply_mob_outgoing_damage_rate(src, &wd);
 
 	battle_absorb_damage(target, &wd);
 
@@ -9659,6 +9675,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 	if ((skill_damage = battle_skill_damage(src,target,skill_id)) != 0)
 		MATK_ADDRATE(skill_damage);
 
+	battle_apply_mob_outgoing_damage_rate(src, &ad);
 	battle_absorb_damage(target, &ad);
 
 	//battle_do_reflect(BF_MAGIC,&ad, src, target, skill_id, skill_lv); //WIP [lighta] Magic skill has own handler at skill_attack
@@ -10075,6 +10092,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src,struct block_list *
 	if ((skill_damage = battle_skill_damage(src,target,skill_id)) != 0)
 		md.damage += (int64)md.damage * skill_damage / 100;
 
+	battle_apply_mob_outgoing_damage_rate(src, &md);
 	battle_absorb_damage(target, &md);
 
 	battle_do_reflect(BF_MISC,&md, src, target, skill_id, skill_lv); //WIP [lighta]

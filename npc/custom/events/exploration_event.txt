@@ -215,10 +215,6 @@ function	script	F_Fenda_ScaleMob	{
 	}
 	setunitdata .@gid, UMOB_MAXHP, .@hp;
 	setunitdata .@gid, UMOB_HP, .@hp;
-	setunitdata .@gid, UMOB_ATKMIN, .@data[UMOB_ATKMIN] * .@mult;
-	setunitdata .@gid, UMOB_ATKMAX, .@data[UMOB_ATKMAX] * .@mult;
-	setunitdata .@gid, UMOB_MATKMIN, .@data[UMOB_MATKMIN] * .@mult;
-	setunitdata .@gid, UMOB_MATKMAX, .@data[UMOB_MATKMAX] * .@mult;
 	setunitdata .@gid, UMOB_DEF, min(.@data[UMOB_DEF] * .@mult, 32767);
 	setunitdata .@gid, UMOB_MDEF, min(.@data[UMOB_MDEF] * .@mult, 32767);
 	setunitdata .@gid, UMOB_RES, min(.@data[UMOB_RES] * .@mult, 32767);
@@ -227,6 +223,7 @@ function	script	F_Fenda_ScaleMob	{
 	setunitdata .@gid, UMOB_VIT, min(.@data[UMOB_VIT] * .@mult, 32767);
 	setunitdata .@gid, UMOB_INT, min(.@data[UMOB_INT] * .@mult, 32767);
 	setunitdata .@gid, UMOB_DEX, min(.@data[UMOB_DEX] * .@mult, 32767);
+	setunitdata .@gid, UMOB_OUTGOING_DAMAGE_RATE, .@mult * 100;
 
 	// Quando o HP deixa de crescer, reduz o dano recebido a cada nivel restante.
 	// A sequencia preserva o DamageTaken original e nunca torna o monstro mais facil.
