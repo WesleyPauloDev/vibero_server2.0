@@ -1802,6 +1802,13 @@ OnStepTimer:
 		end;
 	}
 	callsub OnMaintainBotEquipment;
+	// Ninja/Kagerou/Oboro precisam manter kunai equipada para as skills de arremesso.
+	if ((Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro || Class == JOB_SHINKIRO || Class == JOB_SHIRANUI) && gettimetick(2) >= @BOT_NEXT_KUNAI_CHECK) {
+		@BOT_NEXT_KUNAI_CHECK = gettimetick(2) + 60;
+		if (countitem(1220001) < 500) getitem 1220001, 2000;
+		if (getequipid(EQI_AMMO) <= 0) equip 1220001;
+		atcommand "@restock 1220001 1000";
+	}
 
 	// Bots ativos de nivel 130+ procuram, no maximo a cada 5 minutos, um
 	// MVP abaixo do nivel 150 que esteja vivo ha uma hora em mapa sem jogadores.
@@ -2636,6 +2643,12 @@ OnStepTimer:
 			// Rebellion se aproxima o suficiente para a habilidade acertar o alvo.
 			if (Class == Job_Rebellion && getequipid(EQI_HAND_R) > 0 && getItemInfo(getequipid(EQI_HAND_R), ITEMINFO_SUBTYPE) == W_REVOLVER)
 				.@atk_range = 3;
+			// Turbilhao de Kunais e auto-self: o bot precisa chegar ate o
+			// monstro para que a area ao redor atinja o alvo.
+			if ((Class == Job_Kagerou || Class == Job_Oboro) && getskilllv("KO_HAPPOKUNAI") > 0)
+				.@atk_range = 2;
+			if ((Class == JOB_SHINKIRO || Class == JOB_SHIRANUI) && getskilllv("SS_HITOUAKUMU") > 0)
+				.@atk_range = 3;
 
 			// Se ainda esta fora do alcance de ataque: anda em direcao ao monstro de forma fluida
 			if (.@dist > .@atk_range) {
@@ -3336,13 +3349,23 @@ OnStepTimer:
 			// =========================================================
 			// 7. NINJA / KAGEROU / OBORO
 			// =========================================================
-			else if (BaseClass == Job_Ninja || Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro) {
-				// Esta arvore usa somente ataques fisicos. As magias ofensivas de
-				// Ninja/Kagerou/Oboro sao elementais ou dependem de talismas.
+			else if ((BaseClass == Job_Ninja && Class != JOB_SHINKIRO && Class != JOB_SHIRANUI) || Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro) {
+				// Alterna Dragao Explosivo e Tempestade de Raios quando aprendidas.
 				.@nin_step = @BOT_SKILL_ROT % 4;
 				.@nin_weapon_id = getequipid(EQI_HAND_R);
 				.@nin_weapon_type = (.@nin_weapon_id > 0 ? getItemInfo(.@nin_weapon_id, ITEMINFO_SUBTYPE) : -1);
-				if (.@nin_step == 0 && getskilllv("KO_BAKURETSU") > 0 && Sp >= 9) {
+				if ((Class == Job_Kagerou || Class == Job_Oboro) && getskilllv("KO_HAPPOKUNAI") > 0 && .@dist <= 2 && Sp >= 12 && (@BOT_SKILL_ROT % 3 == 0)) {
+					// Turbilhao de Kunais e uma habilidade propria de Kagerou/Oboro.
+					unitskilluseid getcharid(3), "KO_HAPPOKUNAI", getskilllv("KO_HAPPOKUNAI"), getcharid(3), 0, 0, 0, 1;
+					.@skill_delay = 1000;
+				} else if ((@BOT_SKILL_ROT % 2 == 0) && getskilllv("NJ_BAKUENRYU") > 0 && Sp >= 20) {
+					unitskilluseid getcharid(3), "NJ_BAKUENRYU", getskilllv("NJ_BAKUENRYU"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
+					.@skill_delay = 1200;
+				} else if ((@BOT_SKILL_ROT % 2 == 1) && getskilllv("NJ_RAIGEKISAI") > 0 && Sp >= 16) {
+					getunitdata @BOT_CURRENT_TARGET, .@nin_target_data;
+					unitskillusepos getcharid(3), "NJ_RAIGEKISAI", getskilllv("NJ_RAIGEKISAI"), .@nin_target_data[UMOB_X], .@nin_target_data[UMOB_Y], 0, 1, 0, 1;
+					.@skill_delay = 1200;
+				} else if (.@nin_step == 0 && getskilllv("KO_BAKURETSU") > 0 && Sp >= 9) {
 					// Explosao de Kunai: ataque fisico em area e de longo alcance.
 					unitskilluseid getcharid(3), "KO_BAKURETSU", getskilllv("KO_BAKURETSU"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 1200;
@@ -3364,6 +3387,20 @@ OnStepTimer:
 				} else if (.@dist <= 2 && getskilllv("NJ_KASUMIKIRI") > 0 && Sp >= 8) {
 					unitskilluseid getcharid(3), "NJ_KASUMIKIRI", getskilllv("NJ_KASUMIKIRI"), @BOT_CURRENT_TARGET, 0, 0, 0, 1;
 					.@skill_delay = 800;
+				} else {
+					unitattack getcharid(3), @BOT_CURRENT_TARGET, 1;
+					.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
+				}
+			}
+			else if (Class == JOB_SHINKIRO || Class == JOB_SHIRANUI) {
+				// Shinkiro/Shiranui: Huuma Shuriken e Kunai - Pesadelo.
+				if (getskilllv("SS_FUUMASHOUAKU") > 0 && Sp >= 48 && (@BOT_SKILL_ROT % 2 == 0)) {
+					getunitdata @BOT_CURRENT_TARGET, .@ss_target_data;
+					unitskillusepos getcharid(3), "SS_FUUMASHOUAKU", getskilllv("SS_FUUMASHOUAKU"), .@ss_target_data[UMOB_X], .@ss_target_data[UMOB_Y], 0, 1, 0, 1;
+					.@skill_delay = 1200;
+				} else if (getskilllv("SS_HITOUAKUMU") > 0 && .@dist <= 3 && Sp >= 70 && (@BOT_SKILL_ROT % 2 == 1)) {
+					unitskilluseid getcharid(3), "SS_HITOUAKUMU", 1, getcharid(3), 0, 1, 0, 1;
+					.@skill_delay = 1500;
 				} else {
 					unitattack getcharid(3), @BOT_CURRENT_TARGET, 1;
 					.@skill_delay = (.@aspd_delay > 400 ? .@aspd_delay : 400);
@@ -5020,6 +5057,17 @@ OnDistributeSkills:
 		skill "GC_CLOAKINGEXCEED", 5, 1;
 		skill "GC_DARKCROW", 5, 1;
 	}
+	// Ninja / Kagerou / Oboro: magias solicitadas para a rotação ofensiva.
+	if (Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro || Class == JOB_SHINKIRO || Class == JOB_SHIRANUI) {
+		skill "NJ_BAKUENRYU", 5, 1;
+		skill "NJ_RAIGEKISAI", 5, 1;
+		if (Class == Job_Kagerou || Class == Job_Oboro)
+			skill "KO_HAPPOKUNAI", 5, 1;
+		if (Class == JOB_SHINKIRO || Class == JOB_SHIRANUI) {
+			skill "SS_FUUMASHOUAKU", 10, 1;
+			skill "SS_HITOUAKUMU", 1, 1;
+		}
+	}
 
 	// =========================================================
 	// 5. NOVICO / SACERDOTE / SUMO SACERDOTE / ARCEBISPO / MONGE / MESTRE / SHURA
@@ -5486,9 +5534,16 @@ OnCheckJobChange:
 		return;
 	}
 
-	// Ninja evolui diretamente, sem renascimento, conforme o sexo do personagem.
-	if (BOT_FINAL_JOB == 116 && Class == Job_Ninja && BaseLevel >= 99 && JobLevel >= 70) {
+	// Ninja evolui diretamente no job 70, sem exigir que o nivel base esteja
+	// exatamente em 99 (o bot pode ter evoluido com base menor).
+	if (Class == Job_Ninja && JobLevel >= 70) {
 		jobchange (Sex == SEX_MALE ? Job_Kagerou : Job_Oboro);
+		callsub OnFinalizeBotJobChange;
+		return;
+	}
+	// Kagerou/Oboro evoluem para Shinkiro/Shiranui no job 70.
+	if ((Class == Job_Kagerou || Class == Job_Oboro) && BaseLevel >= 99 && JobLevel >= 70) {
+		jobchange (Class == Job_Kagerou ? JOB_SHINKIRO : JOB_SHIRANUI);
 		callsub OnFinalizeBotJobChange;
 		return;
 	}
