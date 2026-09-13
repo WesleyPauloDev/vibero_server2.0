@@ -73,7 +73,7 @@ L_IcyStormSuit:
 	mes "Posso criar e encantar as armaduras especiais da Deep Biosphere.";
 	next;
 
-	switch (select("Criar armadura:Encantar armadura:Voltar:Cancelar")) {
+	switch (select("Criar armadura:Encantar armadura:Encantar Anel Deep:Voltar:Cancelar")) {
 	case 1:
 		mes "[Administrador Varmundt]";
 		mes "A loja mostra todas as armaduras Deep e suas versoes Engraved.";
@@ -84,6 +84,8 @@ L_IcyStormSuit:
 	case 2:
 		break;
 	case 3:
+		goto L_EnchantBiosphereRing;
+	case 4:
 		goto L_Main;
 	default:
 		close;
@@ -206,6 +208,11 @@ L_EnchantVarmundt:
 	default:
 		close;
 	}
+	end;
+
+L_EnchantBiosphereRing:
+	close2;
+	item_enchant(167);
 	end;
 
 L_EnchantBase:
