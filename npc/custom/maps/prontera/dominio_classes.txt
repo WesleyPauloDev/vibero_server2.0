@@ -55,25 +55,34 @@ OnTalk:
 			}
 
 			.@class_id = Class;
-			if (BaseClass == Job_Summoner)
-				.@class_id = Job_Summoner;
 
-			// Normaliza variantes masculino/feminino para um unico ID canonico.
-			switch (.@class_id) {
-				case 4076: .@class_id = 4075; break; // Wanderer -> Minstrel/Trovador
-				case 4212: .@class_id = 4211; break; // Oboro -> Kagerou
+			// Normaliza classes e evolucoes para os IDs canonicos da tabela
+			if ((eaclass() & EAJ_BASEMASK) == EAJ_NINJA || BaseClass == Job_Ninja || .@class_id == 4211 || .@class_id == 4212 || .@class_id == 4304 || .@class_id == 4305 || .@class_id == JOB_SHINKIRO || .@class_id == JOB_SHIRANUI) {
+				.@class_id = 4211; // Ninja canonico
+			} else if ((eaclass() & EAJ_BASEMASK) == EAJ_SUMMONER || BaseClass == Job_Summoner || .@class_id == 4218 || .@class_id == 4308 || .@class_id == JOB_SPIRIT_HANDLER) {
+				.@class_id = Job_Summoner; // Doram canonico (4218)
+			} else if ((eaclass() & EAJ_BASEMASK) == EAJ_GUNSLINGER || .@class_id == 4215 || .@class_id == 4306 || .@class_id == JOB_NIGHT_WATCH) {
+				.@class_id = 4215; // Rebellion / Gunslinger canonico
+			} else if (.@class_id == 4239 || .@class_id == 4302 || .@class_id == JOB_SKY_EMPEROR) {
+				.@class_id = 4239; // Star Emperor canonico
+			} else if (.@class_id == 4240 || .@class_id == 4303 || .@class_id == JOB_SOUL_ASCETIC) {
+				.@class_id = 4240; // Soul Reaper canonico
+			} else if (.@class_id == 4190 || .@class_id == 4307 || .@class_id == JOB_HYPER_NOVICE) {
+				.@class_id = 4190; // Super Novice Expandido canonico
+			} else if (.@class_id == 4076 || .@class_id == 4097 || .@class_id == JOB_TROUVERE) {
+				.@class_id = 4075; // Minstrel/Wanderer canonico
 			}
 
 			.@rate_event_active = (getbattleflag("base_exp_rate") >= 300 || getvariableofnpc(.weekend_rates_active, "Weekend_Rates") || $Event_Exp2x);
 			.@required_base = (.@rate_event_active ? 175 : 200);
-			.@required_job = (.@class_id == Job_Summoner ? 60 : 70);
+			.@required_job = 70;
 			if (BaseLevel < .@required_base || JobLevel < .@required_job) {
 				mes "[Dominio das Classes]";
 				mes "Voce ainda nao alcancou o nivel necessario (" + .@required_base + "/" + .@required_job + ").";
 				close;
 			}
 
-			if (getd("#class_mastered_" + .@class_id)) {
+			if (getd("#class_mastered_" + .@class_id) || (.@class_id == 4211 && (getd("#class_mastered_4211") || getd("#class_mastered_4212") || getd("#class_mastered_4304") || getd("#class_mastered_4305")))) {
 				mes "[Dominio das Classes]";
 				mes "Voce ja alcancou o dominio desta classe.";
 				close;
@@ -98,7 +107,10 @@ OnTalk:
 					setd("#class_mastered_4076", 1);
 					break;
 				case 4211:
+					setd("#class_mastered_4211", 1);
 					setd("#class_mastered_4212", 1);
+					setd("#class_mastered_4304", 1);
+					setd("#class_mastered_4305", 1);
 					break;
 			}
 			#classes_mastered++;
@@ -133,10 +145,10 @@ OnTalk:
 				// "Minstrel/Wanderer",
 				"Mechanic",
 				"Genetic",
-				"Kagerou/Oboro",
+				"Ninja (Shinkiro/Shiranui)",
 				// "Kagerou/Oboro",
 				"Rebellion",
-				"Doram",
+				"Doram (Spirit Handler)",
 				"Star Emperor",
 				"Soul Reaper",
 				"Super Aprendiz Expandido";
@@ -145,8 +157,8 @@ OnTalk:
 			mes "==== ^00FF00Classes Conquistadas^000000 ====";
 			for (.@i = 0; .@i < getarraysize(.@classes_id); .@i++) {
 				switch (.@classes_id[.@i]) {
-					case 4211: // Kagerou/Oboro
-						if (getd("#class_mastered_4211") || getd("#class_mastered_4212"))
+					case 4211: // Ninja (Kagerou/Oboro/Shinkiro/Shiranui)
+						if (getd("#class_mastered_4211") || getd("#class_mastered_4212") || getd("#class_mastered_4304") || getd("#class_mastered_4305"))
 							mes "^00FF00- " + .@classes_name$[.@i] + "^000000";
 						break;
 					case 4075: // Minstrel/Wanderer
@@ -163,8 +175,8 @@ OnTalk:
 			mes "===== ^FF0000Classes Restantes^000000 =====";
 			for (.@i = 0; .@i < getarraysize(.@classes_id); .@i++) {
 				switch (.@classes_id[.@i]) {
-					case 4211: // Kagerou/Oboro
-						if (!getd("#class_mastered_4211") && !getd("#class_mastered_4212"))
+					case 4211: // Ninja (Kagerou/Oboro/Shinkiro/Shiranui)
+						if (!getd("#class_mastered_4211") && !getd("#class_mastered_4212") && !getd("#class_mastered_4304") && !getd("#class_mastered_4305"))
 							mes "^FF0000- " + .@classes_name$[.@i] + "^000000";
 						break;
 					case 4075: // Minstrel/Wanderer
