@@ -3,6 +3,9 @@
 //  Comandos: @evento (jogadores), @globalboss e @startbossglobal (GM nivel 99)
 //===========================================================
 
+// Nunca permite que personagens sejam salvos dentro do mapa do evento.
+boss_global	mapflag	nosave	SavePoint
+
 -	script	GlobalBossCtrl	-1,{
 
 OnInit:
@@ -13,7 +16,10 @@ OnInit:
     .boss_y    = 55;
     .min_players = 1;
     .start_minutes = 5;
+    .reward_minutes = 5;
     .active    = 0;
+    .event_id  = 0;
+    .reward_event = 0;
     if ($GlobalBossLevel < 1)
         $GlobalBossLevel = 1;
     bindatcmd "globalboss", .npc_name$ + "::OnGMStart", 99, 99;
@@ -54,6 +60,11 @@ OnOpenEvent:
     killmonsterall .map$;
     disablenpc "Recompensa do Boss";
     .active = 1;
+    .reward_event = 0;
+    $GlobalBossEventId++;
+    if ($GlobalBossEventId < 1)
+        $GlobalBossEventId = 1;
+    .event_id = $GlobalBossEventId;
     initnpctimer;
     setnpctimer 300000 - (.start_minutes * 60000);
     announce "[Evento Boss Global] Comeca em " + .start_minutes + " minuto(s)! Use @evento para participar.", bc_all, 0xFF0000;
@@ -86,8 +97,10 @@ OnTimer1800000:
     if (.active == 2) {
         announce "[Evento Boss Global] O tempo acabou! O Boss fugiu.", bc_all, 0xFF0000;
         callsub S_EndEvent;
+    } else if (.active == 3) {
+        announce "[Evento Boss Global] O prazo para retirar a recompensa terminou.", bc_all, 0xFF0000;
+        callsub S_EndEvent;
     }
-    stopnpctimer;
     end;
 
 OnStartEvent:	
@@ -138,31 +151,45 @@ OnBossDead:
     .@winner$ = strcharinfo(0);
     getitem 9679, 1;
     announce "[Boss Global Lv. " + .boss_level + "] " + .@winner$ + " Finalizou o Boss Global!", bc_all, 0xFF0000;
-    enablenpc "Recompensa do Boss";
+
+    // Somente contas conectadas no mapa no momento da morte ficam elegiveis.
+    // A trava por conta impede resgates usando varios personagens da mesma conta.
+    .reward_event = .event_id;
     getmapunits(BL_PC, .map$, .@units);
     for (.@i = 0; .@i < getarraysize(.@units); .@i++) {
         if (attachrid(.@units[.@i])) {
+            #GlobalBossEligibleEvent = .reward_event;
             callfunc("F_BattlePassRegisterWeekly", "global_boss");
             detachrid;
         }
     }
+    enablenpc "Recompensa do Boss";
     $GlobalBossLevel++;
     announce "[Evento] Boss derrotado! O proximo Boss Global sera Lv. " + $GlobalBossLevel + ".", bc_all, 0xFF0000;
+    announce "[Evento Boss Global] Participantes elegiveis tem " + .reward_minutes + " minutos para retirar a recompensa.", bc_all, 0xFF0000;
 
     .boss_gid = 0;
-    .active = 0;
+    .active = 3;
     stopnpctimer;
+    initnpctimer;
+    setnpctimer 1800000 - (.reward_minutes * 60000);
     end;
 
 OnClock2030:
     if (.active == 2) {
         announce "[Evento Boss Global] O tempo acabou! O Boss fugiu.", bc_all, 0xFF0000;
         callsub S_EndEvent;
+    } else if (.active == 3) {
+        announce "[Evento Boss Global] O prazo para retirar a recompensa terminou.", bc_all, 0xFF0000;
+        callsub S_EndEvent;
     }
     end;
 
 S_EndEvent:
+    stopnpctimer;
     .active = 0;
+    .boss_gid = 0;
+    .reward_event = 0;
     disablenpc "Recompensa do Boss";
 
     getmapunits(BL_PC, .map$, .@units);
@@ -176,6 +203,13 @@ S_EndEvent:
     sleep 1000;
     killmonsterall .map$;
     return;
+
+// Defesa adicional para personagens que ja estavam salvos no mapa antes
+// da inclusao do mapflag nosave. Todo login no mapa volta ao ponto salvo.
+OnPCLoginEvent:
+    if (strcharinfo(3) == .map$)
+        warp "SavePoint", 0, 0;
+    end;
 }
 
 //-----------------------------------------------------------
@@ -202,6 +236,25 @@ OnEnterEvent:
 }
 
 boss_global,50,50,4	script	Recompensa do Boss	10403,{
+    .@active = getvariableofnpc(.active, "GlobalBossCtrl");
+    .@reward_event = getvariableofnpc(.reward_event, "GlobalBossCtrl");
+
+    if (.@active != 3 || .@reward_event < 1) {
+        mes "[Recompensa do Boss]";
+        mes "Nao ha uma recompensa disponivel neste momento.";
+        close;
+    }
+    if (#GlobalBossEligibleEvent != .@reward_event) {
+        mes "[Recompensa do Boss]";
+        mes "Sua conta nao estava presente no mapa quando o Boss foi derrotado.";
+        close;
+    }
+    if (#GlobalBossClaimedEvent == .@reward_event) {
+        mes "[Recompensa do Boss]";
+        mes "Sua conta ja retirou a recompensa desta edicao.";
+        close;
+    }
+
     // Mensagem de parabenizacao
     mes "[Parabens!]";
     mes "Voce venceu o Evento Boss Global!";
@@ -226,6 +279,15 @@ boss_global,50,50,4	script	Recompensa do Boss	10403,{
             break;
         }
     }
+
+    if (!checkweight(9608, 20, .@rewardID, .@amount[.@i])) {
+        mes "Voce nao tem peso suficiente para receber a recompensa.";
+        mes "Libere espaco e fale comigo novamente.";
+        close;
+    }
+
+    // Registra antes da entrega para impedir repeticao por fechamento do socket.
+    #GlobalBossClaimedEvent = .@reward_event;
     getitem 9608, 20;
     getitem .@rewardID, .@amount[.@i];
     callfunc("F_DiaryRefreshDaily");
@@ -235,10 +297,8 @@ boss_global,50,50,4	script	Recompensa do Boss	10403,{
     if (#boss == 1)
         #boss = 2;
     
-    // Teleporta o jogador para Prontera
-    close2;
-    warp "prontera", 154, 186;
-    
+    // O warp ocorre no mesmo fluxo da entrega, sem janela apos close2.
+    warp "SavePoint", 0, 0;
     end;
 }
 
