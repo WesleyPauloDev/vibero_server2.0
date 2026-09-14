@@ -90,19 +90,42 @@ OnInit:
 
     .MapY  = 221;
 
+    // @reloadnpcfile tambem precisa restaurar a WoE durante a janela ativa.
+    if (gettime(DT_DAYOFWEEK) == SUNDAY) {
+        if (gettime(DT_HOUR) == 22 && gettime(DT_MINUTE) < 30)
+            donpcevent strnpcinfo(3)+"::OnRestoreWoE";
+        else if ($WOE_CUSTOM_ACTIVE && gettime(DT_HOUR) >= 22)
+            donpcevent strnpcinfo(3)+"::OnEndWoE";
+    }
+
     end;
 
 OnAgitInit:
     if (gettime(DT_DAYOFWEEK) != SUNDAY) end;
 
-    if (gettime(DT_HOUR) == 22 && gettime(DT_MINUTE) >= 30) {
-        if (!$WOE_CUSTOM_ACTIVE && !agitcheck())
-            donpcevent strnpcinfo(3)+"::OnStartWoE";
+    if (gettime(DT_HOUR) == 22 && gettime(DT_MINUTE) < 30) {
+        donpcevent strnpcinfo(3)+"::OnRestoreWoE";
         end;
     }
 
-    if ($WOE_CUSTOM_ACTIVE && gettime(DT_HOUR) >= 23)
+    if ($WOE_CUSTOM_ACTIVE && gettime(DT_HOUR) >= 22)
         donpcevent strnpcinfo(3)+"::OnEndWoE";
+    end;
+
+OnRestoreWoE:
+    // Nao reinicializa dono, participantes ou pontuacao em reload.
+    $WOE_CUSTOM_ACTIVE = 1;
+    $WOE_CUSTOM_ENDED = 0;
+
+    if (!agitcheck())
+        AgitStart;
+    GvgOn .Castle$;
+
+    // O reload pode remover o monstro dinamico; recria apenas se necessario.
+    if (mobcount(.Castle$, strnpcinfo(3)+"::OnEmpDie") < 1)
+        monster .Castle$, .MapX, .MapY, "Emperium", 1905, 1, strnpcinfo(3)+"::OnEmpDie";
+
+    initnpctimer;
     end;
 
 OnPCLoadMapEvent:
@@ -286,10 +309,16 @@ OnEVENT:
     announce "[WoE] A Guerra do Emperium comecou!", bc_all|bc_woe;
     end;
 
+OnMenu:
+    close;
+
 // ======================================================================
 // EVENTO DE MORTE DO EMPERIUM
 // ======================================================================
 OnEmpDie:
+    // Um monstro removido durante reload nao possui jogador anexado.
+    if (!playerattached()) end;
+
     .@gid = getcharid(2);
     .@gname$ = getguildname(.@gid);
 
