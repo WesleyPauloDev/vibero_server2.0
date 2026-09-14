@@ -256,8 +256,9 @@ OnStartSingleBot:
 	query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 645, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
 	query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 656, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
 	query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 657, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
-	if (countitem(504) < 50) getitem 504, 50;
-	if (countitem(505) < 50) getitem 505, 50;
+callsub OnCleanBotInventory;
+	if (countitem(504) < 50 && checkweight(504, 50)) getitem 504, 50;
+	if (countitem(505) < 50 && checkweight(505, 50)) getitem 505, 50;
 
 	atcommand "@autoloot 100";
 	atcommand "@restock 504 100";
@@ -394,11 +395,34 @@ OnPronteraBuffTimer:
 	// que pode ser recusado quando a fila de eventos do bot esta cheia.
 	@last_buff_time = gettimetick(2);
 	repairall;
+	callsub OnCleanBotInventory;
 	specialeffect2 EF_INCAGILITY;
 	sc_start SC_INCREASEAGI, 600000, 10;
 	specialeffect2 EF_BLESSING;
 	sc_start SC_BLESSING, 600000, 10;
 	end;
+
+// ======================================================================
+// Sub-rotina: Limpeza preventiva de inventario (Anti-Lotamento por Autoloot)
+// ======================================================================
+OnCleanBotInventory:
+	getinventorylist;
+	if (@inventorylist_count < 60 && (Weight * 100 / MaxWeight) < 70) return;
+	for (.@i = 0; .@i < @inventorylist_count; .@i++) {
+		.@id = @inventorylist_id[.@i];
+		// Nao remove itens equipados ou consumiveis/equipamentos vitais do bot
+		if (@inventorylist_equip[.@i] > 0) continue;
+		if (.@id == 504 || .@id == 505 || .@id == 645 || .@id == 656 || .@id == 657) continue;
+		if (.@id == 18000 || .@id == 13200 || .@id == 1220001 || .@id == 1750 || .@id == 6124 || .@id == 7142) continue;
+		if (.@id == 1124 || .@id == 1104 || .@id == 1601 || .@id == 1704 || .@id == 1207 || .@id == 1504 || .@id == 1304 || .@id == 1681 || .@id == 1550) continue;
+
+		// Remove itens do tipo ETC (loots de monstros acumulados pelo @autoloot)
+		.@itype = getItemInfo(.@id, ITEMINFO_TYPE);
+		if (.@itype == IT_ETC) {
+			delitem .@id, @inventorylist_amount[.@i];
+		}
+	}
+	return;
 
 // ======================================================================
 // COMANDOS DO GM: @bot <acao> [nome | all]
@@ -1805,7 +1829,7 @@ OnStepTimer:
 	// Ninja/Kagerou/Oboro precisam manter kunai equipada para as skills de arremesso.
 	if ((Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro || Class == JOB_SHINKIRO || Class == JOB_SHIRANUI) && gettimetick(2) >= @BOT_NEXT_KUNAI_CHECK) {
 		@BOT_NEXT_KUNAI_CHECK = gettimetick(2) + 60;
-		if (countitem(1220001) < 500) getitem 1220001, 2000;
+		if (countitem(1220001) < 500 && checkweight(1220001, 2000)) getitem 1220001, 2000;
 		if (getequipid(EQI_AMMO) <= 0) equip 1220001;
 		atcommand "@restock 1220001 1000";
 	}
@@ -3267,7 +3291,7 @@ OnStepTimer:
 				// --- 6.1 BIOQUIMICO / GENETIC (3a CLASSE) & BIOLO (4a CLASSE) ---
 				if (Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 || Class == Job_Biolo || Class == Job_Biolo2 || Class == 4257 || Class == 4258 || BOT_FINAL_JOB == 112 || getskilllv("GN_CARTCANNON") > 0 || getskilllv("GN_SPORE_EXPLOSION") > 0) {
 					if (countitem(18000) < 100) {
-						getitem 18000, 2000;
+						if (checkweight(18000, 2000)) getitem 18000, 2000;
 						if (getequipid(EQI_AMMO) <= 0) equip 18000;
 						atcommand "@restock 18000 1000";
 					}
@@ -3299,7 +3323,7 @@ OnStepTimer:
 				// --- 6.2 MECANICO / MECHANIC (3a CLASSE) & MEISTER (4a CLASSE) ---
 				else if (Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Meister || Class == Job_Meister2 || Class == 4256 || BOT_FINAL_JOB == 111 || getskilllv("NC_ARMSCANNON") > 0) {
 					if (countitem(18000) < 100) {
-						getitem 18000, 2000;
+						if (checkweight(18000, 2000)) getitem 18000, 2000;
 						// Nunca substitui a municao escolhida manualmente pelo jogador.
 						if (getequipid(EQI_AMMO) <= 0) equip 18000;
 						atcommand "@restock 18000 1000";
@@ -3437,7 +3461,7 @@ OnStepTimer:
 			else if (Class == Job_Gunslinger || Class == Job_Rebellion) {
 				// Mantem balas comuns disponiveis, sem trocar uma municao manual ja equipada.
 				if (countitem(13200) < 500) {
-					getitem 13200, 2000;
+					if (checkweight(13200, 2000)) getitem 13200, 2000;
 					atcommand "@restock 13200 1000";
 				}
 				if (getequipid(EQI_AMMO) <= 0) equip 13200;
@@ -3883,7 +3907,7 @@ OnApplyBuffs:
 	if (BaseClass == Job_Merchant) {
 		if (Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Meister || Class == Job_Meister2 || Class == 4256 || Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Genetic2 || Class == Job_Genetic_T2 || Class == Job_Biolo || Class == Job_Biolo2 || Class == 4257 || Class == 4258 || BOT_FINAL_JOB == 111 || BOT_FINAL_JOB == 112) {
 			if (countitem(18000) < 500) {
-				getitem 18000, 2000;
+				if (checkweight(18000, 2000)) getitem 18000, 2000;
 				// Preenche apenas o slot vazio; preserva a municao equipada.
 				if (getequipid(EQI_AMMO) <= 0) equip 18000;
 				atcommand "@restock 18000 1000";
@@ -3909,7 +3933,7 @@ OnApplyBuffs:
 		}
 	}
 	if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler || Class == 4218 || Class == 4220 || Class == 4308) {
-		if (countitem(1681) == 0 && getequipid(EQI_HAND_R) <= 0) {
+		if (countitem(1681) == 0 && getequipid(EQI_HAND_R) <= 0 && checkweight(1681, 1)) {
 			getitem 1681, 1;
 			equip 1681;
 		}
@@ -3922,7 +3946,7 @@ OnApplyBuffs:
 	}
 	// Espiritualista / Ceifador de Almas (Soul Reaper 4241)
 	if (BOT_FINAL_JOB == 115 || Class == Job_Soul_Linker || Class == Job_Soul_Reaper || Class == Job_Soul_Reaper_B || Class == 4241 || Class == 4242) {
-		if (countitem(1601) == 0 && getequipid(EQI_HAND_R) <= 0) {
+		if (countitem(1601) == 0 && getequipid(EQI_HAND_R) <= 0 && checkweight(1601, 1)) {
 			getitem 1601, 1; // Bastao
 			equip 1601;
 		}
@@ -3938,7 +3962,7 @@ OnApplyBuffs:
 	}
 	// Taekwon / Mestre Taekwon / Imperador Estelar (Star Emperor 4239)
 	else if (BOT_FINAL_JOB == 114 || Class == Job_Star_Emperor || Class == Job_Star_Emperor_B || Class == Job_Star_Gladiator || Class == Job_Star_Gladiator2 || (BaseClass == Job_Taekwon && Class == Job_Taekwon) || Class == 4239 || Class == 4240) {
-		if (countitem(1550) == 0 && getequipid(EQI_HAND_R) <= 0) {
+		if (countitem(1550) == 0 && getequipid(EQI_HAND_R) <= 0 && checkweight(1550, 1)) {
 			getitem 1550, 1; // Livro
 			equip 1550;
 		}
@@ -4006,7 +4030,7 @@ OnCheckMounts:
 	// 1. Sentinela (Lobo/Warg) & Cacador / Sniper (Falcao)
 	if (getskilllv("RA_WUGMASTERY") > 0) {
 		if (!checkwug()) setoption OPTION_WUG, 1;
-		if (countitem(6124) == 0) getitem 6124, 1; // Flauta do Lobo
+		if (countitem(6124) == 0 && checkweight(6124, 1)) getitem 6124, 1; // Flauta do Lobo
 	} else if (getskilllv("HT_FALCON") > 0 && (BaseClass == Job_Archer || BOT_FINAL_JOB == 105 || BOT_FINAL_JOB == 106)) {
 		if (!checkfalcon() && !checkwug()) setfalcon;
 	}
@@ -4256,7 +4280,7 @@ OnCheckHomunculus:
 
 	// 1. Se ainda nao possui nenhum homunculo criado (ou sumiu/deletado): cria um novo
 	if (.@h_db_id == 0 || checkhomcall() == -1) {
-		if (countitem(7142) < 5) getitem 7142, 5; // Embriao
+		if (countitem(7142) < 5 && checkweight(7142, 5)) getitem 7142, 5; // Embriao
 		atcommand "@makehomun " + (6001 + rand(4)); // Cria Lif (6001), Amistr (6002), Filir (6003) ou Vanilmirth (6004)
 		atcommand "@homfriendly 1000";
 		atcommand "@homhungry 90";
@@ -4313,7 +4337,7 @@ OnCheckSpeedPotion:
 	} else {
 		atcommand "@restock " + .@pot_id + " 5";
 		atcommand "@restock";
-		if (countitem(.@pot_id) == 0) {
+		if (countitem(.@pot_id) == 0 && checkweight(.@pot_id, 5)) {
 			getitem .@pot_id, 5;
 		}
 		if (countitem(.@pot_id) > 0) {
@@ -4330,41 +4354,50 @@ OnCheckSpeedPotion:
 // Sub-rotina: Auto-Pocao HP (Branca 504 < 70%) e SP (Azul 505 < 80%)
 // ======================================================================
 OnCheckPotions:
-	// HP < 85% -> Pocao Branca (504) em loop rapido ate atingir vida segura
-	.@hp_loops = 0;
-	while ((Hp * 100 / MaxHp) < 85 && .@hp_loops < 10) {
-		.@hp_loops++;
-		if (countitem(504) == 0) {
+	// Se estiver sem peso ou espaco no inventario e sem pocoes, usa percentheal direto de contingencia
+	if (!checkweight(504, 1) && countitem(504) == 0) {
+		if ((Hp * 100 / MaxHp) < 85) percentheal 30, 0;
+	} else {
+		// HP < 85% -> Pocao Branca (504) em loop rapido ate atingir vida segura
+		.@hp_loops = 0;
+		while ((Hp * 100 / MaxHp) < 85 && .@hp_loops < 10) {
+			.@hp_loops++;
+			if (countitem(504) == 0) {
 			atcommand "@restock 504 100";
 			atcommand "@restock";
-			if (countitem(504) == 0) getitem 504, 50;
-		}
-		if (countitem(504) > 0) {
+			if (countitem(504) == 0 && checkweight(504, 50)) getitem 504, 50;
+			}
+			if (countitem(504) > 0) {
 			delitem 504, 1;
 			itemheal rand(325, 405), 0;
 			specialeffect EF_POTION_WHITE;
-		} else {
+			} else {
 			percentheal 30, 0;
 			break;
+			}
 		}
 	}
 
-	// SP < 80% -> Pocao Azul (505) em loop rapido ate restaurar
-	.@sp_loops = 0;
-	while ((Sp * 100 / MaxSp) < 80 && .@sp_loops < 10) {
-		.@sp_loops++;
-		if (countitem(505) == 0) {
+	if (!checkweight(505, 1) && countitem(505) == 0) {
+		if ((Sp * 100 / MaxSp) < 80) percentheal 0, 50;
+	} else {
+		// SP < 80% -> Pocao Azul (505) em loop rapido ate restaurar
+		.@sp_loops = 0;
+		while ((Sp * 100 / MaxSp) < 80 && .@sp_loops < 10) {
+			.@sp_loops++;
+			if (countitem(505) == 0) {
 			atcommand "@restock 505 100";
 			atcommand "@restock";
-			if (countitem(505) == 0) getitem 505, 50;
-		}
-		if (countitem(505) > 0) {
+			if (countitem(505) == 0 && checkweight(505, 50)) getitem 505, 50;
+			}
+			if (countitem(505) > 0) {
 			delitem 505, 1;
 			itemheal 0, rand(40, 65);
 			specialeffect EF_POTION_BLUE;
-		} else {
+			} else {
 			percentheal 0, 50;
 			break;
+			}
 		}
 	}
 	return;
@@ -5463,7 +5496,7 @@ OnCheckJobChange:
 			jobchange Job_Super_Novice;
 		} else if (BOT_FINAL_JOB == 118) {
 			jobchange Job_Gunslinger;
-			if (countitem(13200) < 500) getitem 13200, 2000;
+			if (countitem(13200) < 500 && checkweight(13200, 2000)) getitem 13200, 2000;
 			if (getequipid(EQI_AMMO) <= 0) equip 13200;
 			atcommand "@restock 13200 1000";
 			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 13200, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
@@ -5476,30 +5509,30 @@ OnCheckJobChange:
 		} else switch(@BOT_TARGET_JOB) {
 			case 1: 
 				jobchange (Class == Job_Novice_High ? Job_Swordman_High : Job_Swordman);
-				if (countitem(1124) == 0 && countitem(1104) == 0) getitem 1124, 1;
+				if (countitem(1124) == 0 && countitem(1104) == 0 && checkweight(1124, 1)) getitem 1124, 1;
 				break;
 			case 2: 
 				jobchange (Class == Job_Novice_High ? Job_Mage_High : Job_Mage);
-				if (countitem(1601) == 0) getitem 1601, 1;
+				if (countitem(1601) == 0 && checkweight(1601, 1)) getitem 1601, 1;
 				break;
 			case 3: 
 				jobchange (Class == Job_Novice_High ? Job_Archer_High : Job_Archer);
-				if (countitem(1704) == 0) getitem 1704, 1;
-				if (countitem(1750) < 500) getitem 1750, 2000;
-				atcommand "@restock 1750 1000";
-				query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 1750, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
+				if (countitem(1704) == 0 && checkweight(1704, 1)) getitem 1704, 1;
+				if (countitem(1750) < 500 && checkweight(1750, 2000)) getitem 1750, 2000;
+			atcommand "@restock 1750 1000";
+			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 1750, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
 				break;
 			case 4: 
 				jobchange (Class == Job_Novice_High ? Job_Thief_High : Job_Thief);
-				if (countitem(1207) == 0) getitem 1207, 1;
+				if (countitem(1207) == 0 && checkweight(1207, 1)) getitem 1207, 1;
 				break;
 			case 5: 
 				jobchange (Class == Job_Novice_High ? Job_Acolyte_High : Job_Acolyte);
-				if (countitem(1504) == 0) getitem 1504, 1;
+				if (countitem(1504) == 0 && checkweight(1504, 1)) getitem 1504, 1;
 				break;
 			case 6:
 				jobchange (Class == Job_Novice_High ? Job_Merchant_High : Job_Merchant);
-				if (countitem(1304) == 0) getitem 1304, 1;
+				if (countitem(1304) == 0 && checkweight(1304, 1)) getitem 1304, 1;
 				// Nao troca a arma que ja foi entregue/equipada no personagem.
 				if (getequipid(EQI_HAND_R) <= 0) equip 1304;
 				if (Zeny < 5000000) Zeny += 10000000;
@@ -5556,7 +5589,7 @@ OnCheckJobChange:
 	}
 	if (BOT_FINAL_JOB == 118 && Class == Job_Gunslinger && BaseLevel >= 99 && JobLevel >= 70) {
 		jobchange Job_Rebellion;
-		if (countitem(13200) < 500) getitem 13200, 2000;
+		if (countitem(13200) < 500 && checkweight(13200, 2000)) getitem 13200, 2000;
 		if (getequipid(EQI_AMMO) <= 0) equip 13200;
 		atcommand "@restock 13200 1000";
 		query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 13200, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
@@ -5639,7 +5672,7 @@ OnCheckJobChange:
 		else return;
 
 		if (BOT_FINAL_JOB == 111 || BOT_FINAL_JOB == 112) {
-			if (countitem(18000) < 500) getitem 18000, 2000;
+			if (countitem(18000) < 500 && checkweight(18000, 2000)) getitem 18000, 2000;
 			if (getequipid(EQI_AMMO) <= 0) equip 18000;
 			atcommand "@restock 18000 1000";
 			query_sql "INSERT INTO `storage` (`account_id`, `nameid`, `amount`, `identify`) VALUES (" + getcharid(3) + ", 18000, 30000, 1) ON DUPLICATE KEY UPDATE `amount` = 30000;";
