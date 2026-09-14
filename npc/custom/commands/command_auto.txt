@@ -1,0 +1,1203 @@
+// ======================================================================
+// Sistema de Caca Automatica para Jogadores (@auto / @manual / @auto setup)
+// ======================================================================
+// - Comando @auto para iniciar a caca automatica no mapa atual do jogador
+// - Comando @manual para desativar e pausar o tempo
+// - Menu @auto setup para configurar Amuleto de Ziegfried (7621) e Modo XP
+// - 30 minutos diarios gratuitos: na virada do dia, se < 30 reseta para 30, se >= 30 mantem
+// - Pergaminhos de Tempo (+30 minutos) acumulativos
+// - Pausa o tempo imediatamente ao morrer
+// - Se configurado Ziegfried e possuir 7621 no inventario, ressuscita e continua
+// - Modo XP: ao atingir BaseLevel e JobLevel maximos da classe atual, teleporta para a cidade
+// - Guarda loots/drops no armazem automaticamente ao ficar pesado (>= 70%)
+// - Usa @buff automaticamente e renova periodicamente
+// - Usa Asa de Mosca (601) quando nao houver monstros por perto
+// Arquivo: npc/custom/commands/command_auto.txt
+// ======================================================================
+
+function	script	F_AutoCheckDaily	{
+	.@today = gettime(DT_YYYYMMDD);
+	if (#AutoLastDay != .@today) {
+		#AutoLastDay = .@today;
+		if (#AutoTimeSecs < 1800) {
+			#AutoTimeSecs = 1800; // 30 minutos gratuitos
+		}
+	}
+	return;
+}
+
+function	script	F_AddAutoTime	{
+	.@mins = getarg(0, 30);
+	callfunc "F_AutoCheckDaily";
+	#AutoTimeSecs += (.@mins * 60);
+	specialeffect2 EF_INCAGILITY;
+	.@total_m = #AutoTimeSecs / 60;
+	.@total_s = #AutoTimeSecs % 60;
+	dispbottom "==================================================", 0x00FFFF;
+	dispbottom "[Auto]: +" + .@mins + " minutos adicionados ao seu saldo de @auto!", 0x55FF55;
+	dispbottom "[Auto]: Tempo total acumulado: " + .@total_m + "m " + (.@total_s < 10 ? "0" : "") + .@total_s + "s.", 0xFFFF00;
+	dispbottom "==================================================", 0x00FFFF;
+	return;
+}
+
+-	script	AutoPlayerSystem	-1,{
+
+OnInit:
+	bindatcmd("auto", "AutoPlayerSystem::OnAutoCommand", 0, 99);
+	bindatcmd("manual", "AutoPlayerSystem::OnManualCommand", 0, 99);
+	end;
+
+// ======================================================================
+// COMANDO: @manual (Desativacao instantanea)
+// ======================================================================
+OnManualCommand:
+	if (!@AUTO_ACTIVE) {
+		dispbottom "[Auto]: O modo automatico nao esta ativo no momento.", 0xFFAAAA;
+		end;
+	}
+	callsub OnStopAuto, "[Auto]: Modo automatico desativado por @manual. Tempo restante pausado.";
+	end;
+
+// ======================================================================
+// COMANDO: @auto [setup | config | status | on | off]
+// ======================================================================
+OnAutoCommand:
+	.@arg$ = strtolower(.@atcmd_parameters$[0]);
+
+	if (.@arg$ == "setup" || .@arg$ == "config" || .@arg$ == "ajustes") {
+		callsub OnOpenSetupMenu;
+		end;
+	}
+
+	if (.@arg$ == "off" || .@arg$ == "stop" || .@arg$ == "parar") {
+		if (@AUTO_ACTIVE) {
+			callsub OnStopAuto, "[Auto]: Modo automatico desativado. Tempo restante pausado.";
+		} else {
+			dispbottom "[Auto]: O modo automatico nao esta ativo.", 0xFFAAAA;
+		}
+		end;
+	}
+
+	callfunc "F_AutoCheckDaily";
+
+	if (.@arg$ == "status" || .@arg$ == "tempo" || .@arg$ == "time") {
+		.@rm_m = #AutoTimeSecs / 60;
+		.@rm_s = #AutoTimeSecs % 60;
+		dispbottom "==================================================", 0x00FFFF;
+		dispbottom "   STATUS DO MODO AUTOMATICO (@auto)", 0xFFFF00;
+		dispbottom "==================================================", 0x00FFFF;
+		dispbottom "Status: " + (@AUTO_ACTIVE ? "^00FF00[ATIVO]^000000" : "^FF0000[INATIVO]^000000"), 0xFFFFFF;
+		dispbottom "Tempo Restante: " + .@rm_m + "m " + (.@rm_s < 10 ? "0" : "") + .@rm_s + "s", 0xFFFFFF;
+		dispbottom "Usar Ziegfried (7621): " + (#AutoUseZiegfried ? "^00FF00SIM^000000" : "^FF0000NAO^000000") + " (Possui: " + countitem(7621) + ")", 0xFFFFFF;
+		dispbottom "Modo de Foco: " + (#AutoFarmMode ? "^00FFFFFoco XP (Retorna na Cidade no Nivel Maximo)^000000" : "^FFFF00Farm Livre^000000"), 0xFFFFFF;
+		dispbottom "==================================================", 0x00FFFF;
+		end;
+	}
+
+	// Se ja estiver ativo, avisa e mostra tempo
+	if (@AUTO_ACTIVE) {
+		.@rm_m = #AutoTimeSecs / 60;
+		.@rm_s = #AutoTimeSecs % 60;
+		dispbottom "[Auto]: O modo automatico ja esta ATIVO no mapa '" + @AUTO_MAP$ + "'!", 0x55FF55;
+		dispbottom "[Auto]: Tempo restante: " + .@rm_m + "m " + (.@rm_s < 10 ? "0" : "") + .@rm_s + "s. Use '@manual' para desligar.", 0xFFFF00;
+		end;
+	}
+
+	// Verificacoes previas de seguranca
+	if (Hp <= 0 || Dead) {
+		dispbottom "[Auto]: Voce nao pode ativar o modo automatico enquanto estiver morto.", 0xFF5555;
+		end;
+	}
+	if (checkvending() || checkchatting()) {
+		dispbottom "[Auto]: Feche sua loja ou sala de chat antes de ativar o modo automatico.", 0xFF5555;
+		end;
+	}
+
+	if (#AutoTimeSecs <= 0) {
+		dispbottom "[Auto]: Voce nao possui tempo de @auto restante hoje.", 0xFF5555;
+		dispbottom "[Auto]: O tempo diario gratuito e de 30 minutos. Use Pergaminhos de Tempo (+30m) para recarregar!", 0xFFFF00;
+		end;
+	}
+
+	stand;
+	@AUTO_ACTIVE = 1;
+	@AUTO_MAP$ = strcharinfo(3);
+	@AUTO_LAST_TICK = gettimetick(2);
+	@AUTO_LAST_BUFF = gettimetick(2);
+	atcommand "@buff";
+	@AUTO_CURRENT_TARGET = 0;
+	@AUTO_TARGET_TRACK_ID = 0;
+	@AUTO_TARGET_LAST_HP = 0;
+	@AUTO_TARGET_PROGRESS_TICK = 0;
+	@AUTO_BLOCKED_TARGET = 0;
+	@AUTO_BLOCKED_UNTIL = 0;
+	@AUTO_LAST_TX = 0;
+	@AUTO_LAST_TY = 0;
+	@AUTO_STUCK_X = 0;
+	@AUTO_STUCK_Y = 0;
+	@AUTO_STUCK_TICKS = 0;
+	@AUTO_SKILL_ROT = 0;
+	@AUTO_LAST_TELEPORT = 0;
+
+	.@rm_m = #AutoTimeSecs / 60;
+	.@rm_s = #AutoTimeSecs % 60;
+	dispbottom "==================================================", 0x00FFFF;
+	dispbottom "   MODO AUTOMATICO ATIVADO COM SUCESSO!", 0x55FF55;
+	dispbottom "==================================================", 0x00FFFF;
+	dispbottom "Mapa de Caca: " + @AUTO_MAP$, 0xFFFFFF;
+	dispbottom "Tempo Restante: " + .@rm_m + "m " + (.@rm_s < 10 ? "0" : "") + .@rm_s + "s", 0xFFFF00;
+	dispbottom "Para desligar a qualquer momento, digite: @manual", 0xFFFFFF;
+	dispbottom "Para abrir as configuracoes, digite: @auto setup", 0xFFFFFF;
+	dispbottom "==================================================", 0x00FFFF;
+
+	deltimer "AutoPlayerSystem::OnStepTimer";
+	addtimer 500, "AutoPlayerSystem::OnStepTimer";
+	end;
+
+// ======================================================================
+// MENU INTERATIVO: @auto setup
+// ======================================================================
+OnOpenSetupMenu:
+	callfunc "F_AutoCheckDaily";
+	.@rm_m = #AutoTimeSecs / 60;
+	.@rm_s = #AutoTimeSecs % 60;
+
+	mes "[^0000FFConfiguracoes do Modo Auto^000000]";
+	mes "Personalize as opcoes do seu modo automatico:";
+	mes "----------------------------------------";
+	mes "Tempo Restante: ^008800" + .@rm_m + "m " + (.@rm_s < 10 ? "0" : "") + .@rm_s + "s^000000";
+	mes "Amuleto de Ziegfried: " + (#AutoUseZiegfried ? "^00AA00[ATIVADO]^000000" : "^FF0000[DESATIVADO]^000000") + " (" + countitem(7621) + " no inventario)";
+	mes "Modo de Foco: " + (#AutoFarmMode ? "^0000FF[Foco XP / Teleporta na Cidade]^000000" : "^FF8800[Farm Livre / Sem Teleporte]^000000");
+	mes "Armazenamento no Armazem: ^00AA00[Automatico ao atingir 70% peso]^000000";
+	next;
+
+	switch (select(
+		"Amuleto de Ziegfried (" + (#AutoUseZiegfried ? "^00AA00Ligado^000000" : "^FF0000Desligado^000000") + ")",
+		"Modo de Foco (" + (#AutoFarmMode ? "Foco XP" : "Farm Livre") + ")",
+		"Consultar Tempo Restante Detalhado",
+		"Como Funciona o Sistema?",
+		"Fechar Menu"
+	)) {
+	case 1:
+		#AutoUseZiegfried = !#AutoUseZiegfried;
+		dispbottom "[Auto]: Usar Amuleto de Ziegfried ao morrer agora esta: " + (#AutoUseZiegfried ? "^00FF00ATIVADO^000000" : "^FF0000DESATIVADO^000000"), 0xFFFF00;
+		goto OnOpenSetupMenu;
+
+	case 2:
+		#AutoFarmMode = !#AutoFarmMode;
+		if (#AutoFarmMode) {
+			dispbottom "[Auto]: Modo de Foco alterado para: ^00FFFFFoco XP^000000 (Ao atingir Base e Job maximos da classe, teleporta para a cidade e desliga o tempo).", 0x55FF55;
+		} else {
+			dispbottom "[Auto]: Modo de Foco alterado para: ^00FF00Farm Livre^000000 (Continua cacando mesmo no nivel maximo ate usar @manual ou o tempo esgotar).", 0x55FF55;
+		}
+		goto OnOpenSetupMenu;
+
+	case 3:
+		mes "[^0000FFTempo Restante^000000]";
+		mes "Seu saldo atual de modo automatico:";
+		mes "^00AA00" + .@rm_m + " minuto(s) e " + .@rm_s + " segundo(s).^000000";
+		mes " ";
+		mes "Todos os dias voce recebe 30 minutos gratuitos.";
+		mes "Pergaminhos de Tempo (+30m) acumulam e nao sao perdidos na virada do dia.";
+		next;
+		goto OnOpenSetupMenu;
+
+	case 4:
+		mes "[^0000FFComo Funciona o Modo Auto^000000]";
+		mes "1. Va ate o mapa onde deseja cacar.";
+		mes "2. Configure seu ^008800@autopot^000000, ^008800@autoloot^000000 e ^008800@restock^000000.";
+		mes "3. Digite ^0000FF@auto^000000 para comecar a cacada.";
+		mes "4. O bot usara as habilidades ofensivas que voce tiver aprendido na sua arvore de skills.";
+		mes "5. O bot usa @buff e Asa de Mosca (601) quando nao houver monstros por perto.";
+		mes "6. Ao ficar com peso >= 70%, seus drops coletados sao guardados no armazem.";
+		mes "7. Ao morrer, o tempo pausa. Se Ziegfried estiver ativo e voce tiver o item 7621, ele revive e continua.";
+		mes "8. Para desligar a qualquer momento, digite ^FF0000@manual^000000.";
+		next;
+		goto OnOpenSetupMenu;
+
+	case 5:
+		close;
+	}
+	end;
+
+// ======================================================================
+// SUB-ROTINA: Finalizacao Segura do Modo Auto
+// ======================================================================
+OnStopAuto:
+	.@reason$ = getarg(0, "");
+	@AUTO_ACTIVE = 0;
+	@AUTO_CURRENT_TARGET = 0;
+	@AUTO_TARGET_TRACK_ID = 0;
+	@AUTO_TARGET_LAST_HP = 0;
+	@AUTO_TARGET_PROGRESS_TICK = 0;
+	@AUTO_BLOCKED_TARGET = 0;
+	@AUTO_BLOCKED_UNTIL = 0;
+	@AUTO_LAST_TX = 0;
+	@AUTO_LAST_TY = 0;
+	@AUTO_STUCK_TICKS = 0;
+	deltimer "AutoPlayerSystem::OnStepTimer";
+	unitstopwalk getcharid(3), USW_FORCE_STOP;
+	unitstopattack getcharid(3);
+
+	if (.@reason$ != "") {
+		dispbottom .@reason$, 0xFFFF00;
+	}
+	.@rm_m = #AutoTimeSecs / 60;
+	.@rm_s = #AutoTimeSecs % 60;
+	dispbottom "[Auto]: Tempo restante atual: " + .@rm_m + "m " + (.@rm_s < 10 ? "0" : "") + .@rm_s + "s.", 0x00FFFF;
+	return;
+
+// ======================================================================
+// EVENTO: Morte do Jogador (OnPCDieEvent)
+// ======================================================================
+OnPCDieEvent:
+	if (!@AUTO_ACTIVE) end;
+
+	// Pausa imediata do timer
+	deltimer "AutoPlayerSystem::OnStepTimer";
+
+	// Atualiza e deduz o tempo decorrido ate o instante exato da morte
+	.@now = gettimetick(2);
+	.@diff = .@now - @AUTO_LAST_TICK;
+	if (.@diff > 0) {
+		#AutoTimeSecs -= .@diff;
+		if (#AutoTimeSecs < 0) #AutoTimeSecs = 0;
+		@AUTO_LAST_TICK = .@now;
+	}
+
+	// Verifica se a opcao de usar Ziegfried esta ativada e se tem o item no inventario
+	if (#AutoUseZiegfried && countitem(7621) > 0 && #AutoTimeSecs > 0) {
+		delitem 7621, 1;
+		specialeffect2 EF_RESURRECTION;
+		recovery 0, getcharid(0);
+		stand;
+		percentheal 100, 100;
+		dispbottom "==================================================", 0x55FF55;
+		dispbottom "[Auto]: Amuleto de Ziegfried utilizado com sucesso!", 0x55FF55;
+		dispbottom "[Auto]: Personagem ressuscitado. Retomando modo automatico...", 0xFFFF00;
+		dispbottom "==================================================", 0x55FF55;
+
+		@AUTO_CURRENT_TARGET = 0;
+		@AUTO_TARGET_TRACK_ID = 0;
+		@AUTO_TARGET_LAST_HP = 0;
+		@AUTO_TARGET_PROGRESS_TICK = 0;
+		@AUTO_LAST_TX = 0;
+		@AUTO_LAST_TY = 0;
+		@AUTO_STUCK_TICKS = 0;
+		@AUTO_LAST_TICK = gettimetick(2);
+
+		addtimer 1500, "AutoPlayerSystem::OnStepTimer";
+		end;
+	}
+
+	// Sem Ziegfried: desliga o modo automatico e pausa o tempo
+	callsub OnStopAuto, "[Auto]: Voce foi derrotado. Modo automatico encerrado e contagem de tempo pausada.";
+	end;
+
+// ======================================================================
+// EVENTOS: Troca de Mapa / Logout
+// ======================================================================
+OnPCLoadMapEvent:
+	if (@AUTO_ACTIVE && strcharinfo(3) != @AUTO_MAP$) {
+		callsub OnStopAuto, "[Auto]: Voce mudou de mapa. Modo automatico encerrado e tempo pausado.";
+	}
+	end;
+
+OnPCLogoutEvent:
+	if (@AUTO_ACTIVE) {
+		.@now = gettimetick(2);
+		.@diff = .@now - @AUTO_LAST_TICK;
+		if (.@diff > 0) {
+			#AutoTimeSecs -= .@diff;
+			if (#AutoTimeSecs < 0) #AutoTimeSecs = 0;
+		}
+		@AUTO_ACTIVE = 0;
+		deltimer "AutoPlayerSystem::OnStepTimer";
+	}
+	end;
+
+// ======================================================================
+// LOOP PRINCIPAL DE INTELIGENCIA ARTIFICIAL E COMBATE
+// ======================================================================
+OnStepTimer:
+	if (!@AUTO_ACTIVE) end;
+
+	// Se estiver morto, interrompe
+	if (Hp <= 0 || Dead) {
+		callsub OnStopAuto, "[Auto]: Personagem incapacitado. Modo automatico pausado.";
+		end;
+	}
+
+	// Garante que o jogador esta em pe
+	stand;
+
+	// Verifica se permanece no mapa configurado
+	getmapxy(.@cur_map$, .@cx, .@cy, BL_PC);
+	if (.@cur_map$ != @AUTO_MAP$) {
+		callsub OnStopAuto, "[Auto]: Voce nao esta mais no mapa configurado. Modo automatico encerrado.";
+		end;
+	}
+
+	// Atualizacao do Tempo Diario
+	.@now = gettimetick(2);
+	.@diff = .@now - @AUTO_LAST_TICK;
+	if (.@diff > 0) {
+		#AutoTimeSecs -= .@diff;
+		@AUTO_LAST_TICK = .@now;
+	}
+
+	// Verifica se o tempo esgotou
+	if (#AutoTimeSecs <= 0) {
+		#AutoTimeSecs = 0;
+		callsub OnStopAuto, "[Auto]: Seu tempo diario de modo automatico esgotou! Utilize um Pergaminho de Tempo para continuar.";
+		end;
+	}
+
+	// ==================================================================
+	// Checagem periodica e renovacao de @buff
+	// ==================================================================
+	if (!getstatus(SC_BLESSING) || !getstatus(SC_INCREASEAGI) || (.@now - @AUTO_LAST_BUFF) >= 300) {
+		@AUTO_LAST_BUFF = .@now;
+		atcommand "@buff";
+	}
+
+	// ==================================================================
+	// Reconhecimento e ativacao de habilidades de suporte / auto-buffs
+	// Usa buffs proprios com delay de 1 minuto ou duracao do status
+	// ==================================================================
+	.@buff_used = callsub(OnCheckSupportBuffs);
+	if (.@buff_used) {
+		addtimer 700, "AutoPlayerSystem::OnStepTimer";
+		end;
+	}
+
+	// ==================================================================
+	// Foco em XP: Se atingiu nivel Base e Job maximos da classe atual
+	// ==================================================================
+	if (#AutoFarmMode == 1 && is_maxbaselv() && is_maxjoblv()) {
+		dispbottom "==================================================", 0x00FFFF;
+		dispbottom "[Auto]: Nivel Base e Classe maximos da classe atingidos!", 0x55FF55;
+		dispbottom "[Auto]: Retornando para a cidade e encerrando o modo automatico.", 0xFFFF00;
+		dispbottom "==================================================", 0x00FFFF;
+		callsub OnStopAuto, "";
+		warp "SavePoint", 0, 0;
+		end;
+	}
+
+	// ==================================================================
+	// Gestao de Peso: Guarda drops acumulados no Armazem ao atingir >= 70%
+	// ==================================================================
+	if ((Weight * 100 / MaxWeight) >= 70) {
+		.@stored_items = autostore_loot(70);
+		if (.@stored_items > 0) {
+			dispbottom "[Auto]: Peso elevado! " + .@stored_items + " item(ns) de drop foram guardados com seguranca no armazem.", 0x00FFFF;
+		}
+	}
+
+	// Libera alvo bloqueado por parede/obstaculo apos timeout
+	if (@AUTO_BLOCKED_TARGET > 0 && .@now >= @AUTO_BLOCKED_UNTIL) {
+		@AUTO_BLOCKED_TARGET = 0;
+		@AUTO_BLOCKED_UNTIL = 0;
+	}
+
+	// 1. Validacao do Alvo Atual
+	if (@AUTO_CURRENT_TARGET > 0) {
+		if (!unitexists(@AUTO_CURRENT_TARGET)) {
+			@AUTO_CURRENT_TARGET = 0;
+			@AUTO_TARGET_TRACK_ID = 0;
+			@AUTO_TARGET_LAST_HP = 0;
+			@AUTO_TARGET_PROGRESS_TICK = 0;
+			@AUTO_LAST_TX = 0;
+			@AUTO_LAST_TY = 0;
+		} else {
+			getunitdata @AUTO_CURRENT_TARGET, .@cur_data;
+			.@cur_class = .@cur_data[UMOB_CLASS];
+			.@cur_target_id = .@cur_data[UMOB_TARGETID];
+			.@d = distance(.@cx, .@cy, .@cur_data[UMOB_X], .@cur_data[UMOB_Y]);
+
+			// Se morreu, planta/cogumelo, se afastou mais de 14 celulas ou foi engatado por outro jogador (Anti-KS):
+			if (.@cur_data[UMOB_HP] <= 0 || (.@cur_class >= 1078 && .@cur_class <= 1085) || (.@cur_class >= 1930 && .@cur_class <= 1933) || .@cur_class == 1064 ||
+			    .@d > 14 || (.@cur_data[UMOB_HP] < .@cur_data[UMOB_MAXHP] && .@cur_target_id > 0 && .@cur_target_id != getcharid(3))) {
+				@AUTO_CURRENT_TARGET = 0;
+				@AUTO_TARGET_TRACK_ID = 0;
+				@AUTO_TARGET_LAST_HP = 0;
+				@AUTO_TARGET_PROGRESS_TICK = 0;
+				@AUTO_LAST_TX = 0;
+				@AUTO_LAST_TY = 0;
+			} else {
+				.@mx = .@cur_data[UMOB_X];
+				.@my = .@cur_data[UMOB_Y];
+
+				// Detecta parede / linha de visao bloqueada se o HP nao mudar em 8 segundos
+				if (@AUTO_TARGET_TRACK_ID == @AUTO_CURRENT_TARGET) {
+					if (.@cur_data[UMOB_HP] < @AUTO_TARGET_LAST_HP) {
+						@AUTO_TARGET_LAST_HP = .@cur_data[UMOB_HP];
+						@AUTO_TARGET_PROGRESS_TICK = .@now;
+					} else if ((.@now - @AUTO_TARGET_PROGRESS_TICK) >= 8) {
+						@AUTO_BLOCKED_TARGET = @AUTO_CURRENT_TARGET;
+						@AUTO_BLOCKED_UNTIL = .@now + 15;
+						@AUTO_CURRENT_TARGET = 0;
+						@AUTO_TARGET_TRACK_ID = 0;
+						@AUTO_TARGET_LAST_HP = 0;
+						@AUTO_TARGET_PROGRESS_TICK = 0;
+						@AUTO_LAST_TX = 0;
+						@AUTO_LAST_TY = 0;
+						unitstopattack getcharid(3);
+						unitstopwalk getcharid(3), USW_FORCE_STOP;
+					} else if (.@cur_data[UMOB_HP] > @AUTO_TARGET_LAST_HP) {
+						@AUTO_TARGET_LAST_HP = .@cur_data[UMOB_HP];
+					}
+				}
+			}
+		}
+	}
+
+	// 2. Busca por Novo Monstro Valido em Raio de ate 14 celulas
+	if (@AUTO_CURRENT_TARGET == 0) {
+		.@num_mobs = getareaunits(BL_MOB, @AUTO_MAP$, .@cx - 14, .@cy - 14, .@cx + 14, .@cy + 14, .@mob_list[0]);
+		.@best_dist = 999;
+		.@best_mob = 0;
+
+		for (.@i = 0; .@i < .@num_mobs; ++.@i) {
+			.@mid = .@mob_list[.@i];
+			if (!unitexists(.@mid)) continue;
+			if (.@mid == @AUTO_BLOCKED_TARGET && .@now < @AUTO_BLOCKED_UNTIL) continue;
+
+			getunitdata .@mid, .@t_data;
+			.@m_class = .@t_data[UMOB_CLASS];
+			// Ignora plantas e cogumelos
+			if ((.@m_class >= 1078 && .@m_class <= 1085) || (.@m_class >= 1930 && .@m_class <= 1933) || .@m_class == 1064)
+				continue;
+
+			// Anti-KS: nao ataca monstro que ja esta sofrendo dano de outro jogador
+			.@m_target = .@t_data[UMOB_TARGETID];
+			if (.@t_data[UMOB_HP] < .@t_data[UMOB_MAXHP] && .@m_target > 0 && .@m_target != getcharid(3))
+				continue;
+
+			if (.@t_data[UMOB_HP] > 0) {
+				.@d = distance(.@cx, .@cy, .@t_data[UMOB_X], .@t_data[UMOB_Y]);
+				if (.@d < .@best_dist) {
+					.@best_dist = .@d;
+					.@best_mob = .@mid;
+					.@mx = .@t_data[UMOB_X];
+					.@my = .@t_data[UMOB_Y];
+				}
+			}
+		}
+
+		if (.@best_mob > 0) {
+			@AUTO_CURRENT_TARGET = .@best_mob;
+		}
+	}
+
+	// 3. Nenhum Monstro Encontrado na Tela -> Usa Asa de Mosca (601) se tiver, ou explora caminhando
+	if (@AUTO_CURRENT_TARGET == 0) {
+		// Se possuir Asa de Mosca (601) no inventario: teleporta pelo mapa
+		if (countitem(601) > 0) {
+			if ((.@now - @AUTO_LAST_TELEPORT) >= 1) {
+				@AUTO_LAST_TELEPORT = .@now;
+				delitem 601, 1;
+				@AUTO_LAST_TX = 0;
+				@AUTO_LAST_TY = 0;
+				@AUTO_STUCK_TICKS = 0;
+				unitstopattack getcharid(3);
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				warp @AUTO_MAP$, 0, 0;
+				addtimer 1000, "AutoPlayerSystem::OnStepTimer";
+				end;
+			}
+		}
+
+		// Se nao tiver Asa de Mosca (601) ou enquanto aguarda o intervalo: caminha e explora ao redor
+		if (@AUTO_LAST_TX == 0 || @AUTO_LAST_TY == 0 || (@AUTO_STUCK_X == .@cx && @AUTO_STUCK_Y == .@cy)) {
+			@AUTO_LAST_TX = .@cx + rand(-8, 8);
+			@AUTO_LAST_TY = .@cy + rand(-8, 8);
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
+			unitwalk getcharid(3), @AUTO_LAST_TX, @AUTO_LAST_TY;
+		}
+		@AUTO_STUCK_X = .@cx;
+		@AUTO_STUCK_Y = .@cy;
+		addtimer 600, "AutoPlayerSystem::OnStepTimer";
+		end;
+	}
+
+	// 4. Monstro Encontrado -> Aproximacao e Combate
+	.@dist = distance(.@cx, .@cy, .@mx, .@my);
+	.@atk_range = 2; // Alcance padrao corpo-a-corpo
+
+	// Ajusta alcance para arqueiros, magos, armas de disparo ou habilidades de longa distancia
+	if (BaseClass == Job_Archer || BaseClass == Job_Mage || BaseClass == Job_Ninja || Class == Job_Gunslinger || Class == Job_Rebellion || BaseClass == Job_Summoner) {
+		.@atk_range = 7;
+	}
+
+	// Se estiver fora de alcance, caminha ate o alvo
+	if (.@dist > .@atk_range) {
+		// Anti-travamento
+		if (@AUTO_STUCK_X == .@cx && @AUTO_STUCK_Y == .@cy) {
+			@AUTO_STUCK_TICKS++;
+			if (@AUTO_STUCK_TICKS >= 6) {
+				@AUTO_CURRENT_TARGET = 0;
+				@AUTO_LAST_TX = 0;
+				@AUTO_LAST_TY = 0;
+				@AUTO_STUCK_TICKS = 0;
+			}
+		} else {
+			@AUTO_STUCK_TICKS = 0;
+		}
+
+		if (@AUTO_LAST_TX != .@mx || @AUTO_LAST_TY != .@my) {
+			@AUTO_LAST_TX = .@mx;
+			@AUTO_LAST_TY = .@my;
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
+			unitwalk getcharid(3), .@mx, .@my;
+		}
+
+		@AUTO_STUCK_X = .@cx;
+		@AUTO_STUCK_Y = .@cy;
+		addtimer 400, "AutoPlayerSystem::OnStepTimer";
+		end;
+	}
+
+	// Chegou no alcance de ataque! Para de andar
+	if (@AUTO_LAST_TX != 0 || @AUTO_LAST_TY != 0) {
+		@AUTO_LAST_TX = 0;
+		@AUTO_LAST_TY = 0;
+		unitstopwalk getcharid(3), USW_FORCE_STOP;
+	}
+	@AUTO_STUCK_TICKS = 0;
+	@AUTO_STUCK_X = .@cx;
+	@AUTO_STUCK_Y = .@cy;
+
+	// Inicia tracking do HP para monitoramento de travamento
+	if (@AUTO_TARGET_TRACK_ID != @AUTO_CURRENT_TARGET) {
+		getunitdata @AUTO_CURRENT_TARGET, .@atk_data;
+		@AUTO_TARGET_TRACK_ID = @AUTO_CURRENT_TARGET;
+		@AUTO_TARGET_LAST_HP = .@atk_data[UMOB_HP];
+		@AUTO_TARGET_PROGRESS_TICK = .@now;
+	}
+
+	// Engata ataque fisico basico
+	unitattack getcharid(3), @AUTO_CURRENT_TARGET, 1;
+	@AUTO_SKILL_ROT++;
+
+	// ==================================================================
+	// ROTACAO DE HABILIDADES NATIVAS DA ARVORE DO JOGADOR
+	// ==================================================================
+	.@cur_aspd = readparam(bAspd);
+	if (.@cur_aspd < 100) .@cur_aspd = 100;
+	if (.@cur_aspd > 195) .@cur_aspd = 195;
+	.@step_delay = (200 - .@cur_aspd) * 15;
+	if (.@step_delay < 350) .@step_delay = 350;
+
+	// 1. ESPADACHIM E EVOLUCOES
+	if (BaseClass == Job_Swordman) {
+		if (getskilllv("RK_IGNITIONBREAK") > 0 && Sp >= 35 && (@AUTO_SKILL_ROT % 2 == 0)) {
+			unitskilluseid getcharid(3), "RK_IGNITIONBREAK", getskilllv("RK_IGNITIONBREAK"), getcharid(3), 0, 0, 0, 1;
+			.@step_delay = 900;
+		} else if (getskilllv("RK_WINDCUTTER") > 0 && Sp >= 25) {
+			unitskilluseid getcharid(3), "RK_WINDCUTTER", getskilllv("RK_WINDCUTTER"), getcharid(3), 0, 0, 0, 1;
+			.@step_delay = 600;
+		} else if (getskilllv("RK_DRAGONBREATH") > 0 && Sp >= 30) {
+			unitskillusepos getcharid(3), "RK_DRAGONBREATH", getskilllv("RK_DRAGONBREATH"), .@mx, .@my;
+			.@step_delay = 900;
+		} else if (getskilllv("LG_BANISHINGPOINT") > 0 && Sp >= 20) {
+			unitskilluseid getcharid(3), "LG_BANISHINGPOINT", getskilllv("LG_BANISHINGPOINT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 450;
+		} else if (getskilllv("LG_CANNONSPEAR") > 0 && Sp >= 30) {
+			unitskilluseid getcharid(3), "LG_CANNONSPEAR", getskilllv("LG_CANNONSPEAR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 700;
+		} else if (getskilllv("LK_SPIRALPIERCE") > 0 && Sp >= 20) {
+			unitskilluseid getcharid(3), "LK_SPIRALPIERCE", getskilllv("LK_SPIRALPIERCE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 800;
+		} else if (getskilllv("KN_BOWLINGBASH") > 0 && Sp >= 15) {
+			unitskilluseid getcharid(3), "KN_BOWLINGBASH", getskilllv("KN_BOWLINGBASH"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 600;
+		} else if (getskilllv("CR_HOLYCROSS") > 0 && Sp >= 15) {
+			unitskilluseid getcharid(3), "CR_HOLYCROSS", getskilllv("CR_HOLYCROSS"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 500;
+		} else if (getskilllv("SM_BASH") > 0 && Sp >= 8) {
+			unitskilluseid getcharid(3), "SM_BASH", getskilllv("SM_BASH"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 450;
+		}
+	}
+	// 2. MAGO E EVOLUCOES
+	else if (BaseClass == Job_Mage) {
+		if (getskilllv("WL_CRIMSONROCK") > 0 && Sp >= 60 && (@AUTO_SKILL_ROT % 2 == 0)) {
+			unitskillusepos getcharid(3), "WL_CRIMSONROCK", getskilllv("WL_CRIMSONROCK"), .@mx, .@my;
+			.@step_delay = 1200;
+		} else if (getskilllv("WL_CHAINLIGHTNING") > 0 && Sp >= 50) {
+			unitskilluseid getcharid(3), "WL_CHAINLIGHTNING", getskilllv("WL_CHAINLIGHTNING"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 1000;
+		} else if (getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 48 && (@AUTO_SKILL_ROT % 2 == 0)) {
+			unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my;
+			.@step_delay = 1200;
+		} else if (getskilllv("WZ_METEOR") > 0 && Sp >= 40 && (@AUTO_SKILL_ROT % 3 == 0)) {
+			unitskillusepos getcharid(3), "WZ_METEOR", getskilllv("WZ_METEOR"), .@mx, .@my;
+			.@step_delay = 1300;
+		} else if (getskilllv("WZ_STORMGUST") > 0 && Sp >= 40 && (@AUTO_SKILL_ROT % 3 == 0)) {
+			unitskillusepos getcharid(3), "WZ_STORMGUST", getskilllv("WZ_STORMGUST"), .@mx, .@my;
+			.@step_delay = 1300;
+		} else if (getskilllv("MG_SOULSTRIKE") > 0 && Sp >= 15) {
+			unitskilluseid getcharid(3), "MG_SOULSTRIKE", getskilllv("MG_SOULSTRIKE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 600;
+		} else if (getskilllv("MG_FIREBOLT") > 0 && Sp >= 12) {
+			unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 900;
+		} else if (getskilllv("MG_COLDBOLT") > 0 && Sp >= 12) {
+			unitskilluseid getcharid(3), "MG_COLDBOLT", getskilllv("MG_COLDBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 900;
+		} else if (getskilllv("MG_LIGHTNINGBOLT") > 0 && Sp >= 12) {
+			unitskilluseid getcharid(3), "MG_LIGHTNINGBOLT", getskilllv("MG_LIGHTNINGBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 900;
+		}
+	}
+	// 3. ARQUEIRO E EVOLUCOES
+	else if (BaseClass == Job_Archer) {
+		if (getskilllv("RA_ARROWSTORM") > 0 && Sp >= 40 && (@AUTO_SKILL_ROT % 2 == 0)) {
+			unitskillusepos getcharid(3), "RA_ARROWSTORM", getskilllv("RA_ARROWSTORM"), .@mx, .@my;
+			.@step_delay = 900;
+		} else if (getskilllv("RA_AIMEDBOLT") > 0 && Sp >= 30) {
+			unitskilluseid getcharid(3), "RA_AIMEDBOLT", getskilllv("RA_AIMEDBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 700;
+		} else if (getskilllv("WA_SEVERE_RAINSTORM") > 0 && Sp >= 50 && (@AUTO_SKILL_ROT % 2 == 0)) {
+			unitskillusepos getcharid(3), "WA_SEVERE_RAINSTORM", getskilllv("WA_SEVERE_RAINSTORM"), .@mx, .@my;
+			.@step_delay = 1000;
+		} else if (getskilllv("AC_DOUBLE") > 0 && Sp >= 12) {
+			unitskilluseid getcharid(3), "AC_DOUBLE", getskilllv("AC_DOUBLE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 450;
+		} else if (getskilllv("AC_SHOWER") > 0 && Sp >= 15 && (@AUTO_SKILL_ROT % 2 == 0)) {
+			unitskillusepos getcharid(3), "AC_SHOWER", getskilllv("AC_SHOWER"), .@mx, .@my;
+			.@step_delay = 600;
+		}
+	}
+	// 4. GATUNO E EVOLUCOES
+	else if (BaseClass == Job_Thief) {
+		if (getskilllv("GC_CROSSIMPACT") > 0 && Sp >= 25) {
+			unitskilluseid getcharid(3), "GC_CROSSIMPACT", getskilllv("GC_CROSSIMPACT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 600;
+		} else if (getskilllv("GC_ROLLINGCUTTER") > 0 && Sp >= 5) {
+			unitskilluseid getcharid(3), "GC_ROLLINGCUTTER", getskilllv("GC_ROLLINGCUTTER"), getcharid(3), 0, 0, 0, 1;
+			.@step_delay = 400;
+		} else if (getskilllv("SC_FATALMENACE") > 0 && Sp >= 30) {
+			unitskilluseid getcharid(3), "SC_FATALMENACE", getskilllv("SC_FATALMENACE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 550;
+		} else if (getskilllv("SC_TRIANGLESHOT") > 0 && Sp >= 24) {
+			unitskilluseid getcharid(3), "SC_TRIANGLESHOT", getskilllv("SC_TRIANGLESHOT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 550;
+		} else if (getskilllv("ASC_SONICBLOW") > 0 && Sp >= 20) {
+			unitskilluseid getcharid(3), "ASC_SONICBLOW", getskilllv("ASC_SONICBLOW"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 700;
+		} else if (getskilllv("RG_BACKSTAP") > 0 && Sp >= 16) {
+			unitskilluseid getcharid(3), "RG_BACKSTAP", getskilllv("RG_BACKSTAP"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 500;
+		} else if (getskilllv("TF_DOUBLE") > 0) {
+			// Passiva de ataque duplo ativa automaticamente
+			.@step_delay = 400;
+		}
+	}
+	// 5. NOVYCO E EVOLUCOES
+	else if (BaseClass == Job_Acolyte) {
+		if (getskilllv("SR_TIGERCANNON") > 0 && Sp >= 40 && Hp >= 500 && (@AUTO_SKILL_ROT % 2 == 0)) {
+			unitskilluseid getcharid(3), "SR_TIGERCANNON", getskilllv("SR_TIGERCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 800;
+		} else if (getskilllv("AB_JUDEX") > 0 && Sp >= 20) {
+			unitskilluseid getcharid(3), "AB_JUDEX", getskilllv("AB_JUDEX"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 600;
+		} else if (getskilllv("AB_ADORAMUS") > 0 && Sp >= 40 && countitem(717) > 0) {
+			unitskilluseid getcharid(3), "AB_ADORAMUS", getskilllv("AB_ADORAMUS"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 800;
+		} else if (getskilllv("MO_TRIPLEATTACK") > 0) {
+			// Passiva de combo ativa automaticamente
+			.@step_delay = 400;
+		} else if (getskilllv("AL_HOLYLIGHT") > 0 && Sp >= 15) {
+			unitskilluseid getcharid(3), "AL_HOLYLIGHT", 1, @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 600;
+		}
+	}
+	// 6. MERCADOR E EVOLUCOES
+	else if (BaseClass == Job_Merchant) {
+		if (getskilllv("NC_ARMSCANNON") > 0 && Sp >= 30) {
+			unitskilluseid getcharid(3), "NC_ARMSCANNON", getskilllv("NC_ARMSCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 700;
+		} else if (getskilllv("GN_CARTCANNON") > 0 && Sp >= 30) {
+			unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 600;
+		} else if (getskilllv("WS_CARTTERMINATION") > 0 && Sp >= 15) {
+			unitskilluseid getcharid(3), "WS_CARTTERMINATION", getskilllv("WS_CARTTERMINATION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 450;
+		} else if (getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12) {
+			unitskilluseid getcharid(3), "MC_CARTREVOLUTION", 1, getcharid(3), 0, 0, 0, 1;
+			.@step_delay = 500;
+		} else if (getskilllv("MC_MAMMONITE") > 0 && Sp >= 5 && Zeny >= 1000) {
+			unitskilluseid getcharid(3), "MC_MAMMONITE", getskilllv("MC_MAMMONITE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 450;
+		}
+	}
+	// 7. NINJA E EVOLUCOES
+	else if (BaseClass == Job_Ninja) {
+		if (getskilllv("KO_HAPPOKUNAI") > 0 && Sp >= 20) {
+			unitskilluseid getcharid(3), "KO_HAPPOKUNAI", getskilllv("KO_HAPPOKUNAI"), getcharid(3), 0, 0, 0, 1;
+			.@step_delay = 600;
+		} else if (getskilllv("KO_BAKURETSU") > 0 && Sp >= 25) {
+			unitskilluseid getcharid(3), "KO_BAKURETSU", getskilllv("KO_BAKURETSU"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 700;
+		} else if (getskilllv("NJ_HUUMA") > 0 && Sp >= 20) {
+			unitskillusepos getcharid(3), "NJ_HUUMA", getskilllv("NJ_HUUMA"), .@mx, .@my;
+			.@step_delay = 800;
+		}
+	}
+	// 8. JUSTICEIRO / REBELLION
+	else if (BaseClass == Job_Gunslinger || Class == Job_Gunslinger || Class == Job_Rebellion) {
+		if (getskilllv("RL_FIREDANCE") > 0 && Sp >= 20) {
+			unitskilluseid getcharid(3), "RL_FIREDANCE", getskilllv("RL_FIREDANCE"), getcharid(3), 0, 0, 0, 1;
+			.@step_delay = 500;
+		} else if (getskilllv("RL_ROUNDTRIP") > 0 && Sp >= 30) {
+			unitskilluseid getcharid(3), "RL_ROUNDTRIP", getskilllv("RL_ROUNDTRIP"), getcharid(3), 0, 0, 0, 1;
+			.@step_delay = 700;
+		} else if (getskilllv("GS_DESPERADO") > 0 && Sp >= 30) {
+			unitskilluseid getcharid(3), "GS_DESPERADO", getskilllv("GS_DESPERADO"), getcharid(3), 0, 0, 0, 1;
+			.@step_delay = 800;
+		} else if (getskilllv("GS_TRIPLEACTION") > 0 && Sp >= 15) {
+			unitskilluseid getcharid(3), "GS_TRIPLEACTION", getskilllv("GS_TRIPLEACTION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 500;
+		}
+	}
+	// 9. DORAM (SUMMONER)
+	else if (BaseClass == Job_Summoner || Class == Job_Summoner) {
+		if (getskilllv("SU_PICKPECK") > 0 && Sp >= 10) {
+			unitskilluseid getcharid(3), "SU_PICKPECK", getskilllv("SU_PICKPECK"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 500;
+		} else if (getskilllv("SU_SV_STEMSPEAR") > 0 && Sp >= 15) {
+			unitskilluseid getcharid(3), "SU_SV_STEMSPEAR", getskilllv("SU_SV_STEMSPEAR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+			.@step_delay = 600;
+		} else if (getskilllv("SU_CN_METEOR") > 0 && Sp >= 30 && (@AUTO_SKILL_ROT % 2 == 0)) {
+			unitskillusepos getcharid(3), "SU_CN_METEOR", getskilllv("SU_CN_METEOR"), .@mx, .@my;
+			.@step_delay = 900;
+		}
+	}
+
+	addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+	end;
+
+// ======================================================================
+// SUB-ROTINA: Reconhecimento e Uso de Habilidades de Suporte (Auto-Buffs)
+// Reconhece habilidades aprendidas e as mantem ativas respeitando a
+// duracao do buff ou delay minimo de 1 minuto (60 segundos).
+// Retorna 1 se usou alguma habilidade (para aguardar delay), ou 0 se nao.
+// ======================================================================
+OnCheckSupportBuffs:
+	.@now = gettimetick(2);
+
+	// 1. ESPADACHIM E EVOLUCOES
+	if (getskilllv("LK_CONCENTRATION") > 0 && Sp >= 20 && !getstatus(SC_CONCENTRATION) && .@now >= @BUFF_LK_CONCENTRATION + 60) {
+		@BUFF_LK_CONCENTRATION = .@now;
+		unitskilluseid getcharid(3), "LK_CONCENTRATION", getskilllv("LK_CONCENTRATION"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("LK_AURABLADE") > 0 && Sp >= 20 && !getstatus(SC_AURABLADE) && .@now >= @BUFF_LK_AURABLADE + 60) {
+		@BUFF_LK_AURABLADE = .@now;
+		unitskilluseid getcharid(3), "LK_AURABLADE", getskilllv("LK_AURABLADE"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("KN_TWOHANDQUICKEN") > 0 && Sp >= 20 && !getstatus(SC_TWOHANDQUICKEN) && .@now >= @BUFF_KN_TWOHANDQUICKEN + 60) {
+		@BUFF_KN_TWOHANDQUICKEN = .@now;
+		unitskilluseid getcharid(3), "KN_TWOHANDQUICKEN", getskilllv("KN_TWOHANDQUICKEN"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SM_ENDURE") > 0 && Sp >= 10 && !getstatus(SC_ENDURE) && .@now >= @BUFF_SM_ENDURE + 60) {
+		@BUFF_SM_ENDURE = .@now;
+		unitskilluseid getcharid(3), "SM_ENDURE", getskilllv("SM_ENDURE"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("RK_ENCHANTBLADE") > 0 && Sp >= 40 && !getstatus(SC_ENCHANTBLADE) && .@now >= @BUFF_RK_ENCHANTBLADE + 60) {
+		@BUFF_RK_ENCHANTBLADE = .@now;
+		unitskilluseid getcharid(3), "RK_ENCHANTBLADE", getskilllv("RK_ENCHANTBLADE"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("CR_AUTOGUARD") > 0 && Sp >= 15 && !getstatus(SC_AUTOGUARD) && .@now >= @BUFF_CR_AUTOGUARD + 60) {
+		@BUFF_CR_AUTOGUARD = .@now;
+		unitskilluseid getcharid(3), "CR_AUTOGUARD", getskilllv("CR_AUTOGUARD"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("CR_REFLECTSHIELD") > 0 && Sp >= 20 && !getstatus(SC_REFLECTSHIELD) && .@now >= @BUFF_CR_REFLECTSHIELD + 60) {
+		@BUFF_CR_REFLECTSHIELD = .@now;
+		unitskilluseid getcharid(3), "CR_REFLECTSHIELD", getskilllv("CR_REFLECTSHIELD"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("CR_DEFENDER") > 0 && Sp >= 20 && !getstatus(SC_DEFENDER) && .@now >= @BUFF_CR_DEFENDER + 60) {
+		@BUFF_CR_DEFENDER = .@now;
+		unitskilluseid getcharid(3), "CR_DEFENDER", getskilllv("CR_DEFENDER"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("CR_SPEARQUICKEN") > 0 && Sp >= 24 && !getstatus(SC_SPEARQUICKEN) && .@now >= @BUFF_CR_SPEARQUICKEN + 60) {
+		@BUFF_CR_SPEARQUICKEN = .@now;
+		unitskilluseid getcharid(3), "CR_SPEARQUICKEN", getskilllv("CR_SPEARQUICKEN"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("LG_FORCEOFVANGUARD") > 0 && Sp >= 30 && !getstatus(SC_FORCEOFVANGUARD) && .@now >= @BUFF_LG_FORCEOFVANGUARD + 60) {
+		@BUFF_LG_FORCEOFVANGUARD = .@now;
+		unitskilluseid getcharid(3), "LG_FORCEOFVANGUARD", getskilllv("LG_FORCEOFVANGUARD"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("LG_PRESTIGE") > 0 && Sp >= 40 && !getstatus(SC_PRESTIGE) && .@now >= @BUFF_LG_PRESTIGE + 60) {
+		@BUFF_LG_PRESTIGE = .@now;
+		unitskilluseid getcharid(3), "LG_PRESTIGE", getskilllv("LG_PRESTIGE"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("LG_INSPIRATION") > 0 && Sp >= 80 && !getstatus(SC_INSPIRATION) && .@now >= @BUFF_LG_INSPIRATION + 60) {
+		@BUFF_LG_INSPIRATION = .@now;
+		unitskilluseid getcharid(3), "LG_INSPIRATION", getskilllv("LG_INSPIRATION"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+
+	// 2. MAGO E EVOLUCOES
+	if (getskilllv("MG_ENERGYCOAT") > 0 && Sp >= 30 && !getstatus(SC_ENERGYCOAT) && .@now >= @BUFF_MG_ENERGYCOAT + 60) {
+		@BUFF_MG_ENERGYCOAT = .@now;
+		unitskilluseid getcharid(3), "MG_ENERGYCOAT", 1, getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("HW_MAGICPOWER") > 0 && Sp >= 40 && !getstatus(SC_MAGICPOWER) && .@now >= @BUFF_HW_MAGICPOWER + 60) {
+		@BUFF_HW_MAGICPOWER = .@now;
+		unitskilluseid getcharid(3), "HW_MAGICPOWER", getskilllv("HW_MAGICPOWER"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("WL_RECOGNIZEDSPELL") > 0 && Sp >= 50 && !getstatus(SC_RECOGNIZEDSPELL) && .@now >= @BUFF_WL_RECOGNIZEDSPELL + 60) {
+		@BUFF_WL_RECOGNIZEDSPELL = .@now;
+		unitskilluseid getcharid(3), "WL_RECOGNIZEDSPELL", getskilllv("WL_RECOGNIZEDSPELL"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("WL_TELEKINESIS_INTENSE") > 0 && Sp >= 50 && !getstatus(SC_TELEKINESIS_INTENSE) && .@now >= @BUFF_WL_TELEKINESIS_INTENSE + 60) {
+		@BUFF_WL_TELEKINESIS_INTENSE = .@now;
+		unitskilluseid getcharid(3), "WL_TELEKINESIS_INTENSE", getskilllv("WL_TELEKINESIS_INTENSE"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SA_AUTOSPELL") > 0 && Sp >= 30 && !getstatus(SC_AUTOSPELL) && .@now >= @BUFF_SA_AUTOSPELL + 60) {
+		@BUFF_SA_AUTOSPELL = .@now;
+		unitskilluseid getcharid(3), "SA_AUTOSPELL", getskilllv("SA_AUTOSPELL"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SO_STRIKING") > 0 && Sp >= 40 && !getstatus(SC_STRIKING) && .@now >= @BUFF_SO_STRIKING + 60) {
+		@BUFF_SO_STRIKING = .@now;
+		unitskilluseid getcharid(3), "SO_STRIKING", getskilllv("SO_STRIKING"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+
+	// 3. ARQUEIRO E EVOLUCOES
+	if (getskilllv("AC_CONCENTRATION") > 0 && Sp >= 25 && !getstatus(SC_CONCENTRATE) && .@now >= @BUFF_AC_CONCENTRATION + 60) {
+		@BUFF_AC_CONCENTRATION = .@now;
+		unitskilluseid getcharid(3), "AC_CONCENTRATION", getskilllv("AC_CONCENTRATION"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("HT_WINDWALK") > 0 && Sp >= 30 && !getstatus(SC_WINDWALK) && .@now >= @BUFF_HT_WINDWALK + 60) {
+		@BUFF_HT_WINDWALK = .@now;
+		unitskilluseid getcharid(3), "HT_WINDWALK", getskilllv("HT_WINDWALK"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SN_SIGHT") > 0 && Sp >= 30 && !getstatus(SC_TRUESIGHT) && .@now >= @BUFF_SN_SIGHT + 60) {
+		@BUFF_SN_SIGHT = .@now;
+		unitskilluseid getcharid(3), "SN_SIGHT", getskilllv("SN_SIGHT"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("RA_FEARBREEZE") > 0 && Sp >= 45 && !getstatus(SC_FEARBREEZE) && .@now >= @BUFF_RA_FEARBREEZE + 60) {
+		@BUFF_RA_FEARBREEZE = .@now;
+		unitskilluseid getcharid(3), "RA_FEARBREEZE", getskilllv("RA_FEARBREEZE"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("RA_UNLIMIT") > 0 && Sp >= 50 && !getstatus(SC_UNLIMIT) && .@now >= @BUFF_RA_UNLIMIT + 60) {
+		@BUFF_RA_UNLIMIT = .@now;
+		unitskilluseid getcharid(3), "RA_UNLIMIT", getskilllv("RA_UNLIMIT"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("MI_RUSH_WINDMILL") > 0 && Sp >= 30 && !getstatus(SC_RUSHWINDMILL) && .@now >= @BUFF_MI_RUSH_WINDMILL + 60) {
+		@BUFF_MI_RUSH_WINDMILL = .@now;
+		unitskilluseid getcharid(3), "MI_RUSH_WINDMILL", getskilllv("MI_RUSH_WINDMILL"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("WA_SWING_DANCE") > 0 && Sp >= 30 && !getstatus(SC_SWINGDANCE) && .@now >= @BUFF_WA_SWING_DANCE + 60) {
+		@BUFF_WA_SWING_DANCE = .@now;
+		unitskilluseid getcharid(3), "WA_SWING_DANCE", getskilllv("WA_SWING_DANCE"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+
+	// 4. GATUNO E EVOLUCOES
+	if (getskilllv("AS_ENCHANTPOISON") > 0 && Sp >= 20 && !getstatus(SC_ENCPOISON) && .@now >= @BUFF_AS_ENCHANTPOISON + 60) {
+		@BUFF_AS_ENCHANTPOISON = .@now;
+		unitskilluseid getcharid(3), "AS_ENCHANTPOISON", getskilllv("AS_ENCHANTPOISON"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("AS_POISONREACT") > 0 && Sp >= 20 && !getstatus(SC_POISONREACT) && .@now >= @BUFF_AS_POISONREACT + 60) {
+		@BUFF_AS_POISONREACT = .@now;
+		unitskilluseid getcharid(3), "AS_POISONREACT", getskilllv("AS_POISONREACT"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("ASC_EDP") > 0 && Sp >= 40 && countitem(678) > 0 && !getstatus(SC_EDP) && .@now >= @BUFF_ASC_EDP + 60) {
+		@BUFF_ASC_EDP = .@now;
+		unitskilluseid getcharid(3), "ASC_EDP", getskilllv("ASC_EDP"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("GC_WEAPONBLOCKING") > 0 && Sp >= 20 && !getstatus(SC_WEAPONBLOCKING) && .@now >= @BUFF_GC_WEAPONBLOCKING + 60) {
+		@BUFF_GC_WEAPONBLOCKING = .@now;
+		unitskilluseid getcharid(3), "GC_WEAPONBLOCKING", getskilllv("GC_WEAPONBLOCKING"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("ST_PRESERVE") > 0 && Sp >= 30 && !getstatus(SC_PRESERVE) && .@now >= @BUFF_ST_PRESERVE + 60) {
+		@BUFF_ST_PRESERVE = .@now;
+		unitskilluseid getcharid(3), "ST_PRESERVE", getskilllv("ST_PRESERVE"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SC_AUTOSHADOWSPELL") > 0 && Sp >= 40 && !getstatus(SC__AUTOSHADOWSPELL) && .@now >= @BUFF_SC_AUTOSHADOWSPELL + 60) {
+		@BUFF_SC_AUTOSHADOWSPELL = .@now;
+		unitskilluseid getcharid(3), "SC_AUTOSHADOWSPELL", getskilllv("SC_AUTOSHADOWSPELL"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SC_SHADOWFORM") > 0 && Sp >= 30 && !getstatus(SC__SHADOWFORM) && .@now >= @BUFF_SC_SHADOWFORM + 60) {
+		@BUFF_SC_SHADOWFORM = .@now;
+		unitskilluseid getcharid(3), "SC_SHADOWFORM", getskilllv("SC_SHADOWFORM"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+
+	// 5. ACOLITO E EVOLUCOES
+	if (getskilllv("AL_BLESSING") > 0 && Sp >= 30 && !getstatus(SC_BLESSING) && .@now >= @BUFF_AL_BLESSING + 60) {
+		@BUFF_AL_BLESSING = .@now;
+		unitskilluseid getcharid(3), "AL_BLESSING", getskilllv("AL_BLESSING"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("AL_INCAGI") > 0 && Sp >= 25 && !getstatus(SC_INCREASEAGI) && .@now >= @BUFF_AL_INCAGI + 60) {
+		@BUFF_AL_INCAGI = .@now;
+		unitskilluseid getcharid(3), "AL_INCAGI", getskilllv("AL_INCAGI"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("AL_ANGELUS") > 0 && Sp >= 25 && !getstatus(SC_ANGELUS) && .@now >= @BUFF_AL_ANGELUS + 60) {
+		@BUFF_AL_ANGELUS = .@now;
+		unitskilluseid getcharid(3), "AL_ANGELUS", getskilllv("AL_ANGELUS"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("PR_KYRIE") > 0 && Sp >= 25 && !getstatus(SC_KYRIE) && .@now >= @BUFF_PR_KYRIE + 60) {
+		@BUFF_PR_KYRIE = .@now;
+		unitskilluseid getcharid(3), "PR_KYRIE", getskilllv("PR_KYRIE"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("PR_MAGNIFICAT") > 0 && Sp >= 40 && !getstatus(SC_MAGNIFICAT) && .@now >= @BUFF_PR_MAGNIFICAT + 60) {
+		@BUFF_PR_MAGNIFICAT = .@now;
+		unitskilluseid getcharid(3), "PR_MAGNIFICAT", getskilllv("PR_MAGNIFICAT"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("PR_GLORIA") > 0 && Sp >= 20 && !getstatus(SC_GLORIA) && .@now >= @BUFF_PR_GLORIA + 60) {
+		@BUFF_PR_GLORIA = .@now;
+		unitskilluseid getcharid(3), "PR_GLORIA", getskilllv("PR_GLORIA"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("PR_IMPOSITIO") > 0 && Sp >= 20 && !getstatus(SC_IMPOSITIO) && .@now >= @BUFF_PR_IMPOSITIO + 60) {
+		@BUFF_PR_IMPOSITIO = .@now;
+		unitskilluseid getcharid(3), "PR_IMPOSITIO", getskilllv("PR_IMPOSITIO"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("PR_SUFFRAGIUM") > 0 && Sp >= 10 && !getstatus(SC_SUFFRAGIUM) && .@now >= @BUFF_PR_SUFFRAGIUM + 60) {
+		@BUFF_PR_SUFFRAGIUM = .@now;
+		unitskilluseid getcharid(3), "PR_SUFFRAGIUM", getskilllv("PR_SUFFRAGIUM"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("AB_EXPIATIO") > 0 && Sp >= 35 && !getstatus(SC_EXPIATIO) && .@now >= @BUFF_AB_EXPIATIO + 60) {
+		@BUFF_AB_EXPIATIO = .@now;
+		unitskilluseid getcharid(3), "AB_EXPIATIO", getskilllv("AB_EXPIATIO"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("CH_ZEN") > 0 && Sp >= 20 && .@now >= @BUFF_CH_ZEN + 60) {
+		@BUFF_CH_ZEN = .@now;
+		unitskilluseid getcharid(3), "CH_ZEN", 1, getcharid(3), 0, 0, 0, 1;
+		return 1;
+	} else if (getskilllv("MO_CALLSPIRITS") > 0 && Sp >= 15 && .@now >= @BUFF_MO_CALLSPIRITS + 60) {
+		@BUFF_MO_CALLSPIRITS = .@now;
+		unitskilluseid getcharid(3), "MO_CALLSPIRITS", 5, getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("MO_EXPLOSIONSPIRITS") > 0 && Sp >= 15 && !getstatus(SC_EXPLOSIONSPIRITS) && .@now >= @BUFF_MO_EXPLOSIONSPIRITS + 60) {
+		@BUFF_MO_EXPLOSIONSPIRITS = .@now;
+		unitskilluseid getcharid(3), "MO_EXPLOSIONSPIRITS", 5, getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SR_RAISINGDRAGON") > 0 && Sp >= 80 && !getstatus(SC_RAISINGDRAGON) && .@now >= @BUFF_SR_RAISINGDRAGON + 60) {
+		@BUFF_SR_RAISINGDRAGON = .@now;
+		unitskilluseid getcharid(3), "SR_RAISINGDRAGON", getskilllv("SR_RAISINGDRAGON"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SR_GENTLETOUCH_ENERGYGAIN") > 0 && Sp >= 30 && !getstatus(SC_GT_ENERGYGAIN) && .@now >= @BUFF_SR_ENERGYGAIN + 60) {
+		@BUFF_SR_ENERGYGAIN = .@now;
+		unitskilluseid getcharid(3), "SR_GENTLETOUCH_ENERGYGAIN", getskilllv("SR_GENTLETOUCH_ENERGYGAIN"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SR_GENTLETOUCH_CHANGE") > 0 && Sp >= 30 && !getstatus(SC_GT_CHANGE) && .@now >= @BUFF_SR_CHANGE + 60) {
+		@BUFF_SR_CHANGE = .@now;
+		unitskilluseid getcharid(3), "SR_GENTLETOUCH_CHANGE", getskilllv("SR_GENTLETOUCH_CHANGE"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SR_GENTLETOUCH_REVITALIZE") > 0 && Sp >= 30 && !getstatus(SC_GT_REVITALIZE) && .@now >= @BUFF_SR_REVITALIZE + 60) {
+		@BUFF_SR_REVITALIZE = .@now;
+		unitskilluseid getcharid(3), "SR_GENTLETOUCH_REVITALIZE", getskilllv("SR_GENTLETOUCH_REVITALIZE"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+
+	// 6. MERCADOR E EVOLUCOES
+	if (getskilllv("MC_LOUD") > 0 && Sp >= 8 && !getstatus(SC_LOUD) && .@now >= @BUFF_MC_LOUD + 60) {
+		@BUFF_MC_LOUD = .@now;
+		unitskilluseid getcharid(3), "MC_LOUD", 1, getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("BS_ADRENALINE") > 0 && Sp >= 20 && !getstatus(SC_ADRENALINE) && .@now >= @BUFF_BS_ADRENALINE + 60) {
+		@BUFF_BS_ADRENALINE = .@now;
+		unitskilluseid getcharid(3), "BS_ADRENALINE", getskilllv("BS_ADRENALINE"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("BS_WEAPONPERFECT") > 0 && Sp >= 18 && !getstatus(SC_WEAPONPERFECTION) && .@now >= @BUFF_BS_WEAPONPERFECT + 60) {
+		@BUFF_BS_WEAPONPERFECT = .@now;
+		unitskilluseid getcharid(3), "BS_WEAPONPERFECT", getskilllv("BS_WEAPONPERFECT"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("BS_OVERTHRUST") > 0 && Sp >= 20 && !getstatus(SC_OVERTHRUST) && .@now >= @BUFF_BS_OVERTHRUST + 60) {
+		@BUFF_BS_OVERTHRUST = .@now;
+		unitskilluseid getcharid(3), "BS_OVERTHRUST", getskilllv("BS_OVERTHRUST"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("BS_MAXIMIZE") > 0 && Sp >= 10 && !getstatus(SC_MAXIMIZEPOWER) && .@now >= @BUFF_WS_MAXIMIZE + 60) {
+		@BUFF_WS_MAXIMIZE = .@now;
+		unitskilluseid getcharid(3), "BS_MAXIMIZE", getskilllv("BS_MAXIMIZE"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("WS_OVERTHRUSTMAX") > 0 && Sp >= 20 && !getstatus(SC_MAXOVERTHRUST) && .@now >= @BUFF_WS_OVERTHRUSTMAX + 60) {
+		@BUFF_WS_OVERTHRUSTMAX = .@now;
+		unitskilluseid getcharid(3), "WS_OVERTHRUSTMAX", getskilllv("WS_OVERTHRUSTMAX"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (checkcart()) {
+		if (getskilllv("BS_CARTBOOST") > 0 && Sp >= 20 && !getstatus(SC_CARTBOOST) && .@now >= @BUFF_BS_CARTBOOST + 60) {
+			@BUFF_BS_CARTBOOST = .@now;
+			unitskilluseid getcharid(3), "BS_CARTBOOST", 1, getcharid(3), 0, 0, 0, 1;
+			return 1;
+		}
+		if (getskilllv("GN_CARTBOOST") > 0 && Sp >= 20 && !getstatus(SC_GN_CARTBOOST) && .@now >= @BUFF_GN_CARTBOOST + 60) {
+			@BUFF_GN_CARTBOOST = .@now;
+			unitskilluseid getcharid(3), "GN_CARTBOOST", getskilllv("GN_CARTBOOST"), getcharid(3), 0, 0, 0, 1;
+			return 1;
+		}
+	}
+	if (getskilllv("NC_ACCELERATION") > 0 && Sp >= 20 && !getstatus(SC_ACCELERATION) && .@now >= @BUFF_NC_ACCELERATION + 60) {
+		@BUFF_NC_ACCELERATION = .@now;
+		unitskilluseid getcharid(3), "NC_ACCELERATION", getskilllv("NC_ACCELERATION"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("NC_HOVERING") > 0 && Sp >= 20 && !getstatus(SC_HOVERING) && .@now >= @BUFF_NC_HOVERING + 60) {
+		@BUFF_NC_HOVERING = .@now;
+		unitskilluseid getcharid(3), "NC_HOVERING", getskilllv("NC_HOVERING"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+
+	// 7. TAEKWON E EVOLUCOES
+	if (getskilllv("TK_RUN") > 0 && Sp >= 10 && !getstatus(SC_SPURT) && .@now >= @BUFF_TK_RUN + 60) {
+		@BUFF_TK_RUN = .@now;
+		unitskilluseid getcharid(3), "TK_RUN", 1, getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("TK_READYSTORM") > 0 && Sp >= 1 && !getstatus(SC_READYSTORM) && .@now >= @BUFF_TK_READYSTORM + 60) {
+		@BUFF_TK_READYSTORM = .@now;
+		unitskilluseid getcharid(3), "TK_READYSTORM", 1, getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("TK_READYDOWN") > 0 && Sp >= 1 && !getstatus(SC_READYDOWN) && .@now >= @BUFF_TK_READYDOWN + 60) {
+		@BUFF_TK_READYDOWN = .@now;
+		unitskilluseid getcharid(3), "TK_READYDOWN", 1, getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("TK_READYTURN") > 0 && Sp >= 1 && !getstatus(SC_READYTURN) && .@now >= @BUFF_TK_READYTURN + 60) {
+		@BUFF_TK_READYTURN = .@now;
+		unitskilluseid getcharid(3), "TK_READYTURN", 1, getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("TK_READYCOUNTER") > 0 && Sp >= 1 && !getstatus(SC_READYCOUNTER) && .@now >= @BUFF_TK_READYCOUNTER + 60) {
+		@BUFF_TK_READYCOUNTER = .@now;
+		unitskilluseid getcharid(3), "TK_READYCOUNTER", 1, getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+
+	// 8. NINJA E EVOLUCOES
+	if (getskilllv("NJ_NEN") > 0 && Sp >= 20 && !getstatus(SC_NEN) && .@now >= @BUFF_NJ_NEN + 60) {
+		@BUFF_NJ_NEN = .@now;
+		unitskilluseid getcharid(3), "NJ_NEN", getskilllv("NJ_NEN"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("NJ_UTSUSEMI") > 0 && Sp >= 15 && !getstatus(SC_UTSUSEMI) && .@now >= @BUFF_NJ_UTSUSEMI + 60) {
+		@BUFF_NJ_UTSUSEMI = .@now;
+		unitskilluseid getcharid(3), "NJ_UTSUSEMI", getskilllv("NJ_UTSUSEMI"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("KO_IZAYOI") > 0 && Sp >= 40 && !getstatus(SC_IZAYOI) && .@now >= @BUFF_KO_IZAYOI + 60) {
+		@BUFF_KO_IZAYOI = .@now;
+		unitskilluseid getcharid(3), "KO_IZAYOI", getskilllv("KO_IZAYOI"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("KO_ZANGETSU") > 0 && Sp >= 40 && !getstatus(SC_ZANGETSU) && .@now >= @BUFF_KO_ZANGETSU + 60) {
+		@BUFF_KO_ZANGETSU = .@now;
+		unitskilluseid getcharid(3), "KO_ZANGETSU", getskilllv("KO_ZANGETSU"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+
+	// 9. JUSTICEIRO / REBELLION
+	if (getskilllv("GS_INCREASING") > 0 && Sp >= 20 && !getstatus(SC_INCREASING) && .@now >= @BUFF_GS_INCREASING + 60) {
+		@BUFF_GS_INCREASING = .@now;
+		unitskilluseid getcharid(3), "GS_INCREASING", getskilllv("GS_INCREASING"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("GS_MADNESSCANCEL") > 0 && Sp >= 30 && !getstatus(SC_MADNESSCANCEL) && .@now >= @BUFF_GS_MADNESSCANCEL + 60) {
+		@BUFF_GS_MADNESSCANCEL = .@now;
+		unitskilluseid getcharid(3), "GS_MADNESSCANCEL", getskilllv("GS_MADNESSCANCEL"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("GS_GATLINGFEVER") > 0 && Sp >= 30 && !getstatus(SC_GATLINGFEVER) && .@now >= @BUFF_GS_GATLINGFEVER + 60) {
+		@BUFF_GS_GATLINGFEVER = .@now;
+		unitskilluseid getcharid(3), "GS_GATLINGFEVER", getskilllv("GS_GATLINGFEVER"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("RL_RICHOCHS_COIN") > 0 && Sp >= 10 && .@now >= @BUFF_RL_COIN + 60) {
+		@BUFF_RL_COIN = .@now;
+		unitskilluseid getcharid(3), "RL_RICHOCHS_COIN", 1, getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("RL_HEAT_BARREL") > 0 && Sp >= 30 && !getstatus(SC_HEAT_BARREL) && .@now >= @BUFF_RL_HEAT_BARREL + 60) {
+		@BUFF_RL_HEAT_BARREL = .@now;
+		unitskilluseid getcharid(3), "RL_HEAT_BARREL", getskilllv("RL_HEAT_BARREL"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("RL_PLATINUM_ALTER") > 0 && Sp >= 20 && !getstatus(SC_P_ALTER) && .@now >= @BUFF_RL_PLATINUM_ALTER + 60) {
+		@BUFF_RL_PLATINUM_ALTER = .@now;
+		unitskilluseid getcharid(3), "RL_PLATINUM_ALTER", getskilllv("RL_PLATINUM_ALTER"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+
+	// 10. DORAM (SUMMONER)
+	if (getskilllv("SU_BUNCHOFSHRIMP") > 0 && Sp >= 20 && !getstatus(SC_SHRIMP) && .@now >= @BUFF_SU_SHRIMP + 60) {
+		@BUFF_SU_SHRIMP = .@now;
+		unitskilluseid getcharid(3), "SU_BUNCHOFSHRIMP", getskilllv("SU_BUNCHOFSHRIMP"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SU_CHATTERING") > 0 && Sp >= 20 && !getstatus(SC_CHATTERING) && .@now >= @BUFF_SU_CHATTERING + 60) {
+		@BUFF_SU_CHATTERING = .@now;
+		unitskilluseid getcharid(3), "SU_CHATTERING", getskilllv("SU_CHATTERING"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SU_TUNAPARTY") > 0 && Sp >= 30 && !getstatus(SC_TUNAPARTY) && .@now >= @BUFF_SU_TUNAPARTY + 60) {
+		@BUFF_SU_TUNAPARTY = .@now;
+		unitskilluseid getcharid(3), "SU_TUNAPARTY", getskilllv("SU_TUNAPARTY"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SU_ARCLOUSEDASH") > 0 && Sp >= 20 && !getstatus(SC_ARCLOUSEDASH) && .@now >= @BUFF_SU_ARCLOUSEDASH + 60) {
+		@BUFF_SU_ARCLOUSEDASH = .@now;
+		unitskilluseid getcharid(3), "SU_ARCLOUSEDASH", getskilllv("SU_ARCLOUSEDASH"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+	if (getskilllv("SU_HISS") > 0 && Sp >= 20 && !getstatus(SC_HISS) && .@now >= @BUFF_SU_HISS + 60) {
+		@BUFF_SU_HISS = .@now;
+		unitskilluseid getcharid(3), "SU_HISS", getskilllv("SU_HISS"), getcharid(3), 0, 0, 0, 1;
+		return 1;
+	}
+
+	return 0;
+}

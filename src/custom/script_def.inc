@@ -8,4 +8,6 @@
  *	BUILDIN_DEF(command_name,"parameters"),
  **/
 
-//BUILDIN_DEF(example,""),
+BUILDIN_DEF(is_maxbaselv, ""),
+BUILDIN_DEF(is_maxjoblv, ""),
+BUILDIN_DEF(autostore_loot, "?"),
