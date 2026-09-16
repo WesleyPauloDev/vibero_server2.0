@@ -52,7 +52,7 @@ OnInit:
 // ======================================================================
 OnManualCommand:
 	if (getgroupid() != 5 && getgmlevel() < 1 && getgroupid() < 5) {
-		dispbottom "[Auto]: Este comando e exclusivo para jogadores VIP (Grupo 5).", 0xFF5555;
+		dispbottom "[Auto]: Este comando e exclusivo para jogadores VIP.", 0xFF5555;
 		end;
 	}
 	if (!@AUTO_ACTIVE) {
@@ -67,13 +67,13 @@ OnManualCommand:
 // ======================================================================
 OnAutoCommand:
 	if (getgroupid() != 5 && getgmlevel() < 1 && getgroupid() < 5) {
-		dispbottom "[Auto]: Este comando e exclusivo para jogadores VIP (Grupo 5).", 0xFF5555;
+		dispbottom "[Auto]: Este comando e exclusivo para jogadores VIP.", 0xFF5555;
 		end;
 	}
 	.@arg$ = strtolower(.@atcmd_parameters$[0]);
 
 	if (.@arg$ == "setup" || .@arg$ == "config" || .@arg$ == "ajustes") {
-		callsub OnOpenSetupMenu;
+		callsub(OnOpenSetupMenu);
 		end;
 	}
 
@@ -145,7 +145,7 @@ OnAutoCommand:
 	@AUTO_MAP$ = strcharinfo(3);
 	@AUTO_LAST_TICK = gettimetick(2);
 	@AUTO_LAST_BUFF = gettimetick(2);
-	callsub OnApplyBaseBuffs;
+	callsub(OnApplyBaseBuffs);
 	if ((BaseClass == Job_Acolyte || Class == Job_Acolyte || Class == Job_Acolyte_High || BaseJob == Job_Acolyte || BaseJob == Job_Acolyte_High) && getskilllv("AL_HOLYLIGHT") <= 0) {
 		skill "AL_HOLYLIGHT", 1, 0;
 	}
@@ -427,9 +427,9 @@ OnStepTimer:
 	// ==================================================================
 	// Checagem periodica e renovacao direta dos buffs basicos
 	// ==================================================================
-	if (!getstatus(SC_BLESSING) || !getstatus(SC_INCREASEAGI) || (.@now - @AUTO_LAST_BUFF) >= 300) {
+	if (!getstatus(SC_BLESSING) || !getstatus(SC_INCREASEAGI) || (.@now - @AUTO_LAST_BUFF) >= 120) {
 		@AUTO_LAST_BUFF = .@now;
-		callsub OnApplyBaseBuffs;
+		callsub(OnApplyBaseBuffs);
 	}
 
 	// ==================================================================
@@ -858,10 +858,10 @@ OnStepTimer:
 	.@step_delay = (200 - .@cur_aspd) * 15;
 	if (.@step_delay < 350) .@step_delay = 350;
 
-	// 1. ESPADACHIM E EVOLUCOES (Inclui Espadachim T / Swordman High)
-	if (BaseClass == Job_Swordman || Class == Job_Swordman || Class == Job_Swordman_High || BaseJob == Job_Swordman || BaseJob == Job_Swordman_High) {
-		// Cavaleiro Runico: Se Sopro de Gelo estiver no lvl 10, usa exclusivamente Sopro do Dragao e Sopro de Gelo
-		if (getskilllv("RK_DRAGONBREATH_WATER") >= 10) {
+	// 1. ESPADACHIM E EVOLUCOES (Inclui Cavaleiro Runico, Guardiao Real, Lorde, Paladino, etc.)
+	if (BaseClass == Job_Swordman || Class == Job_Swordman || Class == Job_Swordman_High || BaseJob == Job_Swordman || BaseJob == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight || Class == Job_Rune_Knight_T || Class == 4060 || Class == 4054 || Class == 4008 || Class == Job_Crusader || Class == Job_Paladin || Class == Job_Royal_Guard || Class == Job_Royal_Guard_T || Class == 4073 || Class == 4066 || Class == 4015 || BaseJob == Job_Knight || BaseJob == Job_Crusader || BaseJob == Job_Lord_Knight || BaseJob == Job_Paladin || BaseJob == Job_Rune_Knight || BaseJob == Job_Royal_Guard) {
+		// Cavaleiro Runico: Se Sopro de Gelo estiver no lvl 10 E estiver montado, usa exclusivamente Sopro do Dragao e Sopro de Gelo
+		if (getskilllv("RK_DRAGONBREATH_WATER") >= 10 && (checkriding() || checkdragon())) {
 			if (Sp >= 30) {
 				if ((@AUTO_SKILL_ROT % 2 == 0) && getskilllv("RK_DRAGONBREATH") > 0) {
 					unitskillusepos getcharid(3), "RK_DRAGONBREATH", getskilllv("RK_DRAGONBREATH"), .@mx, .@my;
@@ -887,19 +887,27 @@ OnStepTimer:
 		} else if (getskilllv("RK_WINDCUTTER") > 0 && Sp >= 20 && .@dist <= 2) {
 			unitskilluseid getcharid(3), "RK_WINDCUTTER", getskilllv("RK_WINDCUTTER"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 500;
-		} else if (getskilllv("RK_DRAGONBREATH") > 0 && Sp >= 30) {
+		} else if (getskilllv("RK_DRAGONBREATH") > 0 && (checkriding() || checkdragon()) && Sp >= 30) {
 			unitskillusepos getcharid(3), "RK_DRAGONBREATH", getskilllv("RK_DRAGONBREATH"), .@mx, .@my;
 			.@step_delay = 900;
+		} else if (getskilllv("LG_OVERBRAND") > 0 && Sp >= 32) {
+			unitskilluseid getcharid(3), "LG_OVERBRAND", getskilllv("LG_OVERBRAND"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 750;
 		} else if (getskilllv("LG_BANISHINGPOINT") > 0 && Sp >= 20) {
 			unitskilluseid getcharid(3), "LG_BANISHINGPOINT", getskilllv("LG_BANISHINGPOINT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 450;
 		} else if (getskilllv("LG_CANNONSPEAR") > 0 && Sp >= 30) {
 			unitskilluseid getcharid(3), "LG_CANNONSPEAR", getskilllv("LG_CANNONSPEAR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 700;
+		} else if (getskilllv("LG_RAYOFGENESIS") > 0 && Sp >= 60) {
+			unitskilluseid getcharid(3), "LG_RAYOFGENESIS", getskilllv("LG_RAYOFGENESIS"), getcharid(3), 0, 0, 0, 0;
+			.@step_delay = 900;
 		} else if (getskilllv("LK_SPIRALPIERCE") > 0 && Sp >= 20) {
+			// Heranca de 2nd T (Lord Knight): Perfurar em Espiral
 			unitskilluseid getcharid(3), "LK_SPIRALPIERCE", getskilllv("LK_SPIRALPIERCE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 800;
 		} else if (getskilllv("PA_SHIELDCHAIN") > 0 && Sp >= (25 + getskilllv("PA_SHIELDCHAIN") * 3) && getequipid(EQI_HAND_L) > 0) {
+			// Heranca de 2nd T (Paladino): Choque Rapido
 			unitskilluseid getcharid(3), "PA_SHIELDCHAIN", getskilllv("PA_SHIELDCHAIN"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 800;
 		} else if (getskilllv("CR_HOLYCROSS") > 0 && Sp >= 15) {
@@ -916,8 +924,17 @@ OnStepTimer:
 			.@step_delay = 450;
 		}
 	}
-	// 2. MAGO E EVOLUCOES (Inclui Mago T / Mage High)
-	else if (BaseClass == Job_Mage || Class == Job_Mage || Class == Job_Mage_High || BaseJob == Job_Mage || BaseJob == Job_Mage_High) {
+	// 2. MAGO E EVOLUCOES (Inclui Arcano, Feiticeiro, Arquimago, Professor, etc.)
+	else if (BaseClass == Job_Mage || Class == Job_Mage || Class == Job_Mage_High || BaseJob == Job_Mage || BaseJob == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock || Class == Job_Warlock_T || Class == 4061 || Class == Job_Sage || Class == Job_Professor || Class == Job_Sorcerer || Class == Job_Sorcerer_T || Class == 4074 || Class == 4067 || Class == 4055 || Class == 4009 || Class == 4017 || BaseJob == Job_Wizard || BaseJob == Job_Sage || BaseJob == Job_High_Wizard || BaseJob == Job_Professor || BaseJob == Job_Warlock || BaseJob == Job_Sorcerer) {
+		// Arcano: Mantem Telecinesia (WL_TELEKINESIS_INTENSE) ativa sempre que disponivel
+		if (getskilllv("WL_TELEKINESIS_INTENSE") > 0 && Sp >= (50 + getskilllv("WL_TELEKINESIS_INTENSE") * 50) && !getstatus(SC_TELEKINESIS_INTENSE) && .@now >= @CD_WL_TELEKINESIS) {
+			@CD_WL_TELEKINESIS = .@now + 3;
+			unitskilluseid getcharid(3), "WL_TELEKINESIS_INTENSE", getskilllv("WL_TELEKINESIS_INTENSE"), getcharid(3), 0, 0, 0, 0;
+			.@step_delay = 500;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		}
+
 		// Arquimago e evolucoes: Mantem Amplificacao Mistica ativa antes de conjurar magias ofensivas
 		if (getskilllv("HW_MAGICPOWER") > 0 && Sp >= 40 && !getstatus(SC_MAGICPOWER) && .@now >= @BUFF_HW_MAGICPOWER + 2) {
 			@BUFF_HW_MAGICPOWER = .@now;
@@ -927,107 +944,253 @@ OnStepTimer:
 			end;
 		}
 
-		// Professor / Feiticeiro: Mantem Presciencia (PF_MEMORIZE) ativa antes de conjurar magias ofensivas
-		if (getskilllv("PF_MEMORIZE") > 0 && Sp >= 1 && !getstatus(SC_MEMORIZE) && .@now >= @BUFF_PF_MEMORIZE + 2) {
-			@BUFF_PF_MEMORIZE = .@now;
-			unitskilluseid getcharid(3), "PF_MEMORIZE", getskilllv("PF_MEMORIZE"), getcharid(3), 0, 0, 0, 0;
-			.@step_delay = 500;
-			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
-			end;
+		// ==============================================================
+		// Feiticeiro / Sorcerer / Professor / Sabio:
+		// ==============================================================
+		.@is_sorc_class = (Class == Job_Sorcerer || Class == Job_Sorcerer_T || Class == 4074 || Class == 4067 || Class == Job_Baby_Sorcerer || Class == Job_Elemental_Master || Class == Job_Elemental_Master_T || Class == Job_Baby_Elemental_Master || Class == 4255 || BaseJob == Job_Sorcerer);
+		.@has_sorc_skills = (getskilllv("SO_PSYCHIC_WAVE") > 0 || getskilllv("SO_DIAMONDDUST") > 0 || getskilllv("SO_EARTHGRAVE") > 0 || getskilllv("SO_VARETYR_SPEAR") > 0 || getskilllv("SO_CLOUD_KILL") > 0);
+
+		// Se for Feiticeiro e JA tiver habilidades de 3a classe aprendidas:
+		if (.@is_sorc_class && .@has_sorc_skills) {
+			for (.@siter = 0; .@siter < 5; .@siter++) {
+				.@sidx = (@SO_ROT_STEP + .@siter) % 5;
+				if (.@sidx == 0 && getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 70 && .@now >= @CD_SO_PSYCHIC_WAVE) {
+					@CD_SO_PSYCHIC_WAVE = .@now + 5;
+					@SO_ROT_STEP = (.@sidx + 1) % 5;
+					unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my;
+					.@step_delay = 950;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				} else if (.@sidx == 1 && getskilllv("SO_DIAMONDDUST") > 0 && Sp >= 50 && .@now >= @CD_SO_DIAMONDDUST) {
+					@CD_SO_DIAMONDDUST = .@now + 5;
+					@SO_ROT_STEP = (.@sidx + 1) % 5;
+					unitskillusepos getcharid(3), "SO_DIAMONDDUST", getskilllv("SO_DIAMONDDUST"), .@mx, .@my;
+					.@step_delay = 850;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				} else if (.@sidx == 2 && getskilllv("SO_EARTHGRAVE") > 0 && Sp >= 62 && .@now >= @CD_SO_EARTHGRAVE) {
+					@CD_SO_EARTHGRAVE = .@now + 5;
+					@SO_ROT_STEP = (.@sidx + 1) % 5;
+					unitskillusepos getcharid(3), "SO_EARTHGRAVE", getskilllv("SO_EARTHGRAVE"), .@mx, .@my;
+					.@step_delay = 850;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				} else if (.@sidx == 3 && getskilllv("SO_VARETYR_SPEAR") > 0 && Sp >= 65 && .@now >= @CD_SO_VARETYR_SPEAR) {
+					@CD_SO_VARETYR_SPEAR = .@now + 3;
+					@SO_ROT_STEP = (.@sidx + 1) % 5;
+					unitskilluseid getcharid(3), "SO_VARETYR_SPEAR", getskilllv("SO_VARETYR_SPEAR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 800;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				} else if (.@sidx == 4 && getskilllv("SO_CLOUD_KILL") > 0 && Sp >= 48 && .@now >= @CD_SO_CLOUD_KILL) {
+					@CD_SO_CLOUD_KILL = .@now + 5;
+					@SO_ROT_STEP = (.@sidx + 1) % 5;
+					unitskillusepos getcharid(3), "SO_CLOUD_KILL", getskilllv("SO_CLOUD_KILL"), .@mx, .@my;
+					.@step_delay = 850;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				}
+			}
 		}
 
-		// Professor / Feiticeiro: Mantem Lancas Duplas (PF_DOUBLECASTING) ativo
-		if (getskilllv("PF_DOUBLECASTING") > 0 && Sp >= (35 + getskilllv("PF_DOUBLECASTING") * 5) && !getstatus(SC_DOUBLECAST) && .@now >= @BUFF_PF_DOUBLECAST + 2) {
-			@BUFF_PF_DOUBLECAST = .@now;
-			unitskilluseid getcharid(3), "PF_DOUBLECASTING", getskilllv("PF_DOUBLECASTING"), getcharid(3), 0, 0, 0, 0;
-			.@step_delay = 500;
-			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
-			end;
-		}
-
-		// Professor / Sabio / Feiticeiro com Lancas Duplas: Alterna entre Lancas de Fogo e Lancas de Gelo (nao usa Bola de Fogo)
-		if (Class == Job_Sage || Class == Job_Professor || Class == Job_Sorcerer || Class == Job_Sorcerer_T || Class == Job_Elemental_Master || Class == 4255 || getskilllv("PF_DOUBLECASTING") > 0) {
-			deletearray .@prof_bolts$[0], 2;
-			.@bolt_cnt = 0;
-			if (getskilllv("MG_FIREBOLT") > 0 && Sp >= 12) {
-				.@prof_bolts$[.@bolt_cnt] = "MG_FIREBOLT";
-				.@bolt_cnt++;
-			}
-			if (getskilllv("MG_COLDBOLT") > 0 && Sp >= 12) {
-				.@prof_bolts$[.@bolt_cnt] = "MG_COLDBOLT";
-				.@bolt_cnt++;
-			}
-			if (.@bolt_cnt > 0) {
-				.@chosen_bolt$ = .@prof_bolts$[@AUTO_SKILL_ROT % .@bolt_cnt];
-				unitskilluseid getcharid(3), .@chosen_bolt$, getskilllv(.@chosen_bolt$), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-				.@step_delay = 850;
+		// Heranca de 2nd T (Professor / Sabio) para Feiticeiro (enquanto sem skills de 3a classe ou durante cooldown):
+		.@is_sage_tree = (.@is_sorc_class || Class == Job_Sage || Class == Job_Sage_T || Class == Job_Baby_Sage || Class == Job_Professor || Class == Job_Baby_Professor || Class == 4017 || Class == 16 || BaseJob == Job_Sage || BaseJob == Job_Professor || getskilllv("PF_DOUBLECASTING") > 0);
+		if (.@is_sage_tree) {
+			// Lancas Duplas (PF_DOUBLECASTING) - Apenas se usar lancas elementais
+			if (getskilllv("PF_DOUBLECASTING") > 0 && Sp >= 40 && !getstatus(SC_DOUBLECAST) && .@now >= @BUFF_PF_DOUBLECAST + 5 && (getskilllv("MG_FIREBOLT") > 0 || getskilllv("MG_COLDBOLT") > 0 || getskilllv("MG_LIGHTNINGBOLT") > 0)) {
+				@BUFF_PF_DOUBLECAST = .@now + 90;
+				unitskilluseid getcharid(3), "PF_DOUBLECASTING", getskilllv("PF_DOUBLECASTING"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 1800;
 				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 				end;
 			}
+
+			// Furia da Terra / Coluna de Pedra / Lancas Elementais
+			if (getskilllv("WZ_HEAVENDRIVE") > 0 && Sp >= 28 && ((.@now - @AUTO_LAST_HEAVENDRIVE) >= 2 || getskilllv("MG_FIREBOLT") <= 0)) {
+				@AUTO_LAST_HEAVENDRIVE = .@now;
+				unitskillusepos getcharid(3), "WZ_HEAVENDRIVE", getskilllv("WZ_HEAVENDRIVE"), .@mx, .@my;
+				.@step_delay = 1000;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("WZ_EARTHSPIKE") > 0 && Sp >= 12 && ((@AUTO_SKILL_ROT % 3 == 0) || (getskilllv("MG_FIREBOLT") <= 0 && getskilllv("MG_COLDBOLT") <= 0 && getskilllv("MG_LIGHTNINGBOLT") <= 0))) {
+				unitskilluseid getcharid(3), "WZ_EARTHSPIKE", getskilllv("WZ_EARTHSPIKE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else {
+				deletearray .@prof_bolts$[0], 3;
+				.@bolt_cnt = 0;
+				if (getskilllv("MG_FIREBOLT") > 0 && Sp >= 12) {
+					.@prof_bolts$[.@bolt_cnt] = "MG_FIREBOLT";
+					.@bolt_cnt++;
+				}
+				if (getskilllv("MG_COLDBOLT") > 0 && Sp >= 12) {
+					.@prof_bolts$[.@bolt_cnt] = "MG_COLDBOLT";
+					.@bolt_cnt++;
+				}
+				if (getskilllv("MG_LIGHTNINGBOLT") > 0 && Sp >= 12) {
+					.@prof_bolts$[.@bolt_cnt] = "MG_LIGHTNINGBOLT";
+					.@bolt_cnt++;
+				}
+				if (.@bolt_cnt > 0) {
+					.@chosen_bolt$ = .@prof_bolts$[@AUTO_SKILL_ROT % .@bolt_cnt];
+					unitskilluseid getcharid(3), .@chosen_bolt$, getskilllv(.@chosen_bolt$), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 800;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				} else if (getskilllv("MG_SOULSTRIKE") > 0 && Sp >= 15) {
+					unitskilluseid getcharid(3), "MG_SOULSTRIKE", getskilllv("MG_SOULSTRIKE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 600;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				}
+			}
 		}
 
-		if (getskilllv("WL_CRIMSONROCK") > 0 && Sp >= 60 && (@AUTO_SKILL_ROT % 2 == 0)) {
-			unitskillusepos getcharid(3), "WL_CRIMSONROCK", getskilllv("WL_CRIMSONROCK"), .@mx, .@my;
-			.@step_delay = 1200;
-		} else if (getskilllv("WL_CHAINLIGHTNING") > 0 && Sp >= 50) {
-			unitskilluseid getcharid(3), "WL_CHAINLIGHTNING", getskilllv("WL_CHAINLIGHTNING"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 1000;
-		} else if (getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 48 && (@AUTO_SKILL_ROT % 2 == 0)) {
-			unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my;
-			.@step_delay = 1200;
-		} else if ((getskilllv("WZ_STORMGUST") > 0 || getskilllv("WZ_VERMILION") > 0 || getskilllv("WZ_METEOR") > 0) && (Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock)) {
-			// Habilidades em Area do Bruxo: Nevasca, Ira de Thor, Furia da Terra e Chuva de Meteoros
-			deletearray .@wz_skills$[0], 4;
-			.@wz_count = 0;
-			if (getskilllv("WZ_STORMGUST") > 0 && Sp >= 40) {
-				.@wz_skills$[.@wz_count] = "WZ_STORMGUST";
-				.@wz_count++;
+		// Arcano / Warlock: Habilidades de 3a classe
+		.@is_wl = (Class == Job_Warlock || Class == Job_Warlock_T || Class == Job_Baby_Warlock || Class == Job_Arch_Mage || Class == Job_Arch_Mage_T || Class == Job_Baby_Arch_Mage || getskilllv("WL_CHAINLIGHTNING") > 0 || getskilllv("WL_CRIMSONROCK") > 0 || getskilllv("WL_HELLINFERNO") > 0 || getskilllv("WL_COMET") > 0 || getskilllv("WL_SOULEXPANSION") > 0 || getskilllv("WL_EARTHSTRAIN") > 0 || getskilllv("WL_JACKFROST") > 0);
+		if (.@is_wl) {
+			// Regra 1: Se Cometa estiver lvl maximo (>= 5), priorize Cometa enquanto nao estiver em cooldown
+			if (getskilllv("WL_COMET") >= 5 && Sp >= 150 && .@now >= @CD_WL_COMET) {
+				@CD_WL_COMET = .@now + 20;
+				unitskillusepos getcharid(3), "WL_COMET", getskilllv("WL_COMET"), .@mx, .@my;
+				.@step_delay = 1100;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
 			}
-			if (getskilllv("WZ_VERMILION") > 0 && Sp >= 40) {
-				.@wz_skills$[.@wz_count] = "WZ_VERMILION";
-				.@wz_count++;
+			// Regra 2: Se Impacto Espiritual estiver lvl maximo (>= 5) e Cometa nao estiver maximo (< 5), priorize Impacto Espiritual
+			else if (getskilllv("WL_SOULEXPANSION") >= 5 && getskilllv("WL_COMET") < 5 && Sp >= 50) {
+				unitskilluseid getcharid(3), "WL_SOULEXPANSION", getskilllv("WL_SOULEXPANSION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 500;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
 			}
-			if (getskilllv("WZ_HEAVENDRIVE") > 0 && Sp >= 28) {
-				.@wz_skills$[.@wz_count] = "WZ_HEAVENDRIVE";
-				.@wz_count++;
-			}
-			if (getskilllv("WZ_METEOR") > 0 && Sp >= 40) {
-				.@wz_skills$[.@wz_count] = "WZ_METEOR";
-				.@wz_count++;
-			}
-
-			if (.@wz_count > 0) {
-				.@chosen_skill$ = .@wz_skills$[@AUTO_SKILL_ROT % .@wz_count];
-				unitskillusepos getcharid(3), .@chosen_skill$, getskilllv(.@chosen_skill$), .@mx, .@my;
-				.@step_delay = 1300;
-			}
-		} else if (getskilllv("WZ_HEAVENDRIVE") > 0 && Sp >= 28 && (Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock) && ((.@now - @AUTO_LAST_HEAVENDRIVE) >= 2 || getskilllv("MG_FIREBALL") <= 0)) {
-			// Prioridade: Furia da Terra quando nao estiver em cooldown (Bruxos)
-			@AUTO_LAST_HEAVENDRIVE = .@now;
-			unitskillusepos getcharid(3), "WZ_HEAVENDRIVE", getskilllv("WZ_HEAVENDRIVE"), .@mx, .@my;
-			.@step_delay = 1200;
-		} else if (getskilllv("MG_FIREBALL") > 0 && Sp >= 15 && (Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock || Class == Job_Mage || Class == Job_Mage_High)) {
-			// Bruxo/Mago usa Bola de Fogo
-			unitskilluseid getcharid(3), "MG_FIREBALL", getskilllv("MG_FIREBALL"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 700;
-		} else {
-			if (getskilllv("MG_SOULSTRIKE") > 0 && Sp >= 15) {
-				unitskilluseid getcharid(3), "MG_SOULSTRIKE", getskilllv("MG_SOULSTRIKE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-				.@step_delay = 600;
-			} else if (getskilllv("MG_FIREBOLT") > 0 && Sp >= 12) {
-				unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-				.@step_delay = 900;
-			} else if (getskilllv("MG_COLDBOLT") > 0 && Sp >= 12) {
-				unitskilluseid getcharid(3), "MG_COLDBOLT", getskilllv("MG_COLDBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-				.@step_delay = 900;
-			} else if (getskilllv("MG_LIGHTNINGBOLT") > 0 && Sp >= 12) {
-				unitskilluseid getcharid(3), "MG_LIGHTNINGBOLT", getskilllv("MG_LIGHTNINGBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-				.@step_delay = 900;
+			// Regra 3: Rotacao sequencial - Chamas de Hela, Abalo Sismico, Corrente Eletrica, Meteoro Escarlate e Esquife de Gelo
+			else {
+				for (.@iter = 0; .@iter < 5; .@iter++) {
+					.@idx = (@WL_ROT_STEP + .@iter) % 5;
+					if (.@idx == 0 && getskilllv("WL_HELLINFERNO") > 0 && Sp >= 64 && .@now >= @CD_WL_HELLINFERNO) {
+						@CD_WL_HELLINFERNO = .@now + 3;
+						@WL_ROT_STEP = (.@idx + 1) % 5;
+						unitskilluseid getcharid(3), "WL_HELLINFERNO", getskilllv("WL_HELLINFERNO"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+						.@step_delay = 600;
+						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+						end;
+					} else if (.@idx == 1 && getskilllv("WL_EARTHSTRAIN") > 0 && Sp >= 70 && .@dist <= 6 && .@now >= @CD_WL_EARTHSTRAIN) {
+						@CD_WL_EARTHSTRAIN = .@now + 7;
+						@WL_ROT_STEP = (.@idx + 1) % 5;
+						unitskillusepos getcharid(3), "WL_EARTHSTRAIN", getskilllv("WL_EARTHSTRAIN"), .@mx, .@my;
+						.@step_delay = 650;
+						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+						end;
+					} else if (.@idx == 2 && getskilllv("WL_CHAINLIGHTNING") > 0 && Sp >= 80) {
+						@WL_ROT_STEP = (.@idx + 1) % 5;
+						unitskilluseid getcharid(3), "WL_CHAINLIGHTNING", getskilllv("WL_CHAINLIGHTNING"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+						.@step_delay = 600;
+						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+						end;
+					} else if (.@idx == 3 && getskilllv("WL_CRIMSONROCK") > 0 && Sp >= 60 && .@now >= @CD_WL_CRIMSONROCK) {
+						@CD_WL_CRIMSONROCK = .@now + 5;
+						@WL_ROT_STEP = (.@idx + 1) % 5;
+						unitskilluseid getcharid(3), "WL_CRIMSONROCK", getskilllv("WL_CRIMSONROCK"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+						.@step_delay = 650;
+						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+						end;
+					} else if (.@idx == 4 && getskilllv("WL_JACKFROST") > 0 && Sp >= 50 && .@now >= @CD_WL_JACKFROST) {
+						@CD_WL_JACKFROST = .@now + 4;
+						@WL_ROT_STEP = (.@idx + 1) % 5;
+						unitskilluseid getcharid(3), "WL_JACKFROST", getskilllv("WL_JACKFROST"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+						.@step_delay = 600;
+						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+						end;
+					}
+				}
 			}
 		}
+
+		// Arquimago / Bruxo / Warlock sem skills de 3a classe:
+			.@is_wz = (Class == Job_Wizard || Class == Job_Wizard_T || Class == Job_High_Wizard || Class == Job_High_Wizard_T || Class == Job_Baby_Wizard || Class == Job_Warlock || Class == Job_Warlock_T || Class == Job_Baby_Warlock || Class == Job_Arch_Mage || Class == Job_Arch_Mage_T || Class == Job_Baby_Arch_Mage || BaseJob == Job_Wizard || BaseJob == Job_High_Wizard || BaseJob == Job_Warlock || getskilllv("WZ_STORMGUST") > 0 || getskilllv("WZ_VERMILION") > 0 || getskilllv("WZ_METEOR") > 0 || getskilllv("WZ_HEAVENDRIVE") > 0 || getskilllv("HW_NAPALMVULCAN") > 0);
+
+			if (.@is_wz && (getskilllv("WZ_STORMGUST") > 0 || getskilllv("WZ_VERMILION") > 0 || getskilllv("WZ_METEOR") > 0 || getskilllv("WZ_HEAVENDRIVE") > 0 || getskilllv("HW_NAPALMVULCAN") > 0)) {
+				// Alterna com Vulcao Napalm (se tiver e rot % 2 == 0 ou se nao tiver magias em area)
+				if (getskilllv("HW_NAPALMVULCAN") > 0 && Sp >= 50 && ((@AUTO_SKILL_ROT % 2 == 0) || (getskilllv("WZ_STORMGUST") <= 0 && getskilllv("WZ_VERMILION") <= 0 && getskilllv("WZ_METEOR") <= 0 && getskilllv("WZ_HEAVENDRIVE") <= 0))) {
+					unitskilluseid getcharid(3), "HW_NAPALMVULCAN", getskilllv("HW_NAPALMVULCAN"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 600;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				} else {
+					// Habilidades em Area do Bruxo/Arquimago: Nevasca, Ira de Thor, Furia da Terra e Chuva de Meteoros
+					deletearray .@wz_skills$[0], 4;
+					.@wz_count = 0;
+					if (getskilllv("WZ_STORMGUST") > 0 && Sp >= 40) {
+						.@wz_skills$[.@wz_count] = "WZ_STORMGUST";
+						.@wz_count++;
+					}
+					if (getskilllv("WZ_VERMILION") > 0 && Sp >= 40) {
+						.@wz_skills$[.@wz_count] = "WZ_VERMILION";
+						.@wz_count++;
+					}
+					if (getskilllv("WZ_HEAVENDRIVE") > 0 && Sp >= 28) {
+						.@wz_skills$[.@wz_count] = "WZ_HEAVENDRIVE";
+						.@wz_count++;
+					}
+					if (getskilllv("WZ_METEOR") > 0 && Sp >= 40) {
+						.@wz_skills$[.@wz_count] = "WZ_METEOR";
+						.@wz_count++;
+					}
+
+					if (.@wz_count > 0) {
+						.@chosen_skill$ = .@wz_skills$[@AUTO_SKILL_ROT % .@wz_count];
+						unitskillusepos getcharid(3), .@chosen_skill$, getskilllv(.@chosen_skill$), .@mx, .@my;
+						.@step_delay = 1300;
+						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+						end;
+					} else if (getskilllv("HW_NAPALMVULCAN") > 0 && Sp >= 50) {
+						unitskilluseid getcharid(3), "HW_NAPALMVULCAN", getskilllv("HW_NAPALMVULCAN"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+						.@step_delay = 600;
+						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+						end;
+					}
+				}
+			} else if (getskilllv("WZ_HEAVENDRIVE") > 0 && Sp >= 28 && .@is_wz && ((.@now - @AUTO_LAST_HEAVENDRIVE) >= 2 || getskilllv("MG_FIREBALL") <= 0)) {
+				// Furia da Terra quando nao estiver em cooldown
+				@AUTO_LAST_HEAVENDRIVE = .@now;
+				unitskillusepos getcharid(3), "WZ_HEAVENDRIVE", getskilllv("WZ_HEAVENDRIVE"), .@mx, .@my;
+				.@step_delay = 1200;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("MG_FIREBALL") > 0 && Sp >= 15 && (.@is_wz || Class == Job_Mage || Class == Job_Mage_High)) {
+				// Bruxo/Mago usa Bola de Fogo
+				unitskilluseid getcharid(3), "MG_FIREBALL", getskilllv("MG_FIREBALL"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else {
+				if (getskilllv("MG_SOULSTRIKE") > 0 && Sp >= 15) {
+					unitskilluseid getcharid(3), "MG_SOULSTRIKE", getskilllv("MG_SOULSTRIKE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 600;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				} else if (getskilllv("MG_FIREBOLT") > 0 && Sp >= 12) {
+					unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 900;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				} else if (getskilllv("MG_COLDBOLT") > 0 && Sp >= 12) {
+					unitskilluseid getcharid(3), "MG_COLDBOLT", getskilllv("MG_COLDBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 900;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				} else if (getskilllv("MG_LIGHTNINGBOLT") > 0 && Sp >= 12) {
+					unitskilluseid getcharid(3), "MG_LIGHTNINGBOLT", getskilllv("MG_LIGHTNINGBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 900;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				}
+			}
 	}
-	// 3. ARQUEIRO E EVOLUCOES (Inclui Arqueiro T / Archer High)
-	else if (BaseClass == Job_Archer || Class == Job_Archer || Class == Job_Archer_High || BaseJob == Job_Archer || BaseJob == Job_Archer_High) {
+	// 3. ARQUEIRO E EVOLUCOES (Inclui Ranger, Menestrel, Cigana, Atirador de Elite, Bardo, etc.)
+	else if (BaseClass == Job_Archer || Class == Job_Archer || Class == Job_Archer_High || BaseJob == Job_Archer || BaseJob == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger || Class == Job_Ranger_T || Class == 4062 || Class == 4056 || Class == 4012 || Class == Job_Bard || Class == Job_Clown || Class == Job_Minstrel || Class == Job_Minstrel_T || Class == 4075 || Class == 4068 || Class == 4019 || Class == Job_Dancer || Class == Job_Gypsy || Class == Job_Wanderer || Class == Job_Wanderer_T || Class == 4076 || Class == 4069 || Class == 4020 || BaseJob == Job_Hunter || BaseJob == Job_Sniper || BaseJob == Job_Ranger || BaseJob == Job_Bard || BaseJob == Job_Clown || BaseJob == Job_Minstrel || BaseJob == Job_Dancer || BaseJob == Job_Gypsy || BaseJob == Job_Wanderer) {
 		if (getskilllv("HT_BLITZBEAT") > 0 && !checkfalcon()) {
 			if (getskilllv("HT_FALCON") <= 0) {
 				skill "HT_FALCON", 1, 0;
@@ -1038,7 +1201,7 @@ OnStepTimer:
 		.@w_type = (.@w_id > 0 ? getiteminfo(.@w_id, ITEMINFO_SUBTYPE) : 0);
 
 		// Bardo / Menestrel: Mantem Banquete de Njord ativo apenas se for Bardo e estiver de instrumento (dura 180s)
-		if ((Class == Job_Bard || Class == Job_Clown || Class == Job_Minstrel || Class == Job_Minstrel_T || Class == Job_Troubadour || Class == 4259) && .@w_type == W_MUSICAL) {
+		if ((Class == Job_Bard || Class == Job_Clown || Class == Job_Minstrel || Class == Job_Minstrel_T || Class == Job_Troubadour || Class == 4259 || Class == 4075) && .@w_type == W_MUSICAL) {
 			if (getskilllv("BD_RICHMANKIM") > 0 && Sp >= (56 + getskilllv("BD_RICHMANKIM") * 6) && !getstatus(SC_RICHMANKIM) && .@now >= @BUFF_BD_RICHMANKIM + 180) {
 				@BUFF_BD_RICHMANKIM = .@now;
 				unitskilluseid getcharid(3), "BD_RICHMANKIM", getskilllv("BD_RICHMANKIM"), getcharid(3), 0, 0, 0, 1;
@@ -1051,8 +1214,28 @@ OnStepTimer:
 			}
 		}
 
-		// Atirador de Elite / Sniper: Mantem Visao Real (SN_SIGHT) ativa no nivel maximo aprendido
-		if (Class == Job_Sniper || Class == Job_Sniper_T || Class == Job_Hunter || Class == Job_Hunter_T || Class == Job_Ranger || Class == Job_Windhawk || Class == 4252) {
+		// Atirador de Elite / Ranger / Cacador e evolucoes
+		.@is_ranger = (Class == Job_Sniper || Class == Job_Sniper_T || Class == Job_Baby_Sniper || Class == Job_Hunter || Class == Job_Hunter_T || Class == Job_Baby_Hunter || Class == Job_Ranger || Class == Job_Ranger_T || Class == 4062 || Class == 4056 || Class == 4012 || Class == Job_Baby_Ranger || Class == Job_Windhawk || Class == Job_Windhawk_T || Class == Job_Baby_Windhawk || BaseJob == Job_Hunter || BaseJob == Job_Sniper || BaseJob == Job_Ranger);
+		if (.@is_ranger) {
+			// Ranger: Mantem Ilimitar (RA_UNLIMIT) ativo sempre que disponivel
+			if (getskilllv("RA_UNLIMIT") > 0 && Sp >= (80 + getskilllv("RA_UNLIMIT") * 20) && !getstatus(SC_UNLIMIT) && .@now >= @CD_RA_UNLIMIT) {
+				@CD_RA_UNLIMIT = .@now + 5;
+				unitskilluseid getcharid(3), "RA_UNLIMIT", getskilllv("RA_UNLIMIT"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 500;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			}
+
+			// Ranger: Mantem Disparo Selvagem (RA_FEARBREEZE) ativo
+			if (getskilllv("RA_FEARBREEZE") > 0 && Sp >= 45 && !getstatus(SC_FEARBREEZE) && .@now >= @BUFF_RA_FEARBREEZE + 3) {
+				@BUFF_RA_FEARBREEZE = .@now;
+				unitskilluseid getcharid(3), "RA_FEARBREEZE", getskilllv("RA_FEARBREEZE"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 450;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			}
+
+			// Mantem Visao Real (SN_SIGHT) ativa no nivel maximo aprendido
 			.@sn_sp = 15 + ((getskilllv("SN_SIGHT") + 1) / 2) * 5;
 			if (getskilllv("SN_SIGHT") > 0 && Sp >= .@sn_sp && !getstatus(SC_TRUESIGHT) && .@now >= @BUFF_SN_SIGHT + 2) {
 				@BUFF_SN_SIGHT = .@now;
@@ -1066,46 +1249,63 @@ OnStepTimer:
 			}
 		}
 
-		// SE ESTIVER DE ARCO: Rajada de Flechas (AC_DOUBLE) ou Tiro Preciso (SN_SHARPSHOOTING)
+		// SE ESTIVER DE ARCO:
 		if (.@w_type == W_BOW) {
-			if (getskilllv("RA_ARROWSTORM") > 0 && Sp >= 40 && (@AUTO_SKILL_ROT % 2 == 0)) {
-				unitskillusepos getcharid(3), "RA_ARROWSTORM", getskilllv("RA_ARROWSTORM"), .@mx, .@my;
-				.@step_delay = 900;
+			// Tempestade de Flechas (RA_ARROWSTORM): Prioridade sempre que disponivel (fora de cooldown)
+			if (getskilllv("RA_ARROWSTORM") > 0 && Sp >= (20 + getskilllv("RA_ARROWSTORM") * 4) && .@now >= @CD_RA_ARROWSTORM) {
+				@CD_RA_ARROWSTORM = .@now + 3;
+				unitskilluseid getcharid(3), "RA_ARROWSTORM", getskilllv("RA_ARROWSTORM"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 850;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
 			} else if (getskilllv("WM_SEVERE_RAINSTORM") > 0 && Sp >= 50 && (@AUTO_SKILL_ROT % 2 == 0)) {
 				unitskillusepos getcharid(3), "WM_SEVERE_RAINSTORM", getskilllv("WM_SEVERE_RAINSTORM"), .@mx, .@my;
 				.@step_delay = 1000;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
 			} else if (getskilllv("SN_SHARPSHOOTING") > 0 && Sp >= (14 + getskilllv("SN_SHARPSHOOTING") * 2)) {
-				// Atirador de Elite: Tiro Preciso como habilidade principal de arco
+				// Heranca de 2nd T (Atirador de Elite): Tiro Preciso
 				unitskilluseid getcharid(3), "SN_SHARPSHOOTING", getskilllv("SN_SHARPSHOOTING"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 				.@step_delay = 550;
-			} else if (getskilllv("AC_DOUBLE") > 0 && Sp >= 12) {
-				// Rajada de Flechas como habilidade principal de arco
-				unitskilluseid getcharid(3), "AC_DOUBLE", getskilllv("AC_DOUBLE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-				.@step_delay = 450;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
 			} else if (getskilllv("RA_AIMEDBOLT") > 0 && Sp >= 30) {
 				unitskilluseid getcharid(3), "RA_AIMEDBOLT", getskilllv("RA_AIMEDBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 				.@step_delay = 700;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("AC_DOUBLE") > 0 && Sp >= 12) {
+				unitskilluseid getcharid(3), "AC_DOUBLE", getskilllv("AC_DOUBLE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
 			} else if (getskilllv("SN_FALCONASSAULT") > 0 && Sp >= 30) {
 				unitskilluseid getcharid(3), "SN_FALCONASSAULT", getskilllv("SN_FALCONASSAULT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 				.@step_delay = 700;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
 			} else if (getskilllv("HT_BLITZBEAT") > 0 && Sp >= (7 + getskilllv("HT_BLITZBEAT") * 3)) {
 				unitskilluseid getcharid(3), "HT_BLITZBEAT", getskilllv("HT_BLITZBEAT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 				.@step_delay = 700;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
 			} else if (getskilllv("AC_SHOWER") > 0 && Sp >= 15 && (@AUTO_SKILL_ROT % 2 == 0)) {
 				unitskillusepos getcharid(3), "AC_SHOWER", getskilllv("AC_SHOWER"), .@mx, .@my;
 				.@step_delay = 600;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
 			}
 		}
-		// SE ESTIVER DE INSTRUMENTO: Flecha Melodica (BA_MUSICALSTRIKE) como ataque principal
+		// SE ESTIVER DE INSTRUMENTO: Flecha Melodica / Ruido Estridente / Vulcao de Flechas
 		else if (.@w_type == W_MUSICAL) {
-			if (getskilllv("CG_ARROWVULCAN") > 0 && Sp >= 25 && (@AUTO_SKILL_ROT % 3 == 0)) {
-				unitskilluseid getcharid(3), "CG_ARROWVULCAN", getskilllv("CG_ARROWVULCAN"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
-				.@step_delay = 800;
-			} else if (getskilllv("WM_METALLICSOUND") > 0 && Sp >= 20 && (@AUTO_SKILL_ROT % 3 == 0)) {
+			if (getskilllv("WM_METALLICSOUND") > 0 && Sp >= 20 && (@AUTO_SKILL_ROT % 3 == 0)) {
 				unitskilluseid getcharid(3), "WM_METALLICSOUND", getskilllv("WM_METALLICSOUND"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
 				.@step_delay = 600;
+			} else if (getskilllv("CG_ARROWVULCAN") > 0 && Sp >= 25 && (@AUTO_SKILL_ROT % 3 == 1)) {
+				// Heranca de 2nd T (Menestrel/Clown): Vulcao de Flechas
+				unitskilluseid getcharid(3), "CG_ARROWVULCAN", getskilllv("CG_ARROWVULCAN"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+				.@step_delay = 800;
 			} else if (getskilllv("BA_MUSICALSTRIKE") > 0 && Sp >= 12) {
-				// Flecha Melodica como habilidade principal de instrumento
 				unitskilluseid getcharid(3), "BA_MUSICALSTRIKE", getskilllv("BA_MUSICALSTRIKE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
 				.@step_delay = 500;
 			} else if (getskilllv("AC_DOUBLE") > 0 && Sp >= 12) {
@@ -1113,9 +1313,29 @@ OnStepTimer:
 				.@step_delay = 450;
 			}
 		}
-		// DEMAIS ARMAS (Chicote, adaga ou sem arma):
+		// SE ESTIVER DE CHICOTE: Ruido Estridente / Vulcao de Flechas / Estilingue
+		else if (.@w_type == W_WHIP) {
+			if (getskilllv("WM_METALLICSOUND") > 0 && Sp >= 20 && (@AUTO_SKILL_ROT % 3 == 0)) {
+				unitskilluseid getcharid(3), "WM_METALLICSOUND", getskilllv("WM_METALLICSOUND"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+				.@step_delay = 600;
+			} else if (getskilllv("CG_ARROWVULCAN") > 0 && Sp >= 25 && (@AUTO_SKILL_ROT % 3 == 1)) {
+				// Heranca de 2nd T (Cigana/Gypsy): Vulcao de Flechas
+				unitskilluseid getcharid(3), "CG_ARROWVULCAN", getskilllv("CG_ARROWVULCAN"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+				.@step_delay = 800;
+			} else if (getskilllv("DC_THROWARROW") > 0 && Sp >= 12) {
+				unitskilluseid getcharid(3), "DC_THROWARROW", getskilllv("DC_THROWARROW"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+				.@step_delay = 500;
+			} else if (getskilllv("AC_DOUBLE") > 0 && Sp >= 12) {
+				unitskilluseid getcharid(3), "AC_DOUBLE", getskilllv("AC_DOUBLE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450;
+			}
+		}
+		// DEMAIS ARMAS:
 		else {
-			if (getskilllv("BA_MUSICALSTRIKE") > 0 && Sp >= 12) {
+			if (getskilllv("CG_ARROWVULCAN") > 0 && Sp >= 25 && (@AUTO_SKILL_ROT % 3 == 0)) {
+				unitskilluseid getcharid(3), "CG_ARROWVULCAN", getskilllv("CG_ARROWVULCAN"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+				.@step_delay = 800;
+			} else if (getskilllv("BA_MUSICALSTRIKE") > 0 && Sp >= 12) {
 				unitskilluseid getcharid(3), "BA_MUSICALSTRIKE", getskilllv("BA_MUSICALSTRIKE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
 				.@step_delay = 500;
 			} else if (getskilllv("DC_THROWARROW") > 0 && Sp >= 12) {
@@ -1127,8 +1347,8 @@ OnStepTimer:
 			}
 		}
 	}
-	// 4. GATUNO E EVOLUCOES (Inclui Gatuno T / Thief High)
-	else if (BaseClass == Job_Thief || Class == Job_Thief || Class == Job_Thief_High || BaseJob == Job_Thief || BaseJob == Job_Thief_High) {
+	// 4. GATUNO E EVOLUCOES (Inclui Sicario, Renegado, Algoz, Desordeiro, etc.)
+	else if (BaseClass == Job_Thief || Class == Job_Thief || Class == Job_Thief_High || BaseJob == Job_Thief || BaseJob == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross || Class == Job_Guillotine_Cross_T || Class == 4065 || Class == 4059 || Class == 4013 || Class == Job_Rogue || Class == Job_Stalker || Class == Job_Shadow_Chaser || Class == Job_Shadow_Chaser_T || Class == 4079 || Class == 4072 || Class == 4021 || BaseJob == Job_Assassin || BaseJob == Job_Assassin_Cross || BaseJob == Job_Guillotine_Cross || BaseJob == Job_Rogue || BaseJob == Job_Stalker || BaseJob == Job_Shadow_Chaser) {
 		if (getskilllv("GC_CROSSIMPACT") > 0 && Sp >= 25) {
 			unitskilluseid getcharid(3), "GC_CROSSIMPACT", getskilllv("GC_CROSSIMPACT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 600;
@@ -1142,31 +1362,22 @@ OnStepTimer:
 			unitskilluseid getcharid(3), "SC_TRIANGLESHOT", getskilllv("SC_TRIANGLESHOT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 550;
 		} else if (getskilllv("ASC_BREAKER") > 0 && Sp >= (getskilllv("ASC_BREAKER") > 5 ? 30 : 20) && (.@dist > 3 || getskilllv("ASC_METEORASSAULT") <= 0 || (@AUTO_SKILL_ROT % 2 == 0))) {
-			// Algoz: Destruidor de Almas (Soul Destroyer) a distancia no nivel maximo aprendido
+			// Heranca de 2nd T (Algoz): Destruidor de Almas
 			unitskilluseid getcharid(3), "ASC_BREAKER", getskilllv("ASC_BREAKER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 650;
 		} else if (getskilllv("ASC_METEORASSAULT") > 0 && Sp >= (8 + getskilllv("ASC_METEORASSAULT") * 2) && .@dist <= 3) {
-			// Algoz: Impacto Meteoro (Meteor Assault) em area ao redor quando o monstro estiver proximo (ate 3 celulas)
-			unitskilluseid getcharid(3), "ASC_METEORASSAULT", getskilllv("ASC_METEORASSAULT"), getcharid(3), 0, 0, 0, 0;
-			.@step_delay = 550;
-		} else if (getskilllv("ASC_BREAKER") > 0 && Sp >= (getskilllv("ASC_BREAKER") > 5 ? 30 : 20)) {
-			// Algoz: Destruidor de Almas
-			unitskilluseid getcharid(3), "ASC_BREAKER", getskilllv("ASC_BREAKER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 650;
-		} else if (getskilllv("ASC_METEORASSAULT") > 0 && Sp >= (8 + getskilllv("ASC_METEORASSAULT") * 2)) {
-			// Algoz: Impacto Meteoro
+			// Heranca de 2nd T (Algoz): Impacto Meteoro
 			unitskilluseid getcharid(3), "ASC_METEORASSAULT", getskilllv("ASC_METEORASSAULT"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 550;
 		} else if (getskilllv("AS_SONICBLOW") > 0 && Sp >= 20) {
 			unitskilluseid getcharid(3), "AS_SONICBLOW", getskilllv("AS_SONICBLOW"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 700;
 		} else if (getstatus(SC_HIDING) && getskilllv("RG_RAID") > 0 && Sp >= 15) {
-			// Se estiver escondido, desfere Ataque Surpresa!
+			// Heranca de 2nd T (Desordeiro): Ataque Surpresa
 			unitskilluseid getcharid(3), "RG_RAID", getskilllv("RG_RAID"), getcharid(3), 0, 0, 0, 0;
 			@AUTO_ROGUE_STEP = 0;
 			.@step_delay = 700;
 		} else if (getskilllv("RG_RAID") > 0 && Sp >= 25 && (@AUTO_ROGUE_STEP == 1 || getskilllv("RG_BACKSTAP") <= 0)) {
-			// Esconderijo preparatorio para Ataque Surpresa apos a pos-conjuracao do Apunhalar
 			if (getskilllv("TF_HIDING") <= 0) {
 				skill "TF_HIDING", 1, 0;
 			}
@@ -1178,7 +1389,7 @@ OnStepTimer:
 			@AUTO_ROGUE_STEP = 2;
 			.@step_delay = 600;
 		} else if (getskilllv("RG_BACKSTAP") > 0 && Sp >= 16 && @AUTO_ROGUE_STEP == 0) {
-			// Apunhalar: aguarda o termino completo da pos-conjuracao (1000ms) antes do esconderijo
+			// Heranca de 2nd T (Desordeiro): Apunhalar
 			unitskilluseid getcharid(3), "RG_BACKSTAP", getskilllv("RG_BACKSTAP"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			@AUTO_ROGUE_STEP = 1;
 			.@step_delay = 1000;
@@ -1191,27 +1402,33 @@ OnStepTimer:
 				unitskilluseid getcharid(3), "TF_SPRINKLESAND", getskilllv("TF_SPRINKLESAND"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 				.@step_delay = 450;
 			} else if (getskilllv("TF_DOUBLE") > 0) {
-				// Passiva de ataque duplo ativa automaticamente
 				.@step_delay = 400;
 			}
 		}
 	}
-	// 5. NOVICO E EVOLUCOES (Inclui Novico T / Acolyte High)
-	else if (BaseClass == Job_Acolyte || Class == Job_Acolyte || Class == Job_Acolyte_High || BaseJob == Job_Acolyte || BaseJob == Job_Acolyte_High) {
+	// 5. NOVICO E EVOLUCOES (Inclui Arcebispo, Shura, Sumo Sacerdote, Mestre, etc.)
+	else if (BaseClass == Job_Acolyte || Class == Job_Acolyte || Class == Job_Acolyte_High || BaseJob == Job_Acolyte || BaseJob == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop || Class == Job_Arch_Bishop_T || Class == 4063 || Class == 4057 || Class == 4010 || Class == Job_Monk || Class == Job_Champion || Class == Job_Sura || Class == Job_Sura_T || Class == 4077 || Class == 4070 || Class == 4016 || BaseJob == Job_Priest || BaseJob == Job_High_Priest || BaseJob == Job_Arch_Bishop || BaseJob == Job_Monk || BaseJob == Job_Champion || BaseJob == Job_Sura) {
 		if (getskilllv("AB_ADORAMUS") > 0 && Sp >= 40 && countitem(717) > 0) {
 			unitskilluseid getcharid(3), "AB_ADORAMUS", getskilllv("AB_ADORAMUS"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 800;
 		} else if (getskilllv("AB_JUDEX") > 0 && Sp >= 20) {
 			unitskilluseid getcharid(3), "AB_JUDEX", getskilllv("AB_JUDEX"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 600;
+		} else if (getskilllv("SR_RAMPAGEBLASTER") > 0 && Sp >= 40 && countspiritball() >= 3) {
+			unitskilluseid getcharid(3), "SR_RAMPAGEBLASTER", getskilllv("SR_RAMPAGEBLASTER"), getcharid(3), 0, 0, 0, 0;
+			.@step_delay = 800;
+		} else if (getskilllv("SR_KNUCKLEARROW") > 0 && Sp >= 20 && .@dist <= 7) {
+			unitskilluseid getcharid(3), "SR_KNUCKLEARROW", getskilllv("SR_KNUCKLEARROW"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 550;
+		} else if (getskilllv("SR_TIGERCANNON") > 0 && Sp >= 40 && Hp >= 500 && (@AUTO_SKILL_ROT % 2 == 0)) {
+			unitskilluseid getcharid(3), "SR_TIGERCANNON", getskilllv("SR_TIGERCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 800;
 		} else if (getskilllv("PR_MAGNUS") > 0 && Sp >= 40 && (@AUTO_SKILL_ROT % 2 == 0)) {
-			// Sacerdote com Magnus Exorcismus: conjura no chao onde o monstro esta
+			// Heranca de 2nd T (Sumo Sacerdote): Magnus Exorcismus
 			unitskillusepos getcharid(3), "PR_MAGNUS", getskilllv("PR_MAGNUS"), .@mx, .@my;
 			.@step_delay = 1200;
 		} else if (getskilllv("MO_FINGEROFFENSIVE") > 0) {
-			// Champion com Zen / Invocador de Esferas:
-			// Se estiver sem nenhuma esfera (0), usa Zen (CH_SOULCOLLECT) ou Invocar Esferas (MO_CALLSPIRITS).
-			// Enquanto possuir pelo menos 1 esfera, dispara sucessivamente ate zerar (5 ataques se tinha 5 esferas).
+			// Heranca de 2nd T (Mestre/Champion): Zen + Disparo de Esferas
 			if (countspiritball() <= 0) {
 				if (getskilllv("CH_SOULCOLLECT") > 0 && Sp >= 20) {
 					unitskilluseid getcharid(3), "CH_SOULCOLLECT", getskilllv("CH_SOULCOLLECT"), getcharid(3), 0, 0, 0, 0;
@@ -1231,19 +1448,14 @@ OnStepTimer:
 				}
 			}
 		} else if (getskilllv("AL_HOLYLIGHT") > 0 && Sp >= 15 && getskilllv("MO_FINGEROFFENSIVE") <= 0) {
-			// Sacerdote usa Luz Divina enquanto nao possui Magnus Exorcismus (ou em alternancia)
 			unitskilluseid getcharid(3), "AL_HOLYLIGHT", getskilllv("AL_HOLYLIGHT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 550;
-		} else if (getskilllv("SR_TIGERCANNON") > 0 && Sp >= 40 && Hp >= 500 && (@AUTO_SKILL_ROT % 2 == 0)) {
-			unitskilluseid getcharid(3), "SR_TIGERCANNON", getskilllv("SR_TIGERCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 800;
 		} else if (getskilllv("MO_TRIPLEATTACK") > 0) {
-			// Passiva de combo ativa automaticamente
 			.@step_delay = 400;
 		}
 	}
-	// 6. MERCADOR E EVOLUCOES (Inclui Mercador T / Merchant High)
-	else if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || BaseJob == Job_Merchant || BaseJob == Job_Merchant_High) {
+	// 6. MERCADOR E EVOLUCOES (Inclui Mecanico, Bioquimico, Mestre-Ferreiro, Criador, etc.)
+	else if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || BaseJob == Job_Merchant || BaseJob == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Mechanic_T || Class == 4064 || Class == 4058 || Class == 4011 || Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == 4078 || Class == 4071 || Class == 4018 || BaseJob == Job_Blacksmith || BaseJob == Job_Whitesmith || BaseJob == Job_Mechanic || BaseJob == Job_Alchemist || BaseJob == Job_Creator || BaseJob == Job_Genetic) {
 		// Arremessar Pocao Branca Nvl 4 no Homunculo se HP < 50% (delay 5s)
 		if (getskilllv("AM_POTIONPITCHER") >= 4 && Sp >= 1 && countitem(504) > 0 && .@now >= @LAST_HOMUN_PITCHER_TICK + 5) {
 			.@hom_gid = gethominfo(7);
@@ -1262,7 +1474,6 @@ OnStepTimer:
 
 		if (getskilllv("AM_RESURRECTHOMUN") > 0 && Sp >= 74 && .@now >= @BUFF_HOMUN_RES + 5 &&
 		    gethominfo(0) > 0 && checkhomcall() == 0 && !unitexists(gethominfo(7))) {
-			// Ressuscita o homunculo se estiver morto durante o combate
 			@BUFF_HOMUN_RES = .@now;
 			unitskilluseid getcharid(3), "AM_RESURRECTHOMUN", getskilllv("AM_RESURRECTHOMUN"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 1200;
@@ -1273,13 +1484,15 @@ OnStepTimer:
 			unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 600;
 		} else if (getskilllv("CR_ACIDDEMONSTRATION") > 0 && Sp >= 30) {
+			// Heranca de 2nd T (Criador): Bomba Acida
 			unitskilluseid getcharid(3), "CR_ACIDDEMONSTRATION", getskilllv("CR_ACIDDEMONSTRATION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 800;
 		} else if (getskilllv("AM_ACIDTERROR") > 0 && Sp >= 15) {
-			// Alquimista usa Terror Acido continuamente a distancia
+			// Heranca de 2nd T (Alquimista): Terror Acido
 			unitskilluseid getcharid(3), "AM_ACIDTERROR", getskilllv("AM_ACIDTERROR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 650;
 		} else if (getskilllv("WS_CARTTERMINATION") > 0) {
+			// Heranca de 2nd T (Mestre-Ferreiro): Choque de Carrinho
 			if (!checkcart() && getskilllv("MC_PUSHCART") > 0) {
 				setcart;
 			}
@@ -1380,13 +1593,13 @@ OnGetCombatRange:
 	}
 	.@range = .@w_range;
 
-	// ESPADACHIM E EVOLUCOES (Inclui Espadachim T / Swordman High)
-	if (BaseClass == Job_Swordman || Class == Job_Swordman || Class == Job_Swordman_High || BaseJob == Job_Swordman || BaseJob == Job_Swordman_High) {
-		if (getskilllv("RK_DRAGONBREATH_WATER") >= 10 && Sp >= 30) {
+	// ESPADACHIM E EVOLUCOES (Inclui Cavaleiro Runico 4060, Guardiao Real 4073, Lorde 4008, Paladino 4015, etc.)
+	if (BaseClass == Job_Swordman || Class == Job_Swordman || Class == Job_Swordman_High || BaseJob == Job_Swordman || BaseJob == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight || Class == Job_Rune_Knight_T || Class == 4060 || Class == 4054 || Class == 4008 || Class == Job_Crusader || Class == Job_Paladin || Class == Job_Royal_Guard || Class == Job_Royal_Guard_T || Class == 4073 || Class == 4066 || Class == 4015 || BaseJob == Job_Knight || BaseJob == Job_Crusader || BaseJob == Job_Lord_Knight || BaseJob == Job_Paladin || BaseJob == Job_Rune_Knight || BaseJob == Job_Royal_Guard) {
+		if (getskilllv("RK_DRAGONBREATH_WATER") >= 10 && (checkriding() || checkdragon()) && Sp >= 30) {
 			.@range = 7;
 		} else if (getskilllv("RK_IGNITIONBREAK") > 0 || getskilllv("RK_WINDCUTTER") > 0) {
 			.@range = (.@w_range > 0 && .@w_range < 2 ? .@w_range : 2);
-		} else if (getskilllv("RK_DRAGONBREATH") > 0 && Sp >= 30) {
+		} else if (getskilllv("RK_DRAGONBREATH") > 0 && (checkriding() || checkdragon()) && Sp >= 30) {
 			.@range = 7;
 		} else if (getskilllv("RK_SONICWAVE") > 0 && Sp >= 35) {
 			.@range = 7;
@@ -1400,18 +1613,20 @@ OnGetCombatRange:
 			.@range = .@w_range;
 		}
 	}
-	// MAGO E EVOLUCOES (Inclui Mago T / Mage High)
-	else if (BaseClass == Job_Mage || Class == Job_Mage || Class == Job_Mage_High || BaseJob == Job_Mage || BaseJob == Job_Mage_High) {
-		if (Sp >= 12) {
-			.@range = 8;
+	// MAGO E EVOLUCOES (Inclui Arcano 4061, Feiticeiro 4074, Arquimago 4009, Professor 4017, etc.)
+	else if (BaseClass == Job_Mage || Class == Job_Mage || Class == Job_Mage_High || BaseJob == Job_Mage || BaseJob == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock || Class == Job_Warlock_T || Class == 4061 || Class == Job_Sage || Class == Job_Professor || Class == Job_Sorcerer || Class == Job_Sorcerer_T || Class == 4074 || Class == 4067 || Class == 4055 || Class == 4009 || Class == 4017 || BaseJob == Job_Wizard || BaseJob == Job_Sage || BaseJob == Job_High_Wizard || BaseJob == Job_Professor || BaseJob == Job_Warlock || BaseJob == Job_Sorcerer) {
+		if (getskilllv("WL_EARTHSTRAIN") > 0 && Sp >= 70) {
+			.@range = 6; // Abalo Sismico requer alcance maximo de 6 celulas
+		} else {
+			.@range = 8; // Magias de Arcano, Feiticeiro, Arquimago, Professor e Mago atacam a longa distancia
 		}
 	}
-	// ARQUEIRO E EVOLUCOES (Inclui Arqueiro T / Archer High)
-	else if (BaseClass == Job_Archer || Class == Job_Archer || Class == Job_Archer_High || BaseJob == Job_Archer || BaseJob == Job_Archer_High) {
+	// ARQUEIRO E EVOLUCOES (Inclui Sentinela 4062, Menestrel 4075, Musa/Cigana 4076, Atirador de Elite 4012, etc.)
+	else if (BaseClass == Job_Archer || Class == Job_Archer || Class == Job_Archer_High || BaseJob == Job_Archer || BaseJob == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger || Class == Job_Ranger_T || Class == 4062 || Class == 4056 || Class == 4012 || Class == Job_Bard || Class == Job_Clown || Class == Job_Minstrel || Class == Job_Minstrel_T || Class == 4075 || Class == 4068 || Class == 4019 || Class == Job_Dancer || Class == Job_Gypsy || Class == Job_Wanderer || Class == Job_Wanderer_T || Class == 4076 || Class == 4069 || Class == 4020 || BaseJob == Job_Hunter || BaseJob == Job_Sniper || BaseJob == Job_Ranger || BaseJob == Job_Bard || BaseJob == Job_Clown || BaseJob == Job_Minstrel || BaseJob == Job_Dancer || BaseJob == Job_Gypsy || BaseJob == Job_Wanderer) {
 		.@range = 8;
 	}
-	// GATUNO E EVOLUCOES (Inclui Gatuno T / Thief High)
-	else if (BaseClass == Job_Thief || Class == Job_Thief || Class == Job_Thief_High || BaseJob == Job_Thief || BaseJob == Job_Thief_High) {
+	// GATUNO E EVOLUCOES (Inclui Sicario 4065, Renegado 4079, Algoz 4013, Desordeiro 4021, etc.)
+	else if (BaseClass == Job_Thief || Class == Job_Thief || Class == Job_Thief_High || BaseJob == Job_Thief || BaseJob == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross || Class == Job_Guillotine_Cross_T || Class == 4065 || Class == 4058 || Class == 4013 || Class == Job_Rogue || Class == Job_Stalker || Class == Job_Shadow_Chaser || Class == Job_Shadow_Chaser_T || Class == 4079 || Class == 4072 || Class == 4021 || BaseJob == Job_Assassin || BaseJob == Job_Assassin_Cross || BaseJob == Job_Guillotine_Cross || BaseJob == Job_Rogue || BaseJob == Job_Stalker || BaseJob == Job_Shadow_Chaser) {
 		if (getskilllv("SC_TRIANGLESHOT") > 0 && Sp >= 24) {
 			.@range = 7;
 		} else if (getskilllv("ASC_BREAKER") > 0 && Sp >= (getskilllv("ASC_BREAKER") > 5 ? 30 : 20)) {
@@ -1420,14 +1635,16 @@ OnGetCombatRange:
 			.@range = .@w_range;
 		}
 	}
-	// ACOLITO E EVOLUCOES (Inclui Novico T / Acolyte High)
-	else if (BaseClass == Job_Acolyte || Class == Job_Acolyte || Class == Job_Acolyte_High || BaseJob == Job_Acolyte || BaseJob == Job_Acolyte_High) {
+	// ACOLITO E EVOLUCOES (Inclui Arcebispo 4063, Shura 4077, Sumo Sacerdote 4010, Mestre 4016, etc.)
+	else if (BaseClass == Job_Acolyte || Class == Job_Acolyte || Class == Job_Acolyte_High || BaseJob == Job_Acolyte || BaseJob == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop || Class == Job_Arch_Bishop_T || Class == 4063 || Class == 4057 || Class == 4010 || Class == Job_Monk || Class == Job_Champion || Class == Job_Sura || Class == Job_Sura_T || Class == 4077 || Class == 4070 || Class == 4016 || BaseJob == Job_Priest || BaseJob == Job_High_Priest || BaseJob == Job_Arch_Bishop || BaseJob == Job_Monk || BaseJob == Job_Champion || BaseJob == Job_Sura) {
 		if (getskilllv("AB_ADORAMUS") > 0 && Sp >= 40 && countitem(717) > 0) {
 			.@range = 8;
 		} else if (getskilllv("AB_JUDEX") > 0 && Sp >= 20) {
 			.@range = 8;
 		} else if (getskilllv("PR_MAGNUS") > 0 && Sp >= 40) {
 			.@range = 8; // Magnus Exorcismus ataca a 8 celulas de alcance
+		} else if (getskilllv("SR_KNUCKLEARROW") > 0 && Sp >= 15) {
+			.@range = 7; // Investida de Shura ataca a 7 celulas
 		} else if (getskilllv("MO_FINGEROFFENSIVE") > 0 && Sp >= 20) {
 			.@range = 8; // Disparo de Esferas Espirituais ataca a 8 celulas de distancia
 		} else if (getskilllv("AL_HOLYLIGHT") > 0 && Sp >= 15 && getskilllv("MO_FINGEROFFENSIVE") <= 0) {
@@ -1436,8 +1653,8 @@ OnGetCombatRange:
 			.@range = .@w_range;
 		}
 	}
-	// MERCADOR E EVOLUCOES (Inclui Mercador T / Merchant High)
-	else if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || BaseJob == Job_Merchant || BaseJob == Job_Merchant_High) {
+	// MERCADOR E EVOLUCOES (Inclui Mecanico 4064, Bioquimico 4078, Mestre-Ferreiro 4011, Criador 4018, etc.)
+	else if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || BaseJob == Job_Merchant || BaseJob == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Mechanic_T || Class == 4064 || Class == 4059 || Class == 4011 || Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == 4078 || Class == 4071 || Class == 4018 || BaseJob == Job_Blacksmith || BaseJob == Job_Whitesmith || BaseJob == Job_Mechanic || BaseJob == Job_Alchemist || BaseJob == Job_Creator || BaseJob == Job_Genetic) {
 		if ((getskilllv("NC_ARMSCANNON") > 0 || getskilllv("GN_CARTCANNON") > 0) && Sp >= 30) {
 			.@range = 7;
 		} else if ((getskilllv("AM_ACIDTERROR") > 0 || getskilllv("CR_ACIDDEMONSTRATION") > 0) && Sp >= 15) {
@@ -1498,7 +1715,7 @@ OnApplyBaseBuffs:
 	sc_start SC_MAGNIFICAT, 600000, 5;
 	sc_start SC_GLORIA, 600000, 5;
 	sc_start SC_IMPOSITIO, 600000, 5;
-	if (BaseClass == Job_Mage || Class == Job_Mage || Class == Job_Mage_High || BaseJob == Job_Mage || BaseJob == Job_Mage_High) {
+	if (BaseClass == Job_Mage || Class == Job_Mage || Class == Job_Mage_High || BaseJob == Job_Mage || BaseJob == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock || Class == Job_Warlock_T || Class == 4061 || Class == Job_Sage || Class == Job_Professor || Class == Job_Sorcerer || Class == Job_Sorcerer_T || Class == 4074) {
 		specialeffect2 EF_ENERGYCOAT;
 		sc_start SC_ENERGYCOAT, 600000, 1;
 	}
@@ -1624,8 +1841,8 @@ OnCheckSupportBuffs:
 			unitskilluseid getcharid(3), "WL_RECOGNIZEDSPELL", getskilllv("WL_RECOGNIZEDSPELL"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("WL_TELEKINESIS_INTENSE") > 0 && Sp >= 50 && !getstatus(SC_TELEKINESIS_INTENSE) && .@now >= @BUFF_WL_TELEKINESIS_INTENSE + 60) {
-			@BUFF_WL_TELEKINESIS_INTENSE = .@now;
+		if (getskilllv("WL_TELEKINESIS_INTENSE") > 0 && Sp >= (50 + getskilllv("WL_TELEKINESIS_INTENSE") * 50) && !getstatus(SC_TELEKINESIS_INTENSE) && .@now >= @CD_WL_TELEKINESIS) {
+			@CD_WL_TELEKINESIS = .@now + 3;
 			unitskilluseid getcharid(3), "WL_TELEKINESIS_INTENSE", getskilllv("WL_TELEKINESIS_INTENSE"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
@@ -1668,8 +1885,8 @@ OnCheckSupportBuffs:
 			unitskilluseid getcharid(3), "RA_FEARBREEZE", getskilllv("RA_FEARBREEZE"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("RA_UNLIMIT") > 0 && Sp >= 50 && !getstatus(SC_UNLIMIT) && .@now >= @BUFF_RA_UNLIMIT + 3) {
-			@BUFF_RA_UNLIMIT = .@now;
+		if (getskilllv("RA_UNLIMIT") > 0 && Sp >= (80 + getskilllv("RA_UNLIMIT") * 20) && !getstatus(SC_UNLIMIT) && .@now >= @CD_RA_UNLIMIT) {
+			@CD_RA_UNLIMIT = .@now + 5;
 			unitskilluseid getcharid(3), "RA_UNLIMIT", getskilllv("RA_UNLIMIT"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
