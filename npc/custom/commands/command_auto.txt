@@ -878,16 +878,14 @@ OnStepTimer:
 		}
 		// Cavaleiro Runico Fisico:
 		// 1. Prioridade: Impacto Flamejante (alcance seguro <= 3 celulas)
-		// 2. Cooldown de Impacto: Onda de Choque
-		// 3. Nem Impacto nem Onda disponivel: Vento Cortante (alcance seguro <= 2 celulas)
-		else if (getskilllv("RK_IGNITIONBREAK") > 0 && Sp >= 35 && .@dist <= 3 && .@now >= @CD_RK_IGNITIONBREAK) {
-			@CD_RK_IGNITIONBREAK = .@now + 2;
+		// 2. Onda de Choque
+		// 3. Vento Cortante (alcance seguro <= 2 celulas)
+		else if (getskilllv("RK_IGNITIONBREAK") > 0 && Sp >= 35 && .@dist <= 3) {
 			unitskilluseid getcharid(3), "RK_IGNITIONBREAK", getskilllv("RK_IGNITIONBREAK"), getcharid(3), 0, 0, 0, 0;
-			.@step_delay = 900;
-		} else if (getskilllv("RK_SONICWAVE") > 0 && Sp >= (30 + getskilllv("RK_SONICWAVE") * 3) && .@dist <= 8 && .@now >= @CD_RK_SONICWAVE && (.@now < @CD_RK_IGNITIONBREAK || .@dist > 3 || getskilllv("RK_IGNITIONBREAK") <= 0)) {
-			@CD_RK_SONICWAVE = .@now + 2;
+			.@step_delay = 500;
+		} else if (getskilllv("RK_SONICWAVE") > 0 && Sp >= (30 + getskilllv("RK_SONICWAVE") * 3) && .@dist <= 8) {
 			unitskilluseid getcharid(3), "RK_SONICWAVE", getskilllv("RK_SONICWAVE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 550;
+			.@step_delay = 500;
 		} else if (getskilllv("RK_WINDCUTTER") > 0 && Sp >= 20 && .@dist <= 2) {
 			unitskilluseid getcharid(3), "RK_WINDCUTTER", getskilllv("RK_WINDCUTTER"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 500;
@@ -952,47 +950,72 @@ OnStepTimer:
 		// Feiticeiro / Sorcerer / Professor / Sabio:
 		// ==============================================================
 		.@is_sorc_class = (Class == Job_Sorcerer || Class == Job_Sorcerer_T || Class == 4074 || Class == 4067 || Class == Job_Baby_Sorcerer || Class == Job_Elemental_Master || Class == Job_Elemental_Master_T || Class == Job_Baby_Elemental_Master || Class == 4255 || BaseJob == Job_Sorcerer);
-		.@has_sorc_skills = (getskilllv("SO_PSYCHIC_WAVE") > 0 || getskilllv("SO_DIAMONDDUST") > 0 || getskilllv("SO_EARTHGRAVE") > 0 || getskilllv("SO_VARETYR_SPEAR") > 0 || getskilllv("SO_CLOUD_KILL") > 0);
+		.@has_sorc_skills = (getskilllv("SO_PSYCHIC_WAVE") > 0 || getskilllv("SO_POISON_BUSTER") > 0 || getskilllv("SO_DIAMONDDUST") > 0 || getskilllv("SO_EARTHGRAVE") > 0 || getskilllv("SO_VARETYR_SPEAR") > 0 || getskilllv("SO_CLOUD_KILL") > 0);
 
 		// Se for Feiticeiro e JA tiver habilidades de 3a classe aprendidas:
 		if (.@is_sorc_class && .@has_sorc_skills) {
-			for (.@siter = 0; .@siter < 5; .@siter++) {
-				.@sidx = (@SO_ROT_STEP + .@siter) % 5;
-				if (.@sidx == 0 && getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 70 && .@now >= @CD_SO_PSYCHIC_WAVE) {
-					@CD_SO_PSYCHIC_WAVE = .@now + 5;
-					@SO_ROT_STEP = (.@sidx + 1) % 5;
-					unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my;
-					.@step_delay = 950;
-					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
-					end;
-				} else if (.@sidx == 1 && getskilllv("SO_DIAMONDDUST") > 0 && Sp >= 50 && .@now >= @CD_SO_DIAMONDDUST) {
-					@CD_SO_DIAMONDDUST = .@now + 5;
-					@SO_ROT_STEP = (.@sidx + 1) % 5;
-					unitskillusepos getcharid(3), "SO_DIAMONDDUST", getskilllv("SO_DIAMONDDUST"), .@mx, .@my;
-					.@step_delay = 850;
-					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
-					end;
-				} else if (.@sidx == 2 && getskilllv("SO_EARTHGRAVE") > 0 && Sp >= 62 && .@now >= @CD_SO_EARTHGRAVE) {
-					@CD_SO_EARTHGRAVE = .@now + 5;
-					@SO_ROT_STEP = (.@sidx + 1) % 5;
-					unitskillusepos getcharid(3), "SO_EARTHGRAVE", getskilllv("SO_EARTHGRAVE"), .@mx, .@my;
-					.@step_delay = 850;
-					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
-					end;
-				} else if (.@sidx == 3 && getskilllv("SO_VARETYR_SPEAR") > 0 && Sp >= 65 && .@now >= @CD_SO_VARETYR_SPEAR) {
-					@CD_SO_VARETYR_SPEAR = .@now + 3;
-					@SO_ROT_STEP = (.@sidx + 1) % 5;
-					unitskilluseid getcharid(3), "SO_VARETYR_SPEAR", getskilllv("SO_VARETYR_SPEAR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-					.@step_delay = 800;
-					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
-					end;
-				} else if (.@sidx == 4 && getskilllv("SO_CLOUD_KILL") > 0 && Sp >= 48 && .@now >= @CD_SO_CLOUD_KILL) {
-					@CD_SO_CLOUD_KILL = .@now + 5;
-					@SO_ROT_STEP = (.@sidx + 1) % 5;
-					unitskillusepos getcharid(3), "SO_CLOUD_KILL", getskilllv("SO_CLOUD_KILL"), .@mx, .@my;
-					.@step_delay = 850;
-					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
-					end;
+			// Prioridade 1: Se Onda Psiquica estiver lvl max (>= 5), spama sempre que disponivel (sem cooldown artificial e sem depender de outras)
+			if (getskilllv("SO_PSYCHIC_WAVE") >= 5 && Sp >= 70) {
+				unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my;
+				.@step_delay = 450;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			}
+			// Prioridade 2: Se Implosao Toxica estiver lvl max (>= 5) e Onda nao, spama Implosao sempre que disponivel
+			else if (getskilllv("SO_POISON_BUSTER") >= 5 && getskilllv("SO_PSYCHIC_WAVE") < 5 && Sp >= 70) {
+				unitskilluseid getcharid(3), "SO_POISON_BUSTER", getskilllv("SO_POISON_BUSTER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			}
+			// Prioridade 3: Se Po de Diamante estiver lvl max (>= 5) e Onda e Implosao nao, spama Po de Diamante sempre que disponivel
+			else if (getskilllv("SO_DIAMONDDUST") >= 5 && getskilllv("SO_PSYCHIC_WAVE") < 5 && getskilllv("SO_POISON_BUSTER") < 5 && Sp >= 50) {
+				unitskillusepos getcharid(3), "SO_DIAMONDDUST", getskilllv("SO_DIAMONDDUST"), .@mx, .@my;
+				.@step_delay = 450;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			}
+			// Se nenhuma das 3 estiver lvl max, spama em rotacao as habilidades que tiver aprendidas:
+			else {
+				for (.@siter = 0; .@siter < 6; .@siter++) {
+					.@sidx = (@SO_ROT_STEP + .@siter) % 6;
+					if (.@sidx == 0 && getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 70) {
+						@SO_ROT_STEP = (.@sidx + 1) % 6;
+						unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my;
+						.@step_delay = 450;
+						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+						end;
+					} else if (.@sidx == 1 && getskilllv("SO_POISON_BUSTER") > 0 && Sp >= 70) {
+						@SO_ROT_STEP = (.@sidx + 1) % 6;
+						unitskilluseid getcharid(3), "SO_POISON_BUSTER", getskilllv("SO_POISON_BUSTER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+						.@step_delay = 450;
+						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+						end;
+					} else if (.@sidx == 2 && getskilllv("SO_DIAMONDDUST") > 0 && Sp >= 50) {
+						@SO_ROT_STEP = (.@sidx + 1) % 6;
+						unitskillusepos getcharid(3), "SO_DIAMONDDUST", getskilllv("SO_DIAMONDDUST"), .@mx, .@my;
+						.@step_delay = 450;
+						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+						end;
+					} else if (.@sidx == 3 && getskilllv("SO_EARTHGRAVE") > 0 && Sp >= 62) {
+						@SO_ROT_STEP = (.@sidx + 1) % 6;
+						unitskillusepos getcharid(3), "SO_EARTHGRAVE", getskilllv("SO_EARTHGRAVE"), .@mx, .@my;
+						.@step_delay = 450;
+						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+						end;
+					} else if (.@sidx == 4 && getskilllv("SO_VARETYR_SPEAR") > 0 && Sp >= 65) {
+						@SO_ROT_STEP = (.@sidx + 1) % 6;
+						unitskilluseid getcharid(3), "SO_VARETYR_SPEAR", getskilllv("SO_VARETYR_SPEAR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+						.@step_delay = 450;
+						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+						end;
+					} else if (.@sidx == 5 && getskilllv("SO_CLOUD_KILL") > 0 && Sp >= 48) {
+						@SO_ROT_STEP = (.@sidx + 1) % 6;
+						unitskillusepos getcharid(3), "SO_CLOUD_KILL", getskilllv("SO_CLOUD_KILL"), .@mx, .@my;
+						.@step_delay = 450;
+						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+						end;
+					}
 				}
 			}
 		}
@@ -1255,11 +1278,10 @@ OnStepTimer:
 
 		// SE ESTIVER DE ARCO:
 		if (.@w_type == W_BOW) {
-			// Tempestade de Flechas (RA_ARROWSTORM): Prioridade sempre que disponivel (fora de cooldown)
-			if (getskilllv("RA_ARROWSTORM") > 0 && Sp >= (20 + getskilllv("RA_ARROWSTORM") * 4) && .@now >= @CD_RA_ARROWSTORM) {
-				@CD_RA_ARROWSTORM = .@now + 3;
+			// Tempestade de Flechas (RA_ARROWSTORM): Prioridade sempre que disponivel
+			if (getskilllv("RA_ARROWSTORM") > 0 && Sp >= (20 + getskilllv("RA_ARROWSTORM") * 4)) {
 				unitskilluseid getcharid(3), "RA_ARROWSTORM", getskilllv("RA_ARROWSTORM"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-				.@step_delay = 850;
+				.@step_delay = 500;
 				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 				end;
 			} else if (getskilllv("WM_SEVERE_RAINSTORM") > 0 && Sp >= 50 && (@AUTO_SKILL_ROT % 2 == 0)) {
@@ -1841,7 +1863,7 @@ OnCheckSupportBuffs:
 
 		// Lancas Duplas (PF_DOUBLECASTING):
 		// Sorcerer NAO usa mais lancas duplas se ja possuir habilidades de 3a classe aprendidas
-		.@has_sorc_3rd = (Class == Job_Sorcerer || Class == Job_Sorcerer_T || Class == 4074 || Class == 4067 || Class == Job_Baby_Sorcerer || Class == Job_Elemental_Master || Class == Job_Elemental_Master_T || Class == Job_Baby_Elemental_Master || Class == 4255 || BaseJob == Job_Sorcerer) && (getskilllv("SO_PSYCHIC_WAVE") > 0 || getskilllv("SO_DIAMONDDUST") > 0 || getskilllv("SO_EARTHGRAVE") > 0 || getskilllv("SO_VARETYR_SPEAR") > 0 || getskilllv("SO_CLOUD_KILL") > 0);
+		.@has_sorc_3rd = (Class == Job_Sorcerer || Class == Job_Sorcerer_T || Class == 4074 || Class == 4067 || Class == Job_Baby_Sorcerer || Class == Job_Elemental_Master || Class == Job_Elemental_Master_T || Class == Job_Baby_Elemental_Master || Class == 4255 || BaseJob == Job_Sorcerer) && (getskilllv("SO_PSYCHIC_WAVE") > 0 || getskilllv("SO_POISON_BUSTER") > 0 || getskilllv("SO_DIAMONDDUST") > 0 || getskilllv("SO_EARTHGRAVE") > 0 || getskilllv("SO_VARETYR_SPEAR") > 0 || getskilllv("SO_CLOUD_KILL") > 0);
 		if (!.@has_sorc_3rd && getskilllv("PF_DOUBLECASTING") > 0 && Sp >= (35 + getskilllv("PF_DOUBLECASTING") * 5) && !getstatus(SC_DOUBLECAST) && .@now >= @BUFF_PF_DOUBLECAST + 3) {
 			@BUFF_PF_DOUBLECAST = .@now;
 			unitskilluseid getcharid(3), "PF_DOUBLECASTING", getskilllv("PF_DOUBLECASTING"), getcharid(3), 0, 0, 0, 0;

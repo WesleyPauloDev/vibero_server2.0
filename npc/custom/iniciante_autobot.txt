@@ -64,9 +64,9 @@ OnInit:
 		$BOT_REST_Y = 166;
 	}
 	// Simulacao individual de instancias: cada bot elegivel entra em um
-	// intervalo diferente para evitar anuncios simultaneos (60 a 120 minutos).
-	$BOT_INSTANCE_MIN_MINUTES = 60;
-	$BOT_INSTANCE_MAX_MINUTES = 120;
+	// intervalo diferente para evitar anuncios simultaneos (120 a 240 minutos).
+	$BOT_INSTANCE_MIN_MINUTES = 120;
+	$BOT_INSTANCE_MAX_MINUTES = 240;
 	if ($BOT_INSTANCE_STAY_SECONDS <= 0) $BOT_INSTANCE_STAY_SECONDS = 300;
 	// Cacada automatica de MVP abandonado: verificacao leve, a cada 5 minutos.
 	if ($BOT_MVP_CHECK_SECONDS <= 0) $BOT_MVP_CHECK_SECONDS = 300;
@@ -230,7 +230,10 @@ OnStartSingleBot:
 	@BOT_STUCK_TICKS = 0;
 	@BOT_WAIT_END = 0;
 	@BOT_INSTANCE_ACTIVE = 0;
+	@BOT_INSTANCE_STATE = 0;
+	@BOT_INSTANCE_START_TICK = 0;
 	@BOT_INSTANCE_END_TICK = 0;
+	@BOT_INSTANCE_EXIT_TICK = 0;
 	@BOT_INSTANCE_NAME$ = "";
 	@BOT_INSTANCE_MAP$ = "";
 	@BOT_NEXT_INSTANCE_TICK = gettimetick(2) + rand($BOT_INSTANCE_MIN_MINUTES, $BOT_INSTANCE_MAX_MINUTES) * 60;
@@ -359,7 +362,10 @@ OnPauseSingleBot:
 	@BOT_STUCK_TICKS = 0;
 	@BOT_NEXT_EQUIP_CHECK = 0;
 	@BOT_INSTANCE_ACTIVE = 0;
+	@BOT_INSTANCE_STATE = 0;
+	@BOT_INSTANCE_START_TICK = 0;
 	@BOT_INSTANCE_END_TICK = 0;
+	@BOT_INSTANCE_EXIT_TICK = 0;
 	@BOT_INSTANCE_NAME$ = "";
 	@BOT_INSTANCE_MAP$ = "";
 	deltimer "PlayerBotAI::OnStepTimer";
@@ -1651,7 +1657,7 @@ OnShowGMStatus:
 		else .@st$ = "No Grupo Eden (Caminhando para a Saida 30,14)";
 	}
 	else if (.@b_stage == 3) .@st$ = "Em Campo de Cacada com Habilidades";
-	else if (.@b_stage == 4) .@st$ = "Simulando a instancia " + .@b_instance_name$ + " (parado por 5 minutos)";
+	else if (.@b_stage == 4) .@st$ = "Simulando a instancia " + .@b_instance_name$ + " (4 a 10 minutos)";
 
 	dispbottom "--------------------------------------------------", 0x00FFFF;
 	dispbottom "Personagem: " + .@t_name$ + " | Modo: " + (.@b_test ? "^00FF00[TESTE]^00FFFF" : "[NORMAL]") + " | Ativo: " + (.@b_active ? "SIM" : "NAO"), 0x00FFFF;
@@ -1735,9 +1741,13 @@ OnPCDieEvent:
 		recovery 1;
 		percentheal 100, 100;
 		stand; // Garante que levanta do chao apos reviver
-		// Durante a simulacao, permanece na instancia ate completar os 5 minutos.
-		if (@BOT_AI_STAGE == 4 && @BOT_INSTANCE_ACTIVE && @BOT_INSTANCE_MAP$ != "") {
-			warp @BOT_INSTANCE_MAP$, @BOT_INSTANCE_X, @BOT_INSTANCE_Y;
+		// Durante a simulacao, permanece na preparacao ou instancia ate completar o ciclo.
+		if (@BOT_AI_STAGE == 4 && @BOT_INSTANCE_ACTIVE) {
+			if (@BOT_INSTANCE_STATE == 0) {
+				warp "prontera", 169, 190;
+			} else if (@BOT_INSTANCE_MAP$ != "") {
+				warp @BOT_INSTANCE_MAP$, @BOT_INSTANCE_X, @BOT_INSTANCE_Y;
+			}
 			deltimer "PlayerBotAI::OnStepTimer";
 			addtimer 1500, "PlayerBotAI::OnStepTimer";
 			end;
@@ -3768,7 +3778,10 @@ OnTryBotInstance:
 	@BOT_INSTANCE_X = .@instance_x[.@instance_index];
 	@BOT_INSTANCE_Y = .@instance_y[.@instance_index];
 	@BOT_INSTANCE_ACTIVE = 1;
-	@BOT_INSTANCE_END_TICK = gettimetick(2) + $BOT_INSTANCE_STAY_SECONDS;
+	@BOT_INSTANCE_STATE = 0; // 0 = Aguardando 10 segundos em Prontera (169, 190) antes de iniciar
+	@BOT_INSTANCE_START_TICK = gettimetick(2) + 10;
+	@BOT_INSTANCE_END_TICK = 0;
+	@BOT_INSTANCE_EXIT_TICK = 0;
 	@BOT_AI_STAGE = 4;
 	BOT_SAVED_STAGE = 4;
 	@BOT_CURRENT_TARGET = 0;
@@ -3777,17 +3790,18 @@ OnTryBotInstance:
 	unitstopattack getcharid(3);
 	unitstopwalk getcharid(3), USW_FORCE_STOP;
 
-	.@party_name$ = callsub(OnGetBotPartyName);
-	announce "[Instancias] " + strcharinfo(0) + " criou " + @BOT_INSTANCE_NAME$ + " para o grupo " + .@party_name$ + ".", bc_all, 0xFF9900;
-
-	warp @BOT_INSTANCE_MAP$, @BOT_INSTANCE_X, @BOT_INSTANCE_Y;
+	// Vai para Prontera 169, 190 aguardar 10 segundos antes de iniciar
+	warp "prontera", 169, 190;
 	addtimer 1000, "PlayerBotAI::OnStepTimer";
 	return 1;
 
 OnHandleBotInstance:
 	if (!@BOT_INSTANCE_ACTIVE || @BOT_INSTANCE_NAME$ == "" || @BOT_INSTANCE_MAP$ == "") {
 		@BOT_INSTANCE_ACTIVE = 0;
+		@BOT_INSTANCE_STATE = 0;
+		@BOT_INSTANCE_START_TICK = 0;
 		@BOT_INSTANCE_END_TICK = 0;
+		@BOT_INSTANCE_EXIT_TICK = 0;
 		@BOT_INSTANCE_NAME$ = "";
 		@BOT_INSTANCE_MAP$ = "";
 		callsub OnScheduleNextInstance;
@@ -3804,33 +3818,78 @@ OnHandleBotInstance:
 	unitstopattack getcharid(3);
 	unitstopwalk getcharid(3), USW_FORCE_STOP;
 	stand;
-	if (gettimetick(2) < @BOT_INSTANCE_END_TICK) {
-		getmapxy(.@instance_current_map$, .@instance_current_x, .@instance_current_y, BL_PC);
-		if (.@instance_current_map$ != @BOT_INSTANCE_MAP$)
-			warp @BOT_INSTANCE_MAP$, @BOT_INSTANCE_X, @BOT_INSTANCE_Y;
+
+	// FASE 0: Aguarda 10 segundos em Prontera (169, 190) antes de iniciar e criar a instancia
+	if (@BOT_INSTANCE_STATE == 0) {
+		getmapxy(.@cur_map$, .@cur_x, .@cur_y, BL_PC);
+		if (.@cur_map$ != "prontera" || distance(.@cur_x, .@cur_y, 169, 190) > 3) {
+			warp "prontera", 169, 190;
+		}
+		if (gettimetick(2) < @BOT_INSTANCE_START_TICK) {
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
+			return;
+		}
+
+		// Passaram os 10 segundos: Inicia e cria a instancia
+		@BOT_INSTANCE_STATE = 1; // Dentro da instancia
+		@BOT_INSTANCE_DURATION = rand(4, 10) * 60; // Sorteia entre 4 e 10 minutos para encerrar
+		@BOT_INSTANCE_END_TICK = gettimetick(2) + @BOT_INSTANCE_DURATION;
+
+		.@party_name$ = callsub(OnGetBotPartyName);
+		announce "[Instancias] " + strcharinfo(0) + " criou " + @BOT_INSTANCE_NAME$ + " para o grupo " + .@party_name$ + ".", bc_all, 0xFF9900;
+
+		warp @BOT_INSTANCE_MAP$, @BOT_INSTANCE_X, @BOT_INSTANCE_Y;
 		addtimer 1000, "PlayerBotAI::OnStepTimer";
 		return;
 	}
 
-	.@party_name$ = callsub(OnGetBotPartyName);
-	announce "[Instancias] " + strcharinfo(0) + " concluiu " + @BOT_INSTANCE_NAME$ + " com o grupo " + .@party_name$ + ".", bc_all, 0xFF9900;
+	// FASE 1: Permanencia simulada dentro da instancia (sorteado entre 4 e 10 minutos)
+	if (@BOT_INSTANCE_STATE == 1) {
+		if (gettimetick(2) < @BOT_INSTANCE_END_TICK) {
+			getmapxy(.@instance_current_map$, .@instance_current_x, .@instance_current_y, BL_PC);
+			if (.@instance_current_map$ != @BOT_INSTANCE_MAP$)
+				warp @BOT_INSTANCE_MAP$, @BOT_INSTANCE_X, @BOT_INSTANCE_Y;
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
+			return;
+		}
 
-	@BOT_INSTANCE_ACTIVE = 0;
-	@BOT_INSTANCE_END_TICK = 0;
-	@BOT_INSTANCE_NAME$ = "";
-	@BOT_INSTANCE_MAP$ = "";
-	callsub OnScheduleNextInstance;
-	@BOT_AI_STAGE = 0;
-	BOT_SAVED_STAGE = 0;
-	@BOT_WP_INDEX = 99;
-	@BOT_WAIT_END = gettimetick(2) + 2;
-	@BOT_PRT_MAX = 0;
-	@BOT_PRT_COUNT = 0;
-	savepoint "prontera", 156, 191;
-	warp "prontera", 156, 191;
-	callsub OnQueuePronteraBuff;
-	addtimer 2000, "PlayerBotAI::OnStepTimer";
-	return;
+		// Conclusao da instancia: Anuncia e aguarda 5 segundos antes de teleportar para Prontera
+		.@party_name$ = callsub(OnGetBotPartyName);
+		announce "[Instancias] " + strcharinfo(0) + " concluiu " + @BOT_INSTANCE_NAME$ + " com o grupo " + .@party_name$ + ".", bc_all, 0xFF9900;
+
+		@BOT_INSTANCE_STATE = 2; // Aguardando 5 segundos pos-conclusao
+		@BOT_INSTANCE_EXIT_TICK = gettimetick(2) + 5;
+		addtimer 1000, "PlayerBotAI::OnStepTimer";
+		return;
+	}
+
+	// FASE 2: Aguardou os 5 segundos pos-conclusao -> Teleporta de volta para Prontera
+	if (@BOT_INSTANCE_STATE == 2) {
+		if (gettimetick(2) < @BOT_INSTANCE_EXIT_TICK) {
+			addtimer 1000, "PlayerBotAI::OnStepTimer";
+			return;
+		}
+
+		@BOT_INSTANCE_ACTIVE = 0;
+		@BOT_INSTANCE_STATE = 0;
+		@BOT_INSTANCE_START_TICK = 0;
+		@BOT_INSTANCE_END_TICK = 0;
+		@BOT_INSTANCE_EXIT_TICK = 0;
+		@BOT_INSTANCE_NAME$ = "";
+		@BOT_INSTANCE_MAP$ = "";
+		callsub OnScheduleNextInstance;
+		@BOT_AI_STAGE = 0;
+		BOT_SAVED_STAGE = 0;
+		@BOT_WP_INDEX = 99;
+		@BOT_WAIT_END = gettimetick(2) + 2;
+		@BOT_PRT_MAX = 0;
+		@BOT_PRT_COUNT = 0;
+		savepoint "prontera", 156, 191;
+		warp "prontera", 156, 191;
+		callsub OnQueuePronteraBuff;
+		addtimer 2000, "PlayerBotAI::OnStepTimer";
+		return;
+	}
 
 OnApplyBuffs:
 	if (!@BOT_AI_ACTIVE || @BOT_AI_STAGE != 3) return;
