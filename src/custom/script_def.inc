@@ -10,4 +10,4 @@
 
 BUILDIN_DEF(is_maxbaselv, ""),
 BUILDIN_DEF(is_maxjoblv, ""),
-BUILDIN_DEF(autostore_loot, "?"),
+BUILDIN_DEF(autostore_loot, "?*"),

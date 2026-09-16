@@ -70,11 +70,19 @@ BUILDIN_FUNC(autostore_loot)
 			protected_items.insert(restock_id);
 	}
 
-	// Protege itens ativos do @autopot
-	t_itemid autopot_hp = static_cast<t_itemid>(pc_readglobalreg(sd, add_str("@autopot_hp_ID")));
+	// Protege itens configurados no @autopot (le os registros persistentes do char)
+	t_itemid autopot_hp = static_cast<t_itemid>(pc_readglobalreg(sd, add_str("autopot_hp_id")));
 	if (autopot_hp > 0) protected_items.insert(autopot_hp);
-	t_itemid autopot_sp = static_cast<t_itemid>(pc_readglobalreg(sd, add_str("@autopot_sp_ID")));
+	t_itemid autopot_sp = static_cast<t_itemid>(pc_readglobalreg(sd, add_str("autopot_sp_id")));
 	if (autopot_sp > 0) protected_items.insert(autopot_sp);
+
+	// Protege itens extras passados como argumentos: autostore_loot(threshold, item1, item2, ...)
+	for (int32 arg = 3; script_hasdata(st, arg); ++arg) {
+		t_itemid extra_item = static_cast<t_itemid>(script_getnum(st, arg));
+		if (extra_item > 0) {
+			protected_items.insert(extra_item);
+		}
+	}
 
 	bool opened_by_us = false;
 	if (sd->state.storage_flag == 0) {
