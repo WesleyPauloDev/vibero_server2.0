@@ -575,7 +575,9 @@ OnStepTimer:
 		}
 
 		if (countitem(601) > 0) {
-			delitem 601, 1;
+			if (getgroupid() != 5 && getgmlevel() < 1 && getgroupid() < 5) {
+				delitem 601, 1;
+			}
 		} else if (getskilllv("AL_TELEPORT") > 0 && Sp >= 9) {
 			Sp -= 9;
 		}
@@ -730,7 +732,9 @@ OnStepTimer:
 					end;
 				}
 
-				delitem 601, 1;
+				if (getgroupid() != 5 && getgmlevel() < 1 && getgroupid() < 5) {
+					delitem 601, 1;
+				}
 				@AUTO_LAST_TX = 0;
 				@AUTO_LAST_TY = 0;
 				@AUTO_STUCK_TICKS = 0;
@@ -996,8 +1000,8 @@ OnStepTimer:
 		// Heranca de 2nd T (Professor / Sabio) para Feiticeiro (enquanto sem skills de 3a classe ou durante cooldown):
 		.@is_sage_tree = (.@is_sorc_class || Class == Job_Sage || Class == Job_Sage_T || Class == Job_Baby_Sage || Class == Job_Professor || Class == Job_Baby_Professor || Class == 4017 || Class == 16 || BaseJob == Job_Sage || BaseJob == Job_Professor || getskilllv("PF_DOUBLECASTING") > 0);
 		if (.@is_sage_tree) {
-			// Lancas Duplas (PF_DOUBLECASTING) - Apenas se usar lancas elementais
-			if (getskilllv("PF_DOUBLECASTING") > 0 && Sp >= 40 && !getstatus(SC_DOUBLECAST) && .@now >= @BUFF_PF_DOUBLECAST + 5 && (getskilllv("MG_FIREBOLT") > 0 || getskilllv("MG_COLDBOLT") > 0 || getskilllv("MG_LIGHTNINGBOLT") > 0)) {
+			// Lancas Duplas (PF_DOUBLECASTING) - Apenas se usar lancas elementais e NAO tiver habilidades de 3a classe
+			if (!.@has_sorc_skills && getskilllv("PF_DOUBLECASTING") > 0 && Sp >= 40 && !getstatus(SC_DOUBLECAST) && .@now >= @BUFF_PF_DOUBLECAST + 5 && (getskilllv("MG_FIREBOLT") > 0 || getskilllv("MG_COLDBOLT") > 0 || getskilllv("MG_LIGHTNINGBOLT") > 0)) {
 				@BUFF_PF_DOUBLECAST = .@now + 90;
 				unitskilluseid getcharid(3), "PF_DOUBLECASTING", getskilllv("PF_DOUBLECASTING"), getcharid(3), 0, 0, 0, 0;
 				.@step_delay = 1800;
@@ -1826,12 +1830,19 @@ OnCheckSupportBuffs:
 			unitskilluseid getcharid(3), "HW_MAGICPOWER", getskilllv("HW_MAGICPOWER"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("PF_MEMORIZE") > 0 && Sp >= 1 && !getstatus(SC_MEMORIZE) && .@now >= @BUFF_PF_MEMORIZE + 3) {
+		// Presciencia (PF_MEMORIZE):
+		// Para de usar se tiver reducao de conjuracao variavel de -100% ou (dex * 2 + int) >= 530
+		.@has_instant_varcast = ((readparam(bDex) * 2 + readparam(bInt) >= 530) || readparam(bVariableCastrate) <= -100 || readparam(bVariableCastrate) >= 100 || readparam(bCastrate) <= -100 || readparam(bCastrate) >= 100);
+		if (!.@has_instant_varcast && getskilllv("PF_MEMORIZE") > 0 && Sp >= 1 && !getstatus(SC_MEMORIZE) && .@now >= @BUFF_PF_MEMORIZE + 3) {
 			@BUFF_PF_MEMORIZE = .@now;
 			unitskilluseid getcharid(3), "PF_MEMORIZE", getskilllv("PF_MEMORIZE"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("PF_DOUBLECASTING") > 0 && Sp >= (35 + getskilllv("PF_DOUBLECASTING") * 5) && !getstatus(SC_DOUBLECAST) && .@now >= @BUFF_PF_DOUBLECAST + 3) {
+
+		// Lancas Duplas (PF_DOUBLECASTING):
+		// Sorcerer NAO usa mais lancas duplas se ja possuir habilidades de 3a classe aprendidas
+		.@has_sorc_3rd = (Class == Job_Sorcerer || Class == Job_Sorcerer_T || Class == 4074 || Class == 4067 || Class == Job_Baby_Sorcerer || Class == Job_Elemental_Master || Class == Job_Elemental_Master_T || Class == Job_Baby_Elemental_Master || Class == 4255 || BaseJob == Job_Sorcerer) && (getskilllv("SO_PSYCHIC_WAVE") > 0 || getskilllv("SO_DIAMONDDUST") > 0 || getskilllv("SO_EARTHGRAVE") > 0 || getskilllv("SO_VARETYR_SPEAR") > 0 || getskilllv("SO_CLOUD_KILL") > 0);
+		if (!.@has_sorc_3rd && getskilllv("PF_DOUBLECASTING") > 0 && Sp >= (35 + getskilllv("PF_DOUBLECASTING") * 5) && !getstatus(SC_DOUBLECAST) && .@now >= @BUFF_PF_DOUBLECAST + 3) {
 			@BUFF_PF_DOUBLECAST = .@now;
 			unitskilluseid getcharid(3), "PF_DOUBLECASTING", getskilllv("PF_DOUBLECASTING"), getcharid(3), 0, 0, 0, 0;
 			return 1;
