@@ -365,6 +365,8 @@ int32 battle_damage(struct block_list *src, struct block_list *target, int64 dam
 
 	if (src)
 		sd = BL_CAST(BL_PC, src);
+	if (sd)
+		pc_delinvincibletimer(sd);
 	map_freeblock_lock();
 	if (sd && battle_check_coma(*sd, *target, (e_battle_flag)attack_type))
 		dmg_change = status_damage(src, target, damage, 0, delay, 16, skill_id); // Coma attack

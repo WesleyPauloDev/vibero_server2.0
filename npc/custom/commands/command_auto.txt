@@ -98,6 +98,7 @@ OnAutoCommand:
 		dispbottom "Tempo Restante: " + .@rm_m + "m " + (.@rm_s < 10 ? "0" : "") + .@rm_s + "s", 0xFFFFFF;
 		dispbottom "Usar Ziegfried (7621): " + (#AutoUseZiegfried ? "^00FF00SIM^000000" : "^FF0000NAO^000000") + " (Possui: " + countitem(7621) + ")", 0xFFFFFF;
 		dispbottom "Modo de Foco: " + (#AutoFarmMode ? "^00FFFFFoco XP (Retorna na Cidade no Nivel Maximo)^000000" : "^FFFF00Farm Livre^000000"), 0xFFFFFF;
+		dispbottom "Enfrentar MVP: " + (#AutoFightMVP ? "^00FF00SIM (Caca MVP)^000000" : "^FFAA00NAO (Foge de MVP)^000000"), 0xFFFFFF;
 		dispbottom "==================================================", 0x00FFFF;
 		end;
 	}
@@ -220,12 +221,14 @@ OnOpenSetupMenu:
 	mes "Tempo Restante: ^008800" + .@rm_m + "m " + (.@rm_s < 10 ? "0" : "") + .@rm_s + "s^000000";
 	mes "Amuleto de Ziegfried: " + (#AutoUseZiegfried ? "^00AA00[ATIVADO]^000000" : "^FF0000[DESATIVADO]^000000") + " (" + countitem(7621) + " no inventario)";
 	mes "Modo de Foco: " + (#AutoFarmMode ? "^0000FF[Foco XP / Teleporta na Cidade]^000000" : "^FF8800[Farm Livre / Sem Teleporte]^000000");
+	mes "Enfrentar MVP: " + (#AutoFightMVP ? "^00AA00[SIM / Caca MVP]^000000" : "^FF8800[NAO / Foge de MVP]^000000");
 	mes "Armazenamento no Armazem: ^00AA00[Automatico ao atingir 70% peso]^000000";
 	next;
 
 	switch (select(
 		"Amuleto de Ziegfried (" + (#AutoUseZiegfried ? "^00AA00Ligado^000000" : "^FF0000Desligado^000000") + ")",
 		"Modo de Foco (" + (#AutoFarmMode ? "Foco XP" : "Farm Livre") + ")",
+		"Enfrentar MVP (" + (#AutoFightMVP ? "^00AA00Sim (Cacar)^000000" : "^FF0000Nao (Fugir)^000000") + ")",
 		"Consultar Tempo Restante Detalhado",
 		"Como Funciona o Sistema?",
 		"Fechar Menu"
@@ -245,6 +248,15 @@ OnOpenSetupMenu:
 		goto OnOpenSetupMenu;
 
 	case 3:
+		#AutoFightMVP = !#AutoFightMVP;
+		if (#AutoFightMVP) {
+			dispbottom "[Auto]: Enfrentar MVP: ^00FF00ATIVADO^000000 (O bot enfrentara e cacara MVPs encontrados no mapa sem teleportar).", 0x55FF55;
+		} else {
+			dispbottom "[Auto]: Enfrentar MVP: ^FFAA00DESATIVADO^000000 (O bot teleportara imediatamente ao encontrar MVPs para proteger o personagem).", 0xFFAA00;
+		}
+		goto OnOpenSetupMenu;
+
+	case 4:
 		mes "[^0000FFTempo Restante^000000]";
 		mes "Seu saldo atual de modo automatico:";
 		mes "^00AA00" + .@rm_m + " minuto(s) e " + .@rm_s + " segundo(s).^000000";
@@ -254,7 +266,7 @@ OnOpenSetupMenu:
 		next;
 		goto OnOpenSetupMenu;
 
-	case 4:
+	case 5:
 		mes "[^0000FFComo Funciona o Modo Auto^000000]";
 		mes "1. Va ate o mapa onde deseja cacar.";
 		mes "2. Configure seu ^008800@autopot^000000, ^008800@autoloot^000000 e ^008800@restock^000000.";
@@ -263,11 +275,12 @@ OnOpenSetupMenu:
 		mes "5. O bot usa @buff e Asa de Mosca (601) quando nao houver monstros por perto.";
 		mes "6. Ao ficar com peso >= 70%, seus drops coletados sao guardados no armazem.";
 		mes "7. Ao morrer, o tempo pausa. Se Ziegfried estiver ativo e voce tiver o item 7621, ele revive e continua.";
-		mes "8. Para desligar a qualquer momento, digite ^FF0000@manual^000000.";
+		mes "8. No @auto setup voce pode escolher se deseja enfrentar MVPs ou fugir deles para nao morrer.";
+		mes "9. Para desligar a qualquer momento, digite ^FF0000@manual^000000.";
 		next;
 		goto OnOpenSetupMenu;
 
-	case 5:
+	case 6:
 		close;
 	}
 	end;
@@ -537,53 +550,55 @@ OnStepTimer:
 	}
 
 	// ==================================================================
-	// Deteccao de MVP nas Proximidades -> Teleporta para nao morrer
+	// Deteccao de MVP nas Proximidades -> Teleporta para nao morrer (se nao configurado para enfrentar)
 	// ==================================================================
-	.@num_mobs_around = getareaunits(BL_MOB, @AUTO_MAP$, .@cx - 14, .@cy - 14, .@cx + 14, .@cy + 14, .@mob_check_list[0]);
-	.@found_mvp = 0;
-	for (.@k = 0; .@k < .@num_mobs_around; ++.@k) {
-		.@chk_mid = .@mob_check_list[.@k];
-		if (!unitexists(.@chk_mid)) continue;
-		getunitdata .@chk_mid, .@chk_data;
-		.@chk_class = .@chk_data[UMOB_CLASS];
-		if ((.@chk_data[UMOB_MODE] & MD_MVP) || getmonsterinfo(.@chk_class, MOB_MVPEXP) > 0 || (getmonsterinfo(.@chk_class, MOB_MODE) & MD_MVP)) {
-			.@found_mvp = .@chk_mid;
-			break;
+	if (!#AutoFightMVP) {
+		.@num_mobs_around = getareaunits(BL_MOB, @AUTO_MAP$, .@cx - 14, .@cy - 14, .@cx + 14, .@cy + 14, .@mob_check_list[0]);
+		.@found_mvp = 0;
+		for (.@k = 0; .@k < .@num_mobs_around; ++.@k) {
+			.@chk_mid = .@mob_check_list[.@k];
+			if (!unitexists(.@chk_mid)) continue;
+			getunitdata .@chk_mid, .@chk_data;
+			.@chk_class = .@chk_data[UMOB_CLASS];
+			if ((.@chk_data[UMOB_MODE] & MD_MVP) || getmonsterinfo(.@chk_class, MOB_MVPEXP) > 0 || (getmonsterinfo(.@chk_class, MOB_MODE) & MD_MVP)) {
+				.@found_mvp = .@chk_mid;
+				break;
+			}
 		}
-	}
 
-	if (.@found_mvp > 0) {
-		dispbottom "==================================================", 0xFFAA00;
-		dispbottom "[Auto]: MVP detectado nas proximidades! Teleportando para nao morrer...", 0xFFAA00;
-		dispbottom "==================================================", 0xFFAA00;
-		@AUTO_CURRENT_TARGET = 0;
-		@AUTO_TARGET_TRACK_ID = 0;
-		@AUTO_TARGET_LAST_HP = 0;
-		@AUTO_TARGET_PROGRESS_TICK = 0;
-		@AUTO_LAST_TX = 0;
-		@AUTO_LAST_TY = 0;
-		@AUTO_STUCK_TICKS = 0;
-		unitstopattack getcharid(3);
-		unitstopwalk getcharid(3), USW_FORCE_STOP;
+		if (.@found_mvp > 0) {
+			dispbottom "==================================================", 0xFFAA00;
+			dispbottom "[Auto]: MVP detectado nas proximidades! Teleportando para nao morrer...", 0xFFAA00;
+			dispbottom "==================================================", 0xFFAA00;
+			@AUTO_CURRENT_TARGET = 0;
+			@AUTO_TARGET_TRACK_ID = 0;
+			@AUTO_TARGET_LAST_HP = 0;
+			@AUTO_TARGET_PROGRESS_TICK = 0;
+			@AUTO_LAST_TX = 0;
+			@AUTO_LAST_TY = 0;
+			@AUTO_STUCK_TICKS = 0;
+			unitstopattack getcharid(3);
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
 
-		// Se o mapa bloquear teleporte, retorna a cidade para salvar o personagem
-		if (getmapflag(@AUTO_MAP$, MF_NOTELEPORT) || getmapflag(@AUTO_MAP$, MF_NOWARP)) {
-			dispbottom "[Auto]: Teleporte bloqueado neste mapa! Retornando para a cidade...", 0xFF5555;
-			callsub OnStopAuto, "";
-			warp "SavePoint", 0, 0;
+			// Se o mapa bloquear teleporte, retorna a cidade para salvar o personagem
+			if (getmapflag(@AUTO_MAP$, MF_NOTELEPORT) || getmapflag(@AUTO_MAP$, MF_NOWARP)) {
+				dispbottom "[Auto]: Teleporte bloqueado neste mapa! Retornando para a cidade...", 0xFF5555;
+				callsub OnStopAuto, "[Auto]: Modo automatico finalizado por seguranca ao encontrar MVP em mapa sem teleporte.";
+				warp "SavePoint", 0, 0;
+				end;
+			}
+
+			if (countitem(601) > 0) {
+				if (!getmapflag(@AUTO_MAP$, MF_NOTRADE)) {
+					delitem 601, 1;
+				}
+			} else if (getskilllv("AL_TELEPORT") > 0 && Sp >= 9) {
+				// Usa habilidade Teleporte se nao tiver item
+			}
+			warp @AUTO_MAP$, 0, 0;
+			addtimer 1000, "AutoPlayerSystem::OnStepTimer";
 			end;
 		}
-
-		if (countitem(601) > 0) {
-			if (getgroupid() != 5 && getgmlevel() < 1 && getgroupid() < 5) {
-				delitem 601, 1;
-			}
-		} else if (getskilllv("AL_TELEPORT") > 0 && Sp >= 9) {
-			Sp -= 9;
-		}
-		warp @AUTO_MAP$, 0, 0;
-		addtimer 1000, "AutoPlayerSystem::OnStepTimer";
-		end;
 	}
 
 	// 1. Validacao do Alvo Atual
@@ -663,6 +678,7 @@ OnStepTimer:
 		.@num_mobs = getareaunits(BL_MOB, @AUTO_MAP$, .@cx - 14, .@cy - 14, .@cx + 14, .@cy + 14, .@mob_list[0]);
 		.@best_dist = 999;
 		.@best_mob = 0;
+		.@best_is_mvp = 0;
 
 		for (.@i = 0; .@i < .@num_mobs; ++.@i) {
 			.@mid = .@mob_list[.@i];
@@ -680,10 +696,13 @@ OnStepTimer:
 
 			getunitdata .@mid, .@t_data;
 			.@m_class = .@t_data[UMOB_CLASS];
-			// Ignora plantas, cogumelos e MVPs
+			// Ignora plantas e cogumelos
 			if ((.@m_class >= 1078 && .@m_class <= 1085) || (.@m_class >= 1930 && .@m_class <= 1933) || .@m_class == 1064)
 				continue;
-			if ((.@t_data[UMOB_MODE] & MD_MVP) || getmonsterinfo(.@m_class, MOB_MVPEXP) > 0 || (getmonsterinfo(.@m_class, MOB_MODE) & MD_MVP))
+
+			.@is_mvp = ((.@t_data[UMOB_MODE] & MD_MVP) || getmonsterinfo(.@m_class, MOB_MVPEXP) > 0 || (getmonsterinfo(.@m_class, MOB_MODE) & MD_MVP));
+			// Se configurado para fugir de MVP, ignora MVP como alvo
+			if (.@is_mvp && !#AutoFightMVP)
 				continue;
 
 			// Anti-KS: nao ataca monstro que ja esta sofrendo dano de outro jogador
@@ -693,11 +712,20 @@ OnStepTimer:
 
 			if (.@t_data[UMOB_HP] > 0) {
 				.@d = distance(.@cx, .@cy, .@t_data[UMOB_X], .@t_data[UMOB_Y]);
-				if (.@d < .@best_dist) {
+				// Se for MVP e configurado para enfrentar, prioriza o MVP em relacao a monstros comuns
+				if (.@is_mvp && #AutoFightMVP && !.@best_is_mvp) {
 					.@best_dist = .@d;
 					.@best_mob = .@mid;
+					.@best_is_mvp = 1;
 					.@mx = .@t_data[UMOB_X];
 					.@my = .@t_data[UMOB_Y];
+				} else if ((.@is_mvp && .@best_is_mvp) || (!.@is_mvp && !.@best_is_mvp)) {
+					if (.@d < .@best_dist) {
+						.@best_dist = .@d;
+						.@best_mob = .@mid;
+						.@mx = .@t_data[UMOB_X];
+						.@my = .@t_data[UMOB_Y];
+					}
 				}
 			}
 		}
@@ -955,43 +983,43 @@ OnStepTimer:
 		// Se for Feiticeiro e JA tiver habilidades de 3a classe aprendidas:
 		if (.@is_sorc_class && .@has_sorc_skills) {
 			// Prioridade 1: Se Onda Psiquica estiver lvl max (>= 5), spama sempre que disponivel (sem cooldown artificial e sem depender de outras)
-			if (getskilllv("SO_PSYCHIC_WAVE") >= 5 && Sp >= 70) {
+			if (getskilllv("SO_PSYCHIC_WAVE") >= 5 && Sp >= 70 && .@now >= @CD_SO_PSYCHIC_WAVE) {
 				unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my;
 				.@step_delay = 450;
 				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 				end;
 			}
 			// Prioridade 2: Se Implosao Toxica estiver lvl max (>= 5) e Onda nao, spama Implosao sempre que disponivel
-			else if (getskilllv("SO_POISON_BUSTER") >= 5 && getskilllv("SO_PSYCHIC_WAVE") < 5 && Sp >= 70) {
+			else if (getskilllv("SO_POISON_BUSTER") >= 5 && (getskilllv("SO_PSYCHIC_WAVE") < 5 || .@now < @CD_SO_PSYCHIC_WAVE) && Sp >= 70 && .@now >= @CD_SO_POISON_BUSTER) {
 				unitskilluseid getcharid(3), "SO_POISON_BUSTER", getskilllv("SO_POISON_BUSTER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 				.@step_delay = 450;
 				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 				end;
 			}
 			// Prioridade 3: Se Po de Diamante estiver lvl max (>= 5) e Onda e Implosao nao, spama Po de Diamante sempre que disponivel
-			else if (getskilllv("SO_DIAMONDDUST") >= 5 && getskilllv("SO_PSYCHIC_WAVE") < 5 && getskilllv("SO_POISON_BUSTER") < 5 && Sp >= 50) {
+			else if (getskilllv("SO_DIAMONDDUST") >= 5 && (getskilllv("SO_PSYCHIC_WAVE") < 5 || .@now < @CD_SO_PSYCHIC_WAVE) && (getskilllv("SO_POISON_BUSTER") < 5 || .@now < @CD_SO_POISON_BUSTER) && Sp >= 50 && .@now >= @CD_SO_DIAMONDDUST) {
 				unitskillusepos getcharid(3), "SO_DIAMONDDUST", getskilllv("SO_DIAMONDDUST"), .@mx, .@my;
 				.@step_delay = 450;
 				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 				end;
 			}
-			// Se nenhuma das 3 estiver lvl max, spama em rotacao as habilidades que tiver aprendidas:
+			// Enquanto a prioritaria estiver em cooldown (ou nenhuma das 3 estiver lvl max), usa as outras habilidades aprendidas em rotacao:
 			else {
 				for (.@siter = 0; .@siter < 6; .@siter++) {
 					.@sidx = (@SO_ROT_STEP + .@siter) % 6;
-					if (.@sidx == 0 && getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 70) {
+					if (.@sidx == 0 && getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 70 && .@now >= @CD_SO_PSYCHIC_WAVE) {
 						@SO_ROT_STEP = (.@sidx + 1) % 6;
 						unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my;
 						.@step_delay = 450;
 						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 						end;
-					} else if (.@sidx == 1 && getskilllv("SO_POISON_BUSTER") > 0 && Sp >= 70) {
+					} else if (.@sidx == 1 && getskilllv("SO_POISON_BUSTER") > 0 && Sp >= 70 && .@now >= @CD_SO_POISON_BUSTER) {
 						@SO_ROT_STEP = (.@sidx + 1) % 6;
 						unitskilluseid getcharid(3), "SO_POISON_BUSTER", getskilllv("SO_POISON_BUSTER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 						.@step_delay = 450;
 						addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 						end;
-					} else if (.@sidx == 2 && getskilllv("SO_DIAMONDDUST") > 0 && Sp >= 50) {
+					} else if (.@sidx == 2 && getskilllv("SO_DIAMONDDUST") > 0 && Sp >= 50 && .@now >= @CD_SO_DIAMONDDUST) {
 						@SO_ROT_STEP = (.@sidx + 1) % 6;
 						unitskillusepos getcharid(3), "SO_DIAMONDDUST", getskilllv("SO_DIAMONDDUST"), .@mx, .@my;
 						.@step_delay = 450;
@@ -1498,25 +1526,79 @@ OnStepTimer:
 			}
 		}
 
+		// Garante carrinho aberto para Bioquimico / Ferreiro caso tenha a habilidade
+		if (!checkcart() && getskilllv("MC_PUSHCART") > 0) {
+			setcart;
+		}
+
+		// Aceleracao de Carrinho para Bioquimico
+		if (checkcart() && !getstatus(SC_GN_CARTBOOST) && getskilllv("GN_CARTBOOST") > 0 && Sp >= 20 && .@now >= @BUFF_GN_CARTBOOST + 2) {
+			@BUFF_GN_CARTBOOST = .@now;
+			unitskilluseid getcharid(3), "GN_CARTBOOST", getskilllv("GN_CARTBOOST"), getcharid(3), 0, 0, 0, 0;
+			.@step_delay = 450;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		}
+
 		if (getskilllv("AM_RESURRECTHOMUN") > 0 && Sp >= 74 && .@now >= @BUFF_HOMUN_RES + 5 &&
 		    gethominfo(0) > 0 && checkhomcall() == 0 && !unitexists(gethominfo(7))) {
 			@BUFF_HOMUN_RES = .@now;
 			unitskilluseid getcharid(3), "AM_RESURRECTHOMUN", getskilllv("AM_RESURRECTHOMUN"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 1200;
+		} else if (getskilllv("GN_CARTCANNON") >= 5 && Sp >= 40 && checkcart() && .@now >= @CD_GN_CARTCANNON) {
+			// Bioquimico - Prioridade 1: Canhao de Protons em nivel maximo (lvl 5)
+			unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 450;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		} else if (getskilllv("GN_CARTCANNON") < 5 && getskilllv("GN_SPORE_EXPLOSION") > 0 && Sp >= 35 && .@now >= @CD_GN_SPORE_EXPLOSION) {
+			// Bioquimico - Prioridade 2: Esporo Explosivo (se Canhao nao estiver no lvl max)
+			@CD_GN_SPORE_EXPLOSION = .@now + 5;
+			unitskilluseid getcharid(3), "GN_SPORE_EXPLOSION", getskilllv("GN_SPORE_EXPLOSION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 450;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		} else if (getskilllv("GN_CARTCANNON") < 5 && getskilllv("GN_SPORE_EXPLOSION") <= 0 && getskilllv("GN_CART_TORNADO") > 0 && Sp >= 30 && checkcart() && .@dist <= 2 && .@now >= @CD_GN_CART_TORNADO) {
+			// Bioquimico - Prioridade 3: Tornado de Carrinho (se Canhao e Esporo nao estiverem disponiveis/priorizados)
+			@CD_GN_CART_TORNADO = .@now + 2;
+			unitskilluseid getcharid(3), "GN_CART_TORNADO", getskilllv("GN_CART_TORNADO"), getcharid(3), 0, 0, 0, 0;
+			.@step_delay = 450;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		// ==========================================================
+		// HABILIDADES ALTERNATIVAS QUANDO A PRINCIPAL ESTIVER EM COOLDOWN:
+		// ==========================================================
+		} else if (getskilllv("GN_SPORE_EXPLOSION") > 0 && Sp >= 35 && .@now >= @CD_GN_SPORE_EXPLOSION) {
+			// Esporo Explosivo disponivel como alternativa
+			@CD_GN_SPORE_EXPLOSION = .@now + 5;
+			unitskilluseid getcharid(3), "GN_SPORE_EXPLOSION", getskilllv("GN_SPORE_EXPLOSION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 450;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		} else if (getskilllv("GN_CART_TORNADO") > 0 && Sp >= 30 && checkcart() && .@dist <= 2 && .@now >= @CD_GN_CART_TORNADO) {
+			// Tornado de Carrinho disponivel como alternativa (corpo-a-corpo)
+			@CD_GN_CART_TORNADO = .@now + 2;
+			unitskilluseid getcharid(3), "GN_CART_TORNADO", getskilllv("GN_CART_TORNADO"), getcharid(3), 0, 0, 0, 0;
+			.@step_delay = 450;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
 		} else if (getskilllv("NC_ARMSCANNON") > 0 && Sp >= 30) {
 			unitskilluseid getcharid(3), "NC_ARMSCANNON", getskilllv("NC_ARMSCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 700;
-		} else if (getskilllv("GN_CARTCANNON") > 0 && Sp >= 30) {
+		} else if (getskilllv("GN_CARTCANNON") > 0 && Sp >= 30 && checkcart() && .@now >= @CD_GN_CARTCANNON) {
+			// Canhao de Protons caso nao esteja no lvl max e sem Esporo/Tornado (ou enquanto estiverem em cd)
 			unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 600;
+			.@step_delay = 450;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
 		} else if (getskilllv("CR_ACIDDEMONSTRATION") > 0 && Sp >= 30) {
 			// Heranca de 2nd T (Criador): Bomba Acida
 			unitskilluseid getcharid(3), "CR_ACIDDEMONSTRATION", getskilllv("CR_ACIDDEMONSTRATION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 800;
+			.@step_delay = 700;
 		} else if (getskilllv("AM_ACIDTERROR") > 0 && Sp >= 15) {
 			// Heranca de 2nd T (Alquimista): Terror Acido
 			unitskilluseid getcharid(3), "AM_ACIDTERROR", getskilllv("AM_ACIDTERROR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 650;
+			.@step_delay = 600;
 		} else if (getskilllv("WS_CARTTERMINATION") > 0) {
 			// Heranca de 2nd T (Mestre-Ferreiro): Choque de Carrinho
 			if (!checkcart() && getskilllv("MC_PUSHCART") > 0) {
@@ -1681,10 +1763,21 @@ OnGetCombatRange:
 	}
 	// MERCADOR E EVOLUCOES (Inclui Mecanico 4064, Bioquimico 4078, Mestre-Ferreiro 4011, Criador 4018, etc.)
 	else if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || BaseJob == Job_Merchant || BaseJob == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Mechanic_T || Class == 4064 || Class == 4059 || Class == 4011 || Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == 4078 || Class == 4071 || Class == 4018 || BaseJob == Job_Blacksmith || BaseJob == Job_Whitesmith || BaseJob == Job_Mechanic || BaseJob == Job_Alchemist || BaseJob == Job_Creator || BaseJob == Job_Genetic) {
-		if ((getskilllv("NC_ARMSCANNON") > 0 || getskilllv("GN_CARTCANNON") > 0) && Sp >= 30) {
+		if (getskilllv("GN_CARTCANNON") >= 5 && Sp >= 40 && .@now >= @CD_GN_CARTCANNON) {
+			// Prioridade 1 Bioquimico: Canhao de Protons no nivel maximo
+			.@range = 7;
+		} else if (getskilllv("GN_CARTCANNON") < 5 && getskilllv("GN_SPORE_EXPLOSION") > 0 && Sp >= 35 && .@now >= @CD_GN_SPORE_EXPLOSION) {
+			// Prioridade 2 Bioquimico: Esporo Explosivo
+			.@range = 8;
+		} else if (getskilllv("GN_CART_TORNADO") > 0 && Sp >= 30 && .@now >= @CD_GN_CART_TORNADO && (getskilllv("GN_CARTCANNON") < 5 || .@now < @CD_GN_CARTCANNON) && (getskilllv("GN_SPORE_EXPLOSION") <= 0 || .@now < @CD_GN_SPORE_EXPLOSION)) {
+			// Prioridade 3 Bioquimico: Tornado de Carrinho (aproxima para alcance corpo-a-corpo)
+			.@range = (.@w_range > 0 && .@w_range < 2 ? .@w_range : 2);
+		} else if ((getskilllv("NC_ARMSCANNON") > 0 || getskilllv("GN_CARTCANNON") > 0) && Sp >= 30) {
 			.@range = 7;
 		} else if ((getskilllv("AM_ACIDTERROR") > 0 || getskilllv("CR_ACIDDEMONSTRATION") > 0) && Sp >= 15) {
 			.@range = 8; // Terror Acido e Bomba Acida atacam a 8 celulas de distancia
+		} else if (getskilllv("GN_SPORE_EXPLOSION") > 0 && Sp >= 35) {
+			.@range = 8;
 		} else {
 			.@range = .@w_range;
 		}

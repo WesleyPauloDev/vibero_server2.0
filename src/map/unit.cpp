@@ -840,6 +840,9 @@ int32 unit_walktoxy( struct block_list *bl, int16 x, int16 y, unsigned char flag
 {
 	nullpo_ret(bl);
 
+	if (bl->type == BL_PC)
+		pc_delinvincibletimer((map_session_data*)bl);
+
 	unit_data* ud = unit_bl2ud(bl);
 
 	if (ud == nullptr)
@@ -2164,6 +2167,8 @@ int32 unit_skilluse_id2(struct block_list *src, int32 target_id, uint16 skill_id
 		return 0; // Do not continue source is dead
 
 	sd = BL_CAST(BL_PC, src);
+	if (sd)
+		pc_delinvincibletimer(sd);
 	ud = unit_bl2ud(src);
 
 	if(ud == nullptr)
@@ -2699,6 +2704,8 @@ int32 unit_skilluse_pos2( struct block_list *src, int16 skill_x, int16 skill_y, 
 		return 0;
 
 	sd = BL_CAST(BL_PC, src);
+	if (sd)
+		pc_delinvincibletimer(sd);
 	ud = unit_bl2ud(src);
 
 	if(ud == nullptr)
@@ -2986,6 +2993,9 @@ int32 unit_attack(struct block_list *src,int32 target_id,int32 continuous)
 {
 	struct block_list *target;
 	int32 range;
+
+	if (src && src->type == BL_PC)
+		pc_delinvincibletimer((map_session_data*)src);
 
 	unit_data* ud = unit_bl2ud(src);
 	if (ud == nullptr)
