@@ -8,6 +8,14 @@ OnChallenge:
 	if (!@ab_tp_quiz_active)
 		end;
 
+	// Se o jogador estiver no modo automatico (@AUTO_ACTIVE), nao ativa o desafio
+	if (@AUTO_ACTIVE) {
+		@ab_tp_quiz_active = 0;
+		@ab_tp_quiz_timeout = 0;
+		@ab_tp_quiz_cooldown_until = gettimetick(2) + 86400;
+		end;
+	}
+
 	// Bloqueia movimento, ataque, skills, itens e demais acoes enquanto a
 	// interface permanece ativa; mantem o jogador imune aos monstros.
 	setpcblock PCBLOCK_ALL|PCBLOCK_IMMUNE, true;

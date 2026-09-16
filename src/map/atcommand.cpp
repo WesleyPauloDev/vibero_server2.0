@@ -2138,7 +2138,7 @@ ACMD_FUNC(go)
 	nullpo_retr(-1, sd);
 
 	if( strcmp(mapindex_id2name(sd->mapindex), "new_1-1") == 0 ) {
-		clif_displaymessage(fd, "Você não pode usar o comando @go neste mapa.");
+		clif_displaymessage(fd, "Voc no pode usar o comando @go neste mapa.");
 		return -1;
 	}
 
@@ -6936,6 +6936,7 @@ ACMD_FUNC(autoloot)
 	if (rate > 10000) rate = 10000;
 
 	sd->state.autoloot = rate;
+	pc_setglobalreg(sd, add_str("AutolootRate"), rate);
 	if (sd->state.autoloot) {
 		snprintf(atcmd_output, sizeof atcmd_output, msg_txt(sd,1187),((double)sd->state.autoloot)/100.); // Autolooting items with drop rates of %0.02f%% and below.
 		clif_displaymessage(fd, atcmd_output);
@@ -6997,6 +6998,7 @@ ACMD_FUNC(autolootitem)
 			return -1;
 		}
 		sd->state.autolootid[i] = item_data->nameid; // Autoloot Activated
+		pc_setglobalreg(sd, reference_uid(add_str("AlootidItem"), i), item_data->nameid);
 		sprintf(atcmd_output, msg_txt(sd,1192), item_data->name.c_str(), item_db.create_item_link( item_data ).c_str(), item_data->nameid); // Autolooting item: '%s'/'%s' {%u}
 		clif_displaymessage(fd, atcmd_output);
 		sd->state.autolooting = 1;
@@ -7008,6 +7010,7 @@ ACMD_FUNC(autolootitem)
 			return -1;
 		}
 		sd->state.autolootid[i] = 0;
+		pc_setglobalreg(sd, reference_uid(add_str("AlootidItem"), i), 0);
 		sprintf(atcmd_output, msg_txt(sd,1194), item_data->name.c_str(), item_db.create_item_link( item_data ).c_str(), item_data->nameid); // Removed item: '%s'/'%s' {%u} from your autolootitem list.
 		clif_displaymessage(fd, atcmd_output);
 		ARR_FIND(0, AUTOLOOTITEM_SIZE, i, sd->state.autolootid[i] != 0);
@@ -7043,6 +7046,9 @@ ACMD_FUNC(autolootitem)
 		break;
 	case 4:
 		memset(sd->state.autolootid, 0, sizeof(sd->state.autolootid));
+		for (i = 0; i < AUTOLOOTITEM_SIZE; i++) {
+			pc_setglobalreg(sd, reference_uid(add_str("AlootidItem"), i), 0);
+		}
 		clif_displaymessage(fd, msg_txt(sd,1200)); // Your autolootitem list has been reset.
 		sd->state.autolooting = 0;
 		break;
@@ -8295,7 +8301,7 @@ ACMD_FUNC(droprate)
 
     std::shared_ptr<s_mob_db> mob = mob_db.find(mob_id);
     if (!mob) {
-        clif_displaymessage(fd, "Monstro inválido.");
+        clif_displaymessage(fd, "Monstro invlido.");
         return -1;
     }
 
@@ -8314,7 +8320,7 @@ ACMD_FUNC(droprate)
         }
     }
 
-    clif_displaymessage(fd, "Este monstro não dropa esse item.");
+    clif_displaymessage(fd, "Este monstro no dropa esse item.");
     return 0;
 }
 
@@ -8941,7 +8947,7 @@ ACMD_FUNC(whodrops2)
 		}
 
 		if (!mvp_list.empty()) {
-			sprintf(atcmd_output, " - Monstros MVP com maiores chances de drop (somente máx %d são listados):", MAX_SEARCH);
+			sprintf(atcmd_output, " - Monstros MVP com maiores chances de drop (somente mx %d so listados):", MAX_SEARCH);
 			clif_displaymessage(fd, atcmd_output);
 
 			size_t max_j = (std::min)((size_t)MAX_SEARCH, mvp_list.size());
@@ -11792,9 +11798,9 @@ ACMD_FUNC(ws)
 
 	int item_id = atoi(message);
 
-	// Nova verificação — compatível com rAthena atual
+	// Nova verificao  compatvel com rAthena atual
 	if (!item_db.exists(item_id)) {
-		clif_displaymessage(fd, "Item ID inválido.");
+		clif_displaymessage(fd, "Item ID invlido.");
 		return false;
 	}
 
@@ -11836,7 +11842,7 @@ ACMD_FUNC(wb)
 	int item_id = atoi(message);
 
 	if (item_id <= 0) {
-		clif_displaymessage(fd, "Item ID inválido.");
+		clif_displaymessage(fd, "Item ID invlido.");
 		return false;
 	}
 

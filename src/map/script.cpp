@@ -20194,10 +20194,10 @@ BUILDIN_FUNC(getunitdata)
 
 			getunitdata_sub(UHOM_SIZE, hd->base_status.size);
 			getunitdata_sub(UHOM_LEVEL, hd->homunculus.level);
-			getunitdata_sub(UHOM_HP, hd->homunculus.hp);
-			getunitdata_sub(UHOM_MAXHP, hd->homunculus.max_hp);
-			getunitdata_sub(UHOM_SP, hd->homunculus.sp);
-			getunitdata_sub(UHOM_MAXSP, hd->homunculus.max_sp);
+			getunitdata_sub(UHOM_HP, hd->battle_status.hp);
+			getunitdata_sub(UHOM_MAXHP, hd->battle_status.max_hp);
+			getunitdata_sub(UHOM_SP, hd->battle_status.sp);
+			getunitdata_sub(UHOM_MAXSP, hd->battle_status.max_sp);
 			getunitdata_sub(UHOM_MASTERCID, hd->homunculus.char_id);
 			getunitdata_sub(UHOM_MAPID, hd->m);
 			getunitdata_sub(UHOM_X, hd->x);

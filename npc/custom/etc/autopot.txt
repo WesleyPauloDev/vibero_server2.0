@@ -94,6 +94,10 @@ L_Start:
 	}
 	setd "@autopot_" + .@type$ + "_ID",.@potion;
 	setd "@autopot_" + .@type$ + "_Active",true;
+	setd "autopot_" + .@type$ + "_id", .@potion;
+	setd "autopot_" + .@type$ + "_min", getd("@autopot_" + .@type$ + "_Min");
+	setd "autopot_" + .@type$ + "_active", 1;
+	autopot_delay = @autopot_delay;
 	addtimer @autopot_delay,strnpcinfo(3) + "::OnStart";
 	message strcharinfo(0), "Auto-Potion " + strtoupper(.@type$) + " enabled.";
 	callsub L_Info;
@@ -118,17 +122,21 @@ OnCommand:
 				message strcharinfo(0), "Auto-Potion " + strtoupper(.@command$[0]) + " is already on.";
 				end;
 			}
-			if(!getd("@autopot_" + .@command$[0] + "_ID")){
+			.@saved_id = (getd("@autopot_" + .@command$[0] + "_ID") ? getd("@autopot_" + .@command$[0] + "_ID") : getd("autopot_" + .@command$[0] + "_id"));
+			if(!.@saved_id){
 				dispbottom "You need to set a " + strtoupper(.@command$[0]) + " Potion to be used.";
 				callsub L_Help;
 				end;
 			}
-			callsub L_Start,.@command$[0],getd("@autopot_" + .@command$[0] + "_ID");
+			.@saved_min = (getd("@autopot_" + .@command$[0] + "_Min") ? getd("@autopot_" + .@command$[0] + "_Min") : (getd("autopot_" + .@command$[0] + "_min") ? getd("autopot_" + .@command$[0] + "_min") : 90));
+			.@saved_delay = (@autopot_delay ? @autopot_delay : (autopot_delay ? autopot_delay : .MinDelay));
+			callsub L_Start, .@command$[0], .@saved_id, .@saved_min, .@saved_delay;
 			end;
 		}
 		if(.@command$[1] == "off"){
 			message strcharinfo(0), "Auto-Potion " + strtoupper(.@command$[0]) + " disabled.";
 			setd "@autopot_" + .@command$[0] + "_Active",false;
+			setd "autopot_" + .@command$[0] + "_active", 0;
 			if(!@autopot_hp_Active && !@autopot_sp_Active)
 				deltimer strnpcinfo(3) + "::OnStart";
 			end;
@@ -271,4 +279,26 @@ OnStart:
 	if(@autopot_hp_Active || @autopot_sp_Active)
 		addtimer @autopot_delay,strnpcinfo(3) + "::OnStart";
 end;
+
+OnPCLoginEvent:
+	if (autopot_hp_active || autopot_sp_active) {
+		if (autopot_hp_active && autopot_hp_id > 0) {
+			@autopot_hp_ID = autopot_hp_id;
+			@autopot_hp_Min = (autopot_hp_min > 0 ? autopot_hp_min : 90);
+			@autopot_hp_Active = true;
+		}
+		if (autopot_sp_active && autopot_sp_id > 0) {
+			@autopot_sp_ID = autopot_sp_id;
+			@autopot_sp_Min = (autopot_sp_min > 0 ? autopot_sp_min : 90);
+			@autopot_sp_Active = true;
+		}
+		@autopot_delay = (autopot_delay >= .MinDelay && autopot_delay <= .MaxDelay ? autopot_delay : .MinDelay);
+
+		if (@autopot_hp_Active || @autopot_sp_Active) {
+			deltimer strnpcinfo(3) + "::OnStart";
+			addtimer @autopot_delay, strnpcinfo(3) + "::OnStart";
+			dispbottom "[Auto-Pot]: Ativado automaticamente para este personagem.", 0x00FF00;
+		}
+	}
+	end;
 }

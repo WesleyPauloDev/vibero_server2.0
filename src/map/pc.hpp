@@ -707,8 +707,8 @@ public:
 	// zeroed vars end here.
 	
 
-	int reborn_drop; // ? bônus de drop permanente, não será zerado
-	int reborn_exp;   // bônus de experiência (%), pode ser negativo
+	int reborn_drop; // ? bnus de drop permanente, no ser zerado
+	int reborn_exp;   // bnus de experincia (%), pode ser negativo
 	int bonus_hp;
 	int bonus_sp;
 	int bonus_allstats;
@@ -1685,6 +1685,7 @@ int64 pc_readreg2(map_session_data *sd, const char *reg);
 
 uint16 pc_get_storage2_capacity(map_session_data *sd);
 void pc_update_storage2_capacity(map_session_data *sd);
+void pc_restock_check_all(map_session_data *sd);
 bool pc_expand_storage2(map_session_data *sd, uint16 amount);
 
 bool pc_addeventtimer(map_session_data *sd,int32 tick,const char *name);

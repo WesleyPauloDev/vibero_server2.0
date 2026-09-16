@@ -146,6 +146,7 @@ int32 storage_storageopen(map_session_data *sd)
 	storage_sortitem(sd->storage.u.items_storage, ARRAYLENGTH(sd->storage.u.items_storage));
 	clif_storagelist(sd, sd->storage.u.items_storage, ARRAYLENGTH(sd->storage.u.items_storage), storage_getName(0));
 	clif_updatestorageamount(*sd, sd->storage.amount, sd->storage.max_amount);
+	pc_restock_check_all(sd);
 
 	return 0;
 }

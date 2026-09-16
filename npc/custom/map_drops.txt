@@ -97,18 +97,41 @@ function	script	Bio5HardCardMapDrop	{
 	return;
 }
 
-// Um unico evento distribui as mortes para os sistemas customizados.
-// Assim eles ocupam apenas uma vaga na fila de eventos do jogador.
+// Um unico evento distribui as mortes para os sistemas customizados de forma otimizada.
+// Assim eles ocupam apenas uma vaga na fila de eventos do jogador e evitam sobrecarga.
 -	script	GlobalKillDispatcher	-1,{
 OnNPCKillEvent:
-	callfunc("F_ContadorEdenKill", killedrid);
-	callfunc("F_BattlePassSync");
-	callfunc("BossniaMapDrop");
-	callfunc("FendaMapDrop");
-	callfunc("F_ContadorPoringKill", killedrid);
-	callfunc("F_MapCustomDropsKill", killedrid);
-	callfunc("F_MVP_PointsRegister", killedrid);
-	callfunc("F_MVP_KillsRegister", killedrid);
+	.@map$ = strcharinfo(3);
+
+	// 1. Missao do Eden (apenas se ativa)
+	if (eden_missao_ativa)
+		callfunc("F_ContadorEdenKill", killedrid);
+
+	// 2. Drops da Cheffenia (apenas nos mapas da Cheffenia)
+	if (.@map$ == "bossnia_01" || .@map$ == "bossnia_02" || .@map$ == "bossnia_03" || .@map$ == "bossnia_04")
+		callfunc("BossniaMapDrop");
+
+	// 3. Drop da Fenda (apenas monstro Errante da Fenda)
+	if (killedrid == 31900)
+		callfunc("FendaMapDrop");
+
+	// 4. Quest do Poring (apenas se ativa e o monstro for Poring)
+	if (quest_poring_started == 1 && killedrid == 1002)
+		callfunc("F_ContadorPoringKill", killedrid);
+
+	// 5. Mapa Intermediario (apenas inter01)
+	if (.@map$ == "inter01")
+		callfunc("F_MapCustomDropsKill", killedrid);
+
+	// 6. Drops Customizados da Instancia Chaotic Snake Nest (apenas se em instancia)
+	if (instance_id() > 0)
+		callfunc("F_CSN_CustomDrops");
+
+	// 7. Registro de MVP (apenas se for de fato um MVP com exp MVP)
+	if (getmonsterinfo(killedrid, MOB_MVPEXP) > 0) {
+		callfunc("F_MVP_PointsRegister", killedrid);
+		callfunc("F_MVP_KillsRegister", killedrid);
+	}
 	end;
 }
 

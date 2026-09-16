@@ -2461,6 +2461,42 @@ void pc_reg_received(map_session_data *sd)
 	}
 	sd->roulette.prizeIdx = -1;
 
+	// Autoloot persistence
+	sd->state.autoloot = static_cast<int32>(pc_readglobalreg(sd, add_str("AutolootRate")));
+	if (sd->state.autoloot > 0) {
+		char al_buf[CHAT_SIZE_MAX];
+		snprintf(al_buf, sizeof(al_buf), "[AutoLoot]: Ativo automaticamente (taxa: %0.2f%%).", ((double)sd->state.autoloot) / 100.);
+		clif_displaymessage(sd->fd, al_buf);
+	}
+
+	// Alootid persistence
+	sd->state.autolooting = 0;
+	int32 alootid_cnt = 0;
+	for (i = 0; i < AUTOLOOTITEM_SIZE; i++) {
+		sd->state.autolootid[i] = static_cast<t_itemid>(pc_readglobalreg(sd, reference_uid(add_str("AlootidItem"), i)));
+		if (sd->state.autolootid[i] > 0) {
+			sd->state.autolooting = 1;
+			alootid_cnt++;
+		}
+	}
+	if (alootid_cnt > 0) {
+		char ali_buf[CHAT_SIZE_MAX];
+		snprintf(ali_buf, sizeof(ali_buf), "[Alootid]: Ativo automaticamente com %d item(ns) na lista.", alootid_cnt);
+		clif_displaymessage(sd->fd, ali_buf);
+	}
+
+	// Restock status notice on login
+	int32 restock_cnt = 0;
+	for (i = 0; i < RESTOCK_MAX_ITEMS; i++) {
+		if (static_cast<t_itemid>(pc_readglobalreg(sd, reference_uid(add_str(RESTOCK_ITEM_VAR), i))) > 0)
+			restock_cnt++;
+	}
+	if (restock_cnt > 0) {
+		char res_buf[CHAT_SIZE_MAX];
+		snprintf(res_buf, sizeof(res_buf), "[Restock]: Ativo com %d item(ns) configurado(s).", restock_cnt);
+		clif_displaymessage(sd->fd, res_buf);
+	}
+
 	//SG map and mob read [Komurka]
 	for(i=0;i<MAX_PC_FEELHATE;i++) { //for now - someone need to make reading from txt/sql
 		uint16 j;
@@ -7126,7 +7162,7 @@ static void pc_antibot_teleport_check(map_session_data& sd, clr_type clrtype, bo
 	if (!battle_config.antibot_teleport_quiz_enable || battle_config.antibot_teleport_quiz_count <= 0)
 		return;
 
-	if (clrtype != CLR_TELEPORT || changed_map || sd.state.autotrade)
+	if (clrtype != CLR_TELEPORT || changed_map || sd.state.autotrade || pc_readreg(&sd, add_str("@AUTO_ACTIVE")) != 0)
 		return;
 
 	if (pc_readreg(&sd, add_str("@ab_tp_quiz_active")) != 0)
@@ -16706,4 +16742,86 @@ void do_init_pc(void) {
 	ers_chunk_size(pc_sc_display_ers, 150);
 	ers_chunk_size(num_reg_ers, 300);
 	ers_chunk_size(str_reg_ers, 50);
+}
+
+/**
+ * Automatically restocks all items configured via @restock from personal storage into inventory.
+ * Enforces weight <= 90% and inventory slots.
+ */
+void pc_restock_check_all(map_session_data* sd)
+{
+	nullpo_retv(sd);
+
+	if (!sd->vars_ok || !sd->state.storage_flag)
+		return;
+
+	for (uint32 idx = 0; idx < RESTOCK_MAX_ITEMS; ++idx) {
+		const t_itemid nameid = static_cast<t_itemid>(pc_readglobalreg(sd, reference_uid(add_str(RESTOCK_ITEM_VAR), idx)));
+		const int32 configured_amount = static_cast<int32>(pc_readglobalreg(sd, reference_uid(add_str(RESTOCK_AMOUNT_VAR), idx)));
+		if (nameid == 0 || configured_amount < RESTOCK_MIN_AMOUNT || configured_amount > MAX_AMOUNT)
+			continue;
+
+		std::shared_ptr<item_data> data = item_db.find(nameid);
+		if (data == nullptr)
+			continue;
+
+		int32 current_inv = 0;
+		for (int32 inv_i = 0; inv_i < MAX_INVENTORY; ++inv_i) {
+			if (sd->inventory.u.items_inventory[inv_i].nameid == nameid)
+				current_inv += sd->inventory.u.items_inventory[inv_i].amount;
+		}
+
+		int32 needed = configured_amount - current_inv;
+		if (needed <= 0)
+			continue;
+
+		if (data->weight > 0) {
+			const uint64 max_allowed = static_cast<uint64>(sd->max_weight) * 90 / 100;
+			if (max_allowed > static_cast<uint64>(sd->weight)) {
+				const int32 allowed_units = static_cast<int32>((max_allowed - static_cast<uint64>(sd->weight)) / data->weight);
+				needed = min(needed, allowed_units);
+			} else {
+				needed = 0;
+			}
+		}
+		if (needed <= 0)
+			continue;
+
+		if (pc_inventoryblank(sd) == 0 && current_inv == 0)
+			continue;
+
+		int32 storage_index = -1;
+		int32 available = 0;
+		for (int32 s_i = 0; s_i < sd->storage.max_amount; ++s_i) {
+			if (sd->storage.u.items_storage[s_i].nameid == nameid) {
+				if (storage_index < 0)
+					storage_index = s_i;
+				available += sd->storage.u.items_storage[s_i].amount;
+			}
+		}
+
+		if (storage_index < 0 || available <= 0)
+			continue;
+
+		const int32 transfer_amount = min(needed, available);
+		item restocked_item = sd->storage.u.items_storage[storage_index];
+		const e_additem_result result = pc_additem(sd, &restocked_item, transfer_amount, LOG_TYPE_STORAGE);
+		if (result != ADDITEM_SUCCESS)
+			continue;
+
+		int32 remaining = transfer_amount;
+		for (int32 s_i = storage_index; s_i < sd->storage.max_amount && remaining > 0; ++s_i) {
+			item& stored_item = sd->storage.u.items_storage[s_i];
+			if (stored_item.nameid != nameid)
+				continue;
+
+			const int32 withdrawn = min(remaining, static_cast<int32>(stored_item.amount));
+			storage_delitem(sd, &sd->storage, s_i, withdrawn);
+			remaining -= withdrawn;
+		}
+
+		char output[CHAT_SIZE_MAX];
+		snprintf(output, sizeof(output), "[Restock]: %d unidade(s) de %s retiradas do armazem.", transfer_amount, data->name.c_str());
+		clif_displaymessage(sd->fd, output);
+	}
 }

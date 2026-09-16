@@ -16,7 +16,7 @@ OnStartInstance:
 		200,
 		"Ninho da Serpente Confusa"
 	);
-	end;
+	return;
 }
 -	script	dummy_csn	-1,{ end; }
 
@@ -1636,14 +1636,13 @@ end;
 // 1001032: EP19_N_P_Crystal (Neutralized Magical Crystal)
 // 1001249: EP20_D_P_Crystal (Pure Magical Crystal)
 // =========================================================================
--	script	#csn_custom_drops	-1,{
-OnNPCKillEvent:
+function	script	F_CSN_CustomDrops	{
 	if (instance_id() <= 0)
-		end;
+		return;
 
 	.@map$ = strcharinfo(3);
 	if (.@map$ != instance_mapname("1@jorchs"))
-		end;
+		return;
 
 	// Chaotic Snake Nest monsters:
 	// 21534: Modified Superior Rgan
@@ -1652,7 +1651,7 @@ OnNPCKillEvent:
 	// 21590: Furious Rgan
 	// 2529: Faceworm Queen (Boss)
 	if (killedrid != 21534 && killedrid != 21535 && killedrid != 21536 && killedrid != 21590 && killedrid != 2529)
-		end;
+		return;
 
 	getmapxy(.@m$, .@x, .@y, BL_PC);
 
