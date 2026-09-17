@@ -1427,3 +1427,37 @@ Body:
       }
       itemskill "AL_TELEPORT", 1;
 
+  # Goma de Mascar (12210) e Chicle de Bola (12412): Tempo de drop cumulativo (+30m por uso)
+  - Id: 12210
+    Delay:
+      Duration: 0
+    Script: |
+      .@time = getstatus(SC_ITEMBOOST, 5);
+      .@cur_rate = getstatus(SC_ITEMBOOST, 1);
+      .@rate = (.@cur_rate > 100 ? .@cur_rate : 100);
+      if (.@time > 0) {
+        .@new_time = .@time + 1800000;
+        sc_start SC_ITEMBOOST, .@new_time, .@rate;
+      } else {
+        .@new_time = 1800000;
+        sc_start SC_ITEMBOOST, 1800000, .@rate;
+      }
+      .@mins = .@new_time / 60000;
+      .@secs = (.@new_time % 60000) / 1000;
+      dispbottom "[Goma de Mascar]: +30 minutos adicionados! Tempo total: " + .@mins + "m " + (.@secs < 10 ? "0" : "") + .@secs + "s.", 0x55FF55;
+
+  - Id: 12412
+    Script: |
+      .@time = getstatus(SC_ITEMBOOST, 5);
+      .@rate = 200;
+      if (.@time > 0) {
+        .@new_time = .@time + 1800000;
+        sc_start SC_ITEMBOOST, .@new_time, .@rate;
+      } else {
+        .@new_time = 1800000;
+        sc_start SC_ITEMBOOST, 1800000, .@rate;
+      }
+      .@mins = .@new_time / 60000;
+      .@secs = (.@new_time % 60000) / 1000;
+      dispbottom "[Chicle de Bola]: +30 minutos adicionados! Tempo total: " + .@mins + "m " + (.@secs < 10 ? "0" : "") + .@secs + "s.", 0x55FF55;
+

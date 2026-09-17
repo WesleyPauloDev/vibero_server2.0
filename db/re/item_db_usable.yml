@@ -7112,14 +7112,23 @@ Body:
     Type: Usable
     Buy: 2
     Weight: 10
-    Delay:
-      Duration: 60000
-      Status: Reuse_Limit_D
     Trade:
       NoDrop: true
       NoSell: true
     Script: |
-      sc_start SC_ITEMBOOST,1800000,100;
+      .@time = getstatus(SC_ITEMBOOST, 5);
+      .@cur_rate = getstatus(SC_ITEMBOOST, 1);
+      .@rate = (.@cur_rate > 100 ? .@cur_rate : 100);
+      if (.@time > 0) {
+        .@new_time = .@time + 1800000;
+        sc_start SC_ITEMBOOST, .@new_time, .@rate;
+      } else {
+        .@new_time = 1800000;
+        sc_start SC_ITEMBOOST, 1800000, .@rate;
+      }
+      .@mins = .@new_time / 60000;
+      .@secs = (.@new_time % 60000) / 1000;
+      dispbottom "[Goma de Mascar]: +30 minutos adicionados! Tempo total: " + .@mins + "m " + (.@secs < 10 ? "0" : "") + .@secs + "s.", 0x55FF55;
   - Id: 12211
     AegisName: Kafra_Card
     Name: Kafra Card
@@ -9698,7 +9707,18 @@ Body:
     Buy: 2
     Weight: 10
     Script: |
-      sc_start SC_ITEMBOOST,1800000,200;
+      .@time = getstatus(SC_ITEMBOOST, 5);
+      .@rate = 200;
+      if (.@time > 0) {
+        .@new_time = .@time + 1800000;
+        sc_start SC_ITEMBOOST, .@new_time, .@rate;
+      } else {
+        .@new_time = 1800000;
+        sc_start SC_ITEMBOOST, 1800000, .@rate;
+      }
+      .@mins = .@new_time / 60000;
+      .@secs = (.@new_time % 60000) / 1000;
+      dispbottom "[Chicle de Bola]: +30 minutos adicionados! Tempo total: " + .@mins + "m " + (.@secs < 10 ? "0" : "") + .@secs + "s.", 0x55FF55;
   - Id: 12413
     AegisName: PCBang_Coupon_Box2
     Name: PC Cafe Coupon BoxⅡ
