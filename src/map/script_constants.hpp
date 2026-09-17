@@ -1992,6 +1992,7 @@
 	export_constant(SC_CONTENTS_20);
 	export_constant(SC_NODISPELL_PROTECTION);
 	export_constant(SC_OVERCOMING_CRISIS);
+	export_constant(SC_AUTOBATTLE);
 
 /// Do not modify code below this, until the end of the API hook, since it will be automatically generated again
 /// @APIHOOK_START(EFST_CONST)
@@ -3497,6 +3498,7 @@
 	export_constant(EFST_TITLE43);
 	export_constant(EFST_TITLE44);
 	export_constant(EFST_TITLE45);
+	export_constant(EFST_AUTOBATTLE);
 	export_constant(EFST_CONTENTS_36);
 	export_constant(EFST_CONTENTS_37);
 	export_constant(EFST_CONTENTS_38);

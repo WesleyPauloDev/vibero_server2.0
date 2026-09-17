@@ -17049,6 +17049,45 @@ BUILDIN_FUNC(getmapxy)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/**
+ * getmapsize("<map name>", <mapX>, <mapY>);
+ * Returns the width (xs) and height (ys) of the specified map.
+ **/
+BUILDIN_FUNC(getmapsize)
+{
+	const char *mapname = script_getstr(st, 2);
+	int16 m = map_mapname2mapid(mapname);
+	struct map_data *mapdata = map_getmapdata(m);
+	TBL_PC *sd = nullptr;
+
+	if (!mapdata) {
+		script_pushint(st, -1);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	if (!data_isreference(script_getdata(st, 3)) || !data_isreference(script_getdata(st, 4))) {
+		ShowWarning("script: buildin_getmapsize: mapX or mapY is not a variable.\n");
+		script_pushint(st, -1);
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	int64 num = st->stack->stack_data[st->start + 3].u.num;
+	const char *name = get_str(script_getvarid(num));
+	if (not_server_variable(*name))
+		script_rid2sd(sd);
+	set_reg_num(st, sd, num, name, mapdata->xs, script_getref(st, 3));
+
+	sd = nullptr;
+	num = st->stack->stack_data[st->start + 4].u.num;
+	name = get_str(script_getvarid(num));
+	if (not_server_variable(*name))
+		script_rid2sd(sd);
+	set_reg_num(st, sd, num, name, mapdata->ys, script_getref(st, 4));
+
+	script_pushint(st, 0);
+	return SCRIPT_CMD_SUCCESS;
+}
+
 /// Returns the map name of given map ID.
 ///
 /// mapid2name <map ID>;
@@ -29605,6 +29644,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(npcwalkto,"ii?"),
 	BUILDIN_DEF(npcstop,"??"),
 	BUILDIN_DEF(getmapxy,"rrr??"),	//by Lorky [Lupus]
+	BUILDIN_DEF(getmapsize,"srr"),
 	BUILDIN_DEF(mapid2name,"i"),
 	BUILDIN_DEF(mapname2id,"s"),
 	BUILDIN_DEF(checkoption1,"i?"),

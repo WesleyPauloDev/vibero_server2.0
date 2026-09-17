@@ -6765,6 +6765,10 @@ ACMD_FUNC(autotrade) {
 	}
 
 	if( !sd->state.vending && !sd->state.buyingstore ) { //check if player is vending or buying
+		if (pc_readreg2(sd, "@AUTO_ACTIVE") != 0) {
+			npc_event(sd, "AutoPlayerSystem::OnStartAutoOffline", 0);
+			return 0;
+		}
 		clif_displaymessage(fd, msg_txt(sd,549)); // "You should have a shop open to use @autotrade."
 		return -1;
 	}

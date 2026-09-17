@@ -26407,6 +26407,13 @@ static int32 clif_parse(int32 fd)
 
 	if (session[fd]->flag.eof) {
 		if (sd) {
+			if (!sd->state.autotrade && (pc_readreg2(sd, "@AUTO_ACTIVE") != 0 || pc_readreg2(sd, "@AUTO_OFFLINE") != 0 || pc_readreg2(sd, "#AutoOffline") != 0)) {
+				sd->state.autotrade = 1;
+				pc_setreg2(sd, "@AUTO_OFFLINE", 1);
+				pc_setreg2(sd, "#AutoOffline", 1);
+				channel_pcquit(sd, 0xF);
+				chrif_save(sd, CSAVE_AUTOTRADE);
+			}
 			if (sd->state.autotrade) {
 				//Disassociate character from the socket connection.
 				session[fd]->session_data = nullptr;

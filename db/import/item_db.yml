@@ -1416,3 +1416,14 @@ Body:
       BuyingStore: true
     Script: |
       callfunc("F_AddAutoTime", 30);
+
+  # Asa de Mosca: Permite uso em bossnia_01~04 e lhz_dun_n~n4 somente durante o modo @auto (sem consumir, regra VIP)
+  - Id: 601
+    Script: |
+      .@m$ = strcharinfo(3);
+      if (@AUTO_ACTIVE && (.@m$ == "bossnia_01" || .@m$ == "bossnia_02" || .@m$ == "bossnia_03" || .@m$ == "bossnia_04" || .@m$ == "lhz_dun_n" || .@m$ == "lhz_dun_n2" || .@m$ == "lhz_dun_n3" || .@m$ == "lhz_dun_n4")) {
+        warp .@m$, 0, 0;
+        end;
+      }
+      itemskill "AL_TELEPORT", 1;
+
