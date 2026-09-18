@@ -43,13 +43,20 @@ function	script	F_AddAutoTime	{
 	return;
 }
 
+function	script	F_AutoIsDoubleTimeMap	{
+	.@m$ = getarg(0, strcharinfo(3));
+	if (compare(.@m$, "bossnia") || compare(.@m$, "lhz_dun_n")) {
+		return 1;
+	}
+	return 0;
+}
+
 function	script	F_AutoMapAllowsFlyWing	{
 	.@m$ = getarg(0, strcharinfo(3));
 	if (!getmapflag(.@m$, MF_NOTELEPORT) && !getmapflag(.@m$, MF_NOWARP)) {
 		return 1;
 	}
-	if (.@m$ == "bossnia_01" || .@m$ == "bossnia_02" || .@m$ == "bossnia_03" || .@m$ == "bossnia_04" ||
-	    .@m$ == "lhz_dun_n" || .@m$ == "lhz_dun_n2" || .@m$ == "lhz_dun_n3" || .@m$ == "lhz_dun_n4") {
+	if (callfunc("F_AutoIsDoubleTimeMap", .@m$)) {
 		return 1;
 	}
 	return 0;
@@ -129,6 +136,9 @@ OnAutoCommand:
 		dispbottom "Status: " + (@AUTO_ACTIVE ? "^00FF00[ATIVO]^000000" : "^FF0000[INATIVO]^000000"), 0xFFFFFF;
 		dispbottom "Modo Offline: " + (@AUTO_OFFLINE ? "^00FF00[SIM - Farmando no Servidor]^000000" : "^FFFF00[NAO - Online]^000000"), 0xFFFFFF;
 		dispbottom "Tempo Restante: " + .@rm_m + "m " + (.@rm_s < 10 ? "0" : "") + .@rm_s + "s", 0xFFFFFF;
+		if (callfunc("F_AutoIsDoubleTimeMap", strcharinfo(3))) {
+			dispbottom "[Auto]: Mapa especial (" + strcharinfo(3) + "): O tempo e consumido 2x MAIS RAPIDO!", 0xFFAAAA;
+		}
 		dispbottom "Usar Ziegfried (7621): " + (#AutoUseZiegfried ? "^00FF00SIM^000000" : "^FF0000NAO^000000") + " (Possui: " + countitem(7621) + ")", 0xFFFFFF;
 		dispbottom "Modo de Foco: " + (#AutoFarmMode ? "^00FFFFFoco XP (Retorna na Cidade no Nivel Maximo)^000000" : "^FFFF00Farm Livre^000000"), 0xFFFFFF;
 		dispbottom "Enfrentar MVP: " + (#AutoFightMVP ? "^00FF00SIM (Caca MVP)^000000" : "^FFAA00NAO (Foge de MVP)^000000"), 0xFFFFFF;
@@ -160,8 +170,17 @@ OnAutoCommand:
 			@AUTO_EXP_DIR_Y = 0;
 			@AUTO_STUCK_TICKS = 0;
 			dispbottom "[Auto]: Modo automatico atualizado para o mapa atual: '" + @AUTO_MAP$ + "'!", 0x55FF55;
+			if (callfunc("F_AutoIsDoubleTimeMap", @AUTO_MAP$)) {
+				dispbottom "==================================================", 0xFF5555;
+				dispbottom "[Auto]: ATENCAO: Voce entrou em um mapa especial (" + @AUTO_MAP$ + ")!", 0xFF5555;
+				dispbottom "[Auto]: O consumo de tempo agora e 2x MAIS RAPIDO!", 0xFFFF00;
+				dispbottom "==================================================", 0xFF5555;
+			}
 		} else {
 			dispbottom "[Auto]: O modo automatico ja esta ATIVO no mapa atual ('" + @AUTO_MAP$ + "')!", 0x55FF55;
+			if (callfunc("F_AutoIsDoubleTimeMap", @AUTO_MAP$)) {
+				dispbottom "[Auto]: AVISO: Mapa especial! O consumo de tempo e 2x mais rapido.", 0xFF5555;
+			}
 		}
 
 		dispbottom "[Auto]: Tempo restante: " + .@rm_m + "m " + (.@rm_s < 10 ? "0" : "") + .@rm_s + "s.", 0xFFFF00;
@@ -195,6 +214,23 @@ OnAutoCommand:
 		dispbottom "[Auto]: O modo automatico nao pode ser utilizado dentro de cidades!", 0xFF5555;
 		dispbottom "==================================================", 0xFF5555;
 		end;
+	}
+
+	if (callfunc("F_AutoIsDoubleTimeMap", .@cur_map$)) {
+		mes "[^0000FFAviso - Mapa Especial^000000]";
+		mes "Voce esta prestes a ativar o Modo Automatico no mapa: ^FF0000" + .@cur_map$ + "^000000.";
+		mes " ";
+		mes "^FF0000[ATENCAO]^000000";
+		mes "Neste mapa o tempo do Modo Automatico e consumido ^FF00002x MAIS RAPIDO^000000!";
+		mes " ";
+		mes "Deseja realmente ativar o modo automatico?";
+		next;
+		if (select("Sim, ativar modo automatico:Cancelar") == 2) {
+			mes "[^0000FFModo Automatico^000000]";
+			mes "Ativacao cancelada.";
+			close;
+		}
+		close2;
 	}
 
 	stand;
@@ -264,6 +300,7 @@ OnAutoCommand:
 	@CD_SR_RAISINGDRAGON = 0;
 	@CD_SS_ANTENPOU = 0;
 	@CD_SS_ANKOKURYUUAKUMU = 0;
+	@CD_GC_DARKCROW = 0;
 	@AUTO_LAST_ATTACK_TICK = gettimetick(2);
 	@AUTO_NIGHTMARE_TARGET = 0;
 	@AUTO_NIGHTMARE_EXPIRES = 0;
@@ -275,6 +312,9 @@ OnAutoCommand:
 	dispbottom "==================================================", 0x00FFFF;
 	dispbottom "Mapa de Caca: " + @AUTO_MAP$, 0xFFFFFF;
 	dispbottom "Tempo Restante: " + .@rm_m + "m " + (.@rm_s < 10 ? "0" : "") + .@rm_s + "s", 0xFFFF00;
+	if (callfunc("F_AutoIsDoubleTimeMap", @AUTO_MAP$)) {
+		dispbottom "[Auto]: AVISO: Mapa especial! O tempo e consumido 2x MAIS RAPIDO.", 0xFF5555;
+	}
 	dispbottom "Para desligar a qualquer momento, digite: @manual", 0xFFFFFF;
 	dispbottom "Para abrir as configuracoes, digite: @auto setup", 0xFFFFFF;
 	dispbottom "Para fechar o jogo e continuar farmando: @auto offline", 0x00FFFF;
@@ -325,6 +365,23 @@ OnStartAutoOffline:
 		end;
 	}
 
+	if (callfunc("F_AutoIsDoubleTimeMap", .@cur_map$)) {
+		mes "[^0000FFAviso - Mapa Especial (Offline)^000000]";
+		mes "Voce esta prestes a ativar o Modo Offline no mapa: ^FF0000" + .@cur_map$ + "^000000.";
+		mes " ";
+		mes "^FF0000[ATENCAO]^000000";
+		mes "Neste mapa o tempo do Modo Automatico e consumido ^FF00002x MAIS RAPIDO^000000!";
+		mes " ";
+		mes "Deseja realmente prosseguir com a ativacao offline?";
+		next;
+		if (select("Sim, ativar modo offline:Cancelar") == 2) {
+			mes "[^0000FFModo Automatico Offline^000000]";
+			mes "Ativacao cancelada.";
+			close;
+		}
+		close2;
+	}
+
 	// Guarda loots preventivamente se peso >= 70%
 	if ((Weight * 100 / MaxWeight) >= 70) {
 		.@ap_hp = (getd("@autopot_hp_ID") ? getd("@autopot_hp_ID") : autopot_hp_id);
@@ -364,6 +421,7 @@ OnStartAutoOffline:
 	@CD_SR_RAISINGDRAGON = 0;
 	@CD_SS_ANTENPOU = 0;
 	@CD_SS_ANKOKURYUUAKUMU = 0;
+	@CD_GC_DARKCROW = 0;
 	@AUTO_LAST_ATTACK_TICK = gettimetick(2);
 	@AUTO_NIGHTMARE_TARGET = 0;
 	@AUTO_NIGHTMARE_EXPIRES = 0;
@@ -379,6 +437,9 @@ OnStartAutoOffline:
 	dispbottom "==================================================", 0x00FFFF;
 	dispbottom "Mapa de Caca: " + @AUTO_MAP$, 0xFFFFFF;
 	dispbottom "Tempo Restante: " + .@rm_m + "m " + (.@rm_s < 10 ? "0" : "") + .@rm_s + "s", 0xFFFF00;
+	if (callfunc("F_AutoIsDoubleTimeMap", @AUTO_MAP$)) {
+		dispbottom "[Auto]: AVISO: Mapa especial! O tempo e consumido 2x MAIS RAPIDO.", 0xFF5555;
+	}
 	dispbottom "Seu personagem continuara farmando normalmente neste mapa.", 0x55FF55;
 	dispbottom "Voce pode fechar o jogo ou desligar o computador.", 0x55FF55;
 	dispbottom "Ao logar novamente na conta, o controle do personagem e retomado.", 0x00FFFF;
@@ -404,6 +465,9 @@ OnOpenSetupMenu:
 	mes "Personalize as opcoes do seu modo automatico:";
 	mes "----------------------------------------";
 	mes "Tempo Restante: ^008800" + .@rm_m + "m " + (.@rm_s < 10 ? "0" : "") + .@rm_s + "s^000000";
+	if (callfunc("F_AutoIsDoubleTimeMap", strcharinfo(3))) {
+		mes "^FF0000[Mapa Especial: Consumo de Tempo 2x MAIS RAPIDO]^000000";
+	}
 	mes "Amuleto de Ziegfried: " + (#AutoUseZiegfried ? "^00AA00[ATIVADO]^000000" : "^FF0000[DESATIVADO]^000000") + " (" + countitem(7621) + " no inventario)";
 	mes "Modo de Foco: " + (#AutoFarmMode ? "^0000FF[Foco XP / Teleporta na Cidade]^000000" : "^FF8800[Farm Livre / Sem Teleporte]^000000");
 	mes "Enfrentar MVP: " + (#AutoFightMVP ? "^00AA00[SIM / Caca MVP]^000000" : "^FF8800[NAO / Foge de MVP]^000000");
@@ -561,6 +625,10 @@ OnGetSkillPriorityName:
 	if (.@sk$ == "AC_SHOWER") return "Chuva de Flechas";
 	if (.@sk$ == "GC_CROSSIMPACT") return "Impacto Cruzado";
 	if (.@sk$ == "GC_ROLLINGCUTTER") return "Laminas de Loki";
+	if (.@sk$ == "GC_CROSSRIPPERSLASHER") return "Laminas Retalhadoras";
+	if (.@sk$ == "GC_DARKILLUSION") return "Passo Sombrio";
+	if (.@sk$ == "GC_DARKCROW") return "Garra Sombria";
+	if (.@sk$ == "GC_COUNTERSLASH") return "Retaliacao";
 	if (.@sk$ == "SC_FATALMENACE") return "Ameaca Fatal";
 	if (.@sk$ == "SC_TRIANGLESHOT") return "Disparo Triplo";
 	if (.@sk$ == "ASC_BREAKER") return "Destruidor de Almas";
@@ -701,6 +769,7 @@ OnSelectSkillPriority:
 	else if (BaseClass == Job_Thief || Class == Job_Thief || Class == Job_Thief_High || BaseJob == Job_Thief || BaseJob == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross || Class == Job_Guillotine_Cross_T || Class == 4065 || Class == 4059 || Class == 4013 || Class == Job_Rogue || Class == Job_Stalker || Class == Job_Shadow_Chaser || Class == Job_Shadow_Chaser_T || Class == 4079 || Class == 4072 || Class == 4021 || BaseJob == Job_Assassin || BaseJob == Job_Assassin_Cross || BaseJob == Job_Guillotine_Cross || BaseJob == Job_Rogue || BaseJob == Job_Stalker || BaseJob == Job_Shadow_Chaser) {
 		if (getskilllv("GC_CROSSIMPACT") > 0) { .@opt_skills$[.@opt_count] = "GC_CROSSIMPACT"; .@opt_names$[.@opt_count] = "Impacto Cruzado"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("GC_CROSSIMPACT") + "):"; .@opt_count++; }
 		if (getskilllv("GC_ROLLINGCUTTER") > 0) { .@opt_skills$[.@opt_count] = "GC_ROLLINGCUTTER"; .@opt_names$[.@opt_count] = "Laminas de Loki"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("GC_ROLLINGCUTTER") + "):"; .@opt_count++; }
+		if (getskilllv("GC_CROSSRIPPERSLASHER") > 0) { .@opt_skills$[.@opt_count] = "GC_CROSSRIPPERSLASHER"; .@opt_names$[.@opt_count] = "Laminas Retalhadoras [Cross Ripper Slasher]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("GC_CROSSRIPPERSLASHER") + "):"; .@opt_count++; }
 		if (getskilllv("SC_FATALMENACE") > 0) { .@opt_skills$[.@opt_count] = "SC_FATALMENACE"; .@opt_names$[.@opt_count] = "Ameaca Fatal"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SC_FATALMENACE") + "):"; .@opt_count++; }
 		if (getskilllv("SC_TRIANGLESHOT") > 0) { .@opt_skills$[.@opt_count] = "SC_TRIANGLESHOT"; .@opt_names$[.@opt_count] = "Disparo Triplo"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SC_TRIANGLESHOT") + "):"; .@opt_count++; }
 		if (getskilllv("ASC_BREAKER") > 0) { .@opt_skills$[.@opt_count] = "ASC_BREAKER"; .@opt_names$[.@opt_count] = "Destruidor de Almas"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("ASC_BREAKER") + "):"; .@opt_count++; }
@@ -838,6 +907,19 @@ OnSelectSkillPriority:
 // ======================================================================
 OnStopAuto:
 	.@reason$ = getarg(0, "");
+	if (@AUTO_ACTIVE) {
+		.@now = gettimetick(2);
+		.@diff = .@now - @AUTO_LAST_TICK;
+		if (.@diff > 0) {
+			if (callfunc("F_AutoIsDoubleTimeMap", @AUTO_MAP$)) {
+				#AutoTimeSecs -= (.@diff * 2);
+			} else {
+				#AutoTimeSecs -= .@diff;
+			}
+			if (#AutoTimeSecs < 0) #AutoTimeSecs = 0;
+			@AUTO_LAST_TICK = .@now;
+		}
+	}
 	@AUTO_ACTIVE = 0;
 	@AUTO_CONSECUTIVE_WING_TELEPORTS = 0;
 	@ab_tp_quiz_cooldown_until = 0;
@@ -873,6 +955,7 @@ OnStopAuto:
 	@CD_SR_RAISINGDRAGON = 0;
 	@CD_SS_ANTENPOU = 0;
 	@CD_SS_ANKOKURYUUAKUMU = 0;
+	@CD_GC_DARKCROW = 0;
 	@BUFF_HOMUN_RES = 0;
 	@LAST_HOMUN_PITCHER_TICK = 0;
 	deltimer "AutoPlayerSystem::OnStepTimer";
@@ -901,6 +984,8 @@ OnStopAuto:
 	return;
 
 OnOfflineBotQuitTimer:
+	@AUTO_ACTIVE = 0;
+	deltimer "AutoPlayerSystem::OnStepTimer";
 	if (Hp <= 0 || Dead) {
 		recovery 0, getcharid(0);
 		recovery 1;
@@ -908,7 +993,7 @@ OnOfflineBotQuitTimer:
 		stand;
 	}
 	warp "SavePoint", 0, 0;
-	sleep2 500;
+	sleep2 1000;
 	kick;
 	end;
 
@@ -925,7 +1010,11 @@ OnPCDieEvent:
 	.@now = gettimetick(2);
 	.@diff = .@now - @AUTO_LAST_TICK;
 	if (.@diff > 0) {
-		#AutoTimeSecs -= .@diff;
+		if (callfunc("F_AutoIsDoubleTimeMap", @AUTO_MAP$)) {
+			#AutoTimeSecs -= (.@diff * 2);
+		} else {
+			#AutoTimeSecs -= .@diff;
+		}
 		if (#AutoTimeSecs < 0) #AutoTimeSecs = 0;
 		@AUTO_LAST_TICK = .@now;
 	}
@@ -985,6 +1074,12 @@ OnPCLoadMapEvent:
 			@AUTO_EXP_DIR_Y = 0;
 			@AUTO_STUCK_TICKS = 0;
 			dispbottom "[Auto]: Modo automatico ativo no mapa atual: '" + @AUTO_MAP$ + "'.", 0x55FF55;
+			if (callfunc("F_AutoIsDoubleTimeMap", @AUTO_MAP$)) {
+				dispbottom "==================================================", 0xFF5555;
+				dispbottom "[Auto]: ATENCAO: Voce entrou em um mapa especial (" + @AUTO_MAP$ + ")!", 0xFF5555;
+				dispbottom "[Auto]: O consumo de tempo agora e 2x MAIS RAPIDO!", 0xFFFF00;
+				dispbottom "==================================================", 0xFF5555;
+			}
 		}
 	}
 	end;
@@ -998,7 +1093,11 @@ OnPCLogoutEvent:
 		.@now = gettimetick(2);
 		.@diff = .@now - @AUTO_LAST_TICK;
 		if (.@diff > 0) {
-			#AutoTimeSecs -= .@diff;
+			if (callfunc("F_AutoIsDoubleTimeMap", @AUTO_MAP$)) {
+				#AutoTimeSecs -= (.@diff * 2);
+			} else {
+				#AutoTimeSecs -= .@diff;
+			}
 			if (#AutoTimeSecs < 0) #AutoTimeSecs = 0;
 		}
 		@AUTO_ACTIVE = 0;
@@ -1081,6 +1180,12 @@ OnStepTimer:
 		@AUTO_EXP_DIR_Y = 0;
 		@AUTO_STUCK_TICKS = 0;
 		@AUTO_TARGET_WALKING = 0;
+		if (callfunc("F_AutoIsDoubleTimeMap", @AUTO_MAP$)) {
+			dispbottom "==================================================", 0xFF5555;
+			dispbottom "[Auto]: ATENCAO: Voce entrou em um mapa especial (" + @AUTO_MAP$ + ")!", 0xFF5555;
+			dispbottom "[Auto]: O consumo de tempo agora e 2x MAIS RAPIDO!", 0xFFFF00;
+			dispbottom "==================================================", 0xFF5555;
+		}
 	}
 
 	// Monitor de movimento global: detecta tanto parado quanto indo e voltando (ping-pong entre 2 celulas)
@@ -1101,7 +1206,12 @@ OnStepTimer:
 	@ab_tp_quiz_timeout = 0;
 	.@diff = .@now - @AUTO_LAST_TICK;
 	if (.@diff > 0) {
-		#AutoTimeSecs -= .@diff;
+		if (callfunc("F_AutoIsDoubleTimeMap", @AUTO_MAP$)) {
+			#AutoTimeSecs -= (.@diff * 2);
+		} else {
+			#AutoTimeSecs -= .@diff;
+		}
+		if (#AutoTimeSecs < 0) #AutoTimeSecs = 0;
 		@AUTO_LAST_TICK = .@now;
 	}
 
@@ -1577,7 +1687,7 @@ OnStepTimer:
 		// Se o personagem ja esta caminhando continuamente na direcao de exploracao e ainda nao chegou ao destino:
 		// Continua caminhando direto! Nao interrompe a caminhada!
 		if (!.@at_edge && @AUTO_STUCK_TICKS < 4 && @AUTO_EXP_DEST_X > 0 && distance(.@cx, .@cy, @AUTO_EXP_DEST_X, @AUTO_EXP_DEST_Y) > 0 && !@AUTO_SNAP_USED) {
-			addtimer 250, "AutoPlayerSystem::OnStepTimer";
+			addtimer 800, "AutoPlayerSystem::OnStepTimer";
 			end;
 		}
 
@@ -1684,7 +1794,7 @@ OnStepTimer:
 			}
 		}
 
-		addtimer 250, "AutoPlayerSystem::OnStepTimer";
+		addtimer 800, "AutoPlayerSystem::OnStepTimer";
 		end;
 	}
 
@@ -1759,6 +1869,13 @@ OnStepTimer:
 
 		if (getstatus(SC_HIDING)) {
 			sc_end SC_HIDING;
+		}
+
+		// Sicario com Passo Sombrio (GC_DARKILLUSION): avanca instantaneamente ate o alvo!
+		if (getskilllv("GC_DARKILLUSION") > 0 && Sp >= 40 && .@dist >= 3 && .@dist <= (getskilllv("GC_DARKILLUSION") + 4)) {
+			unitskilluseid getcharid(3), "GC_DARKILLUSION", getskilllv("GC_DARKILLUSION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			addtimer 350, "AutoPlayerSystem::OnStepTimer";
+			end;
 		}
 
 		// Encontra a melhor celula adjacente/acessivel ao redor do monstro
@@ -2549,6 +2666,25 @@ OnStepTimer:
 	}
 	// 4. GATUNO E EVOLUCOES (Inclui Sicario, Renegado, Algoz, Desordeiro, etc.)
 	else if (BaseClass == Job_Thief || Class == Job_Thief || Class == Job_Thief_High || BaseJob == Job_Thief || BaseJob == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross || Class == Job_Guillotine_Cross_T || Class == 4065 || Class == 4059 || Class == 4013 || Class == Job_Rogue || Class == Job_Stalker || Class == Job_Shadow_Chaser || Class == Job_Shadow_Chaser_T || Class == 4079 || Class == 4072 || Class == 4021 || BaseJob == Job_Assassin || BaseJob == Job_Assassin_Cross || BaseJob == Job_Guillotine_Cross || BaseJob == Job_Rogue || BaseJob == Job_Stalker || BaseJob == Job_Shadow_Chaser) {
+		// 1. Passo Sombrio (GC_DARKILLUSION): Se o alvo estiver a distancia (3 a 9 celulas), salta instantaneamente ate ele!
+		if (getskilllv("GC_DARKILLUSION") > 0 && Sp >= 40 && .@dist >= 3 && .@dist <= (getskilllv("GC_DARKILLUSION") + 4)) {
+			unitskilluseid getcharid(3), "GC_DARKILLUSION", getskilllv("GC_DARKILLUSION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 350; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+		}
+
+		// 2. Retaliacao (GC_COUNTERSLASH): Sempre que possivel (apos bloqueio de Bloqueio de Arma)
+		if (getskilllv("GC_COUNTERSLASH") > 0 && Sp >= 5 && getstatus(SC_WEAPONBLOCK_ON) && .@dist <= 2) {
+			unitskilluseid getcharid(3), "GC_COUNTERSLASH", getskilllv("GC_COUNTERSLASH"), getcharid(3), 0, 0, 0, 0;
+			.@step_delay = 400; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+		}
+
+		// 3. Garra Sombria (GC_DARKCROW): Sempre que disponivel (debuff massivo no alvo)
+		if (getskilllv("GC_DARKCROW") > 0 && Sp >= 22 && .@dist <= 2 && .@now >= @CD_GC_DARKCROW) {
+			@CD_GC_DARKCROW = .@now + 60;
+			unitskilluseid getcharid(3), "GC_DARKCROW", getskilllv("GC_DARKCROW"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+		}
+
 		.@sk_p$ = AutoSkillPriority$;
 		if (.@sk_p$ != "") {
 			if (.@sk_p$ == "GC_CROSSIMPACT" && getskilllv("GC_CROSSIMPACT") > 0 && Sp >= 25 && .@dist <= 3) {
@@ -2557,6 +2693,9 @@ OnStepTimer:
 			} else if (.@sk_p$ == "GC_ROLLINGCUTTER" && getskilllv("GC_ROLLINGCUTTER") > 0 && Sp >= 5 && .@dist <= 2) {
 				unitskilluseid getcharid(3), "GC_ROLLINGCUTTER", getskilllv("GC_ROLLINGCUTTER"), getcharid(3), 0, 0, 0, 0;
 				.@step_delay = 400; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "GC_CROSSRIPPERSLASHER" && getskilllv("GC_CROSSRIPPERSLASHER") > 0 && Sp >= 20 && .@dist <= (getskilllv("GC_CROSSRIPPERSLASHER") + 8)) {
+				unitskilluseid getcharid(3), "GC_CROSSRIPPERSLASHER", getskilllv("GC_CROSSRIPPERSLASHER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
 			} else if (.@sk_p$ == "SC_FATALMENACE" && getskilllv("SC_FATALMENACE") > 0 && Sp >= 30 && .@dist <= 3) {
 				unitskilluseid getcharid(3), "SC_FATALMENACE", getskilllv("SC_FATALMENACE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 				.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
@@ -2593,6 +2732,9 @@ OnStepTimer:
 		} else if (getskilllv("GC_ROLLINGCUTTER") > 0 && Sp >= 5) {
 			unitskilluseid getcharid(3), "GC_ROLLINGCUTTER", getskilllv("GC_ROLLINGCUTTER"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 400;
+		} else if (getskilllv("GC_CROSSRIPPERSLASHER") > 0 && Sp >= 20 && (getstatus(SC_ROLLINGCUTTER) > 0 || .@dist > 2) && .@dist <= (getskilllv("GC_CROSSRIPPERSLASHER") + 8)) {
+			unitskilluseid getcharid(3), "GC_CROSSRIPPERSLASHER", getskilllv("GC_CROSSRIPPERSLASHER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 450;
 		} else if (getskilllv("SC_FATALMENACE") > 0 && Sp >= 30) {
 			unitskilluseid getcharid(3), "SC_FATALMENACE", getskilllv("SC_FATALMENACE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 550;
@@ -3768,7 +3910,9 @@ OnGetCombatRange:
 	}
 	// GATUNO E EVOLUCOES (Inclui Sicario 4065, Renegado 4079, Algoz 4013, Desordeiro 4021, etc.)
 	else if (BaseClass == Job_Thief || Class == Job_Thief || Class == Job_Thief_High || BaseJob == Job_Thief || BaseJob == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross || Class == Job_Guillotine_Cross_T || Class == 4065 || Class == 4058 || Class == 4013 || Class == Job_Rogue || Class == Job_Stalker || Class == Job_Shadow_Chaser || Class == Job_Shadow_Chaser_T || Class == 4079 || Class == 4072 || Class == 4021 || BaseJob == Job_Assassin || BaseJob == Job_Assassin_Cross || BaseJob == Job_Guillotine_Cross || BaseJob == Job_Rogue || BaseJob == Job_Stalker || BaseJob == Job_Shadow_Chaser) {
-		if (getskilllv("GC_ROLLINGCUTTER") > 0 || getskilllv("GC_CROSSIMPACT") > 0 || getskilllv("SC_FATALMENACE") > 0 || getskilllv("AS_SONICBLOW") > 0 || getskilllv("RG_BACKSTAP") > 0 || getskilllv("RG_RAID") > 0) {
+		if (AutoSkillPriority$ == "GC_CROSSRIPPERSLASHER" && getskilllv("GC_CROSSRIPPERSLASHER") > 0 && Sp >= 20) {
+			.@range = 9;
+		} else if (getskilllv("GC_ROLLINGCUTTER") > 0 || getskilllv("GC_CROSSIMPACT") > 0 || getskilllv("SC_FATALMENACE") > 0 || getskilllv("AS_SONICBLOW") > 0 || getskilllv("RG_BACKSTAP") > 0 || getskilllv("RG_RAID") > 0) {
 			.@range = (.@w_range > 0 && .@w_range < 2 ? .@w_range : 2);
 		} else if (getskilllv("SC_TRIANGLESHOT") > 0 && Sp >= 24) {
 			.@range = 7;

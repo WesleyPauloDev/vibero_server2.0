@@ -3806,8 +3806,8 @@ int32 unit_remove_map_(struct block_list *bl, clr_type clrtype, const char* file
 				}
 
 				// A IA pode encadear warp e logout no mesmo ciclo. Esse diagnostico
-				// conhecido nao deve poluir o terminal para bots registrados.
-				if (!pc_readglobalreg(sd, add_str("BOT_REGISTERED"))) {
+				// conhecido nao deve poluir o terminal para bots registrados ou offline bots.
+				if (!pc_readglobalreg(sd, add_str("BOT_REGISTERED")) && !sd->state.autotrade && !pc_readglobalreg(sd, add_str("AUTO_OFFLINE_ACTIVE"))) {
 					ShowDebug("unit_remove_map: unexpected state when removing player AID/CID:%d/%d"
 						" (active=%d connect_new=%d rewarp=%d changemap=%d debug_remove_map=%d)"
 						" from map=%s (users=%d)."
