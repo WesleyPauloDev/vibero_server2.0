@@ -1104,6 +1104,7 @@ OnStepTimer:
 		.@buff_used = callsub(OnCheckSupportBuffs);
 		if (.@buff_used) {
 			@AUTO_LAST_SUPPORT_BUFF = .@now;
+			@AUTO_LAST_ATTACK_TICK = .@now;
 			addtimer 450, "AutoPlayerSystem::OnStepTimer";
 			end;
 		}
@@ -1197,15 +1198,57 @@ OnStepTimer:
 		end;
 	}
 
-	// 5. Inatividade de Combate: 30 segundos sem efetuar nenhum ataque -> Cancela e teleporta para cidade
-	if (@AUTO_LAST_ATTACK_TICK > 0 && (.@now - @AUTO_LAST_ATTACK_TICK) >= 30) {
-		dispbottom "==================================================", 0xFF5555;
-		dispbottom "[Auto]: 30 segundos sem efetuar nenhum ataque!", 0xFF5555;
-		dispbottom "[Auto]: Modo automatico cancelado. Retornando para a cidade...", 0xFFFF00;
-		dispbottom "==================================================", 0xFF5555;
-		callsub OnStopAuto, "";
-		warp "SavePoint", 0, 0;
-		end;
+	// 5. Inatividade de Combate: Se passar 5 segundos sem atacar -> Usa Asa de Mosca e tela no mapa
+	if (@AUTO_LAST_ATTACK_TICK > 0 && (.@now - @AUTO_LAST_ATTACK_TICK) >= 5) {
+		if ((countitem(601) > 0 || (getskilllv("AL_TELEPORT") > 0 && Sp >= 9)) && callfunc("F_AutoMapAllowsFlyWing", @AUTO_MAP$)) {
+			@AUTO_LAST_ATTACK_TICK = .@now;
+			@AUTO_LAST_TELEPORT = .@now;
+			@AUTO_CONSECUTIVE_WING_TELEPORTS++;
+
+			if (@AUTO_CONSECUTIVE_WING_TELEPORTS >= 15) {
+				dispbottom "==================================================", 0xFF5555;
+				dispbottom "[Auto]: 15 asas de mosca utilizadas sem encontrar monstros!", 0xFF5555;
+				dispbottom "[Auto]: Este mapa nao possui monstros suficientes para o modo automatico.", 0xFFFF00;
+				dispbottom "[Auto]: Retornando para a cidade e encerrando o modo automatico.", 0xFFFF00;
+				dispbottom "==================================================", 0xFF5555;
+				callsub OnStopAuto, "";
+				warp "SavePoint", 0, 0;
+				end;
+			}
+
+			@AUTO_CURRENT_TARGET = 0;
+			@AUTO_CURRENT_ATTACK_TARGET = 0;
+			@AUTO_TARGET_TRACK_ID = 0;
+			@AUTO_TARGET_LAST_HP = 0;
+			@AUTO_TARGET_PROGRESS_TICK = 0;
+			@AUTO_LAST_TX = 0;
+			@AUTO_LAST_TY = 0;
+			@AUTO_TARGET_WALKING = 0;
+			@AUTO_PURSUIT_TARGET = 0;
+			@AUTO_PURSUIT_FAIL_TICKS = 0;
+			@AUTO_STUCK_TICKS = 0;
+			@AUTO_EXP_DIR_X = 0;
+			@AUTO_EXP_DIR_Y = 0;
+			@AUTO_EXP_DEST_X = 0;
+			@AUTO_EXP_DEST_Y = 0;
+			deletearray @AUTO_BLOCKED_MOB[0], 16;
+			deletearray @AUTO_BLOCKED_TIME[0], 16;
+			@AUTO_BLOCKED_INDEX = 0;
+			unitstopattack getcharid(3);
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
+			specialeffect2 EF_TELEPORTATION;
+			warp @AUTO_MAP$, 0, 0;
+			addtimer 600, "AutoPlayerSystem::OnStepTimer";
+			end;
+		} else if ((.@now - @AUTO_LAST_ATTACK_TICK) >= 30) {
+			dispbottom "==================================================", 0xFF5555;
+			dispbottom "[Auto]: 30 segundos sem efetuar nenhum ataque!", 0xFF5555;
+			dispbottom "[Auto]: Modo automatico cancelado. Retornando para a cidade...", 0xFFFF00;
+			dispbottom "==================================================", 0xFF5555;
+			callsub OnStopAuto, "";
+			warp "SavePoint", 0, 0;
+			end;
+		}
 	}
 
 	// Libera alvo bloqueado por parede/obstaculo apos timeout
@@ -1446,15 +1489,16 @@ OnStepTimer:
 			sc_end SC_HIDING;
 		}
 
-		// Se possuir Asa de Mosca (601) no inventario e o mapa permitir teleporte (ou mapas especiais liberados no @auto):
-		if (countitem(601) > 0 && callfunc("F_AutoMapAllowsFlyWing", @AUTO_MAP$)) {
+		// Se possuir Asa de Mosca (601) no inventario ou Teleporte e o mapa permitir teleporte:
+		if ((countitem(601) > 0 || (getskilllv("AL_TELEPORT") > 0 && Sp >= 9)) && callfunc("F_AutoMapAllowsFlyWing", @AUTO_MAP$)) {
 			if ((.@now - @AUTO_LAST_TELEPORT) >= 5) {
 				@AUTO_LAST_TELEPORT = .@now;
+				@AUTO_LAST_ATTACK_TICK = .@now;
 				@AUTO_CONSECUTIVE_WING_TELEPORTS++;
 
-				if (@AUTO_CONSECUTIVE_WING_TELEPORTS >= 10) {
+				if (@AUTO_CONSECUTIVE_WING_TELEPORTS >= 15) {
 					dispbottom "==================================================", 0xFF5555;
-					dispbottom "[Auto]: 10 asas de mosca utilizadas sem encontrar monstros!", 0xFF5555;
+					dispbottom "[Auto]: 15 asas de mosca utilizadas sem encontrar monstros!", 0xFF5555;
 					dispbottom "[Auto]: Este mapa nao possui monstros suficientes para o modo automatico.", 0xFFFF00;
 					dispbottom "[Auto]: Retornando para a cidade e encerrando o modo automatico.", 0xFFFF00;
 					dispbottom "==================================================", 0xFF5555;
@@ -1664,7 +1708,7 @@ OnStepTimer:
 			// Em mapas de labirinto com teleporte liberado no @auto (bossnia e lhz_dun_n):
 			// Se possuir Asa de Mosca e ja se passaram pelo menos 3s do ultimo teleporte,
 			// usa Asa de Mosca para sair do impasse com monstro inatingivel na parede!
-			if (countitem(601) > 0 && callfunc("F_AutoMapAllowsFlyWing", @AUTO_MAP$) && (.@now - @AUTO_LAST_TELEPORT >= 3) &&
+			if ((countitem(601) > 0 || (getskilllv("AL_TELEPORT") > 0 && Sp >= 9)) && callfunc("F_AutoMapAllowsFlyWing", @AUTO_MAP$) && (.@now - @AUTO_LAST_TELEPORT >= 3) &&
 			    (@AUTO_MAP$ == "bossnia_01" || @AUTO_MAP$ == "bossnia_02" || @AUTO_MAP$ == "bossnia_03" || @AUTO_MAP$ == "bossnia_04" ||
 			     @AUTO_MAP$ == "lhz_dun_n" || @AUTO_MAP$ == "lhz_dun_n2" || @AUTO_MAP$ == "lhz_dun_n3" || @AUTO_MAP$ == "lhz_dun_n4")) {
 				@AUTO_LAST_TELEPORT = .@now;
