@@ -262,7 +262,11 @@ OnAutoCommand:
 	@CD_SR_HOWLINGOFLION = 0;
 	@CD_SR_RAMPAGEBLASTER = 0;
 	@CD_SR_RAISINGDRAGON = 0;
+	@CD_SS_ANTENPOU = 0;
+	@CD_SS_ANKOKURYUUAKUMU = 0;
 	@AUTO_LAST_ATTACK_TICK = gettimetick(2);
+	@AUTO_NIGHTMARE_TARGET = 0;
+	@AUTO_NIGHTMARE_EXPIRES = 0;
 
 	.@rm_m = #AutoTimeSecs / 60;
 	.@rm_s = #AutoTimeSecs % 60;
@@ -358,7 +362,11 @@ OnStartAutoOffline:
 	@CD_SR_HOWLINGOFLION = 0;
 	@CD_SR_RAMPAGEBLASTER = 0;
 	@CD_SR_RAISINGDRAGON = 0;
+	@CD_SS_ANTENPOU = 0;
+	@CD_SS_ANKOKURYUUAKUMU = 0;
 	@AUTO_LAST_ATTACK_TICK = gettimetick(2);
+	@AUTO_NIGHTMARE_TARGET = 0;
+	@AUTO_NIGHTMARE_EXPIRES = 0;
 
 	// Aplica buffs iniciais
 	callsub(OnApplyBaseBuffs);
@@ -582,6 +590,21 @@ OnGetSkillPriorityName:
 	if (.@sk$ == "WS_CARTTERMINATION") return "Choque de Carrinho";
 	if (.@sk$ == "MC_CARTREVOLUTION") return "Cavalo-de-Pau [Cart Revolution]";
 	if (.@sk$ == "MC_MAMMONITE") return "Mammonita";
+	if (.@sk$ == "SS_ANTENPOU") return "Canhao Obscurescente [Darkening Cannon]";
+	if (.@sk$ == "SS_ANKOKURYUUAKUMU") return "Dragao Sombrio - Pesadelo [Dark Dragon Nightmare]";
+	if (.@sk$ == "SS_KAGEAKUMU") return "Sombra - Pesadelo [Shadow Nightmare]";
+	if (.@sk$ == "SS_HITOUAKUMU") return "Kunai - Pesadelo [Kunai Nightmare]";
+	if (.@sk$ == "SS_KAGENOMAI") return "Danca das Sombras";
+	if (.@sk$ == "SS_KAGEGISSEN") return "Corte Espelhado";
+	if (.@sk$ == "SS_KUNAIKAITEN") return "Rotacao de Kunai";
+	if (.@sk$ == "SS_KUNAIKUSSETSU") return "Refracao de Kunai";
+	if (.@sk$ == "SS_KUNAIWAIKYOKU") return "Distorcao de Kunai";
+	if (.@sk$ == "SS_FUUMAKOUCHIKU") return "Construcao de Huuma";
+	if (.@sk$ == "SS_FUUMASHOUAKU") return "Dominio de Huuma";
+	if (.@sk$ == "SS_SEKIENHOU") return "Canhao Flamejante";
+	if (.@sk$ == "SS_REIKETSUHOU") return "Canhao Sangue-Frio";
+	if (.@sk$ == "SS_RAIDENPOU") return "Canhao Trovejante";
+	if (.@sk$ == "SS_KINRYUUHOU") return "Canhao Dragao Dourado";
 	if (.@sk$ == "KO_HUUMARANKA") return "Turbilhao de Petalas";
 	if (.@sk$ == "KO_BAKURETSU") return "Kunai Explosiva";
 	if (.@sk$ == "KO_HAPPOKUNAI") return "Disparo de Kunai";
@@ -739,7 +762,7 @@ OnSelectSkillPriority:
 		if (getskilllv("SS_REIKETSUHOU") > 0) { .@opt_skills$[.@opt_count] = "SS_REIKETSUHOU"; .@opt_names$[.@opt_count] = "Canhao Sangue-Frio [Cold Blooded Cannon]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_REIKETSUHOU") + "):"; .@opt_count++; }
 		if (getskilllv("SS_RAIDENPOU") > 0) { .@opt_skills$[.@opt_count] = "SS_RAIDENPOU"; .@opt_names$[.@opt_count] = "Canhao Trovejante [Thundering Cannon]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_RAIDENPOU") + "):"; .@opt_count++; }
 		if (getskilllv("SS_KINRYUUHOU") > 0) { .@opt_skills$[.@opt_count] = "SS_KINRYUUHOU"; .@opt_names$[.@opt_count] = "Canhao Dragao Dourado [Golden Dragon Cannon]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_KINRYUUHOU") + "):"; .@opt_count++; }
-		if (getskilllv("SS_ANTENPOU") > 0) { .@opt_skills$[.@opt_count] = "SS_ANTENPOU"; .@opt_names$[.@opt_count] = "Canhao das Sombras [Darkening Cannon]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_ANTENPOU") + "):"; .@opt_count++; }
+		if (getskilllv("SS_ANTENPOU") > 0) { .@opt_skills$[.@opt_count] = "SS_ANTENPOU"; .@opt_names$[.@opt_count] = "Canhao Obscurescente [Darkening Cannon]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_ANTENPOU") + "):"; .@opt_count++; }
 		if (getskilllv("SS_SHIMIRU") > 0) { .@opt_skills$[.@opt_count] = "SS_SHIMIRU"; .@opt_names$[.@opt_count] = "Infiltracao [Infiltrate]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_SHIMIRU") + "):"; .@opt_count++; }
 		if (getskilllv("SS_KAGEGARI") > 0) { .@opt_skills$[.@opt_count] = "SS_KAGEGARI"; .@opt_names$[.@opt_count] = "Cacada das Sombras [Shadow Hunting]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_KAGEGARI") + "):"; .@opt_count++; }
 		if (getskilllv("SS_ANKOKURYUUAKUMU") > 0) { .@opt_skills$[.@opt_count] = "SS_ANKOKURYUUAKUMU"; .@opt_names$[.@opt_count] = "Dragao Sombrio - Pesadelo [Dark Dragon Nightmare]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_ANKOKURYUUAKUMU") + "):"; .@opt_count++; }
@@ -840,12 +863,16 @@ OnStopAuto:
 	@AUTO_EXP_DEST_X = 0;
 	@AUTO_EXP_DEST_Y = 0;
 	@AUTO_LAST_ATTACK_TICK = 0;
+	@AUTO_NIGHTMARE_TARGET = 0;
+	@AUTO_NIGHTMARE_EXPIRES = 0;
 	@AUTO_ROGUE_STEP = 0;
 	@AUTO_SNAP_USED = 0;
 	@CD_SR_TIGERCANNON = 0;
 	@CD_SR_HOWLINGOFLION = 0;
 	@CD_SR_RAMPAGEBLASTER = 0;
 	@CD_SR_RAISINGDRAGON = 0;
+	@CD_SS_ANTENPOU = 0;
+	@CD_SS_ANKOKURYUUAKUMU = 0;
 	@BUFF_HOMUN_RES = 0;
 	@LAST_HOMUN_PITCHER_TICK = 0;
 	deltimer "AutoPlayerSystem::OnStepTimer";
@@ -1198,8 +1225,8 @@ OnStepTimer:
 		end;
 	}
 
-	// 5. Inatividade de Combate: Se passar 5 segundos sem atacar -> Usa Asa de Mosca e tela no mapa
-	if (@AUTO_LAST_ATTACK_TICK > 0 && (.@now - @AUTO_LAST_ATTACK_TICK) >= 5) {
+	// 5. Inatividade de Combate: Se passar 3 segundos sem atacar -> Usa Asa de Mosca e tela no mapa
+	if (@AUTO_LAST_ATTACK_TICK > 0 && (.@now - @AUTO_LAST_ATTACK_TICK) >= 3) {
 		if ((countitem(601) > 0 || (getskilllv("AL_TELEPORT") > 0 && Sp >= 9)) && callfunc("F_AutoMapAllowsFlyWing", @AUTO_MAP$)) {
 			@AUTO_LAST_ATTACK_TICK = .@now;
 			@AUTO_LAST_TELEPORT = .@now;
@@ -1231,6 +1258,8 @@ OnStepTimer:
 			@AUTO_EXP_DIR_Y = 0;
 			@AUTO_EXP_DEST_X = 0;
 			@AUTO_EXP_DEST_Y = 0;
+			@AUTO_NIGHTMARE_TARGET = 0;
+			@AUTO_NIGHTMARE_EXPIRES = 0;
 			deletearray @AUTO_BLOCKED_MOB[0], 16;
 			deletearray @AUTO_BLOCKED_TIME[0], 16;
 			@AUTO_BLOCKED_INDEX = 0;
@@ -1319,6 +1348,8 @@ OnStepTimer:
 			@AUTO_TARGET_WALKING = 0;
 			@AUTO_PURSUIT_TARGET = 0;
 			@AUTO_PURSUIT_FAIL_TICKS = 0;
+			@AUTO_NIGHTMARE_TARGET = 0;
+			@AUTO_NIGHTMARE_EXPIRES = 0;
 			// Apos um combate / morte do alvo: libera monstros desistidos para buscar novamente o mais proximo
 			deletearray @AUTO_BLOCKED_MOB[0], 16;
 			deletearray @AUTO_BLOCKED_TIME[0], 16;
@@ -1491,7 +1522,7 @@ OnStepTimer:
 
 		// Se possuir Asa de Mosca (601) no inventario ou Teleporte e o mapa permitir teleporte:
 		if ((countitem(601) > 0 || (getskilllv("AL_TELEPORT") > 0 && Sp >= 9)) && callfunc("F_AutoMapAllowsFlyWing", @AUTO_MAP$)) {
-			if ((.@now - @AUTO_LAST_TELEPORT) >= 5) {
+			if ((.@now - @AUTO_LAST_TELEPORT) >= 3) {
 				@AUTO_LAST_TELEPORT = .@now;
 				@AUTO_LAST_ATTACK_TICK = .@now;
 				@AUTO_CONSECUTIVE_WING_TELEPORTS++;
@@ -3162,12 +3193,7 @@ OnStepTimer:
 	}
 	// 7. NINJA E EVOLUCOES (Kagerou, Oboro, Shinkiro, Shiranui)
 	else if (BaseClass == Job_Ninja || Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro || Class == Job_Shinkiro || Class == Job_Shiranui) {
-		// Buffs de combate (Utsusemi, Nen, Izayoi, Zangetsu)
-		if (getskilllv("NJ_UTSUSEMI") > 0 && Sp >= 15 && !getstatus(SC_UTSUSEMI) && .@now >= @BUFF_NJ_UTSUSEMI + 10) {
-			@BUFF_NJ_UTSUSEMI = .@now;
-			unitskilluseid getcharid(3), "NJ_UTSUSEMI", getskilllv("NJ_UTSUSEMI"), getcharid(3), 0, 0, 0, 0;
-			.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
-		}
+		// Buffs de combate (Nen, Izayoi, Zangetsu)
 		if (getskilllv("NJ_NEN") > 0 && Sp >= 20 && !getstatus(SC_NEN) && .@now >= @BUFF_NJ_NEN + 15) {
 			@BUFF_NJ_NEN = .@now;
 			unitskilluseid getcharid(3), "NJ_NEN", getskilllv("NJ_NEN"), getcharid(3), 0, 0, 0, 0;
@@ -3221,7 +3247,51 @@ OnStepTimer:
 			} else if (.@sk_p$ == "SS_KINRYUUHOU" && getskilllv("SS_KINRYUUHOU") > 0 && Sp >= 52 && .@dist <= 11) {
 				unitskilluseid getcharid(3), "SS_KINRYUUHOU", getskilllv("SS_KINRYUUHOU"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
-			} else if (.@sk_p$ == "SS_ANTENPOU" && getskilllv("SS_ANTENPOU") > 0 && Sp >= 40 && .@dist <= 2) {
+			} else if ((.@sk_p$ == "SS_ANTENPOU" || .@sk_p$ == "SS_ANKOKURYUUAKUMU") && getskilllv("SS_ANTENPOU") > 0 && getskilllv("SS_ANKOKURYUUAKUMU") > 0) {
+				// Se as duas estiverem em cooldown: usa Dragao Explosivo!
+				if (.@now < @CD_SS_ANTENPOU && .@now < @CD_SS_ANKOKURYUUAKUMU) {
+					if (getskilllv("NJ_BAKUENRYU") > 0 && Sp >= 20 && .@dist <= 9) {
+						unitskilluseid getcharid(3), "NJ_BAKUENRYU", getskilllv("NJ_BAKUENRYU"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+						.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+					}
+				}
+
+				// COMBO PESADELO: Canhao Obscurescente (aplica Pesadelo) + Dragao Sombrio - Pesadelo (detona Pesadelo)
+				if (.@dist <= 3) {
+					if (@AUTO_NIGHTMARE_TARGET != @AUTO_CURRENT_TARGET || .@now > @AUTO_NIGHTMARE_EXPIRES) {
+						if (.@now >= @CD_SS_ANTENPOU && Sp >= 40) {
+							@CD_SS_ANTENPOU = .@now + 1;
+							unitskilluseid getcharid(3), "SS_ANTENPOU", getskilllv("SS_ANTENPOU"), getcharid(3), 0, 0, 0, 0;
+							@AUTO_NIGHTMARE_TARGET = @AUTO_CURRENT_TARGET;
+							@AUTO_NIGHTMARE_EXPIRES = .@now + 5;
+							.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+						} else if (getskilllv("NJ_BAKUENRYU") > 0 && Sp >= 20 && .@dist <= 9) {
+							// Canhao Obscurescente em cooldown: usa Dragao Explosivo enquanto aguarda!
+							unitskilluseid getcharid(3), "NJ_BAKUENRYU", getskilllv("NJ_BAKUENRYU"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+							.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+						}
+					} else {
+						if (.@now >= @CD_SS_ANKOKURYUUAKUMU && Sp >= 120) {
+							@CD_SS_ANKOKURYUUAKUMU = .@now + 2;
+							unitskilluseid getcharid(3), "SS_ANKOKURYUUAKUMU", getskilllv("SS_ANKOKURYUUAKUMU"), getcharid(3), 0, 0, 0, 0;
+							@AUTO_NIGHTMARE_TARGET = 0;
+							@AUTO_NIGHTMARE_EXPIRES = 0;
+							.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+						} else if (.@now >= @CD_SS_ANTENPOU && Sp >= 40) {
+							@CD_SS_ANTENPOU = .@now + 1;
+							unitskilluseid getcharid(3), "SS_ANTENPOU", getskilllv("SS_ANTENPOU"), getcharid(3), 0, 0, 0, 0;
+							.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+						} else if (getskilllv("NJ_BAKUENRYU") > 0 && Sp >= 20 && .@dist <= 9) {
+							// Em cooldown do combo: usa Dragao Explosivo!
+							unitskilluseid getcharid(3), "NJ_BAKUENRYU", getskilllv("NJ_BAKUENRYU"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+							.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+						}
+					}
+				} else if (getskilllv("NJ_BAKUENRYU") > 0 && Sp >= 20 && .@dist <= 9) {
+					unitskilluseid getcharid(3), "NJ_BAKUENRYU", getskilllv("NJ_BAKUENRYU"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+			} else if (.@sk_p$ == "SS_ANTENPOU" && getskilllv("SS_ANTENPOU") > 0 && Sp >= 40 && .@dist <= 3) {
 				unitskilluseid getcharid(3), "SS_ANTENPOU", getskilllv("SS_ANTENPOU"), getcharid(3), 0, 0, 0, 0;
 				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
 			} else if (.@sk_p$ == "SS_SHIMIRU" && getskilllv("SS_SHIMIRU") > 0 && Sp >= 40 && .@dist <= 10) {
@@ -3321,7 +3391,49 @@ OnStepTimer:
 			} else if (getskilllv("SS_KINRYUUHOU") > 0 && Sp >= 52 && .@dist <= 11) {
 				unitskilluseid getcharid(3), "SS_KINRYUUHOU", getskilllv("SS_KINRYUUHOU"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
-			} else if (getskilllv("SS_ANTENPOU") > 0 && Sp >= 40 && .@dist <= 2) {
+			} else if (getskilllv("SS_ANTENPOU") > 0 && getskilllv("SS_ANKOKURYUUAKUMU") > 0) {
+				// Se as duas estiverem em cooldown: usa Dragao Explosivo!
+				if (.@now < @CD_SS_ANTENPOU && .@now < @CD_SS_ANKOKURYUUAKUMU) {
+					if (getskilllv("NJ_BAKUENRYU") > 0 && Sp >= 20 && .@dist <= 9) {
+						unitskilluseid getcharid(3), "NJ_BAKUENRYU", getskilllv("NJ_BAKUENRYU"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+						.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+					}
+				}
+
+				// COMBO PESADELO (Rotacao Padrao): Canhao Obscurescente (aplica) + Dragao Sombrio (detona)
+				if (.@dist <= 3) {
+					if (@AUTO_NIGHTMARE_TARGET != @AUTO_CURRENT_TARGET || .@now > @AUTO_NIGHTMARE_EXPIRES) {
+						if (.@now >= @CD_SS_ANTENPOU && Sp >= 40) {
+							@CD_SS_ANTENPOU = .@now + 1;
+							unitskilluseid getcharid(3), "SS_ANTENPOU", getskilllv("SS_ANTENPOU"), getcharid(3), 0, 0, 0, 0;
+							@AUTO_NIGHTMARE_TARGET = @AUTO_CURRENT_TARGET;
+							@AUTO_NIGHTMARE_EXPIRES = .@now + 5;
+							.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+						} else if (getskilllv("NJ_BAKUENRYU") > 0 && Sp >= 20 && .@dist <= 9) {
+							unitskilluseid getcharid(3), "NJ_BAKUENRYU", getskilllv("NJ_BAKUENRYU"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+							.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+						}
+					} else {
+						if (.@now >= @CD_SS_ANKOKURYUUAKUMU && Sp >= 120) {
+							@CD_SS_ANKOKURYUUAKUMU = .@now + 2;
+							unitskilluseid getcharid(3), "SS_ANKOKURYUUAKUMU", getskilllv("SS_ANKOKURYUUAKUMU"), getcharid(3), 0, 0, 0, 0;
+							@AUTO_NIGHTMARE_TARGET = 0;
+							@AUTO_NIGHTMARE_EXPIRES = 0;
+							.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+						} else if (.@now >= @CD_SS_ANTENPOU && Sp >= 40) {
+							@CD_SS_ANTENPOU = .@now + 1;
+							unitskilluseid getcharid(3), "SS_ANTENPOU", getskilllv("SS_ANTENPOU"), getcharid(3), 0, 0, 0, 0;
+							.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+						} else if (getskilllv("NJ_BAKUENRYU") > 0 && Sp >= 20 && .@dist <= 9) {
+							unitskilluseid getcharid(3), "NJ_BAKUENRYU", getskilllv("NJ_BAKUENRYU"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+							.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+						}
+					}
+				} else if (getskilllv("NJ_BAKUENRYU") > 0 && Sp >= 20 && .@dist <= 9) {
+					unitskilluseid getcharid(3), "NJ_BAKUENRYU", getskilllv("NJ_BAKUENRYU"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+			} else if (getskilllv("SS_ANTENPOU") > 0 && Sp >= 40 && .@dist <= 3) {
 				unitskilluseid getcharid(3), "SS_ANTENPOU", getskilllv("SS_ANTENPOU"), getcharid(3), 0, 0, 0, 0;
 				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
 			} else if (getskilllv("SS_SHIMIRU") > 0 && Sp >= 40 && .@dist <= 10) {
@@ -4292,11 +4404,6 @@ OnCheckSupportBuffs:
 		if (getskilllv("NJ_NEN") > 0 && Sp >= 20 && !getstatus(SC_NEN) && .@now >= @BUFF_NJ_NEN + 15) {
 			@BUFF_NJ_NEN = .@now;
 			unitskilluseid getcharid(3), "NJ_NEN", getskilllv("NJ_NEN"), getcharid(3), 0, 0, 0, 0;
-			return 1;
-		}
-		if (getskilllv("NJ_UTSUSEMI") > 0 && Sp >= 15 && !getstatus(SC_UTSUSEMI) && .@now >= @BUFF_NJ_UTSUSEMI + 10) {
-			@BUFF_NJ_UTSUSEMI = .@now;
-			unitskilluseid getcharid(3), "NJ_UTSUSEMI", getskilllv("NJ_UTSUSEMI"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
 		if (getskilllv("KO_IZAYOI") > 0 && Sp >= 40 && !getstatus(SC_IZAYOI) && .@now >= @BUFF_KO_IZAYOI + 15) {
