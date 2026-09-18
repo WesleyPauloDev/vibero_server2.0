@@ -9686,7 +9686,7 @@ void clif_GM_kick(map_session_data *sd, map_session_data *tsd)
 	if (session_isActive(tsd->fd))
 		clif_authfail_fd(tsd->fd, 15);
 	else
-		map_quit(tsd);
+		add_timer(gettick() + 50, clif_delayquit, tsd->id, 0);
 
 	if (sd)
 		clif_GM_kickack(sd, tsd->status.account_id);

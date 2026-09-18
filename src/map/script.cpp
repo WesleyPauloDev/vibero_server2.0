@@ -21085,9 +21085,14 @@ BUILDIN_FUNC(unitwalk)
 
 	// Unit was already forced to walk.
 	if (ud != nullptr && ud->state.force_walk) {
-		script_pushint(st, 0);
-		ShowWarning("buildin_%s: Unit has already been forced to walk and not reached it's destination yet.\n", cmd);
-		return SCRIPT_CMD_FAILURE;
+		if (bl->type == BL_PC) {
+			ud->state.force_walk = false;
+			unit_stop_walking(bl, USW_NONE);
+		} else {
+			script_pushint(st, 0);
+			ShowWarning("buildin_%s: Unit has already been forced to walk and not reached it's destination yet.\n", cmd);
+			return SCRIPT_CMD_FAILURE;
+		}
 	}
 
 	if (bl->type == BL_NPC) {

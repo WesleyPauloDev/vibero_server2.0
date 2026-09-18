@@ -207,6 +207,7 @@ OnAutoCommand:
 	@AUTO_MAP$ = strcharinfo(3);
 	@AUTO_LAST_TICK = gettimetick(2);
 	@AUTO_LAST_BUFF = gettimetick(2);
+	@AUTO_LAST_SUPPORT_BUFF = gettimetick(2);
 	callsub(OnApplyBaseBuffs);
 	if ((BaseClass == Job_Acolyte || Class == Job_Acolyte || Class == Job_Acolyte_High || BaseJob == Job_Acolyte || BaseJob == Job_Acolyte_High) && getskilllv("AL_HOLYLIGHT") <= 0) {
 		skill "AL_HOLYLIGHT", 1, 0;
@@ -256,6 +257,11 @@ OnAutoCommand:
 	@AUTO_EXP_DIR_Y = 0;
 	@AUTO_EXP_DEST_X = 0;
 	@AUTO_EXP_DEST_Y = 0;
+	@AUTO_SNAP_USED = 0;
+	@CD_SR_TIGERCANNON = 0;
+	@CD_SR_HOWLINGOFLION = 0;
+	@CD_SR_RAMPAGEBLASTER = 0;
+	@CD_SR_RAISINGDRAGON = 0;
 	@AUTO_LAST_ATTACK_TICK = gettimetick(2);
 
 	.@rm_m = #AutoTimeSecs / 60;
@@ -332,6 +338,7 @@ OnStartAutoOffline:
 	@AUTO_MAP$ = strcharinfo(3);
 	@AUTO_LAST_TICK = gettimetick(2);
 	@AUTO_LAST_BUFF = @AUTO_LAST_TICK;
+	@AUTO_LAST_SUPPORT_BUFF = @AUTO_LAST_TICK;
 	@AUTO_CONSECUTIVE_NO_DAMAGE = 0;
 	@AUTO_CONSECUTIVE_WING_TELEPORTS = 0;
 	@AUTO_CURRENT_TARGET = 0;
@@ -346,6 +353,11 @@ OnStartAutoOffline:
 	@AUTO_EXP_DIR_Y = 0;
 	@AUTO_EXP_DEST_X = 0;
 	@AUTO_EXP_DEST_Y = 0;
+	@AUTO_SNAP_USED = 0;
+	@CD_SR_TIGERCANNON = 0;
+	@CD_SR_HOWLINGOFLION = 0;
+	@CD_SR_RAMPAGEBLASTER = 0;
+	@CD_SR_RAISINGDRAGON = 0;
 	@AUTO_LAST_ATTACK_TICK = gettimetick(2);
 
 	// Aplica buffs iniciais
@@ -388,12 +400,26 @@ OnOpenSetupMenu:
 	mes "Modo de Foco: " + (#AutoFarmMode ? "^0000FF[Foco XP / Teleporta na Cidade]^000000" : "^FF8800[Farm Livre / Sem Teleporte]^000000");
 	mes "Enfrentar MVP: " + (#AutoFightMVP ? "^00AA00[SIM / Caca MVP]^000000" : "^FF8800[NAO / Foge de MVP]^000000");
 	mes "Armazenamento no Armazem: ^00AA00[Automatico ao atingir 70% peso]^000000";
+
+	.@cur_p$ = AutoSkillPriority$;
+	if (.@cur_p$ == "" && #AutoSkillPriority > 0) {
+		if (#AutoSkillPriority == 1) .@cur_p$ = "SR_TIGERCANNON";
+		else if (#AutoSkillPriority == 2) .@cur_p$ = "SR_HOWLINGOFLION";
+		else if (#AutoSkillPriority == 3) .@cur_p$ = "SR_RAMPAGEBLASTER";
+		else if (#AutoSkillPriority == 4) .@cur_p$ = "SR_SKYNETBLOW";
+		else if (#AutoSkillPriority == 5) .@cur_p$ = "SR_KNUCKLEARROW";
+		else if (#AutoSkillPriority == 6) .@cur_p$ = "SR_GATEOFHELL";
+		else if (#AutoSkillPriority == 7) .@cur_p$ = "MO_FINGEROFFENSIVE";
+	}
+	.@prior_name$ = callsub(OnGetSkillPriorityName, .@cur_p$);
+	mes "Habilidade Prioritaria: ^0000FF[" + .@prior_name$ + "]^000000";
 	next;
 
 	switch (select(
 		"Amuleto de Ziegfried (" + (#AutoUseZiegfried ? "^00AA00Ligado^000000" : "^FF0000Desligado^000000") + ")",
 		"Modo de Foco (" + (#AutoFarmMode ? "Foco XP" : "Farm Livre") + ")",
 		"Enfrentar MVP (" + (#AutoFightMVP ? "^00AA00Sim (Cacar)^000000" : "^FF0000Nao (Fugir)^000000") + ")",
+		"Priorizar Habilidade Ofensiva (" + .@prior_name$ + ")",
 		"^0055FFAtivar Modo OFFLINE (@auto offline)^000000",
 		"Consultar Tempo Restante Detalhado",
 		"Como Funciona o Sistema?",
@@ -423,10 +449,14 @@ OnOpenSetupMenu:
 		goto OnOpenSetupMenu;
 
 	case 4:
+		callsub OnSelectSkillPriority;
+		goto OnOpenSetupMenu;
+
+	case 5:
 		callsub OnStartAutoOffline;
 		end;
 
-	case 5:
+	case 6:
 		mes "[^0000FFTempo Restante^000000]";
 		mes "Seu saldo atual de modo automatico:";
 		mes "^00AA00" + .@rm_m + " minuto(s) e " + .@rm_s + " segundo(s).^000000";
@@ -436,7 +466,7 @@ OnOpenSetupMenu:
 		next;
 		goto OnOpenSetupMenu;
 
-	case 6:
+	case 7:
 		mes "[^0000FFComo Funciona o Modo Auto^000000]";
 		mes "1. Va ate o mapa onde deseja cacar.";
 		mes "2. Configure seu ^008800@autopot^000000, ^008800@autoloot^000000 e ^008800@restock^000000.";
@@ -451,10 +481,306 @@ OnOpenSetupMenu:
 		next;
 		goto OnOpenSetupMenu;
 
-	case 7:
+	case 8:
 		close;
 	}
 	end;
+
+OnGetSkillPriorityName:
+	.@sk$ = getarg(0, "");
+	if (.@sk$ == "" || .@sk$ == "0") return "Automatico (Padrao)";
+	if (.@sk$ == "SR_TIGERCANNON") return "Garra do Tigre";
+	if (.@sk$ == "SR_HOWLINGOFLION") return "Rugido do Leao";
+	if (.@sk$ == "SR_RAMPAGEBLASTER") return "Explosao Espiritual";
+	if (.@sk$ == "SR_SKYNETBLOW") return "Soco Furacao";
+	if (.@sk$ == "SR_KNUCKLEARROW") return "Pancada Corporal [Knuckle Arrow]";
+	if (.@sk$ == "SR_GATEOFHELL") return "Portoes do Inferno";
+	if (.@sk$ == "MO_FINGEROFFENSIVE") return "Disparo de Esferas";
+	if (.@sk$ == "AB_ADORAMUS") return "Adoramus";
+	if (.@sk$ == "AB_JUDEX") return "Judex";
+	if (.@sk$ == "PR_MAGNUS") return "Magnus Exorcismus";
+	if (.@sk$ == "AL_HOLYLIGHT") return "Luz Divina";
+	if (.@sk$ == "RK_DRAGONBREATH") return "Sopro do Dragao";
+	if (.@sk$ == "RK_DRAGONBREATH_WATER") return "Sopro de Gelo";
+	if (.@sk$ == "RK_IGNITIONBREAK") return "Impacto Flamejante";
+	if (.@sk$ == "RK_SONICWAVE") return "Onda de Choque";
+	if (.@sk$ == "RK_WINDCUTTER") return "Vento Cortante";
+	if (.@sk$ == "LG_OVERBRAND") return "Lanca do Destino [Overbrand]";
+	if (.@sk$ == "LG_BANISHINGPOINT") return "Toque do Oblivio [Banishing Point]";
+	if (.@sk$ == "LG_CANNONSPEAR") return "Disparo Perfurante [Cannon Spear]";
+	if (.@sk$ == "LG_RAYOFGENESIS") return "Luz da Criacao [Ray of Genesis]";
+	if (.@sk$ == "LK_SPIRALPIERCE") return "Perfurar em Espiral";
+	if (.@sk$ == "PA_SHIELDCHAIN") return "Choque Rapido";
+	if (.@sk$ == "CR_HOLYCROSS") return "Crux Divina";
+	if (.@sk$ == "KN_BOWLINGBASH") return "Impacto de Tyr";
+	if (.@sk$ == "SM_MAGNUM") return "Golpe Fatal [Magnum Break]";
+	if (.@sk$ == "SM_BASH") return "Golpe Fulminante [Bash]";
+	if (.@sk$ == "SO_PSYCHIC_WAVE") return "Onda Psiquica";
+	if (.@sk$ == "SO_POISON_BUSTER") return "Implosao Toxica";
+	if (.@sk$ == "SO_DIAMONDDUST") return "Po de Diamante";
+	if (.@sk$ == "SO_EARTHGRAVE") return "Tumulo de Pedra";
+	if (.@sk$ == "SO_VARETYR_SPEAR") return "Lanca de Varetyr";
+	if (.@sk$ == "SO_CLOUD_KILL") return "Castigo de Nerthus [Cloud Kill]";
+	if (.@sk$ == "WL_COMET") return "Cometa";
+	if (.@sk$ == "WL_SOULEXPANSION") return "Impacto Espiritual";
+	if (.@sk$ == "WL_HELLINFERNO") return "Chamas de Hela";
+	if (.@sk$ == "WL_EARTHSTRAIN") return "Abalo Sismico";
+	if (.@sk$ == "WL_CHAINLIGHTNING") return "Corrente Eletrica";
+	if (.@sk$ == "WL_CRIMSONROCK") return "Meteoro Escarlate";
+	if (.@sk$ == "WL_JACKFROST") return "Esquife de Gelo";
+	if (.@sk$ == "HW_NAPALMVULCAN") return "Vulcao Napalm";
+	if (.@sk$ == "WZ_STORMGUST") return "Nevasca";
+	if (.@sk$ == "WZ_VERMILION") return "Ira de Thor";
+	if (.@sk$ == "WZ_METEOR") return "Chuva de Meteoros";
+	if (.@sk$ == "WZ_HEAVENDRIVE") return "Furia da Terra";
+	if (.@sk$ == "WZ_EARTHSPIKE") return "Coluna de Pedra";
+	if (.@sk$ == "MG_FIREBALL") return "Bola de Fogo";
+	if (.@sk$ == "MG_FIREBOLT") return "Lancas de Fogo";
+	if (.@sk$ == "MG_COLDBOLT") return "Lancas de Gelo";
+	if (.@sk$ == "MG_LIGHTNINGBOLT") return "Relampago";
+	if (.@sk$ == "MG_SOULSTRIKE") return "Espiritos Ancioes";
+	if (.@sk$ == "RA_ARROWSTORM") return "Tempestade de Flechas";
+	if (.@sk$ == "RA_AIMEDBOLT") return "Disparo Certeiro";
+	if (.@sk$ == "WM_SEVERE_RAINSTORM") return "Temporal de Mil Flechas";
+	if (.@sk$ == "WM_METALLICSOUND") return "Ruido Estridente";
+	if (.@sk$ == "SN_SHARPSHOOTING") return "Tiro Preciso";
+	if (.@sk$ == "SN_FALCONASSAULT") return "Assalto do Falcao";
+	if (.@sk$ == "HT_BLITZBEAT") return "Ataque Aereo";
+	if (.@sk$ == "CG_ARROWVULCAN") return "Vulcao de Flechas";
+	if (.@sk$ == "BA_MUSICALSTRIKE") return "Flecha Melodica";
+	if (.@sk$ == "DC_THROWARROW") return "Estilingue";
+	if (.@sk$ == "AC_DOUBLE") return "Rajada de Flechas";
+	if (.@sk$ == "AC_SHOWER") return "Chuva de Flechas";
+	if (.@sk$ == "GC_CROSSIMPACT") return "Impacto Cruzado";
+	if (.@sk$ == "GC_ROLLINGCUTTER") return "Laminas de Loki";
+	if (.@sk$ == "SC_FATALMENACE") return "Ameaca Fatal";
+	if (.@sk$ == "SC_TRIANGLESHOT") return "Disparo Triplo";
+	if (.@sk$ == "ASC_BREAKER") return "Destruidor de Almas";
+	if (.@sk$ == "ASC_METEORASSAULT") return "Impacto Meteoro";
+	if (.@sk$ == "AS_SONICBLOW") return "Laminas Destruidoras";
+	if (.@sk$ == "RG_BACKSTAP") return "Apunhalar";
+	if (.@sk$ == "RG_RAID") return "Ataque Surpresa";
+	if (.@sk$ == "TF_POISON") return "Envenenar";
+	if (.@sk$ == "TF_SPRINKLESAND") return "Chute de Areia";
+	if (.@sk$ == "GN_CARTCANNON") return "Canhao de Protons";
+	if (.@sk$ == "GN_CART_TORNADO") return "Tornado de Carrinho";
+	if (.@sk$ == "GN_SPORE_EXPLOSION") return "Esporo Explosivo";
+	if (.@sk$ == "NC_ARMSCANNON") return "Canhao";
+	if (.@sk$ == "NC_AXETORNADO") return "Furia do Furacao";
+	if (.@sk$ == "NC_POWERSWING") return "Brandir Machado [Power Swing]";
+	if (.@sk$ == "NC_AXEBOOMERANG") return "Arremesso do Machado";
+	if (.@sk$ == "NC_MAGMA_ERUPTION") return "Erupcao de Magma";
+	if (.@sk$ == "NC_BOOSTKNUCKLE") return "Punho Foguete";
+	if (.@sk$ == "NC_PILEBUNKER") return "Bate Estaca [Pile Bunker]";
+	if (.@sk$ == "NC_VULCANARM") return "Metralhadora [Vulcan Arm]";
+	if (.@sk$ == "NC_FLAMELAUNCHER") return "Lanca-Chamas [Flame Launcher]";
+	if (.@sk$ == "NC_COLDSLOWER") return "Gas Criogenico [Cold Slower]";
+	if (.@sk$ == "MT_AXE_STOMP") return "Pisada de Machado [Axe Stomp]";
+	if (.@sk$ == "MT_RUSH_QUAKE") return "Impacto Sismico [Rush Quake]";
+	if (.@sk$ == "CR_ACIDDEMONSTRATION") return "Bomba Acida";
+	if (.@sk$ == "AM_ACIDTERROR") return "Terror Acido";
+	if (.@sk$ == "WS_CARTTERMINATION") return "Choque de Carrinho";
+	if (.@sk$ == "MC_CARTREVOLUTION") return "Cavalo-de-Pau [Cart Revolution]";
+	if (.@sk$ == "MC_MAMMONITE") return "Mammonita";
+	if (.@sk$ == "KO_HUUMARANKA") return "Turbilhao de Petalas";
+	if (.@sk$ == "KO_BAKURETSU") return "Kunai Explosiva";
+	if (.@sk$ == "KO_HAPPOKUNAI") return "Disparo de Kunai";
+	if (.@sk$ == "NJ_HUUMA") return "Arremesso de Shuriken Huuma";
+	if (.@sk$ == "NJ_KOUENKA") return "Petalas Flamejantes";
+	if (.@sk$ == "RL_FIREDANCE") return "Danca das Chamas";
+	if (.@sk$ == "RL_R_TRIP") return "Lancamento Circular [Round Trip]";
+	if (.@sk$ == "GS_DESPERADO") return "Desperado";
+	if (.@sk$ == "GS_TRIPLEACTION") return "Ataque Triplo";
+	if (.@sk$ == "SU_PICKYPECK") return "Bicada de Picky";
+	if (.@sk$ == "SU_SV_STEMSPEAR") return "Lanca de Raizes";
+	if (.@sk$ == "SU_CN_METEOR") return "Cometa de Cenouras";
+	if (.@sk$ == "TK_DOWNKICK") return "Chute Decrescente";
+	if (.@sk$ == "TK_STORMKICK") return "Chute Tornado";
+	if (.@sk$ == "TK_TURNKICK") return "Chute Giratorio";
+	if (.@sk$ == "TK_COUNTER") return "Contra-Chute";
+	return .@sk$;
+
+OnSelectSkillPriority:
+	mes "[^0000FFPrioridade de Habilidade Ofensiva^000000]";
+	mes "Escolha qual habilidade aprendida voce deseja priorizar:";
+	mes "(Se a habilidade estiver em cooldown ou sem recursos, o bot usara as demais disponiveis).";
+	next;
+
+	deletearray .@opt_skills$[0];
+	deletearray .@opt_names$[0];
+	.@opt_count = 0;
+	.@menu$ = "Automatico (Padrao - Rotacao Inteligente):";
+	.@opt_skills$[.@opt_count] = "";
+	.@opt_names$[.@opt_count] = "Automatico (Padrao)";
+	.@opt_count++;
+
+	// 1. ESPADACHIM E EVOLUCOES (Cavaleiro Runico, Guardiao Real, etc.)
+	if (BaseClass == Job_Swordman || Class == Job_Swordman || Class == Job_Swordman_High || BaseJob == Job_Swordman || BaseJob == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight || Class == Job_Rune_Knight_T || Class == 4060 || Class == 4054 || Class == 4008 || Class == Job_Crusader || Class == Job_Paladin || Class == Job_Royal_Guard || Class == Job_Royal_Guard_T || Class == 4073 || Class == 4066 || Class == 4015 || BaseJob == Job_Knight || BaseJob == Job_Crusader || BaseJob == Job_Lord_Knight || BaseJob == Job_Paladin || BaseJob == Job_Rune_Knight || BaseJob == Job_Royal_Guard) {
+		if (getskilllv("RK_DRAGONBREATH") > 0) { .@opt_skills$[.@opt_count] = "RK_DRAGONBREATH"; .@opt_names$[.@opt_count] = "Sopro do Dragao"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("RK_DRAGONBREATH") + "):"; .@opt_count++; }
+		if (getskilllv("RK_DRAGONBREATH_WATER") > 0) { .@opt_skills$[.@opt_count] = "RK_DRAGONBREATH_WATER"; .@opt_names$[.@opt_count] = "Sopro de Gelo"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("RK_DRAGONBREATH_WATER") + "):"; .@opt_count++; }
+		if (getskilllv("RK_IGNITIONBREAK") > 0) { .@opt_skills$[.@opt_count] = "RK_IGNITIONBREAK"; .@opt_names$[.@opt_count] = "Impacto Flamejante"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("RK_IGNITIONBREAK") + "):"; .@opt_count++; }
+		if (getskilllv("RK_SONICWAVE") > 0) { .@opt_skills$[.@opt_count] = "RK_SONICWAVE"; .@opt_names$[.@opt_count] = "Onda de Choque"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("RK_SONICWAVE") + "):"; .@opt_count++; }
+		if (getskilllv("RK_WINDCUTTER") > 0) { .@opt_skills$[.@opt_count] = "RK_WINDCUTTER"; .@opt_names$[.@opt_count] = "Vento Cortante"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("RK_WINDCUTTER") + "):"; .@opt_count++; }
+		if (getskilllv("LG_OVERBRAND") > 0) { .@opt_skills$[.@opt_count] = "LG_OVERBRAND"; .@opt_names$[.@opt_count] = "Lanca do Destino [Overbrand]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("LG_OVERBRAND") + "):"; .@opt_count++; }
+		if (getskilllv("LG_BANISHINGPOINT") > 0) { .@opt_skills$[.@opt_count] = "LG_BANISHINGPOINT"; .@opt_names$[.@opt_count] = "Toque do Oblivio [Banishing Point]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("LG_BANISHINGPOINT") + "):"; .@opt_count++; }
+		if (getskilllv("LG_CANNONSPEAR") > 0) { .@opt_skills$[.@opt_count] = "LG_CANNONSPEAR"; .@opt_names$[.@opt_count] = "Disparo Perfurante [Cannon Spear]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("LG_CANNONSPEAR") + "):"; .@opt_count++; }
+		if (getskilllv("LG_RAYOFGENESIS") > 0) { .@opt_skills$[.@opt_count] = "LG_RAYOFGENESIS"; .@opt_names$[.@opt_count] = "Luz da Criacao [Ray of Genesis]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("LG_RAYOFGENESIS") + "):"; .@opt_count++; }
+		if (getskilllv("LK_SPIRALPIERCE") > 0) { .@opt_skills$[.@opt_count] = "LK_SPIRALPIERCE"; .@opt_names$[.@opt_count] = "Perfurar em Espiral"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("LK_SPIRALPIERCE") + "):"; .@opt_count++; }
+		if (getskilllv("PA_SHIELDCHAIN") > 0) { .@opt_skills$[.@opt_count] = "PA_SHIELDCHAIN"; .@opt_names$[.@opt_count] = "Choque Rapido"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("PA_SHIELDCHAIN") + "):"; .@opt_count++; }
+		if (getskilllv("CR_HOLYCROSS") > 0) { .@opt_skills$[.@opt_count] = "CR_HOLYCROSS"; .@opt_names$[.@opt_count] = "Crux Divina"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("CR_HOLYCROSS") + "):"; .@opt_count++; }
+		if (getskilllv("KN_BOWLINGBASH") > 0) { .@opt_skills$[.@opt_count] = "KN_BOWLINGBASH"; .@opt_names$[.@opt_count] = "Impacto de Tyr"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("KN_BOWLINGBASH") + "):"; .@opt_count++; }
+		if (getskilllv("SM_MAGNUM") > 0) { .@opt_skills$[.@opt_count] = "SM_MAGNUM"; .@opt_names$[.@opt_count] = "Golpe Fatal [Magnum Break]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SM_MAGNUM") + "):"; .@opt_count++; }
+		if (getskilllv("SM_BASH") > 0) { .@opt_skills$[.@opt_count] = "SM_BASH"; .@opt_names$[.@opt_count] = "Golpe Fulminante [Bash]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SM_BASH") + "):"; .@opt_count++; }
+	}
+	// 2. MAGO E EVOLUCOES (Arcano, Feiticeiro, etc.)
+	else if (BaseClass == Job_Mage || Class == Job_Mage || Class == Job_Mage_High || BaseJob == Job_Mage || BaseJob == Job_Mage_High || Class == Job_Wizard || Class == Job_High_Wizard || Class == Job_Warlock || Class == Job_Warlock_T || Class == 4061 || Class == Job_Sage || Class == Job_Professor || Class == Job_Sorcerer || Class == Job_Sorcerer_T || Class == 4074 || Class == 4067 || Class == 4055 || Class == 4009 || Class == 4017 || BaseJob == Job_Wizard || BaseJob == Job_Sage || BaseJob == Job_High_Wizard || BaseJob == Job_Professor || BaseJob == Job_Warlock || BaseJob == Job_Sorcerer) {
+		if (getskilllv("SO_PSYCHIC_WAVE") > 0) { .@opt_skills$[.@opt_count] = "SO_PSYCHIC_WAVE"; .@opt_names$[.@opt_count] = "Onda Psiquica"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SO_PSYCHIC_WAVE") + "):"; .@opt_count++; }
+		if (getskilllv("SO_POISON_BUSTER") > 0) { .@opt_skills$[.@opt_count] = "SO_POISON_BUSTER"; .@opt_names$[.@opt_count] = "Implosao Toxica"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SO_POISON_BUSTER") + "):"; .@opt_count++; }
+		if (getskilllv("SO_DIAMONDDUST") > 0) { .@opt_skills$[.@opt_count] = "SO_DIAMONDDUST"; .@opt_names$[.@opt_count] = "Po de Diamante"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SO_DIAMONDDUST") + "):"; .@opt_count++; }
+		if (getskilllv("SO_EARTHGRAVE") > 0) { .@opt_skills$[.@opt_count] = "SO_EARTHGRAVE"; .@opt_names$[.@opt_count] = "Tumulo de Pedra"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SO_EARTHGRAVE") + "):"; .@opt_count++; }
+		if (getskilllv("SO_VARETYR_SPEAR") > 0) { .@opt_skills$[.@opt_count] = "SO_VARETYR_SPEAR"; .@opt_names$[.@opt_count] = "Lanca de Varetyr"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SO_VARETYR_SPEAR") + "):"; .@opt_count++; }
+		if (getskilllv("SO_CLOUD_KILL") > 0) { .@opt_skills$[.@opt_count] = "SO_CLOUD_KILL"; .@opt_names$[.@opt_count] = "Castigo de Nerthus [Cloud Kill]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SO_CLOUD_KILL") + "):"; .@opt_count++; }
+		if (getskilllv("WL_COMET") > 0) { .@opt_skills$[.@opt_count] = "WL_COMET"; .@opt_names$[.@opt_count] = "Cometa"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WL_COMET") + "):"; .@opt_count++; }
+		if (getskilllv("WL_SOULEXPANSION") > 0) { .@opt_skills$[.@opt_count] = "WL_SOULEXPANSION"; .@opt_names$[.@opt_count] = "Impacto Espiritual"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WL_SOULEXPANSION") + "):"; .@opt_count++; }
+		if (getskilllv("WL_HELLINFERNO") > 0) { .@opt_skills$[.@opt_count] = "WL_HELLINFERNO"; .@opt_names$[.@opt_count] = "Chamas de Hela"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WL_HELLINFERNO") + "):"; .@opt_count++; }
+		if (getskilllv("WL_EARTHSTRAIN") > 0) { .@opt_skills$[.@opt_count] = "WL_EARTHSTRAIN"; .@opt_names$[.@opt_count] = "Abalo Sismico"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WL_EARTHSTRAIN") + "):"; .@opt_count++; }
+		if (getskilllv("WL_CHAINLIGHTNING") > 0) { .@opt_skills$[.@opt_count] = "WL_CHAINLIGHTNING"; .@opt_names$[.@opt_count] = "Corrente Eletrica"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WL_CHAINLIGHTNING") + "):"; .@opt_count++; }
+		if (getskilllv("WL_CRIMSONROCK") > 0) { .@opt_skills$[.@opt_count] = "WL_CRIMSONROCK"; .@opt_names$[.@opt_count] = "Meteoro Escarlate"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WL_CRIMSONROCK") + "):"; .@opt_count++; }
+		if (getskilllv("WL_JACKFROST") > 0) { .@opt_skills$[.@opt_count] = "WL_JACKFROST"; .@opt_names$[.@opt_count] = "Esquife de Gelo"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WL_JACKFROST") + "):"; .@opt_count++; }
+		if (getskilllv("HW_NAPALMVULCAN") > 0) { .@opt_skills$[.@opt_count] = "HW_NAPALMVULCAN"; .@opt_names$[.@opt_count] = "Vulcao Napalm"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("HW_NAPALMVULCAN") + "):"; .@opt_count++; }
+		if (getskilllv("WZ_STORMGUST") > 0) { .@opt_skills$[.@opt_count] = "WZ_STORMGUST"; .@opt_names$[.@opt_count] = "Nevasca"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WZ_STORMGUST") + "):"; .@opt_count++; }
+		if (getskilllv("WZ_VERMILION") > 0) { .@opt_skills$[.@opt_count] = "WZ_VERMILION"; .@opt_names$[.@opt_count] = "Ira de Thor"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WZ_VERMILION") + "):"; .@opt_count++; }
+		if (getskilllv("WZ_METEOR") > 0) { .@opt_skills$[.@opt_count] = "WZ_METEOR"; .@opt_names$[.@opt_count] = "Chuva de Meteoros"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WZ_METEOR") + "):"; .@opt_count++; }
+		if (getskilllv("WZ_HEAVENDRIVE") > 0) { .@opt_skills$[.@opt_count] = "WZ_HEAVENDRIVE"; .@opt_names$[.@opt_count] = "Furia da Terra"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WZ_HEAVENDRIVE") + "):"; .@opt_count++; }
+		if (getskilllv("WZ_EARTHSPIKE") > 0) { .@opt_skills$[.@opt_count] = "WZ_EARTHSPIKE"; .@opt_names$[.@opt_count] = "Coluna de Pedra"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WZ_EARTHSPIKE") + "):"; .@opt_count++; }
+		if (getskilllv("MG_FIREBALL") > 0) { .@opt_skills$[.@opt_count] = "MG_FIREBALL"; .@opt_names$[.@opt_count] = "Bola de Fogo"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("MG_FIREBALL") + "):"; .@opt_count++; }
+		if (getskilllv("MG_FIREBOLT") > 0) { .@opt_skills$[.@opt_count] = "MG_FIREBOLT"; .@opt_names$[.@opt_count] = "Lancas de Fogo"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("MG_FIREBOLT") + "):"; .@opt_count++; }
+		if (getskilllv("MG_COLDBOLT") > 0) { .@opt_skills$[.@opt_count] = "MG_COLDBOLT"; .@opt_names$[.@opt_count] = "Lancas de Gelo"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("MG_COLDBOLT") + "):"; .@opt_count++; }
+		if (getskilllv("MG_LIGHTNINGBOLT") > 0) { .@opt_skills$[.@opt_count] = "MG_LIGHTNINGBOLT"; .@opt_names$[.@opt_count] = "Relampago"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("MG_LIGHTNINGBOLT") + "):"; .@opt_count++; }
+		if (getskilllv("MG_SOULSTRIKE") > 0) { .@opt_skills$[.@opt_count] = "MG_SOULSTRIKE"; .@opt_names$[.@opt_count] = "Espiritos Ancioes"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("MG_SOULSTRIKE") + "):"; .@opt_count++; }
+	}
+	// 3. ARQUEIRO E EVOLUCOES (Ranger, Menestrel, Musa, etc.)
+	else if (BaseClass == Job_Archer || Class == Job_Archer || Class == Job_Archer_High || BaseJob == Job_Archer || BaseJob == Job_Archer_High || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Ranger || Class == Job_Ranger_T || Class == 4062 || Class == 4056 || Class == 4012 || Class == Job_Bard || Class == Job_Clown || Class == Job_Minstrel || Class == Job_Minstrel_T || Class == 4075 || Class == 4068 || Class == 4019 || Class == Job_Dancer || Class == Job_Gypsy || Class == Job_Wanderer || Class == Job_Wanderer_T || Class == 4076 || Class == 4069 || Class == 4020 || BaseJob == Job_Hunter || BaseJob == Job_Sniper || BaseJob == Job_Ranger || BaseJob == Job_Bard || BaseJob == Job_Clown || BaseJob == Job_Minstrel || BaseJob == Job_Dancer || BaseJob == Job_Gypsy || BaseJob == Job_Wanderer) {
+		if (getskilllv("RA_ARROWSTORM") > 0) { .@opt_skills$[.@opt_count] = "RA_ARROWSTORM"; .@opt_names$[.@opt_count] = "Tempestade de Flechas"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("RA_ARROWSTORM") + "):"; .@opt_count++; }
+		if (getskilllv("RA_AIMEDBOLT") > 0) { .@opt_skills$[.@opt_count] = "RA_AIMEDBOLT"; .@opt_names$[.@opt_count] = "Disparo Certeiro"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("RA_AIMEDBOLT") + "):"; .@opt_count++; }
+		if (getskilllv("WM_SEVERE_RAINSTORM") > 0) { .@opt_skills$[.@opt_count] = "WM_SEVERE_RAINSTORM"; .@opt_names$[.@opt_count] = "Temporal de Mil Flechas"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WM_SEVERE_RAINSTORM") + "):"; .@opt_count++; }
+		if (getskilllv("WM_METALLICSOUND") > 0) { .@opt_skills$[.@opt_count] = "WM_METALLICSOUND"; .@opt_names$[.@opt_count] = "Ruido Estridente"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WM_METALLICSOUND") + "):"; .@opt_count++; }
+		if (getskilllv("SN_SHARPSHOOTING") > 0) { .@opt_skills$[.@opt_count] = "SN_SHARPSHOOTING"; .@opt_names$[.@opt_count] = "Tiro Preciso"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SN_SHARPSHOOTING") + "):"; .@opt_count++; }
+		if (getskilllv("SN_FALCONASSAULT") > 0) { .@opt_skills$[.@opt_count] = "SN_FALCONASSAULT"; .@opt_names$[.@opt_count] = "Assalto do Falcao"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SN_FALCONASSAULT") + "):"; .@opt_count++; }
+		if (getskilllv("HT_BLITZBEAT") > 0) { .@opt_skills$[.@opt_count] = "HT_BLITZBEAT"; .@opt_names$[.@opt_count] = "Ataque Aereo"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("HT_BLITZBEAT") + "):"; .@opt_count++; }
+		if (getskilllv("CG_ARROWVULCAN") > 0) { .@opt_skills$[.@opt_count] = "CG_ARROWVULCAN"; .@opt_names$[.@opt_count] = "Vulcao de Flechas"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("CG_ARROWVULCAN") + "):"; .@opt_count++; }
+		if (getskilllv("BA_MUSICALSTRIKE") > 0) { .@opt_skills$[.@opt_count] = "BA_MUSICALSTRIKE"; .@opt_names$[.@opt_count] = "Flecha Melodica"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("BA_MUSICALSTRIKE") + "):"; .@opt_count++; }
+		if (getskilllv("DC_THROWARROW") > 0) { .@opt_skills$[.@opt_count] = "DC_THROWARROW"; .@opt_names$[.@opt_count] = "Estilingue"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("DC_THROWARROW") + "):"; .@opt_count++; }
+		if (getskilllv("AC_DOUBLE") > 0) { .@opt_skills$[.@opt_count] = "AC_DOUBLE"; .@opt_names$[.@opt_count] = "Rajada de Flechas"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("AC_DOUBLE") + "):"; .@opt_count++; }
+		if (getskilllv("AC_SHOWER") > 0) { .@opt_skills$[.@opt_count] = "AC_SHOWER"; .@opt_names$[.@opt_count] = "Chuva de Flechas"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("AC_SHOWER") + "):"; .@opt_count++; }
+	}
+	// 4. GATUNO E EVOLUCOES (Sicario, Renegado, etc.)
+	else if (BaseClass == Job_Thief || Class == Job_Thief || Class == Job_Thief_High || BaseJob == Job_Thief || BaseJob == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross || Class == Job_Guillotine_Cross_T || Class == 4065 || Class == 4059 || Class == 4013 || Class == Job_Rogue || Class == Job_Stalker || Class == Job_Shadow_Chaser || Class == Job_Shadow_Chaser_T || Class == 4079 || Class == 4072 || Class == 4021 || BaseJob == Job_Assassin || BaseJob == Job_Assassin_Cross || BaseJob == Job_Guillotine_Cross || BaseJob == Job_Rogue || BaseJob == Job_Stalker || BaseJob == Job_Shadow_Chaser) {
+		if (getskilllv("GC_CROSSIMPACT") > 0) { .@opt_skills$[.@opt_count] = "GC_CROSSIMPACT"; .@opt_names$[.@opt_count] = "Impacto Cruzado"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("GC_CROSSIMPACT") + "):"; .@opt_count++; }
+		if (getskilllv("GC_ROLLINGCUTTER") > 0) { .@opt_skills$[.@opt_count] = "GC_ROLLINGCUTTER"; .@opt_names$[.@opt_count] = "Laminas de Loki"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("GC_ROLLINGCUTTER") + "):"; .@opt_count++; }
+		if (getskilllv("SC_FATALMENACE") > 0) { .@opt_skills$[.@opt_count] = "SC_FATALMENACE"; .@opt_names$[.@opt_count] = "Ameaca Fatal"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SC_FATALMENACE") + "):"; .@opt_count++; }
+		if (getskilllv("SC_TRIANGLESHOT") > 0) { .@opt_skills$[.@opt_count] = "SC_TRIANGLESHOT"; .@opt_names$[.@opt_count] = "Disparo Triplo"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SC_TRIANGLESHOT") + "):"; .@opt_count++; }
+		if (getskilllv("ASC_BREAKER") > 0) { .@opt_skills$[.@opt_count] = "ASC_BREAKER"; .@opt_names$[.@opt_count] = "Destruidor de Almas"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("ASC_BREAKER") + "):"; .@opt_count++; }
+		if (getskilllv("ASC_METEORASSAULT") > 0) { .@opt_skills$[.@opt_count] = "ASC_METEORASSAULT"; .@opt_names$[.@opt_count] = "Impacto Meteoro"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("ASC_METEORASSAULT") + "):"; .@opt_count++; }
+		if (getskilllv("AS_SONICBLOW") > 0) { .@opt_skills$[.@opt_count] = "AS_SONICBLOW"; .@opt_names$[.@opt_count] = "Laminas Destruidoras"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("AS_SONICBLOW") + "):"; .@opt_count++; }
+		if (getskilllv("RG_BACKSTAP") > 0) { .@opt_skills$[.@opt_count] = "RG_BACKSTAP"; .@opt_names$[.@opt_count] = "Apunhalar"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("RG_BACKSTAP") + "):"; .@opt_count++; }
+		if (getskilllv("RG_RAID") > 0) { .@opt_skills$[.@opt_count] = "RG_RAID"; .@opt_names$[.@opt_count] = "Ataque Surpresa"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("RG_RAID") + "):"; .@opt_count++; }
+		if (getskilllv("TF_POISON") > 0) { .@opt_skills$[.@opt_count] = "TF_POISON"; .@opt_names$[.@opt_count] = "Envenenar"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("TF_POISON") + "):"; .@opt_count++; }
+		if (getskilllv("TF_SPRINKLESAND") > 0) { .@opt_skills$[.@opt_count] = "TF_SPRINKLESAND"; .@opt_names$[.@opt_count] = "Chute de Areia"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("TF_SPRINKLESAND") + "):"; .@opt_count++; }
+	}
+	// 5. NOVICO E EVOLUCOES (Shura, Arcebispo, etc.)
+	else if (BaseClass == Job_Acolyte || Class == Job_Acolyte || Class == Job_Acolyte_High || BaseJob == Job_Acolyte || BaseJob == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop || Class == Job_Arch_Bishop_T || Class == 4063 || Class == 4057 || Class == 4010 || Class == Job_Monk || Class == Job_Champion || Class == Job_Sura || Class == Job_Sura_T || Class == 4077 || Class == 4070 || Class == 4016 || Class == Job_Inquisitor || BaseJob == Job_Priest || BaseJob == Job_High_Priest || BaseJob == Job_Arch_Bishop || BaseJob == Job_Monk || BaseJob == Job_Champion || BaseJob == Job_Sura || BaseJob == Job_Inquisitor) {
+		if (getskilllv("SR_TIGERCANNON") > 0) { .@opt_skills$[.@opt_count] = "SR_TIGERCANNON"; .@opt_names$[.@opt_count] = "Garra do Tigre"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SR_TIGERCANNON") + "):"; .@opt_count++; }
+		if (getskilllv("SR_HOWLINGOFLION") > 0) { .@opt_skills$[.@opt_count] = "SR_HOWLINGOFLION"; .@opt_names$[.@opt_count] = "Rugido do Leao"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SR_HOWLINGOFLION") + "):"; .@opt_count++; }
+		if (getskilllv("SR_RAMPAGEBLASTER") > 0) { .@opt_skills$[.@opt_count] = "SR_RAMPAGEBLASTER"; .@opt_names$[.@opt_count] = "Explosao Espiritual"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SR_RAMPAGEBLASTER") + "):"; .@opt_count++; }
+		if (getskilllv("SR_SKYNETBLOW") > 0) { .@opt_skills$[.@opt_count] = "SR_SKYNETBLOW"; .@opt_names$[.@opt_count] = "Soco Furacao"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SR_SKYNETBLOW") + "):"; .@opt_count++; }
+		if (getskilllv("SR_KNUCKLEARROW") > 0) { .@opt_skills$[.@opt_count] = "SR_KNUCKLEARROW"; .@opt_names$[.@opt_count] = "Pancada Corporal [Knuckle Arrow]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SR_KNUCKLEARROW") + "):"; .@opt_count++; }
+		if (getskilllv("SR_GATEOFHELL") > 0) { .@opt_skills$[.@opt_count] = "SR_GATEOFHELL"; .@opt_names$[.@opt_count] = "Portoes do Inferno"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SR_GATEOFHELL") + "):"; .@opt_count++; }
+		if (getskilllv("MO_FINGEROFFENSIVE") > 0) { .@opt_skills$[.@opt_count] = "MO_FINGEROFFENSIVE"; .@opt_names$[.@opt_count] = "Disparo de Esferas"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("MO_FINGEROFFENSIVE") + "):"; .@opt_count++; }
+		if (getskilllv("AB_ADORAMUS") > 0) { .@opt_skills$[.@opt_count] = "AB_ADORAMUS"; .@opt_names$[.@opt_count] = "Adoramus"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("AB_ADORAMUS") + "):"; .@opt_count++; }
+		if (getskilllv("AB_JUDEX") > 0) { .@opt_skills$[.@opt_count] = "AB_JUDEX"; .@opt_names$[.@opt_count] = "Judex"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("AB_JUDEX") + "):"; .@opt_count++; }
+		if (getskilllv("PR_MAGNUS") > 0) { .@opt_skills$[.@opt_count] = "PR_MAGNUS"; .@opt_names$[.@opt_count] = "Magnus Exorcismus"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("PR_MAGNUS") + "):"; .@opt_count++; }
+		if (getskilllv("AL_HOLYLIGHT") > 0) { .@opt_skills$[.@opt_count] = "AL_HOLYLIGHT"; .@opt_names$[.@opt_count] = "Luz Divina"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("AL_HOLYLIGHT") + "):"; .@opt_count++; }
+	}
+	// 6. MERCADOR E EVOLUCOES (Mecanico, Bioquimico, etc.)
+	else if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || BaseJob == Job_Merchant || BaseJob == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Mechanic_T || Class == 4064 || Class == 4058 || Class == 4011 || Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == 4078 || Class == 4071 || Class == 4018 || BaseJob == Job_Blacksmith || BaseJob == Job_Whitesmith || BaseJob == Job_Mechanic || BaseJob == Job_Alchemist || BaseJob == Job_Creator || BaseJob == Job_Genetic || Class == Job_Meister || BaseJob == Job_Meister) {
+		if (getskilllv("GN_CARTCANNON") > 0) { .@opt_skills$[.@opt_count] = "GN_CARTCANNON"; .@opt_names$[.@opt_count] = "Canhao de Protons"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("GN_CARTCANNON") + "):"; .@opt_count++; }
+		if (getskilllv("GN_CART_TORNADO") > 0) { .@opt_skills$[.@opt_count] = "GN_CART_TORNADO"; .@opt_names$[.@opt_count] = "Tornado de Carrinho"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("GN_CART_TORNADO") + "):"; .@opt_count++; }
+		if (getskilllv("GN_SPORE_EXPLOSION") > 0) { .@opt_skills$[.@opt_count] = "GN_SPORE_EXPLOSION"; .@opt_names$[.@opt_count] = "Esporo Explosivo"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("GN_SPORE_EXPLOSION") + "):"; .@opt_count++; }
+		if (getskilllv("NC_ARMSCANNON") > 0) { .@opt_skills$[.@opt_count] = "NC_ARMSCANNON"; .@opt_names$[.@opt_count] = "Canhao de Braco"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("NC_ARMSCANNON") + "):"; .@opt_count++; }
+		if (getskilllv("NC_AXETORNADO") > 0) { .@opt_skills$[.@opt_count] = "NC_AXETORNADO"; .@opt_names$[.@opt_count] = "Furacao de Machado"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("NC_AXETORNADO") + "):"; .@opt_count++; }
+		if (getskilllv("NC_POWERSWING") > 0) { .@opt_skills$[.@opt_count] = "NC_POWERSWING"; .@opt_names$[.@opt_count] = "Forca Total [Power Swing]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("NC_POWERSWING") + "):"; .@opt_count++; }
+		if (getskilllv("NC_AXEBOOMERANG") > 0) { .@opt_skills$[.@opt_count] = "NC_AXEBOOMERANG"; .@opt_names$[.@opt_count] = "Bumerangue de Machado"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("NC_AXEBOOMERANG") + "):"; .@opt_count++; }
+		if (getskilllv("NC_MAGMA_ERUPTION") > 0) { .@opt_skills$[.@opt_count] = "NC_MAGMA_ERUPTION"; .@opt_names$[.@opt_count] = "Erupcao de Magma"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("NC_MAGMA_ERUPTION") + "):"; .@opt_count++; }
+		if (getskilllv("NC_BOOSTKNUCKLE") > 0) { .@opt_skills$[.@opt_count] = "NC_BOOSTKNUCKLE"; .@opt_names$[.@opt_count] = "Punho Foguete"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("NC_BOOSTKNUCKLE") + "):"; .@opt_count++; }
+		if (getskilllv("NC_PILEBUNKER") > 0) { .@opt_skills$[.@opt_count] = "NC_PILEBUNKER"; .@opt_names$[.@opt_count] = "Canhao Espetador [Pile Bunker]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("NC_PILEBUNKER") + "):"; .@opt_count++; }
+		if (getskilllv("NC_VULCANARM") > 0) { .@opt_skills$[.@opt_count] = "NC_VULCANARM"; .@opt_names$[.@opt_count] = "Metralhadora [Vulcan Arm]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("NC_VULCANARM") + "):"; .@opt_count++; }
+		if (getskilllv("NC_FLAMELAUNCHER") > 0) { .@opt_skills$[.@opt_count] = "NC_FLAMELAUNCHER"; .@opt_names$[.@opt_count] = "Lanca-Chamas [Flame Launcher]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("NC_FLAMELAUNCHER") + "):"; .@opt_count++; }
+		if (getskilllv("NC_COLDSLOWER") > 0) { .@opt_skills$[.@opt_count] = "NC_COLDSLOWER"; .@opt_names$[.@opt_count] = "Canhao Criogenico [Cold Slower]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("NC_COLDSLOWER") + "):"; .@opt_count++; }
+		if (getskilllv("MT_AXE_STOMP") > 0) { .@opt_skills$[.@opt_count] = "MT_AXE_STOMP"; .@opt_names$[.@opt_count] = "Pisada de Machado [Axe Stomp]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("MT_AXE_STOMP") + "):"; .@opt_count++; }
+		if (getskilllv("MT_RUSH_QUAKE") > 0) { .@opt_skills$[.@opt_count] = "MT_RUSH_QUAKE"; .@opt_names$[.@opt_count] = "Impacto Sismico [Rush Quake]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("MT_RUSH_QUAKE") + "):"; .@opt_count++; }
+		if (getskilllv("CR_ACIDDEMONSTRATION") > 0) { .@opt_skills$[.@opt_count] = "CR_ACIDDEMONSTRATION"; .@opt_names$[.@opt_count] = "Bomba Acida"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("CR_ACIDDEMONSTRATION") + "):"; .@opt_count++; }
+		if (getskilllv("AM_ACIDTERROR") > 0) { .@opt_skills$[.@opt_count] = "AM_ACIDTERROR"; .@opt_names$[.@opt_count] = "Terror Acido"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("AM_ACIDTERROR") + "):"; .@opt_count++; }
+		if (getskilllv("WS_CARTTERMINATION") > 0) { .@opt_skills$[.@opt_count] = "WS_CARTTERMINATION"; .@opt_names$[.@opt_count] = "Choque de Carrinho"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("WS_CARTTERMINATION") + "):"; .@opt_count++; }
+		if (getskilllv("MC_CARTREVOLUTION") > 0) { .@opt_skills$[.@opt_count] = "MC_CARTREVOLUTION"; .@opt_names$[.@opt_count] = "Cavalo-de-Pau [Cart Revolution]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("MC_CARTREVOLUTION") + "):"; .@opt_count++; }
+		if (getskilllv("MC_MAMMONITE") > 0) { .@opt_skills$[.@opt_count] = "MC_MAMMONITE"; .@opt_names$[.@opt_count] = "Mammonita"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("MC_MAMMONITE") + "):"; .@opt_count++; }
+	}
+	// 7. NINJA E EVOLUCOES
+	else if (BaseClass == Job_Ninja || Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro || Class == Job_Shinkiro || Class == Job_Shiranui) {
+		if (getskilllv("KO_HUUMARANKA") > 0) { .@opt_skills$[.@opt_count] = "KO_HUUMARANKA"; .@opt_names$[.@opt_count] = "Turbilhao de Petalas"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("KO_HUUMARANKA") + "):"; .@opt_count++; }
+		if (getskilllv("KO_BAKURETSU") > 0) { .@opt_skills$[.@opt_count] = "KO_BAKURETSU"; .@opt_names$[.@opt_count] = "Kunai Explosiva"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("KO_BAKURETSU") + "):"; .@opt_count++; }
+		if (getskilllv("KO_HAPPOKUNAI") > 0) { .@opt_skills$[.@opt_count] = "KO_HAPPOKUNAI"; .@opt_names$[.@opt_count] = "Disparo de Kunai"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("KO_HAPPOKUNAI") + "):"; .@opt_count++; }
+		if (getskilllv("NJ_HUUMA") > 0) { .@opt_skills$[.@opt_count] = "NJ_HUUMA"; .@opt_names$[.@opt_count] = "Arremesso de Shuriken Huuma"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("NJ_HUUMA") + "):"; .@opt_count++; }
+		if (getskilllv("NJ_KOUENKA") > 0) { .@opt_skills$[.@opt_count] = "NJ_KOUENKA"; .@opt_names$[.@opt_count] = "Petalas Flamejantes"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("NJ_KOUENKA") + "):"; .@opt_count++; }
+	}
+	// 8. JUSTICEIRO / REBELLION
+	else if (BaseClass == Job_Gunslinger || Class == Job_Gunslinger || Class == Job_Rebellion || Class == Job_Night_Watch) {
+		if (getskilllv("RL_FIREDANCE") > 0) { .@opt_skills$[.@opt_count] = "RL_FIREDANCE"; .@opt_names$[.@opt_count] = "Danca das Chamas"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("RL_FIREDANCE") + "):"; .@opt_count++; }
+		if (getskilllv("RL_R_TRIP") > 0) { .@opt_skills$[.@opt_count] = "RL_R_TRIP"; .@opt_names$[.@opt_count] = "Lancamento Circular [Round Trip]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("RL_R_TRIP") + "):"; .@opt_count++; }
+		if (getskilllv("GS_DESPERADO") > 0) { .@opt_skills$[.@opt_count] = "GS_DESPERADO"; .@opt_names$[.@opt_count] = "Desperado"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("GS_DESPERADO") + "):"; .@opt_count++; }
+		if (getskilllv("GS_TRIPLEACTION") > 0) { .@opt_skills$[.@opt_count] = "GS_TRIPLEACTION"; .@opt_names$[.@opt_count] = "Ataque Triplo"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("GS_TRIPLEACTION") + "):"; .@opt_count++; }
+	}
+	// 9. DORAM (SUMMONER)
+	else if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler) {
+		if (getskilllv("SU_PICKYPECK") > 0) { .@opt_skills$[.@opt_count] = "SU_PICKYPECK"; .@opt_names$[.@opt_count] = "Bicada de Picky"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SU_PICKYPECK") + "):"; .@opt_count++; }
+		if (getskilllv("SU_SV_STEMSPEAR") > 0) { .@opt_skills$[.@opt_count] = "SU_SV_STEMSPEAR"; .@opt_names$[.@opt_count] = "Lanca de Raizes"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SU_SV_STEMSPEAR") + "):"; .@opt_count++; }
+		if (getskilllv("SU_CN_METEOR") > 0) { .@opt_skills$[.@opt_count] = "SU_CN_METEOR"; .@opt_names$[.@opt_count] = "Cometa de Cenouras"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SU_CN_METEOR") + "):"; .@opt_count++; }
+	}
+	// 10. TAEKWON
+	else if (BaseClass == Job_Taekwon || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Soul_Linker || Class == Job_Star_Emperor || Class == Job_Soul_Reaper) {
+		if (getskilllv("TK_DOWNKICK") > 0) { .@opt_skills$[.@opt_count] = "TK_DOWNKICK"; .@opt_names$[.@opt_count] = "Chute Decrescente"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("TK_DOWNKICK") + "):"; .@opt_count++; }
+		if (getskilllv("TK_STORMKICK") > 0) { .@opt_skills$[.@opt_count] = "TK_STORMKICK"; .@opt_names$[.@opt_count] = "Chute Tornado"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("TK_STORMKICK") + "):"; .@opt_count++; }
+		if (getskilllv("TK_TURNKICK") > 0) { .@opt_skills$[.@opt_count] = "TK_TURNKICK"; .@opt_names$[.@opt_count] = "Chute Giratorio"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("TK_TURNKICK") + "):"; .@opt_count++; }
+		if (getskilllv("TK_COUNTER") > 0) { .@opt_skills$[.@opt_count] = "TK_COUNTER"; .@opt_names$[.@opt_count] = "Contra-Chute"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("TK_COUNTER") + "):"; .@opt_count++; }
+	}
+
+	if (.@opt_count <= 1) {
+		mes "Voce ainda nao aprendeu nenhuma habilidade ofensiva compativel com a sua classe atual.";
+		next;
+		return;
+	}
+
+	.@menu$ = .@menu$ + "Cancelar / Voltar";
+
+	.@sel = select(.@menu$) - 1;
+	if (.@sel == 0) {
+		AutoSkillPriority$ = "";
+		#AutoSkillPriority = 0;
+		dispbottom "[Auto]: Prioridade redefinida para: ^00FF00Rotacao Inteligente Automatica^000000!", 0x55FF55;
+	} else if (.@sel > 0 && .@sel < .@opt_count) {
+		AutoSkillPriority$ = .@opt_skills$[.@sel];
+		if (AutoSkillPriority$ == "SR_TIGERCANNON") #AutoSkillPriority = 1;
+		else if (AutoSkillPriority$ == "SR_HOWLINGOFLION") #AutoSkillPriority = 2;
+		else if (AutoSkillPriority$ == "SR_RAMPAGEBLASTER") #AutoSkillPriority = 3;
+		else if (AutoSkillPriority$ == "SR_SKYNETBLOW") #AutoSkillPriority = 4;
+		else if (AutoSkillPriority$ == "SR_KNUCKLEARROW") #AutoSkillPriority = 5;
+		else if (AutoSkillPriority$ == "SR_GATEOFHELL") #AutoSkillPriority = 6;
+		else if (AutoSkillPriority$ == "MO_FINGEROFFENSIVE") #AutoSkillPriority = 7;
+		else #AutoSkillPriority = 0;
+
+		dispbottom "[Auto]: Habilidade ofensiva prioritaria definida para: ^00FF00" + .@opt_names$[.@sel] + "^000000!", 0x55FF55;
+	}
+	return;
 
 // ======================================================================
 // SUB-ROTINA: Finalizacao Segura do Modo Auto
@@ -487,6 +813,11 @@ OnStopAuto:
 	@AUTO_EXP_DEST_Y = 0;
 	@AUTO_LAST_ATTACK_TICK = 0;
 	@AUTO_ROGUE_STEP = 0;
+	@AUTO_SNAP_USED = 0;
+	@CD_SR_TIGERCANNON = 0;
+	@CD_SR_HOWLINGOFLION = 0;
+	@CD_SR_RAMPAGEBLASTER = 0;
+	@CD_SR_RAISINGDRAGON = 0;
 	@BUFF_HOMUN_RES = 0;
 	@LAST_HOMUN_PITCHER_TICK = 0;
 	deltimer "AutoPlayerSystem::OnStepTimer";
@@ -504,15 +835,27 @@ OnStopAuto:
 	.@rm_s = #AutoTimeSecs % 60;
 	dispbottom "[Auto]: Tempo restante atual: " + .@rm_m + "m " + (.@rm_s < 10 ? "0" : "") + .@rm_s + "s.", 0x00FFFF;
 
-	// Se estiver em modo offline, transporta para cidade e desconecta a sessao com seguranca
+	// Se estiver em modo offline, agenda finalizacao assincrona segura para evitar crash em combate
 	if (@AUTO_OFFLINE || #AutoOffline) {
 		@AUTO_OFFLINE = 0;
 		#AutoOffline = 0;
 		query_sql "DELETE FROM `char_reg_num` WHERE `char_id` = " + getcharid(0) + " AND `key` = 'AUTO_OFFLINE_ACTIVE'";
-		warp "SavePoint", 0, 0;
-		kick;
+		deltimer "AutoPlayerSystem::OnOfflineBotQuitTimer";
+		addtimer 1000, "AutoPlayerSystem::OnOfflineBotQuitTimer";
 	}
 	return;
+
+OnOfflineBotQuitTimer:
+	if (Hp <= 0 || Dead) {
+		recovery 0, getcharid(0);
+		recovery 1;
+		percentheal 100, 100;
+		stand;
+	}
+	warp "SavePoint", 0, 0;
+	sleep2 500;
+	kick;
+	end;
 
 // ======================================================================
 // EVENTO: Morte do Jogador (OnPCDieEvent)
@@ -629,6 +972,7 @@ OnPCLoginEvent:
 			@AUTO_MAP$ = .@cur_map$;
 			@AUTO_LAST_TICK = gettimetick(2);
 			@AUTO_LAST_BUFF = @AUTO_LAST_TICK;
+			@AUTO_LAST_SUPPORT_BUFF = @AUTO_LAST_TICK;
 			@AUTO_LAST_ATTACK_TICK = @AUTO_LAST_TICK;
 			dispbottom "[Auto]: Modo automatico RETOMADO online com sucesso!", 0x55FF55;
 			dispbottom "[Auto]: Digite '@manual' para desligar ou '@auto offline' para sair.", 0x00FFFF;
@@ -715,20 +1059,26 @@ OnStepTimer:
 
 	// ==================================================================
 	// Checagem periodica e renovacao direta dos buffs basicos
+	// Nunca renova com menos de 60 segundos de intervalo
 	// ==================================================================
-	if (!getstatus(SC_BLESSING) || !getstatus(SC_INCREASEAGI) || (.@now - @AUTO_LAST_BUFF) >= 120) {
-		@AUTO_LAST_BUFF = .@now;
-		callsub(OnApplyBaseBuffs);
+	if ((.@now - @AUTO_LAST_BUFF) >= 60) {
+		if (!getstatus(SC_BLESSING) || !getstatus(SC_INCREASEAGI) || (.@now - @AUTO_LAST_BUFF) >= 180) {
+			@AUTO_LAST_BUFF = .@now;
+			callsub(OnApplyBaseBuffs);
+		}
 	}
 
 	// ==================================================================
 	// Reconhecimento e ativacao de habilidades de suporte / auto-buffs
-	// Usa buffs proprios com delay de 1 minuto ou duracao do status
+	// Usa buffs proprios FORA DE COMBATE (sem alvo ativo) com intervalo suave
 	// ==================================================================
-	.@buff_used = callsub(OnCheckSupportBuffs);
-	if (.@buff_used) {
-		addtimer 700, "AutoPlayerSystem::OnStepTimer";
-		end;
+	if (@AUTO_CURRENT_TARGET <= 0) {
+		.@buff_used = callsub(OnCheckSupportBuffs);
+		if (.@buff_used) {
+			@AUTO_LAST_SUPPORT_BUFF = .@now;
+			addtimer 450, "AutoPlayerSystem::OnStepTimer";
+			end;
+		}
 	}
 
 	// ==================================================================
@@ -766,7 +1116,7 @@ OnStepTimer:
 		.@mammo_cost = 10;
 		if (Zeny < .@mammo_cost) {
 			.@has_alt_skill = 0;
-			if (getskilllv("NC_ARMSCANNON") > 0 && Sp >= 30) .@has_alt_skill = 1;
+			if ((getskilllv("NC_ARMSCANNON") > 0 || getskilllv("NC_AXETORNADO") > 0 || getskilllv("NC_POWERSWING") > 0 || getskilllv("NC_MAGMA_ERUPTION") > 0 || getskilllv("NC_BOOSTKNUCKLE") > 0 || getskilllv("NC_AXEBOOMERANG") > 0 || getskilllv("NC_VULCANARM") > 0 || getskilllv("MT_AXE_STOMP") > 0 || getskilllv("MT_RUSH_QUAKE") > 0) && Sp >= 20) .@has_alt_skill = 1;
 			if (getskilllv("GN_CARTCANNON") > 0 && Sp >= 30) .@has_alt_skill = 1;
 			if (checkcart()) {
 				if (getskilllv("WS_CARTTERMINATION") > 0 && Sp >= 15) .@has_alt_skill = 1;
@@ -1121,9 +1471,10 @@ OnStepTimer:
 		.@space_n = (.@map_h - 12) - .@cy; if (.@space_n < 0) .@space_n = 0; // Cima (+Y)
 		.@space_s = .@cy - 12;             if (.@space_s < 0) .@space_s = 0; // Baixo (-Y)
 
-		// Se o personagem ja esta caminhando suavemente na reta e nao parou: deixa continuar sem interrupcao!
-		if (@AUTO_STUCK_TICKS < 2 && @AUTO_EXP_DEST_X > 0 && distance(.@cx, .@cy, @AUTO_EXP_DEST_X, @AUTO_EXP_DEST_Y) > 1) {
-			addtimer 350, "AutoPlayerSystem::OnStepTimer";
+		// Se o personagem ja esta caminhando continuamente na direcao de exploracao e ainda nao chegou ao destino:
+		// Continua caminhando direto! Nao interrompe a caminhada!
+		if (!.@at_edge && @AUTO_STUCK_TICKS < 4 && @AUTO_EXP_DEST_X > 0 && distance(.@cx, .@cy, @AUTO_EXP_DEST_X, @AUTO_EXP_DEST_Y) > 0 && !@AUTO_SNAP_USED) {
+			addtimer 250, "AutoPlayerSystem::OnStepTimer";
 			end;
 		}
 
@@ -1158,11 +1509,11 @@ OnStepTimer:
 		else if (@AUTO_EXP_DIR_Y == 1 && .@space_n <= 8) .@at_edge = 1;
 		else if (@AUTO_EXP_DIR_Y == -1 && .@space_s <= 8) .@at_edge = 1;
 
-		// 1. Tenta avancar na reta (12 celulas a frente). Se encontrar obstaculo, desvia!
+		// 1. Tenta avancar na reta (14 celulas a frente). Se encontrar obstaculo, desvia suavemente!
 		.@walked = 0;
-		if (!.@at_edge && @AUTO_STUCK_TICKS < 2) {
-			.@dest_x = .@cx + (@AUTO_EXP_DIR_X * 12);
-			.@dest_y = .@cy + (@AUTO_EXP_DIR_Y * 12);
+		if (!.@at_edge && @AUTO_STUCK_TICKS < 4) {
+			.@dest_x = .@cx + (@AUTO_EXP_DIR_X * 14);
+			.@dest_y = .@cy + (@AUTO_EXP_DIR_Y * 14);
 			if (.@dest_x < 10) .@dest_x = 10;
 			if (.@dest_x >= .@map_w - 10) .@dest_x = .@map_w - 10;
 			if (.@dest_y < 10) .@dest_y = 10;
@@ -1172,6 +1523,11 @@ OnStepTimer:
 			if (.@walked) {
 				@AUTO_EXP_DEST_X = @AUTO_LAST_TX;
 				@AUTO_EXP_DEST_Y = @AUTO_LAST_TY;
+				if (@AUTO_SNAP_USED) {
+					@AUTO_SNAP_USED = 0;
+					addtimer 250, "AutoPlayerSystem::OnStepTimer";
+					end;
+				}
 			}
 		}
 
@@ -1202,8 +1558,8 @@ OnStepTimer:
 			}
 
 			// Imediatamente comeca a andar na nova direcao
-			.@cand_x = .@cx + (@AUTO_EXP_DIR_X * 12);
-			.@cand_y = .@cy + (@AUTO_EXP_DIR_Y * 12);
+			.@cand_x = .@cx + (@AUTO_EXP_DIR_X * 14);
+			.@cand_y = .@cy + (@AUTO_EXP_DIR_Y * 14);
 			if (.@cand_x < 10) .@cand_x = 10;
 			if (.@cand_x >= .@map_w - 10) .@cand_x = .@map_w - 10;
 			if (.@cand_y < 10) .@cand_y = 10;
@@ -1213,15 +1569,19 @@ OnStepTimer:
 			if (.@walked) {
 				@AUTO_EXP_DEST_X = @AUTO_LAST_TX;
 				@AUTO_EXP_DEST_Y = @AUTO_LAST_TY;
+				if (@AUTO_SNAP_USED) {
+					@AUTO_SNAP_USED = 0;
+					addtimer 250, "AutoPlayerSystem::OnStepTimer";
+					end;
+				}
 			} else {
 				if (@AUTO_EXP_DIR_X != 0) @AUTO_EXP_DIR_X = -@AUTO_EXP_DIR_X;
 				else @AUTO_EXP_DIR_Y = -@AUTO_EXP_DIR_Y;
-				unitstopwalk getcharid(3), USW_FORCE_STOP;
-				unitwalk getcharid(3), .@cx + rand(-2, 2), .@cy + rand(-2, 2);
+				unitwalk getcharid(3), .@cx + (@AUTO_EXP_DIR_X * 6), .@cy + (@AUTO_EXP_DIR_Y * 6);
 			}
 		}
 
-		addtimer 350, "AutoPlayerSystem::OnStepTimer";
+		addtimer 250, "AutoPlayerSystem::OnStepTimer";
 		end;
 	}
 
@@ -1255,7 +1615,7 @@ OnStepTimer:
 		// Se nao conseguir se aproximar por mais de 3 ticks ou se estiver preso:
 		// Monstro inatingivel (do outro lado da parede/abismo/penhasco):
 		// DESISTE DO ALVO IMEDIATAMENTE!
-		if (@AUTO_PURSUIT_FAIL_TICKS >= 3 || @AUTO_STUCK_TICKS >= 2) {
+		if (@AUTO_PURSUIT_FAIL_TICKS >= 3 || @AUTO_STUCK_TICKS >= 4) {
 			@AUTO_BLOCKED_INDEX = (@AUTO_BLOCKED_INDEX + 1) % 16;
 			@AUTO_BLOCKED_MOB[@AUTO_BLOCKED_INDEX] = @AUTO_CURRENT_TARGET;
 			@AUTO_BLOCKED_TIME[@AUTO_BLOCKED_INDEX] = .@now + 20; // 20s de bloqueio temporario
@@ -1318,8 +1678,8 @@ OnStepTimer:
 
 		// Se o personagem ja estiver caminhando suavemente em direcao a este alvo e nao parou:
 		// NAO interrompe! Deixa o boneco andar suavemente na velocidade maxima!
-		if (@AUTO_STUCK_TICKS < 2 && @AUTO_TARGET_WALKING == @AUTO_CURRENT_TARGET && distance(@AUTO_LAST_TX, @AUTO_LAST_TY, .@app_x, .@app_y) <= 2) {
-			addtimer 300, "AutoPlayerSystem::OnStepTimer";
+		if (@AUTO_STUCK_TICKS < 4 && @AUTO_TARGET_WALKING == @AUTO_CURRENT_TARGET && distance(@AUTO_LAST_TX, @AUTO_LAST_TY, .@app_x, .@app_y) <= 2 && !@AUTO_SNAP_USED) {
+			addtimer 250, "AutoPlayerSystem::OnStepTimer";
 			end;
 		}
 
@@ -1344,6 +1704,12 @@ OnStepTimer:
 			@AUTO_STUCK_TICKS = 0;
 			unitstopwalk getcharid(3), USW_FORCE_STOP;
 			addtimer 200, "AutoPlayerSystem::OnStepTimer";
+			end;
+		}
+
+		if (@AUTO_SNAP_USED) {
+			@AUTO_SNAP_USED = 0;
+			addtimer 250, "AutoPlayerSystem::OnStepTimer";
 			end;
 		}
 
@@ -1396,6 +1762,56 @@ OnStepTimer:
 
 	// 1. ESPADACHIM E EVOLUCOES (Inclui Cavaleiro Runico, Guardiao Real, Lorde, Paladino, etc.)
 	if (BaseClass == Job_Swordman || Class == Job_Swordman || Class == Job_Swordman_High || BaseJob == Job_Swordman || BaseJob == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight || Class == Job_Rune_Knight_T || Class == 4060 || Class == 4054 || Class == 4008 || Class == Job_Crusader || Class == Job_Paladin || Class == Job_Royal_Guard || Class == Job_Royal_Guard_T || Class == 4073 || Class == 4066 || Class == 4015 || BaseJob == Job_Knight || BaseJob == Job_Crusader || BaseJob == Job_Lord_Knight || BaseJob == Job_Paladin || BaseJob == Job_Rune_Knight || BaseJob == Job_Royal_Guard) {
+		.@sk_p$ = AutoSkillPriority$;
+		if (.@sk_p$ != "") {
+			if (.@sk_p$ == "RK_DRAGONBREATH" && getskilllv("RK_DRAGONBREATH") > 0 && (checkriding() || checkdragon()) && Sp >= 30) {
+				unitskillusepos getcharid(3), "RK_DRAGONBREATH", getskilllv("RK_DRAGONBREATH"), .@mx, .@my;
+				.@step_delay = 850; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "RK_DRAGONBREATH_WATER" && getskilllv("RK_DRAGONBREATH_WATER") > 0 && (checkriding() || checkdragon()) && Sp >= 30) {
+				unitskillusepos getcharid(3), "RK_DRAGONBREATH_WATER", getskilllv("RK_DRAGONBREATH_WATER"), .@mx, .@my;
+				.@step_delay = 850; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "RK_IGNITIONBREAK" && getskilllv("RK_IGNITIONBREAK") > 0 && Sp >= 35 && .@dist <= 3) {
+				unitskilluseid getcharid(3), "RK_IGNITIONBREAK", getskilllv("RK_IGNITIONBREAK"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "RK_SONICWAVE" && getskilllv("RK_SONICWAVE") > 0 && Sp >= (30 + getskilllv("RK_SONICWAVE") * 3) && .@dist <= 8) {
+				unitskilluseid getcharid(3), "RK_SONICWAVE", getskilllv("RK_SONICWAVE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "RK_WINDCUTTER" && getskilllv("RK_WINDCUTTER") > 0 && Sp >= 20 && .@dist <= 2) {
+				unitskilluseid getcharid(3), "RK_WINDCUTTER", getskilllv("RK_WINDCUTTER"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "LG_OVERBRAND" && getskilllv("LG_OVERBRAND") > 0 && Sp >= 32) {
+				unitskilluseid getcharid(3), "LG_OVERBRAND", getskilllv("LG_OVERBRAND"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 750; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "LG_BANISHINGPOINT" && getskilllv("LG_BANISHINGPOINT") > 0 && Sp >= 20) {
+				unitskilluseid getcharid(3), "LG_BANISHINGPOINT", getskilllv("LG_BANISHINGPOINT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "LG_CANNONSPEAR" && getskilllv("LG_CANNONSPEAR") > 0 && Sp >= 30) {
+				unitskilluseid getcharid(3), "LG_CANNONSPEAR", getskilllv("LG_CANNONSPEAR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "LG_RAYOFGENESIS" && getskilllv("LG_RAYOFGENESIS") > 0 && Sp >= 60) {
+				unitskilluseid getcharid(3), "LG_RAYOFGENESIS", getskilllv("LG_RAYOFGENESIS"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 900; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "LK_SPIRALPIERCE" && getskilllv("LK_SPIRALPIERCE") > 0 && Sp >= 20) {
+				unitskilluseid getcharid(3), "LK_SPIRALPIERCE", getskilllv("LK_SPIRALPIERCE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 800; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "PA_SHIELDCHAIN" && getskilllv("PA_SHIELDCHAIN") > 0 && Sp >= (25 + getskilllv("PA_SHIELDCHAIN") * 3) && getequipid(EQI_HAND_L) > 0) {
+				unitskilluseid getcharid(3), "PA_SHIELDCHAIN", getskilllv("PA_SHIELDCHAIN"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 800; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "CR_HOLYCROSS" && getskilllv("CR_HOLYCROSS") > 0 && Sp >= 15) {
+				unitskilluseid getcharid(3), "CR_HOLYCROSS", getskilllv("CR_HOLYCROSS"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "KN_BOWLINGBASH" && getskilllv("KN_BOWLINGBASH") > 0 && Sp >= 15) {
+				unitskilluseid getcharid(3), "KN_BOWLINGBASH", getskilllv("KN_BOWLINGBASH"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SM_MAGNUM" && getskilllv("SM_MAGNUM") > 0 && Sp >= 30) {
+				unitskillusepos getcharid(3), "SM_MAGNUM", getskilllv("SM_MAGNUM"), .@cx, .@cy;
+				.@step_delay = 650; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SM_BASH" && getskilllv("SM_BASH") > 0 && Sp >= 8) {
+				unitskilluseid getcharid(3), "SM_BASH", getskilllv("SM_BASH"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			}
+		}
+
 		// Cavaleiro Runico: Se Sopro de Gelo estiver no lvl 10 E estiver montado, usa exclusivamente Sopro do Dragao e Sopro de Gelo
 		if (getskilllv("RK_DRAGONBREATH_WATER") >= 10 && (checkriding() || checkdragon())) {
 			if (Sp >= 30) {
@@ -1470,12 +1886,94 @@ OnStepTimer:
 		}
 
 		// Arquimago e evolucoes: Mantem Amplificacao Mistica ativa antes de conjurar magias ofensivas
-		if (getskilllv("HW_MAGICPOWER") > 0 && Sp >= 40 && !getstatus(SC_MAGICPOWER) && .@now >= @BUFF_HW_MAGICPOWER + 2) {
+		if (getskilllv("HW_MAGICPOWER") > 0 && Sp >= 40 && !getstatus(SC_MAGICPOWER) && .@now >= @BUFF_HW_MAGICPOWER + 15) {
 			@BUFF_HW_MAGICPOWER = .@now;
 			unitskilluseid getcharid(3), "HW_MAGICPOWER", getskilllv("HW_MAGICPOWER"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 450;
 			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 			end;
+		}
+
+		.@sk_p$ = AutoSkillPriority$;
+		if (.@sk_p$ != "") {
+			if (.@sk_p$ == "SO_PSYCHIC_WAVE" && getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 70 && .@now >= @CD_SO_PSYCHIC_WAVE) {
+				unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SO_POISON_BUSTER" && getskilllv("SO_POISON_BUSTER") > 0 && Sp >= 70 && .@now >= @CD_SO_POISON_BUSTER) {
+				unitskilluseid getcharid(3), "SO_POISON_BUSTER", getskilllv("SO_POISON_BUSTER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SO_DIAMONDDUST" && getskilllv("SO_DIAMONDDUST") > 0 && Sp >= 50 && .@now >= @CD_SO_DIAMONDDUST) {
+				unitskillusepos getcharid(3), "SO_DIAMONDDUST", getskilllv("SO_DIAMONDDUST"), .@mx, .@my;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SO_EARTHGRAVE" && getskilllv("SO_EARTHGRAVE") > 0 && Sp >= 62) {
+				unitskillusepos getcharid(3), "SO_EARTHGRAVE", getskilllv("SO_EARTHGRAVE"), .@mx, .@my;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SO_VARETYR_SPEAR" && getskilllv("SO_VARETYR_SPEAR") > 0 && Sp >= 65) {
+				unitskilluseid getcharid(3), "SO_VARETYR_SPEAR", getskilllv("SO_VARETYR_SPEAR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SO_CLOUD_KILL" && getskilllv("SO_CLOUD_KILL") > 0 && Sp >= 48) {
+				unitskillusepos getcharid(3), "SO_CLOUD_KILL", getskilllv("SO_CLOUD_KILL"), .@mx, .@my;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WL_COMET" && getskilllv("WL_COMET") > 0 && Sp >= 150 && .@now >= @CD_WL_COMET) {
+				@CD_WL_COMET = .@now + 20;
+				unitskillusepos getcharid(3), "WL_COMET", getskilllv("WL_COMET"), .@mx, .@my;
+				.@step_delay = 1100; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WL_SOULEXPANSION" && getskilllv("WL_SOULEXPANSION") > 0 && Sp >= 50) {
+				unitskilluseid getcharid(3), "WL_SOULEXPANSION", getskilllv("WL_SOULEXPANSION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WL_HELLINFERNO" && getskilllv("WL_HELLINFERNO") > 0 && Sp >= 64 && .@now >= @CD_WL_HELLINFERNO) {
+				@CD_WL_HELLINFERNO = .@now + 3;
+				unitskilluseid getcharid(3), "WL_HELLINFERNO", getskilllv("WL_HELLINFERNO"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WL_EARTHSTRAIN" && getskilllv("WL_EARTHSTRAIN") > 0 && Sp >= 70 && .@dist <= 6 && .@now >= @CD_WL_EARTHSTRAIN) {
+				@CD_WL_EARTHSTRAIN = .@now + 7;
+				unitskillusepos getcharid(3), "WL_EARTHSTRAIN", getskilllv("WL_EARTHSTRAIN"), .@mx, .@my;
+				.@step_delay = 650; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WL_CHAINLIGHTNING" && getskilllv("WL_CHAINLIGHTNING") > 0 && Sp >= 80) {
+				unitskilluseid getcharid(3), "WL_CHAINLIGHTNING", getskilllv("WL_CHAINLIGHTNING"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WL_CRIMSONROCK" && getskilllv("WL_CRIMSONROCK") > 0 && Sp >= 60 && .@now >= @CD_WL_CRIMSONROCK) {
+				@CD_WL_CRIMSONROCK = .@now + 5;
+				unitskilluseid getcharid(3), "WL_CRIMSONROCK", getskilllv("WL_CRIMSONROCK"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 650; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WL_JACKFROST" && getskilllv("WL_JACKFROST") > 0 && Sp >= 50 && .@now >= @CD_WL_JACKFROST) {
+				@CD_WL_JACKFROST = .@now + 4;
+				unitskilluseid getcharid(3), "WL_JACKFROST", getskilllv("WL_JACKFROST"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "HW_NAPALMVULCAN" && getskilllv("HW_NAPALMVULCAN") > 0 && Sp >= 50) {
+				unitskilluseid getcharid(3), "HW_NAPALMVULCAN", getskilllv("HW_NAPALMVULCAN"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WZ_STORMGUST" && getskilllv("WZ_STORMGUST") > 0 && Sp >= 40) {
+				unitskillusepos getcharid(3), "WZ_STORMGUST", getskilllv("WZ_STORMGUST"), .@mx, .@my;
+				.@step_delay = 1300; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WZ_VERMILION" && getskilllv("WZ_VERMILION") > 0 && Sp >= 40) {
+				unitskillusepos getcharid(3), "WZ_VERMILION", getskilllv("WZ_VERMILION"), .@mx, .@my;
+				.@step_delay = 1300; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WZ_METEOR" && getskilllv("WZ_METEOR") > 0 && Sp >= 40) {
+				unitskillusepos getcharid(3), "WZ_METEOR", getskilllv("WZ_METEOR"), .@mx, .@my;
+				.@step_delay = 1300; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WZ_HEAVENDRIVE" && getskilllv("WZ_HEAVENDRIVE") > 0 && Sp >= 28) {
+				unitskillusepos getcharid(3), "WZ_HEAVENDRIVE", getskilllv("WZ_HEAVENDRIVE"), .@mx, .@my;
+				.@step_delay = 1200; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WZ_EARTHSPIKE" && getskilllv("WZ_EARTHSPIKE") > 0 && Sp >= 12) {
+				unitskilluseid getcharid(3), "WZ_EARTHSPIKE", getskilllv("WZ_EARTHSPIKE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "MG_FIREBALL" && getskilllv("MG_FIREBALL") > 0 && Sp >= 15) {
+				unitskilluseid getcharid(3), "MG_FIREBALL", getskilllv("MG_FIREBALL"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "MG_FIREBOLT" && getskilllv("MG_FIREBOLT") > 0 && Sp >= 12) {
+				unitskilluseid getcharid(3), "MG_FIREBOLT", getskilllv("MG_FIREBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 900; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "MG_COLDBOLT" && getskilllv("MG_COLDBOLT") > 0 && Sp >= 12) {
+				unitskilluseid getcharid(3), "MG_COLDBOLT", getskilllv("MG_COLDBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 900; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "MG_LIGHTNINGBOLT" && getskilllv("MG_LIGHTNINGBOLT") > 0 && Sp >= 12) {
+				unitskilluseid getcharid(3), "MG_LIGHTNINGBOLT", getskilllv("MG_LIGHTNINGBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 900; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "MG_SOULSTRIKE" && getskilllv("MG_SOULSTRIKE") > 0 && Sp >= 15) {
+				unitskilluseid getcharid(3), "MG_SOULSTRIKE", getskilllv("MG_SOULSTRIKE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			}
 		}
 
 		// ==============================================================
@@ -1778,7 +2276,7 @@ OnStepTimer:
 		if (.@is_ranger) {
 			// Ranger: Mantem Ilimitar (RA_UNLIMIT) ativo sempre que disponivel
 			if (getskilllv("RA_UNLIMIT") > 0 && Sp >= (80 + getskilllv("RA_UNLIMIT") * 20) && !getstatus(SC_UNLIMIT) && .@now >= @CD_RA_UNLIMIT) {
-				@CD_RA_UNLIMIT = .@now + 5;
+				@CD_RA_UNLIMIT = .@now + 300;
 				unitskilluseid getcharid(3), "RA_UNLIMIT", getskilllv("RA_UNLIMIT"), getcharid(3), 0, 0, 0, 0;
 				.@step_delay = 500;
 				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
@@ -1786,7 +2284,7 @@ OnStepTimer:
 			}
 
 			// Ranger: Mantem Disparo Selvagem (RA_FEARBREEZE) ativo
-			if (getskilllv("RA_FEARBREEZE") > 0 && Sp >= 45 && !getstatus(SC_FEARBREEZE) && .@now >= @BUFF_RA_FEARBREEZE + 3) {
+			if (getskilllv("RA_FEARBREEZE") > 0 && Sp >= 45 && !getstatus(SC_FEARBREEZE) && .@now >= @BUFF_RA_FEARBREEZE + 60) {
 				@BUFF_RA_FEARBREEZE = .@now;
 				unitskilluseid getcharid(3), "RA_FEARBREEZE", getskilllv("RA_FEARBREEZE"), getcharid(3), 0, 0, 0, 0;
 				.@step_delay = 450;
@@ -1796,7 +2294,7 @@ OnStepTimer:
 
 			// Mantem Visao Real (SN_SIGHT) ativa no nivel maximo aprendido
 			.@sn_sp = 15 + ((getskilllv("SN_SIGHT") + 1) / 2) * 5;
-			if (getskilllv("SN_SIGHT") > 0 && Sp >= .@sn_sp && !getstatus(SC_TRUESIGHT) && .@now >= @BUFF_SN_SIGHT + 2) {
+			if (getskilllv("SN_SIGHT") > 0 && Sp >= .@sn_sp && !getstatus(SC_TRUESIGHT) && .@now >= @BUFF_SN_SIGHT + 30) {
 				@BUFF_SN_SIGHT = .@now;
 				unitskilluseid getcharid(3), "SN_SIGHT", getskilllv("SN_SIGHT"), getcharid(3), 0, 0, 0, 0;
 				if (!getstatus(SC_TRUESIGHT)) {
@@ -1805,6 +2303,47 @@ OnStepTimer:
 				.@step_delay = 450;
 				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 				end;
+			}
+		}
+
+		.@sk_p$ = AutoSkillPriority$;
+		if (.@sk_p$ != "") {
+			if (.@sk_p$ == "RA_ARROWSTORM" && getskilllv("RA_ARROWSTORM") > 0 && Sp >= (20 + getskilllv("RA_ARROWSTORM") * 4)) {
+				unitskilluseid getcharid(3), "RA_ARROWSTORM", getskilllv("RA_ARROWSTORM"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "RA_AIMEDBOLT" && getskilllv("RA_AIMEDBOLT") > 0 && Sp >= 30) {
+				unitskilluseid getcharid(3), "RA_AIMEDBOLT", getskilllv("RA_AIMEDBOLT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WM_SEVERE_RAINSTORM" && getskilllv("WM_SEVERE_RAINSTORM") > 0 && Sp >= 50) {
+				unitskillusepos getcharid(3), "WM_SEVERE_RAINSTORM", getskilllv("WM_SEVERE_RAINSTORM"), .@mx, .@my;
+				.@step_delay = 1000; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WM_METALLICSOUND" && getskilllv("WM_METALLICSOUND") > 0 && Sp >= 20) {
+				unitskilluseid getcharid(3), "WM_METALLICSOUND", getskilllv("WM_METALLICSOUND"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SN_SHARPSHOOTING" && getskilllv("SN_SHARPSHOOTING") > 0 && Sp >= (14 + getskilllv("SN_SHARPSHOOTING") * 2)) {
+				unitskilluseid getcharid(3), "SN_SHARPSHOOTING", getskilllv("SN_SHARPSHOOTING"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SN_FALCONASSAULT" && getskilllv("SN_FALCONASSAULT") > 0 && Sp >= 30) {
+				unitskilluseid getcharid(3), "SN_FALCONASSAULT", getskilllv("SN_FALCONASSAULT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "HT_BLITZBEAT" && getskilllv("HT_BLITZBEAT") > 0 && Sp >= (7 + getskilllv("HT_BLITZBEAT") * 3)) {
+				unitskilluseid getcharid(3), "HT_BLITZBEAT", getskilllv("HT_BLITZBEAT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "CG_ARROWVULCAN" && getskilllv("CG_ARROWVULCAN") > 0 && Sp >= 25) {
+				unitskilluseid getcharid(3), "CG_ARROWVULCAN", getskilllv("CG_ARROWVULCAN"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+				.@step_delay = 800; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "BA_MUSICALSTRIKE" && getskilllv("BA_MUSICALSTRIKE") > 0 && Sp >= 12) {
+				unitskilluseid getcharid(3), "BA_MUSICALSTRIKE", getskilllv("BA_MUSICALSTRIKE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "DC_THROWARROW" && getskilllv("DC_THROWARROW") > 0 && Sp >= 12) {
+				unitskilluseid getcharid(3), "DC_THROWARROW", getskilllv("DC_THROWARROW"), @AUTO_CURRENT_TARGET, 0, 0, 0, 1;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "AC_DOUBLE" && getskilllv("AC_DOUBLE") > 0 && Sp >= 12) {
+				unitskilluseid getcharid(3), "AC_DOUBLE", getskilllv("AC_DOUBLE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "AC_SHOWER" && getskilllv("AC_SHOWER") > 0 && Sp >= 15) {
+				unitskillusepos getcharid(3), "AC_SHOWER", getskilllv("AC_SHOWER"), .@mx, .@my;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
 			}
 		}
 
@@ -1907,6 +2446,44 @@ OnStepTimer:
 	}
 	// 4. GATUNO E EVOLUCOES (Inclui Sicario, Renegado, Algoz, Desordeiro, etc.)
 	else if (BaseClass == Job_Thief || Class == Job_Thief || Class == Job_Thief_High || BaseJob == Job_Thief || BaseJob == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross || Class == Job_Guillotine_Cross_T || Class == 4065 || Class == 4059 || Class == 4013 || Class == Job_Rogue || Class == Job_Stalker || Class == Job_Shadow_Chaser || Class == Job_Shadow_Chaser_T || Class == 4079 || Class == 4072 || Class == 4021 || BaseJob == Job_Assassin || BaseJob == Job_Assassin_Cross || BaseJob == Job_Guillotine_Cross || BaseJob == Job_Rogue || BaseJob == Job_Stalker || BaseJob == Job_Shadow_Chaser) {
+		.@sk_p$ = AutoSkillPriority$;
+		if (.@sk_p$ != "") {
+			if (.@sk_p$ == "GC_CROSSIMPACT" && getskilllv("GC_CROSSIMPACT") > 0 && Sp >= 25 && .@dist <= 3) {
+				unitskilluseid getcharid(3), "GC_CROSSIMPACT", getskilllv("GC_CROSSIMPACT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "GC_ROLLINGCUTTER" && getskilllv("GC_ROLLINGCUTTER") > 0 && Sp >= 5 && .@dist <= 2) {
+				unitskilluseid getcharid(3), "GC_ROLLINGCUTTER", getskilllv("GC_ROLLINGCUTTER"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 400; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SC_FATALMENACE" && getskilllv("SC_FATALMENACE") > 0 && Sp >= 30 && .@dist <= 3) {
+				unitskilluseid getcharid(3), "SC_FATALMENACE", getskilllv("SC_FATALMENACE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SC_TRIANGLESHOT" && getskilllv("SC_TRIANGLESHOT") > 0 && Sp >= 24 && .@dist <= 8) {
+				unitskilluseid getcharid(3), "SC_TRIANGLESHOT", getskilllv("SC_TRIANGLESHOT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "ASC_BREAKER" && getskilllv("ASC_BREAKER") > 0 && Sp >= 20 && .@dist <= 8) {
+				unitskilluseid getcharid(3), "ASC_BREAKER", getskilllv("ASC_BREAKER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 650; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "ASC_METEORASSAULT" && getskilllv("ASC_METEORASSAULT") > 0 && Sp >= 8 && .@dist <= 3) {
+				unitskilluseid getcharid(3), "ASC_METEORASSAULT", getskilllv("ASC_METEORASSAULT"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "AS_SONICBLOW" && getskilllv("AS_SONICBLOW") > 0 && Sp >= 20 && .@dist <= 2) {
+				unitskilluseid getcharid(3), "AS_SONICBLOW", getskilllv("AS_SONICBLOW"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "RG_BACKSTAP" && getskilllv("RG_BACKSTAP") > 0 && Sp >= 16 && .@dist <= 2) {
+				unitskilluseid getcharid(3), "RG_BACKSTAP", getskilllv("RG_BACKSTAP"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "RG_RAID" && getskilllv("RG_RAID") > 0 && Sp >= 15 && .@dist <= 2) {
+				unitskilluseid getcharid(3), "RG_RAID", getskilllv("RG_RAID"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "TF_POISON" && getskilllv("TF_POISON") > 0 && Sp >= 12 && .@dist <= 2) {
+				unitskilluseid getcharid(3), "TF_POISON", getskilllv("TF_POISON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "TF_SPRINKLESAND" && getskilllv("TF_SPRINKLESAND") > 0 && Sp >= 9 && .@dist <= 2) {
+				unitskilluseid getcharid(3), "TF_SPRINKLESAND", getskilllv("TF_SPRINKLESAND"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			}
+		}
+
 		if (getskilllv("GC_CROSSIMPACT") > 0 && Sp >= 25) {
 			unitskilluseid getcharid(3), "GC_CROSSIMPACT", getskilllv("GC_CROSSIMPACT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 600;
@@ -1965,55 +2542,215 @@ OnStepTimer:
 		}
 	}
 	// 5. NOVICO E EVOLUCOES (Inclui Arcebispo, Shura, Sumo Sacerdote, Mestre, etc.)
-	else if (BaseClass == Job_Acolyte || Class == Job_Acolyte || Class == Job_Acolyte_High || BaseJob == Job_Acolyte || BaseJob == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop || Class == Job_Arch_Bishop_T || Class == 4063 || Class == 4057 || Class == 4010 || Class == Job_Monk || Class == Job_Champion || Class == Job_Sura || Class == Job_Sura_T || Class == 4077 || Class == 4070 || Class == 4016 || BaseJob == Job_Priest || BaseJob == Job_High_Priest || BaseJob == Job_Arch_Bishop || BaseJob == Job_Monk || BaseJob == Job_Champion || BaseJob == Job_Sura) {
-		if (getskilllv("AB_ADORAMUS") > 0 && Sp >= 40 && countitem(717) > 0) {
-			unitskilluseid getcharid(3), "AB_ADORAMUS", getskilllv("AB_ADORAMUS"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 800;
-		} else if (getskilllv("AB_JUDEX") > 0 && Sp >= 20) {
-			unitskilluseid getcharid(3), "AB_JUDEX", getskilllv("AB_JUDEX"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 600;
-		} else if (getskilllv("SR_RAMPAGEBLASTER") > 0 && Sp >= 40 && countspiritball() >= 3) {
-			unitskilluseid getcharid(3), "SR_RAMPAGEBLASTER", getskilllv("SR_RAMPAGEBLASTER"), getcharid(3), 0, 0, 0, 0;
-			.@step_delay = 800;
-		} else if (getskilllv("SR_KNUCKLEARROW") > 0 && Sp >= 20 && .@dist <= 7) {
-			unitskilluseid getcharid(3), "SR_KNUCKLEARROW", getskilllv("SR_KNUCKLEARROW"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 550;
-		} else if (getskilllv("SR_TIGERCANNON") > 0 && Sp >= 40 && Hp >= 500 && (@AUTO_SKILL_ROT % 2 == 0)) {
-			unitskilluseid getcharid(3), "SR_TIGERCANNON", getskilllv("SR_TIGERCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 800;
-		} else if (getskilllv("PR_MAGNUS") > 0 && Sp >= 40 && (@AUTO_SKILL_ROT % 2 == 0)) {
-			// Heranca de 2nd T (Sumo Sacerdote): Magnus Exorcismus
-			unitskillusepos getcharid(3), "PR_MAGNUS", getskilllv("PR_MAGNUS"), .@mx, .@my;
-			.@step_delay = 1200;
-		} else if (getskilllv("MO_FINGEROFFENSIVE") > 0) {
-			// Heranca de 2nd T (Mestre/Champion): Zen + Disparo de Esferas
-			if (countspiritball() <= 0) {
+	else if (BaseClass == Job_Acolyte || Class == Job_Acolyte || Class == Job_Acolyte_High || BaseJob == Job_Acolyte || BaseJob == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop || Class == Job_Arch_Bishop_T || Class == 4063 || Class == 4057 || Class == 4010 || Class == Job_Monk || Class == Job_Champion || Class == Job_Sura || Class == Job_Sura_T || Class == 4077 || Class == 4070 || Class == 4016 || Class == Job_Inquisitor || BaseJob == Job_Priest || BaseJob == Job_High_Priest || BaseJob == Job_Arch_Bishop || BaseJob == Job_Monk || BaseJob == Job_Champion || BaseJob == Job_Sura || BaseJob == Job_Inquisitor) {
+		.@is_ab_tree = (Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop || Class == Job_Arch_Bishop_T || Class == 4063 || Class == 4057 || Class == 4010 || Class == Job_Cardinal || BaseJob == Job_Priest || BaseJob == Job_High_Priest || BaseJob == Job_Arch_Bishop || BaseJob == Job_Cardinal);
+		.@sk_p$ = AutoSkillPriority$;
+
+		// Prioridade configurada de habilidades ofensivas para Arcebispo / Sacerdote
+		if (.@sk_p$ != "") {
+			if (.@sk_p$ == "AB_ADORAMUS") {
+				if (getskilllv("AB_ADORAMUS") > 0 && Sp >= 40 && .@now >= @CD_AB_ADORAMUS) {
+					@CD_AB_ADORAMUS = .@now + 2;
+					unitskilluseid getcharid(3), "AB_ADORAMUS", getskilllv("AB_ADORAMUS"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 800; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				} else if (getskilllv("AB_JUDEX") > 0 && Sp >= 20) {
+					// Fallback continuo enquanto Adoramus estiver em cooldown de 2s ou sem SP
+					unitskilluseid getcharid(3), "AB_JUDEX", getskilllv("AB_JUDEX"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				} else if (getskilllv("PR_MAGNUS") > 0 && Sp >= 40) {
+					unitskillusepos getcharid(3), "PR_MAGNUS", getskilllv("PR_MAGNUS"), .@mx, .@my;
+					.@step_delay = 1200; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				} else if (getskilllv("AL_HOLYLIGHT") > 0 && Sp >= 15) {
+					unitskilluseid getcharid(3), "AL_HOLYLIGHT", getskilllv("AL_HOLYLIGHT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+			} else if (.@sk_p$ == "AB_JUDEX" && getskilllv("AB_JUDEX") > 0 && Sp >= 20) {
+				unitskilluseid getcharid(3), "AB_JUDEX", getskilllv("AB_JUDEX"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "PR_MAGNUS" && getskilllv("PR_MAGNUS") > 0 && Sp >= 40) {
+				unitskillusepos getcharid(3), "PR_MAGNUS", getskilllv("PR_MAGNUS"), .@mx, .@my;
+				.@step_delay = 1200; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "AL_HOLYLIGHT" && getskilllv("AL_HOLYLIGHT") > 0 && Sp >= 15) {
+				unitskilluseid getcharid(3), "AL_HOLYLIGHT", getskilllv("AL_HOLYLIGHT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			}
+		}
+
+		// Rotacao Padrao de Arcebispo / Sacerdote (quando nao definiu prioridade especifica):
+		// Padrao: prioriza Adoramus sempre que disponivel; se em cooldown ou sem Adoramus, usa Judex / Magnus / Luz Divina
+		if (.@is_ab_tree && (getskilllv("AB_ADORAMUS") > 0 || getskilllv("AB_JUDEX") > 0 || getskilllv("PR_MAGNUS") > 0 || getskilllv("AL_HOLYLIGHT") > 0)) {
+			if (getskilllv("AB_ADORAMUS") > 0 && Sp >= 40 && .@now >= @CD_AB_ADORAMUS) {
+				@CD_AB_ADORAMUS = .@now + 2;
+				unitskilluseid getcharid(3), "AB_ADORAMUS", getskilllv("AB_ADORAMUS"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 800;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("AB_JUDEX") > 0 && Sp >= 20) {
+				unitskilluseid getcharid(3), "AB_JUDEX", getskilllv("AB_JUDEX"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("PR_MAGNUS") > 0 && Sp >= 40 && (@AUTO_SKILL_ROT % 2 == 0)) {
+				unitskillusepos getcharid(3), "PR_MAGNUS", getskilllv("PR_MAGNUS"), .@mx, .@my;
+				.@step_delay = 1200;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("AL_HOLYLIGHT") > 0 && Sp >= 15) {
+				unitskilluseid getcharid(3), "AL_HOLYLIGHT", getskilllv("AL_HOLYLIGHT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 550;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			}
+		} else {
+			// ==============================================================
+			// Shura / Monge / Mestre / Inquisidor:
+			// ==============================================================
+			// 1. Recuperacao de Esferas com Dragao Ascendente (Rising Dragon):
+			// Se as esferas estiverem baixas (< 3) e possuir Dragao Ascendente:
+			if (getskilllv("SR_RAISINGDRAGON") > 0 && Sp >= 120 && countspiritball() < 3 && .@now >= @CD_SR_RAISINGDRAGON) {
+				@CD_SR_RAISINGDRAGON = .@now + 2;
+				unitskilluseid getcharid(3), "SR_RAISINGDRAGON", getskilllv("SR_RAISINGDRAGON"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 400;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("SR_RAISINGDRAGON") <= 0 && countspiritball() <= 0) {
 				if (getskilllv("CH_SOULCOLLECT") > 0 && Sp >= 20) {
 					unitskilluseid getcharid(3), "CH_SOULCOLLECT", getskilllv("CH_SOULCOLLECT"), getcharid(3), 0, 0, 0, 0;
-					.@step_delay = 500;
+					.@step_delay = 450;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
 				} else if (getskilllv("MO_CALLSPIRITS") > 0 && Sp >= 8) {
 					unitskilluseid getcharid(3), "MO_CALLSPIRITS", getskilllv("MO_CALLSPIRITS"), getcharid(3), 0, 0, 0, 0;
-					.@step_delay = 450;
+					.@step_delay = 400;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
 				}
-			} else {
+			}
+
+			// Variaveis auxiliares de disponibilidade:
+			.@can_tiger = (getskilllv("SR_TIGERCANNON") > 0 && Sp >= (30 + getskilllv("SR_TIGERCANNON") * 5) && Hp > 500 && (getstatus(SC_EXPLOSIONSPIRITS) || getstatus(SC_RAISINGDRAGON)) && .@dist <= 3 && .@now >= @CD_SR_TIGERCANNON);
+			.@can_lion = (getskilllv("SR_HOWLINGOFLION") > 0 && Sp >= 70 && countspiritball() >= 3 && .@dist <= 4 && .@now >= @CD_SR_HOWLINGOFLION);
+			.@can_rampage = (getskilllv("SR_RAMPAGEBLASTER") > 0 && Sp >= 100 && countspiritball() >= 1 && (getstatus(SC_EXPLOSIONSPIRITS) || getstatus(SC_RAISINGDRAGON)) && .@dist <= 3 && .@now >= @CD_SR_RAMPAGEBLASTER);
+			.@can_skynet = (getskilllv("SR_SKYNETBLOW") > 0 && Sp >= (10 + getskilllv("SR_SKYNETBLOW") * 2) && .@dist <= 2);
+			.@can_knuckle = (getskilllv("SR_KNUCKLEARROW") > 0 && Sp >= 20 && .@dist <= 7);
+			.@can_gate = (getskilllv("SR_GATEOFHELL") > 0 && Sp >= 50 && countspiritball() >= 2 && (getstatus(SC_EXPLOSIONSPIRITS) || getstatus(SC_RAISINGDRAGON)) && .@dist <= 7 && .@now >= @CD_SR_GATEOFHELL);
+			.@can_finger = (getskilllv("MO_FINGEROFFENSIVE") > 0 && countspiritball() > 0 && Sp >= (8 + getskilllv("MO_FINGEROFFENSIVE") * 4) && .@dist <= 8);
+
+			.@skill_executed = 0;
+
+			// ==============================================================
+			// PRIORIDADE ESCOLHIDA EM @auto setup:
+			// ==============================================================
+			if ((AutoSkillPriority$ == "SR_TIGERCANNON" || #AutoSkillPriority == 1) && .@can_tiger) {
+				@CD_SR_TIGERCANNON = .@now + 2;
+				unitskilluseid getcharid(3), "SR_TIGERCANNON", getskilllv("SR_TIGERCANNON"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 550;
+				.@skill_executed = 1;
+			} else if ((AutoSkillPriority$ == "SR_HOWLINGOFLION" || #AutoSkillPriority == 2) && .@can_lion) {
+				@CD_SR_HOWLINGOFLION = .@now + 10;
+				unitskilluseid getcharid(3), "SR_HOWLINGOFLION", getskilllv("SR_HOWLINGOFLION"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 600;
+				.@skill_executed = 1;
+			} else if ((AutoSkillPriority$ == "SR_RAMPAGEBLASTER" || #AutoSkillPriority == 3) && .@can_rampage) {
+				@CD_SR_RAMPAGEBLASTER = .@now + 10;
+				unitskilluseid getcharid(3), "SR_RAMPAGEBLASTER", getskilllv("SR_RAMPAGEBLASTER"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 600;
+				.@skill_executed = 1;
+			} else if ((AutoSkillPriority$ == "SR_SKYNETBLOW" || #AutoSkillPriority == 4) && .@can_skynet) {
+				unitskilluseid getcharid(3), "SR_SKYNETBLOW", getskilllv("SR_SKYNETBLOW"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 450;
+				.@skill_executed = 1;
+			} else if ((AutoSkillPriority$ == "SR_KNUCKLEARROW" || #AutoSkillPriority == 5) && .@can_knuckle) {
+				unitskilluseid getcharid(3), "SR_KNUCKLEARROW", getskilllv("SR_KNUCKLEARROW"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 550;
+				.@skill_executed = 1;
+			} else if ((AutoSkillPriority$ == "SR_GATEOFHELL" || #AutoSkillPriority == 6) && .@can_gate) {
+				@CD_SR_GATEOFHELL = .@now + 5;
+				unitskilluseid getcharid(3), "SR_GATEOFHELL", getskilllv("SR_GATEOFHELL"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 650;
+				.@skill_executed = 1;
+			} else if ((AutoSkillPriority$ == "MO_FINGEROFFENSIVE" || #AutoSkillPriority == 7) && .@can_finger) {
 				.@shoot_lv = getskilllv("MO_FINGEROFFENSIVE");
 				if (.@shoot_lv > 5) .@shoot_lv = 5;
 				if (.@shoot_lv < 1) .@shoot_lv = 1;
-				.@sp_cost = 8 + .@shoot_lv * 4;
-				if (Sp >= .@sp_cost) {
+				unitskilluseid getcharid(3), "MO_FINGEROFFENSIVE", .@shoot_lv, @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700;
+				.@skill_executed = 1;
+			}
+
+			// ==============================================================
+			// MODO AUTOMATICO OU FALLBACK QUANDO A PRIORITARIA ESTA EM COOLDOWN:
+			// "qdo uma skill n estiver disponivel por cooldow ou por outro motivo usar as que estao disponivel"
+			// 1. Garra do Tigre se estiver nivel maximo (10)
+			// 2. Rugido do Leao se estiver nivel maximo (5)
+			// 3. Explosao Espiritual se estiver nivel maximo (5)
+			// 4. Soco Furacao se nao tiver as outras skills 3rd (ou durante cooldown)
+			// 5. Demais habilidades 3rd aprendidas / Heranca de Mestre e Monge
+			// ==============================================================
+			if (!.@skill_executed) {
+				if (getskilllv("SR_TIGERCANNON") >= 10 && .@can_tiger) {
+					@CD_SR_TIGERCANNON = .@now + 2;
+					unitskilluseid getcharid(3), "SR_TIGERCANNON", getskilllv("SR_TIGERCANNON"), getcharid(3), 0, 0, 0, 0;
+					.@step_delay = 550;
+					.@skill_executed = 1;
+				} else if (getskilllv("SR_HOWLINGOFLION") >= 5 && .@can_lion) {
+					@CD_SR_HOWLINGOFLION = .@now + 10;
+					unitskilluseid getcharid(3), "SR_HOWLINGOFLION", getskilllv("SR_HOWLINGOFLION"), getcharid(3), 0, 0, 0, 0;
+					.@step_delay = 600;
+					.@skill_executed = 1;
+				} else if (getskilllv("SR_RAMPAGEBLASTER") >= 5 && .@can_rampage) {
+					@CD_SR_RAMPAGEBLASTER = .@now + 10;
+					unitskilluseid getcharid(3), "SR_RAMPAGEBLASTER", getskilllv("SR_RAMPAGEBLASTER"), getcharid(3), 0, 0, 0, 0;
+					.@step_delay = 600;
+					.@skill_executed = 1;
+				} else if (.@can_skynet) {
+					// Soco Furacao: usado se nao tiver as outras 3rd ou enquanto estiverem em cooldown!
+					unitskilluseid getcharid(3), "SR_SKYNETBLOW", getskilllv("SR_SKYNETBLOW"), getcharid(3), 0, 0, 0, 0;
+					.@step_delay = 450;
+					.@skill_executed = 1;
+				} else if (.@can_tiger) {
+					@CD_SR_TIGERCANNON = .@now + 2;
+					unitskilluseid getcharid(3), "SR_TIGERCANNON", getskilllv("SR_TIGERCANNON"), getcharid(3), 0, 0, 0, 0;
+					.@step_delay = 550;
+					.@skill_executed = 1;
+				} else if (.@can_lion) {
+					@CD_SR_HOWLINGOFLION = .@now + 10;
+					unitskilluseid getcharid(3), "SR_HOWLINGOFLION", getskilllv("SR_HOWLINGOFLION"), getcharid(3), 0, 0, 0, 0;
+					.@step_delay = 600;
+					.@skill_executed = 1;
+				} else if (.@can_rampage) {
+					@CD_SR_RAMPAGEBLASTER = .@now + 10;
+					unitskilluseid getcharid(3), "SR_RAMPAGEBLASTER", getskilllv("SR_RAMPAGEBLASTER"), getcharid(3), 0, 0, 0, 0;
+					.@step_delay = 600;
+					.@skill_executed = 1;
+				} else if (.@can_knuckle) {
+					unitskilluseid getcharid(3), "SR_KNUCKLEARROW", getskilllv("SR_KNUCKLEARROW"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 550;
+					.@skill_executed = 1;
+				} else if (.@can_gate) {
+					@CD_SR_GATEOFHELL = .@now + 5;
+					unitskilluseid getcharid(3), "SR_GATEOFHELL", getskilllv("SR_GATEOFHELL"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 650;
+					.@skill_executed = 1;
+				} else if (.@can_finger) {
+					.@shoot_lv = getskilllv("MO_FINGEROFFENSIVE");
+					if (.@shoot_lv > 5) .@shoot_lv = 5;
+					if (.@shoot_lv < 1) .@shoot_lv = 1;
 					unitskilluseid getcharid(3), "MO_FINGEROFFENSIVE", .@shoot_lv, @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-					.@step_delay = 800;
+					.@step_delay = 700;
+					.@skill_executed = 1;
+				} else if (getskilllv("AL_HOLYLIGHT") > 0 && Sp >= 15 && getskilllv("MO_FINGEROFFENSIVE") <= 0) {
+					unitskilluseid getcharid(3), "AL_HOLYLIGHT", getskilllv("AL_HOLYLIGHT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 550;
+					.@skill_executed = 1;
+				} else if (getskilllv("MO_TRIPLEATTACK") > 0) {
+					.@step_delay = 400;
 				}
 			}
-		} else if (getskilllv("AL_HOLYLIGHT") > 0 && Sp >= 15 && getskilllv("MO_FINGEROFFENSIVE") <= 0) {
-			unitskilluseid getcharid(3), "AL_HOLYLIGHT", getskilllv("AL_HOLYLIGHT"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 550;
-		} else if (getskilllv("MO_TRIPLEATTACK") > 0) {
-			.@step_delay = 400;
 		}
 	}
 	// 6. MERCADOR E EVOLUCOES (Inclui Mecanico, Bioquimico, Mestre-Ferreiro, Criador, etc.)
-	else if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || BaseJob == Job_Merchant || BaseJob == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Mechanic_T || Class == 4064 || Class == 4058 || Class == 4011 || Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == 4078 || Class == 4071 || Class == 4018 || BaseJob == Job_Blacksmith || BaseJob == Job_Whitesmith || BaseJob == Job_Mechanic || BaseJob == Job_Alchemist || BaseJob == Job_Creator || BaseJob == Job_Genetic) {
+	else if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || BaseJob == Job_Merchant || BaseJob == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Mechanic_T || Class == 4064 || Class == 4058 || Class == 4070 || Class == 4071 || Class == 4011 || Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == 4078 || Class == 4072 || Class == 4018 || BaseJob == Job_Blacksmith || BaseJob == Job_Whitesmith || BaseJob == Job_Mechanic || BaseJob == Job_Alchemist || BaseJob == Job_Creator || BaseJob == Job_Genetic || Class == Job_Meister || BaseJob == Job_Meister) {
 		// Arremessar Pocao Branca Nvl 4 no Homunculo se HP < 50% (delay 5s)
 		if (getskilllv("AM_POTIONPITCHER") >= 4 && Sp >= 1 && countitem(504) > 0 && .@now >= @LAST_HOMUN_PITCHER_TICK + 5) {
 			.@hom_gid = gethominfo(7);
@@ -2030,111 +2767,349 @@ OnStepTimer:
 			}
 		}
 
-		// Garante carrinho aberto para Bioquimico / Ferreiro caso tenha a habilidade
+		// Garante carrinho aberto caso tenha a habilidade
 		if (!checkcart() && getskilllv("MC_PUSHCART") > 0) {
 			setcart;
 		}
 
-		// Aceleracao de Carrinho para Bioquimico
-		if (checkcart() && !getstatus(SC_GN_CARTBOOST) && getskilllv("GN_CARTBOOST") > 0 && Sp >= 20 && .@now >= @BUFF_GN_CARTBOOST + 2) {
-			@BUFF_GN_CARTBOOST = .@now;
-			unitskilluseid getcharid(3), "GN_CARTBOOST", getskilllv("GN_CARTBOOST"), getcharid(3), 0, 0, 0, 0;
+		// Buffs da 1ª e 2ª Classe / Trans / 3ª (Mercador, Ferreiro, Mestre-Ferreiro, Mecanico, etc.)
+		if (getskilllv("MC_LOUD") > 0 && Sp >= 8 && !getstatus(SC_LOUD) && .@now >= @BUFF_MC_LOUD + 10) {
+			@BUFF_MC_LOUD = .@now;
+			unitskilluseid getcharid(3), "MC_LOUD", getskilllv("MC_LOUD"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 450;
 			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 			end;
 		}
-
-		if (getskilllv("AM_RESURRECTHOMUN") > 0 && Sp >= 74 && .@now >= @BUFF_HOMUN_RES + 5 &&
-		    gethominfo(0) > 0 && checkhomcall() == 0 && !unitexists(gethominfo(7))) {
-			@BUFF_HOMUN_RES = .@now;
-			unitskilluseid getcharid(3), "AM_RESURRECTHOMUN", getskilllv("AM_RESURRECTHOMUN"), getcharid(3), 0, 0, 0, 0;
-			.@step_delay = 1200;
-		} else if (getskilllv("GN_CARTCANNON") >= 5 && Sp >= 40 && checkcart() && .@now >= @CD_GN_CARTCANNON) {
-			// Bioquimico - Prioridade 1: Canhao de Protons em nivel maximo (lvl 5)
-			unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+		if (getskilllv("BS_ADRENALINE") > 0 && Sp >= 20 && !getstatus(SC_ADRENALINE) && .@now >= @BUFF_BS_ADRENALINE + 15) {
+			@BUFF_BS_ADRENALINE = .@now;
+			unitskilluseid getcharid(3), "BS_ADRENALINE", getskilllv("BS_ADRENALINE"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 450;
 			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 			end;
-		} else if (getskilllv("GN_CARTCANNON") < 5 && getskilllv("GN_SPORE_EXPLOSION") > 0 && Sp >= 35 && .@now >= @CD_GN_SPORE_EXPLOSION) {
-			// Bioquimico - Prioridade 2: Esporo Explosivo (se Canhao nao estiver no lvl max)
-			@CD_GN_SPORE_EXPLOSION = .@now + 5;
-			unitskilluseid getcharid(3), "GN_SPORE_EXPLOSION", getskilllv("GN_SPORE_EXPLOSION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+		}
+		if (getskilllv("BS_WEAPONPERFECT") > 0 && Sp >= 18 && !getstatus(SC_WEAPONPERFECTION) && .@now >= @BUFF_BS_WEAPONPERFECT + 10) {
+			@BUFF_BS_WEAPONPERFECT = .@now;
+			unitskilluseid getcharid(3), "BS_WEAPONPERFECT", getskilllv("BS_WEAPONPERFECT"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 450;
 			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 			end;
-		} else if (getskilllv("GN_CARTCANNON") < 5 && getskilllv("GN_SPORE_EXPLOSION") <= 0 && getskilllv("GN_CART_TORNADO") > 0 && Sp >= 30 && checkcart() && .@dist <= 2 && .@now >= @CD_GN_CART_TORNADO) {
-			// Bioquimico - Prioridade 3: Tornado de Carrinho (se Canhao e Esporo nao estiverem disponiveis/priorizados)
-			@CD_GN_CART_TORNADO = .@now + 2;
-			unitskilluseid getcharid(3), "GN_CART_TORNADO", getskilllv("GN_CART_TORNADO"), getcharid(3), 0, 0, 0, 0;
+		}
+		if (getskilllv("WS_OVERTHRUSTMAX") > 0 && Sp >= 20 && Zeny >= 5000 && !getstatus(SC_MAXOVERTHRUST) && !getstatus(SC_OVERTHRUST) && .@now >= @BUFF_WS_OVERTHRUSTMAX + 15) {
+			@BUFF_WS_OVERTHRUSTMAX = .@now;
+			unitskilluseid getcharid(3), "WS_OVERTHRUSTMAX", getskilllv("WS_OVERTHRUSTMAX"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 450;
 			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 			end;
-		// ==========================================================
-		// HABILIDADES ALTERNATIVAS QUANDO A PRINCIPAL ESTIVER EM COOLDOWN:
-		// ==========================================================
-		} else if (getskilllv("GN_SPORE_EXPLOSION") > 0 && Sp >= 35 && .@now >= @CD_GN_SPORE_EXPLOSION) {
-			// Esporo Explosivo disponivel como alternativa
-			@CD_GN_SPORE_EXPLOSION = .@now + 5;
-			unitskilluseid getcharid(3), "GN_SPORE_EXPLOSION", getskilllv("GN_SPORE_EXPLOSION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+		} else if (getskilllv("BS_OVERTHRUST") > 0 && Sp >= 18 && !getstatus(SC_OVERTHRUST) && !getstatus(SC_MAXOVERTHRUST) && .@now >= @BUFF_BS_OVERTHRUST + 15) {
+			@BUFF_BS_OVERTHRUST = .@now;
+			unitskilluseid getcharid(3), "BS_OVERTHRUST", getskilllv("BS_OVERTHRUST"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 450;
 			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 			end;
-		} else if (getskilllv("GN_CART_TORNADO") > 0 && Sp >= 30 && checkcart() && .@dist <= 2 && .@now >= @CD_GN_CART_TORNADO) {
-			// Tornado de Carrinho disponivel como alternativa (corpo-a-corpo)
-			@CD_GN_CART_TORNADO = .@now + 2;
-			unitskilluseid getcharid(3), "GN_CART_TORNADO", getskilllv("GN_CART_TORNADO"), getcharid(3), 0, 0, 0, 0;
+		}
+		if (getskilllv("BS_MAXIMIZE") > 0 && Sp >= 20 && !getstatus(SC_MAXIMIZEPOWER) && .@now >= @BUFF_WS_MAXIMIZE + 10) {
+			@BUFF_WS_MAXIMIZE = .@now;
+			unitskilluseid getcharid(3), "BS_MAXIMIZE", getskilllv("BS_MAXIMIZE"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 450;
 			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 			end;
-		} else if (getskilllv("NC_ARMSCANNON") > 0 && Sp >= 30) {
-			unitskilluseid getcharid(3), "NC_ARMSCANNON", getskilllv("NC_ARMSCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 700;
-		} else if (getskilllv("GN_CARTCANNON") > 0 && Sp >= 30 && checkcart() && .@now >= @CD_GN_CARTCANNON) {
-			// Canhao de Protons caso nao esteja no lvl max e sem Esporo/Tornado (ou enquanto estiverem em cd)
-			unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 450;
-			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
-			end;
-		} else if (getskilllv("CR_ACIDDEMONSTRATION") > 0 && Sp >= 30) {
-			// Heranca de 2nd T (Criador): Bomba Acida
-			unitskilluseid getcharid(3), "CR_ACIDDEMONSTRATION", getskilllv("CR_ACIDDEMONSTRATION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 700;
-		} else if (getskilllv("AM_ACIDTERROR") > 0 && Sp >= 15) {
-			// Heranca de 2nd T (Alquimista): Terror Acido
-			unitskilluseid getcharid(3), "AM_ACIDTERROR", getskilllv("AM_ACIDTERROR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-			.@step_delay = 600;
-		} else if (getskilllv("WS_CARTTERMINATION") > 0) {
-			// Heranca de 2nd T (Mestre-Ferreiro): Choque de Carrinho
-			if (!checkcart() && getskilllv("MC_PUSHCART") > 0) {
-				setcart;
-			}
-			if (checkcart() && !getstatus(SC_CARTBOOST) && getskilllv("WS_CARTBOOST") > 0 && Sp >= 20 && .@now >= @BUFF_WS_CARTBOOST + 2) {
+		}
+		if (checkcart()) {
+			if (getskilllv("WS_CARTBOOST") > 0 && Sp >= 20 && !getstatus(SC_CARTBOOST) && .@now >= @BUFF_WS_CARTBOOST + 15) {
 				@BUFF_WS_CARTBOOST = .@now;
 				unitskilluseid getcharid(3), "WS_CARTBOOST", getskilllv("WS_CARTBOOST"), getcharid(3), 0, 0, 0, 0;
 				.@step_delay = 450;
 				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 				end;
 			}
-			if (checkcart() && getstatus(SC_CARTBOOST) && Sp >= 15) {
+			if (getskilllv("GN_CARTBOOST") > 0 && Sp >= 20 && !getstatus(SC_GN_CARTBOOST) && .@now >= @BUFF_GN_CARTBOOST + 15) {
+				@BUFF_GN_CARTBOOST = .@now;
+				unitskilluseid getcharid(3), "GN_CARTBOOST", getskilllv("GN_CARTBOOST"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 450;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			}
+		}
+		if (checkmadogear()) {
+			if ((getequipid(EQI_ACC_L) == 2800 || getequipid(EQI_ACC_R) == 2800) && getskilllv("NC_ACCELERATION") > 0 && Sp >= 20 && !getstatus(SC_ACCELERATION) && .@now >= @BUFF_NC_ACCELERATION + 15) {
+				@BUFF_NC_ACCELERATION = .@now;
+				unitskilluseid getcharid(3), "NC_ACCELERATION", getskilllv("NC_ACCELERATION"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 450;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			}
+			if ((getequipid(EQI_ACC_L) == 2801 || getequipid(EQI_ACC_R) == 2801) && getskilllv("NC_HOVERING") > 0 && Sp >= 25 && !getstatus(SC_HOVERING) && .@now >= @BUFF_NC_HOVERING + 15) {
+				@BUFF_NC_HOVERING = .@now;
+				unitskilluseid getcharid(3), "NC_HOVERING", getskilllv("NC_HOVERING"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 450;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			}
+		}
+
+		// Prioridade configurada pelo jogador (@auto setup)
+		.@sk_p$ = AutoSkillPriority$;
+		if (.@sk_p$ != "") {
+			if (.@sk_p$ == "GN_CARTCANNON" && getskilllv("GN_CARTCANNON") > 0 && Sp >= 30 && checkcart() && .@now >= @CD_GN_CARTCANNON) {
+				unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "GN_CART_TORNADO" && getskilllv("GN_CART_TORNADO") > 0 && Sp >= 30 && checkcart() && .@dist <= 2 && .@now >= @CD_GN_CART_TORNADO) {
+				@CD_GN_CART_TORNADO = .@now + 2;
+				unitskilluseid getcharid(3), "GN_CART_TORNADO", getskilllv("GN_CART_TORNADO"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "GN_SPORE_EXPLOSION" && getskilllv("GN_SPORE_EXPLOSION") > 0 && Sp >= 35 && .@now >= @CD_GN_SPORE_EXPLOSION) {
+				@CD_GN_SPORE_EXPLOSION = .@now + 5;
+				unitskilluseid getcharid(3), "GN_SPORE_EXPLOSION", getskilllv("GN_SPORE_EXPLOSION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "NC_ARMSCANNON" && getskilllv("NC_ARMSCANNON") > 0 && Sp >= 30 && checkmadogear()) {
+				unitskilluseid getcharid(3), "NC_ARMSCANNON", getskilllv("NC_ARMSCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "NC_AXETORNADO" && getskilllv("NC_AXETORNADO") > 0 && Sp >= 18 && .@dist <= 3 && .@now >= @CD_NC_AXETORNADO) {
+				@CD_NC_AXETORNADO = .@now + 2;
+				unitskilluseid getcharid(3), "NC_AXETORNADO", getskilllv("NC_AXETORNADO"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "NC_POWERSWING" && getskilllv("NC_POWERSWING") > 0 && Sp >= 20 && .@dist <= 2) {
+				unitskilluseid getcharid(3), "NC_POWERSWING", getskilllv("NC_POWERSWING"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "NC_AXEBOOMERANG" && getskilllv("NC_AXEBOOMERANG") > 0 && Sp >= 20 && .@now >= @CD_NC_AXEBOOMERANG && .@dist <= 8) {
+				@CD_NC_AXEBOOMERANG = .@now + 3;
+				unitskilluseid getcharid(3), "NC_AXEBOOMERANG", getskilllv("NC_AXEBOOMERANG"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 550; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "NC_MAGMA_ERUPTION" && getskilllv("NC_MAGMA_ERUPTION") > 0 && Sp >= 40 && .@now >= @CD_NC_MAGMA_ERUPTION && .@dist <= 3) {
+				@CD_NC_MAGMA_ERUPTION = .@now + 5;
+				unitskillusepos getcharid(3), "NC_MAGMA_ERUPTION", getskilllv("NC_MAGMA_ERUPTION"), .@cx, .@cy;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "NC_BOOSTKNUCKLE" && getskilllv("NC_BOOSTKNUCKLE") > 0 && Sp >= 15 && checkmadogear()) {
+				unitskilluseid getcharid(3), "NC_BOOSTKNUCKLE", getskilllv("NC_BOOSTKNUCKLE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "NC_PILEBUNKER" && getskilllv("NC_PILEBUNKER") > 0 && Sp >= 20 && .@dist <= 3 && checkmadogear()) {
+				unitskilluseid getcharid(3), "NC_PILEBUNKER", getskilllv("NC_PILEBUNKER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "NC_VULCANARM" && getskilllv("NC_VULCANARM") > 0 && Sp >= 15 && checkmadogear()) {
+				unitskilluseid getcharid(3), "NC_VULCANARM", getskilllv("NC_VULCANARM"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "NC_FLAMELAUNCHER" && getskilllv("NC_FLAMELAUNCHER") > 0 && Sp >= 20 && .@dist <= 5 && checkmadogear()) {
+				unitskilluseid getcharid(3), "NC_FLAMELAUNCHER", getskilllv("NC_FLAMELAUNCHER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "NC_COLDSLOWER" && getskilllv("NC_COLDSLOWER") > 0 && Sp >= 20 && .@dist <= 5 && checkmadogear()) {
+				unitskillusepos getcharid(3), "NC_COLDSLOWER", getskilllv("NC_COLDSLOWER"), .@mx, .@my;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "MT_AXE_STOMP" && getskilllv("MT_AXE_STOMP") > 0 && Sp >= 30 && .@dist <= 3) {
+				unitskilluseid getcharid(3), "MT_AXE_STOMP", getskilllv("MT_AXE_STOMP"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "MT_RUSH_QUAKE" && getskilllv("MT_RUSH_QUAKE") > 0 && Sp >= 30 && .@dist <= 3) {
+				unitskilluseid getcharid(3), "MT_RUSH_QUAKE", getskilllv("MT_RUSH_QUAKE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "CR_ACIDDEMONSTRATION" && getskilllv("CR_ACIDDEMONSTRATION") > 0 && Sp >= 30) {
+				unitskilluseid getcharid(3), "CR_ACIDDEMONSTRATION", getskilllv("CR_ACIDDEMONSTRATION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "AM_ACIDTERROR" && getskilllv("AM_ACIDTERROR") > 0 && Sp >= 15) {
+				unitskilluseid getcharid(3), "AM_ACIDTERROR", getskilllv("AM_ACIDTERROR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "WS_CARTTERMINATION" && getskilllv("WS_CARTTERMINATION") > 0 && checkcart() && Sp >= 15 && .@dist <= 2) {
+				unitskilluseid getcharid(3), "WS_CARTTERMINATION", getskilllv("WS_CARTTERMINATION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 400; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "MC_CARTREVOLUTION" && getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12 && checkcart() && .@dist <= 2) {
+				unitskilluseid getcharid(3), "MC_CARTREVOLUTION", getskilllv("MC_CARTREVOLUTION"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "MC_MAMMONITE" && getskilllv("MC_MAMMONITE") > 0 && Sp >= 5 && Zeny >= 10 && .@dist <= 2) {
+				unitskilluseid getcharid(3), "MC_MAMMONITE", getskilllv("MC_MAMMONITE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			}
+		}
+
+		// Ressurreicao de Homunculo se necessario
+		if (getskilllv("AM_RESURRECTHOMUN") > 0 && Sp >= 74 && .@now >= @BUFF_HOMUN_RES + 5 &&
+		    gethominfo(0) > 0 && checkhomcall() == 0 && !unitexists(gethominfo(7))) {
+			@BUFF_HOMUN_RES = .@now;
+			unitskilluseid getcharid(3), "AM_RESURRECTHOMUN", getskilllv("AM_RESURRECTHOMUN"), getcharid(3), 0, 0, 0, 0;
+			.@step_delay = 1200;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		}
+
+		// ==========================================
+		// RAMO 1: MECANICO NO ROBO (MADO GEAR)
+		// ==========================================
+		if (checkmadogear()) {
+			if (getskilllv("NC_ARMSCANNON") > 0 && Sp >= 30) {
+				unitskilluseid getcharid(3), "NC_ARMSCANNON", getskilllv("NC_ARMSCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("NC_BOOSTKNUCKLE") > 0 && Sp >= 15) {
+				unitskilluseid getcharid(3), "NC_BOOSTKNUCKLE", getskilllv("NC_BOOSTKNUCKLE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 500;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("NC_VULCANARM") > 0 && Sp >= 15) {
+				unitskilluseid getcharid(3), "NC_VULCANARM", getskilllv("NC_VULCANARM"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 500;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("NC_FLAMELAUNCHER") > 0 && Sp >= 20 && .@dist <= 5) {
+				unitskilluseid getcharid(3), "NC_FLAMELAUNCHER", getskilllv("NC_FLAMELAUNCHER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("NC_COLDSLOWER") > 0 && Sp >= 20 && .@dist <= 5) {
+				unitskillusepos getcharid(3), "NC_COLDSLOWER", getskilllv("NC_COLDSLOWER"), .@mx, .@my;
+				.@step_delay = 600;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("NC_PILEBUNKER") > 0 && Sp >= 20 && .@dist <= 3) {
+				unitskilluseid getcharid(3), "NC_PILEBUNKER", getskilllv("NC_PILEBUNKER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("NC_MAGMA_ERUPTION") > 0 && Sp >= 40 && .@dist <= 3 && .@now >= @CD_NC_MAGMA_ERUPTION) {
+				@CD_NC_MAGMA_ERUPTION = .@now + 5;
+				unitskillusepos getcharid(3), "NC_MAGMA_ERUPTION", getskilllv("NC_MAGMA_ERUPTION"), .@cx, .@cy;
+				.@step_delay = 700;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			} else if (getskilllv("NC_POWERSWING") > 0 && Sp >= 20 && .@dist <= 2) {
+				unitskilluseid getcharid(3), "NC_POWERSWING", getskilllv("NC_POWERSWING"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			}
+		}
+
+		// ==========================================
+		// RAMO 2: MECANICO MACHADEIRO / FERREIRO / MEISTER (A PE)
+		// ==========================================
+		// 1. Erupcao de Magma (AoE de solo - CD 5s)
+		if (getskilllv("NC_MAGMA_ERUPTION") > 0 && Sp >= 40 && .@dist <= 3 && .@now >= @CD_NC_MAGMA_ERUPTION) {
+			@CD_NC_MAGMA_ERUPTION = .@now + 5;
+			unitskillusepos getcharid(3), "NC_MAGMA_ERUPTION", getskilllv("NC_MAGMA_ERUPTION"), .@cx, .@cy;
+			.@step_delay = 700;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		}
+		// 2. Furacao de Machado (AoE centralizada no jogador - CD 2s)
+		else if (getskilllv("NC_AXETORNADO") > 0 && Sp >= 18 && .@dist <= 3 && .@now >= @CD_NC_AXETORNADO) {
+			@CD_NC_AXETORNADO = .@now + 2;
+			unitskilluseid getcharid(3), "NC_AXETORNADO", getskilllv("NC_AXETORNADO"), getcharid(3), 0, 0, 0, 0;
+			.@step_delay = 500;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		}
+		// 3. Forca Total / Impacto Retalhador [Power Swing] (Sem CD, spamavel em corpo-a-corpo!)
+		else if (getskilllv("NC_POWERSWING") > 0 && Sp >= 20 && .@dist <= 2) {
+			unitskilluseid getcharid(3), "NC_POWERSWING", getskilllv("NC_POWERSWING"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 450;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		}
+		// 4. Bumerangue de Machado (Ataque a distancia - CD 3s)
+		else if (getskilllv("NC_AXEBOOMERANG") > 0 && Sp >= 20 && .@now >= @CD_NC_AXEBOOMERANG && .@dist <= 8) {
+			@CD_NC_AXEBOOMERANG = .@now + 3;
+			unitskilluseid getcharid(3), "NC_AXEBOOMERANG", getskilllv("NC_AXEBOOMERANG"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 550;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		}
+		// 5. Meister (4th Job): Pisada e Abalo Sismico
+		else if (getskilllv("MT_AXE_STOMP") > 0 && Sp >= 30 && .@dist <= 3) {
+			unitskilluseid getcharid(3), "MT_AXE_STOMP", getskilllv("MT_AXE_STOMP"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 500;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		} else if (getskilllv("MT_RUSH_QUAKE") > 0 && Sp >= 30 && .@dist <= 3) {
+			unitskilluseid getcharid(3), "MT_RUSH_QUAKE", getskilllv("MT_RUSH_QUAKE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 500;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		}
+		// ==========================================
+		// RAMO 3: BIOQUIMICO / CRIADOR / ALQUIMISTA
+		// ==========================================
+		else if (getskilllv("GN_CARTCANNON") >= 5 && Sp >= 40 && checkcart() && .@now >= @CD_GN_CARTCANNON) {
+			unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 450;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		} else if (getskilllv("GN_SPORE_EXPLOSION") > 0 && Sp >= 35 && .@now >= @CD_GN_SPORE_EXPLOSION) {
+			@CD_GN_SPORE_EXPLOSION = .@now + 5;
+			unitskilluseid getcharid(3), "GN_SPORE_EXPLOSION", getskilllv("GN_SPORE_EXPLOSION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 450;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		} else if (getskilllv("GN_CART_TORNADO") > 0 && Sp >= 30 && checkcart() && .@dist <= 2 && .@now >= @CD_GN_CART_TORNADO) {
+			@CD_GN_CART_TORNADO = .@now + 2;
+			unitskilluseid getcharid(3), "GN_CART_TORNADO", getskilllv("GN_CART_TORNADO"), getcharid(3), 0, 0, 0, 0;
+			.@step_delay = 450;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		} else if (getskilllv("GN_CARTCANNON") > 0 && Sp >= 30 && checkcart() && .@now >= @CD_GN_CARTCANNON) {
+			unitskilluseid getcharid(3), "GN_CARTCANNON", getskilllv("GN_CARTCANNON"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 450;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		} else if (getskilllv("CR_ACIDDEMONSTRATION") > 0 && Sp >= 30) {
+			unitskilluseid getcharid(3), "CR_ACIDDEMONSTRATION", getskilllv("CR_ACIDDEMONSTRATION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 700;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		} else if (getskilllv("AM_ACIDTERROR") > 0 && Sp >= 15) {
+			unitskilluseid getcharid(3), "AM_ACIDTERROR", getskilllv("AM_ACIDTERROR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+			.@step_delay = 600;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		}
+		// ==========================================
+		// RAMO 4: MESTRE-FERREIRO E MERCADOR
+		// ==========================================
+		else if (getskilllv("WS_CARTTERMINATION") > 0 && checkcart()) {
+			if (!getstatus(SC_CARTBOOST) && getskilllv("WS_CARTBOOST") > 0 && Sp >= 20 && .@now >= @BUFF_WS_CARTBOOST + 60) {
+				@BUFF_WS_CARTBOOST = .@now;
+				unitskilluseid getcharid(3), "WS_CARTBOOST", getskilllv("WS_CARTBOOST"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 450;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
+			}
+			if (getstatus(SC_CARTBOOST) && Sp >= 15 && .@dist <= 2) {
 				unitskilluseid getcharid(3), "WS_CARTTERMINATION", getskilllv("WS_CARTTERMINATION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 				.@step_delay = 400;
-			} else if (getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12 && checkcart()) {
-				unitskilluseid getcharid(3), "MC_CARTREVOLUTION", getskilllv("MC_CARTREVOLUTION"), getcharid(3), 0, 0, 0, 0;
-				.@step_delay = 500;
-			} else if (getskilllv("MC_MAMMONITE") > 0 && Sp >= 5 && Zeny >= 10) {
-				unitskilluseid getcharid(3), "MC_MAMMONITE", getskilllv("MC_MAMMONITE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-				.@step_delay = 450;
+				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+				end;
 			}
-		} else if (getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12) {
+		}
+		if (getskilllv("MC_CARTREVOLUTION") > 0 && Sp >= 12 && checkcart() && .@dist <= 2) {
 			unitskilluseid getcharid(3), "MC_CARTREVOLUTION", getskilllv("MC_CARTREVOLUTION"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 500;
-		} else if (getskilllv("MC_MAMMONITE") > 0 && Sp >= 5 && Zeny >= 10) {
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
+		} else if (getskilllv("MC_MAMMONITE") > 0 && Sp >= 5 && Zeny >= 10 && .@dist <= 2) {
 			unitskilluseid getcharid(3), "MC_MAMMONITE", getskilllv("MC_MAMMONITE"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 450;
+			addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+			end;
 		}
 	}
 	// 7. NINJA E EVOLUCOES
-	else if (BaseClass == Job_Ninja) {
+	else if (BaseClass == Job_Ninja || Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro || Class == Job_Shinkiro || Class == Job_Shiranui) {
+		.@sk_p$ = AutoSkillPriority$;
+		if (.@sk_p$ != "") {
+			if (.@sk_p$ == "KO_HUUMARANKA" && getskilllv("KO_HUUMARANKA") > 0 && Sp >= 22) {
+				unitskilluseid getcharid(3), "KO_HUUMARANKA", getskilllv("KO_HUUMARANKA"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 650; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "KO_BAKURETSU" && getskilllv("KO_BAKURETSU") > 0 && Sp >= 25) {
+				unitskilluseid getcharid(3), "KO_BAKURETSU", getskilllv("KO_BAKURETSU"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "NJ_KOUENKA" && getskilllv("NJ_KOUENKA") > 0 && Sp >= 15) {
+				unitskilluseid getcharid(3), "NJ_KOUENKA", getskilllv("NJ_KOUENKA"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "NJ_HUUMA" && getskilllv("NJ_HUUMA") > 0 && Sp >= 20) {
+				unitskillusepos getcharid(3), "NJ_HUUMA", getskilllv("NJ_HUUMA"), .@mx, .@my;
+				.@step_delay = 800; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "KO_HAPPOKUNAI" && getskilllv("KO_HAPPOKUNAI") > 0 && Sp >= 20) {
+				unitskilluseid getcharid(3), "KO_HAPPOKUNAI", getskilllv("KO_HAPPOKUNAI"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			}
+		}
+
 		if (getskilllv("KO_HUUMARANKA") > 0 && Sp >= 22) {
 			unitskilluseid getcharid(3), "KO_HUUMARANKA", getskilllv("KO_HUUMARANKA"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 650;
@@ -2153,7 +3128,24 @@ OnStepTimer:
 		}
 	}
 	// 8. JUSTICEIRO / REBELLION
-	else if (BaseClass == Job_Gunslinger || Class == Job_Gunslinger || Class == Job_Rebellion) {
+	else if (BaseClass == Job_Gunslinger || Class == Job_Gunslinger || Class == Job_Rebellion || Class == Job_Night_Watch) {
+		.@sk_p$ = AutoSkillPriority$;
+		if (.@sk_p$ != "") {
+			if (.@sk_p$ == "RL_FIREDANCE" && getskilllv("RL_FIREDANCE") > 0 && Sp >= 20) {
+				unitskilluseid getcharid(3), "RL_FIREDANCE", getskilllv("RL_FIREDANCE"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "RL_R_TRIP" && getskilllv("RL_R_TRIP") > 0 && Sp >= 30) {
+				unitskilluseid getcharid(3), "RL_R_TRIP", getskilllv("RL_R_TRIP"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "GS_DESPERADO" && getskilllv("GS_DESPERADO") > 0 && Sp >= 30) {
+				unitskilluseid getcharid(3), "GS_DESPERADO", getskilllv("GS_DESPERADO"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 800; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "GS_TRIPLEACTION" && getskilllv("GS_TRIPLEACTION") > 0 && Sp >= 15) {
+				unitskilluseid getcharid(3), "GS_TRIPLEACTION", getskilllv("GS_TRIPLEACTION"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			}
+		}
+
 		if (getskilllv("RL_FIREDANCE") > 0 && Sp >= 20) {
 			unitskilluseid getcharid(3), "RL_FIREDANCE", getskilllv("RL_FIREDANCE"), getcharid(3), 0, 0, 0, 0;
 			.@step_delay = 500;
@@ -2169,7 +3161,21 @@ OnStepTimer:
 		}
 	}
 	// 9. DORAM (SUMMONER)
-	else if (BaseClass == Job_Summoner || Class == Job_Summoner) {
+	else if (BaseClass == Job_Summoner || Class == Job_Summoner || Class == Job_Baby_Summoner || Class == Job_Spirit_Handler) {
+		.@sk_p$ = AutoSkillPriority$;
+		if (.@sk_p$ != "") {
+			if (.@sk_p$ == "SU_PICKYPECK" && getskilllv("SU_PICKYPECK") > 0 && Sp >= 10) {
+				unitskilluseid getcharid(3), "SU_PICKYPECK", getskilllv("SU_PICKYPECK"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SU_SV_STEMSPEAR" && getskilllv("SU_SV_STEMSPEAR") > 0 && Sp >= 15) {
+				unitskilluseid getcharid(3), "SU_SV_STEMSPEAR", getskilllv("SU_SV_STEMSPEAR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SU_CN_METEOR" && getskilllv("SU_CN_METEOR") > 0 && Sp >= 30) {
+				unitskillusepos getcharid(3), "SU_CN_METEOR", getskilllv("SU_CN_METEOR"), .@mx, .@my;
+				.@step_delay = 900; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			}
+		}
+
 		if (getskilllv("SU_PICKYPECK") > 0 && Sp >= 10) {
 			unitskilluseid getcharid(3), "SU_PICKYPECK", getskilllv("SU_PICKYPECK"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 			.@step_delay = 500;
@@ -2181,7 +3187,27 @@ OnStepTimer:
 			.@step_delay = 900;
 		}
 	}
-	// 10. APRENDIZ E APRENDIZ T (NOVICE / NOVICE HIGH)
+	// 10. TAEKWON E EVOLUCOES
+	else if (BaseClass == Job_Taekwon || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Soul_Linker || Class == Job_Star_Emperor || Class == Job_Soul_Reaper) {
+		.@sk_p$ = AutoSkillPriority$;
+		if (.@sk_p$ != "") {
+			if (.@sk_p$ == "TK_DOWNKICK" && getskilllv("TK_DOWNKICK") > 0 && Sp >= 1) {
+				unitskilluseid getcharid(3), "TK_DOWNKICK", getskilllv("TK_DOWNKICK"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "TK_STORMKICK" && getskilllv("TK_STORMKICK") > 0 && Sp >= 1) {
+				unitskilluseid getcharid(3), "TK_STORMKICK", getskilllv("TK_STORMKICK"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "TK_TURNKICK" && getskilllv("TK_TURNKICK") > 0 && Sp >= 1) {
+				unitskilluseid getcharid(3), "TK_TURNKICK", getskilllv("TK_TURNKICK"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "TK_COUNTER" && getskilllv("TK_COUNTER") > 0 && Sp >= 1) {
+				unitskilluseid getcharid(3), "TK_COUNTER", getskilllv("TK_COUNTER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			}
+		}
+		.@step_delay = 400;
+	}
+	// 11. APRENDIZ E APRENDIZ T (NOVICE / NOVICE HIGH)
 	else if (BaseClass == Job_Novice || Class == Job_Novice || Class == Job_Novice_High || BaseJob == Job_Novice || BaseJob == Job_Novice_High) {
 		.@step_delay = 400;
 	}
@@ -2214,10 +3240,36 @@ OnContourWalkTo:
 	.@dist = distance(.@cur_x, .@cur_y, .@tgt_x, .@tgt_y);
 	if (.@dist <= 0) return 1;
 
+	// Se for Shura / Monge com Passo Etereo (Body Relocation) e recursos disponiveis:
+	.@can_snap = (getskilllv("MO_BODYRELOCATION") > 0 && Sp >= 14 && (getstatus(SC_EXPLOSIONSPIRITS) || getstatus(SC_RAISINGDRAGON) || countspiritball() > 0));
+	if (.@can_snap) {
+		if (.@dist <= 14 && checkcell(.@m$, .@tgt_x, .@tgt_y, CELL_CHKPASS)) {
+			unitstopwalk getcharid(3), USW_FORCE_STOP;
+			unitskillusepos getcharid(3), "MO_BODYRELOCATION", 1, .@tgt_x, .@tgt_y;
+			@AUTO_LAST_TX = .@tgt_x;
+			@AUTO_LAST_TY = .@tgt_y;
+			@AUTO_SNAP_USED = 1;
+			return 1;
+		}
+		.@diff_x = .@tgt_x - .@cur_x;
+		.@diff_y = .@tgt_y - .@cur_y;
+		if (.@dist > 14) {
+			.@fx = .@cur_x + ((.@diff_x * 14) / .@dist);
+			.@fy = .@cur_y + ((.@diff_y * 14) / .@dist);
+			if (checkcell(.@m$, .@fx, .@fy, CELL_CHKPASS)) {
+				unitstopwalk getcharid(3), USW_FORCE_STOP;
+				unitskillusepos getcharid(3), "MO_BODYRELOCATION", 1, .@fx, .@fy;
+				@AUTO_LAST_TX = .@fx;
+				@AUTO_LAST_TY = .@fy;
+				@AUTO_SNAP_USED = 1;
+				return 1;
+			}
+		}
+	}
+
 	// 1. Caminho direto: se <= 14 celulas e transitavel, anda direto ate o ponto
 	// Em rAthena, unitwalk utiliza A* nativo (path_search) que contorna pequenos obstaculos
 	if (.@dist <= 14 && checkcell(.@m$, .@tgt_x, .@tgt_y, CELL_CHKPASS)) {
-		unitstopwalk getcharid(3), USW_FORCE_STOP;
 		if (unitwalk(getcharid(3), .@tgt_x, .@tgt_y)) {
 			@AUTO_LAST_TX = .@tgt_x;
 			@AUTO_LAST_TY = .@tgt_y;
@@ -2225,15 +3277,14 @@ OnContourWalkTo:
 		}
 	}
 
-	// 2. Se o ponto estiver distante (> 10 celulas), tenta avancar NA RETA DIRETA (passos de 10 a 6 celulas)
+	// 2. Se o ponto estiver distante (> 10 celulas), tenta avancar NA RETA DIRETA (passos de 14 a 6 celulas)
 	.@diff_x = .@tgt_x - .@cur_x;
 	.@diff_y = .@tgt_y - .@cur_y;
 	if (.@dist > 10) {
-		for (.@step = 10; .@step >= 6; .@step -= 2) {
+		for (.@step = 14; .@step >= 6; .@step -= 2) {
 			.@fx = .@cur_x + ((.@diff_x * .@step) / .@dist);
 			.@fy = .@cur_y + ((.@diff_y * .@step) / .@dist);
 			if (checkcell(.@m$, .@fx, .@fy, CELL_CHKPASS)) {
-				unitstopwalk getcharid(3), USW_FORCE_STOP;
 				if (unitwalk(getcharid(3), .@fx, .@fy)) {
 					@AUTO_LAST_TX = .@fx;
 					@AUTO_LAST_TY = .@fy;
@@ -2263,7 +3314,6 @@ OnContourWalkTo:
 		.@dx = .@base_x + (.@pRx * .@off);
 		.@dy = .@base_y + (.@pRy * .@off);
 		if (checkcell(.@m$, .@dx, .@dy, CELL_CHKPASS)) {
-			unitstopwalk getcharid(3), USW_FORCE_STOP;
 			if (unitwalk(getcharid(3), .@dx, .@dy)) {
 				@AUTO_LAST_TX = .@dx;
 				@AUTO_LAST_TY = .@dy;
@@ -2291,7 +3341,31 @@ OnGetCombatRange:
 	}
 	.@range = .@w_range;
 
-	// ESPADACHIM E EVOLUCOES (Inclui Cavaleiro Runico 4060, Guardiao Real 4073, Lorde 4008, Paladino 4015, etc.)
+	.@cur_p$ = AutoSkillPriority$;
+	if (.@cur_p$ == "" && #AutoSkillPriority > 0) {
+		if (#AutoSkillPriority == 1) .@cur_p$ = "SR_TIGERCANNON";
+		else if (#AutoSkillPriority == 2) .@cur_p$ = "SR_HOWLINGOFLION";
+		else if (#AutoSkillPriority == 3) .@cur_p$ = "SR_RAMPAGEBLASTER";
+		else if (#AutoSkillPriority == 4) .@cur_p$ = "SR_SKYNETBLOW";
+		else if (#AutoSkillPriority == 5) .@cur_p$ = "SR_KNUCKLEARROW";
+		else if (#AutoSkillPriority == 6) .@cur_p$ = "SR_GATEOFHELL";
+		else if (#AutoSkillPriority == 7) .@cur_p$ = "MO_FINGEROFFENSIVE";
+	}
+	if (.@cur_p$ != "" && getskilllv(.@cur_p$) > 0) {
+		if (.@cur_p$ == "SR_TIGERCANNON" || .@cur_p$ == "SR_SKYNETBLOW" || .@cur_p$ == "RK_IGNITIONBREAK" || .@cur_p$ == "RK_WINDCUTTER" || .@cur_p$ == "KN_BOWLINGBASH" || .@cur_p$ == "SM_BASH" || .@cur_p$ == "SM_MAGNUM" || .@cur_p$ == "CR_HOLYCROSS" || .@cur_p$ == "LG_RAYOFGENESIS" || .@cur_p$ == "GC_ROLLINGCUTTER" || .@cur_p$ == "AS_SONICBLOW" || .@cur_p$ == "RG_BACKSTAP" || .@cur_p$ == "RG_RAID" || .@cur_p$ == "TF_POISON" || .@cur_p$ == "TF_SPRINKLESAND" || .@cur_p$ == "GN_CART_TORNADO" || .@cur_p$ == "MC_CARTREVOLUTION" || .@cur_p$ == "MC_MAMMONITE" || .@cur_p$ == "WS_CARTTERMINATION" || .@cur_p$ == "GS_DESPERADO" || .@cur_p$ == "TK_DOWNKICK" || .@cur_p$ == "TK_STORMKICK" || .@cur_p$ == "TK_TURNKICK" || .@cur_p$ == "TK_COUNTER" || .@cur_p$ == "NC_AXETORNADO" || .@cur_p$ == "NC_POWERSWING" || .@cur_p$ == "NC_MAGMA_ERUPTION" || .@cur_p$ == "MT_AXE_STOMP" || .@cur_p$ == "MT_RUSH_QUAKE") {
+			return (.@w_range > 0 && .@w_range < 2 ? .@w_range : 2);
+		}
+		if (.@cur_p$ == "GC_CROSSIMPACT" || .@cur_p$ == "SC_FATALMENACE" || .@cur_p$ == "ASC_METEORASSAULT" || .@cur_p$ == "LG_OVERBRAND" || .@cur_p$ == "PA_SHIELDCHAIN" || .@cur_p$ == "SR_HOWLINGOFLION" || .@cur_p$ == "SR_RAMPAGEBLASTER" || .@cur_p$ == "RL_FIREDANCE" || .@cur_p$ == "NC_PILEBUNKER") {
+			return 3;
+		}
+		if (.@cur_p$ == "NC_FLAMELAUNCHER" || .@cur_p$ == "NC_COLDSLOWER") {
+			return 5;
+		}
+		if (.@cur_p$ == "LK_SPIRALPIERCE" || .@cur_p$ == "SR_KNUCKLEARROW" || .@cur_p$ == "SR_GATEOFHELL" || .@cur_p$ == "GN_CARTCANNON" || .@cur_p$ == "NC_ARMSCANNON" || .@cur_p$ == "NC_AXEBOOMERANG" || .@cur_p$ == "NC_BOOSTKNUCKLE" || .@cur_p$ == "NC_VULCANARM" || .@cur_p$ == "LG_BANISHINGPOINT" || .@cur_p$ == "LG_CANNONSPEAR" || .@cur_p$ == "WL_EARTHSTRAIN" || .@cur_p$ == "KO_HUUMARANKA" || .@cur_p$ == "KO_BAKURETSU" || .@cur_p$ == "NJ_HUUMA" || .@cur_p$ == "NJ_KOUENKA" || .@cur_p$ == "RL_R_TRIP" || .@cur_p$ == "GS_TRIPLEACTION" || .@cur_p$ == "SU_PICKYPECK" || .@cur_p$ == "SU_SV_STEMSPEAR") {
+			return 7;
+		}
+		return 8;
+	}
 	if (BaseClass == Job_Swordman || Class == Job_Swordman || Class == Job_Swordman_High || BaseJob == Job_Swordman || BaseJob == Job_Swordman_High || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Rune_Knight || Class == Job_Rune_Knight_T || Class == 4060 || Class == 4054 || Class == 4008 || Class == Job_Crusader || Class == Job_Paladin || Class == Job_Royal_Guard || Class == Job_Royal_Guard_T || Class == 4073 || Class == 4066 || Class == 4015 || BaseJob == Job_Knight || BaseJob == Job_Crusader || BaseJob == Job_Lord_Knight || BaseJob == Job_Paladin || BaseJob == Job_Rune_Knight || BaseJob == Job_Royal_Guard) {
 		if (getskilllv("RK_DRAGONBREATH_WATER") >= 10 && (checkriding() || checkdragon()) && Sp >= 30) {
 			.@range = 7;
@@ -2325,7 +3399,9 @@ OnGetCombatRange:
 	}
 	// GATUNO E EVOLUCOES (Inclui Sicario 4065, Renegado 4079, Algoz 4013, Desordeiro 4021, etc.)
 	else if (BaseClass == Job_Thief || Class == Job_Thief || Class == Job_Thief_High || BaseJob == Job_Thief || BaseJob == Job_Thief_High || Class == Job_Assassin || Class == Job_Assassin_Cross || Class == Job_Guillotine_Cross || Class == Job_Guillotine_Cross_T || Class == 4065 || Class == 4058 || Class == 4013 || Class == Job_Rogue || Class == Job_Stalker || Class == Job_Shadow_Chaser || Class == Job_Shadow_Chaser_T || Class == 4079 || Class == 4072 || Class == 4021 || BaseJob == Job_Assassin || BaseJob == Job_Assassin_Cross || BaseJob == Job_Guillotine_Cross || BaseJob == Job_Rogue || BaseJob == Job_Stalker || BaseJob == Job_Shadow_Chaser) {
-		if (getskilllv("SC_TRIANGLESHOT") > 0 && Sp >= 24) {
+		if (getskilllv("GC_ROLLINGCUTTER") > 0 || getskilllv("GC_CROSSIMPACT") > 0 || getskilllv("SC_FATALMENACE") > 0 || getskilllv("AS_SONICBLOW") > 0 || getskilllv("RG_BACKSTAP") > 0 || getskilllv("RG_RAID") > 0) {
+			.@range = (.@w_range > 0 && .@w_range < 2 ? .@w_range : 2);
+		} else if (getskilllv("SC_TRIANGLESHOT") > 0 && Sp >= 24) {
 			.@range = 7;
 		} else if (getskilllv("ASC_BREAKER") > 0 && Sp >= (getskilllv("ASC_BREAKER") > 5 ? 30 : 20)) {
 			.@range = 8; // Destruidor de Almas ataca a longa distancia (8 celulas)
@@ -2334,13 +3410,21 @@ OnGetCombatRange:
 		}
 	}
 	// ACOLITO E EVOLUCOES (Inclui Arcebispo 4063, Shura 4077, Sumo Sacerdote 4010, Mestre 4016, etc.)
-	else if (BaseClass == Job_Acolyte || Class == Job_Acolyte || Class == Job_Acolyte_High || BaseJob == Job_Acolyte || BaseJob == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop || Class == Job_Arch_Bishop_T || Class == 4063 || Class == 4057 || Class == 4010 || Class == Job_Monk || Class == Job_Champion || Class == Job_Sura || Class == Job_Sura_T || Class == 4077 || Class == 4070 || Class == 4016 || BaseJob == Job_Priest || BaseJob == Job_High_Priest || BaseJob == Job_Arch_Bishop || BaseJob == Job_Monk || BaseJob == Job_Champion || BaseJob == Job_Sura) {
-		if (getskilllv("AB_ADORAMUS") > 0 && Sp >= 40 && countitem(717) > 0) {
+	else if (BaseClass == Job_Acolyte || Class == Job_Acolyte || Class == Job_Acolyte_High || BaseJob == Job_Acolyte || BaseJob == Job_Acolyte_High || Class == Job_Priest || Class == Job_High_Priest || Class == Job_Arch_Bishop || Class == Job_Arch_Bishop_T || Class == 4063 || Class == 4057 || Class == 4010 || Class == Job_Monk || Class == Job_Champion || Class == Job_Sura || Class == Job_Sura_T || Class == 4077 || Class == 4070 || Class == 4016 || Class == Job_Inquisitor || BaseJob == Job_Priest || BaseJob == Job_High_Priest || BaseJob == Job_Arch_Bishop || BaseJob == Job_Monk || BaseJob == Job_Champion || BaseJob == Job_Sura || BaseJob == Job_Inquisitor) {
+		if (getskilllv("AB_ADORAMUS") > 0 && Sp >= 40) {
 			.@range = 8;
 		} else if (getskilllv("AB_JUDEX") > 0 && Sp >= 20) {
 			.@range = 8;
 		} else if (getskilllv("PR_MAGNUS") > 0 && Sp >= 40) {
 			.@range = 8; // Magnus Exorcismus ataca a 8 celulas de alcance
+		} else if (#AutoSkillPriority == 5 && getskilllv("SR_KNUCKLEARROW") > 0 && Sp >= 15) {
+			.@range = 7; // Prioridade configurada de Pancada Corporal (Knuckle Arrow)
+		} else if (#AutoSkillPriority == 6 && getskilllv("SR_GATEOFHELL") > 0 && Sp >= 50) {
+			.@range = 7; // Prioridade configurada de Portoes do Inferno
+		} else if (#AutoSkillPriority == 7 && getskilllv("MO_FINGEROFFENSIVE") > 0 && Sp >= 20) {
+			.@range = 8; // Prioridade configurada de Disparo de Esferas
+		} else if (getskilllv("SR_TIGERCANNON") > 0 || getskilllv("SR_HOWLINGOFLION") > 0 || getskilllv("SR_RAMPAGEBLASTER") > 0 || getskilllv("SR_SKYNETBLOW") > 0) {
+			.@range = (.@w_range > 0 && .@w_range < 2 ? .@w_range : 2); // Habilidades em area de Shura sao corpo-a-corpo
 		} else if (getskilllv("SR_KNUCKLEARROW") > 0 && Sp >= 15) {
 			.@range = 7; // Investida de Shura ataca a 7 celulas
 		} else if (getskilllv("MO_FINGEROFFENSIVE") > 0 && Sp >= 20) {
@@ -2351,9 +3435,18 @@ OnGetCombatRange:
 			.@range = .@w_range;
 		}
 	}
-	// MERCADOR E EVOLUCOES (Inclui Mecanico 4064, Bioquimico 4078, Mestre-Ferreiro 4011, Criador 4018, etc.)
-	else if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || BaseJob == Job_Merchant || BaseJob == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Mechanic_T || Class == 4064 || Class == 4059 || Class == 4011 || Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == 4078 || Class == 4071 || Class == 4018 || BaseJob == Job_Blacksmith || BaseJob == Job_Whitesmith || BaseJob == Job_Mechanic || BaseJob == Job_Alchemist || BaseJob == Job_Creator || BaseJob == Job_Genetic) {
-		if (getskilllv("GN_CARTCANNON") >= 5 && Sp >= 40 && .@now >= @CD_GN_CARTCANNON) {
+	// MERCADOR E EVOLUCOES (Inclui Mecanico 4064, Bioquimico 4078, Mestre-Ferreiro 4011, Criador 4018, Meister, etc.)
+	else if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || BaseJob == Job_Merchant || BaseJob == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Mechanic || Class == Job_Mechanic_T || Class == 4064 || Class == 4058 || Class == 4070 || Class == 4071 || Class == 4011 || Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == 4078 || Class == 4072 || Class == 4018 || BaseJob == Job_Blacksmith || BaseJob == Job_Whitesmith || BaseJob == Job_Mechanic || BaseJob == Job_Alchemist || BaseJob == Job_Creator || BaseJob == Job_Genetic || Class == Job_Meister || BaseJob == Job_Meister) {
+		if (checkmadogear()) {
+			// Mecanico no Robo (Mado Gear): mantem alcance a distancia do Canhao/Punho
+			if ((getskilllv("NC_ARMSCANNON") > 0 || getskilllv("NC_BOOSTKNUCKLE") > 0 || getskilllv("NC_VULCANARM") > 0) && Sp >= 15) {
+				.@range = 7;
+			} else if ((getskilllv("NC_FLAMELAUNCHER") > 0 || getskilllv("NC_COLDSLOWER") > 0) && Sp >= 20) {
+				.@range = 5;
+			} else {
+				.@range = (.@w_range > 0 && .@w_range < 2 ? .@w_range : 2);
+			}
+		} else if (getskilllv("GN_CARTCANNON") >= 5 && Sp >= 40 && .@now >= @CD_GN_CARTCANNON) {
 			// Prioridade 1 Bioquimico: Canhao de Protons no nivel maximo
 			.@range = 7;
 		} else if (getskilllv("GN_CARTCANNON") < 5 && getskilllv("GN_SPORE_EXPLOSION") > 0 && Sp >= 35 && .@now >= @CD_GN_SPORE_EXPLOSION) {
@@ -2362,12 +3455,18 @@ OnGetCombatRange:
 		} else if (getskilllv("GN_CART_TORNADO") > 0 && Sp >= 30 && .@now >= @CD_GN_CART_TORNADO && (getskilllv("GN_CARTCANNON") < 5 || .@now < @CD_GN_CARTCANNON) && (getskilllv("GN_SPORE_EXPLOSION") <= 0 || .@now < @CD_GN_SPORE_EXPLOSION)) {
 			// Prioridade 3 Bioquimico: Tornado de Carrinho (aproxima para alcance corpo-a-corpo)
 			.@range = (.@w_range > 0 && .@w_range < 2 ? .@w_range : 2);
-		} else if ((getskilllv("NC_ARMSCANNON") > 0 || getskilllv("GN_CARTCANNON") > 0) && Sp >= 30) {
-			.@range = 7;
+		} else if (.@cur_p$ == "NC_AXEBOOMERANG" && getskilllv("NC_AXEBOOMERANG") > 0 && Sp >= 20) {
+			// Apenas se priorizou explicitamente Bumerangue de Machado mantem distancia
+			.@range = 6;
+		} else if (getskilllv("NC_AXETORNADO") > 0 || getskilllv("NC_POWERSWING") > 0 || getskilllv("NC_MAGMA_ERUPTION") > 0 || getskilllv("MT_AXE_STOMP") > 0 || getskilllv("MT_RUSH_QUAKE") > 0 || getskilllv("WS_CARTTERMINATION") > 0 || getskilllv("MC_CARTREVOLUTION") > 0 || getskilllv("MC_MAMMONITE") > 0) {
+			// Mecanico Machadeiro / Ferreiro a pe: SEMPRE fecha para alcance corpo-a-corpo (2 celulas)!
+			.@range = (.@w_range > 0 && .@w_range < 2 ? .@w_range : 2);
 		} else if ((getskilllv("AM_ACIDTERROR") > 0 || getskilllv("CR_ACIDDEMONSTRATION") > 0) && Sp >= 15) {
 			.@range = 8; // Terror Acido e Bomba Acida atacam a 8 celulas de distancia
 		} else if (getskilllv("GN_SPORE_EXPLOSION") > 0 && Sp >= 35) {
 			.@range = 8;
+		} else if (getskilllv("GN_CARTCANNON") > 0 && Sp >= 30) {
+			.@range = 7;
 		} else {
 			.@range = .@w_range;
 		}
@@ -2521,7 +3620,7 @@ OnCheckSupportBuffs:
 		if (getskilllv("MG_ENERGYCOAT") <= 0) {
 			skill "MG_ENERGYCOAT", 1, 0;
 		}
-		if (Sp >= 30 && !getstatus(SC_ENERGYCOAT) && .@now >= @BUFF_MG_ENERGYCOAT + 5) {
+		if (Sp >= 30 && !getstatus(SC_ENERGYCOAT) && .@now >= @BUFF_MG_ENERGYCOAT + 60) {
 			@BUFF_MG_ENERGYCOAT = .@now;
 			if (getskilllv("MG_ENERGYCOAT") > 0) {
 				unitskilluseid getcharid(3), "MG_ENERGYCOAT", getskilllv("MG_ENERGYCOAT"), getcharid(3), 0, 0, 0, 0;
@@ -2530,7 +3629,7 @@ OnCheckSupportBuffs:
 			specialeffect2 EF_ENERGYCOAT;
 			return 1;
 		}
-		if (getskilllv("HW_MAGICPOWER") > 0 && Sp >= 40 && !getstatus(SC_MAGICPOWER) && .@now >= @BUFF_HW_MAGICPOWER + 3) {
+		if (getskilllv("HW_MAGICPOWER") > 0 && Sp >= 40 && !getstatus(SC_MAGICPOWER) && .@now >= @BUFF_HW_MAGICPOWER + 30) {
 			@BUFF_HW_MAGICPOWER = .@now;
 			unitskilluseid getcharid(3), "HW_MAGICPOWER", getskilllv("HW_MAGICPOWER"), getcharid(3), 0, 0, 0, 0;
 			return 1;
@@ -2538,7 +3637,7 @@ OnCheckSupportBuffs:
 		// Presciencia (PF_MEMORIZE):
 		// Para de usar se tiver reducao de conjuracao variavel de -100% ou (dex * 2 + int) >= 530
 		.@has_instant_varcast = ((readparam(bDex) * 2 + readparam(bInt) >= 530) || readparam(bVariableCastrate) <= -100 || readparam(bVariableCastrate) >= 100 || readparam(bCastrate) <= -100 || readparam(bCastrate) >= 100);
-		if (!.@has_instant_varcast && getskilllv("PF_MEMORIZE") > 0 && Sp >= 1 && !getstatus(SC_MEMORIZE) && .@now >= @BUFF_PF_MEMORIZE + 3) {
+		if (!.@has_instant_varcast && getskilllv("PF_MEMORIZE") > 0 && Sp >= 1 && !getstatus(SC_MEMORIZE) && .@now >= @BUFF_PF_MEMORIZE + 60) {
 			@BUFF_PF_MEMORIZE = .@now;
 			unitskilluseid getcharid(3), "PF_MEMORIZE", getskilllv("PF_MEMORIZE"), getcharid(3), 0, 0, 0, 0;
 			return 1;
@@ -2547,7 +3646,7 @@ OnCheckSupportBuffs:
 		// Lancas Duplas (PF_DOUBLECASTING):
 		// Sorcerer NAO usa mais lancas duplas se ja possuir habilidades de 3a classe aprendidas
 		.@has_sorc_3rd = (Class == Job_Sorcerer || Class == Job_Sorcerer_T || Class == 4074 || Class == 4067 || Class == Job_Baby_Sorcerer || Class == Job_Elemental_Master || Class == Job_Elemental_Master_T || Class == Job_Baby_Elemental_Master || Class == 4255 || BaseJob == Job_Sorcerer) && (getskilllv("SO_PSYCHIC_WAVE") > 0 || getskilllv("SO_POISON_BUSTER") > 0 || getskilllv("SO_DIAMONDDUST") > 0 || getskilllv("SO_EARTHGRAVE") > 0 || getskilllv("SO_VARETYR_SPEAR") > 0 || getskilllv("SO_CLOUD_KILL") > 0);
-		if (!.@has_sorc_3rd && getskilllv("PF_DOUBLECASTING") > 0 && Sp >= (35 + getskilllv("PF_DOUBLECASTING") * 5) && !getstatus(SC_DOUBLECAST) && .@now >= @BUFF_PF_DOUBLECAST + 3) {
+		if (!.@has_sorc_3rd && getskilllv("PF_DOUBLECASTING") > 0 && Sp >= (35 + getskilllv("PF_DOUBLECASTING") * 5) && !getstatus(SC_DOUBLECAST) && .@now >= @BUFF_PF_DOUBLECAST + 60) {
 			@BUFF_PF_DOUBLECAST = .@now;
 			unitskilluseid getcharid(3), "PF_DOUBLECASTING", getskilllv("PF_DOUBLECASTING"), getcharid(3), 0, 0, 0, 0;
 			return 1;
@@ -2558,7 +3657,7 @@ OnCheckSupportBuffs:
 			return 1;
 		}
 		if (getskilllv("WL_TELEKINESIS_INTENSE") > 0 && Sp >= (50 + getskilllv("WL_TELEKINESIS_INTENSE") * 50) && !getstatus(SC_TELEKINESIS_INTENSE) && .@now >= @CD_WL_TELEKINESIS) {
-			@CD_WL_TELEKINESIS = .@now + 3;
+			@CD_WL_TELEKINESIS = .@now + 300;
 			unitskilluseid getcharid(3), "WL_TELEKINESIS_INTENSE", getskilllv("WL_TELEKINESIS_INTENSE"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
@@ -2577,18 +3676,18 @@ OnCheckSupportBuffs:
 			}
 			setfalcon 1;
 		}
-		if (getskilllv("AC_CONCENTRATION") > 0 && Sp >= 25 && !getstatus(SC_CONCENTRATE) && .@now >= @BUFF_AC_CONCENTRATION + 3) {
+		if (getskilllv("AC_CONCENTRATION") > 0 && Sp >= 25 && !getstatus(SC_CONCENTRATE) && .@now >= @BUFF_AC_CONCENTRATION + 60) {
 			@BUFF_AC_CONCENTRATION = .@now;
 			unitskilluseid getcharid(3), "AC_CONCENTRATION", getskilllv("AC_CONCENTRATION"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("SN_WINDWALK") > 0 && Sp >= 30 && !getstatus(SC_WINDWALK) && .@now >= @BUFF_SN_WINDWALK + 3) {
+		if (getskilllv("SN_WINDWALK") > 0 && Sp >= 30 && !getstatus(SC_WINDWALK) && .@now >= @BUFF_SN_WINDWALK + 60) {
 			@BUFF_SN_WINDWALK = .@now;
 			unitskilluseid getcharid(3), "SN_WINDWALK", getskilllv("SN_WINDWALK"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
 		.@sn_sp = 15 + ((getskilllv("SN_SIGHT") + 1) / 2) * 5;
-		if (getskilllv("SN_SIGHT") > 0 && Sp >= .@sn_sp && !getstatus(SC_TRUESIGHT) && .@now >= @BUFF_SN_SIGHT + 2) {
+		if (getskilllv("SN_SIGHT") > 0 && Sp >= .@sn_sp && !getstatus(SC_TRUESIGHT) && .@now >= @BUFF_SN_SIGHT + 30) {
 			@BUFF_SN_SIGHT = .@now;
 			unitskilluseid getcharid(3), "SN_SIGHT", getskilllv("SN_SIGHT"), getcharid(3), 0, 0, 0, 0;
 			if (!getstatus(SC_TRUESIGHT)) {
@@ -2596,13 +3695,13 @@ OnCheckSupportBuffs:
 			}
 			return 1;
 		}
-		if (getskilllv("RA_FEARBREEZE") > 0 && Sp >= 45 && !getstatus(SC_FEARBREEZE) && .@now >= @BUFF_RA_FEARBREEZE + 3) {
+		if (getskilllv("RA_FEARBREEZE") > 0 && Sp >= 45 && !getstatus(SC_FEARBREEZE) && .@now >= @BUFF_RA_FEARBREEZE + 60) {
 			@BUFF_RA_FEARBREEZE = .@now;
 			unitskilluseid getcharid(3), "RA_FEARBREEZE", getskilllv("RA_FEARBREEZE"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
 		if (getskilllv("RA_UNLIMIT") > 0 && Sp >= (80 + getskilllv("RA_UNLIMIT") * 20) && !getstatus(SC_UNLIMIT) && .@now >= @CD_RA_UNLIMIT) {
-			@CD_RA_UNLIMIT = .@now + 5;
+			@CD_RA_UNLIMIT = .@now + 300;
 			unitskilluseid getcharid(3), "RA_UNLIMIT", getskilllv("RA_UNLIMIT"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
@@ -2690,7 +3789,7 @@ OnCheckSupportBuffs:
 			unitskilluseid getcharid(3), "AS_POISONREACT", getskilllv("AS_POISONREACT"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("ASC_EDP") > 0 && Sp >= 40 && countitem(678) > 0 && !getstatus(SC_EDP) && .@now >= @BUFF_ASC_EDP + 3) {
+		if (getskilllv("ASC_EDP") > 0 && Sp >= 40 && countitem(678) > 0 && !getstatus(SC_EDP) && .@now >= @BUFF_ASC_EDP + 60) {
 			@BUFF_ASC_EDP = .@now;
 			unitskilluseid getcharid(3), "ASC_EDP", getskilllv("ASC_EDP"), getcharid(3), 0, 0, 0, 0;
 			return 1;
@@ -2719,17 +3818,17 @@ OnCheckSupportBuffs:
 
 	// 5. ACOLITO E EVOLUCOES
 	if (BaseClass == Job_Acolyte || Class == Job_Acolyte || Class == Job_Acolyte_High || BaseJob == Job_Acolyte || BaseJob == Job_Acolyte_High) {
-		if (getskilllv("AL_BLESSING") > 0 && Sp >= 30 && !getstatus(SC_BLESSING) && .@now >= @BUFF_AL_BLESSING + 60) {
+		if (getskilllv("AL_BLESSING") > 0 && Sp >= 30 && !getstatus(SC_BLESSING) && .@now >= @BUFF_AL_BLESSING + 120) {
 			@BUFF_AL_BLESSING = .@now;
 			unitskilluseid getcharid(3), "AL_BLESSING", getskilllv("AL_BLESSING"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("AL_INCAGI") > 0 && Sp >= 25 && !getstatus(SC_INCREASEAGI) && .@now >= @BUFF_AL_INCAGI + 60) {
+		if (getskilllv("AL_INCAGI") > 0 && Sp >= 25 && !getstatus(SC_INCREASEAGI) && .@now >= @BUFF_AL_INCAGI + 120) {
 			@BUFF_AL_INCAGI = .@now;
 			unitskilluseid getcharid(3), "AL_INCAGI", getskilllv("AL_INCAGI"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("AL_ANGELUS") > 0 && Sp >= 25 && !getstatus(SC_ANGELUS) && .@now >= @BUFF_AL_ANGELUS + 60) {
+		if (getskilllv("AL_ANGELUS") > 0 && Sp >= 25 && !getstatus(SC_ANGELUS) && .@now >= @BUFF_AL_ANGELUS + 120) {
 			@BUFF_AL_ANGELUS = .@now;
 			unitskilluseid getcharid(3), "AL_ANGELUS", getskilllv("AL_ANGELUS"), getcharid(3), 0, 0, 0, 0;
 			return 1;
@@ -2739,17 +3838,17 @@ OnCheckSupportBuffs:
 			unitskilluseid getcharid(3), "PR_KYRIE", getskilllv("PR_KYRIE"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("PR_MAGNIFICAT") > 0 && Sp >= 40 && !getstatus(SC_MAGNIFICAT) && .@now >= @BUFF_PR_MAGNIFICAT + 60) {
+		if (getskilllv("PR_MAGNIFICAT") > 0 && Sp >= 40 && !getstatus(SC_MAGNIFICAT) && .@now >= @BUFF_PR_MAGNIFICAT + 120) {
 			@BUFF_PR_MAGNIFICAT = .@now;
 			unitskilluseid getcharid(3), "PR_MAGNIFICAT", getskilllv("PR_MAGNIFICAT"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("PR_GLORIA") > 0 && Sp >= 20 && !getstatus(SC_GLORIA) && .@now >= @BUFF_PR_GLORIA + 60) {
+		if (getskilllv("PR_GLORIA") > 0 && Sp >= 20 && !getstatus(SC_GLORIA) && .@now >= @BUFF_PR_GLORIA + 120) {
 			@BUFF_PR_GLORIA = .@now;
 			unitskilluseid getcharid(3), "PR_GLORIA", getskilllv("PR_GLORIA"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("PR_IMPOSITIO") > 0 && Sp >= 20 && !getstatus(SC_IMPOSITIO) && .@now >= @BUFF_PR_IMPOSITIO + 60) {
+		if (getskilllv("PR_IMPOSITIO") > 0 && Sp >= 20 && !getstatus(SC_IMPOSITIO) && .@now >= @BUFF_PR_IMPOSITIO + 120) {
 			@BUFF_PR_IMPOSITIO = .@now;
 			unitskilluseid getcharid(3), "PR_IMPOSITIO", getskilllv("PR_IMPOSITIO"), getcharid(3), 0, 0, 0, 0;
 			return 1;
@@ -2759,29 +3858,31 @@ OnCheckSupportBuffs:
 			unitskilluseid getcharid(3), "PR_SUFFRAGIUM", getskilllv("PR_SUFFRAGIUM"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("AB_EXPIATIO") > 0 && Sp >= 35 && !getstatus(SC_EXPIATIO) && .@now >= @BUFF_AB_EXPIATIO + 60) {
+		if (getskilllv("AB_EXPIATIO") > 0 && Sp >= 35 && !getstatus(SC_EXPIATIO) && .@now >= @BUFF_AB_EXPIATIO + 120) {
 			@BUFF_AB_EXPIATIO = .@now;
 			unitskilluseid getcharid(3), "AB_EXPIATIO", getskilllv("AB_EXPIATIO"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("CH_SOULCOLLECT") > 0 && Sp >= 20 && countspiritball() <= 0 && .@now >= @BUFF_CH_SOULCOLLECT + 2) {
-			@BUFF_CH_SOULCOLLECT = .@now;
-			unitskilluseid getcharid(3), "CH_SOULCOLLECT", getskilllv("CH_SOULCOLLECT"), getcharid(3), 0, 0, 0, 0;
-			return 1;
-		} else if (getskilllv("MO_CALLSPIRITS") > 0 && Sp >= 8 && countspiritball() <= 0 && .@now >= @BUFF_MO_CALLSPIRITS + 1) {
-			@BUFF_MO_CALLSPIRITS = .@now;
-			unitskilluseid getcharid(3), "MO_CALLSPIRITS", getskilllv("MO_CALLSPIRITS"), getcharid(3), 0, 0, 0, 0;
-			return 1;
-		}
-		if (getskilllv("MO_EXPLOSIONSPIRITS") > 0 && Sp >= 15 && !getstatus(SC_EXPLOSIONSPIRITS) && .@now >= @BUFF_MO_EXPLOSIONSPIRITS + 60) {
-			@BUFF_MO_EXPLOSIONSPIRITS = .@now;
-			unitskilluseid getcharid(3), "MO_EXPLOSIONSPIRITS", getskilllv("MO_EXPLOSIONSPIRITS"), getcharid(3), 0, 0, 0, 0;
-			return 1;
-		}
-		if (getskilllv("SR_RAISINGDRAGON") > 0 && Sp >= 80 && !getstatus(SC_RAISINGDRAGON) && .@now >= @BUFF_SR_RAISINGDRAGON + 60) {
+		if (getskilllv("SR_RAISINGDRAGON") > 0 && Sp >= 120 && .@now >= @BUFF_SR_RAISINGDRAGON + 15 && (!getstatus(SC_RAISINGDRAGON) || countspiritball() < 5)) {
 			@BUFF_SR_RAISINGDRAGON = .@now;
 			unitskilluseid getcharid(3), "SR_RAISINGDRAGON", getskilllv("SR_RAISINGDRAGON"), getcharid(3), 0, 0, 0, 0;
 			return 1;
+		}
+		if (getskilllv("SR_RAISINGDRAGON") <= 0) {
+			if (getskilllv("CH_SOULCOLLECT") > 0 && Sp >= 20 && countspiritball() <= 0 && .@now >= @BUFF_CH_SOULCOLLECT + 5) {
+				@BUFF_CH_SOULCOLLECT = .@now;
+				unitskilluseid getcharid(3), "CH_SOULCOLLECT", getskilllv("CH_SOULCOLLECT"), getcharid(3), 0, 0, 0, 0;
+				return 1;
+			} else if (getskilllv("MO_CALLSPIRITS") > 0 && Sp >= 8 && countspiritball() <= 0 && .@now >= @BUFF_MO_CALLSPIRITS + 5) {
+				@BUFF_MO_CALLSPIRITS = .@now;
+				unitskilluseid getcharid(3), "MO_CALLSPIRITS", getskilllv("MO_CALLSPIRITS"), getcharid(3), 0, 0, 0, 0;
+				return 1;
+			}
+			if (getskilllv("MO_EXPLOSIONSPIRITS") > 0 && Sp >= 15 && !getstatus(SC_EXPLOSIONSPIRITS) && .@now >= @BUFF_MO_EXPLOSIONSPIRITS + 60) {
+				@BUFF_MO_EXPLOSIONSPIRITS = .@now;
+				unitskilluseid getcharid(3), "MO_EXPLOSIONSPIRITS", getskilllv("MO_EXPLOSIONSPIRITS"), getcharid(3), 0, 0, 0, 0;
+				return 1;
+			}
 		}
 		if (getskilllv("SR_GENTLETOUCH_ENERGYGAIN") > 0 && Sp >= 30 && !getstatus(SC_GT_ENERGYGAIN) && .@now >= @BUFF_SR_ENERGYGAIN + 60) {
 			@BUFF_SR_ENERGYGAIN = .@now;
@@ -2800,8 +3901,15 @@ OnCheckSupportBuffs:
 		}
 	}
 
-	// 6. MERCADOR E EVOLUCOES
-	if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || BaseJob == Job_Merchant || BaseJob == Job_Merchant_High) {
+	// 6. MERCADOR E EVOLUCOES (Ferreiro, Mestre-Ferreiro, Mecanico, Alquimista, Criador, Bioquimico, etc.)
+	if (BaseClass == Job_Merchant || Class == Job_Merchant || Class == Job_Merchant_High || BaseJob == Job_Merchant || BaseJob == Job_Merchant_High ||
+	    Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Baby_Blacksmith ||
+	    Class == Job_Mechanic || Class == Job_Mechanic_T || Class == Job_Mechanic2 || Class == Job_Mechanic_T2 || Class == Job_Baby_Mechanic || Class == Job_Baby_Mechanic2 ||
+	    Class == Job_Meister || Class == Job_Alchemist || Class == Job_Creator || Class == Job_Genetic || Class == Job_Genetic_T || Class == Job_Biolo) {
+		// Garante carrinho aberto caso tenha a habilidade
+		if (!checkcart() && getskilllv("MC_PUSHCART") > 0) {
+			setcart;
+		}
 		if (getskilllv("AM_RESURRECTHOMUN") > 0 && Sp >= 74 && .@now >= @BUFF_HOMUN_RES + 5) {
 			if (gethominfo(0) > 0 && checkhomcall() == 0 && !unitexists(gethominfo(7))) {
 				@BUFF_HOMUN_RES = .@now;
@@ -2821,57 +3929,58 @@ OnCheckSupportBuffs:
 				}
 			}
 		}
-		if (getskilllv("MC_LOUD") > 0 && Sp >= 8 && !getstatus(SC_LOUD) && .@now >= @BUFF_MC_LOUD + 60) {
+		if (getskilllv("MC_LOUD") > 0 && Sp >= 8 && !getstatus(SC_LOUD) && .@now >= @BUFF_MC_LOUD + 10) {
 			@BUFF_MC_LOUD = .@now;
 			unitskilluseid getcharid(3), "MC_LOUD", getskilllv("MC_LOUD"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("BS_ADRENALINE") > 0 && Sp >= 20 && !getstatus(SC_ADRENALINE) && .@now >= @BUFF_BS_ADRENALINE + 60) {
+		if (getskilllv("BS_ADRENALINE") > 0 && Sp >= 20 && !getstatus(SC_ADRENALINE) && .@now >= @BUFF_BS_ADRENALINE + 15) {
 			@BUFF_BS_ADRENALINE = .@now;
 			unitskilluseid getcharid(3), "BS_ADRENALINE", getskilllv("BS_ADRENALINE"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("BS_WEAPONPERFECT") > 0 && Sp >= 18 && !getstatus(SC_WEAPONPERFECTION) && .@now >= @BUFF_BS_WEAPONPERFECT + 60) {
+		if (getskilllv("BS_WEAPONPERFECT") > 0 && Sp >= 18 && !getstatus(SC_WEAPONPERFECTION) && .@now >= @BUFF_BS_WEAPONPERFECT + 10) {
 			@BUFF_BS_WEAPONPERFECT = .@now;
 			unitskilluseid getcharid(3), "BS_WEAPONPERFECT", getskilllv("BS_WEAPONPERFECT"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("BS_OVERTHRUST") > 0 && Sp >= 20 && !getstatus(SC_OVERTHRUST) && .@now >= @BUFF_BS_OVERTHRUST + 60) {
+		if (getskilllv("WS_OVERTHRUSTMAX") > 0 && Sp >= 20 && Zeny >= 5000 && !getstatus(SC_MAXOVERTHRUST) && !getstatus(SC_OVERTHRUST) && .@now >= @BUFF_WS_OVERTHRUSTMAX + 15) {
+			@BUFF_WS_OVERTHRUSTMAX = .@now;
+			unitskilluseid getcharid(3), "WS_OVERTHRUSTMAX", getskilllv("WS_OVERTHRUSTMAX"), getcharid(3), 0, 0, 0, 0;
+			return 1;
+		} else if (getskilllv("BS_OVERTHRUST") > 0 && Sp >= 18 && !getstatus(SC_OVERTHRUST) && !getstatus(SC_MAXOVERTHRUST) && .@now >= @BUFF_BS_OVERTHRUST + 15) {
 			@BUFF_BS_OVERTHRUST = .@now;
 			unitskilluseid getcharid(3), "BS_OVERTHRUST", getskilllv("BS_OVERTHRUST"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("BS_MAXIMIZE") > 0 && Sp >= 10 && !getstatus(SC_MAXIMIZEPOWER) && .@now >= @BUFF_WS_MAXIMIZE + 60) {
+		if (getskilllv("BS_MAXIMIZE") > 0 && Sp >= 20 && !getstatus(SC_MAXIMIZEPOWER) && .@now >= @BUFF_WS_MAXIMIZE + 10) {
 			@BUFF_WS_MAXIMIZE = .@now;
 			unitskilluseid getcharid(3), "BS_MAXIMIZE", getskilllv("BS_MAXIMIZE"), getcharid(3), 0, 0, 0, 0;
 			return 1;
 		}
-		if (getskilllv("WS_OVERTHRUSTMAX") > 0 && Sp >= 20 && !getstatus(SC_MAXOVERTHRUST) && .@now >= @BUFF_WS_OVERTHRUSTMAX + 60) {
-			@BUFF_WS_OVERTHRUSTMAX = .@now;
-			unitskilluseid getcharid(3), "WS_OVERTHRUSTMAX", getskilllv("WS_OVERTHRUSTMAX"), getcharid(3), 0, 0, 0, 0;
-			return 1;
-		}
 		if (checkcart()) {
-			if (getskilllv("WS_CARTBOOST") > 0 && Sp >= 20 && !getstatus(SC_CARTBOOST) && .@now >= @BUFF_WS_CARTBOOST + 3) {
+			if (getskilllv("WS_CARTBOOST") > 0 && Sp >= 20 && !getstatus(SC_CARTBOOST) && .@now >= @BUFF_WS_CARTBOOST + 15) {
 				@BUFF_WS_CARTBOOST = .@now;
 				unitskilluseid getcharid(3), "WS_CARTBOOST", getskilllv("WS_CARTBOOST"), getcharid(3), 0, 0, 0, 0;
 				return 1;
 			}
-			if (getskilllv("GN_CARTBOOST") > 0 && Sp >= 20 && !getstatus(SC_GN_CARTBOOST) && .@now >= @BUFF_GN_CARTBOOST + 60) {
+			if (getskilllv("GN_CARTBOOST") > 0 && Sp >= 20 && !getstatus(SC_GN_CARTBOOST) && .@now >= @BUFF_GN_CARTBOOST + 15) {
 				@BUFF_GN_CARTBOOST = .@now;
 				unitskilluseid getcharid(3), "GN_CARTBOOST", getskilllv("GN_CARTBOOST"), getcharid(3), 0, 0, 0, 0;
 				return 1;
 			}
 		}
-		if (getskilllv("NC_ACCELERATION") > 0 && Sp >= 20 && !getstatus(SC_ACCELERATION) && .@now >= @BUFF_NC_ACCELERATION + 60) {
-			@BUFF_NC_ACCELERATION = .@now;
-			unitskilluseid getcharid(3), "NC_ACCELERATION", getskilllv("NC_ACCELERATION"), getcharid(3), 0, 0, 0, 0;
-			return 1;
-		}
-		if (getskilllv("NC_HOVERING") > 0 && Sp >= 20 && !getstatus(SC_HOVERING) && .@now >= @BUFF_NC_HOVERING + 60) {
-			@BUFF_NC_HOVERING = .@now;
-			unitskilluseid getcharid(3), "NC_HOVERING", getskilllv("NC_HOVERING"), getcharid(3), 0, 0, 0, 0;
-			return 1;
+		if (checkmadogear()) {
+			if ((getequipid(EQI_ACC_L) == 2800 || getequipid(EQI_ACC_R) == 2800) && getskilllv("NC_ACCELERATION") > 0 && Sp >= 20 && !getstatus(SC_ACCELERATION) && .@now >= @BUFF_NC_ACCELERATION + 15) {
+				@BUFF_NC_ACCELERATION = .@now;
+				unitskilluseid getcharid(3), "NC_ACCELERATION", getskilllv("NC_ACCELERATION"), getcharid(3), 0, 0, 0, 0;
+				return 1;
+			}
+			if ((getequipid(EQI_ACC_L) == 2801 || getequipid(EQI_ACC_R) == 2801) && getskilllv("NC_HOVERING") > 0 && Sp >= 25 && !getstatus(SC_HOVERING) && .@now >= @BUFF_NC_HOVERING + 15) {
+				@BUFF_NC_HOVERING = .@now;
+				unitskilluseid getcharid(3), "NC_HOVERING", getskilllv("NC_HOVERING"), getcharid(3), 0, 0, 0, 0;
+				return 1;
+			}
 		}
 	}
 

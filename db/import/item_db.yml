@@ -1433,31 +1433,46 @@ Body:
       Duration: 0
     Script: |
       .@time = getstatus(SC_ITEMBOOST, 5);
-      .@cur_rate = getstatus(SC_ITEMBOOST, 1);
-      .@rate = (.@cur_rate > 100 ? .@cur_rate : 100);
+      .@rate = getstatus(SC_ITEMBOOST, 1);
       if (.@time > 0) {
+        if (.@rate >= 200) {
+          dispbottom "[Goma de Mascar]: Voce ja possui o efeito do Chicle de Bola (+200%) ativo.", 0xFF5555;
+          getitem 12210, 1;
+          end;
+        }
         .@new_time = .@time + 1800000;
-        sc_start SC_ITEMBOOST, .@new_time, .@rate;
+        sc_start SC_ITEMBOOST, .@new_time, 100;
       } else {
         .@new_time = 1800000;
-        sc_start SC_ITEMBOOST, 1800000, .@rate;
+        sc_start SC_ITEMBOOST, 1800000, 100;
       }
       .@mins = .@new_time / 60000;
       .@secs = (.@new_time % 60000) / 1000;
-      dispbottom "[Goma de Mascar]: +30 minutos adicionados! Tempo total: " + .@mins + "m " + (.@secs < 10 ? "0" : "") + .@secs + "s.", 0x55FF55;
+      dispbottom "[Goma de Mascar]: +30 minutos adicionados (+100% drop)! Tempo total: " + .@mins + "m " + (.@secs < 10 ? "0" : "") + .@secs + "s.", 0x55FF55;
 
   - Id: 12412
     Script: |
       .@time = getstatus(SC_ITEMBOOST, 5);
-      .@rate = 200;
+      .@rate = getstatus(SC_ITEMBOOST, 1);
       if (.@time > 0) {
-        .@new_time = .@time + 1800000;
-        sc_start SC_ITEMBOOST, .@new_time, .@rate;
-      } else {
-        .@new_time = 1800000;
-        sc_start SC_ITEMBOOST, 1800000, .@rate;
+        if (.@rate >= 200) {
+          .@new_time = .@time + 1800000;
+          sc_start SC_ITEMBOOST, .@new_time, 200;
+          .@mins = .@new_time / 60000;
+          .@secs = (.@new_time % 60000) / 1000;
+          dispbottom "[Chicle de Bola]: +30 minutos adicionados (+200% drop)! Tempo total: " + .@mins + "m " + (.@secs < 10 ? "0" : "") + .@secs + "s.", 0x55FF55;
+          end;
+        }
+        if (.@time > 1800000) {
+          dispbottom "[Chicle de Bola]: Voce possui mais de 30 minutos de Goma (+100%) ativa. Aguarde restar menos de 30m para substituir.", 0xFF5555;
+          getitem 12412, 1;
+          end;
+        }
+        sc_end SC_ITEMBOOST;
+        sc_start SC_ITEMBOOST, 1800000, 200;
+        dispbottom "[Chicle de Bola]: Efeito da Goma (+100%) substituido pelo Chicle de Bola (+200%) por 30 minutos!", 0x55FF55;
+        end;
       }
-      .@mins = .@new_time / 60000;
-      .@secs = (.@new_time % 60000) / 1000;
-      dispbottom "[Chicle de Bola]: +30 minutos adicionados! Tempo total: " + .@mins + "m " + (.@secs < 10 ? "0" : "") + .@secs + "s.", 0x55FF55;
+      sc_start SC_ITEMBOOST, 1800000, 200;
+      dispbottom "[Chicle de Bola]: Efeito ativado (+200% drop) por 30 minutos!", 0x55FF55;
 
