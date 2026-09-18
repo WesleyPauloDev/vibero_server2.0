@@ -742,6 +742,9 @@ OnSelectSkillPriority:
 		if (getskilllv("SS_ANTENPOU") > 0) { .@opt_skills$[.@opt_count] = "SS_ANTENPOU"; .@opt_names$[.@opt_count] = "Canhao das Sombras [Darkening Cannon]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_ANTENPOU") + "):"; .@opt_count++; }
 		if (getskilllv("SS_SHIMIRU") > 0) { .@opt_skills$[.@opt_count] = "SS_SHIMIRU"; .@opt_names$[.@opt_count] = "Infiltracao [Infiltrate]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_SHIMIRU") + "):"; .@opt_count++; }
 		if (getskilllv("SS_KAGEGARI") > 0) { .@opt_skills$[.@opt_count] = "SS_KAGEGARI"; .@opt_names$[.@opt_count] = "Cacada das Sombras [Shadow Hunting]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_KAGEGARI") + "):"; .@opt_count++; }
+		if (getskilllv("SS_ANKOKURYUUAKUMU") > 0) { .@opt_skills$[.@opt_count] = "SS_ANKOKURYUUAKUMU"; .@opt_names$[.@opt_count] = "Dragao Sombrio - Pesadelo [Dark Dragon Nightmare]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_ANKOKURYUUAKUMU") + "):"; .@opt_count++; }
+		if (getskilllv("SS_KAGEAKUMU") > 0) { .@opt_skills$[.@opt_count] = "SS_KAGEAKUMU"; .@opt_names$[.@opt_count] = "Sombra - Pesadelo [Shadow Nightmare]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_KAGEAKUMU") + "):"; .@opt_count++; }
+		if (getskilllv("SS_HITOUAKUMU") > 0) { .@opt_skills$[.@opt_count] = "SS_HITOUAKUMU"; .@opt_names$[.@opt_count] = "Kunai - Pesadelo [Kunai Nightmare]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("SS_HITOUAKUMU") + "):"; .@opt_count++; }
 		// 2ª Classe (Kagerou / Oboro)
 		if (getskilllv("KO_JYUMONJIKIRI") > 0) { .@opt_skills$[.@opt_count] = "KO_JYUMONJIKIRI"; .@opt_names$[.@opt_count] = "Impacto Cruzado [Cross Slash]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("KO_JYUMONJIKIRI") + "):"; .@opt_count++; }
 		if (getskilllv("KO_HUUMARANKA") > 0) { .@opt_skills$[.@opt_count] = "KO_HUUMARANKA"; .@opt_names$[.@opt_count] = "Turbilhao de Petalas [Swirling Petal]"; .@menu$ = .@menu$ + .@opt_names$[.@opt_count] + " (Nvl " + getskilllv("KO_HUUMARANKA") + "):"; .@opt_count++; }
@@ -3183,6 +3186,15 @@ OnStepTimer:
 			} else if (.@sk_p$ == "SS_KAGEGARI" && getskilllv("SS_KAGEGARI") > 0 && Sp >= 33 && .@dist <= 3) {
 				unitskillusepos getcharid(3), "SS_KAGEGARI", getskilllv("SS_KAGEGARI"), .@cx, .@cy;
 				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SS_ANKOKURYUUAKUMU" && getskilllv("SS_ANKOKURYUUAKUMU") > 0 && Sp >= 120 && .@dist <= 3) {
+				unitskilluseid getcharid(3), "SS_ANKOKURYUUAKUMU", getskilllv("SS_ANKOKURYUUAKUMU"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SS_KAGEAKUMU" && getskilllv("SS_KAGEAKUMU") > 0 && Sp >= 70 && .@dist <= 3) {
+				unitskilluseid getcharid(3), "SS_KAGEAKUMU", getskilllv("SS_KAGEAKUMU"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (.@sk_p$ == "SS_HITOUAKUMU" && getskilllv("SS_HITOUAKUMU") > 0 && Sp >= 70 && .@dist <= 3) {
+				unitskilluseid getcharid(3), "SS_HITOUAKUMU", getskilllv("SS_HITOUAKUMU"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
 			}
 			// 2ª Classe (Kagerou / Oboro)
 			else if (.@sk_p$ == "KO_JYUMONJIKIRI" && getskilllv("KO_JYUMONJIKIRI") > 0 && Sp >= 10 && .@dist <= 2) {
@@ -3274,6 +3286,15 @@ OnStepTimer:
 			} else if (getskilllv("SS_KAGEGARI") > 0 && Sp >= 33 && .@dist <= 3) {
 				unitskillusepos getcharid(3), "SS_KAGEGARI", getskilllv("SS_KAGEGARI"), .@cx, .@cy;
 				.@step_delay = 500; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (getskilllv("SS_ANKOKURYUUAKUMU") > 0 && Sp >= 120 && .@dist <= 3) {
+				unitskilluseid getcharid(3), "SS_ANKOKURYUUAKUMU", getskilllv("SS_ANKOKURYUUAKUMU"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (getskilllv("SS_KAGEAKUMU") > 0 && Sp >= 70 && .@dist <= 3) {
+				unitskilluseid getcharid(3), "SS_KAGEAKUMU", getskilllv("SS_KAGEAKUMU"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			} else if (getskilllv("SS_HITOUAKUMU") > 0 && Sp >= 70 && .@dist <= 3) {
+				unitskilluseid getcharid(3), "SS_HITOUAKUMU", getskilllv("SS_HITOUAKUMU"), getcharid(3), 0, 0, 0, 0;
+				.@step_delay = 700; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
 			}
 		}
 
@@ -3667,13 +3688,13 @@ OnGetCombatRange:
 	else if (BaseClass == Job_Ninja || Class == Job_Ninja || Class == Job_Kagerou || Class == Job_Oboro || Class == Job_Shinkiro || Class == Job_Shiranui) {
 		.@sk_p$ = AutoSkillPriority$;
 		if (.@sk_p$ != "") {
-			if (.@sk_p$ == "SS_KAGENOMAI" || .@sk_p$ == "SS_KAGEGISSEN" || .@sk_p$ == "SS_KUNAIKAITEN" || .@sk_p$ == "SS_KUNAIKUSSETSU" || .@sk_p$ == "SS_FUUMAKOUCHIKU" || .@sk_p$ == "SS_SEKIENHOU" || .@sk_p$ == "SS_RAIDENPOU" || .@sk_p$ == "SS_ANTENPOU" || .@sk_p$ == "SS_KAGEGARI" || .@sk_p$ == "KO_JYUMONJIKIRI" || .@sk_p$ == "KO_BAKURETSU" || .@sk_p$ == "KO_HAPPOKUNAI" || .@sk_p$ == "NJ_HYOUSYOURAKU" || .@sk_p$ == "NJ_KAMAITACHI") {
+			if (.@sk_p$ == "SS_KAGENOMAI" || .@sk_p$ == "SS_KAGEGISSEN" || .@sk_p$ == "SS_KUNAIKAITEN" || .@sk_p$ == "SS_KUNAIKUSSETSU" || .@sk_p$ == "SS_FUUMAKOUCHIKU" || .@sk_p$ == "SS_SEKIENHOU" || .@sk_p$ == "SS_RAIDENPOU" || .@sk_p$ == "SS_ANTENPOU" || .@sk_p$ == "SS_KAGEGARI" || .@sk_p$ == "SS_ANKOKURYUUAKUMU" || .@sk_p$ == "SS_KAGEAKUMU" || .@sk_p$ == "SS_HITOUAKUMU" || .@sk_p$ == "KO_JYUMONJIKIRI" || .@sk_p$ == "KO_BAKURETSU" || .@sk_p$ == "KO_HAPPOKUNAI" || .@sk_p$ == "NJ_HYOUSYOURAKU" || .@sk_p$ == "NJ_KAMAITACHI") {
 				.@range = (.@w_range > 0 && .@w_range < 2 ? .@w_range : 2);
 			} else {
 				.@range = 6;
 			}
 		} else if (Class == Job_Shinkiro || Class == Job_Shiranui) {
-			if (getskilllv("SS_KAGENOMAI") > 0 || getskilllv("SS_KAGEGISSEN") > 0 || getskilllv("SS_KUNAIKAITEN") > 0 || getskilllv("SS_KUNAIKUSSETSU") > 0 || getskilllv("SS_SEKIENHOU") > 0 || getskilllv("SS_RAIDENPOU") > 0 || getskilllv("SS_ANTENPOU") > 0 || getskilllv("SS_FUUMAKOUCHIKU") > 0 || getskilllv("SS_KAGEGARI") > 0) {
+			if (getskilllv("SS_KAGENOMAI") > 0 || getskilllv("SS_KAGEGISSEN") > 0 || getskilllv("SS_KUNAIKAITEN") > 0 || getskilllv("SS_KUNAIKUSSETSU") > 0 || getskilllv("SS_SEKIENHOU") > 0 || getskilllv("SS_RAIDENPOU") > 0 || getskilllv("SS_ANTENPOU") > 0 || getskilllv("SS_FUUMAKOUCHIKU") > 0 || getskilllv("SS_KAGEGARI") > 0 || getskilllv("SS_ANKOKURYUUAKUMU") > 0 || getskilllv("SS_KAGEAKUMU") > 0 || getskilllv("SS_HITOUAKUMU") > 0) {
 				.@range = (.@w_range > 0 && .@w_range < 2 ? .@w_range : 2);
 			} else if (getskilllv("SS_FUUMASHOUAKU") > 0 || getskilllv("SS_KUNAIWAIKYOKU") > 0 || getskilllv("SS_REIKETSUHOU") > 0 || getskilllv("SS_KINRYUUHOU") > 0 || getskilllv("SS_SHIMIRU") > 0) {
 				.@range = 6;
