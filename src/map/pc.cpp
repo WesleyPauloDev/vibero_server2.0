@@ -7628,7 +7628,7 @@ int32 pc_get_skillcooldown(map_session_data *sd, uint16 skill_id, uint16 skill_l
 uint8 pc_checkskill(map_session_data *sd, uint16 skill_id)
 {
 	uint16 idx = 0;
-	if (sd == nullptr)
+	if (sd == nullptr || skill_id == 0)
 		return 0;
 
 #ifdef RENEWAL

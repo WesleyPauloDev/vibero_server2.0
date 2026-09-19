@@ -240,6 +240,10 @@ OnAutoCommand:
 	@ab_tp_quiz_timeout = 0;
 	setpcblock PCBLOCK_ALL|PCBLOCK_IMMUNE, false;
 	@AUTO_CONSECUTIVE_WING_TELEPORTS = 0;
+	if (AutoSkillPriority$ == "0" || AutoSkillPriority$ == "none" || AutoSkillPriority$ == "null") {
+		AutoSkillPriority$ = "";
+		#AutoSkillPriority = 0;
+	}
 	@AUTO_MAP$ = strcharinfo(3);
 	@AUTO_LAST_TICK = gettimetick(2);
 	@AUTO_LAST_BUFF = gettimetick(2);
@@ -4516,6 +4520,10 @@ OnGetCombatRange:
 	.@range = .@w_range;
 
 	.@cur_p$ = AutoSkillPriority$;
+	if (.@cur_p$ == "0" || .@cur_p$ == "none" || .@cur_p$ == "null" || .@cur_p$ == "Rotacao Padrao / Inteligente") {
+		AutoSkillPriority$ = "";
+		.@cur_p$ = "";
+	}
 	if (.@cur_p$ == "" && #AutoSkillPriority > 0) {
 		if (#AutoSkillPriority == 1) .@cur_p$ = "SR_TIGERCANNON";
 		else if (#AutoSkillPriority == 2) .@cur_p$ = "SR_HOWLINGOFLION";
@@ -4526,7 +4534,21 @@ OnGetCombatRange:
 		else if (#AutoSkillPriority == 7) .@cur_p$ = "MO_FINGEROFFENSIVE";
 	}
 	if (.@cur_p$ == "WM_METALLICSOUND") .@cur_p$ = "WM_METALICSOUND";
-	if (.@cur_p$ != "" && getskilllv(.@cur_p$) > 0) {
+	if (.@cur_p$ != "" && .@cur_p$ != "0") {
+		// Imperador Estelar (Star Emperor) e Taekwon
+		if (.@cur_p$ == "SJ_SOLARBURST" || .@cur_p$ == "SJ_PROMINENCEKICK" || .@cur_p$ == "SJ_FULLMOONKICK" || .@cur_p$ == "SJ_NEWMOONKICK" || .@cur_p$ == "SJ_FLASHKICK") {
+			return (.@w_range > 0 && .@w_range < 2 ? .@w_range : 2);
+		}
+		if (.@cur_p$ == "SJ_NOVAEXPLOSING" || .@cur_p$ == "SJ_STAREMPEROR") {
+			return 3;
+		}
+		if (.@cur_p$ == "SJ_GRAVITYCONTROL") {
+			return 7;
+		}
+		if (.@cur_p$ == "TK_JUMPKICK") {
+			return 9;
+		}
+
 		if (.@cur_p$ == "SR_TIGERCANNON" || .@cur_p$ == "SR_SKYNETBLOW" || .@cur_p$ == "RK_IGNITIONBREAK" || .@cur_p$ == "RK_WINDCUTTER" || .@cur_p$ == "KN_BOWLINGBASH" || .@cur_p$ == "SM_BASH" || .@cur_p$ == "SM_MAGNUM" || .@cur_p$ == "CR_HOLYCROSS" || .@cur_p$ == "LG_RAYOFGENESIS" || .@cur_p$ == "GC_ROLLINGCUTTER" || .@cur_p$ == "AS_SONICBLOW" || .@cur_p$ == "RG_BACKSTAP" || .@cur_p$ == "RG_RAID" || .@cur_p$ == "TF_POISON" || .@cur_p$ == "TF_SPRINKLESAND" || .@cur_p$ == "GN_CART_TORNADO" || .@cur_p$ == "MC_CARTREVOLUTION" || .@cur_p$ == "MC_MAMMONITE" || .@cur_p$ == "WS_CARTTERMINATION" || .@cur_p$ == "GS_DESPERADO" || .@cur_p$ == "TK_DOWNKICK" || .@cur_p$ == "TK_STORMKICK" || .@cur_p$ == "TK_TURNKICK" || .@cur_p$ == "TK_COUNTER" || .@cur_p$ == "NC_AXETORNADO" || .@cur_p$ == "NC_POWERSWING" || .@cur_p$ == "NC_MAGMA_ERUPTION" || .@cur_p$ == "MT_AXE_STOMP" || .@cur_p$ == "MT_RUSH_QUAKE") {
 			return (.@w_range > 0 && .@w_range < 2 ? .@w_range : 2);
 		}
