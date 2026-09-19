@@ -21234,6 +21234,15 @@ BUILDIN_FUNC(unitattack)
 		case BL_PET:
 			((TBL_PET *)unit_bl)->target_id = target_bl->id;
 			break;
+		case BL_ELEM:
+			((TBL_ELEM *)unit_bl)->target_id = target_bl->id;
+			break;
+		case BL_HOM:
+			((TBL_HOM *)unit_bl)->target_id = target_bl->id;
+			break;
+		case BL_MER:
+			((TBL_MER *)unit_bl)->target_id = target_bl->id;
+			break;
 		default:
 			ShowError("buildin_unitattack: Unsupported source unit type %d.\n", unit_bl->type);
 			script_pushint(st, false);

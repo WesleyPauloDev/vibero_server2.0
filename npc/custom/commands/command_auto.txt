@@ -2349,30 +2349,67 @@ OnStepTimer:
 
 		.@sk_p$ = AutoSkillPriority$;
 		if (.@sk_p$ != "") {
-			if (.@sk_p$ == "SO_PSYCHIC_WAVE" && getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 70 && .@now >= @CD_SO_PSYCHIC_WAVE) {
-				@CD_SO_PSYCHIC_WAVE = .@now + 5;
-				unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my;
-				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
-			} else if (.@sk_p$ == "SO_POISON_BUSTER" && getskilllv("SO_POISON_BUSTER") > 0 && Sp >= 70 && .@now >= @CD_SO_POISON_BUSTER) {
-				@CD_SO_POISON_BUSTER = .@now + 2;
-				unitskilluseid getcharid(3), "SO_POISON_BUSTER", getskilllv("SO_POISON_BUSTER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
-			} else if (.@sk_p$ == "SO_DIAMONDDUST" && getskilllv("SO_DIAMONDDUST") > 0 && Sp >= 50 && .@now >= @CD_SO_DIAMONDDUST) {
-				@CD_SO_DIAMONDDUST = .@now + 5;
-				unitskillusepos getcharid(3), "SO_DIAMONDDUST", getskilllv("SO_DIAMONDDUST"), .@mx, .@my;
-				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
-			} else if (.@sk_p$ == "SO_EARTHGRAVE" && getskilllv("SO_EARTHGRAVE") > 0 && Sp >= 62 && .@now >= @CD_SO_EARTHGRAVE) {
-				@CD_SO_EARTHGRAVE = .@now + 5;
-				unitskillusepos getcharid(3), "SO_EARTHGRAVE", getskilllv("SO_EARTHGRAVE"), .@mx, .@my;
-				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
-			} else if (.@sk_p$ == "SO_VARETYR_SPEAR" && getskilllv("SO_VARETYR_SPEAR") > 0 && Sp >= 65 && .@now >= @CD_SO_VARETYR_SPEAR) {
-				@CD_SO_VARETYR_SPEAR = .@now + 2;
-				unitskilluseid getcharid(3), "SO_VARETYR_SPEAR", getskilllv("SO_VARETYR_SPEAR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
-				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
-			} else if (.@sk_p$ == "SO_CLOUD_KILL" && getskilllv("SO_CLOUD_KILL") > 0 && Sp >= 48 && .@now >= @CD_SO_CLOUD_KILL) {
-				@CD_SO_CLOUD_KILL = .@now + 5;
-				unitskillusepos getcharid(3), "SO_CLOUD_KILL", getskilllv("SO_CLOUD_KILL"), .@mx, .@my;
-				.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+			if (.@sk_p$ == "SO_PSYCHIC_WAVE" && getskilllv("SO_PSYCHIC_WAVE") > 0) {
+				.@cd_pw = getskillcooldown("SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE")) / 1000;
+				if (Sp >= 70 && (.@cd_pw <= 0 || .@now >= @CD_SO_PSYCHIC_WAVE)) {
+					if (.@cd_pw > 0) @CD_SO_PSYCHIC_WAVE = .@now + .@cd_pw;
+					unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my;
+					.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+				// Se a prioridade e Onda Psiquica e ela tem CD 0 (ou falta SP), nao gasta SP em outras skills:
+				if (.@cd_pw <= 0) {
+					.@step_delay = 400; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+			} else if (.@sk_p$ == "SO_POISON_BUSTER" && getskilllv("SO_POISON_BUSTER") > 0) {
+				.@cd_pb = getskillcooldown("SO_POISON_BUSTER", getskilllv("SO_POISON_BUSTER")) / 1000;
+				if (Sp >= 70 && (.@cd_pb <= 0 || .@now >= @CD_SO_POISON_BUSTER)) {
+					if (.@cd_pb > 0) @CD_SO_POISON_BUSTER = .@now + .@cd_pb;
+					unitskilluseid getcharid(3), "SO_POISON_BUSTER", getskilllv("SO_POISON_BUSTER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+				if (.@cd_pb <= 0) {
+					.@step_delay = 400; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+			} else if (.@sk_p$ == "SO_DIAMONDDUST" && getskilllv("SO_DIAMONDDUST") > 0) {
+				.@cd_dd = getskillcooldown("SO_DIAMONDDUST", getskilllv("SO_DIAMONDDUST")) / 1000;
+				if (Sp >= 50 && (.@cd_dd <= 0 || .@now >= @CD_SO_DIAMONDDUST)) {
+					if (.@cd_dd > 0) @CD_SO_DIAMONDDUST = .@now + .@cd_dd;
+					unitskillusepos getcharid(3), "SO_DIAMONDDUST", getskilllv("SO_DIAMONDDUST"), .@mx, .@my;
+					.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+				if (.@cd_dd <= 0) {
+					.@step_delay = 400; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+			} else if (.@sk_p$ == "SO_EARTHGRAVE" && getskilllv("SO_EARTHGRAVE") > 0) {
+				.@cd_eg = getskillcooldown("SO_EARTHGRAVE", getskilllv("SO_EARTHGRAVE")) / 1000;
+				if (Sp >= 62 && (.@cd_eg <= 0 || .@now >= @CD_SO_EARTHGRAVE)) {
+					if (.@cd_eg > 0) @CD_SO_EARTHGRAVE = .@now + .@cd_eg;
+					unitskillusepos getcharid(3), "SO_EARTHGRAVE", getskilllv("SO_EARTHGRAVE"), .@mx, .@my;
+					.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+				if (.@cd_eg <= 0) {
+					.@step_delay = 400; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+			} else if (.@sk_p$ == "SO_VARETYR_SPEAR" && getskilllv("SO_VARETYR_SPEAR") > 0) {
+				.@cd_vs = getskillcooldown("SO_VARETYR_SPEAR", getskilllv("SO_VARETYR_SPEAR")) / 1000;
+				if (Sp >= 65 && (.@cd_vs <= 0 || .@now >= @CD_SO_VARETYR_SPEAR)) {
+					if (.@cd_vs > 0) @CD_SO_VARETYR_SPEAR = .@now + .@cd_vs;
+					unitskilluseid getcharid(3), "SO_VARETYR_SPEAR", getskilllv("SO_VARETYR_SPEAR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
+					.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+				if (.@cd_vs <= 0) {
+					.@step_delay = 400; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+			} else if (.@sk_p$ == "SO_CLOUD_KILL" && getskilllv("SO_CLOUD_KILL") > 0) {
+				.@cd_ck = getskillcooldown("SO_CLOUD_KILL", getskilllv("SO_CLOUD_KILL")) / 1000;
+				if (Sp >= 48 && (.@cd_ck <= 0 || .@now >= @CD_SO_CLOUD_KILL)) {
+					if (.@cd_ck > 0) @CD_SO_CLOUD_KILL = .@now + .@cd_ck;
+					unitskillusepos getcharid(3), "SO_CLOUD_KILL", getskilllv("SO_CLOUD_KILL"), .@mx, .@my;
+					.@step_delay = 450; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
+				if (.@cd_ck <= 0) {
+					.@step_delay = 400; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
+				}
 			} else if (.@sk_p$ == "WL_COMET" && getskilllv("WL_COMET") > 0 && Sp >= 150 && .@now >= @CD_WL_COMET) {
 				@CD_WL_COMET = .@now + 20;
 				unitskillusepos getcharid(3), "WL_COMET", getskilllv("WL_COMET"), .@mx, .@my;
@@ -2434,7 +2471,6 @@ OnStepTimer:
 				.@step_delay = 600; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
 			} else if (.@sk_p$ == "SO_EL_ACTION" && getskilllv("SO_EL_ACTION") > 0 && Sp >= 50 && .@now >= @CD_SO_EL_ACTION && geteleminfo(0) > 0 && .@dist <= 5) {
 				@CD_SO_EL_ACTION = .@now + 6;
-				if (geteleminfo(1) > 0) unitattack geteleminfo(1), @AUTO_CURRENT_TARGET;
 				unitskilluseid getcharid(3), "SO_EL_ACTION", 1, @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 				.@step_delay = 350; addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer"; end;
 			}
@@ -2457,11 +2493,6 @@ OnStepTimer:
 				}
 			}
 
-			// Envia o elemental para atacar o monstro alvo
-			if (geteleminfo(1) > 0) {
-				unitattack geteleminfo(1), @AUTO_CURRENT_TARGET;
-			}
-
 			// Acao Elemental (SO_EL_ACTION): Ativa a skill ofensiva do summon
 			if (getskilllv("SO_EL_ACTION") > 0 && Sp >= 50 && .@now >= @CD_SO_EL_ACTION && .@dist <= 5) {
 				@CD_SO_EL_ACTION = .@now + 6;
@@ -2474,9 +2505,28 @@ OnStepTimer:
 
 		// Se for Feiticeiro e JA tiver habilidades de 3a classe aprendidas:
 		if (.@is_sorc_class && .@has_sorc_skills) {
-			// Prioridade: Se Onda Psiquica estiver disponivel e com SP, usa Onda Psiquica
-			if (getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 70 && .@now >= @CD_SO_PSYCHIC_WAVE) {
-				@CD_SO_PSYCHIC_WAVE = .@now + 5;
+			// Se o jogador priorizou Onda Psiquica:
+			if (.@sk_p$ == "SO_PSYCHIC_WAVE") {
+				.@cd_pw = getskillcooldown("SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE")) / 1000;
+				if (getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 70 && (.@cd_pw <= 0 || .@now >= @CD_SO_PSYCHIC_WAVE)) {
+					if (.@cd_pw > 0) @CD_SO_PSYCHIC_WAVE = .@now + .@cd_pw;
+					unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my;
+					.@step_delay = 450;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				}
+				// Se tem CD 0 ou esta aguardando SP, nao executa outras habilidades da rotacao:
+				if (.@cd_pw <= 0) {
+					.@step_delay = 400;
+					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
+					end;
+				}
+			}
+
+			// Prioridade na Rotacao Inteligente: Se Onda Psiquica estiver disponivel e com SP, usa Onda Psiquica
+			.@cd_pw = getskillcooldown("SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE")) / 1000;
+			if (getskilllv("SO_PSYCHIC_WAVE") > 0 && Sp >= 70 && (.@cd_pw <= 0 || .@now >= @CD_SO_PSYCHIC_WAVE)) {
+				if (.@cd_pw > 0) @CD_SO_PSYCHIC_WAVE = .@now + .@cd_pw;
 				unitskillusepos getcharid(3), "SO_PSYCHIC_WAVE", getskilllv("SO_PSYCHIC_WAVE"), .@mx, .@my;
 				.@step_delay = 450;
 				addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
@@ -2488,36 +2538,41 @@ OnStepTimer:
 			for (.@siter = 0; .@siter < 5; .@siter++) {
 				.@sidx = (@SO_ROT_STEP + .@siter) % 5;
 				if (.@sidx == 0 && getskilllv("SO_DIAMONDDUST") > 0 && Sp >= 50 && .@now >= @CD_SO_DIAMONDDUST) {
+					.@cd_dd = getskillcooldown("SO_DIAMONDDUST", getskilllv("SO_DIAMONDDUST")) / 1000;
 					@SO_ROT_STEP = (.@sidx + 1) % 5;
-					@CD_SO_DIAMONDDUST = .@now + 5;
+					@CD_SO_DIAMONDDUST = .@now + (.@cd_dd > 0 ? .@cd_dd : 1);
 					unitskillusepos getcharid(3), "SO_DIAMONDDUST", getskilllv("SO_DIAMONDDUST"), .@mx, .@my;
 					.@step_delay = 450;
 					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 					end;
 				} else if (.@sidx == 1 && getskilllv("SO_EARTHGRAVE") > 0 && Sp >= 62 && .@now >= @CD_SO_EARTHGRAVE) {
+					.@cd_eg = getskillcooldown("SO_EARTHGRAVE", getskilllv("SO_EARTHGRAVE")) / 1000;
 					@SO_ROT_STEP = (.@sidx + 1) % 5;
-					@CD_SO_EARTHGRAVE = .@now + 5;
+					@CD_SO_EARTHGRAVE = .@now + (.@cd_eg > 0 ? .@cd_eg : 1);
 					unitskillusepos getcharid(3), "SO_EARTHGRAVE", getskilllv("SO_EARTHGRAVE"), .@mx, .@my;
 					.@step_delay = 450;
 					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 					end;
 				} else if (.@sidx == 2 && getskilllv("SO_VARETYR_SPEAR") > 0 && Sp >= 65 && .@now >= @CD_SO_VARETYR_SPEAR) {
+					.@cd_vs = getskillcooldown("SO_VARETYR_SPEAR", getskilllv("SO_VARETYR_SPEAR")) / 1000;
 					@SO_ROT_STEP = (.@sidx + 1) % 5;
-					@CD_SO_VARETYR_SPEAR = .@now + 2;
+					@CD_SO_VARETYR_SPEAR = .@now + (.@cd_vs > 0 ? .@cd_vs : 1);
 					unitskilluseid getcharid(3), "SO_VARETYR_SPEAR", getskilllv("SO_VARETYR_SPEAR"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 					.@step_delay = 450;
 					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 					end;
 				} else if (.@sidx == 3 && getskilllv("SO_POISON_BUSTER") > 0 && Sp >= 70 && .@now >= @CD_SO_POISON_BUSTER) {
+					.@cd_pb = getskillcooldown("SO_POISON_BUSTER", getskilllv("SO_POISON_BUSTER")) / 1000;
 					@SO_ROT_STEP = (.@sidx + 1) % 5;
-					@CD_SO_POISON_BUSTER = .@now + 2;
+					@CD_SO_POISON_BUSTER = .@now + (.@cd_pb > 0 ? .@cd_pb : 1);
 					unitskilluseid getcharid(3), "SO_POISON_BUSTER", getskilllv("SO_POISON_BUSTER"), @AUTO_CURRENT_TARGET, 0, 0, 0, 0;
 					.@step_delay = 450;
 					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
 					end;
 				} else if (.@sidx == 4 && getskilllv("SO_CLOUD_KILL") > 0 && Sp >= 48 && .@now >= @CD_SO_CLOUD_KILL) {
+					.@cd_ck = getskillcooldown("SO_CLOUD_KILL", getskilllv("SO_CLOUD_KILL")) / 1000;
 					@SO_ROT_STEP = (.@sidx + 1) % 5;
-					@CD_SO_CLOUD_KILL = .@now + 5;
+					@CD_SO_CLOUD_KILL = .@now + (.@cd_ck > 0 ? .@cd_ck : 1);
 					unitskillusepos getcharid(3), "SO_CLOUD_KILL", getskilllv("SO_CLOUD_KILL"), .@mx, .@my;
 					.@step_delay = 450;
 					addtimer .@step_delay, "AutoPlayerSystem::OnStepTimer";
@@ -2528,7 +2583,7 @@ OnStepTimer:
 
 		// Heranca de 2nd T (Professor / Sabio) para Feiticeiro (enquanto sem skills de 3a classe ou durante cooldown):
 		.@is_sage_tree = (.@is_sorc_class || Class == Job_Sage || Class == Job_Sage_T || Class == Job_Baby_Sage || Class == Job_Professor || Class == Job_Baby_Professor || Class == 4017 || Class == 16 || BaseJob == Job_Sage || BaseJob == Job_Professor || getskilllv("PF_DOUBLECASTING") > 0);
-		if (.@is_sage_tree) {
+		if (.@is_sage_tree && (!.@has_sorc_skills || .@sk_p$ == "")) {
 			// Lancas Duplas (PF_DOUBLECASTING) - Apenas se usar lancas elementais e NAO tiver habilidades de 3a classe
 			if (!.@has_sorc_skills && getskilllv("PF_DOUBLECASTING") > 0 && Sp >= 40 && !getstatus(SC_DOUBLECAST) && .@now >= @BUFF_PF_DOUBLECAST + 5 && (getskilllv("MG_FIREBOLT") > 0 || getskilllv("MG_COLDBOLT") > 0 || getskilllv("MG_LIGHTNINGBOLT") > 0)) {
 				@BUFF_PF_DOUBLECAST = .@now + 90;
